@@ -92,10 +92,12 @@ const ebenen = [
 	}
 
 	.hero-logo {
+		/* 50% größer als der normale Header-Logo-Maßstab, nur hier im Hero. */
+		--logo-h: calc(clamp(32px, 4.4vw, 56px) * 1.5);
 		display: flex;
 		justify-content: center;
 		align-items: flex-end;
-		padding: 0 24px 32px;
+		padding: 0 24px;
 	}
 
 	.hero-logo__flag {
