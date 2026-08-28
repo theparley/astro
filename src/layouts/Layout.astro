@@ -1,5 +1,7 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
+import PageWipe from "../components/PageWipe.astro";
 
 interface Props {
 	title: string;
@@ -20,8 +22,10 @@ const { title, description = "Kein Business ohne Witness. Echte Gespräche, film
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} · The Parley</title>
+		<ClientRouter />
 	</head>
 	<body>
+		<PageWipe />
 		{!hideHeader && <Header />}
 		<slot />
 	</body>

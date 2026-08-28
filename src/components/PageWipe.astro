@@ -1,0 +1,81 @@
+<div id="page-wipe" aria-hidden="true"></div>
+
+<style>
+	#page-wipe {
+		position: fixed;
+		inset: 0;
+		z-index: 9999;
+		background: var(--black);
+		pointer-events: none;
+		/* Deckt die Seite schon vor jedem JS ab (auch beim ersten Aufruf/Neuladen) —
+		   kein Aufblitzen von unverhülltem Inhalt vor dem ersten Wisch-Effekt. */
+		transform: translate(0);
+	}
+
+	@keyframes page-wipe-in {
+		from {
+			transform: translate(-100%);
+		}
+		to {
+			transform: translate(0);
+		}
+	}
+
+	@keyframes page-wipe-out {
+		from {
+			transform: translate(0);
+		}
+		to {
+			transform: translate(100%);
+		}
+	}
+</style>
+
+<script>
+	const DURATION = 800;
+	const EASING = "cubic-bezier(0.76, 0, 0.24, 1)";
+
+	function reduceMotion() {
+		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	}
+
+	function wait(ms: number) {
+		return new Promise((resolve) => window.setTimeout(resolve, ms));
+	}
+
+	// Wisch-raus: läuft bei JEDEM Seitenaufruf, auch dem allerersten (astro:page-load
+	// feuert sowohl beim frischen Laden als auch nach jedem Client-Side-Wechsel).
+	function reveal() {
+		const el = document.getElementById("page-wipe");
+		if (!el) return;
+		if (reduceMotion()) {
+			el.style.animation = "";
+			el.style.transform = "translate(-100%)";
+			return;
+		}
+		el.style.animation = `page-wipe-out ${DURATION}ms ${EASING} forwards`;
+		window.setTimeout(() => {
+			el.style.animation = "";
+			el.style.transform = "translate(-100%)";
+		}, DURATION);
+	}
+
+	document.addEventListener("astro:page-load", reveal);
+
+	// Wisch-rein: startet, sobald ein Seitenwechsel losgeht, und verzögert den
+	// eigentlichen Wechsel um die Animationsdauer — genau das Muster, das Maximilian
+	// bei Nuxt über Vue-Router-Hooks gebaut hat, hier über Astros eigenen
+	// astro:before-preparation-Hook mit überschriebenem Loader.
+	document.addEventListener("astro:before-preparation", (event: any) => {
+		const el = document.getElementById("page-wipe");
+		const originalLoader = event.loader;
+		const skip = reduceMotion();
+
+		event.loader = async function () {
+			if (el && !skip) {
+				el.style.animation = `page-wipe-in ${DURATION}ms ${EASING} forwards`;
+			}
+			await Promise.all([originalLoader(), skip ? Promise.resolve() : wait(DURATION)]);
+		};
+	});
+</script>
