@@ -20,7 +20,7 @@ const ebenen = [
 <Layout title="Start" hideHeader>
 	<header class="hero">
 		<div class="hero-headline">
-			<h1>Kein Business<br />ohne Witness.</h1>
+			<h1>Kein Business ohne Witness.</h1>
 		</div>
 		<a href="/" aria-label="The Parley" class="hero-logo">
 			<img src="/parley/parley-flag.svg" alt="" aria-hidden="true" class="hero-logo__flag" />
@@ -78,16 +78,14 @@ const ebenen = [
 	}
 
 	.hero h1 {
-		/* Reines cqw, keine Ober- oder Untergrenze: die Größe ist genau so tariert,
-		   dass "Kein Business" / "ohne Witness." bei jeder Breite je eine Zeile
-		   füllen. Ein fester rem-Boden hätte bei schmalen Fenstern verhindert,
-		   dass die Schrift klein genug wird, und einen dritten Zeilenumbruch
-		   erzwungen. */
+		/* Wie auf bartleboglehegarty.com: text-wrap:balance statt fester <br>-Umbrüche.
+		   Der Browser entscheidet selbst, wie viele Zeilen und welche Wortgruppen —
+		   kein manuelles Umschalten zwischen Zeilenzahlen nötig. */
 		font-size: 15.6cqw;
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;
-		white-space: nowrap;
+		text-wrap: balance;
 	}
 
 	.hero-logo {
