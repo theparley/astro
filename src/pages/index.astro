@@ -19,8 +19,10 @@ const ebenen = [
 
 <Layout title="Start">
 	<header class="hero">
+		<div class="hero-headline">
+			<h1>Kein Business<br />ohne Witness.</h1>
+		</div>
 		<div class="wrap">
-			<h1>Business braucht Witness.</h1>
 			<p class="sub">Echte Gespräche, filmreif ohne Kamerastress.</p>
 			<p class="sub sub--dim">Als Videopodcast, Webinar, Clip oder Kundentestimonial.</p>
 		</div>
@@ -65,11 +67,16 @@ const ebenen = [
 		padding: 96px 0 48px;
 	}
 
+	.hero-headline {
+		padding: 0 24px;
+	}
+
 	.hero h1 {
-		font-size: clamp(2rem, 6.2vw, 5.4rem);
+		font-size: clamp(3rem, 15vw, 13rem);
 		font-weight: 900;
-		line-height: 1.0;
+		line-height: 0.92;
 		letter-spacing: -0.01em;
+		margin-bottom: 32px;
 	}
 
 	@media (min-width: 700px) {
