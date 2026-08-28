@@ -1,0 +1,103 @@
+<header class="parley-nav">
+	<a href="/" aria-label="The Parley" class="parley-nav__logo">
+		<img src="/parley/parley-flag.svg" alt="" aria-hidden="true" class="parley-nav__logo-flag" />
+		<span class="parley-nav__logo-text-wrap">
+			<img src="/parley/parley-text.svg" alt="The Parley" class="parley-nav__logo-text" />
+		</span>
+	</a>
+</header>
+
+<style>
+	.parley-nav {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 900;
+		padding: 20px 24px;
+	}
+
+	.parley-nav__logo {
+		--logo-h: clamp(32px, 4.4vw, 56px);
+		position: relative;
+		display: inline-flex;
+		align-items: flex-start;
+		isolation: isolate;
+	}
+
+	.parley-nav__logo::before {
+		content: "";
+		position: absolute;
+		inset: -8px -14px;
+		background-color: rgba(0, 0, 0, 0.85);
+		backdrop-filter: blur(6px);
+		opacity: 0;
+		pointer-events: none;
+		z-index: -1;
+		transition: opacity 300ms ease;
+	}
+
+	.parley-nav__logo:hover::before,
+	.parley-nav__logo:focus-visible::before {
+		opacity: 1;
+	}
+
+	.parley-nav__logo-flag {
+		display: block;
+		width: calc(var(--logo-h) * 45 / 85);
+		height: var(--logo-h);
+	}
+
+	.parley-nav__logo-text-wrap {
+		display: inline-block;
+		overflow: hidden;
+		height: var(--logo-h);
+		width: calc(var(--logo-h) * 164 / 85);
+		margin-left: 4px;
+	}
+
+	.parley-nav__logo-text {
+		display: block;
+		height: 100%;
+		width: auto;
+		transform: translateX(calc(var(--collapse, 0) * -110%));
+		will-change: transform;
+	}
+
+	.parley-nav__logo:hover .parley-nav__logo-text,
+	.parley-nav__logo:focus-visible .parley-nav__logo-text {
+		transform: translateX(0);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.parley-nav__logo-text {
+			transition: transform 500ms cubic-bezier(0.22, 0.61, 0.36, 1);
+		}
+	}
+</style>
+
+<script>
+	const header = document.querySelector<HTMLElement>(".parley-nav");
+	const COLLAPSE_START = 120;
+	const COLLAPSE_DISTANCE = 160;
+	let rafId = 0;
+
+	function update() {
+		if (!header) return;
+		const raw = (window.scrollY - COLLAPSE_START) / COLLAPSE_DISTANCE;
+		const collapse = Math.max(0, Math.min(1, raw));
+		header.style.setProperty("--collapse", String(collapse));
+	}
+
+	function onScroll() {
+		if (rafId) return;
+		rafId = requestAnimationFrame(() => {
+			update();
+			rafId = 0;
+		});
+	}
+
+	update();
+	window.addEventListener("scroll", onScroll, { passive: true });
+	window.addEventListener("resize", onScroll, { passive: true });
+</script>

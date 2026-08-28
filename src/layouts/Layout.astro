@@ -1,4 +1,6 @@
 ---
+import Header from "../components/Header.astro";
+
 interface Props {
 	title: string;
 	description?: string;
@@ -18,6 +20,7 @@ const { title, description = "Mach jeden Auftragsentscheider zum Augenzeugen dei
 		<title>{title} · The Parley</title>
 	</head>
 	<body>
+		<Header />
 		<slot />
 	</body>
 </html>
