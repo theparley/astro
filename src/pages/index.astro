@@ -20,7 +20,7 @@ const ebenen = [
 <Layout title="Start" hideHeader>
 	<header class="hero">
 		<div class="hero-headline">
-			<h1>Kein <br class="split" />Business<br />ohne <br class="split" />Witness.</h1>
+			<h1>Kein Business<br />ohne Witness.</h1>
 		</div>
 		<a href="/" aria-label="The Parley" class="hero-logo">
 			<img src="/parley/parley-flag.svg" alt="" aria-hidden="true" class="hero-logo__flag" />
@@ -88,21 +88,6 @@ const ebenen = [
 		line-height: 0.92;
 		letter-spacing: -0.01em;
 		white-space: nowrap;
-	}
-
-	/* Zusätzliche Umbrüche zwischen "Kein"/"Business" und "ohne"/"Witness." —
-	   normal ausgeblendet (zweizeilig), erst unterhalb der Container-Breite
-	   aktiv (vierzeilig). Die Schriftgröße bleibt dabei exakt dieselbe Formel
-	   (15.6cqw) — nur die Zeilenstruktur ändert sich, nicht die Größe, deshalb
-	   kein Ruckeln im Übergang. */
-	.hero h1 br.split {
-		display: none;
-	}
-
-	@container (max-width: 400px) {
-		.hero h1 br.split {
-			display: block;
-		}
 	}
 
 	.hero-logo {
