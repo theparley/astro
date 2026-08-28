@@ -19,8 +19,10 @@ const ebenen = [
 
 <Layout title="Start">
 	<header class="hero">
-		<div class="wrap">
+		<div class="hero-headline">
 			<h1>Kein Business<br />ohne Witness.</h1>
+		</div>
+		<div class="wrap">
 			<p class="sub">Echte Gespräche, filmreif ohne Kamerastress.</p>
 			<p class="sub sub--dim">Als Videopodcast, Webinar, Clip oder Kundentestimonial.</p>
 		</div>
@@ -67,12 +69,16 @@ const ebenen = [
 		padding: 144px 0 48px;
 	}
 
-	.hero .wrap {
+	.hero-headline {
 		container-type: inline-size;
+		padding: 0 24px;
 	}
 
 	.hero h1 {
-		font-size: clamp(2.4rem, 15.6cqw, 12rem);
+		/* max() statt clamp(): keine Obergrenze, damit es auf sehr breiten Fenstern
+		   (>1920px) genauso an den Rand andockt wie überall sonst — nur eine
+		   Mindestgröße für sehr schmale Screens. */
+		font-size: max(2.4rem, 15.6cqw);
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;
