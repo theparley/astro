@@ -20,10 +20,7 @@ const ebenen = [
 <Layout title="Start">
 	<header class="hero">
 		<div class="wrap">
-			<h1>
-				Business braucht<br />
-				Witness.
-			</h1>
+			<h1>Business braucht Witness.</h1>
 			<p class="sub">Echte Gespräche, filmreif ohne Kamerastress.</p>
 			<p class="sub sub--dim">Als Videopodcast, Webinar, Clip oder Kundentestimonial.</p>
 		</div>
@@ -69,10 +66,16 @@ const ebenen = [
 	}
 
 	.hero h1 {
-		font-size: clamp(2.75rem, 8vw, 7rem);
-		font-weight: 700;
+		font-size: clamp(2rem, 6.2vw, 5.4rem);
+		font-weight: 900;
 		line-height: 1.0;
-		letter-spacing: -0.04em;
+		letter-spacing: -0.01em;
+	}
+
+	@media (min-width: 700px) {
+		.hero h1 {
+			white-space: nowrap;
+		}
 	}
 
 	.sub {
