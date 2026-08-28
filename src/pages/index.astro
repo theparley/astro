@@ -1,17 +1,160 @@
 ---
+import Layout from "../layouts/Layout.astro";
 
+const ebenen = [
+	{
+		name: "Identität",
+		text: "Expertise beweisbar machen für die, die Aufträge entscheiden.",
+	},
+	{
+		name: "Mittel",
+		text: "Echte Gespräche, Blickkontaktstudios, Live-Regie, Formatredaktion.",
+	},
+	{
+		name: "Produkte",
+		text: "Videopodcast, Webinar, Clip, Kundentestimonial.",
+	},
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Start">
+	<header class="hero">
+		<div class="wrap">
+			<h1>
+				Mach jeden Auftragsentscheider<br />
+				zum Augenzeugen deiner Expertise.
+			</h1>
+			<p class="sub">Mit echten Gesprächen, filmreif ohne Kamerastress.</p>
+			<p class="sub sub--dim">Ob als Videopodcast, Webinar, Clip oder Kundentestimonial.</p>
+		</div>
+	</header>
+
+	<section class="proof wrap">
+		<!-- TODO Phase 1: self-hosted mp4 + Poster statt Platzhalter, sobald Material freigegeben -->
+		<div class="clip-placeholder">
+			<span>Clip folgt</span>
+		</div>
+	</section>
+
+	<section class="ebenen wrap">
+		{ebenen.map((e) => (
+			<div class="ebene">
+				<h2>{e.name}</h2>
+				<p>{e.text}</p>
+			</div>
+		))}
+	</section>
+
+	<section class="cta wrap">
+		<a href="/buchen" class="button">Gespräch buchen →</a>
+	</section>
+
+	<footer class="wrap">
+		<nav>
+			<a href="/impressum">Impressum</a>
+			<a href="/datenschutz">Datenschutz</a>
+		</nav>
+	</footer>
+</Layout>
+
+<style>
+	.wrap {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: 0 24px;
+	}
+
+	.hero {
+		padding: 96px 0 48px;
+	}
+
+	.hero h1 {
+		font-size: clamp(2rem, 5vw, 3.5rem);
+		font-weight: 500;
+		line-height: 1.1;
+		letter-spacing: -0.01em;
+	}
+
+	.sub {
+		margin-top: 20px;
+		font-size: clamp(1.1rem, 2vw, 1.4rem);
+		max-width: 34ch;
+	}
+
+	.sub--dim {
+		color: var(--gray);
+		margin-top: 8px;
+	}
+
+	.proof {
+		padding: 24px 0 64px;
+	}
+
+	.clip-placeholder {
+		aspect-ratio: 16 / 9;
+		width: 100%;
+		border: 1px solid #2a2a2a;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--gray);
+		font-size: 0.9rem;
+	}
+
+	.ebenen {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 32px;
+		padding: 48px 0;
+		border-top: 1px solid #2a2a2a;
+	}
+
+	.ebene h2 {
+		font-size: 1rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--gray);
+		margin-bottom: 12px;
+	}
+
+	.ebene p {
+		font-size: 1.1rem;
+		line-height: 1.4;
+	}
+
+	.cta {
+		padding: 64px 0;
+		text-align: center;
+	}
+
+	.button {
+		display: inline-block;
+		border: 1px solid var(--white);
+		padding: 16px 32px;
+		text-decoration: none;
+		font-size: 1.1rem;
+	}
+
+	footer {
+		padding: 32px 0 64px;
+		border-top: 1px solid #2a2a2a;
+	}
+
+	footer nav {
+		display: flex;
+		gap: 24px;
+		font-size: 0.85rem;
+		color: var(--gray);
+	}
+
+	footer a {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	@media (max-width: 700px) {
+		.ebenen {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
