@@ -4,9 +4,10 @@ import Header from "../components/Header.astro";
 interface Props {
 	title: string;
 	description?: string;
+	hideHeader?: boolean;
 }
 
-const { title, description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial." } = Astro.props;
+const { title, description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.", hideHeader = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -21,7 +22,7 @@ const { title, description = "Kein Business ohne Witness. Echte Gespräche, film
 		<title>{title} · The Parley</title>
 	</head>
 	<body>
-		<Header />
+		{!hideHeader && <Header />}
 		<slot />
 	</body>
 </html>

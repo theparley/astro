@@ -17,15 +17,15 @@ const ebenen = [
 ];
 ---
 
-<Layout title="Start">
+<Layout title="Start" hideHeader>
 	<header class="hero">
 		<div class="hero-headline">
 			<h1>Kein Business<br />ohne Witness.</h1>
 		</div>
-		<div class="wrap">
-			<p class="sub">Echte Gespräche, filmreif ohne Kamerastress.</p>
-			<p class="sub sub--dim">Als Videopodcast, Webinar, Clip oder Kundentestimonial.</p>
-		</div>
+		<a href="/" aria-label="The Parley" class="hero-logo">
+			<img src="/parley/parley-flag.svg" alt="" aria-hidden="true" class="hero-logo__flag" />
+			<img src="/parley/parley-text.svg" alt="The Parley" class="hero-logo__text" />
+		</a>
 	</header>
 
 	<section class="proof wrap">
@@ -64,14 +64,15 @@ const ebenen = [
 	}
 
 	.hero {
-		/* Header ist bis zu 96px hoch (20px Padding + 56px Logo + 20px Padding, max. Breakpoint).
-		   48px extra Puffer, damit sich Header und Headline nicht nur knapp nicht berühren. */
-		padding: 144px 0 48px;
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.hero-headline {
 		container-type: inline-size;
 		padding: 0 24px;
+		margin: auto 0;
 	}
 
 	.hero h1 {
@@ -82,7 +83,6 @@ const ebenen = [
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;
-		margin-bottom: 32px;
 	}
 
 	@media (min-width: 700px) {
@@ -91,15 +91,24 @@ const ebenen = [
 		}
 	}
 
-	.sub {
-		margin-top: 20px;
-		font-size: clamp(1.1rem, 2vw, 1.4rem);
-		max-width: 34ch;
+	.hero-logo {
+		display: flex;
+		justify-content: center;
+		align-items: flex-end;
+		padding: 0 24px 32px;
 	}
 
-	.sub--dim {
-		color: var(--gray);
-		margin-top: 8px;
+	.hero-logo__flag {
+		display: block;
+		width: calc(var(--logo-h) * 1160.62 / 2018.08);
+		height: var(--logo-h);
+	}
+
+	.hero-logo__text {
+		display: block;
+		height: calc(var(--logo-h) * 1057.41 / 2018.08);
+		width: auto;
+		margin-left: 4px;
 	}
 
 	.proof {
