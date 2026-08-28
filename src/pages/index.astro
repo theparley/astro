@@ -78,19 +78,16 @@ const ebenen = [
 	}
 
 	.hero h1 {
-		/* max() statt clamp(): keine Obergrenze, damit es auf sehr breiten Fenstern
-		   (>1920px) genauso an den Rand andockt wie überall sonst — nur eine
-		   Mindestgröße für sehr schmale Screens. */
-		font-size: max(2.4rem, 15.6cqw);
+		/* Reines cqw, keine Ober- oder Untergrenze: die Größe ist genau so tariert,
+		   dass "Kein Business" / "ohne Witness." bei jeder Breite je eine Zeile
+		   füllen. Ein fester rem-Boden hätte bei schmalen Fenstern verhindert,
+		   dass die Schrift klein genug wird, und einen dritten Zeilenumbruch
+		   erzwungen. */
+		font-size: 15.6cqw;
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;
-	}
-
-	@media (min-width: 700px) {
-		.hero h1 {
-			white-space: nowrap;
-		}
+		white-space: nowrap;
 	}
 
 	.hero-logo {
