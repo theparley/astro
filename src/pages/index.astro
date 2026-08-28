@@ -68,11 +68,13 @@ const ebenen = [
 	}
 
 	.hero-headline {
-		padding: 0 24px;
+		container-type: inline-size;
+		padding-left: calc(24px + var(--logo-w));
+		padding-right: calc(24px + var(--logo-w));
 	}
 
 	.hero h1 {
-		font-size: clamp(3rem, 15vw, 13rem);
+		font-size: clamp(2.4rem, 15.6cqw, 12rem);
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;

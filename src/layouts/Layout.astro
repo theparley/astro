@@ -6,7 +6,7 @@ interface Props {
 	description?: string;
 }
 
-const { title, description = "Business braucht Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial." } = Astro.props;
+const { title, description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial." } = Astro.props;
 ---
 
 <!doctype html>
@@ -40,6 +40,9 @@ const { title, description = "Business braucht Witness. Echte Gespräche, filmre
 		--white: #fafafa;
 		--gray: #888;
 		--max-width: 1100px;
+		--logo-h: clamp(32px, 4.4vw, 56px);
+		/* Fahne + Lücke + Text bei --logo-h, aus den Original-SVG-Maßen (1160.62/2018.08 Fahne, 1986.93/2018.08 Text, 4px Lücke) */
+		--logo-w: calc(var(--logo-h) * 1.5596 + 4px);
 	}
 
 	* {
