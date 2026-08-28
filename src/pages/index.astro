@@ -28,13 +28,15 @@ const ebenen = [
 		</a>
 	</header>
 
-	{/* Vorerst ausgeblendet — reine Splash-Startseite (Headline + Logo), Rest kommt später zurück.
+	{/* Video-Platzhalter: gibt der Seite Scroll-Strecke, um Scroll-Verhalten (Menü-Umwandlung
+	   der Fahne) zu testen. */}
 	<section class="proof wrap">
 		<div class="clip-placeholder">
 			<span>Clip folgt</span>
 		</div>
 	</section>
 
+	{/* Vorerst weiter ausgeblendet — kommt später zurück.
 	<section class="ebenen wrap">
 		{ebenen.map((e) => (
 			<div class="ebene">
@@ -65,8 +67,7 @@ const ebenen = [
 	}
 
 	.hero {
-		position: fixed;
-		inset: 0;
+		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
 	}
