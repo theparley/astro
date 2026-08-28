@@ -95,6 +95,25 @@ const ebenen = [
 		justify-content: center;
 		align-items: flex-end;
 		padding: 0 24px;
+		/* Ladeanimation wie bei theparley.de (dort: seitliches Reinwischen der
+		   Hero-Headline), hier aber von unten — wächst aus dem Boden, passend
+		   zum Andocken an der Bildschirmkante. */
+		animation: hero-logo-rise 700ms cubic-bezier(0.22, 0.61, 0.36, 1) 150ms both;
+	}
+
+	@keyframes hero-logo-rise {
+		from {
+			clip-path: inset(100% 0 0 0);
+		}
+		to {
+			clip-path: inset(0 0 0 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hero-logo {
+			animation: none;
+		}
 	}
 
 	.hero-logo__flag {
