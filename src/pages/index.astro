@@ -11,8 +11,9 @@ const produkteZeile = "Videopodcast. Webinar. Clip. Kundentestimonial.";
 // Fred 29.08. nachts): ausgeschriebener Satz statt Zahlen-Paar — "Ein
 // Gespräch mit tausend Augenzeugen." ersetzt "1 Gespräch. 1000 Augenzeugen.",
 // die Zahlen-Fassung bleibt als Vorrat für Beiträge/Splitflap dokumentiert.
-// Bewusst als einzelne Konstante gehalten, damit ein späterer Tausch ein
-// Ein-Zeilen-Edit bleibt, kein Umbau.
+// Reiner Wortlaut zur Referenz/für einen späteren Tausch — die tatsächliche
+// Darstellung erzwingt jetzt manuelle Umbrüche (siehe Markup unten,
+// Live-Feedback Fred), ist also nicht mehr ein reines Ein-Zeilen-Edit.
 const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 // Vorrat/Alternativen, noch nicht entschieden: "1 Gespräch. 1000 Augenzeugen."
 // (Zahlen-Fassung, für Beiträge/Splitflap), "KI ist kein Augenzeuge."
@@ -58,7 +59,18 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			<p class="plaedoyer-text">Der stärkste Beweis ist ein echtes Gespräch. Und genau das skalieren wir.</p>
 		</div>
 		<div class="plaedoyer-half plaedoyer-half--essence">
-			<p class="essence-line">{soloLine}</p>
+			{/* Live-Feedback Fred (während des Bau-Schritts): text-wrap:balance
+			   allein erzeugte bei ~511px Spaltenbreite einen unglücklichen
+			   3-Zeilen-Umbruch (u.a. "Augenzeugen." allein). Bedingung von Fred:
+			   "tausend Augenzeugen" bleibt IMMER zusammen. Umgesetzt mit einem
+			   gesetzten <br /> nach "Gespräch" + einem geschützten Leerzeichen
+			   (&nbsp;) zwischen "tausend" und "Augenzeugen." — Letzteres kann
+			   dadurch nie auf zwei Zeilen fallen, auch nicht bei sehr schmalen
+			   Breiten (dann wird "mit" allein umgebrochen, macht die Zeile
+			   dreizeilig, verletzt die Bedingung aber nicht). Wortlaut bleibt
+			   1:1 die soloLine oben, nur die Umbruch-Stellen sind jetzt explizit
+			   statt dem Browser überlassen. */}
+			<p class="essence-line">Ein Gespräch<br />mit tausend&nbsp;Augenzeugen.</p>
 		</div>
 	</section>
 
@@ -217,15 +229,25 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   ungedeckelt an der Container-Breite) wie eyebrow/plaedoyer-text/
 	   produkte oben, bewusst NICHT die Hero-eigene cqw-Technik (die ist an
 	   die volle Wrap-Breite gebunden, hier steht die Zeile aber nur in der
-	   schmaleren Spaltenhälfte). text-wrap:balance bleibt, 2 bis 3
-	   Zeilenumbrüche sind bei dieser Größe in der 2fr-Spalte einkalkuliert
-	   und laut Auftrag ausdrücklich erwünscht. */
+	   schmaleren Spaltenhälfte).
+
+	   Umbruch (Live-Feedback Fred, Korrektur während des Bau-Schritts):
+	   text-wrap:balance ALLEIN reichte nicht — bei ~511px Spaltenbreite
+	   (50/50-Split, siehe .plaedoyer oben) erzeugte der Browser-Algorithmus
+	   einen unglücklichen 3-Zeilen-Umbruch, u.a. "Augenzeugen." komplett
+	   allein auf einer Zeile. Jetzt manuell gesetzt im Markup (<br /> +
+	   &nbsp;, siehe Kommentar dort) statt dem Balance-Algorithmus überlassen
+	   — text-wrap:balance deshalb entfernt, würde mit einem harten <br /> im
+	   selben Absatz ohnehin unvorhersehbar zusammenwirken. line-height 1.05
+	   ist unverändert (lag schon in Freds geforderter Spanne 1.05–1.15) —
+	   die "zu groß" wirkende Zeilenhöhe war tatsächlich die Folge der 3
+	   Zeilen aus dem schlechten Umbruch, nicht der line-height-Wert selbst
+	   (live nachgemessen: 85.68px bei 81.6px Schrift = exakt Faktor 1.05). */
 	.essence-line {
 		font-size: clamp(2.75rem, 1.5rem + 4.5vw, 6.25rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;
-		text-wrap: balance;
 	}
 
 	.proof {
