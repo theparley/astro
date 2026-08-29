@@ -1,15 +1,22 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import Header from "../components/Header.astro";
+import MenuTiles from "../components/MenuTiles.astro";
 import PageWipe from "../components/PageWipe.astro";
 
 interface Props {
 	title: string;
 	description?: string;
-	hideHeader?: boolean;
+	// true auf jeder Seite ohne eigenen Splash-Scroll-Hero (= alle außer der
+	// Startseite): das Menü + der CTA starten dann direkt sichtbar, statt auf
+	// einen Scroll-Fortschritt zu warten, der auf Unterseiten nie kommt.
+	menuStartCollapsed?: boolean;
 }
 
-const { title, description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.", hideHeader = false } = Astro.props;
+const {
+	title,
+	description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.",
+	menuStartCollapsed = true,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -26,7 +33,7 @@ const { title, description = "Kein Business ohne Witness. Echte Gespräche, film
 	</head>
 	<body>
 		<PageWipe />
-		{!hideHeader && <Header />}
+		<MenuTiles startCollapsed={menuStartCollapsed} />
 		<slot />
 	</body>
 </html>
