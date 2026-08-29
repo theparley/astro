@@ -15,34 +15,32 @@
 // :hover) ist die Unterzeile PERMANENT sichtbar (Website-Brief-Auftrag),
 // Tap-Ziel bleibt die volle 88px-Kachel (deutlich über der 44×44px-Vorgabe).
 //
-// Bugfix 29.08./29.08. verifiziert (Fred-Meldung): Auf der Startseite tauchte
-// die Kachel sofort nach dem Laden auf, während das Hero-Logo ("The Parley"
-// im Hero, siehe BrandLogo.astro) noch stand — die Erscheinen-Animation lief
-// rein zeitgesteuert (fixe animation-delay nach dem Laden), unabhängig vom
-// Scroll-Zustand. Ursache: das alte System koppelte den CTA an
-// `.hero-logo.collapsed` (eine Scroll-getriebene Klasse) — beim Menü-Ausbau
-// ist mit dem Menü auch diese Kopplung verschwunden, BrandLogo.astro wird nie
-// "collapsed" (es hat gar keine Scroll-Mechanik mehr, bleibt einfach stehen).
-// EIN FRÜHERER BAUVERSUCH HATTE HIER NUR DIESEN KOMMENTAR + DAS
-// `cta-tile--gated`-KLASSEN-ATTRIBUT HINTERLASSEN, OHNE DIE TATSÄCHLICHE
-// GATING-LOGIK ZU SCHREIBEN — die Kachel blieb dadurch weiterhin
-// zeitgesteuert und der Bug bestand fort (per DOM-Prüfung nachgewiesen).
-// Fix (jetzt tatsächlich umgesetzt): `gateBehindHero`-Prop (nur von der
-// Startseite gesetzt) setzt die Klasse `cta-tile--gated`, die die
-// zeitgesteuerte Animation ausschaltet und die Kachel per clip-path
-// verdeckt hält. Das <script> unten beobachtet `.brand-logo` per
-// IntersectionObserver und setzt `cta-tile--revealed`, sobald das Hero-Logo
-// den Viewport nach oben verlassen hat (= Hero durchgescrollt) — Ersatz für
-// die alte `.collapsed`-Kopplung, jetzt gegen "Hero ist aus dem Bild" statt
-// gegen "Logo hat sich in eine Kachel verwandelt" geprüft, weil Letzteres es
-// ohne Menü nicht mehr gibt.
+// Timing-Bug, Historie über zwei Bau-Versuche:
+// 1) Ursprünglich lief die Erscheinen-Animation rein zeitgesteuert (fixe
+//    animation-delay), unabhängig vom Hero — die Kachel tauchte sofort beim
+//    Laden auf, während das Logo noch stand.
+// 2) Ein erster Fix-Versuch koppelte die Kachel per IntersectionObserver an
+//    BrandLogo.astro. Zweite Nachbesserung (Fred): das war die falsche
+//    Choreografie — BrandLogo.astro lag im normalen Fluss (kein
+//    position:fixed, kein Scroll-Collapse mehr, seit der Menü-Ausbau diese
+//    Mechanik mitgenommen hatte), der Observer beobachtete also ein
+//    Element, das nur "wegscrollt", nicht "einklappt" — zwei unabhängige
+//    Zeitsteuerungen statt einer echten Kopplung.
+// FIX (jetzt): BrandLogo.astro ist wieder fixiert unten Mitte (wie vor dem
+// Menü-Bau) und schreibt bei jedem Scroll EINEN gemeinsamen Fortschrittswert
+// (CSS-Custom-Property --hero-dock, 0…1) auf <html>. Diese Kachel liest hier
+// exakt denselben Wert für ihre eigene Sichtbarkeit (siehe .cta-tile--gated
+// unten) — keine zwei Mechanismen, keine Race Condition, eine echte
+// Übergabe an derselben Stelle. Reversibel, weil --hero-dock immer aus der
+// AKTUELLEN scrollY berechnet wird (siehe BrandLogo.astro-Script), nicht aus
+// einem einmal erreichten Maximum.
 interface Props {
 	// true nur auf /buchen: die Tür ist schon erreicht, der Button verschwindet.
 	hideCta?: boolean;
-	// true nur auf der Startseite: die Kachel bleibt verdeckt, bis das
-	// Hero-Logo aus dem Viewport gescrollt ist (siehe Bugfix-Kommentar oben
-	// und <script> unten). Unterseiten haben keinen Hero zum Abwarten und
-	// zeigen die Kachel deshalb sofort (ungated).
+	// true nur auf der Startseite: die Kachel liest --hero-dock statt der
+	// zeitgesteuerten Animation (siehe Kommentar oben + <style> unten).
+	// Unterseiten haben keinen Hero/kein BrandLogo.astro, das --hero-dock
+	// setzt, und zeigen die Kachel deshalb sofort (ungated).
 	gateBehindHero?: boolean;
 }
 
@@ -62,7 +60,9 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 		   einem left:50%-Anker statt right:0 — dadurch bleibt die Kachel beim
 		   Hover-Aufwachsen (width-Änderung) automatisch zentriert, weil der
 		   Browser die Verschiebung bei jedem Reflow neu aus der aktuellen
-		   Breite berechnet, kein manuelles Nachrechnen nötig. */
+		   Breite berechnet, kein manuelles Nachrechnen nötig. Gleiche Stelle
+		   wie BrandLogo.astro (auch dort left:50% + translateX(-50%), bottom:0)
+		   — die Übergabe passiert exakt an diesem Punkt. */
 		--tile-size: 88px;
 		--tile-gap: 4px;
 		position: fixed;
@@ -88,7 +88,7 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 		/* Kommt "von unten ins Bild" (clip-path von komplett verdeckt zu
 		   sichtbar), gleiche Technik wie das archivierte Menü. Startzustand
 		   ist für BEIDE Varianten (gated/ungated) identisch verdeckt — der
-		   Unterschied liegt nur darin, WAS die Animation auslöst (siehe
+		   Unterschied liegt nur darin, WAS die Sichtbarkeit steuert (siehe
 		   unten). */
 		clip-path: inset(100% 0 0 0);
 	}
@@ -102,13 +102,19 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 	}
 
 	/* Gated (nur Startseite, gateBehindHero-Prop): KEINE zeitgesteuerte
-	   Animation — die Kachel bleibt verdeckt (clip-path von oben), bis das
-	   <script> unten per IntersectionObserver meldet, dass .brand-logo den
-	   Viewport verlassen hat, und die Klasse --revealed setzt. Das ist die
-	   eigentliche Bugfix-Kopplung: vorher lief hier ausschließlich die
-	   zeitgesteuerte Animation von oben, unabhängig vom Scroll-Zustand. */
-	.cta-tile--gated.cta-tile--revealed {
-		animation: cta-tile-in 400ms cubic-bezier(0.77, 0, 0.18, 1) both;
+	   Animation, KEIN eigener Beobachter — die Sichtbarkeit ist eine reine
+	   CSS-Funktion von --hero-dock, demselben Wert, den BrandLogo.astro für
+	   sein eigenes Ausblenden liest (dort: opacity 1 → 0 bei 0 → 1; hier
+	   spiegelbildlich 0 → 1). Bei --hero-dock:0 (Seitenanfang) ist der Inset
+	   100% (unsichtbar), bei --hero-dock:1 (Hero durchgescrollt) 0%
+	   (voll sichtbar) — dazwischen läuft die Kachel 1:1 mit dem Scroll statt
+	   einer separaten Animation, exakt spiegelbildlich zum Logo. Default 1
+	   im var()-Fallback (nicht 0!): falls --hero-dock aus irgendeinem Grund
+	   nie gesetzt wird (z. B. JS deaktiviert), zeigt die Kachel sich lieber
+	   sofort, statt für immer verdeckt zu bleiben. */
+	.cta-tile--gated {
+		animation: none;
+		clip-path: inset(calc((1 - var(--hero-dock, 1)) * 100%) 0 0 0);
 	}
 
 	@keyframes cta-tile-in {
@@ -119,18 +125,6 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 
 	@media (prefers-reduced-motion: reduce) {
 		.cta-tile:not(.cta-tile--gated) {
-			animation: none;
-			clip-path: inset(0 0 0 0);
-		}
-
-		/* Gated Kachel bleibt bei reduzierter Bewegung trotzdem an den
-		   Scroll-Zustand gekoppelt (Sichtbarkeits-Logik, keine Animation) —
-		   nur der weiche Übergang entfällt, sie blendet hart um. */
-		.cta-tile--gated {
-			clip-path: inset(100% 0 0 0);
-		}
-
-		.cta-tile--gated.cta-tile--revealed {
 			animation: none;
 			clip-path: inset(0 0 0 0);
 		}
@@ -181,53 +175,3 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 		}
 	}
 </style>
-
-<script>
-	// An astro:page-load gekoppelt (gleiches Muster wie PageWipe.astro und das
-	// archivierte TileMenu.astro) — läuft bei jedem Seitenaufruf UND nach
-	// jedem Client-Side-Wechsel neu an, inkl. Observer-Cleanup zwischen
-	// Navigationen.
-	//
-	// Nur relevant, wenn Layout.astro gateCtaBehindHero gesetzt hat (aktuell
-	// nur die Startseite) — dort trägt die Kachel die Klasse
-	// "cta-tile--gated" und startet verdeckt (siehe <style> oben). Auf jeder
-	// anderen Seite gibt es kein .cta-tile--gated-Element, das querySelector
-	// findet dann nichts und die Funktion kehrt sofort zurück.
-	let cleanup: (() => void) | null = null;
-
-	function initCtaGate() {
-		cleanup?.();
-		cleanup = null;
-
-		const tile = document.querySelector<HTMLElement>(".cta-tile--gated");
-		if (!tile) return;
-
-		const heroLogo = document.querySelector<HTMLElement>(".brand-logo");
-		if (!heroLogo) {
-			// Sicherheitsnetz: gateCtaBehindHero gesetzt, aber kein Hero-Logo im
-			// DOM gefunden (sollte laut Layout-Prop-Vertrag nicht vorkommen) —
-			// lieber sofort zeigen als die Kachel für immer verdeckt zu lassen.
-			tile.classList.add("cta-tile--revealed");
-			return;
-		}
-
-		// isIntersecting = true, solange mindestens 1px von .brand-logo im
-		// Viewport sichtbar ist. Beim Laden (scrollY 0) ist das der Fall →
-		// Kachel bleibt verdeckt. Sobald der Hero durchgescrollt ist, verlässt
-		// .brand-logo den Viewport nach oben, isIntersecting wird false → die
-		// Kachel wird freigegeben. Scrollt der Besucher wieder zurück an den
-		// Seitenanfang, kehrt sich das bewusst um (keine Einweg-Klasse) — die
-		// Kachel folgt dem Hero-Zustand, nicht nur dem ersten Erreichen.
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const heroVisible = entries[0]?.isIntersecting ?? false;
-				tile.classList.toggle("cta-tile--revealed", !heroVisible);
-			},
-			{ threshold: 0 },
-		);
-		observer.observe(heroLogo);
-		cleanup = () => observer.disconnect();
-	}
-
-	document.addEventListener("astro:page-load", initCtaGate);
-</script>

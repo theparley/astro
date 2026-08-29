@@ -24,10 +24,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		<div class="hero-headline">
 			<h1>Kein Business ohne Witness.</h1>
 		</div>
-		{/* Logo bleibt als reine Markenpräsenz im Hero stehen (ohne
-		   Menü-Funktion, siehe Website-Brief "Entscheidung 29.08." + Layout.astro-
-		   Kommentar). Der interaktive Kachel-Menü-Umbau des Logos ist archiviert
-		   in TileMenu.astro. */}
+		{/* Logo bleibt Markenpräsenz OHNE Menü-Funktion (Website-Brief
+		   "Entscheidung 29.08."), ist aber wieder fixiert unten Mitte und
+		   klappt scroll-getrieben ein (Zweite Nachbesserung 29.08. spät,
+		   siehe Kommentar in BrandLogo.astro) — die interaktive
+		   Kachel-Menü-Verwandlung des Logos bleibt archiviert in
+		   TileMenu.astro, nur die reine Scroll-Dock-Choreografie ist zurück. */}
 		<BrandLogo />
 	</header>
 
@@ -214,9 +216,14 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	/* Essenz-Hälfte in sich MITTIG gesetzt (Website-Brief, Layout-Spec: "die
 	   Essenz-Zeile in sich MITTIG gesetzt — text-align center in ihrer
-	   Hälfte"), unabhängig vom linksbündigen Fließtext in der Nachbarspalte. */
+	   Hälfte"), unabhängig vom linksbündigen Fließtext in der Nachbarspalte.
+	   container-type:inline-size (Nachbesserung Fred): macht die Hälfte zum
+	   Bezugsrahmen für cqw-Einheiten IHRER Kinder — die Essenz-Schrift skaliert
+	   dadurch mit der tatsächlichen Spaltenbreite, nicht mehr mit dem
+	   Viewport (siehe .essence-line-Kommentar unten für die Fehlerursache). */
 	.plaedoyer-half--essence {
 		text-align: center;
+		container-type: inline-size;
 	}
 
 	/* Essenz-Zeile (Auftrags-Update 29.08. nachts): "deutlich über text-xl,
@@ -238,13 +245,37 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   allein auf einer Zeile. Jetzt manuell gesetzt im Markup (<br /> +
 	   &nbsp;, siehe Kommentar dort) statt dem Balance-Algorithmus überlassen
 	   — text-wrap:balance deshalb entfernt, würde mit einem harten <br /> im
-	   selben Absatz ohnehin unvorhersehbar zusammenwirken. line-height 1.05
-	   ist unverändert (lag schon in Freds geforderter Spanne 1.05–1.15) —
-	   die "zu groß" wirkende Zeilenhöhe war tatsächlich die Folge der 3
-	   Zeilen aus dem schlechten Umbruch, nicht der line-height-Wert selbst
-	   (live nachgemessen: 85.68px bei 81.6px Schrift = exakt Faktor 1.05). */
+	   selben Absatz ohnehin unvorhersehbar zusammenwirken.
+
+	   ZWEITE Nachbesserung (Fred, Screenshot bei ~2000px Viewport): bei sehr
+	   breiten Monitoren lief die Zeile rechts aus dem Bild ("tausend
+	   Augenzeug…" abgeschnitten) UND brach zusätzlich in Ein-Wort-Zeilen.
+	   Ursache: font-size skalierte mit dem VIEWPORT (vw-Anteil im Clamp),
+	   die Spalte selbst ist aber bei --max-width:1100px gedeckelt — ab da
+	   wuchs die Schrift ungebremst weiter, während die Spalte längst nicht
+	   mehr mitwuchs. Fix: font-size jetzt in cqw statt vw/rem, bezogen auf
+	   .plaedoyer-half--essence als eigenen Query-Container
+	   (container-type:inline-size dort) — die Schrift skaliert dadurch mit
+	   der TATSÄCHLICHEN Spaltenbreite, kann also bei KEINER Viewport-Breite
+	   mehr aus der Spalte laufen.
+	   Kalibrierung (live im Browser gemessen, Forma DJR 900, "mit tausend
+	   Augenzeugen." unrestricted/white-space:nowrap): die Breite pro
+	   Schrift-Pixel ist NICHT exakt konstant (optical-size-Verhalten der
+	   Variable Font) — 12.80 bei 24px Schrift bis 12.11 bei 80px+. Für den
+	   Clamp den ungünstigsten (höchsten) Ratio-Wert aus dem realistischen
+	   Zielbereich angesetzt (~12.8, aufgerundet auf 13.0 als Sicherheits-
+	   puffer) → rechnerisch exakte Passung bei 100/13.0 ≈ 7.69cqw, davon
+	   ~95% angesetzt = 7.3cqw (Luft für Rundung/Kerning-Rauschen, Zeile
+	   bleibt spürbar unter der Spaltenkante statt kante-an-Kante). line-height
+	   1.05 unverändert (lag schon in Freds geforderter Spanne 1.05–1.15) —
+	   die zuvor "zu groß" wirkende Zeilenhöhe war die Folge des
+	   Viewport-Overflows selbst, nicht des line-height-Werts. Min-Bound des
+	   Clamps bewusst niedrig (1.5rem statt vorher 2.75rem): eine harte
+	   Mindestgröße würde bei sehr schmalen Spalten (kleine Mobilgeräte)
+	   wieder genau denselben Overflow-Fehler reproduzieren, den dieser Fix
+	   beheben soll — die Passung hat Vorrang vor einer Mindestgröße. */
 	.essence-line {
-		font-size: clamp(2.75rem, 1.5rem + 4.5vw, 6.25rem);
+		font-size: clamp(1.5rem, 7.3cqw, 6.25rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;
