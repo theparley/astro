@@ -129,6 +129,27 @@
 		transform: translateX(calc(var(--dock-flag, 0) * 110%));
 	}
 
+	/* Logo-Farbe = Flächen-Ton #ededed statt Reinweiß (Fred 29.08. nachts,
+	   BBH-Regel: Schrift ist reinweiß, FLÄCHEN sind #ededed — das Logo ist
+	   Fläche). Die SVGs sind weiß gefüllt; brightness(0.9294) ergibt exakt
+	   237/255 = #ededed, ohne die Dateien anzufassen. */
+	.brand-logo__banner,
+	.brand-logo__text {
+		filter: brightness(0.9294);
+	}
+
+	/* Übergabe-Moment: Sobald die CTA-Kachel offen ist (dock>=1, Script setzt
+	   die Klasse), verschwindet die Stange — sie IST jetzt der Button; die
+	   Kachel liegt mit 95% Deckkraft darüber, und ohne dieses Ausblenden
+	   schien die Stange durch (Freds Befund). Rückwärts kommt sie wieder. */
+	.brand-logo--handedover .brand-logo__pole {
+		opacity: 0;
+	}
+
+	.brand-logo__pole {
+		transition: opacity 150ms ease;
+	}
+
 	/* Text-Wrap: identische Technik wie Header.astro
 	   (.parley-nav__logo-text-wrap: overflow:hidden, fester Ausschnitt).
 	   Position absolut relativ zum Null-Anker, linke Kante 4px rechts von
@@ -183,6 +204,7 @@
 		// eines eigenen Beobachters in CtaTile.astro) — genau EIN Skript
 		// treibt die ganze Sequenz.
 		const cta = document.querySelector<HTMLElement>(".cta-tile--gated");
+		const logo = document.querySelector<HTMLElement>(".brand-logo");
 
 		let rafId = 0;
 
@@ -206,6 +228,9 @@
 			// Richtung — CtaTile.astro's CSS-transition erledigt den Rest
 			// (öffnet/schließt bidirektional, siehe dortiger Kommentar).
 			cta?.classList.toggle("cta-tile--revealed", dock >= 1);
+			// Stange ausblenden, sobald die Kachel sie "übernommen" hat
+			// (sonst scheint sie durch die 95%-Deckkraft der Kachel durch)
+			logo?.classList.toggle("brand-logo--handedover", dock >= 1);
 		};
 
 		const onScroll = () => {
