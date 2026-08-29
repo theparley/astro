@@ -22,9 +22,72 @@ const ebenen = [
 		<div class="hero-headline">
 			<h1>Kein Business ohne Witness.</h1>
 		</div>
-		<a href="/" aria-label="The Parley" class="hero-logo">
-			<img src="/parley/parley-flag.svg" alt="" aria-hidden="true" class="hero-logo__flag" />
-			<img src="/parley/parley-text.svg" alt="The Parley" class="hero-logo__text" />
+		{/* Gemeinsamer Hover-Bezug für Logo+Hamburger UND die vier Menü-Kacheln —
+		   die Kacheln sind zwar per position:fixed woanders im Viewport, liegen
+		   aber im DOM innerhalb dieses Wrappers, damit :hover beim Wechsel von
+		   der Hamburger-Kachel auf eine der vier neuen Kacheln nicht kurz
+		   verloren geht (sonst kippt der Effekt beim Überqueren der Lücke
+		   zwischen den Elementen zurück, obwohl die Maus die ganze Zeit über
+		   dem Menü bleibt). display:contents, damit der Wrapper selbst keine
+		   eigene Layout-Box erzeugt. */}
+		<div class="hero-logo-group">
+			<a href="/" aria-label="The Parley" class="hero-logo">
+				<div class="hero-logo__hit-area" aria-hidden="true"></div>
+				{/* Neuer, einfacherer Ansatz: kein P, kein Hamburger-Quadrat (erstmal) —
+				   Fahne+Text bleiben in ihrem normalen Layout stehen, verschwinden
+				   nicht mehr. Beim Scrollen färben sie sich schwarz (Filter/Hintergrund
+				   statt neuer Assets) und ein heller Chip erscheint dahinter, wie bei
+				   BBHs Logo-Fläche — die Fahne selbst wird der Button. */}
+				<div class="hero-logo__chip" aria-hidden="true"></div>
+				{/* Eigener Wrapper nur für Stange+Fahne+Text — bekommt beim Scrollen
+				   eine Skalierung, damit die Kombo ins 100×100-Quadrat passt (echtes
+				   Quadrat, nicht nur ein Rechteck-Chip). Der Chip selbst bleibt fix
+				   100×100 und skaliert nicht mit. */}
+				<div class="hero-logo__mark">
+					<div class="hero-logo__pole" aria-hidden="true"></div>
+					<div class="hero-logo__banner-wrap" aria-hidden="true">
+						<img src="/parley/parley-flag-banner.svg" alt="" class="hero-logo__banner" />
+					</div>
+					<div class="hero-logo__text-wrap">
+						<img src="/parley/parley-text.svg" alt="The Parley" class="hero-logo__text" />
+					</div>
+				</div>
+				{/* Zweite Kachel rechts daneben, wie bei BBH (Logo + Hamburger als
+				   Paar) — erscheint erst, wenn die erste Kachel fertig animiert ist
+				   (Verzögerung über CSS, siehe transition-delay unten). Gleiche
+				   Farbe/Deckkraft wie der Chip (BBH nutzt für beide Kacheln dieselbe
+				   #ededed/95-Fläche, kein Schwarz). */}
+				<div class="hero-logo__hamburger-tile" aria-hidden="true">
+					<span class="hero-logo__burger-line"></span>
+					<span class="hero-logo__burger-line"></span>
+					<span class="hero-logo__burger-line"></span>
+				</div>
+			</a>
+			{/* Vier Kacheln, NEBEN der (verschwindenden) Hamburger-Kachel statt
+			   oben drüber — 1:1 wie bei BBH: volle Kachelbreite, halbe Kachelhöhe,
+			   als 2×2-Raster. Eigenes Element statt in .hero-logo verschachtelt,
+			   weil .hero-logo selbst ein <a> ist (kein <a> in <a>, ungültiges HTML).
+			   Reihenfolge im Markup = Lesereihenfolge (links-oben nach rechts-unten),
+			   Stagger folgt derselben Reihenfolge. */}
+			<ul class="hero-logo__nav" aria-hidden="true">
+				<li style="--in-delay: 0ms"><a href="#" tabindex="-1">Format</a></li>
+				<li style="--in-delay: 80ms"><a href="#" tabindex="-1">Studio</a></li>
+				<li style="--in-delay: 160ms"><a href="/buchen" tabindex="-1">Buchen</a></li>
+				<li style="--in-delay: 240ms"><a href="#" tabindex="-1">Kontakt</a></li>
+			</ul>
+		</div>
+		{/* Dimmt/verwischt die ganze Seite leicht, während das Menü offen ist —
+		   wie BBHs nav-backdrop (bg-black/10 + backdrop-blur-sm), nicht der
+		   volldeckende Wisch vom Seitenübergang, der ist für Seitenwechsel. */}
+		<div class="hero-logo__backdrop" aria-hidden="true"></div>
+		{/* Eigenständiger CTA-Button, unabhängig vom Menü-Hover/-Klick (eigenes
+		   :hover), aber an den Scroll-Fortschritt gekoppelt: erscheint erst,
+		   wenn Logo- und Hamburger-Kachel fertig durchanimiert sind (.collapsed
+		   auf .hero-logo). Quadratisch, zweizeilig, wird beim Hovern doppelt so
+		   groß und zeigt dann eine zusätzliche CTA-Zeile. */}
+		<a href="#" class="cta-button">
+			<span class="cta-button__main">Let's<br />Parley</span>
+			<span class="cta-button__sub">Gespräch buchen →</span>
 		</a>
 	</header>
 
@@ -60,10 +123,20 @@ const ebenen = [
 </Layout>
 
 <style>
+	/* Randabstand 1:1 von BBH übernommen (live gemessen): 16px bis 1024px
+	   Breite, danach 32px — statt unserem vorherigen festen 24px ohne
+	   Zwischenschritt. Gilt für .wrap UND .hero-headline, damit große Texte
+	   nie ganz an den Bildschirmrand gehen. */
 	.wrap {
 		max-width: var(--max-width);
 		margin: 0 auto;
-		padding: 0 24px;
+		padding: 0 16px;
+	}
+
+	@media (min-width: 1024px) {
+		.wrap {
+			padding: 0 32px;
+		}
 	}
 
 	.hero {
@@ -74,8 +147,14 @@ const ebenen = [
 
 	.hero-headline {
 		container-type: inline-size;
-		padding: 0 24px;
+		padding: 0 16px;
 		margin: auto 0;
+	}
+
+	@media (min-width: 1024px) {
+		.hero-headline {
+			padding: 0 32px;
+		}
 	}
 
 	.hero h1 {
@@ -89,13 +168,85 @@ const ebenen = [
 		text-wrap: balance;
 	}
 
+	.hero {
+		/* Auf .hero definiert (nicht auf .hero-logo), damit .hero-logo__nav als
+		   Geschwister-Element (kein <a> in <a>, sonst ungültiges HTML) dieselben
+		   Maße referenzieren kann.
+		   Normale Header-Logo-Größe (kein *1.5-Hero-Aufschlag mehr wie vorher) —
+		   42px war zu klein fürs Ausgangs-Logo, auch wenn es den Chip näher an
+		   BBHs 88px gebracht hätte. Der Chip wird dadurch etwas größer als BBHs
+		   Feld, aber die Größenordnung passt noch. */
+		--logo-h: clamp(40px, 5.2vw, 64px);
+		--pole-w: calc(var(--logo-h) * 52.36 / 2018.08);
+		/* Breite von Fahne/Text, einmal ausgerechnet — für Gruppen-Zentrierung
+		   und Quadrat-Maße unten wiederverwendet. */
+		--banner-w: calc(var(--logo-h) * 1072.97 / 2018.08);
+		--text-w: calc(var(--logo-h) * 1986.93 / 2018.08);
+		/* Linker Rand der Kombo (Banner-Außenkante) und Gesamtbreite, relativ
+		   zum Anker (= Stangen-Mitte) bei 0. */
+		--combo-left: calc(-1 * var(--pole-w) / 2 - 4px - var(--banner-w));
+		--combo-w: calc(var(--pole-w) + 8px + var(--banner-w) + var(--text-w));
+		/* Eigener Mittelpunkt der Kombo (nicht der Stangen-Anker) — Text ist
+		   breiter als die Fahne, die Mitte liegt also rechts vom Anker. Wird für
+		   Gruppen-Zentrierung UND als Skalierungs-Ankerpunkt fürs Quadrat
+		   gebraucht. */
+		--combo-center-x: calc((var(--text-w) - var(--banner-w)) / 2);
+		/* Kachelgröße als EINE Variable — vorher waren das ~10 einzelne Zahlen
+		   über die ganze Datei verteilt (Chip-/Tile-Maße, Lücke, Verschiebung,
+		   Nav-Position...), jetzt reicht diese eine Zeile zum Anpassen. BBHs
+		   eigenes Maß ist 88px. */
+		--tile-size: 88px;
+		--tile-gap: 4px;
+		/* Echtes Quadrat, scharfe Kanten wie BBHs Logo-Feld — die Kombo ist von
+		   Natur aus breiter als hoch, deshalb wird sie beim Scrollen zusätzlich
+		   verkleinert (.hero-logo__mark), damit sie wirklich reinpasst.
+		   Ziel-Innenbreite = 80% der Kachelgröße (ca. 10% Rand je Seite). */
+		--mark-scale: calc(var(--tile-size) * 0.8 / var(--combo-w));
+		/* Horizontaler Ankerpunkt: die Trennlinie zwischen Chip- und
+		   Hamburger-Kachel (bzw. der linke Rand des aufgeklappten 2×2-Rasters).
+		   Normal Viewport-Mitte — unten per Media Query auf einen linken
+		   Dock-Punkt umgeschaltet, sobald das aufgeklappte Menü sonst mit dem
+		   Let's-Parley-Button unten rechts kollidieren würde. */
+		--seam-x: 50%;
+	}
+
+	@media (max-width: 560px) {
+		.hero {
+			/* Unter ~560px würde das volle 2×2-Menü (Chip+Hamburger+Raster,
+			   zusammen 4× tile-size + 3× tile-gap ≈ 364px ab der Mitte nach
+			   rechts) den unten rechts fixierten Let's-Parley-Button überlappen.
+			   Deshalb dockt das ganze Logo/Menü-Paar links an, auf gleicher
+			   Kante wie die Hero-Headline (16px, siehe .wrap). */
+			--seam-x: calc(16px + var(--tile-size));
+		}
+	}
+
+	.hero-logo-group {
+		/* Erzeugt bewusst keine eigene Box — .hero-logo (fixed) und
+		   .hero-logo__nav (ebenfalls fixed) positionieren sich weiterhin
+		   komplett selbst. Der Wrapper existiert nur, damit :hover auf ihm
+		   gemeinsam auf beide DOM-Nachfahren reagiert. */
+		display: contents;
+	}
+
 	.hero-logo {
-		/* 50% größer als der normale Header-Logo-Maßstab, nur hier im Hero. */
-		--logo-h: calc(clamp(32px, 4.4vw, 56px) * 1.5);
-		display: flex;
-		justify-content: center;
-		align-items: flex-end;
-		padding: 0 24px;
+		/* Fest am unteren Bildrand verankert — scrollt nicht mit weg, weil sie
+		   perspektivisch zum Menü-Button wird und deshalb immer erreichbar
+		   bleiben muss (wie die fixe Header-Nav, nur unten statt oben). */
+		position: fixed;
+		bottom: 0;
+		/* Nullbreiter Anker. Am Anfang ("The Parley" für sich) ist die
+		   Fahne+Text-Kombo mittig zentriert (--pair-shift: 0). Erst sobald die
+		   zweite Kachel erscheint, wandert der ganze Anker zusätzlich um 50px
+		   nach links (--pair-shift, unten bei .collapsed gesetzt), damit am
+		   Ende die Trennlinie zwischen den beiden Kacheln exakt bei 50% liegt
+		   — animiert, synchron mit dem Wisch der zweiten Kachel, nicht von
+		   Anfang an statisch. */
+		--pair-shift: 0px;
+		left: calc(var(--seam-x) - var(--combo-center-x) + var(--pair-shift));
+		width: 0;
+		height: var(--logo-h);
+		z-index: 100;
 		/* Ladeanimation wie bei theparley.de (dort: seitliches Reinwischen der
 		   Hero-Headline), hier aber von unten — echte Bewegung (translateY),
 		   kein Freilegen/Maskieren: das Logo fährt aus dem Boden hoch, statt
@@ -118,17 +269,413 @@ const ebenen = [
 		}
 	}
 
-	.hero-logo__flag {
+	.hero-logo.collapsed {
+		--pair-shift: calc(-1 * var(--tile-size) / 2);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo.transitions-ready {
+			/* Gleiches Timing wie der Hamburger-Kachel-Wisch (400ms Dauer, 400ms
+			   Verzögerung) — der Anker wandert erst los, wenn die erste Kachel
+			   fertig ist, und kommt genau dann bei 50% an, wenn die zweite
+			   Kachel fertig aufgewischt ist. */
+			transition: left 400ms cubic-bezier(0.77, 0, 0.18, 1) 400ms;
+		}
+	}
+
+	.hero-logo__hit-area {
+		/* Unsichtbare, großzügige Hover-/Klick-Fläche — deckt Chip UND die
+		   zweite (Hamburger-)Kachel samt etwas Rand ab. :hover auf einem
+		   Nachfahren zählt für .hero-logo:hover mit, unabhängig von dessen
+		   eigener (nullbreiter) Box. */
+		position: absolute;
+		left: calc(var(--combo-left) - 20px);
+		top: -120px;
+		width: calc(var(--combo-center-x) - var(--combo-left) + 1.5 * var(--tile-size) + var(--tile-gap) + 40px);
+		height: 140px;
+	}
+
+	.hero-logo__mark {
+		/* Umschließt Stange+Fahne+Text — bekommt beim Scrollen eine Skalierung
+		   plus Verschiebung, damit die Kombo mittig ins 100×100-Quadrat passt
+		   (der Chip selbst bleibt fix, siehe unten). Ankerpunkt fürs Skalieren
+		   ist die natürliche Kombo-Mitte (--combo-center-x, vertikal 50% von
+		   --logo-h) — die bleibt beim reinen scale() fix, die zusätzliche
+		   translateY schiebt sie danach exakt in die Quadrat-Mitte. */
+		position: absolute;
+		inset: 0;
+		/* z-index nötig: sobald der scale()-Transform beim Scrollen greift,
+		   erzeugt .hero-logo__mark automatisch einen eigenen Stacking-Context —
+		   ohne eigenen z-index läge der dann bei "auto" (~0), UNTER dem Chip
+		   (z-index:1), der dadurch alles verdeckt hätte. */
+		z-index: 2;
+		transform-origin: var(--combo-center-x) 50%;
+	}
+
+	.hero-logo.collapsed .hero-logo__mark {
+		/* Quadrat-Mitte (vertikal) liegt bei logo-h - tile/2 (Quadrat unten
+		   bündig mit dem Boden) — die natürliche Kombo-Mitte liegt bei
+		   logo-h/2. Differenz = logo-h/2 - tile/2, das ist die nötige
+		   Verschiebung nach dem Skalieren (horizontal keine Verschiebung nötig:
+		   die Kombo-Mitte ist ja schon der Skalierungs-Ankerpunkt). */
+		transform: translateY(calc(var(--logo-h) / 2 - var(--tile-size) / 2)) scale(var(--mark-scale));
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo.transitions-ready .hero-logo__mark {
+			transition: transform 400ms;
+		}
+	}
+
+	.hero-logo__chip {
+		/* Helles Quadrat hinter Stange+Fahne+Text, wie BBHs Logo-Feld — Farbe UND
+		   Deckkraft 1:1 von dort übernommen (bg-[#ededed]/95, live gemessen),
+		   0px Radius (scharfe Ecken, live gemessen). Erscheint erst, sobald
+		   geschwollen (.collapsed). Unten bündig mit dem Boden (bottom:0-
+		   Verankerung von .hero-logo) — sonst würde ein Teil davon unter den
+		   sichtbaren Bereich hängen. Horizontal zentriert auf denselben Punkt
+		   wie die Skalierung (--combo-center-x). Größe = --tile-size (eine
+		   Stelle zum Anpassen, siehe .hero weiter oben). */
+		position: absolute;
+		left: calc(var(--combo-center-x) - var(--tile-size) / 2);
+		top: calc(var(--logo-h) - var(--tile-size));
+		width: var(--tile-size);
+		height: var(--tile-size);
+		background: rgba(237, 237, 237, 0.95);
+		border-radius: 0;
+		z-index: 1;
+		opacity: 0;
+	}
+
+	.hero-logo.collapsed .hero-logo__chip {
+		opacity: 1;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo.transitions-ready .hero-logo__chip {
+			transition: opacity 300ms;
+		}
+	}
+
+	.hero-logo__hamburger-tile {
+		/* Zweite Kachel wie bei BBH (Logo + Hamburger als Paar) — gleiche Farbe/
+		   Deckkraft/Radius wie der Chip (BBH nutzt für beide dieselbe Fläche),
+		   direkt rechts daneben mit kleiner Lücke. */
+		position: absolute;
+		left: calc(var(--combo-center-x) + var(--tile-size) / 2 + var(--tile-gap));
+		top: calc(var(--logo-h) - var(--tile-size));
+		width: var(--tile-size);
+		height: var(--tile-size);
+		background: rgba(237, 237, 237, 0.95);
+		border-radius: 0;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 9px;
+		/* Wischt von links nach rechts ein (BBHs "mask-in"-Technik: clip-path
+		   von voll verdeckt zu sichtbar), statt nur einzublenden — deshalb
+		   opacity hier weg, clip-path übernimmt die Sichtbarkeit komplett. */
+		clip-path: inset(0 100% 0 0);
+	}
+
+	/* Erscheint erst, wenn die erste Kachel fertig durchgewachsen/skaliert ist
+	   (transition-delay = Dauer der .hero-logo__mark-Transition, 400ms) —
+	   "wenn The Parley in der Kachel fertig animiert ist", wie Fred es wollte. */
+	.hero-logo.collapsed .hero-logo__hamburger-tile {
+		clip-path: inset(0 0 0 0);
+	}
+
+	/* Beim Öffnen des Menüs fährt die Hamburger-Kachel in Richtung Schaf
+	   (Chip) rein — sie schrumpft von rechts her weg, der sichtbare Rest
+	   bleibt links (an der Chip-Kante) hängen, bis nichts mehr übrig ist.
+	   Live bei BBH so beobachtet: die Kachel verschwindet nicht einfach,
+	   sie zieht sich zur Logo-Seite hin zurück. Muss NACH der .collapsed-
+	   Regel stehen, sonst gewinnt die falsche bei gleicher Spezifität.
+	   Passiert wie bei BBH schon beim Drüber-Hovern, nicht erst nach einem
+	   Klick — Bezug ist :hover auf .hero-logo-group (nicht auf .hero-logo
+	   selbst), damit der Hover beim Wechsel von der Hamburger-Kachel auf
+	   eine der vier Menü-Kacheln nicht kurz "verloren" geht und der Effekt
+	   fälschlich rückwärts läuft. .is-open bleibt zusätzlich bestehen, damit
+	   ein Klick (z.B. auf Touch-Geräten ohne Hover) das Menü offen hält. */
+	.hero-logo-group:hover .hero-logo.collapsed .hero-logo__hamburger-tile,
+	.hero-logo.is-open .hero-logo__hamburger-tile {
+		clip-path: inset(0 100% 0 0);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo.transitions-ready .hero-logo__hamburger-tile {
+			/* Wie bei BBHs mask-in: 400ms, dieselbe Easing-Kurve, die wir schon
+			   an anderer Stelle von BBH übernommen haben. Verzögerung 400ms =
+			   Dauer der ersten Kachel-Skalierung (.hero-logo__mark), damit die
+			   zweite Kachel erst aufwischt, wenn die erste fertig ist. */
+			transition: clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1) 400ms;
+		}
+
+		/* Das Zurückziehen beim Öffnen/Hovern soll sofort losgehen (keine
+		   400ms-Verzögerung mehr nötig, die galt nur fürs allererste
+		   Erscheinen). */
+		.hero-logo-group:hover .hero-logo.collapsed.transitions-ready .hero-logo__hamburger-tile,
+		.hero-logo.is-open.transitions-ready .hero-logo__hamburger-tile {
+			transition: clip-path 300ms cubic-bezier(0.77, 0, 0.18, 1) 0ms;
+		}
+	}
+
+	.hero-logo__burger-line {
 		display: block;
-		width: calc(var(--logo-h) * 1160.62 / 2018.08);
+		width: 40px;
+		height: 3px;
+		background: var(--black);
+		flex: none;
+	}
+
+	.hero-logo__pole {
+		/* Bleibt stehen — das ist der feste Ankerpunkt. Volle Logo-Höhe, oben
+		   bündig (wie im Original-Logo: Stange geht über die volle Höhe, die
+		   Fahne sitzt nur oben drauf und ragt nicht drüber hinaus — vorher, mit
+		   fixer 78px-Höhe zentriert in --logo-h, war das versehentlich
+		   umgekehrt). Wird beim Scrollen schwarz statt weiß — zusammen mit
+		   Fahne+Text (Filter, siehe unten) und dem hellen Chip dahinter wird aus
+		   der Fahne ein Button, wie bei BBHs Logo-Chip. */
+		position: absolute;
+		left: calc(var(--pole-w) / -2);
+		top: 0;
+		width: var(--pole-w);
 		height: var(--logo-h);
+		background: var(--white);
+		z-index: 3;
+	}
+
+	.hero-logo.collapsed .hero-logo__pole {
+		background: var(--black);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo.transitions-ready .hero-logo__pole {
+			transition: background-color 300ms;
+		}
+	}
+
+	.hero-logo__banner-wrap {
+		/* Rechter Rand exakt an der Stange, wie zuvor — Fahne+Text bleiben aber
+		   jetzt an Ort und Stelle stehen, kein Wegschieben mehr. */
+		position: absolute;
+		right: calc(var(--pole-w) / 2 + 4px);
+		top: calc(var(--logo-h) * 40.9736 / 2018.08);
+		width: calc(var(--logo-h) * 1072.97 / 2018.08);
+		height: calc(var(--logo-h) * 459.85 / 2018.08);
+		z-index: 2;
+	}
+
+	.hero-logo__banner {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.hero-logo__text-wrap {
+		/* Linker Rand exakt an der Stange (+ 4px Lücke wie vorher). */
+		position: absolute;
+		left: calc(var(--pole-w) / 2 + 4px);
+		bottom: 0;
+		width: calc(var(--logo-h) * 1986.93 / 2018.08);
+		height: calc(var(--logo-h) * 1057.41 / 2018.08);
+		z-index: 2;
 	}
 
 	.hero-logo__text {
 		display: block;
-		height: calc(var(--logo-h) * 1057.41 / 2018.08);
+		height: 100%;
 		width: auto;
-		margin-left: 4px;
+	}
+
+	/* Weißer Fahnen-/Text-Fill wird zu Schwarz — per Filter statt neuer Assets,
+	   da die SVGs mit fill="white" fest kodiert sind. invert(1) auf Weiß ergibt
+	   exakt Schwarz, Transparenz bleibt unangetastet. */
+	.hero-logo.collapsed .hero-logo__banner,
+	.hero-logo.collapsed .hero-logo__text {
+		filter: invert(1);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo.transitions-ready .hero-logo__banner,
+		.hero-logo.transitions-ready .hero-logo__text {
+			transition: filter 300ms;
+		}
+	}
+
+	.hero-logo__nav {
+		/* 1:1 wie bei BBH: die ersten beiden neuen Kacheln übernehmen genau den
+		   Platz der (verschwindenden) Hamburger-Kachel — schließen also direkt
+		   an den Chip an, nicht erst hinter der Hamburger-Kachel. Als
+		   2×2-Raster, bündig am Boden wie Chip und Hamburger-Kachel. */
+		position: fixed;
+		left: calc(var(--seam-x) + var(--tile-gap));
+		bottom: 0;
+		width: calc(var(--tile-size) * 2 + var(--tile-gap));
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--tile-gap);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		z-index: 95;
+		pointer-events: none;
+	}
+
+	.hero-logo-group:hover .hero-logo.collapsed ~ .hero-logo__nav,
+	.hero-logo.is-open ~ .hero-logo__nav {
+		pointer-events: auto;
+	}
+
+	.hero-logo__nav li {
+		/* Volle Kachelbreite, halbe Kachelhöhe — aber die Lücke zwischen den
+		   zwei Reihen zählt mit: zwei Reihen + eine Lücke müssen zusammen genau
+		   --tile-size ergeben (wie die große Chip/Hamburger-Kachel), sonst wird
+		   das 2×2-Raster insgesamt höher als die Kachel daneben. Deshalb erst
+		   die Lücke abziehen, dann halbieren. Klappt von OBEN rein (inset(0 0
+		   100% 0) lässt nur einen Nullpixel-Streifen am oberen Rand sichtbar,
+		   wächst dann nach unten auf volle Höhe auf), gestaffelt über --in-delay
+		   pro <li> in Lesereihenfolge. */
+		width: var(--tile-size);
+		height: calc((var(--tile-size) - var(--tile-gap)) / 2);
+		background: rgba(237, 237, 237, 0.95);
+		clip-path: inset(0 0 100% 0);
+	}
+
+	.hero-logo-group:hover .hero-logo.collapsed ~ .hero-logo__nav li,
+	.hero-logo.is-open ~ .hero-logo__nav li {
+		clip-path: inset(0 0 0 0);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo__nav li {
+			transition: clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1) var(--in-delay, 0ms);
+		}
+	}
+
+	.hero-logo__nav a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		padding: 0 20px;
+		white-space: nowrap;
+		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
+		font-weight: 900;
+		font-size: 20px;
+		color: var(--black);
+		text-decoration: none;
+	}
+
+	.hero-logo__backdrop {
+		/* Wie BBHs nav-backdrop: dimmt+verwischt die GANZE Seite leicht, während
+		   das Menü offen ist (nicht der volldeckende Wisch vom Seitenübergang —
+		   das ist ausdrücklich stärker/anders, für Seitenwechsel reserviert). */
+		position: fixed;
+		inset: 0;
+		z-index: 90;
+		background: rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	/* .hero-logo__backdrop ist jetzt Geschwister von .hero-logo-group (nicht
+	   mehr direkt von .hero-logo) — deshalb :has() statt einfachem
+	   Geschwister-Selektor, um den Zustand aus dem Wrapper heraus zu prüfen. */
+	.hero-logo-group:hover:has(.hero-logo.collapsed) ~ .hero-logo__backdrop,
+	.hero-logo-group:has(.hero-logo.is-open) ~ .hero-logo__backdrop {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero-logo__backdrop {
+			transition: opacity 300ms;
+		}
+	}
+
+	.cta-button {
+		/* Unten rechts in der Ecke, im Ruhezustand eine einzelne Kachel
+		   (tile-size). Wächst beim Hovern nicht quadratisch/gleichmäßig,
+		   sondern wie eine Doppelkachel NACH LINKS auf (width statt scale) —
+		   rechts bleibt per right:0 fix, die Höhe bleibt tile-size, nur die
+		   Breite verdoppelt sich Richtung Bildmitte. Erscheint erst, sobald
+		   Logo+Hamburger-Kachel fertig durchanimiert sind (siehe
+		   .hero-logo-group:has(...) unten) — vorher komplett verdeckt. */
+		position: fixed;
+		right: 0;
+		bottom: 0;
+		width: var(--tile-size);
+		height: var(--tile-size);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(237, 237, 237, 0.95);
+		color: var(--black);
+		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
+		text-align: center;
+		text-decoration: none;
+		z-index: 100;
+		/* Wie BBHs Kachel-Wisch (clip-path von komplett verdeckt zu sichtbar) —
+		   inset(100% ...) verdeckt von oben her komplett, die Kachel "kommt von
+		   unten" ins Bild, statt einfach einzublenden. Gleiche Technik wie schon
+		   bei der Hamburger-Kachel und den vier Menü-Kacheln. */
+		clip-path: inset(100% 0 0 0);
+		pointer-events: none;
+	}
+
+	.hero-logo-group:has(.hero-logo.collapsed) ~ .cta-button {
+		clip-path: inset(0 0 0 0);
+		pointer-events: auto;
+	}
+
+	.cta-button:hover {
+		width: calc(var(--tile-size) * 2 + var(--tile-gap));
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.cta-button {
+			/* Erst wenn die Bewegung aus der Mitte (Fahne→Quadrat, 400ms) ganz
+			   nach außen durchgelaufen ist UND die Hamburger-Kachel fertig
+			   gewischt hat (weitere 400ms, startet erst nach der ersten Phase) —
+			   erst dann, nach einer spürbaren Zusatzpause, kommt der
+			   Let's-Parley-Button von unten. Nicht gleichzeitig mit der
+			   Hamburger-Kachel, sondern sichtbar danach. */
+			transition: clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1) 1000ms, width 300ms cubic-bezier(0.77, 0, 0.18, 1);
+		}
+	}
+
+	.cta-button__main {
+		/* Einziges Element in der Flex-Zentrierung des Buttons — .cta-button__sub
+		   ist absolut positioniert (siehe unten), damit sein reservierter Platz
+		   im Ruhezustand nicht den sichtbaren Text nach oben verschiebt. */
+		font-weight: 900;
+		font-size: 20px;
+		line-height: 1.05;
+	}
+
+	.cta-button__sub {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 14px;
+		font-weight: 500;
+		font-size: 12px;
+		opacity: 0;
+	}
+
+	.cta-button:hover .cta-button__sub {
+		opacity: 1;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.cta-button__sub {
+			transition: opacity 200ms;
+		}
 	}
 
 	.proof {
@@ -203,3 +750,67 @@ const ebenen = [
 		}
 	}
 </style>
+
+<script>
+	const logo = document.querySelector<HTMLElement>(".hero-logo");
+
+	// Zwei Scroll-Phasen — Timing hier tunen. Das Öffnen der Pille (--grow)
+	// passiert automatisch, sobald "The Parley" verschwunden ist (.collapsed).
+	const BANNER_START = 0;
+	const BANNER_DISTANCE = 100;
+	const TEXT_START = 0;
+	const TEXT_DISTANCE = 100;
+
+	let rafId = 0;
+	// Einmal verwandelt, bleibt es verwandelt — auch beim Zurückscrollen nach
+	// oben. Statt der aktuellen Scroll-Position nehmen wir den bisher weitesten
+	// erreichten Stand: der kann nur wachsen, nie sinken, die Animation läuft
+	// also nie rückwärts (Fred: man würde sonst beim Hochscrollen das schon
+	// geöffnete Menü wieder verlieren).
+	let maxScrollY = window.scrollY;
+
+	function progress(start: number, distance: number) {
+		return Math.max(0, Math.min(1, (maxScrollY - start) / distance));
+	}
+
+	function update() {
+		if (!logo) return;
+		maxScrollY = Math.max(maxScrollY, window.scrollY);
+		const bannerCollapse = progress(BANNER_START, BANNER_DISTANCE);
+		const textCollapse = progress(TEXT_START, TEXT_DISTANCE);
+		logo.style.setProperty("--banner-collapse", String(bannerCollapse));
+		logo.style.setProperty("--text-collapse", String(textCollapse));
+		// Hover/Klick sollen erst wirken, wenn "The Parley" fertig verschwunden
+		// ist — vorher bleibt die Maus wirkungslos (siehe .collapsed im <style>).
+		logo.classList.toggle("collapsed", bannerCollapse >= 1 && textCollapse >= 1);
+	}
+
+	function onScroll() {
+		if (rafId) return;
+		rafId = requestAnimationFrame(() => {
+			update();
+			rafId = 0;
+		});
+	}
+
+	update();
+	window.addEventListener("scroll", onScroll, { passive: true });
+	window.addEventListener("resize", onScroll, { passive: true });
+
+	// Klick hält den Button offen (wie Zwetschkes .open-Klasse) statt zur
+	// Startseite zu navigieren — echtes Menü-Ziel kommt später. Wirkt nur, wenn
+	// bereits gescrollt genug wurde ("The Parley" ist verschwunden) — sonst
+	// bliebe ein "vorgemerktes" Öffnen stehen, das erst beim späteren Erreichen
+	// von .collapsed unerwartet aufploppt.
+	logo?.addEventListener("click", (event) => {
+		event.preventDefault();
+		if (!logo.classList.contains("collapsed")) return;
+		logo.classList.toggle("is-open");
+	});
+
+	// Transition erst kurz nach dem ersten Seitenaufbau aktivieren (siehe
+	// Kommentar bei .transitions-ready im <style>).
+	setTimeout(() => {
+		logo?.classList.add("transitions-ready");
+	}, 100);
+</script>
