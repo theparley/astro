@@ -17,6 +17,11 @@ pnpm-debug.log*
 .env
 .env.production
 
+# Cloudflare Wrangler — .dev.vars hält lokale Secrets (z.B. METERGO_PAT) für
+# `wrangler pages dev`, darf NIE ins Repo. .wrangler/ ist lokaler CLI-Cache.
+.dev.vars
+.wrangler/
+
 # macOS-specific files
 .DS_Store
 

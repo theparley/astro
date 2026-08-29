@@ -10,12 +10,16 @@ interface Props {
 	// Startseite): das Menü + der CTA starten dann direkt sichtbar, statt auf
 	// einen Scroll-Fortschritt zu warten, der auf Unterseiten nie kommt.
 	menuStartCollapsed?: boolean;
+	// true nur auf /buchen: "Let's Parley" verschwindet, weil die Tür, auf die
+	// der Button zeigt, schon erreicht ist (Website-Brief, Konversions-Kapitel).
+	hideCta?: boolean;
 }
 
 const {
 	title,
 	description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.",
 	menuStartCollapsed = true,
+	hideCta = false,
 } = Astro.props;
 ---
 
@@ -33,7 +37,7 @@ const {
 	</head>
 	<body>
 		<PageWipe />
-		<MenuTiles startCollapsed={menuStartCollapsed} />
+		<MenuTiles startCollapsed={menuStartCollapsed} hideCta={hideCta} />
 		<slot />
 	</body>
 </html>
@@ -48,9 +52,18 @@ const {
 	}
 
 	:root {
+		/* Farb-Treppe (29.08., aus BBHs ausgeliefertem CSS gemessen + für Parley
+		   adaptiert — gilt seitenweit als Token-Satz, siehe Website-Brief
+		   /buchen-Kapitel). Ersetzt die vorherigen Ad-hoc-Werte (--white war
+		   #fafafa, --gray war #888) durch die entschiedenen Spec-Werte. */
 		--black: #000000;
-		--white: #fafafa;
-		--gray: #888;
+		--panel: #0d0d0d;
+		--tile: #404040;
+		--tile-text: #c8c8c8;
+		--surface: #ededed;
+		--white: #ffffff;
+		--gray: #999894;
+		--line: #2a2a2a;
 		--max-width: 1100px;
 		--logo-h: clamp(32px, 4.4vw, 56px);
 		/* Fahne + Lücke + Text bei --logo-h, aus den Original-SVG-Maßen (1160.62/2018.08 Fahne, 1986.93/2018.08 Text, 4px Lücke) */

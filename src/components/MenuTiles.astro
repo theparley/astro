@@ -8,9 +8,12 @@
 // Sekunde an sichtbar statt erst nach Scroll-Fortschritt.
 interface Props {
 	startCollapsed?: boolean;
+	// true nur auf /buchen: "Let's Parley" verschwindet dort (die Tür ist
+	// schon erreicht), siehe Website-Brief.
+	hideCta?: boolean;
 }
 
-const { startCollapsed = false } = Astro.props;
+const { startCollapsed = false, hideCta = false } = Astro.props;
 ---
 
 {/* Gemeinsamer Wrapper um ALLE drei Top-Level-Elemente (Logo-Gruppe, Backdrop,
@@ -74,11 +77,15 @@ const { startCollapsed = false } = Astro.props;
    :hover), aber an den Scroll-Fortschritt gekoppelt: erscheint erst, wenn
    Logo- und Hamburger-Kachel fertig durchanimiert sind (.collapsed auf
    .hero-logo). Wächst beim Hovern als Doppelkachel nach links, zeigt dann
-   eine zusätzliche CTA-Zeile. */}
-<a href="#" class="cta-button">
-	<span class="cta-button__main">Let's<br />Parley</span>
-	<span class="cta-button__sub">Gespräch buchen →</span>
-</a>
+   eine zusätzliche CTA-Zeile. Führt DIREKT auf /buchen (Website-Brief:
+   kein Zwischenmenü) — auf /buchen selbst per hideCta ausgeblendet, die
+   Tür ist schon erreicht. */}
+{!hideCta && (
+	<a href="/buchen" class="cta-button">
+		<span class="cta-button__main">Let's<br />Parley</span>
+		<span class="cta-button__sub">Gespräch buchen →</span>
+	</a>
+)}
 </div>
 
 <style>

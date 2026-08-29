@@ -2,27 +2,664 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Buchen">
-	<main class="wrap">
-		<h1>Gespräch buchen</h1>
-		<p>Termin-Anbindung folgt (eigene, gebrandete Kalender-Oberfläche auf Basis der meetergo-API).</p>
-		<p><a href="/">← Zurück</a></p>
+{/* Eigenbau-Kalender auf Basis der meetergo-API (Website-Brief, /buchen-
+   Kapitel + FINALE UI-Spec 29.08. abends) — PAT bleibt server-seitig in den
+   Cloudflare Pages Functions unter functions/api/{slots,book}.js, siehe
+   functions/_lib/meetergo.js. hideCta: "Let's Parley" verschwindet hier,
+   die Tür ist schon erreicht. */}
+<Layout title="Buchen" description="Ein kleines Gespräch — 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley." hideCta>
+	<main class="buchen">
+		<h1>Ein kleines Gespräch.</h1>
+		<p class="sub">30 Minuten, nichts vorbereiten.</p>
+		<p class="geleit">Parley heißt Verhandlungsgespräch. Wer es ausruft, bekommt sicheres Geleit: kein Pitch, keine Unterlagen, ein Gespräch.</p>
+
+		{/* Schritt 1: Tag */}
+		<div id="stepDay">
+			<p class="step-label">1 · Tag wählen</p>
+			<div id="monthsContainer">
+				<p class="status" id="loadingStatus">Termine werden geladen …</p>
+			</div>
+		</div>
+
+		{/* Schritt 2: Uhrzeit — wird per JS in die inline-{Monat}-Andockstelle
+		   unter dem gewählten Monat verschoben (FINALE Spec: Auswahl und
+		   Antwort bleiben beieinander). IMMER Liste untereinander (Fred-
+		   Entscheid 29.08.), kein Zeilen-/Auto-Modus mehr. */}
+		<div id="stepTime" class="hidden">
+			<p class="step-label">2 · Uhrzeit wählen — <span id="timeDayLabel"></span></p>
+			<div class="slots" id="slotsGrid"></div>
+			<p class="status error hidden" id="slotsError"></p>
+		</div>
+
+		{/* Schritt 3: Daten */}
+		<div id="stepForm" class="hidden">
+			<p class="step-label">3 · Fast geschafft</p>
+			<p class="chosen" id="chosenLabel"></p>
+			<div class="field"><label for="f-name">Name</label><input id="f-name" type="text" autocomplete="name" /></div>
+			<div class="field"><label for="f-email">E-Mail</label><input id="f-email" type="email" autocomplete="email" /></div>
+			<div class="field"><label for="f-message">Worum geht es? (optional)</label><textarea id="f-message" rows="2"></textarea></div>
+			<p class="privacy">Deine Daten nutzen wir nur für diesen Termin. <a href="/datenschutz">Datenschutz</a></p>
+			<p class="status error hidden" id="formError"></p>
+			<div class="actions">
+				<button type="button" class="btn-back" id="btnBack">Zurück</button>
+				<button type="button" class="btn-confirm" id="btnConfirm">Gespräch buchen</button>
+			</div>
+		</div>
+
+		{/* Bestätigung */}
+		<div id="stepDone" class="hidden done">
+			<div class="flag">⚑</div>
+			<h2>Parley angenommen.</h2>
+			<p id="doneLabel"></p>
+			<p style="margin-top:8px">Die Bestätigung ist unterwegs in dein Postfach.</p>
+		</div>
+
+		<div class="direct">
+			Lieber direkt? Ruf an oder schreib.<br />
+			<a href="tel:+497219574304">0721 957 43 04</a> · <a href="mailto:eckert@theparley.de">eckert@theparley.de</a>
+		</div>
 	</main>
 </Layout>
 
-<style>
-	.wrap {
-		max-width: var(--max-width);
+<style is:global>
+	/* is:global (nicht Astros scoped CSS): fast der gesamte Kalender wird per
+	   JS erzeugt (Tage, Uhrzeiten, Balken) — dynamisch angelegte Elemente
+	   bekommen NIE Astros data-astro-cid-Attribut, scoped Selektoren würden
+	   sie also nie treffen. Kollisionsrisiko gering: dieser Style-Block lädt
+	   ohnehin nur auf /buchen, kein anderes Astro-Bundle bekommt ihn zu sehen.
+	   Farb-Treppe kommt aus dem sitewiten Token-Satz (Layout.astro) — hier nur
+	   die Balken-Töne, die laut Website-Brief eigene "Fred-Token" sind statt
+	   Teil der allgemeinen Treppe. */
+	.buchen {
+		--seg-free: #6e6e6e;
+		--seg-busy: #383838;
+		--seg-free-selected: #0a0a0a;
+	}
+
+	/* Eine zentrierte Spalte, fluid bis Deckel 520px (FINALE Spec Punkt 4) —
+	   kein Struktur-Breakpoint nötig, alles atmet über cqw an der Kachel. */
+	.buchen {
+		max-width: 520px;
 		margin: 0 auto;
-		padding: 96px 24px;
+		padding: 64px 16px 140px;
+	}
+
+	@media (min-width: 1024px) {
+		.buchen {
+			padding-left: 32px;
+			padding-right: 32px;
+		}
 	}
 
 	h1 {
-		font-size: 2rem;
-		margin-bottom: 24px;
+		font-size: 1.9rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		line-height: 1.1;
 	}
 
-	p {
+	.sub {
+		color: var(--gray);
+		margin-top: 6px;
+		font-size: 1rem;
+	}
+
+	.geleit {
+		margin-top: 14px;
+		font-size: 0.85rem;
+		color: var(--gray);
+		border-left: 2px solid var(--line);
+		padding-left: 10px;
+		line-height: 1.45;
+	}
+
+	.step-label {
+		margin: 26px 0 10px;
+		font-size: 0.75rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--gray);
+	}
+
+	.status {
+		font-size: 0.85rem;
+		color: var(--gray);
+		padding: 12px 0;
+	}
+
+	.status.error {
+		color: #e0a0a0;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	/* Tages-Kacheln — immer 7 Spalten (Mo–So), FINALE Spec: kein Werktage-
+	   Umschalter mehr, das war nur ein Regler-Experiment in der Demo. */
+	.month {
+		font-size: 0.9rem;
+		font-weight: 700;
+		margin: 10px 0 8px;
+		text-transform: capitalize;
+	}
+
+	.dows,
+	.days {
+		display: grid;
+		grid-template-columns: repeat(7, 1fr);
+		gap: 6px;
+	}
+
+	.dows span {
+		font-size: 0.65rem;
+		color: var(--gray);
+		text-align: center;
+		letter-spacing: 0.05em;
+	}
+
+	.day {
+		aspect-ratio: 1;
+		border: none;
+		background: none;
+		color: var(--white);
+		font-family: inherit;
+		/* Zahl + Balken skalieren mit der Kachelbreite (cqw) — kein Breakpoint */
+		container-type: inline-size;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		padding: 0;
+	}
+
+	.day .num {
+		font-size: clamp(0.95rem, 42cqw, 1.55rem);
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	/* Belegungs-Balken: SENKRECHTER Stapel rechts neben der Zahl (FINALE Spec
+	   Punkt 2 — ersetzt die quere Tagesleiste, die dadurch ganz entfällt).
+	   Miniatur der Uhrzeiten-Liste: oben = morgens, unten = abends. */
+	.day .state {
+		position: absolute;
+		top: 50%;
+		right: 3px;
+		transform: translateY(-50%);
+	}
+
+	.daybar {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1px;
+	}
+
+	/* Segmente als liegende Rechtecke, 2:1 (Fred-Entscheid 29.08.) */
+	.daybar span {
+		flex: none;
+		height: clamp(2px, 6cqw, 4px);
+		aspect-ratio: 2 / 1;
+		background: var(--seg-busy);
+	}
+
+	.daybar span.f {
+		background: var(--seg-free);
+	}
+
+	/* Balken nur auf wählbaren Kacheln (Punkt 3) */
+	.day.free {
+		background: var(--tile);
+	}
+
+	.day.full {
+		color: #555;
+		cursor: default;
+	}
+
+	.day.full .num {
+		text-decoration: line-through;
+	}
+
+	.day.off {
+		color: #444;
+		cursor: default;
+	}
+
+	.day.off .state {
+		display: none;
+	}
+
+	/* Gewählte Kachel: Balken invertiert — nur freie Fenster als dunkle
+	   Marken, vergebene entfallen (Punkt 3) */
+	.day.selected {
+		background: var(--surface);
+		color: #000;
+	}
+
+	.day.selected .daybar span {
+		background: transparent;
+	}
+
+	.day.selected .daybar span.f {
+		background: var(--seg-free-selected);
+	}
+
+	/* Uhrzeiten-Layout: IMMER Liste untereinander, volle Breite, gleiche
+	   Schriftgröße (FINALE Spec Punkt 1) */
+	.slots {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+
+	.slot {
+		border: none;
+		background: var(--tile);
+		color: var(--white);
+		font-family: inherit;
+		font-size: 1.05rem;
+		font-weight: 700;
+		padding: 14px 0;
+		cursor: pointer;
+	}
+
+	.slot.selected {
+		background: var(--surface);
+		color: #000;
+	}
+
+	/* Formular */
+	.chosen {
+		font-size: 1.15rem;
+		font-weight: 800;
+		margin-bottom: 14px;
+	}
+
+	.field {
 		margin-bottom: 12px;
 	}
+
+	.field label {
+		display: block;
+		font-size: 0.75rem;
+		color: var(--gray);
+		margin-bottom: 4px;
+	}
+
+	.field input,
+	.field textarea {
+		width: 100%;
+		background: var(--panel);
+		border: 1px solid var(--line);
+		color: var(--white);
+		font-family: inherit;
+		font-size: 1rem;
+		padding: 12px;
+	}
+
+	.field input:focus,
+	.field textarea:focus {
+		outline: none;
+		border-color: var(--white);
+	}
+
+	.privacy {
+		font-size: 0.7rem;
+		color: var(--gray);
+		line-height: 1.5;
+		margin: 14px 0 18px;
+	}
+
+	.privacy a {
+		color: var(--gray);
+	}
+
+	.actions {
+		display: flex;
+		gap: 10px;
+	}
+
+	.btn-back {
+		border: 1px solid var(--line);
+		background: none;
+		color: var(--gray);
+		font-family: inherit;
+		font-size: 0.95rem;
+		padding: 14px 18px;
+		cursor: pointer;
+	}
+
+	.btn-confirm {
+		flex: 1;
+		border: none;
+		background: var(--surface);
+		color: #000;
+		font-family: inherit;
+		font-size: 1rem;
+		font-weight: 800;
+		padding: 14px 0;
+		cursor: pointer;
+	}
+
+	.btn-confirm:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	/* Bestätigung */
+	.done {
+		text-align: center;
+		padding: 60px 0;
+	}
+
+	.done .flag {
+		font-size: 2.5rem;
+		margin-bottom: 16px;
+	}
+
+	.done h2 {
+		font-size: 1.5rem;
+		font-weight: 800;
+		margin-bottom: 10px;
+	}
+
+	.done p {
+		color: var(--gray);
+		line-height: 1.5;
+	}
+
+	/* Direkt-Zeile */
+	.direct {
+		margin-top: 34px;
+		padding-top: 18px;
+		border-top: 1px solid var(--line);
+		font-size: 0.85rem;
+		color: var(--gray);
+		line-height: 1.6;
+	}
+
+	.direct a {
+		color: var(--white);
+		text-decoration: none;
+		border-bottom: 1px solid var(--gray);
+	}
 </style>
+
+<script>
+	// Eigenbau-Kalender über die meetergo-API (via /api/slots, /api/book —
+	// PAT bleibt server-seitig, siehe functions/). An astro:page-load
+	// gekoppelt (Muster wie MenuTiles/PageWipe), damit ein Zurück-zu-/buchen
+	// per Client-Side-Navigation den Kalender frisch aufbaut.
+	function initBuchen() {
+		const monthsContainer = document.getElementById("monthsContainer");
+		if (!monthsContainer) return; // nicht auf dieser Seite
+
+		const stepDay = document.getElementById("stepDay") as HTMLElement;
+		const stepTime = document.getElementById("stepTime") as HTMLElement;
+		const stepForm = document.getElementById("stepForm") as HTMLElement;
+		const stepDone = document.getElementById("stepDone") as HTMLElement;
+		const loadingStatus = document.getElementById("loadingStatus") as HTMLElement;
+		const slotsGrid = document.getElementById("slotsGrid") as HTMLElement;
+		const slotsError = document.getElementById("slotsError") as HTMLElement;
+		const timeDayLabel = document.getElementById("timeDayLabel") as HTMLElement;
+		const chosenLabel = document.getElementById("chosenLabel") as HTMLElement;
+		const doneLabel = document.getElementById("doneLabel") as HTMLElement;
+		const formError = document.getElementById("formError") as HTMLElement;
+		const nameInput = document.getElementById("f-name") as HTMLInputElement;
+		const emailInput = document.getElementById("f-email") as HTMLInputElement;
+		const messageInput = document.getElementById("f-message") as HTMLTextAreaElement;
+		const btnBack = document.getElementById("btnBack") as HTMLButtonElement;
+		const btnConfirm = document.getElementById("btnConfirm") as HTMLButtonElement;
+
+		// 6 grobe Tagesabschnitte für den Balken (9–18 Uhr Arbeitsfenster) —
+		// ehrlich aus der echten Slot-Antwort abgeleitet: ein Abschnitt gilt
+		// als frei, sobald mindestens ein echter freier Termin hineinfällt.
+		const BUCKETS = [
+			[9 * 60, 10 * 60 + 30],
+			[10 * 60 + 30, 12 * 60],
+			[12 * 60, 13 * 60 + 30],
+			[13 * 60 + 30, 15 * 60],
+			[15 * 60, 16 * 60 + 30],
+			[16 * 60 + 30, 18 * 60],
+		];
+
+		const timeFmt = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Berlin" });
+		const monthFmt = new Intl.DateTimeFormat("de-DE", { month: "long", timeZone: "Europe/Berlin" });
+
+		function pad(n: number) {
+			return String(n).padStart(2, "0");
+		}
+		function isoDate(y: number, m: number, d: number) {
+			return `${y}-${pad(m + 1)}-${pad(d)}`;
+		}
+		function berlinMinutesOfDay(date: Date) {
+			const [h, m] = timeFmt.format(date).split(":").map(Number);
+			return h * 60 + m;
+		}
+
+		function monthMeta(year: number, month: number) {
+			const first = new Date(year, month, 1);
+			const numDays = new Date(year, month + 1, 0).getDate();
+			const startWeekday = (first.getDay() + 6) % 7; // Mo=0…So=6
+			return { year, month, numDays, startWeekday, name: monthFmt.format(first) };
+		}
+
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const thisMonth = monthMeta(today.getFullYear(), today.getMonth());
+		const nextMonthFirst = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+		const nextMonth = monthMeta(nextMonthFirst.getFullYear(), nextMonthFirst.getMonth());
+		const MONTHS = [thisMonth, nextMonth];
+
+		const windowEnd = new Date(nextMonth.year, nextMonth.month, nextMonth.numDays, 23, 59, 59);
+
+		let datesByIso = new Map<string, Array<{ startTime: string }>>();
+		let chosenIso = "";
+		let chosenLabelText = "";
+		let chosenStart = "";
+
+		async function fetchSlots(refresh: boolean) {
+			const params = new URLSearchParams({
+				start: today.toISOString(),
+				end: windowEnd.toISOString(),
+			});
+			if (refresh) params.set("refresh", "1");
+			const res = await fetch(`/api/slots?${params.toString()}`);
+			if (!res.ok) throw new Error(`slots_failed_${res.status}`);
+			const data = await res.json();
+			datesByIso = new Map((data.dates || []).map((d: any) => [d.date, d.spots || []]));
+		}
+
+		function cellState(year: number, month: number, day: number) {
+			const date = new Date(year, month, day);
+			const weekday = date.getDay(); // 0 So … 6 Sa
+			const isWeekend = weekday === 0 || weekday === 6;
+			const isPast = date < today;
+			if (isWeekend || isPast) return { kind: "off" as const, spots: [] as Array<{ startTime: string }> };
+			const spots = datesByIso.get(isoDate(year, month, day)) || [];
+			if (spots.length === 0) return { kind: "full" as const, spots };
+			return { kind: "free" as const, spots };
+		}
+
+		function dayBarHtml(spots: Array<{ startTime: string }>) {
+			const flags = BUCKETS.map(([from, to]) =>
+				spots.some((s) => {
+					const min = berlinMinutesOfDay(new Date(s.startTime));
+					return min >= from && min < to;
+				}),
+			);
+			return '<span class="daybar">' + flags.map((f) => `<span${f ? ' class="f"' : ""}></span>`).join("") + "</span>";
+		}
+
+		function buildMonths() {
+			// Schritt 2+3 vor dem Neuaufbau in Sicherheit bringen (stecken sonst
+			// noch in einer inline-Andockstelle, die gleich neu erzeugt wird).
+			stepDay.appendChild(stepTime);
+			stepDay.appendChild(stepForm);
+			stepTime.classList.add("hidden");
+			stepForm.classList.add("hidden");
+			monthsContainer.innerHTML = "";
+
+			MONTHS.forEach((m) => {
+				const title = document.createElement("p");
+				title.className = "month";
+				title.textContent = m.name;
+				monthsContainer.appendChild(title);
+
+				const dows = document.createElement("div");
+				dows.className = "dows";
+				dows.innerHTML = "<span>MO</span><span>DI</span><span>MI</span><span>DO</span><span>FR</span><span>SA</span><span>SO</span>";
+				monthsContainer.appendChild(dows);
+
+				const grid = document.createElement("div");
+				grid.className = "days";
+				grid.style.marginBottom = "18px";
+				for (let i = 0; i < m.startWeekday; i++) grid.appendChild(document.createElement("div"));
+
+				for (let d = 1; d <= m.numDays; d++) {
+					const { kind, spots } = cellState(m.year, m.month, d);
+					const btn = document.createElement("button");
+					btn.type = "button";
+					btn.className = "day " + kind;
+					if (kind === "off") {
+						btn.disabled = true;
+						btn.innerHTML = `<span class="num">${d}</span>`;
+					} else if (kind === "full") {
+						btn.disabled = true;
+						btn.innerHTML = `<span class="num">${d}</span><span class="state"></span>`;
+					} else {
+						btn.innerHTML = `<span class="num">${d}</span><span class="state">${dayBarHtml(spots)}</span>`;
+						btn.setAttribute("aria-label", `${d}. ${m.name}, ${spots.length} freie Termine`);
+						btn.addEventListener("click", () => pickDay(btn, m, d, spots));
+					}
+					grid.appendChild(btn);
+				}
+				monthsContainer.appendChild(grid);
+
+				// Andock-Stelle: Uhrzeiten + Formular erscheinen direkt UNTER dem
+				// gewählten Monat (FINALE Spec: Auswahl und Antwort bleiben
+				// beieinander, statt weit unten am Seitenende zu erscheinen).
+				const inline = document.createElement("div");
+				inline.id = "inline-" + m.year + "-" + m.month;
+				monthsContainer.appendChild(inline);
+			});
+		}
+
+		function pickDay(btn: HTMLButtonElement, m: { year: number; month: number; name: string }, d: number, spots: Array<{ startTime: string }>) {
+			monthsContainer.querySelectorAll(".day.selected").forEach((x) => x.classList.remove("selected"));
+			btn.classList.add("selected");
+			chosenIso = isoDate(m.year, m.month, d);
+			chosenLabelText = `${d}. ${m.name}`;
+
+			const inline = document.getElementById("inline-" + m.year + "-" + m.month);
+			inline?.appendChild(stepTime);
+			inline?.appendChild(stepForm);
+
+			timeDayLabel.textContent = chosenLabelText;
+			slotsError.classList.add("hidden");
+			renderSlots(spots);
+			stepTime.classList.remove("hidden");
+			stepForm.classList.add("hidden");
+			stepTime.scrollIntoView({ behavior: "smooth", block: "nearest" });
+		}
+
+		function renderSlots(spots: Array<{ startTime: string }>) {
+			slotsGrid.innerHTML = "";
+			spots
+				.slice()
+				.sort((a, b) => a.startTime.localeCompare(b.startTime))
+				.forEach((spot) => {
+					const btn = document.createElement("button");
+					btn.type = "button";
+					btn.className = "slot";
+					btn.textContent = timeFmt.format(new Date(spot.startTime));
+					btn.addEventListener("click", () => pickSlot(btn, spot.startTime));
+					slotsGrid.appendChild(btn);
+				});
+		}
+
+		function pickSlot(btn: HTMLButtonElement, startTime: string) {
+			slotsGrid.querySelectorAll(".slot.selected").forEach((x) => x.classList.remove("selected"));
+			btn.classList.add("selected");
+			chosenStart = startTime;
+			chosenLabel.textContent = `${chosenLabelText}, ${timeFmt.format(new Date(startTime))} Uhr · 30 Minuten`;
+			formError.classList.add("hidden");
+			stepForm.classList.remove("hidden");
+			stepForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+		}
+
+		btnBack.addEventListener("click", () => {
+			stepForm.classList.add("hidden");
+		});
+
+		btnConfirm.addEventListener("click", async () => {
+			const fullname = nameInput.value.trim();
+			const email = emailInput.value.trim();
+			const message = messageInput.value.trim();
+			formError.classList.add("hidden");
+
+			if (!fullname || !email) {
+				formError.textContent = "Bitte Name und E-Mail ausfüllen.";
+				formError.classList.remove("hidden");
+				return;
+			}
+			if (!chosenStart) {
+				formError.textContent = "Bitte zuerst eine Uhrzeit wählen.";
+				formError.classList.remove("hidden");
+				return;
+			}
+
+			btnConfirm.disabled = true;
+			btnConfirm.textContent = "Wird gebucht …";
+
+			try {
+				const res = await fetch("/api/book", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ start: chosenStart, fullname, email, message }),
+				});
+
+				if (res.status === 400 || res.status === 409) {
+					// Slot ist inzwischen weg — frisch nachladen und zurück zu
+					// Schritt 2 (Website-Brief: "bei Buchungs-400 Slots refreshen").
+					formError.textContent = "Diese Uhrzeit ist gerade weggebucht worden. Bitte neu wählen.";
+					formError.classList.remove("hidden");
+					await fetchSlots(true);
+					buildMonths();
+					return;
+				}
+				if (!res.ok) {
+					throw new Error(`book_failed_${res.status}`);
+				}
+
+				doneLabel.textContent = `${chosenLabelText}, ${timeFmt.format(new Date(chosenStart))} Uhr · 30 Minuten`;
+				stepDay.classList.add("hidden");
+				stepTime.classList.add("hidden");
+				stepForm.classList.add("hidden");
+				stepDone.classList.remove("hidden");
+			} catch (err) {
+				formError.textContent = "Das hat gerade nicht geklappt. Bitte gleich nochmal versuchen oder direkt anrufen/schreiben.";
+				formError.classList.remove("hidden");
+			} finally {
+				btnConfirm.disabled = false;
+				btnConfirm.textContent = "Gespräch buchen";
+			}
+		});
+
+		(async () => {
+			try {
+				await fetchSlots(false);
+				loadingStatus.classList.add("hidden");
+				buildMonths();
+			} catch (err) {
+				loadingStatus.textContent = "Termine konnten nicht geladen werden. Bitte gleich nochmal versuchen oder direkt anrufen/schreiben.";
+				loadingStatus.classList.add("error");
+			}
+		})();
+	}
+
+	document.addEventListener("astro:page-load", initBuchen);
+</script>
