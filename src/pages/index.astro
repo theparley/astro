@@ -182,6 +182,11 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.plaedoyer {
 		padding: 56px 0 64px;
 		border-top: 1px solid var(--line);
+		/* BBH-Stil (Fred 30.08.): Statement-Sektionen atmen breiter als der
+		   1100er-Standardrahmen — bis 1400px, dadurch wächst die Essenz-
+		   Spalte auf ~640px und die cqw-gekoppelte Schrift erreicht auf
+		   breiten Monitoren BBHs 80px-Maß (Deckel s. .essence-line). */
+		max-width: 1400px;
 		display: flex;
 		flex-direction: column;
 		gap: 48px;
@@ -198,18 +203,30 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	.plaedoyer-text {
 		max-width: 46rem;
-		font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.375rem);
-		line-height: 1.55;
+		/* BBH-Rezept 1:1 (Fred 30.08., „übernimm das mal") — gemessen am
+		   About-Body-Block (`text-md -tracking-20 leading-120`):
+		   Schrift clamp(20px → 26px, deren fluid-Formel), Zeilenhöhe 1.2
+		   statt vorher 1.55 (DAS war Freds „Abstand wirkt zu groß"-Gefühl:
+		   der luftige Zeilenfall, nicht der Absatz-Abstand), Laufweite
+		   -0.02em. */
+		font-size: clamp(1.25rem, 1.137rem + 0.4518vw, 1.625rem);
+		line-height: 1.2;
+		letter-spacing: -0.02em;
 		color: var(--white);
 	}
 
-	/* Drei Absätze statt vormals einem Fließtext-Block (Feinschliff-Zuruf
-	   während des Bau-Schritts) — Abstand zwischen den Absätzen, damit sie
-	   als eigene Gedankenschritte lesbar bleiben statt zusammenzukleben
-	   (globales p{margin:0} in Layout.astro würde sie sonst direkt
-	   aneinanderstoßen lassen). */
+	/* Absatz-Abstand ebenfalls BBH (`space-y-5 md:space-y-8`): 1.25rem
+	   mobil, 2rem ab Desktop — wirkt durch den dichten Zeilenfall kompakt.
+	   (Globales p{margin:0} in Layout.astro würde die drei Absätze sonst
+	   zusammenkleben lassen.) */
 	.plaedoyer-text + .plaedoyer-text {
-		margin-top: 1em;
+		margin-top: 1.25rem;
+	}
+
+	@media (min-width: 800px) {
+		.plaedoyer-text + .plaedoyer-text {
+			margin-top: 2rem;
+		}
 	}
 
 	/* Essenz-Hälfte in sich MITTIG gesetzt (Website-Brief, Layout-Spec: "die
@@ -268,7 +285,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   (1.5rem): eine harte Mindestgröße würde bei sehr schmalen Spalten
 	   wieder überlaufen — Passung hat Vorrang. */
 	.essence-line {
-		font-size: clamp(1.5rem, 12.3cqw, 6.25rem);
+		/* Deckel exakt auf BBHs text-2xl-Maximum (80px) statt vorher 100px —
+		   „Stil von BBH übernehmen", Fred 30.08. */
+		font-size: clamp(1.5rem, 12.3cqw, 5rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;

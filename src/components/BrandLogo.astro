@@ -146,8 +146,26 @@
 		opacity: 0;
 	}
 
-	.brand-logo__pole {
-		transition: opacity 150ms ease;
+	@media (prefers-reduced-motion: no-preference) {
+		.brand-logo__pole {
+			transition: opacity 150ms ease;
+		}
+	}
+
+	/* Spiegel-Rückweg (Fred 30.08.): Beim Verlassen des Button-Zustands
+	   bleiben Text+Fahne kurz EINGEFROREN (Script hält die Phasen auf 1),
+	   bis die Kachel sich zur Stange geschlossen hat (400ms, siehe
+	   CtaTile). Dann setzt das Script diese Klasse und gibt die Phasen auf
+	   ihre Scroll-Werte frei — die Transition lässt Fahne und Text
+	   HERAUSGLEITEN statt springen. Danach wird die Klasse entfernt und die
+	   normale, transitionslose Scroll-Kopplung übernimmt wieder. Ergebnis:
+	   Button schließt sich zur Stange → Fahne fährt heraus → Text fährt
+	   heraus — das exakte Spiegelbild des Hinwegs. */
+	@media (prefers-reduced-motion: no-preference) {
+		.brand-logo--gliding .brand-logo__banner,
+		.brand-logo--gliding .brand-logo__text {
+			transition: transform 300ms cubic-bezier(0.77, 0, 0.18, 1);
+		}
 	}
 
 	/* Text-Wrap: identische Technik wie Header.astro
@@ -207,30 +225,87 @@
 		const logo = document.querySelector<HTMLElement>(".brand-logo");
 
 		let rafId = 0;
+		// Spiegel-Rückweg-Zustand (siehe CSS-Kommentar .brand-logo--gliding):
+		// beim Verlassen von dock>=1 werden die Phasen eingefroren, bis die
+		// Kachel zu ist (CLOSE_MS = CtaTile-Transition), dann Freigabe mit
+		// 300ms-Gleit-Transition, danach wieder normale Scroll-Kopplung.
+		const CLOSE_MS = 550; // 150ms Schrift-Ausblenden + 400ms Kachel-Schließen (CtaTile)
+		const GLIDE_MS = 300;
+		let prevRevealed = false;
+		let frozen = false;
+		let releaseTimer = 0;
+		let glideTimer = 0;
+		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-		const update = () => {
+		const computePhases = () => {
 			const raw = (window.scrollY - DOCK_START) / DOCK_DISTANCE;
 			const dock = Math.max(0, Math.min(1, raw));
-			// Phase Text: läuft über die ERSTE Hälfte von dock (0→0.5 dock ==
-			// 0→1 Phase) — Text fährt zuerst komplett ein.
-			const phaseText = Math.max(0, Math.min(1, dock * 2));
-			// Phase Fahne: läuft über die ZWEITE Hälfte von dock (0.5→1 dock ==
-			// 0→1 Phase) — Fahne fährt erst ein, wenn der Text fertig ist.
-			const phaseFlag = Math.max(0, Math.min(1, dock * 2 - 1));
+			return {
+				dock,
+				// Phase Text: erste Hälfte von dock — Text fährt zuerst ein.
+				phaseText: Math.max(0, Math.min(1, dock * 2)),
+				// Phase Fahne: zweite Hälfte — Fahne folgt nach dem Text.
+				phaseFlag: Math.max(0, Math.min(1, dock * 2 - 1)),
+			};
+		};
 
-			root.style.setProperty("--hero-dock", String(dock));
+		const setPhases = (phaseText: number, phaseFlag: number) => {
 			root.style.setProperty("--dock-text", String(phaseText));
 			root.style.setProperty("--dock-flag", String(phaseFlag));
+		};
+
+		const update = () => {
+			const { dock, phaseText, phaseFlag } = computePhases();
+			const revealed = dock >= 1;
+
+			root.style.setProperty("--hero-dock", String(dock));
+
+			if (revealed) {
+				// Vorwärts bzw. wieder ganz unten: alles eingefahren, Kachel
+				// offen — eventuelle Rückweg-Sequenz abbrechen.
+				clearTimeout(releaseTimer);
+				clearTimeout(glideTimer);
+				frozen = false;
+				logo?.classList.remove("brand-logo--gliding");
+				setPhases(1, 1);
+			} else if (prevRevealed) {
+				// EBEN den Button-Zustand verlassen (Rückweg beginnt):
+				if (reduceMotion.matches) {
+					setPhases(phaseText, phaseFlag);
+				} else {
+					// Text+Fahne einfrieren, bis die Kachel zu ist …
+					frozen = true;
+					clearTimeout(releaseTimer);
+					releaseTimer = window.setTimeout(() => {
+						frozen = false;
+						logo?.classList.add("brand-logo--gliding");
+						// … dann auf die aktuellen Scroll-Werte GLEITEN lassen
+						const now = computePhases();
+						setPhases(now.phaseText, now.phaseFlag);
+						clearTimeout(glideTimer);
+						glideTimer = window.setTimeout(() => {
+							logo?.classList.remove("brand-logo--gliding");
+							// Anschluss an die Live-Werte (falls weitergescrollt wurde)
+							const cur = computePhases();
+							setPhases(cur.phaseText, cur.phaseFlag);
+						}, GLIDE_MS + 50);
+					}, CLOSE_MS);
+				}
+			} else if (!frozen) {
+				// Normale Scroll-Kopplung (auch während des Gleitens: neue
+				// Zielwerte retargeten die laufende Transition sanft).
+				setPhases(phaseText, phaseFlag);
+			}
+			// Während frozen: Phasen bleiben auf 1 stehen, nur dock läuft mit.
 
 			// CTA-Kachel: diskretes Ereignis bei dock>=1 (Einfahr-Animation
 			// fertig, Stange bereit für die Geburt), NICHT proportional.
-			// classList.toggle mit Boolean setzt/entfernt sauber je nach
-			// Richtung — CtaTile.astro's CSS-transition erledigt den Rest
-			// (öffnet/schließt bidirektional, siehe dortiger Kommentar).
-			cta?.classList.toggle("cta-tile--revealed", dock >= 1);
+			cta?.classList.toggle("cta-tile--revealed", revealed);
 			// Stange ausblenden, sobald die Kachel sie "übernommen" hat
 			// (sonst scheint sie durch die 95%-Deckkraft der Kachel durch)
-			logo?.classList.toggle("brand-logo--handedover", dock >= 1);
+			logo?.classList.toggle("brand-logo--handedover", revealed);
+
+			prevRevealed = revealed;
 		};
 
 		const onScroll = () => {
@@ -247,6 +322,9 @@
 		cleanup = () => {
 			window.removeEventListener("scroll", onScroll);
 			window.removeEventListener("resize", onScroll);
+			if (rafId) cancelAnimationFrame(rafId);
+			clearTimeout(releaseTimer);
+			clearTimeout(glideTimer);
 			root.style.removeProperty("--hero-dock");
 			root.style.removeProperty("--dock-text");
 			root.style.removeProperty("--dock-flag");
