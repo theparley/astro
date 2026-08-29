@@ -1,0 +1,101 @@
+{/* Marken-Logo im Hero — reine Markenpräsenz OHNE Menü-Funktion.
+
+   Phase-1-Rückbau (Website-Brief, "Entscheidung 29.08.": Phase 1 ohne
+   Menü): das frühere Kachel-Menü-System (Logo-Chip → Hamburger-Kachel →
+   2×2-Navigation) wurde nach TileMenu.astro ausgelagert (nicht gelöscht,
+   dort reaktivierbar). Was übrig bleiben muss: das Logo selbst, sichtbar
+   im Hero, aber ohne Klick-Handler, ohne Scroll-Collapse, ohne Chip, ohne
+   Hamburger — nur die Aufstiegs-Ladeanimation (fährt von unten hoch)
+   bleibt, exakt wie schon vor dem Menü-Bau am 2026-08-28 (siehe
+   Fortschritt "Splash-Startseite gebaut"). Gleiche Stange+Fahne+Text-
+   Geometrie/Maße wie TileMenu.astro .hero-logo__mark, aber in normalem
+   Fluss (kein position:fixed) und ohne den Umweg über einen 0-breiten
+   Anker + absolute Positionierung — hier reicht ein einfaches Flex-Row,
+   weil nichts mehr überlappen oder sich ineinander verwandeln muss. */}
+
+<div class="brand-logo">
+	<div class="brand-logo__banner-wrap" aria-hidden="true">
+		<img src="/parley/parley-flag-banner.svg" alt="" class="brand-logo__banner" />
+	</div>
+	<div class="brand-logo__pole" aria-hidden="true"></div>
+	<div class="brand-logo__text-wrap">
+		<img src="/parley/parley-text.svg" alt="The Parley" class="brand-logo__text" />
+	</div>
+</div>
+
+<style>
+	.brand-logo {
+		/* 50% größer als der frühere Header-Maßstab, nur hier im Hero — 1:1
+		   der Wert von vor dem Menü-Bau. */
+		--logo-h: calc(clamp(32px, 4.4vw, 56px) * 1.5);
+		--pole-w: calc(var(--logo-h) * 52.36 / 2018.08);
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		height: var(--logo-h);
+		/* Gleiche Randabstand-Stufe wie .hero-headline/.wrap (16px bis 1024px,
+		   danach 32px) — Logo geht auf keiner Breite näher an den Rand als der
+		   restliche Seiteninhalt. */
+		padding: 0 16px;
+		/* Ladeanimation wie bei theparley.de (dort: seitliches Reinwischen der
+		   Hero-Headline), hier aber von unten — echte Bewegung (translateY),
+		   kein Freilegen/Maskieren. */
+		animation: brand-logo-rise 700ms cubic-bezier(0.22, 0.61, 0.36, 1) 150ms both;
+	}
+
+	@media (min-width: 1024px) {
+		.brand-logo {
+			padding: 0 32px;
+		}
+	}
+
+	@keyframes brand-logo-rise {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.brand-logo {
+			animation: none;
+		}
+	}
+
+	.brand-logo__pole {
+		width: var(--pole-w);
+		height: 100%;
+		background: var(--white);
+		flex: none;
+	}
+
+	.brand-logo__banner-wrap {
+		align-self: flex-start;
+		margin-top: calc(var(--logo-h) * 40.9736 / 2018.08);
+		margin-right: 4px;
+		width: calc(var(--logo-h) * 1072.97 / 2018.08);
+		height: calc(var(--logo-h) * 459.85 / 2018.08);
+		flex: none;
+	}
+
+	.brand-logo__banner {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.brand-logo__text-wrap {
+		margin-left: 4px;
+		width: calc(var(--logo-h) * 1986.93 / 2018.08);
+		height: calc(var(--logo-h) * 1057.41 / 2018.08);
+		flex: none;
+	}
+
+	.brand-logo__text {
+		display: block;
+		height: 100%;
+		width: auto;
+	}
+</style>

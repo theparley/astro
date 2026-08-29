@@ -1,25 +1,31 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import MenuTiles from "../components/MenuTiles.astro";
+// Phase-1-Menü-Rückbau (Website-Brief, "Entscheidung 29.08."): das Kachel-
+// Menü-System ist archiviert in TileMenu.astro (aktuell nicht eingebunden,
+// Kommentar-Kopf dort erklärt die Reaktivierung für Phase 2). Aktiv bleibt
+// nur noch der eigenständige CTA-Button (CtaTile.astro); das Logo lebt jetzt
+// nur noch im Hero der Startseite (BrandLogo.astro, siehe index.astro).
+import CtaTile from "../components/CtaTile.astro";
 import PageWipe from "../components/PageWipe.astro";
 
 interface Props {
 	title: string;
 	description?: string;
-	// true auf jeder Seite ohne eigenen Splash-Scroll-Hero (= alle außer der
-	// Startseite): das Menü + der CTA starten dann direkt sichtbar, statt auf
-	// einen Scroll-Fortschritt zu warten, der auf Unterseiten nie kommt.
-	menuStartCollapsed?: boolean;
 	// true nur auf /buchen: "Let's Parley" verschwindet, weil die Tür, auf die
 	// der Button zeigt, schon erreicht ist (Website-Brief, Konversions-Kapitel).
 	hideCta?: boolean;
+	// true nur auf der Startseite: der CTA bleibt verdeckt, bis das Hero-Logo
+	// (BrandLogo.astro) aus dem Viewport gescrollt ist — siehe Bugfix-
+	// Kommentar in CtaTile.astro. Unterseiten haben keinen Hero und zeigen
+	// den CTA deshalb sofort.
+	gateCtaBehindHero?: boolean;
 }
 
 const {
 	title,
 	description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.",
-	menuStartCollapsed = true,
 	hideCta = false,
+	gateCtaBehindHero = false,
 } = Astro.props;
 ---
 
@@ -37,7 +43,7 @@ const {
 	</head>
 	<body>
 		<PageWipe />
-		<MenuTiles startCollapsed={menuStartCollapsed} hideCta={hideCta} />
+		<CtaTile hideCta={hideCta} gateBehindHero={gateCtaBehindHero} />
 		<slot />
 	</body>
 </html>

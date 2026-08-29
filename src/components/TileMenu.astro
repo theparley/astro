@@ -1,33 +1,46 @@
 ---
-// Menü-Kachel-System + Let's-Parley-CTA — site-weit über Layout.astro
-// eingebunden (vorher lebte das alles nur in index.astro, Unterseiten hatten
-// gar kein Menü, siehe Website-Brief "⚠️ Menü/CTA-Befund 29.08.").
+// ⚠️ ARCHIVIERT, AKTUELL NICHT EINGEBUNDEN (Stand 2026-08-29).
 //
-// startCollapsed: true auf allen Seiten ohne Splash-Scroll-Intro (also
-// überall außer der Startseite) — Kacheln + CTA sind dann von der ersten
-// Sekunde an sichtbar statt erst nach Scroll-Fortschritt.
+// Das komplette Kachel-Menü-System — Logo-Chip → Hamburger-Kachel →
+// 2×2-Navigation (Format/Studio/Buchen/Kontakt) samt Backdrop — wurde aus
+// der Startseite ausgebaut, aber bewusst NICHT gelöscht (Website-Brief,
+// "Entscheidung 29.08.": Phase 1 läuft ohne Menü, weil Format/Studio/
+// Kontakt noch gar nicht existieren — 75% der Ziele würden ins Leere
+// führen). Fred will es in Phase 2 (sobald /formate + Produktseiten
+// stehen) SCHNELL wieder reinholen können, deshalb bleibt der Code
+// unangetastet hier liegen statt gelöscht zu werden.
+//
+// So reaktivierst du es:
+// 1. In Layout.astro importieren: `import TileMenu from "../components/TileMenu.astro";`
+// 2. `<TileMenu startCollapsed={...} />` statt/neben `<BrandLogo />` +
+//    `<CtaTile />` einbinden — vermutlich willst du dann den separaten
+//    Let's-Parley-Button aus CtaTile.astro wieder HIER reinziehen (er wurde
+//    beim Ausbau nach CtaTile.astro verschoben und lebt dort jetzt
+//    eigenständig, unten mittig statt unten rechts). Die alte Choreografie
+//    (CTA erscheint erst NACH der Logo→Chip-Verwandlung, gemeinsames
+//    .menu-tiles.transitions-ready-Gate) müsste dafür wieder zusammengeführt
+//    werden — im aktuellen Split laufen beide unabhängig.
+// 3. BrandLogo.astro kann dann entfallen (das Logo lebt wieder hier, inkl.
+//    Scroll-Collapse-in-Chip-Mechanik) — oder parallel bestehen bleiben,
+//    falls eine Seite das Logo ohne Menü-Funktion braucht.
+// 4. Für die vier Menü-Ziele echte Hrefs statt "#" eintragen, sobald
+//    /formate, /studio, /kontakt existieren (tabindex="-1" dann auch raus).
+//
+// Unverändert übernommen aus der letzten aktiven Fassung (vormals
+// MenuTiles.astro, Commit e5e3724) — nur der eigenständige CTA-Button
+// wurde entfernt (siehe CtaTile.astro), der Rest ist 1:1 stehen geblieben.
 interface Props {
 	startCollapsed?: boolean;
-	// true nur auf /buchen: "Let's Parley" verschwindet dort (die Tür ist
-	// schon erreicht), siehe Website-Brief.
-	hideCta?: boolean;
 }
 
-const { startCollapsed = false, hideCta = false } = Astro.props;
+const { startCollapsed = false } = Astro.props;
 ---
 
-{/* Gemeinsamer Wrapper um ALLE drei Top-Level-Elemente (Logo-Gruppe, Backdrop,
-   CTA-Button) — trägt die Geometrie-Variablen (--tile-size etc.). Wichtig:
-   .hero-logo-group und .cta-button sind GESCHWISTER, kein Vorfahre-Nachfahre-
-   Verhältnis, deshalb reichen die Variablen nur über einen gemeinsamen
-   Vorfahren zu beiden durch (in index.astro übernahm das früher .hero, das
-   hier fehlt). display:contents, keine eigene Layout-Box. */}
 <div class="menu-tiles">
 <div class="hero-logo-group">
 	<a href="/" aria-label="The Parley" class={`hero-logo${startCollapsed ? " collapsed" : ""}`}>
 		<div class="hero-logo__hit-area" aria-hidden="true"></div>
-		{/* Neuer, einfacherer Ansatz: kein P, kein Hamburger-Quadrat (erstmal) —
-		   Fahne+Text bleiben in ihrem normalen Layout stehen, verschwinden
+		{/* Fahne+Text bleiben in ihrem normalen Layout stehen, verschwinden
 		   nicht mehr. Beim Scrollen färben sie sich schwarz (Filter/Hintergrund
 		   statt neuer Assets) und ein heller Chip erscheint dahinter, wie bei
 		   BBHs Logo-Fläche — die Fahne selbst wird der Button. */}
@@ -73,32 +86,14 @@ const { startCollapsed = false, hideCta = false } = Astro.props;
    BBHs nav-backdrop (bg-black/10 + backdrop-blur-sm), nicht der volldeckende
    Wisch vom Seitenübergang, der ist für Seitenwechsel. */}
 <div class="hero-logo__backdrop" aria-hidden="true"></div>
-{/* Eigenständiger CTA-Button, unabhängig vom Menü-Hover/-Klick (eigenes
-   :hover), aber an den Scroll-Fortschritt gekoppelt: erscheint erst, wenn
-   Logo- und Hamburger-Kachel fertig durchanimiert sind (.collapsed auf
-   .hero-logo). Wächst beim Hovern als Doppelkachel nach links, zeigt dann
-   eine zusätzliche CTA-Zeile. Führt DIREKT auf /buchen (Website-Brief:
-   kein Zwischenmenü) — auf /buchen selbst per hideCta ausgeblendet, die
-   Tür ist schon erreicht. */}
-{!hideCta && (
-	<a href="/buchen" class="cta-button">
-		<span class="cta-button__main">Let's<br />Parley</span>
-		<span class="cta-button__sub">Gespräch buchen →</span>
-	</a>
-)}
 </div>
 
 <style>
 	.menu-tiles {
 		/* Erzeugt bewusst keine eigene Box — alle Kinder positionieren sich
 		   per position:fixed komplett selbst. Trägt alle Geometrie-Variablen
-		   des Systems — hier statt auf .hero (das es auf Unterseiten gar nicht
-		   gibt), damit das Menü auf jeder Seite funktioniert. */
+		   des Systems. */
 		display: contents;
-		/* Normale Header-Logo-Größe (kein *1.5-Hero-Aufschlag) — 42px war zu
-		   klein fürs Ausgangs-Logo, auch wenn es den Chip näher an BBHs 88px
-		   gebracht hätte. Der Chip wird dadurch etwas größer als BBHs Feld,
-		   aber die Größenordnung passt noch. */
 		--logo-h: clamp(40px, 5.2vw, 64px);
 		--pole-w: calc(var(--logo-h) * 52.36 / 2018.08);
 		/* Breite von Fahne/Text, einmal ausgerechnet — für Gruppen-Zentrierung
@@ -144,7 +139,7 @@ const { startCollapsed = false, hideCta = false } = Astro.props;
 	.hero-logo-group {
 		/* Eigener (verschachtelter) display:contents-Wrapper nur für Logo +
 		   Nav — damit :hover auf ihm gemeinsam auf beide DOM-Nachfahren
-		   reagiert, ohne dass Backdrop/CTA (Geschwister davon) mit hovern. */
+		   reagiert, ohne dass Backdrop (Geschwister davon) mit hovert. */
 		display: contents;
 	}
 
@@ -521,113 +516,6 @@ const { startCollapsed = false, hideCta = false } = Astro.props;
 			transition: opacity 300ms;
 		}
 	}
-
-	.cta-button {
-		/* Unten rechts in der Ecke, im Ruhezustand eine einzelne Kachel
-		   (tile-size). Wächst beim Hovern nicht quadratisch/gleichmäßig,
-		   sondern wie eine Doppelkachel NACH LINKS auf (width statt scale) —
-		   rechts bleibt per right:0 fix, die Höhe bleibt tile-size, nur die
-		   Breite verdoppelt sich Richtung Bildmitte. Erscheint erst, sobald
-		   Logo+Hamburger-Kachel fertig durchanimiert sind (siehe
-		   .hero-logo-group:has(...) unten) — vorher komplett verdeckt. */
-		position: fixed;
-		right: 0;
-		bottom: 0;
-		width: var(--tile-size);
-		height: var(--tile-size);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		/* Reserviert unten Platz für .cta-button__sub (position:absolute,
-		   bottom:14px) — ohne das würde .cta-button__main in der Mitte der
-		   vollen Höhe zentriert und mit der Unterzeile überlappen, sobald die
-		   sichtbar ist (Hover ODER Touch-Dauersichtbarkeit, siehe unten).
-		   "Gespräch buchen →" bricht bei tile-size-Breite auf zwei Zeilen um
-		   (~29px hoch) — 42px Reserve lässt trotzdem sauberen Abstand. */
-		padding-bottom: 42px;
-		background: rgba(237, 237, 237, 0.95);
-		color: var(--black);
-		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
-		text-align: center;
-		text-decoration: none;
-		z-index: 100;
-		/* Wie BBHs Kachel-Wisch (clip-path von komplett verdeckt zu sichtbar) —
-		   inset(100% ...) verdeckt von oben her komplett, die Kachel "kommt von
-		   unten" ins Bild, statt einfach einzublenden. Gleiche Technik wie
-		   schon bei der Hamburger-Kachel und den vier Menü-Kacheln. */
-		clip-path: inset(100% 0 0 0);
-		pointer-events: none;
-	}
-
-	.hero-logo-group:has(.hero-logo.collapsed) ~ .cta-button {
-		clip-path: inset(0 0 0 0);
-		pointer-events: auto;
-	}
-
-	.cta-button:hover {
-		width: calc(var(--tile-size) * 2 + var(--tile-gap));
-	}
-
-	@media (prefers-reduced-motion: no-preference) {
-		/* Hover-Verbreiterung ist IMMER aktiv (auch vor .transitions-ready) —
-		   nur die Erscheinen-Animation (clip-path) ist unten zusätzlich
-		   gegated, siehe .menu-tiles.transitions-ready. */
-		.cta-button {
-			transition: width 300ms cubic-bezier(0.77, 0, 0.18, 1);
-		}
-
-		/* Erst wenn die Bewegung aus der Mitte (Fahne→Quadrat, 400ms) ganz nach
-		   außen durchgelaufen ist UND die Hamburger-Kachel fertig gewischt hat
-		   (weitere 400ms, startet erst nach der ersten Phase) — erst dann, nach
-		   einer spürbaren Zusatzpause, kommt der Let's-Parley-Button von unten.
-		   Nicht gleichzeitig mit der Hamburger-Kachel, sondern sichtbar danach.
-		   Gate auf .menu-tiles.transitions-ready (die erst 100ms NACH einem
-		   initialen Collapse gesetzt wird): auf Seiten/Viewports, die schon
-		   collapsed starten (Unterseiten-Prop ODER Mobil-Sofort-Collapse), ist
-		   dieser Übergang dadurch unsichtbar — der Button ist von Anfang an im
-		   sichtbaren Endzustand gerendert, statt erst nach 1,4s aufzutauchen. */
-		.menu-tiles.transitions-ready .cta-button {
-			transition: clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1) 1000ms, width 300ms cubic-bezier(0.77, 0, 0.18, 1);
-		}
-	}
-
-	.cta-button__main {
-		/* Einziges Element in der Flex-Zentrierung des Buttons — .cta-button__sub
-		   ist absolut positioniert (siehe unten), damit sein reservierter Platz
-		   im Ruhezustand nicht den sichtbaren Text nach oben verschiebt. */
-		font-weight: 900;
-		font-size: 20px;
-		line-height: 1.05;
-	}
-
-	.cta-button__sub {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 14px;
-		font-weight: 500;
-		font-size: 12px;
-		opacity: 0;
-	}
-
-	.cta-button:hover .cta-button__sub {
-		opacity: 1;
-	}
-
-	/* Touch hat kein :hover — die Unterzeile muss deshalb permanent sichtbar
-	   sein, sonst sieht ein Touch-Besucher "Gespräch buchen →" nie (Backlog-
-	   Punkt aus dem Website-Brief). */
-	@media (hover: none) {
-		.cta-button__sub {
-			opacity: 1;
-		}
-	}
-
-	@media (prefers-reduced-motion: no-preference) {
-		.cta-button__sub {
-			transition: opacity 200ms;
-		}
-	}
 </style>
 
 <script>
@@ -639,7 +527,7 @@ const { startCollapsed = false, hideCta = false } = Astro.props;
 
 	let cleanup: (() => void) | null = null;
 
-	function initMenuTiles() {
+	function initTileMenu() {
 		cleanup?.();
 		cleanup = null;
 
@@ -718,13 +606,13 @@ const { startCollapsed = false, hideCta = false } = Astro.props;
 
 		// Transition erst kurz nach dem ersten Seitenaufbau aktivieren (siehe
 		// Kommentar bei .transitions-ready im <style>) — auf .hero-logo UND
-		// auf .menu-tiles (für CTA-Button + Nav-Kacheln, die keine Nachfahren
-		// von .hero-logo sind).
+		// auf .menu-tiles (für Nav-Kacheln, die keine Nachfahren von
+		// .hero-logo sind).
 		window.setTimeout(() => {
 			logo.classList.add("transitions-ready");
 			group.closest(".menu-tiles")?.classList.add("transitions-ready");
 		}, 100);
 	}
 
-	document.addEventListener("astro:page-load", initMenuTiles);
+	document.addEventListener("astro:page-load", initTileMenu);
 </script>

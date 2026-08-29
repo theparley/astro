@@ -1,43 +1,65 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import BrandLogo from "../components/BrandLogo.astro";
 
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
 // buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
 // Produktseiten live (Phase 1), deshalb reiner Text ohne Links.
 const produkteZeile = "Videopodcast. Webinar. Clip. Kundentestimonial.";
 
-// Solo-Zeile auf Schwarz (Website-Brief: "ENTWEDER '1 Gespräch. 1000
-// Augenzeugen.' ODER 'KI ist kein Augenzeuge.' — nie beide; Fred entscheidet
-// am lebenden Objekt"). Bewusst als einzelne Konstante gehalten, damit der
-// Tausch ein Ein-Zeilen-Edit bleibt, kein Umbau.
-const soloLine = "1 Gespräch. 1000 Augenzeugen.";
-// Alternative, noch nicht entschieden: "KI ist kein Augenzeuge."
+// Essenz-Zeile in der zweiten Hälfte der Plädoyer-Sektion (Website-Brief,
+// Fred 29.08. nachts): ausgeschriebener Satz statt Zahlen-Paar — "Ein
+// Gespräch mit tausend Augenzeugen." ersetzt "1 Gespräch. 1000 Augenzeugen.",
+// die Zahlen-Fassung bleibt als Vorrat für Beiträge/Splitflap dokumentiert.
+// Bewusst als einzelne Konstante gehalten, damit ein späterer Tausch ein
+// Ein-Zeilen-Edit bleibt, kein Umbau.
+const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
+// Vorrat/Alternativen, noch nicht entschieden: "1 Gespräch. 1000 Augenzeugen."
+// (Zahlen-Fassung, für Beiträge/Splitflap), "KI ist kein Augenzeuge."
 ---
 
-<Layout title="Start" menuStartCollapsed={false}>
+<Layout title="Start" gateCtaBehindHero>
 	<header class="hero">
 		<div class="hero-headline">
 			<h1>Kein Business ohne Witness.</h1>
 		</div>
+		{/* Logo bleibt als reine Markenpräsenz im Hero stehen (ohne
+		   Menü-Funktion, siehe Website-Brief "Entscheidung 29.08." + Layout.astro-
+		   Kommentar). Der interaktive Kachel-Menü-Umbau des Logos ist archiviert
+		   in TileMenu.astro. */}
+		<BrandLogo />
 	</header>
 
-	{/* "Das Plädoyer" (Website-Brief, GELOCKT 29.08. spät) — Eyebrow-Label im
-	   Gerichts-Register + der von Fred per Durchfühl-Test abgenommene
-	   4-Satz-Wortlaut, unverändert übernommen. */}
-	<section class="plaedoyer wrap">
-		<p class="eyebrow">Unser Eröffnungsplädoyer</p>
-		<p class="plaedoyer-text">
-			Seit KI Expertise auf Knopfdruck vortäuschen kann, steht alles, was wir im Marketing sehen und lesen,
-			unter Generalverdacht. Damit Auftragsentscheider zu deinen Gunsten entscheiden, müssen sie so früh wie
-			möglich zu Augenzeugen deiner Expertise werden. Der stärkste Beweis ist ein echtes Gespräch. Und genau
-			das skalieren wir: mit unserer Weiterentwicklung des Interrotron-Aufnahmeverfahrens und einer
-			Formatredaktion, zugeschnitten auf deine Ziele.
-		</p>
-	</section>
+	{/* "Das Plädoyer" (Website-Brief, GELOCKT 29.08. spät, FINAL 29.08. nachts
+	   "zweiter Schliff: Anklage-Einstieg", Layout-Update 29.08. spät
+	   ZWEIGETEILT) — eine Hälfte trägt den finalen 4-Satz-Wortlaut
+	   (Anklage-Einstieg "Der Generalverdacht:", Anrede jetzt ihr/euch statt
+	   du, siehe Brief-Begründung), die andere Hälfte die Essenz GROSS
+	   (bisherige eigenständige Solo-Zeilen-Sektion, siehe soloLine oben —
+	   entfällt dadurch als eigene Sektion). Reihenfolge im Markup =
+	   Reihenfolge mobil (untereinander): Text vor Essenz, siehe Begründung
+	   in der .plaedoyer-Regel unten.
 
-	{/* Solo-Zeile allein auf schwarzem Grund, siehe soloLine oben. */}
-	<section class="solo wrap">
-		<p>{soloLine}</p>
+	   Eyebrow-Label "Unser Eröffnungsplädoyer" ENTFERNT (spätes Auftrags-
+	   Update, noch nicht im Brief nachgezogen zum Zeitpunkt dieses Commits —
+	   siehe Fortschritts-Eintrag): "Eröffnungsplädoyer" ist im deutschen
+	   Recht kein sauberer Begriff (ein Plädoyer ist der Schlussvortrag,
+	   "Eröffnungsplädoyer" ein US-Import) — Fred will kein unsauberes
+	   Rechtswort auf der Seite. Absatz beginnt jetzt direkt mit "Der
+	   Generalverdacht: …", trägt den Gerichts-Register-Einstieg also
+	   weiterhin im ersten Satz selbst. */}
+	<section class="plaedoyer wrap">
+		<div class="plaedoyer-half plaedoyer-half--text">
+			{/* Feinschliff Fred (Zuruf während des Bau-Schritts, nach dem Paket
+			   vom 29.08.): zur besseren Lesbarkeit in DREI Absätze gegliedert,
+			   Wortlaut selbst unverändert — nur die Gliederung ist neu. */}
+			<p class="plaedoyer-text">Der Generalverdacht: »Die behauptete Expertise ist durch KI vorgetäuscht.«</p>
+			<p class="plaedoyer-text">Eure Kunden müssen deshalb so früh wie möglich zu Augenzeugen eurer Expertise werden.</p>
+			<p class="plaedoyer-text">Der stärkste Beweis ist ein echtes Gespräch. Und genau das skalieren wir.</p>
+		</div>
+		<div class="plaedoyer-half plaedoyer-half--essence">
+			<p class="essence-line">{soloLine}</p>
+		</div>
 	</section>
 
 	<section class="proof wrap">
@@ -109,32 +131,57 @@ const soloLine = "1 Gespräch. 1000 Augenzeugen.";
 		text-wrap: balance;
 	}
 
-	/* Plädoyer-Sektion: Größenverhältnis Eyebrow/Fließtext zu Hero direkt aus
-	   BBHs ausgeliefertem CSS gemessen (ea792231b42826ae.css, fetch + Regex
-	   auf .text-*-original — die dortigen statischen px-Fallbacks der
+	/* Plädoyer-Sektion, ZWEIGETEILT (Website-Brief, Layout-Update 29.08. spät:
+	   "das Split-Muster von Nuxt-Seite und BBH" — eine Hälfte der 4-Satz-Text,
+	   die andere die Essenz groß; das ursprünglich geplante Eyebrow-Label
+	   "Unser Eröffnungsplädoyer" ist per spätem Auftrags-Update wieder
+	   entfernt, siehe Kommentar oben am Markup). Fließtext-Größe weiterhin
+	   1:1 aus BBHs ausgeliefertem CSS gemessen (ea792231b42826ae.css, fetch +
+	   Regex auf .text-*-original — die dortigen statischen px-Fallbacks der
 	   fluid()-Kette, siehe Fortschritts-Eintrag 2026-08-29 für die Rohwerte):
-	   .text-sm-original: clamp(14px,13.3976px+.1506vw,16px) → Eyebrow.
 	   .text-base-original: clamp(18px,16.7952px+.3012vw,22px) → Fließtext.
-	   Unser Hero (15.6cqw) landet bei ~1036px Innenbreite (1100px Max-Width
-	   minus 64px Rand) bei ~162px — praktisch identisch mit BBHs eigenem
-	   Hero-Maximum (.text-hero = 95% von .text-mega, Maximum ≈ 161.5px).
-	   Weil unser Hero-Maximum BBHs Hero-Maximum trifft, übernimmt der
-	   direkte BBH-Wert für den Fließtext (18–22px) automatisch auch BBHs
-	   Verhältnis Hero:Fließtext (~7,3–7,6× bei voller Breite, ~2,1× am
-	   unteren Rand, weil BBHs Fließtext eine geschützte Lesbarkeits-
-	   Untergrenze von 18px hat, während der Hero viel aggressiver schrumpft). */
+	   Essenz-Zeile hat eine eigene, größere Stufe bekommen (siehe Kommentar
+	   bei .essence-line unten, überschreibt die ursprünglich geplante
+	   BBH-text-xl-Übernahme).
+
+	   Gewichtung Desktop (Website-Brief, Layout-Spec 29.08. nachts: "Teilung
+	   EXAKT 50/50 — nicht nach Schriftgröße gewichtet — Muster: alte
+	   Nuxt-Seite/BBH"): grid-template-columns minmax(0, 1fr) minmax(0, 1fr).
+	   Bugfix beim Bau: reines "1fr 1fr" reicht NICHT für exakt gleiche
+	   Spalten — fr-Tracks haben implizit eine min-width:auto-Untergrenze, und
+	   die Essenz-Zeile (bis 6.25rem, ein einzelnes langes Wort als
+	   Min-Content) zwang ihre Spalte dadurch messbar breiter als die
+	   Text-Spalte (487.9px vs. 535.3px bei 1280px Viewport, live in der
+	   Browser-Pane nachgemessen statt nur angenommen). minmax(0, 1fr) setzt
+	   die Untergrenze explizit auf 0 und erzwingt echte 50/50-Gleichheit,
+	   unabhängig vom Inhalt. max-width:46rem auf .plaedoyer-text bleibt als
+	   reine Lesbarkeits-Zeilenlängen-Bremse bestehen (verhindert nur zu lange
+	   Zeilen innerhalb der 50%-Spalte, ändert nichts an der Spaltenbreite
+	   selbst).
+
+	   Mobil (< 800px): untereinander, Reihenfolge = Markup-Reihenfolge, Text
+	   VOR Essenz (Entscheidung, dokumentiert im Website-Brief-Fortschritt):
+	   das ist die gleiche Argument-vor-Fazit-Reihenfolge, die die Seite schon
+	   als zwei getrennte Sektionen hatte (Plädoyer, danach Solo-Zeile) — der
+	   4-Satz-Absatz ist als Treppen-Stufe (nicken → Stich → zweites Nicken →
+	   Entlastung) auf Vorwissen angewiesen, das die Essenz erst zusammenfasst;
+	   umgekehrt gelesen (Essenz zuerst) nimmt der Pointe die eigene Herleitung
+	   vorweg. */
 	.plaedoyer {
 		padding: 56px 0 64px;
 		border-top: 1px solid var(--line);
+		display: flex;
+		flex-direction: column;
+		gap: 48px;
 	}
 
-	.eyebrow {
-		font-size: clamp(0.875rem, 0.8374rem + 0.1506vw, 1rem);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.14em;
-		color: var(--gray);
-		margin-bottom: 20px;
+	@media (min-width: 800px) {
+		.plaedoyer {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: clamp(40px, 6vw, 96px);
+			align-items: center;
+		}
 	}
 
 	.plaedoyer-text {
@@ -144,16 +191,37 @@ const soloLine = "1 Gespräch. 1000 Augenzeugen.";
 		color: var(--white);
 	}
 
-	/* Solo-Zeile: bewusst eine Stufe größer als der Fließtext, aber deutlich
-	   unter dem Hero — Skala 1:1 von BBHs .text-xl-original übernommen
-	   (clamp(30px,23.9759px+1.506vw,50px)), derselben Quelle wie oben. */
-	.solo {
-		padding: 96px 0;
+	/* Drei Absätze statt vormals einem Fließtext-Block (Feinschliff-Zuruf
+	   während des Bau-Schritts) — Abstand zwischen den Absätzen, damit sie
+	   als eigene Gedankenschritte lesbar bleiben statt zusammenzukleben
+	   (globales p{margin:0} in Layout.astro würde sie sonst direkt
+	   aneinanderstoßen lassen). */
+	.plaedoyer-text + .plaedoyer-text {
+		margin-top: 1em;
+	}
+
+	/* Essenz-Hälfte in sich MITTIG gesetzt (Website-Brief, Layout-Spec: "die
+	   Essenz-Zeile in sich MITTIG gesetzt — text-align center in ihrer
+	   Hälfte"), unabhängig vom linksbündigen Fließtext in der Nachbarspalte. */
+	.plaedoyer-half--essence {
 		text-align: center;
 	}
 
-	.solo p {
-		font-size: clamp(1.875rem, 1.4985rem + 1.506vw, 3.125rem);
+	/* Essenz-Zeile (Auftrags-Update 29.08. nachts): "deutlich über text-xl,
+	   Richtung Zwischen-Hero-Größe, klar unter dem Haupt-Hero" — text-xl lag
+	   bei max. 50px (clamp(1.875rem,1.4985rem+1.506vw,3.125rem), die vorherige
+	   Stufe), der Hero deckelt bei ~161.5px (siehe Kommentar bei .hero h1).
+	   Diese Stufe zielt auf die Mitte zwischen beiden (~80px bei ~1280px
+	   Viewport-Breite): min 44px (mobil noch klar über allen anderen
+	   Fließtext-Stufen der Seite), max 100px. Gleiche Bauart (rem+vw-Clamp,
+	   ungedeckelt an der Container-Breite) wie eyebrow/plaedoyer-text/
+	   produkte oben, bewusst NICHT die Hero-eigene cqw-Technik (die ist an
+	   die volle Wrap-Breite gebunden, hier steht die Zeile aber nur in der
+	   schmaleren Spaltenhälfte). text-wrap:balance bleibt, 2 bis 3
+	   Zeilenumbrüche sind bei dieser Größe in der 2fr-Spalte einkalkuliert
+	   und laut Auftrag ausdrücklich erwünscht. */
+	.essence-line {
+		font-size: clamp(2.75rem, 1.5rem + 4.5vw, 6.25rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;
