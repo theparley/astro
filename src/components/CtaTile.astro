@@ -125,10 +125,18 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 	   transitions reagieren automatisch auf JEDE Wertänderung, in BEIDE
 	   Richtungen, dadurch entsteht die geforderte Reversibilität (Punkt 4)
 	   ohne zwei getrennte Keyframe-Sets für "auf" und "zu". */
-	.cta-tile--gated {
+	/* Doppelklasse für höhere Spezifität: die spätere Hover-Regel
+	   ".cta-tile { transition: width ... }" (Media-Query unten) hatte mit
+	   gleicher Spezifität die clip-path-Transition ÜBERSCHRIEBEN (transition
+	   ist ein Shorthand!) — dadurch sprang die Kachel ohne seitliche
+	   Geburts-Animation auf (Bug 29.08. nachts). Jetzt trägt die gated-Regel
+	   beide Transitions selbst und gewinnt. */
+	.cta-tile.cta-tile--gated {
 		animation: none;
 		clip-path: inset(0 50% 0 50%);
-		transition: clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1);
+		transition:
+			clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1),
+			width 300ms cubic-bezier(0.77, 0, 0.18, 1);
 	}
 
 	/* Das eigentliche Ereignis (vierte Nachbesserung, "Der Strich WIRD der
@@ -157,7 +165,7 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 			clip-path: inset(0 0 0 0);
 		}
 
-		.cta-tile--gated {
+		.cta-tile.cta-tile--gated {
 			transition: none;
 		}
 	}
