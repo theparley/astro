@@ -1,20 +1,17 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
-const ebenen = [
-	{
-		name: "Identität",
-		text: "Expertise beweisbar machen für die, die Aufträge entscheiden.",
-	},
-	{
-		name: "Mittel",
-		text: "Echte Gespräche, Blickkontaktstudios, Live-Regie, Formatredaktion.",
-	},
-	{
-		name: "Produkte",
-		text: "Videopodcast, Webinar, Clip, Kundentestimonial.",
-	},
-];
+// Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
+// buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
+// Produktseiten live (Phase 1), deshalb reiner Text ohne Links.
+const produkteZeile = "Videopodcast. Webinar. Clip. Kundentestimonial.";
+
+// Solo-Zeile auf Schwarz (Website-Brief: "ENTWEDER '1 Gespräch. 1000
+// Augenzeugen.' ODER 'KI ist kein Augenzeuge.' — nie beide; Fred entscheidet
+// am lebenden Objekt"). Bewusst als einzelne Konstante gehalten, damit der
+// Tausch ein Ein-Zeilen-Edit bleibt, kein Umbau.
+const soloLine = "1 Gespräch. 1000 Augenzeugen.";
+// Alternative, noch nicht entschieden: "KI ist kein Augenzeuge."
 ---
 
 <Layout title="Start" menuStartCollapsed={false}>
@@ -24,26 +21,38 @@ const ebenen = [
 		</div>
 	</header>
 
-	{/* Video-Platzhalter: gibt der Seite Scroll-Strecke, um Scroll-Verhalten (Menü-Umwandlung
-	   der Fahne) zu testen. */}
+	{/* "Das Plädoyer" (Website-Brief, GELOCKT 29.08. spät) — Eyebrow-Label im
+	   Gerichts-Register + der von Fred per Durchfühl-Test abgenommene
+	   4-Satz-Wortlaut, unverändert übernommen. */}
+	<section class="plaedoyer wrap">
+		<p class="eyebrow">Unser Eröffnungsplädoyer</p>
+		<p class="plaedoyer-text">
+			Seit KI Expertise auf Knopfdruck vortäuschen kann, steht alles, was wir im Marketing sehen und lesen,
+			unter Generalverdacht. Damit Auftragsentscheider zu deinen Gunsten entscheiden, müssen sie so früh wie
+			möglich zu Augenzeugen deiner Expertise werden. Der stärkste Beweis ist ein echtes Gespräch. Und genau
+			das skalieren wir: mit unserer Weiterentwicklung des Interrotron-Aufnahmeverfahrens und einer
+			Formatredaktion, zugeschnitten auf deine Ziele.
+		</p>
+	</section>
+
+	{/* Solo-Zeile allein auf schwarzem Grund, siehe soloLine oben. */}
+	<section class="solo wrap">
+		<p>{soloLine}</p>
+	</section>
+
 	<section class="proof wrap">
 		<div class="clip-placeholder">
 			<span>Clip folgt</span>
 		</div>
 	</section>
 
-	{/* Vorerst weiter ausgeblendet — kommt später zurück.
-	<section class="ebenen wrap">
-		{ebenen.map((e) => (
-			<div class="ebene">
-				<h2>{e.name}</h2>
-				<p>{e.text}</p>
-			</div>
-		))}
+	<section class="produkte wrap">
+		<p>{produkteZeile}</p>
 	</section>
 
 	<section class="cta wrap">
-		<a href="/buchen" class="button">Gespräch buchen →</a>
+		<p class="cta-line">Ein kleines Gespräch? 30 Minuten, nichts vorbereiten.</p>
+		<a href="/buchen" class="cta-button-inline">Let's parley →</a>
 	</section>
 
 	<footer class="wrap">
@@ -52,7 +61,6 @@ const ebenen = [
 			<a href="/datenschutz">Datenschutz</a>
 		</nav>
 	</footer>
-	*/}
 </Layout>
 
 <style>
@@ -101,6 +109,57 @@ const ebenen = [
 		text-wrap: balance;
 	}
 
+	/* Plädoyer-Sektion: Größenverhältnis Eyebrow/Fließtext zu Hero direkt aus
+	   BBHs ausgeliefertem CSS gemessen (ea792231b42826ae.css, fetch + Regex
+	   auf .text-*-original — die dortigen statischen px-Fallbacks der
+	   fluid()-Kette, siehe Fortschritts-Eintrag 2026-08-29 für die Rohwerte):
+	   .text-sm-original: clamp(14px,13.3976px+.1506vw,16px) → Eyebrow.
+	   .text-base-original: clamp(18px,16.7952px+.3012vw,22px) → Fließtext.
+	   Unser Hero (15.6cqw) landet bei ~1036px Innenbreite (1100px Max-Width
+	   minus 64px Rand) bei ~162px — praktisch identisch mit BBHs eigenem
+	   Hero-Maximum (.text-hero = 95% von .text-mega, Maximum ≈ 161.5px).
+	   Weil unser Hero-Maximum BBHs Hero-Maximum trifft, übernimmt der
+	   direkte BBH-Wert für den Fließtext (18–22px) automatisch auch BBHs
+	   Verhältnis Hero:Fließtext (~7,3–7,6× bei voller Breite, ~2,1× am
+	   unteren Rand, weil BBHs Fließtext eine geschützte Lesbarkeits-
+	   Untergrenze von 18px hat, während der Hero viel aggressiver schrumpft). */
+	.plaedoyer {
+		padding: 56px 0 64px;
+		border-top: 1px solid var(--line);
+	}
+
+	.eyebrow {
+		font-size: clamp(0.875rem, 0.8374rem + 0.1506vw, 1rem);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--gray);
+		margin-bottom: 20px;
+	}
+
+	.plaedoyer-text {
+		max-width: 46rem;
+		font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.375rem);
+		line-height: 1.55;
+		color: var(--white);
+	}
+
+	/* Solo-Zeile: bewusst eine Stufe größer als der Fließtext, aber deutlich
+	   unter dem Hero — Skala 1:1 von BBHs .text-xl-original übernommen
+	   (clamp(30px,23.9759px+1.506vw,50px)), derselben Quelle wie oben. */
+	.solo {
+		padding: 96px 0;
+		text-align: center;
+	}
+
+	.solo p {
+		font-size: clamp(1.875rem, 1.4985rem + 1.506vw, 3.125rem);
+		font-weight: 900;
+		line-height: 1.05;
+		letter-spacing: -0.01em;
+		text-wrap: balance;
+	}
+
 	.proof {
 		padding: 24px 0 64px;
 	}
@@ -108,7 +167,7 @@ const ebenen = [
 	.clip-placeholder {
 		aspect-ratio: 16 / 9;
 		width: 100%;
-		border: 1px solid #2a2a2a;
+		border: 1px solid var(--line);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -116,43 +175,56 @@ const ebenen = [
 		font-size: 0.9rem;
 	}
 
-	.ebenen {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 32px;
-		padding: 48px 0;
-		border-top: 1px solid #2a2a2a;
+	/* Produkte-Zeile: BBHs .text-md-original (clamp(20px,18.1928px+.4518vw,26px)) —
+	   eine Stufe über dem Fließtext, weil es die vier Formate als eigene
+	   Zeile trägt statt als Fußnote. */
+	.produkte {
+		padding: 48px 0 64px;
+		border-top: 1px solid var(--line);
 	}
 
-	.ebene h2 {
-		font-size: 1rem;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--gray);
-		margin-bottom: 12px;
-	}
-
-	.ebene p {
-		font-size: 1.1rem;
-		line-height: 1.4;
+	.produkte p {
+		font-size: clamp(1.25rem, 1.1371rem + 0.4518vw, 1.625rem);
+		font-weight: 500;
+		letter-spacing: -0.005em;
+		text-wrap: balance;
 	}
 
 	.cta {
-		padding: 64px 0;
+		padding: 80px 0 96px;
 		text-align: center;
+		border-top: 1px solid var(--line);
 	}
 
-	.button {
+	.cta-line {
+		font-size: clamp(1.25rem, 1.1371rem + 0.4518vw, 1.625rem);
+		margin-bottom: 32px;
+		text-wrap: balance;
+	}
+
+	/* Eigenständiger In-Flow-CTA (Website-Brief, Dramaturgie-Prinzip 3-Backlog:
+	   "zusätzlicher In-Flow-CTA am Seitenende, gleicher Wortlaut") — dupliziert
+	   NICHT die fixe Let's-Parley-Kachel unten rechts (die bleibt bestehen),
+	   sondern bedient dieselbe eine Tür am Ende der Argumentation. Gleiche
+	   helle Fläche (--surface) wie der Logo-/CTA-Chip, damit die Formsprache
+	   verwandt bleibt. */
+	.cta-button-inline {
 		display: inline-block;
-		border: 1px solid var(--white);
-		padding: 16px 32px;
+		background: var(--surface);
+		color: var(--black);
+		font-weight: 900;
+		font-size: clamp(1.1rem, 1.02rem + 0.35vw, 1.375rem);
+		padding: 18px 40px;
 		text-decoration: none;
-		font-size: 1.1rem;
+	}
+
+	.cta-button-inline:hover {
+		opacity: 0.85;
 	}
 
 	footer {
 		padding: 32px 0 64px;
-		border-top: 1px solid #2a2a2a;
+		border-top: 1px solid var(--line);
 	}
 
 	footer nav {
@@ -165,11 +237,5 @@ const ebenen = [
 	footer a {
 		text-decoration: none;
 		color: inherit;
-	}
-
-	@media (max-width: 700px) {
-		.ebenen {
-			grid-template-columns: 1fr;
-		}
 	}
 </style>
