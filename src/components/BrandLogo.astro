@@ -1,38 +1,40 @@
 {/* Marken-Logo im Hero — FIXIERT unten Mitte, fährt beim Scrollen in die
-   Stange ein und übergibt an CtaTile.astro an DERSELBEN Stelle.
+   Stange ein. Die Stange WIRD dann die CtaTile.astro-Kachel (horizontale
+   Geburt aus der Mitte) statt dass die Kachel separat von unten hereinwischt.
 
-   Dritte Nachbesserung (Fred, exakte Choreografie beschrieben): die zweite
-   Fassung (opacity-Fade + proportional aufdeckende CTA-Kachel) traf DREI
-   Punkte nicht:
-   1) Kein opacity-Fade als Hauptmechanik — gefordert ist die alte
-      EINFAHR-Animation: die Wortmarke "The Parley" fährt in die Stange
-      (translateX + overflow:hidden auf dem Text-Wrap, 1:1 die Mechanik aus
-      Header.astro: transform:translateX(calc(var(--collapse)*-110%)) im
-      überlaufversteckten Wrap), DANACH fährt auch die Fahne in die Stange
-      (gleiches Prinzip, gespiegelt). Sequenz aus EINEM Fortschrittswert:
-      Phase Text = clamp(dock*2, 0, 1) [0→0.5], Phase Fahne = clamp(dock*2-1,
-      0, 1) [0.5→1] — Text fährt zuerst vollständig ein, danach erst die
-      Fahne.
-   2) Die Scroll-Strecke war eine volle Hero-Höhe (viel zu lang) — gefordert
-      ist eine kurze Strecke wie beim alten Header (COLLAPSE_START 120/
-      DISTANCE 160 dort): hier neu kalibriert auf Start ~80px, fertig
-      ~280px (DISTANCE 200).
-   3) Die CTA-Kachel war proportional zum Fortschritt aufgedeckt (clip-path
-      direkt an --hero-dock gekoppelt) — gefordert ist ein EREIGNIS: bei
-      dock>=1 (Einfahr-Animation fertig) wird eine Klasse gesetzt, die
-      CtaTile.astro's bestehende 400ms-Erscheinen-Animation abspielt; bei
-      dock<1 wird die Klasse wieder entfernt (Button verschwindet,
-      reversibel). Kein anteiliges Aufdecken mehr — siehe CtaTile.astro.
-
-   Die POLE (Stange) selbst bleibt während der ganzen Sequenz unverändert
-   stehen (nur Text und Fahne fahren HINEIN) — Fred hat für die Stange
-   selbst kein Ausblenden verlangt, nur für Text und Fahne. */}
+   Vierte Nachbesserung (Fred, "die Verwandlungs-Kette wird vollständig"):
+   bisher fuhren Text und Fahne zwar korrekt in die Stange ein, aber die
+   CTA-Kachel erschien als eigenständiges Element mit eigener Wisch-Animation
+   (von unten) — kein sichtbarer Zusammenhang zur Stange. Gefordert: die
+   Kachel ENTSTEHT aus der Stange (horizontale Expansion aus der Mitte,
+   clip-path inset(0 50% 0 50%) -> inset(0 0 0 0), BBH-Kurve). Dafür nötig:
+   1) Farbe: Stange jetzt #ededed/95% (--surface, exakt der TileMenu-Chip-Ton
+      aus dbdbecc/e5e3724) statt Weiß — kein Farbsprung beim Übergang.
+   2) Positionen exakt fluchtend: TileMenu.astro's Geometrie übernommen
+      (Nullbreiter Anker + absolute Positionierung von Stange/Fahne/Text
+      relativ dazu) statt Flexbox, die die GESAMTE Kombo zentriert hätte
+      (Stange wäre dadurch NICHT exakt auf der Viewport-Mitte gelandet,
+      sondern leicht links davon, weil die Textbreite > Fahnenbreite ist) —
+      jetzt sitzt die Stange selbst exakt auf demselben Anker (left:50% des
+      Containers, Stange bei calc(-1 * pole-w/2)), auf dem auch
+      CtaTile.astro seine Kachel zentriert (dort ebenfalls left:50% +
+      translateX(-50%)) — pixelgenau dieselbe X-Mitte.
+   3) Die eigentliche Öffnungs-Animation (clip-path-Werte, BBH-Kurve) lebt in
+      CtaTile.astro (dort steht die Kachel, dort auch ihre "Geburt"). Diese
+      Datei liefert nur die Stange in der richtigen Farbe/Position als
+      Ausgangspunkt.
+   4) Rückwärts (dock < 1) kehrt sich alles automatisch um: CtaTile.astro
+      nutzt jetzt eine CSS-transition (statt einer einmaligen Animation) für
+      ihren clip-path — dadurch schließt sich die Kachel bei Klassenentzug
+      von selbst wieder zur Stangen-Form, exakt spiegelbildlich zum Öffnen.
+      Fahne/Text fahren ohnehin automatisch zurück (reine Funktionen des
+      kontinuierlichen dock-Werts, siehe Script unten). */}
 
 <div class="brand-logo" aria-hidden="true">
+	<div class="brand-logo__pole" aria-hidden="true"></div>
 	<div class="brand-logo__banner-wrap" aria-hidden="true">
 		<img src="/parley/parley-flag-banner.svg" alt="" class="brand-logo__banner" />
 	</div>
-	<div class="brand-logo__pole" aria-hidden="true"></div>
 	<div class="brand-logo__text-wrap">
 		<img src="/parley/parley-text.svg" alt="The Parley" class="brand-logo__text" />
 	</div>
@@ -44,36 +46,22 @@
 		   der Wert von vor dem Menü-Bau. */
 		--logo-h: calc(clamp(32px, 4.4vw, 56px) * 1.5);
 		--pole-w: calc(var(--logo-h) * 52.36 / 2018.08);
-		/* Fixiert unten Mitte an der Viewport-Kante (Fred: "wie vor dem
-		   Menü-Bau") — scrollt NICHT mit dem Seiteninhalt. Bleibt hier
-		   während der ganzen Einfahr-Sequenz unbewegt stehen; nur Text und
-		   Fahne (innere Elemente) animieren, siehe unten. */
+		/* Nullbreiter Anker (TileMenu.astro-Geometrie, siehe Kommentar oben) —
+		   Fahne/Stange/Text positionieren sich per absolute Positionierung
+		   relativ zu DIESEM Punkt, der selbst exakt auf left:50% des
+		   Viewports sitzt (kein Flex-Zentrieren einer Kombo mehr, das die
+		   Stange von der echten Mitte weggeschoben hätte). */
 		position: fixed;
 		left: 50%;
 		bottom: 0;
 		z-index: 90;
-		transform: translateX(-50%);
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
+		width: 0;
 		height: var(--logo-h);
-		/* Gleiche Randabstand-Stufe wie .hero-headline/.wrap (16px bis 1024px,
-		   danach 32px) — Logo geht auf keiner Breite näher an den Rand als der
-		   restliche Seiteninhalt. */
-		padding: 0 16px;
-		/* Reine Dekoration, nie interaktiv (kein Klick-Handler mehr seit dem
-		   Menü-Rückbau) — Klicks fallen durch auf das, was darunterliegt. */
 		pointer-events: none;
 		/* Ladeanimation beim allerersten Aufruf (Seite frisch geladen) — von
 		   unten hoch, wie schon vor dem Menü-Bau. */
 		clip-path: inset(0 0 0 0);
 		animation: brand-logo-rise 700ms cubic-bezier(0.22, 0.61, 0.36, 1) 150ms both;
-	}
-
-	@media (min-width: 1024px) {
-		.brand-logo {
-			padding: 0 32px;
-		}
 	}
 
 	@keyframes brand-logo-rise {
@@ -91,25 +79,37 @@
 		}
 	}
 
+	/* Stange: der feste Ankerpunkt, exakt auf der Viewport-Mitte zentriert
+	   (left:calc(-1 * pole-w/2) relativ zum Nullbreiten-Anker oben) — DAS ist
+	   der Punkt, an dem CtaTile.astro's Kachel später "geboren" wird, deshalb
+	   muss diese X-Mitte pixelgenau mit der Kachel-Mitte übereinstimmen
+	   (dort ebenfalls left:50%+translateX(-50%) auf denselben Viewport-
+	   Mittelpunkt). Farbe #ededed/95% (--surface) statt Weiß — derselbe Ton
+	   wie die spätere Kachel (TileMenu.astro .hero-logo__chip, dbdbecc), für
+	   den nahtlosen Farbübergang beim "Geburts"-Moment (Öffnungs-Animation
+	   sitzt in CtaTile.astro). */
 	.brand-logo__pole {
+		position: absolute;
+		left: calc(var(--pole-w) / -2);
+		bottom: 0;
 		width: var(--pole-w);
-		height: 100%;
-		background: var(--white);
-		flex: none;
+		height: var(--logo-h);
+		background: rgba(237, 237, 237, 0.95);
 	}
 
 	/* Fahne-Wrap: overflow:hidden macht daraus das "Fenster", aus dem die
 	   Fahne (Kind-Element, siehe .brand-logo__banner) beim Einfahren
 	   herausgleitet — exakt die Header.astro-Technik, hier auf die Fahne
 	   gespiegelt (Fahne sitzt LINKS von der Stange, muss also nach RECHTS,
-	   zur Stange hin, verschwinden). */
+	   zur Stange hin, verschwinden). Position absolut relativ zum
+	   Null-Anker, rechte Kante 4px links von der Stange — 1:1 TileMenu.astro
+	   .hero-logo__banner-wrap-Geometrie. */
 	.brand-logo__banner-wrap {
-		align-self: flex-start;
-		margin-top: calc(var(--logo-h) * 40.9736 / 2018.08);
-		margin-right: 4px;
+		position: absolute;
+		right: calc(var(--pole-w) / 2 + 4px);
+		top: calc(var(--logo-h) * 40.9736 / 2018.08);
 		width: calc(var(--logo-h) * 1072.97 / 2018.08);
 		height: calc(var(--logo-h) * 459.85 / 2018.08);
-		flex: none;
 		overflow: hidden;
 	}
 
@@ -126,12 +126,15 @@
 	}
 
 	/* Text-Wrap: identische Technik wie Header.astro
-	   (.parley-nav__logo-text-wrap: overflow:hidden, fester Ausschnitt). */
+	   (.parley-nav__logo-text-wrap: overflow:hidden, fester Ausschnitt).
+	   Position absolut relativ zum Null-Anker, linke Kante 4px rechts von
+	   der Stange — 1:1 TileMenu.astro .hero-logo__text-wrap-Geometrie. */
 	.brand-logo__text-wrap {
-		margin-left: 4px;
+		position: absolute;
+		left: calc(var(--pole-w) / 2 + 4px);
+		bottom: 0;
 		width: calc(var(--logo-h) * 1986.93 / 2018.08);
 		height: calc(var(--logo-h) * 1057.41 / 2018.08);
-		flex: none;
 		overflow: hidden;
 	}
 
@@ -154,14 +157,14 @@
 	//
 	// EINZIGE Quelle für die gesamte Sequenz: EIN Fortschrittswert "dock"
 	// (0…1), aus dem sowohl die Text-/Fahnen-Einfahr-Phasen ALS AUCH das
-	// diskrete Erscheinen der CTA-Kachel abgeleitet werden — kein zweiter
-	// Mechanismus, keine Race Condition (Fred-Vorgabe seit der zweiten
-	// Nachbesserung, jetzt auf die neue Choreografie übertragen).
+	// diskrete Erscheinen der CTA-Kachel (die "Geburt" aus der Stange,
+	// siehe CtaTile.astro) abgeleitet werden — kein zweiter Mechanismus,
+	// keine Race Condition.
 	//
-	// Kurze Scroll-Strecke (dritte Nachbesserung): Start bei 80px scrollY,
-	// fertig eingefahren bei 280px (DISTANCE 200) — Referenzwerte aus dem
-	// alten Header.astro-Script (dort COLLAPSE_START 120 / DISTANCE 160),
-	// hier leicht angepasst auf Freds explizite Vorgabe 80/280.
+	// Kurze Scroll-Strecke: Start bei 80px scrollY, fertig eingefahren bei
+	// 280px (DISTANCE 200) — Referenzwerte aus dem alten Header.astro-Script
+	// (dort COLLAPSE_START 120 / DISTANCE 160), hier auf Freds explizite
+	// Vorgabe 80/280 angepasst.
 	const DOCK_START = 80;
 	const DOCK_DISTANCE = 200;
 
@@ -194,9 +197,10 @@
 			root.style.setProperty("--dock-flag", String(phaseFlag));
 
 			// CTA-Kachel: diskretes Ereignis bei dock>=1 (Einfahr-Animation
-			// fertig), NICHT proportional. classList.toggle mit Boolean setzt/
-			// entfernt sauber je nach Richtung — dadurch reversibel: scrollt
-			// der Besucher wieder unter 280px, verschwindet die Kachel wieder.
+			// fertig, Stange bereit für die Geburt), NICHT proportional.
+			// classList.toggle mit Boolean setzt/entfernt sauber je nach
+			// Richtung — CtaTile.astro's CSS-transition erledigt den Rest
+			// (öffnet/schließt bidirektional, siehe dortiger Kommentar).
 			cta?.classList.toggle("cta-tile--revealed", dock >= 1);
 		};
 

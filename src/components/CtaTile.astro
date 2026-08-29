@@ -15,7 +15,7 @@
 // :hover) ist die Unterzeile PERMANENT sichtbar (Website-Brief-Auftrag),
 // Tap-Ziel bleibt die volle 88px-Kachel (deutlich über der 44×44px-Vorgabe).
 //
-// Timing-Bug, Historie über DREI Bau-Versuche:
+// Timing-Bug, Historie über VIER Bau-Versuche:
 // 1) Ursprünglich lief die Erscheinen-Animation rein zeitgesteuert (fixe
 //    animation-delay), unabhängig vom Hero — die Kachel tauchte sofort beim
 //    Laden auf, während das Logo noch stand.
@@ -26,17 +26,28 @@
 //    zwei unabhängige Zeitsteuerungen statt einer echten Kopplung.
 // 3) Zweiter Fix-Versuch: BrandLogo.astro wieder fixiert, EIN gemeinsamer
 //    Fortschrittswert --hero-dock (0…1), diese Kachel deckte sich per
-//    clip-path PROPORTIONAL dazu auf (calc((1-var(--hero-dock))*100%)).
-//    DRITTE Nachbesserung (Fred, exakte Choreografie beschrieben): das war
-//    falsch — die Kachel soll NICHT proportional zum Scroll aufdecken,
-//    sondern als EREIGNIS erscheinen, GENAU in dem Moment, in dem die
-//    Logo-Einfahr-Animation fertig ist (dock>=1). BrandLogo.astro's Script
-//    setzt dafür jetzt direkt die Klasse "cta-tile--revealed" auf diese
-//    Kachel (dock>=1 → Klasse dran, dock<1 → Klasse weg) — die bestehende
-//    400ms-Erscheinen-Animation (cta-tile-in, siehe unten) spielt dann
-//    einmalig ab, statt dass die Kachel scroll-proportional "mitwandert".
-//    Weiterhin EIN Skript, EINE Quelle — nur die Art, WIE dieses eine
-//    Skript die Kachel steuert, hat sich geändert (Klasse statt calc()).
+//    clip-path PROPORTIONAL dazu auf. Dritte Nachbesserung (Fred): falsch —
+//    die Kachel soll als EREIGNIS erscheinen, GENAU wenn die Logo-Einfahr-
+//    Animation fertig ist (dock>=1). BrandLogo.astro's Script setzte dafür
+//    die Klasse "cta-tile--revealed", die eine 400ms-Wisch-Animation
+//    (von unten) auslöste.
+// 4) VIERTE Nachbesserung (Fred, "die Verwandlungs-Kette wird vollständig"):
+//    das Wischen von unten war der falsche visuelle Übergang — die Kachel
+//    soll stattdessen AUS DER STANGE ENTSTEHEN (BrandLogo.astro's
+//    .brand-logo__pole, die nach dem Einfahren von Text+Fahne als einziges
+//    Element übrig bleibt): eine horizontale Expansion aus der Mitte
+//    heraus (clip-path inset(0 50% 0 50%) -> inset(0 0 0 0)), an EXAKT
+//    derselben X-Position wie die Stange (siehe BrandLogo.astro-Kommentar
+//    zur TileMenu.astro-Geometrie-Übernahme) und in identischer Farbe
+//    (--surface-Ton, die Stange trägt jetzt dieselbe rgba(237,237,237,.95)
+//    wie diese Kachel). Technik jetzt eine CSS-transition statt einer
+//    Animation (siehe .cta-tile--gated unten) — dadurch automatisch
+//    bidirektional: Klasse dran = öffnet sich aus der Stangen-Form zur
+//    vollen Kachel, Klasse weg = schließt sich zurück zur Stangen-Form,
+//    ohne zwei getrennte Keyframe-Sets pflegen zu müssen.
+//    Weiterhin EIN Skript (BrandLogo.astro), EINE Quelle — nur die Art, WIE
+//    dieses eine Skript die Kachel steuert, hat sich mit jeder Nachbesserung
+//    verfeinert (jetzt: Klasse + CSS-transition statt Klasse + Animation).
 interface Props {
 	// true nur auf /buchen: die Tür ist schon erreicht, der Button verschwindet.
 	hideCta?: boolean;
@@ -104,24 +115,34 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 		animation: cta-tile-in 400ms cubic-bezier(0.77, 0, 0.18, 1) 900ms both;
 	}
 
-	/* Gated (nur Startseite, gateBehindHero-Prop), OHNE --revealed-Klasse:
-	   bleibt verdeckt, keine zeitgesteuerte Animation — wartet auf das
-	   Ereignis von BrandLogo.astro's Script (dock>=1 → Klasse gesetzt). */
+	/* Gated (nur Startseite, gateBehindHero-Prop): "geschlossener" Zustand =
+	   die Kachel ist auf die Breite der Stange zusammengezogen — inset(0 50%
+	   0 50%) heißt "0% oben/unten, 50% links UND 50% rechts weggeschnitten",
+	   also ein 0px schmaler, senkrechter Strich exakt in der Kachel-Mitte
+	   (= exakt da, wo BrandLogo.astro's .brand-logo__pole steht, siehe
+	   dortiger Kommentar zur pixelgenauen X-Ausrichtung). Läuft NICHT über
+	   eine einmalige Animation, sondern über eine transition — CSS-
+	   transitions reagieren automatisch auf JEDE Wertänderung, in BEIDE
+	   Richtungen, dadurch entsteht die geforderte Reversibilität (Punkt 4)
+	   ohne zwei getrennte Keyframe-Sets für "auf" und "zu". */
 	.cta-tile--gated {
 		animation: none;
-		clip-path: inset(100% 0 0 0);
+		clip-path: inset(0 50% 0 50%);
+		transition: clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1);
 	}
 
-	/* Das eigentliche Ereignis (dritte Nachbesserung): sobald
-	   BrandLogo.astro dock>=1 meldet und die Klasse setzt, spielt EINMALIG
-	   dieselbe 400ms-Aufdeck-Animation wie beim ungated Fall ab — kein
-	   scroll-proportionales Aufdecken mehr. Entfernt der Besucher die
-	   Klasse wieder (zurückgescrollt unter dock 1), fällt die Kachel auf
-	   die Basisregel oben zurück (clip-path:inset(100%), sofort verdeckt,
-	   ohne Animation) — reversibel, wie von Fred verlangt ("Button
-	   verschwindet wieder"). */
+	/* Das eigentliche Ereignis (vierte Nachbesserung, "Der Strich WIRD der
+	   Button"): sobald BrandLogo.astro dock>=1 meldet und die Klasse setzt,
+	   öffnet sich der Strich horizontal aus der Mitte zur vollen Kachel
+	   (inset(0 0 0 0)) — die BBH-Kurve (cubic-bezier(0.77,0,0.18,1)) ist
+	   dieselbe, die schon für den Hamburger-Kachel-Wisch in TileMenu.astro
+	   und den Seitenübergang (PageWipe.astro) verwendet wurde, hier 1:1
+	   wiederverwendet statt neu erfunden. Entfernt BrandLogo.astro die
+	   Klasse wieder (zurückgescrollt unter dock 1), übernimmt dieselbe
+	   transition automatisch die RÜCKWÄRTS-Animation (Kachel schließt sich
+	   zur Stangen-Form) — kein Extra-Code nötig. */
 	.cta-tile--gated.cta-tile--revealed {
-		animation: cta-tile-in 400ms cubic-bezier(0.77, 0, 0.18, 1) both;
+		clip-path: inset(0 0 0 0);
 	}
 
 	@keyframes cta-tile-in {
@@ -136,9 +157,8 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 			clip-path: inset(0 0 0 0);
 		}
 
-		.cta-tile--gated.cta-tile--revealed {
-			animation: none;
-			clip-path: inset(0 0 0 0);
+		.cta-tile--gated {
+			transition: none;
 		}
 	}
 

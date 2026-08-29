@@ -61,18 +61,20 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			<p class="plaedoyer-text">Der stärkste Beweis ist ein echtes Gespräch. Und genau das skalieren wir.</p>
 		</div>
 		<div class="plaedoyer-half plaedoyer-half--essence">
-			{/* Live-Feedback Fred (während des Bau-Schritts): text-wrap:balance
-			   allein erzeugte bei ~511px Spaltenbreite einen unglücklichen
-			   3-Zeilen-Umbruch (u.a. "Augenzeugen." allein). Bedingung von Fred:
-			   "tausend Augenzeugen" bleibt IMMER zusammen. Umgesetzt mit einem
-			   gesetzten <br /> nach "Gespräch" + einem geschützten Leerzeichen
-			   (&nbsp;) zwischen "tausend" und "Augenzeugen." — Letzteres kann
-			   dadurch nie auf zwei Zeilen fallen, auch nicht bei sehr schmalen
-			   Breiten (dann wird "mit" allein umgebrochen, macht die Zeile
-			   dreizeilig, verletzt die Bedingung aber nicht). Wortlaut bleibt
-			   1:1 die soloLine oben, nur die Umbruch-Stellen sind jetzt explizit
-			   statt dem Browser überlassen. */}
-			<p class="essence-line">Ein Gespräch<br />mit tausend&nbsp;Augenzeugen.</p>
+			{/* Fünfte Nachbesserung (Fred): die Essenz-Zeile war "deutlich zu
+			   klein" (~37px) — gegen bartleboglehegarty.com gemessen (siehe
+			   .essence-line-Kommentar unten für die Referenzklasse + px-Werte)
+			   und auf eine deutlich größere Stufe gehoben. Bei dieser Größe
+			   passt "mit tausend Augenzeugen." nicht mehr einzeilig in die
+			   50%-Spalte — Fred selbst hat deshalb den Wechsel auf den
+			   DREIZEILER angeordnet, mit bewusst gesetzten Umbrüchen ("Ein
+			   Gespräch" / "mit tausend" / "Augenzeugen."). Das hebt die
+			   vorherige "tausend Augenzeugen bleibt zusammen"-Regel bewusst
+			   auf — Größe hat jetzt Priorität, Freds eigene, spätere Vorgabe.
+			   Jede Zeile ein eigenes Textelement, kein &nbsp; mehr nötig. */}
+			<p class="essence-line">Ein Gespräch</p>
+			<p class="essence-line">mit tausend</p>
+			<p class="essence-line">Augenzeugen.</p>
 		</div>
 	</section>
 
@@ -226,56 +228,51 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		container-type: inline-size;
 	}
 
-	/* Essenz-Zeile (Auftrags-Update 29.08. nachts): "deutlich über text-xl,
-	   Richtung Zwischen-Hero-Größe, klar unter dem Haupt-Hero" — text-xl lag
-	   bei max. 50px (clamp(1.875rem,1.4985rem+1.506vw,3.125rem), die vorherige
-	   Stufe), der Hero deckelt bei ~161.5px (siehe Kommentar bei .hero h1).
-	   Diese Stufe zielt auf die Mitte zwischen beiden (~80px bei ~1280px
-	   Viewport-Breite): min 44px (mobil noch klar über allen anderen
-	   Fließtext-Stufen der Seite), max 100px. Gleiche Bauart (rem+vw-Clamp,
-	   ungedeckelt an der Container-Breite) wie eyebrow/plaedoyer-text/
-	   produkte oben, bewusst NICHT die Hero-eigene cqw-Technik (die ist an
-	   die volle Wrap-Breite gebunden, hier steht die Zeile aber nur in der
-	   schmaleren Spaltenhälfte).
-
-	   Umbruch (Live-Feedback Fred, Korrektur während des Bau-Schritts):
-	   text-wrap:balance ALLEIN reichte nicht — bei ~511px Spaltenbreite
-	   (50/50-Split, siehe .plaedoyer oben) erzeugte der Browser-Algorithmus
-	   einen unglücklichen 3-Zeilen-Umbruch, u.a. "Augenzeugen." komplett
-	   allein auf einer Zeile. Jetzt manuell gesetzt im Markup (<br /> +
-	   &nbsp;, siehe Kommentar dort) statt dem Balance-Algorithmus überlassen
-	   — text-wrap:balance deshalb entfernt, würde mit einem harten <br /> im
-	   selben Absatz ohnehin unvorhersehbar zusammenwirken.
+	/* Essenz-Zeile — Größen-Historie (kurz): erst an BBHs text-xl orientiert
+	   (max 50px), dann auf eine vw-geclampte Zwischenstufe angehoben (zweite
+	   Nachbesserung überlief bei breiten Monitoren, siehe unten), dann auf
+	   cqw umgestellt (an die Spalte statt den Viewport gekoppelt).
 
 	   ZWEITE Nachbesserung (Fred, Screenshot bei ~2000px Viewport): bei sehr
-	   breiten Monitoren lief die Zeile rechts aus dem Bild ("tausend
-	   Augenzeug…" abgeschnitten) UND brach zusätzlich in Ein-Wort-Zeilen.
-	   Ursache: font-size skalierte mit dem VIEWPORT (vw-Anteil im Clamp),
-	   die Spalte selbst ist aber bei --max-width:1100px gedeckelt — ab da
-	   wuchs die Schrift ungebremst weiter, während die Spalte längst nicht
-	   mehr mitwuchs. Fix: font-size jetzt in cqw statt vw/rem, bezogen auf
-	   .plaedoyer-half--essence als eigenen Query-Container
-	   (container-type:inline-size dort) — die Schrift skaliert dadurch mit
-	   der TATSÄCHLICHEN Spaltenbreite, kann also bei KEINER Viewport-Breite
-	   mehr aus der Spalte laufen.
-	   Kalibrierung (live im Browser gemessen, Forma DJR 900, "mit tausend
-	   Augenzeugen." unrestricted/white-space:nowrap): die Breite pro
-	   Schrift-Pixel ist NICHT exakt konstant (optical-size-Verhalten der
-	   Variable Font) — 12.80 bei 24px Schrift bis 12.11 bei 80px+. Für den
-	   Clamp den ungünstigsten (höchsten) Ratio-Wert aus dem realistischen
-	   Zielbereich angesetzt (~12.8, aufgerundet auf 13.0 als Sicherheits-
-	   puffer) → rechnerisch exakte Passung bei 100/13.0 ≈ 7.69cqw, davon
-	   ~95% angesetzt = 7.3cqw (Luft für Rundung/Kerning-Rauschen, Zeile
-	   bleibt spürbar unter der Spaltenkante statt kante-an-Kante). line-height
-	   1.05 unverändert (lag schon in Freds geforderter Spanne 1.05–1.15) —
-	   die zuvor "zu groß" wirkende Zeilenhöhe war die Folge des
-	   Viewport-Overflows selbst, nicht des line-height-Werts. Min-Bound des
-	   Clamps bewusst niedrig (1.5rem statt vorher 2.75rem): eine harte
-	   Mindestgröße würde bei sehr schmalen Spalten (kleine Mobilgeräte)
-	   wieder genau denselben Overflow-Fehler reproduzieren, den dieser Fix
-	   beheben soll — die Passung hat Vorrang vor einer Mindestgröße. */
+	   breiten Monitoren lief die Zeile rechts aus dem Bild, weil font-size
+	   mit dem VIEWPORT skalierte (vw-Anteil im Clamp), während die Spalte
+	   selbst bei --max-width:1100px gedeckelt ist. Fix: font-size in cqw,
+	   bezogen auf .plaedoyer-half--essence als eigenen Query-Container
+	   (container-type:inline-size dort) — skaliert seither mit der
+	   TATSÄCHLICHEN Spaltenbreite, kann bei keiner Breite mehr überlaufen.
+
+	   FÜNFTE Nachbesserung (Fred): bei jener Kalibrierung (7.3cqw, ~37px bei
+	   1280px) war die Zeile "deutlich zu klein". Referenz-Recherche gegen
+	   bartleboglehegarty.com (ausgeliefertes CSS-Bundle
+	   ea792231b42826ae.css, live gefetcht + auf .text-*-original-Klassen
+	   durchsucht, UND live im Markup verifiziert, welche Klasse BBH
+	   tatsächlich für "große Statement-Zeilen in halbbreiten Sektionen"
+	   einsetzt — nicht nur die CSS-Definition, sondern echte Verwendung):
+	   auf /about steht in einem `w-full md:w-1/2`-Split (Signatur-Bild
+	   links, Text rechts — strukturell fast identisch zu unserer
+	   Plädoyer-Sektion) der Eröffnungssatz "We are a global creative
+	   company…" in `text-2xl`. text-xl (die vorherige Referenz, max. 50px)
+	   wird auf allen geprüften Case-Study-Seiten nur für Seitentitel/Stat-
+	   Zahlen verwendet, NICHT für Statement-Fließtext — text-2xl ist die
+	   richtigere Referenz. .text-2xl-original: clamp(30px,14.9398px+
+	   3.7651vw,80px) → bei 1280px Viewport: 14.9398+3.7651*12.8 ≈ 63,1px.
+	   Cqw-Koeffizient neu kalibriert, um diesen Zielwert bei unserer
+	   Spaltenbreite (511.6px bei 1280px Viewport) zu treffen: 63.1/511.6*100
+	   ≈ 12.3cqw — live gemessen ergibt das 62.93px (praktisch exakt der
+	   BBH-Zielwert).
+	   Bei dieser Größe passt "mit tausend Augenzeugen." nicht mehr einzeilig
+	   in die Spalte (Fred: "Priorität hat die GRÖSSE") — auf Freds Anweisung
+	   deshalb DREIZEILER mit bewusst gesetzten Umbrüchen im Markup ("Ein
+	   Gespräch" / "mit tausend" / "Augenzeugen.", siehe dort), die frühere
+	   "tausend Augenzeugen bleibt zusammen"-Regel ist damit aufgehoben.
+	   Breiten-Check je Zeile bei 1280px (Spalte 511.6px): "Ein Gespräch"
+	   382.5px, "mit tausend" 344.3px, "Augenzeugen." 415.6px (die breiteste,
+	   ~81% der Spalte — komfortabler Puffer). line-height 1.05 unverändert
+	   (weiterhin in Freds Spanne 1.05–1.15). Min-Bound weiterhin niedrig
+	   (1.5rem): eine harte Mindestgröße würde bei sehr schmalen Spalten
+	   wieder überlaufen — Passung hat Vorrang. */
 	.essence-line {
-		font-size: clamp(1.5rem, 7.3cqw, 6.25rem);
+		font-size: clamp(1.5rem, 12.3cqw, 6.25rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;
