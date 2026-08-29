@@ -1,43 +1,67 @@
-# Astro Starter Kit: Minimal
+# the-parley-astro
+
+Marketing-Website von The Parley (theparley.de). Statisches Astro-Frontend +
+zwei Cloudflare Pages Functions als serverseitiger Proxy vor der
+meetergo-Buchungsstrecke (`/buchen`).
+
+## Stack
+
+- **Astro** (statischer Output, `ClientRouter`-View-Transitions zwischen Seiten)
+- **Cloudflare Pages** als Hosting + Functions-Runtime (`functions/api/*.js`)
+- Kein Framework-Frontend (React/Vue/…), kein CSS-Framework — reines
+  Astro-Component-CSS, Design-Tokens in `src/layouts/Layout.astro`
+
+## Struktur
+
+```
+src/pages/         Seiten (Datei-Routing: index, buchen, impressum, datenschutz)
+src/components/     Astro-Komponenten (aktiv + archivierte, siehe Kommentar-Köpfe)
+src/layouts/        Layout.astro — Farb-Treppe/Tokens, globale Styles, <head>
+functions/api/      Cloudflare Pages Functions (slots.js, book.js)
+functions/_lib/      Gemeinsamer meetergo-API-Helper
+public/             Statische Assets (Fonts, SVGs, Favicon)
+```
+
+## Entwicklung
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev       # localhost:4321
+npm run build      # → ./dist/
+npm run preview    # Build lokal vorschauen
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Deploy
 
-## 🚀 Project Structure
+Push auf `main` → Cloudflare Pages baut und deployt automatisch
+(ca. 3 Minuten). Kein manueller Deploy-Schritt nötig.
 
-Inside of your Astro project, you'll see the following folders and files:
+## `/buchen` — Secret-Setup
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+Die Buchungsstrecke ruft `functions/api/slots.js` und `functions/api/book.js`
+auf, die als Proxy vor der meetergo-API stehen. Beide brauchen die
+Umgebungsvariable `METERGO_PAT` (Personal Access Token von meetergo):
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+- **Produktiv (Cloudflare Pages):** als Secret in den Projekteinstellungen
+  hinterlegen (Cloudflare Dashboard → Pages-Projekt → Settings →
+  Environment variables → `METERGO_PAT`, Typ "Secret").
+- **Lokal:** in `.dev.vars` im Projekt-Root (Datei liegt nicht im Repo,
+  siehe `.gitignore` — bei Bedarf selbst anlegen: `METERGO_PAT=…`).
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+### Sicherheitsregel
 
-Any static assets, like images, can be placed in the `public/` directory.
+Der PAT darf **niemals** in Client-Code (Browser-JS, `<script>`-Blöcke in
+`.astro`-Dateien, o. ä.) landen — jeder Besucher könnte ihn sonst auslesen
+und hätte vollen Zugriff auf das meetergo-Konto. Er existiert ausschließlich
+serverseitig in `functions/_lib/meetergo.js` und den beiden Functions, die
+ihn importieren. Neue Buchungs-Features immer über die Functions bauen,
+nie über einen direkten Client-Aufruf an die meetergo-API.
 
-## 🧞 Commands
+## Entscheidungs-Dokument
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Konzeptionelle Entscheidungen (Farb-Treppe, Layout-Prinzipien, Konversions-
+Kapitel, Menü-Rückbau-Begründung usw.) leben nicht im Code, sondern im
+Website-Brief außerhalb dieses Repos:
+`letitbeam Marketing/website/Website_Astro_Neubau_Brief_2026-08.md`.
+Bei Unklarheiten über das "Warum" hinter einer Design- oder Architektur-
+Entscheidung dort zuerst nachsehen, bevor Code geändert wird.

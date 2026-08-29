@@ -49,11 +49,17 @@ export async function onRequestGet({ request, env }) {
 	});
 	if (refresh) params.set("refreshCache", "true");
 
+	// Audit-Fix B10: echten Upstream-Status durchreichen (wie book.js es schon
+	// tut), statt hier pauschal 502 zu antworten — ein 4xx von meetergo (z. B.
+	// ungültige Parameter) ist kein Server-/Netzwerkfehler unsererseits. Ein
+	// generisches 502 bleibt reserviert für Netzwerk-/Parse-Fehler (siehe
+	// catch-Block bei getMeetingType oben und den impliziten Fehlerfall, wenn
+	// meetergoFetch selbst wirft).
 	const upstream = await meetergoFetch(`/booking-availability?${params.toString()}`, pat);
 	if (!upstream.ok) {
 		return jsonResponse(
 			{ error: "upstream_error", status: upstream.status, message: await upstream.text() },
-			502,
+			upstream.status,
 		);
 	}
 

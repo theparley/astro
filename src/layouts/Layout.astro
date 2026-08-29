@@ -71,9 +71,13 @@ const {
 		--gray: #999894;
 		--line: #2a2a2a;
 		--max-width: 1100px;
+		/* Nur noch von den archivierten Komponenten gelesen (Header.astro,
+		   TileMenu.astro — beide "nirgends eingebunden", siehe deren eigene
+		   Archiv-Kommentare). BrandLogo.astro, das aktive Hero-Logo, definiert
+		   sein --logo-h lokal (1.5× dieser Basis). Bleibt hier stehen statt
+		   gelöscht zu werden, damit eine Reaktivierung der archivierten
+		   Komponenten den globalen Wert sofort wieder vorfindet (Audit-Fix B7). */
 		--logo-h: clamp(32px, 4.4vw, 56px);
-		/* Fahne + Lücke + Text bei --logo-h, aus den Original-SVG-Maßen (1160.62/2018.08 Fahne, 1986.93/2018.08 Text, 4px Lücke) */
-		--logo-w: calc(var(--logo-h) * 1.5596 + 4px);
 	}
 
 	* {

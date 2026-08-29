@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 ---
 
 <Layout title="Datenschutzerklärung" description="Datenschutzerklärung von The Parley gemäß DSGVO.">
@@ -42,14 +43,20 @@ import Layout from "../layouts/Layout.astro";
 		</p>
 
 		<h2>5. Terminbuchung</h2>
+		<!-- ENTWURF Claude 30.08. — von Fred vor Live-Gang auf theparley.de prüfen lassen -->
 		<p>
-			<em>Wird ergänzt, sobald die Buchungsstrecke (/buchen) live ist.</em> Sie wird voraussichtlich über einen
-			externen Anbieter für Terminbuchung abgewickelt; die entsprechenden Datenschutzhinweise werden vor dem
-			Live-Gang ergänzt.
+			Bei einer Terminbuchung über unsere Buchungsstrecke (/buchen) werden die von Ihnen eingegebenen Daten
+			(Name, E-Mail-Adresse, optionale Nachricht, gewählter Termin) zur Durchführung der Terminvereinbarung
+			verarbeitet (Art. 6 Abs. 1 lit. b DSGVO). Dazu übertragen wir diese Daten an unseren
+			Terminbuchungs-Dienstleister meetergo GmbH, Hauptstrasse 44, 40789 Monheim am Rhein, der die
+			Bestätigungs-Mails und die Kalenderverwaltung für uns übernimmt. Die Übertragung erfolgt server-seitig
+			über unsere Hosting-Infrastruktur (Cloudflare); der Zugangsschlüssel zu meetergo verlässt zu keinem
+			Zeitpunkt unsere Server in Richtung Ihres Browsers.
 		</p>
 
 		<p class="back"><a href="/">← Zurück</a></p>
 	</main>
+	<SiteFooter />
 </Layout>
 
 <style>
@@ -88,7 +95,7 @@ import Layout from "../layouts/Layout.astro";
 	.back {
 		margin-top: 48px;
 		padding-top: 24px;
-		border-top: 1px solid #2a2a2a;
+		border-top: 1px solid var(--line);
 	}
 
 	.back a {

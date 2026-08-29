@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 ---
 
 <Layout title="Impressum" description="Impressum und Anbieterkennzeichnung gemäß § 5 TMG für The Parley.">
@@ -74,6 +75,7 @@ import Layout from "../layouts/Layout.astro";
 
 		<p class="back"><a href="/">← Zurück</a></p>
 	</main>
+	<SiteFooter />
 </Layout>
 
 <style>
@@ -114,7 +116,7 @@ import Layout from "../layouts/Layout.astro";
 	.back {
 		margin-top: 48px;
 		padding-top: 24px;
-		border-top: 1px solid #2a2a2a;
+		border-top: 1px solid var(--line);
 	}
 
 	.back a {

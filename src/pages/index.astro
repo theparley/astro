@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BrandLogo from "../components/BrandLogo.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
 // buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
@@ -93,12 +94,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		<a href="/buchen" class="cta-button-inline">Let's parley →</a>
 	</section>
 
-	<footer class="wrap">
-		<nav>
-			<a href="/impressum">Impressum</a>
-			<a href="/datenschutz">Datenschutz</a>
-		</nav>
-	</footer>
+	<SiteFooter />
 </Layout>
 
 <style>

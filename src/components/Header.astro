@@ -1,3 +1,16 @@
+{/* ⚠️ ARCHIVIERT, AKTUELL NICHT EINGEBUNDEN (Stand 2026-08-29, Fund im
+   Code-Audit 2026-08-30: nirgends importiert).
+
+   Fixierter Kopfzeilen-Header mit Logo, das beim Scrollen von "The Parley"
+   ausgeschrieben zu einer reinen Fahnen-Kachel einklappt (--collapse-
+   Mechanik im Script unten). Wurde durch BrandLogo.astro abgelöst (Logo lebt
+   seither unten mittig im Hero statt oben als Kopfzeile, siehe Website-
+   Brief "Entscheidung 29.08."). Bewusst NICHT gelöscht: die --collapse-
+   Scroll-Choreografie hier ist die Vorbild-Referenz, aus der sowohl
+   BrandLogo.astro's --hero-dock-Mechanik als auch TileMenu.astro's
+   Scroll-Collapse übernommen wurden — falls künftig wieder ein oben
+   fixierter Kopfzeilen-Header gebraucht wird (z. B. Phase 2 mit echten
+   Unterseiten), ist das hier der schnellste Startpunkt. */}
 <header class="parley-nav">
 	<a href="/" aria-label="The Parley" class="parley-nav__logo">
 		<img src="/parley/parley-flag.svg" alt="" aria-hidden="true" class="parley-nav__logo-flag" />

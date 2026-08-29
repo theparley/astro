@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 ---
 
 {/* Eigenbau-Kalender auf Basis der meetergo-API (Website-Brief, /buchen-
@@ -7,7 +8,7 @@ import Layout from "../layouts/Layout.astro";
    Cloudflare Pages Functions unter functions/api/{slots,book}.js, siehe
    functions/_lib/meetergo.js. hideCta: "Let's Parley" verschwindet hier,
    die Tür ist schon erreicht. */}
-<Layout title="Buchen" description="Ein kleines Gespräch — 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley." hideCta>
+<Layout title="Buchen" description="Ein kleines Gespräch. 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley." hideCta>
 	<main class="buchen">
 		<h1>Ein kleines Gespräch.</h1>
 		<p class="sub">30 Minuten, nichts vorbereiten.</p>
@@ -17,7 +18,7 @@ import Layout from "../layouts/Layout.astro";
 		<div id="stepDay">
 			<p class="step-label">1 · Tag wählen</p>
 			<div id="monthsContainer">
-				<p class="status" id="loadingStatus">Termine werden geladen …</p>
+				<p class="status" id="loadingStatus" role="status" aria-live="polite">Termine werden geladen …</p>
 			</div>
 		</div>
 
@@ -26,9 +27,9 @@ import Layout from "../layouts/Layout.astro";
 		   Antwort bleiben beieinander). IMMER Liste untereinander (Fred-
 		   Entscheid 29.08.), kein Zeilen-/Auto-Modus mehr. */}
 		<div id="stepTime" class="hidden">
-			<p class="step-label">2 · Uhrzeit wählen — <span id="timeDayLabel"></span></p>
+			<p class="step-label">2 · Uhrzeit wählen: <span id="timeDayLabel"></span></p>
 			<div class="slots" id="slotsGrid"></div>
-			<p class="status error hidden" id="slotsError"></p>
+			<p class="status error hidden" id="slotsError" role="alert" aria-live="assertive"></p>
 		</div>
 
 		{/* Schritt 3: Daten */}
@@ -38,8 +39,17 @@ import Layout from "../layouts/Layout.astro";
 			<div class="field"><label for="f-name">Name</label><input id="f-name" type="text" autocomplete="name" /></div>
 			<div class="field"><label for="f-email">E-Mail</label><input id="f-email" type="email" autocomplete="email" /></div>
 			<div class="field"><label for="f-message">Worum geht es? (optional)</label><textarea id="f-message" rows="2"></textarea></div>
+			{/* Honeypot (Audit-Fix A4): für Menschen unsichtbares Feld, für simple
+			   Spam-Bots aber wie ein normales Formularfeld auffindbar. Ist es beim
+			   Absenden gefüllt, gilt die Anfrage server-seitig als Spam (siehe
+			   functions/api/book.js) — dort still verworfen, ohne den Bot durch
+			   eine abweichende Fehlerantwort schlauer zu machen. */}
+			<div class="hp-field" aria-hidden="true">
+				<label for="f-website">Website</label>
+				<input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+			</div>
 			<p class="privacy">Deine Daten nutzen wir nur für diesen Termin. <a href="/datenschutz">Datenschutz</a></p>
-			<p class="status error hidden" id="formError"></p>
+			<p class="status error hidden" id="formError" role="alert" aria-live="assertive"></p>
 			<div class="actions">
 				<button type="button" class="btn-back" id="btnBack">Zurück</button>
 				<button type="button" class="btn-confirm" id="btnConfirm">Gespräch buchen</button>
@@ -59,6 +69,7 @@ import Layout from "../layouts/Layout.astro";
 			<a href="tel:+497219574304">0721 957 43 04</a> · <a href="mailto:eckert@theparley.de">eckert@theparley.de</a>
 		</div>
 	</main>
+	<SiteFooter />
 </Layout>
 
 <style is:global>
@@ -127,6 +138,9 @@ import Layout from "../layouts/Layout.astro";
 		padding: 12px 0;
 	}
 
+	/* #e0a0a0 bewusst außerhalb der Kern-Farb-Treppe (Audit-Fix B8, Befund
+	   dokumentiert statt umgefärbt): eigener Fehler-Rot-Ton fürs Kalender-
+	   Formular, kein Token in Layout.astro dafür vorgesehen. */
 	.status.error {
 		color: #e0a0a0;
 	}
@@ -162,7 +176,12 @@ import Layout from "../layouts/Layout.astro";
 		aspect-ratio: 1;
 		border: none;
 		background: none;
-		color: var(--white);
+		/* --tile-text statt --white (Audit-Fix B7/B8): dieser Wert greift nur
+		   für freie Tage (.day.full/.off/.selected überschreiben ihn weiter
+		   unten je mit eigener Farbe) — und genau die haben --tile (#404040)
+		   als Hintergrund (.day.free-Regel unten). --tile-text (#c8c8c8) ist
+		   im Token-Satz (Layout.astro) exakt für diesen Kontrast-Fall gedacht. */
+		color: var(--tile-text);
 		font-family: inherit;
 		/* Zahl + Balken skalieren mit der Kachelbreite (cqw) — kein Breakpoint */
 		container-type: inline-size;
@@ -214,6 +233,10 @@ import Layout from "../layouts/Layout.astro";
 		background: var(--tile);
 	}
 
+	/* #555/#444 bewusst außerhalb der Kern-Farb-Treppe (Audit-Fix B8, Befund
+	   dokumentiert statt umgefärbt): eigene abgestufte Grautöne für
+	   deaktivierte Tages-Zustände (voll/wochenende-oder-Vergangenheit) — kein
+	   Treppen-Token trifft genau diese beiden Abstufungen. */
 	.day.full {
 		color: #555;
 		cursor: default;
@@ -236,7 +259,7 @@ import Layout from "../layouts/Layout.astro";
 	   Marken, vergebene entfallen (Punkt 3) */
 	.day.selected {
 		background: var(--surface);
-		color: #000;
+		color: var(--black);
 	}
 
 	.day.selected .daybar span {
@@ -258,7 +281,9 @@ import Layout from "../layouts/Layout.astro";
 	.slot {
 		border: none;
 		background: var(--tile);
-		color: var(--white);
+		/* --tile-text statt --white — gleicher Kontrast-Grund wie bei .day
+		   oben (Audit-Fix B7/B8): Text auf --tile (#404040)-Fläche. */
+		color: var(--tile-text);
 		font-family: inherit;
 		font-size: 1.05rem;
 		font-weight: 700;
@@ -268,7 +293,7 @@ import Layout from "../layouts/Layout.astro";
 
 	.slot.selected {
 		background: var(--surface);
-		color: #000;
+		color: var(--black);
 	}
 
 	/* Formular */
@@ -280,6 +305,19 @@ import Layout from "../layouts/Layout.astro";
 
 	.field {
 		margin-bottom: 12px;
+	}
+
+	/* Honeypot (Audit-Fix A4): per CSS unsichtbar (nicht display:none/
+	   visibility:hidden — manche Bots überspringen genau diese beiden
+	   Eigenschaften gezielt), aber weiterhin Teil des DOM-Renderflows,
+	   damit einfache Formular-Bots es trotzdem ausfüllen. */
+	.hp-field {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
 	}
 
 	.field label {
@@ -336,7 +374,7 @@ import Layout from "../layouts/Layout.astro";
 		flex: 1;
 		border: none;
 		background: var(--surface);
-		color: #000;
+		color: var(--black);
 		font-family: inherit;
 		font-size: 1rem;
 		font-weight: 800;
@@ -411,6 +449,7 @@ import Layout from "../layouts/Layout.astro";
 		const nameInput = document.getElementById("f-name") as HTMLInputElement;
 		const emailInput = document.getElementById("f-email") as HTMLInputElement;
 		const messageInput = document.getElementById("f-message") as HTMLTextAreaElement;
+		const websiteInput = document.getElementById("f-website") as HTMLInputElement;
 		const btnBack = document.getElementById("btnBack") as HTMLButtonElement;
 		const btnConfirm = document.getElementById("btnConfirm") as HTMLButtonElement;
 
@@ -595,14 +634,34 @@ import Layout from "../layouts/Layout.astro";
 			stepForm.classList.add("hidden");
 		});
 
+		// Client-seitiger Vorab-Check derselben Grenzen wie server-seitig
+		// (Audit-Fix A4, siehe functions/api/book.js) — spart eine unnötige
+		// Runde zum Server bei offensichtlich zu langen Eingaben. Die
+		// eigentliche, verbindliche Prüfung bleibt server-seitig.
+		const MAX_NAME = 200;
+		const MAX_EMAIL = 254;
+		const MAX_MESSAGE = 2000;
+		const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 		btnConfirm.addEventListener("click", async () => {
 			const fullname = nameInput.value.trim();
 			const email = emailInput.value.trim();
 			const message = messageInput.value.trim();
+			const website = websiteInput?.value.trim() || "";
 			formError.classList.add("hidden");
 
 			if (!fullname || !email) {
 				formError.textContent = "Bitte Name und E-Mail ausfüllen.";
+				formError.classList.remove("hidden");
+				return;
+			}
+			if (!EMAIL_RE.test(email)) {
+				formError.textContent = "Bitte eine gültige E-Mail-Adresse eingeben.";
+				formError.classList.remove("hidden");
+				return;
+			}
+			if (fullname.length > MAX_NAME || email.length > MAX_EMAIL || message.length > MAX_MESSAGE) {
+				formError.textContent = "Eine der Eingaben ist zu lang. Bitte kürzen.";
 				formError.classList.remove("hidden");
 				return;
 			}
@@ -619,12 +678,28 @@ import Layout from "../layouts/Layout.astro";
 				const res = await fetch("/api/book", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ start: chosenStart, fullname, email, message }),
+					body: JSON.stringify({ start: chosenStart, fullname, email, message, website }),
 				});
 
 				if (res.status === 400 || res.status === 409) {
-					// Slot ist inzwischen weg — frisch nachladen und zurück zu
-					// Schritt 2 (Website-Brief: "bei Buchungs-400 Slots refreshen").
+					// Zwei mögliche Ursachen hinter 400/409, unterschieden über den
+					// Error-Code im Body (Audit-Fix A4): unsere eigene server-seitige
+					// Validierung (invalid_email/missing_fields/field_too_long) zeigt
+					// die serverseitige Meldung direkt an; ein "upstream_error" kommt
+					// von meetergo und bedeutet "Slot inzwischen weg" — dafür bleibt
+					// der bisherige Refresh-Flow (Website-Brief: "bei Buchungs-400
+					// Slots refreshen").
+					let data: any = null;
+					try {
+						data = await res.json();
+					} catch {
+						/* kein JSON-Body, unten Fallback */
+					}
+					if (data && data.error && data.error !== "upstream_error") {
+						formError.textContent = data.message || "Bitte Angaben prüfen.";
+						formError.classList.remove("hidden");
+						return;
+					}
 					formError.textContent = "Diese Uhrzeit ist gerade weggebucht worden. Bitte neu wählen.";
 					formError.classList.remove("hidden");
 					await fetchSlots(true);

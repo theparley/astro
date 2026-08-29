@@ -1,0 +1,40 @@
+{/* Gemeinsame Footer-Komponente (Audit-Fix A1, 2026-08-30) — vereinheitlicht
+   den kleinen Text-Footer, der vorher nur inline in index.astro lebte.
+   Eingebunden auf /buchen, /impressum, /datenschutz UND index.astro (dort
+   ersetzt sie den bisherigen Inline-Block 1:1, gleicher Stil: kleine
+   Sekundär-Grau-Links am Seitenende, oberer Trennstrich in --line). */}
+<footer class="site-footer">
+	<nav>
+		<a href="/">Start</a>
+		<a href="/impressum">Impressum</a>
+		<a href="/datenschutz">Datenschutz</a>
+	</nav>
+</footer>
+
+<style>
+	.site-footer {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: 32px 16px 64px;
+		border-top: 1px solid var(--line);
+	}
+
+	@media (min-width: 1024px) {
+		.site-footer {
+			padding-left: 32px;
+			padding-right: 32px;
+		}
+	}
+
+	nav {
+		display: flex;
+		gap: 24px;
+		font-size: 0.85rem;
+		color: var(--gray);
+	}
+
+	a {
+		text-decoration: none;
+		color: inherit;
+	}
+</style>
