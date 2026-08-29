@@ -15,32 +15,35 @@
 // :hover) ist die Unterzeile PERMANENT sichtbar (Website-Brief-Auftrag),
 // Tap-Ziel bleibt die volle 88px-Kachel (deutlich über der 44×44px-Vorgabe).
 //
-// Timing-Bug, Historie über zwei Bau-Versuche:
+// Timing-Bug, Historie über DREI Bau-Versuche:
 // 1) Ursprünglich lief die Erscheinen-Animation rein zeitgesteuert (fixe
 //    animation-delay), unabhängig vom Hero — die Kachel tauchte sofort beim
 //    Laden auf, während das Logo noch stand.
 // 2) Ein erster Fix-Versuch koppelte die Kachel per IntersectionObserver an
 //    BrandLogo.astro. Zweite Nachbesserung (Fred): das war die falsche
-//    Choreografie — BrandLogo.astro lag im normalen Fluss (kein
-//    position:fixed, kein Scroll-Collapse mehr, seit der Menü-Ausbau diese
-//    Mechanik mitgenommen hatte), der Observer beobachtete also ein
-//    Element, das nur "wegscrollt", nicht "einklappt" — zwei unabhängige
-//    Zeitsteuerungen statt einer echten Kopplung.
-// FIX (jetzt): BrandLogo.astro ist wieder fixiert unten Mitte (wie vor dem
-// Menü-Bau) und schreibt bei jedem Scroll EINEN gemeinsamen Fortschrittswert
-// (CSS-Custom-Property --hero-dock, 0…1) auf <html>. Diese Kachel liest hier
-// exakt denselben Wert für ihre eigene Sichtbarkeit (siehe .cta-tile--gated
-// unten) — keine zwei Mechanismen, keine Race Condition, eine echte
-// Übergabe an derselben Stelle. Reversibel, weil --hero-dock immer aus der
-// AKTUELLEN scrollY berechnet wird (siehe BrandLogo.astro-Script), nicht aus
-// einem einmal erreichten Maximum.
+//    Choreografie — BrandLogo.astro lag im normalen Fluss, der Observer
+//    beobachtete ein Element, das nur "wegscrollt", nicht "einklappt" —
+//    zwei unabhängige Zeitsteuerungen statt einer echten Kopplung.
+// 3) Zweiter Fix-Versuch: BrandLogo.astro wieder fixiert, EIN gemeinsamer
+//    Fortschrittswert --hero-dock (0…1), diese Kachel deckte sich per
+//    clip-path PROPORTIONAL dazu auf (calc((1-var(--hero-dock))*100%)).
+//    DRITTE Nachbesserung (Fred, exakte Choreografie beschrieben): das war
+//    falsch — die Kachel soll NICHT proportional zum Scroll aufdecken,
+//    sondern als EREIGNIS erscheinen, GENAU in dem Moment, in dem die
+//    Logo-Einfahr-Animation fertig ist (dock>=1). BrandLogo.astro's Script
+//    setzt dafür jetzt direkt die Klasse "cta-tile--revealed" auf diese
+//    Kachel (dock>=1 → Klasse dran, dock<1 → Klasse weg) — die bestehende
+//    400ms-Erscheinen-Animation (cta-tile-in, siehe unten) spielt dann
+//    einmalig ab, statt dass die Kachel scroll-proportional "mitwandert".
+//    Weiterhin EIN Skript, EINE Quelle — nur die Art, WIE dieses eine
+//    Skript die Kachel steuert, hat sich geändert (Klasse statt calc()).
 interface Props {
 	// true nur auf /buchen: die Tür ist schon erreicht, der Button verschwindet.
 	hideCta?: boolean;
-	// true nur auf der Startseite: die Kachel liest --hero-dock statt der
-	// zeitgesteuerten Animation (siehe Kommentar oben + <style> unten).
-	// Unterseiten haben keinen Hero/kein BrandLogo.astro, das --hero-dock
-	// setzt, und zeigen die Kachel deshalb sofort (ungated).
+	// true nur auf der Startseite: die Kachel wird per Klasse (siehe oben)
+	// statt zeitgesteuert sichtbar. Unterseiten haben keinen Hero/kein
+	// BrandLogo.astro, das die Klasse setzt, und zeigen die Kachel deshalb
+	// sofort (ungated).
 	gateBehindHero?: boolean;
 }
 
@@ -101,20 +104,24 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 		animation: cta-tile-in 400ms cubic-bezier(0.77, 0, 0.18, 1) 900ms both;
 	}
 
-	/* Gated (nur Startseite, gateBehindHero-Prop): KEINE zeitgesteuerte
-	   Animation, KEIN eigener Beobachter — die Sichtbarkeit ist eine reine
-	   CSS-Funktion von --hero-dock, demselben Wert, den BrandLogo.astro für
-	   sein eigenes Ausblenden liest (dort: opacity 1 → 0 bei 0 → 1; hier
-	   spiegelbildlich 0 → 1). Bei --hero-dock:0 (Seitenanfang) ist der Inset
-	   100% (unsichtbar), bei --hero-dock:1 (Hero durchgescrollt) 0%
-	   (voll sichtbar) — dazwischen läuft die Kachel 1:1 mit dem Scroll statt
-	   einer separaten Animation, exakt spiegelbildlich zum Logo. Default 1
-	   im var()-Fallback (nicht 0!): falls --hero-dock aus irgendeinem Grund
-	   nie gesetzt wird (z. B. JS deaktiviert), zeigt die Kachel sich lieber
-	   sofort, statt für immer verdeckt zu bleiben. */
+	/* Gated (nur Startseite, gateBehindHero-Prop), OHNE --revealed-Klasse:
+	   bleibt verdeckt, keine zeitgesteuerte Animation — wartet auf das
+	   Ereignis von BrandLogo.astro's Script (dock>=1 → Klasse gesetzt). */
 	.cta-tile--gated {
 		animation: none;
-		clip-path: inset(calc((1 - var(--hero-dock, 1)) * 100%) 0 0 0);
+		clip-path: inset(100% 0 0 0);
+	}
+
+	/* Das eigentliche Ereignis (dritte Nachbesserung): sobald
+	   BrandLogo.astro dock>=1 meldet und die Klasse setzt, spielt EINMALIG
+	   dieselbe 400ms-Aufdeck-Animation wie beim ungated Fall ab — kein
+	   scroll-proportionales Aufdecken mehr. Entfernt der Besucher die
+	   Klasse wieder (zurückgescrollt unter dock 1), fällt die Kachel auf
+	   die Basisregel oben zurück (clip-path:inset(100%), sofort verdeckt,
+	   ohne Animation) — reversibel, wie von Fred verlangt ("Button
+	   verschwindet wieder"). */
+	.cta-tile--gated.cta-tile--revealed {
+		animation: cta-tile-in 400ms cubic-bezier(0.77, 0, 0.18, 1) both;
 	}
 
 	@keyframes cta-tile-in {
@@ -125,6 +132,11 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 
 	@media (prefers-reduced-motion: reduce) {
 		.cta-tile:not(.cta-tile--gated) {
+			animation: none;
+			clip-path: inset(0 0 0 0);
+		}
+
+		.cta-tile--gated.cta-tile--revealed {
 			animation: none;
 			clip-path: inset(0 0 0 0);
 		}

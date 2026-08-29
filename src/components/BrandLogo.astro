@@ -1,27 +1,32 @@
-{/* Marken-Logo im Hero — FIXIERT unten Mitte, klappt beim Scrollen ein und
-   übergibt an CtaTile.astro an DERSELBEN Stelle.
+{/* Marken-Logo im Hero — FIXIERT unten Mitte, fährt beim Scrollen in die
+   Stange ein und übergibt an CtaTile.astro an DERSELBEN Stelle.
 
-   Zweite Nachbesserung (Fred, 29.08. spät): die erste Fassung dieser
-   Komponente (Phase-1-Menü-Rückbau) hatte die Scroll-Choreografie komplett
-   verloren — Logo lag im normalen Fluss (kein position:fixed, kein
-   Scroll-Collapse), CtaTile.astro beobachtete es per IntersectionObserver.
-   Dadurch feuerte die Kachel zu spät/unzuverlässig, und es gab KEINE echte
-   Kopplung — Logo und Kachel liefen technisch unabhängig, nur zufällig
-   ungefähr synchron. Freds Erwartung (= der Vor-Menü-Stand, siehe
-   Git-Historie 60a9921/49861a5 + die alte --collapse-Mechanik aus
-   Header.astro/dbdbecc): Logo sitzt fixiert unten Mitte, klappt
-   scroll-getrieben ein, die CTA-Kachel erscheint an GENAU derselben Stelle
-   im selben Moment — eine Übergabe, kein unabhängiges Timing, reversibel.
+   Dritte Nachbesserung (Fred, exakte Choreografie beschrieben): die zweite
+   Fassung (opacity-Fade + proportional aufdeckende CTA-Kachel) traf DREI
+   Punkte nicht:
+   1) Kein opacity-Fade als Hauptmechanik — gefordert ist die alte
+      EINFAHR-Animation: die Wortmarke "The Parley" fährt in die Stange
+      (translateX + overflow:hidden auf dem Text-Wrap, 1:1 die Mechanik aus
+      Header.astro: transform:translateX(calc(var(--collapse)*-110%)) im
+      überlaufversteckten Wrap), DANACH fährt auch die Fahne in die Stange
+      (gleiches Prinzip, gespiegelt). Sequenz aus EINEM Fortschrittswert:
+      Phase Text = clamp(dock*2, 0, 1) [0→0.5], Phase Fahne = clamp(dock*2-1,
+      0, 1) [0.5→1] — Text fährt zuerst vollständig ein, danach erst die
+      Fahne.
+   2) Die Scroll-Strecke war eine volle Hero-Höhe (viel zu lang) — gefordert
+      ist eine kurze Strecke wie beim alten Header (COLLAPSE_START 120/
+      DISTANCE 160 dort): hier neu kalibriert auf Start ~80px, fertig
+      ~280px (DISTANCE 200).
+   3) Die CTA-Kachel war proportional zum Fortschritt aufgedeckt (clip-path
+      direkt an --hero-dock gekoppelt) — gefordert ist ein EREIGNIS: bei
+      dock>=1 (Einfahr-Animation fertig) wird eine Klasse gesetzt, die
+      CtaTile.astro's bestehende 400ms-Erscheinen-Animation abspielt; bei
+      dock<1 wird die Klasse wieder entfernt (Button verschwindet,
+      reversibel). Kein anteiliges Aufdecken mehr — siehe CtaTile.astro.
 
-   Lösung: EIN gemeinsamer Fortschrittswert, keine zwei Mechanismen. Das
-   <script> unten schreibt bei jedem Scroll die CSS-Custom-Property
-   --hero-dock (0 = Hero ganz oben/Logo voll da, 1 = Hero durchgescrollt/
-   Logo weg) auf <html>. Das Logo hier UND CtaTile.astro's gated Variante
-   lesen BEIDE denselben --hero-dock-Wert direkt in ihrem CSS (calc()) —
-   keine zwei Uhren, keine Race Condition, kein "ungefähr". Rein
-   scroll-Y-basiert (aktuelle Position, nicht maximal je erreichte) —
-   dadurch von selbst reversibel: zurückscrollen bringt das Logo zurück und
-   die Kachel weg, exakt spiegelbildlich. */}
+   Die POLE (Stange) selbst bleibt während der ganzen Sequenz unverändert
+   stehen (nur Text und Fahne fahren HINEIN) — Fred hat für die Stange
+   selbst kein Ausblenden verlangt, nur für Text und Fahne. */}
 
 <div class="brand-logo" aria-hidden="true">
 	<div class="brand-logo__banner-wrap" aria-hidden="true">
@@ -40,14 +45,14 @@
 		--logo-h: calc(clamp(32px, 4.4vw, 56px) * 1.5);
 		--pole-w: calc(var(--logo-h) * 52.36 / 2018.08);
 		/* Fixiert unten Mitte an der Viewport-Kante (Fred: "wie vor dem
-		   Menü-Bau", siehe Kommentar oben) — scrollt NICHT mit dem
-		   Seiteninhalt, sondern bleibt am Bildschirmrand stehen, bis der
-		   Scroll-Fortschritt (--hero-dock) es ausblendet. */
+		   Menü-Bau") — scrollt NICHT mit dem Seiteninhalt. Bleibt hier
+		   während der ganzen Einfahr-Sequenz unbewegt stehen; nur Text und
+		   Fahne (innere Elemente) animieren, siehe unten. */
 		position: fixed;
 		left: 50%;
 		bottom: 0;
 		z-index: 90;
-		transform: translateX(-50%) translateY(calc(var(--hero-dock, 0) * 32px));
+		transform: translateX(-50%);
 		display: flex;
 		align-items: flex-end;
 		justify-content: center;
@@ -59,19 +64,8 @@
 		/* Reine Dekoration, nie interaktiv (kein Klick-Handler mehr seit dem
 		   Menü-Rückbau) — Klicks fallen durch auf das, was darunterliegt. */
 		pointer-events: none;
-		/* Blendet aus, während die Kachel an derselben Stelle einblendet —
-		   beide direkt aus --hero-dock abgeleitet, siehe Kommentar oben.
-		   Keine CSS-transition hier: der Wert wird pro Scroll-Frame vom
-		   Script gesetzt, das IST schon die Animation (1:1 an den
-		   Scroll-Fortschritt gekoppelt, kein Nachlaufen/Ruckeln durch eine
-		   zusätzliche, konkurrierende Zeitsteuerung). */
-		opacity: calc(1 - var(--hero-dock, 0));
-		/* Ladeanimation beim allerersten Aufruf (Seite frisch geladen, bevor
-		   das Script überhaupt einen Scroll-Wert gesetzt hat) — von unten
-		   hoch, wie schon vor dem Menü-Bau. Läuft auf clip-path statt
-		   transform, weil transform hier schon für die Scroll-Kopplung
-		   gebraucht wird (zwei Animationen auf derselben Property würden sich
-		   gegenseitig überschreiben). */
+		/* Ladeanimation beim allerersten Aufruf (Seite frisch geladen) — von
+		   unten hoch, wie schon vor dem Menü-Bau. */
 		clip-path: inset(0 0 0 0);
 		animation: brand-logo-rise 700ms cubic-bezier(0.22, 0.61, 0.36, 1) 150ms both;
 	}
@@ -104,6 +98,11 @@
 		flex: none;
 	}
 
+	/* Fahne-Wrap: overflow:hidden macht daraus das "Fenster", aus dem die
+	   Fahne (Kind-Element, siehe .brand-logo__banner) beim Einfahren
+	   herausgleitet — exakt die Header.astro-Technik, hier auf die Fahne
+	   gespiegelt (Fahne sitzt LINKS von der Stange, muss also nach RECHTS,
+	   zur Stange hin, verschwinden). */
 	.brand-logo__banner-wrap {
 		align-self: flex-start;
 		margin-top: calc(var(--logo-h) * 40.9736 / 2018.08);
@@ -111,25 +110,40 @@
 		width: calc(var(--logo-h) * 1072.97 / 2018.08);
 		height: calc(var(--logo-h) * 459.85 / 2018.08);
 		flex: none;
+		overflow: hidden;
 	}
 
+	/* Fährt NACH dem Text ein (Phase Fahne = dock 0.5→1, siehe Script) —
+	   translateX(+110%) schiebt die Fahne nach rechts aus ihrem eigenen
+	   Fenster hinaus, also zur Stange hin/dahinter. Kein CSS-transition:
+	   der Wert kommt pro Scroll-Frame direkt vom Script (1:1 scroll-gekoppelt,
+	   wie die alte --collapse-Mechanik). */
 	.brand-logo__banner {
 		display: block;
 		width: 100%;
 		height: 100%;
+		transform: translateX(calc(var(--dock-flag, 0) * 110%));
 	}
 
+	/* Text-Wrap: identische Technik wie Header.astro
+	   (.parley-nav__logo-text-wrap: overflow:hidden, fester Ausschnitt). */
 	.brand-logo__text-wrap {
 		margin-left: 4px;
 		width: calc(var(--logo-h) * 1986.93 / 2018.08);
 		height: calc(var(--logo-h) * 1057.41 / 2018.08);
 		flex: none;
+		overflow: hidden;
 	}
 
+	/* Fährt ZUERST ein (Phase Text = dock 0→0.5) — translateX(-110%), 1:1 die
+	   Formel aus Header.astro (dort: calc(var(--collapse,0) * -110%)), nur
+	   jetzt an die neue Phase-Variable gekoppelt statt an --collapse. Text
+	   sitzt RECHTS von der Stange, muss also nach LINKS wegfahren. */
 	.brand-logo__text {
 		display: block;
 		height: 100%;
 		width: auto;
+		transform: translateX(calc(var(--dock-text, 0) * -110%));
 	}
 </style>
 
@@ -138,12 +152,19 @@
 	// TileMenu.astro) — läuft bei jedem Seitenaufruf UND nach jedem
 	// Client-Side-Wechsel neu an, inkl. Cleanup zwischen Navigationen.
 	//
-	// EINZIGE Quelle für den Scroll-Fortschritt --hero-dock: 0 direkt nach
-	// dem Laden (Hero ganz oben, Logo voll sichtbar), 1 sobald um eine volle
-	// Hero-Höhe gescrollt wurde (Logo ausgeblendet, CtaTile.astro zeigt die
-	// Kachel an derselben Stelle — siehe dortiges CSS, das denselben Wert
-	// liest). Rein aktueller scrollY, nicht der höchste je erreichte Wert
-	// (anders als die alte Menü-Mechanik) — dadurch von selbst reversibel.
+	// EINZIGE Quelle für die gesamte Sequenz: EIN Fortschrittswert "dock"
+	// (0…1), aus dem sowohl die Text-/Fahnen-Einfahr-Phasen ALS AUCH das
+	// diskrete Erscheinen der CTA-Kachel abgeleitet werden — kein zweiter
+	// Mechanismus, keine Race Condition (Fred-Vorgabe seit der zweiten
+	// Nachbesserung, jetzt auf die neue Choreografie übertragen).
+	//
+	// Kurze Scroll-Strecke (dritte Nachbesserung): Start bei 80px scrollY,
+	// fertig eingefahren bei 280px (DISTANCE 200) — Referenzwerte aus dem
+	// alten Header.astro-Script (dort COLLAPSE_START 120 / DISTANCE 160),
+	// hier leicht angepasst auf Freds explizite Vorgabe 80/280.
+	const DOCK_START = 80;
+	const DOCK_DISTANCE = 200;
+
 	let cleanup: (() => void) | null = null;
 
 	function initHeroDock() {
@@ -151,25 +172,32 @@
 		cleanup = null;
 
 		const root = document.documentElement;
-		const hero = document.querySelector<HTMLElement>(".hero");
-
-		if (!hero) {
-			// Keine Hero-Sektion auf dieser Seite (sollte bei .brand-logo nicht
-			// vorkommen, die Komponente wird nur auf der Startseite gerendert) —
-			// Sicherheitsnetz: Wert auf 0 lassen, Logo bleibt sichtbar.
-			root.style.setProperty("--hero-dock", "0");
-			return;
-		}
+		// Die CTA-Kachel wird hier direkt geschaltet (Klasse an/aus statt
+		// eines eigenen Beobachters in CtaTile.astro) — genau EIN Skript
+		// treibt die ganze Sequenz.
+		const cta = document.querySelector<HTMLElement>(".cta-tile--gated");
 
 		let rafId = 0;
 
 		const update = () => {
-			// Distanz = eine volle Hero-Höhe: sobald der Besucher eine
-			// Hero-Höhe weit gescrollt hat, ist der Hero optisch "durch" und
-			// die Übergabe an die Kachel abgeschlossen.
-			const distance = Math.max(hero.offsetHeight, 1);
-			const progress = Math.max(0, Math.min(1, window.scrollY / distance));
-			root.style.setProperty("--hero-dock", String(progress));
+			const raw = (window.scrollY - DOCK_START) / DOCK_DISTANCE;
+			const dock = Math.max(0, Math.min(1, raw));
+			// Phase Text: läuft über die ERSTE Hälfte von dock (0→0.5 dock ==
+			// 0→1 Phase) — Text fährt zuerst komplett ein.
+			const phaseText = Math.max(0, Math.min(1, dock * 2));
+			// Phase Fahne: läuft über die ZWEITE Hälfte von dock (0.5→1 dock ==
+			// 0→1 Phase) — Fahne fährt erst ein, wenn der Text fertig ist.
+			const phaseFlag = Math.max(0, Math.min(1, dock * 2 - 1));
+
+			root.style.setProperty("--hero-dock", String(dock));
+			root.style.setProperty("--dock-text", String(phaseText));
+			root.style.setProperty("--dock-flag", String(phaseFlag));
+
+			// CTA-Kachel: diskretes Ereignis bei dock>=1 (Einfahr-Animation
+			// fertig), NICHT proportional. classList.toggle mit Boolean setzt/
+			// entfernt sauber je nach Richtung — dadurch reversibel: scrollt
+			// der Besucher wieder unter 280px, verschwindet die Kachel wieder.
+			cta?.classList.toggle("cta-tile--revealed", dock >= 1);
 		};
 
 		const onScroll = () => {
@@ -187,6 +215,8 @@
 			window.removeEventListener("scroll", onScroll);
 			window.removeEventListener("resize", onScroll);
 			root.style.removeProperty("--hero-dock");
+			root.style.removeProperty("--dock-text");
+			root.style.removeProperty("--dock-flag");
 		};
 	}
 
