@@ -62,6 +62,36 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Generalverdacht: …", trägt den Gerichts-Register-Einstieg also
 	   weiterhin im ersten Satz selbst. */}
 	<section class="plaedoyer wrap">
+		{/* Seiten-Tausch (Fred 31.08.): "Kein Business ohne Witness." wandert
+		   nach LINKS, der Plädoyer-Text nach RECHTS — Markup-Reihenfolge =
+		   mobile Stapel-Reihenfolge, die Essenz steht mobil also jetzt oben. */}
+		<div class="plaedoyer-half plaedoyer-half--essence">
+			{/* Rollentausch in der Essenz-Hälfte (Fred 30.08.): die
+			   Anschlusszeile "Ihr habt die Expertise. Wir verteidigen sie."
+			   wandert aus der Text-Spalte hierher und wird das GROSSE
+			   Statement (zwei Sätze = zwei Zeilen); "Ein Gespräch mit tausend
+			   Augenzeugen." rückt darunter als Unterschrift in klein. Der
+			   frühere Dreizeiler ("Ein Gespräch" / "mit tausend" /
+			   "Augenzeugen.") ist damit Geschichte — die Größen-Historie in
+			   den Style-Kommentaren unten gilt sinngemäß weiter, nur mit
+			   längeren Zeilen und deshalb neu kalibriertem cqw-Koeffizienten. */}
+			{/* Finale Fassung (Fred 30.08.): "mit Augenzeugen" ins große
+			   Statement, die Unterschrift "Ein Gespräch mit tausend
+			   Augenzeugen." entfällt dafür ganz (bleibt als Vorrats-Zeile für
+			   Beiträge/Splitflap dokumentiert, siehe soloLine oben). Drei
+			   Zeilen mit bewusst gesetzten Umbrüchen; längste bleibt "Ihr habt
+			   die Expertise.", die 8.3cqw-Kalibrierung gilt also weiter. */}
+		{/* "Mit Augenzeugen." als EIGENER Satz (Fred-Zuruf direkt danach):
+			   der Nachklapp bekommt Punkt + Großschreibung — drei vollwertige
+			   Schläge statt Satz mit Umbruch. */}
+		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler ist zum Hero
+			   aufgestiegen, "Kein Business ohne Witness." übernimmt dafür die
+			   Essenz-Spalte — in den zwei Zeilen, in denen es als Hero
+			   umbrach. Die Abwechsel-Regel bleibt gewahrt: beide Sätze stehen
+			   nie auf derselben Fläche… jetzt eben in getauschten Rollen. */}
+			<p class="essence-line">Kein Business</p>
+			<p class="essence-line">ohne Witness.</p>
+		</div>
 		<div class="plaedoyer-half plaedoyer-half--text">
 			{/* Neuer Dreiklang (Wording-Session 30.08.): echte Verfahrenslogik
 			   Verdacht → Verteidigung → Urteil, alle drei in derselben Bauform
@@ -131,8 +161,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   Schluss endet auf "Augenzeuge" (Kauf-Brücke "…, bevor er sich
 			   für euch entscheidet und Kunde wird." komplett raus — "jeder
 			   wird Kunde" wäre übertrieben, Rest-Vorrat). */}
-			<p class="plaedoyer-text">Der Generalverdacht des Marktes:<br />Eure behauptete Expertise könnte durch Marketing mit KI vorgetäuscht sein.</p>
-			<p class="plaedoyer-text">Der Gegenbeweis eurer Experten:<br />Das echte Gespräch, beweisbar festgehalten in Bild und Ton.</p>
+			<p class="plaedoyer-text">Im Zeitalter von KI-Marketing steht die Behauptung eurer Expertise unter Generalverdacht. Der Markt fordert den Gegenbeweis.</p>
 		{/* Urteil in zwei Sätzen (Fred 30.08.): Satz 1 = wer urteilt (jeder
 			   einzelne Zuschauer, nicht mehr nur "Auftragsentscheider" — das
 			   Urteil trifft auch die Unsichtbaren, Hidden-Buyer-Logik), Satz 2 =
@@ -155,34 +184,29 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   wird VERGEBEN statt entschieden — löst die Dopplung, und "bevor
 			   er sich entscheidet" braucht kein eigenes Glied, weil "fällt
 			   sein Urteil" genau diese Entscheidung schon ist. */}
-			<p class="plaedoyer-text">Die Urteilsbildung des Publikums:<br />Jeder Zuschauer erlebt eure Expertise unmittelbar als Augenzeuge.</p>
+			<p class="plaedoyer-text">Das echte Gespräch eurer Experten wird zu eurer Verteidigung.</p>
+			<p class="plaedoyer-text">Die beweisbare Aufzeichnung in Bild und Ton macht das Gespräch skalierbar und aus jedem Zuschauer einen Augenzeugen, der eure Expertise unmittelbar erlebt.</p>
+		</div>
+
+	</section>
+
+	{/* Segment 2 "Das Gespräch" (Fred 31.08.): dieselbe zweigeteilte Bauform
+	   wie das Plädoyer, GESPIEGELT — das große Statement steht diesmal
+	   RECHTS ("Filmreif / ohne Kamerastress.", aus dem Tour-Claim, "echte
+	   Gespräche" bewusst weggelassen: das Wort Gespräch trägt schon der
+	   Plädoyer-Schluss darüber). Markup-Reihenfolge Text→Essenz = mobil
+	   steht der Text oben (beim Plädoyer ist es andersrum — die beiden
+	   Segmente wechseln sich auch mobil ab).
+	   ⚠️ Die Textspalte ist ein PLATZHALTER-Vorschlag aus dem gesetzten
+	   Vokabular (ohne Kamera-Sehen) — Wording-Runde mit Fred steht aus. */}
+	<section class="plaedoyer plaedoyer--gespraech wrap">
+		<div class="plaedoyer-half plaedoyer-half--text">
+			<p class="plaedoyer-text">Im Studio führt ihr euer Gespräch miteinander, ohne in eine Kamera zu sehen.</p>
+			<p class="plaedoyer-text">Niemand muss auftreten, niemand muss auswendig lernen. Das Gespräch bleibt echt und sieht trotzdem nach Kino aus.</p>
 		</div>
 		<div class="plaedoyer-half plaedoyer-half--essence">
-			{/* Rollentausch in der Essenz-Hälfte (Fred 30.08.): die
-			   Anschlusszeile "Ihr habt die Expertise. Wir verteidigen sie."
-			   wandert aus der Text-Spalte hierher und wird das GROSSE
-			   Statement (zwei Sätze = zwei Zeilen); "Ein Gespräch mit tausend
-			   Augenzeugen." rückt darunter als Unterschrift in klein. Der
-			   frühere Dreizeiler ("Ein Gespräch" / "mit tausend" /
-			   "Augenzeugen.") ist damit Geschichte — die Größen-Historie in
-			   den Style-Kommentaren unten gilt sinngemäß weiter, nur mit
-			   längeren Zeilen und deshalb neu kalibriertem cqw-Koeffizienten. */}
-			{/* Finale Fassung (Fred 30.08.): "mit Augenzeugen" ins große
-			   Statement, die Unterschrift "Ein Gespräch mit tausend
-			   Augenzeugen." entfällt dafür ganz (bleibt als Vorrats-Zeile für
-			   Beiträge/Splitflap dokumentiert, siehe soloLine oben). Drei
-			   Zeilen mit bewusst gesetzten Umbrüchen; längste bleibt "Ihr habt
-			   die Expertise.", die 8.3cqw-Kalibrierung gilt also weiter. */}
-		{/* "Mit Augenzeugen." als EIGENER Satz (Fred-Zuruf direkt danach):
-			   der Nachklapp bekommt Punkt + Großschreibung — drei vollwertige
-			   Schläge statt Satz mit Umbruch. */}
-		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler ist zum Hero
-			   aufgestiegen, "Kein Business ohne Witness." übernimmt dafür die
-			   Essenz-Spalte — in den zwei Zeilen, in denen es als Hero
-			   umbrach. Die Abwechsel-Regel bleibt gewahrt: beide Sätze stehen
-			   nie auf derselben Fläche… jetzt eben in getauschten Rollen. */}
-			<p class="essence-line">Kein Business</p>
-			<p class="essence-line">ohne Witness.</p>
+			<p class="essence-line">Filmreif.</p>
+			<p class="essence-line">Ohne Kamerastress.</p>
 		</div>
 	</section>
 
@@ -293,6 +317,17 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		animation-delay: 100ms;
 	}
 
+	.hero h1 span:nth-child(2),
+	.hero h1 span:nth-child(3) {
+		/* Wisch-Achse gedreht (Fred 31.08., "wie wenn sie aus dem Text
+		   rauskommen"): nur Zeile 1 wischt seitlich herein — Zeile 2 und 3
+		   wischen VON OBEN NACH UNTEN auf, dieselbe Logik wie die
+		   Menü-Zeilen (reiner clip-Wisch, gleiche Kurve, gleiche 800ms),
+		   nur in Fallrichtung: jede Zeile materialisiert sich unter der
+		   vorigen, als käme sie aus deren Text. */
+		animation-name: hero-line-drop;
+	}
+
 	.hero h1 span:nth-child(2) {
 		animation-delay: 1300ms;
 	}
@@ -300,7 +335,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.hero h1 span:nth-child(3) {
 		/* Längere Pause vor der Pointe (Fred 30.08. nachts) — "Mit
 		   Augenzeugen." darf sich ankündigen. */
-		animation-delay: 3300ms;
+		animation-delay: 2500ms;
 	}
 
 	@keyframes hero-line-wipe {
@@ -316,6 +351,19 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		}
 		to {
 			clip-path: inset(-0.35em 0 -0.35em 0);
+		}
+	}
+
+	/* Vertikale Variante für Zeile 2+3: von oben nach unten freilegen.
+	   Gleiche negative Seiten-Puffer wie beim horizontalen Wisch, damit
+	   Über-/Unterlängen und der letzte Buchstabe nie angeschnitten werden
+	   (line-height 0.92 < Glyphen-Ausdehnung, siehe hero-line-wipe). */
+	@keyframes hero-line-drop {
+		from {
+			clip-path: inset(-0.35em -0.05em 100% -0.05em);
+		}
+		to {
+			clip-path: inset(-0.35em -0.05em -0.35em -0.05em);
 		}
 	}
 
@@ -475,16 +523,18 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   12 beim alten "Augenzeugen.") — 12.3cqw würde weit überlaufen.
 		   Startwert rechnerisch (12.3 × 12/23 ≈ 6.4, plus Luft) und dann live
 		   nachgemessen, siehe Fortschritts-Protokoll. */
-		/* Nach dem Hero-Tausch neu kalibriert (Fred 30.08. spät): "Kein
-		   Business ohne Witness." soll in seinem neuen Zuhause die grafische
-		   Wucht behalten, die es als Hero hatte (Fred: "grafisch fast besser
-		   als Hero") — Füllgrad ~85% der Spalte auf jeder Breite. Herleitung
-		   aus der Live-Messung (bei 80px füllte "Kein Business" 62% einer
-		   816px-Spalte): 13.4cqw ≈ 85% Füllung, breitenunabhängig. Der
-		   BBH-text-2xl-Deckel (5rem) ist dafür bewusst auf 6.875rem (110px)
-		   angehoben — die Abbinder-Zeile darf größer sein als BBHs
-		   Statement-Maß, sie ist der degradierte Ex-Hero. */
-		font-size: clamp(1.5rem, 13.4cqw, 6.875rem);
+		/* GESETZTE REGEL (Fred 31.08.): ALLE großen Segment-Statements der
+		   Seite teilen EINE Größe — sie dürfen zwischen den Segmenten nicht
+		   variieren. Kalibriert wird diese eine Zahl auf die längste
+		   Statement-Zeile des gesamten Auftritts; kommt später ein längerer
+		   Text dazu, wird HIER global gesenkt (keine Sonderregeln pro
+		   Segment!). Aktuell längste Zeile: "Ohne Kamerastress." (Segment 2,
+		   Canvas-Messung: 9.34× Schriftgröße breit → Maximum 10.7cqw, gesetzt
+		   10.5 mit Sicherheitsmarge). "Kein Business ohne Witness." füllt
+		   damit ~66% seiner Spalte — die frühere Kantenfüllungs-Kalibrierung
+		   (13.4cqw, Historie im Git) ist der Gleichheits-Regel gewichen.
+		   Deckel bewusst 6.875rem (110px) statt BBHs text-2xl (80px). */
+		font-size: clamp(1.5rem, 10.5cqw, 6.875rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;
@@ -524,4 +574,5 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		text-decoration: none;
 		color: inherit;
 	}
+
 </style>

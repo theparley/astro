@@ -17,19 +17,26 @@
 	<div class="site-footer__inner">
 		{/* Nur die Wortmarke, volle Breite (Fred 30.08. nachts: "Fahne weg" —
 		   mit Fahne passte die Komposition nicht vollständig ins Bild). */}
-		<div class="site-footer__logo" aria-hidden="true">
-			<img src="/parley/parley-text.svg" alt="" class="site-footer__text" />
+		{/* aria-hidden liegt nur noch auf dem img (leeres alt) — der Container
+		   trägt jetzt auch die Rechts-Links und darf nicht versteckt sein. */}
+		<div class="site-footer__logo">
+			<img src="/parley/parley-text.svg" alt="" class="site-footer__text" aria-hidden="true" />
+		{/* Pflicht-Links IM Freiraum der Wortmarke (Fred 31.08.): rechts neben
+		   dem "e" von "The" bleibt ein großes schwarzes Feld — dahin wandern
+		   Impressum/Datenschutz (absolut positioniert, Maße aus dem SVG
+		   gemessen: Freiraum ab ~66% Breite, Mitte der oberen Zeile bei ~22%
+		   Höhe). Die eigene Link-Zeile unter der Marke entfällt damit — der
+		   Footer ist jetzt exakt so hoch wie das Monument. Die frühere Sorge
+		   (Links oberhalb ragen bei Footer > Viewport aus dem Bild) trifft
+		   diese Position praktisch nicht: die Wortmarke ist ~53% so hoch wie
+		   breit, bei 22% Marken-Höhe liegen die Links im sichtbaren unteren
+		   Bereich jedes gängigen Viewports; nur extrem flache Fenster würden
+		   sie kappen. Nur Impressum/Datenschutz (Fred: "Start weg"). */}
+			<nav aria-label="Rechtliches">
+				<a href="/impressum">Impressum</a>
+				<a href="/datenschutz">Datenschutz</a>
+			</nav>
 		</div>
-		{/* Pflicht-Links UNTER der Wortmarke (Bugfix 30.08. nachts: über ihr
-		   ragten sie aus dem Bild — die randlose Wortmarke macht den Footer
-		   höher als den Viewport, und sticky bottom-0 schiebt dann die
-		   OBERKANTE über den Bildrand hinaus. Die Unterkante ist dagegen auf
-		   jeder Bildschirmhöhe garantiert sichtbar). Nur Impressum/
-		   Datenschutz (Fred: "Start weg") — zur Startseite führen Menü/Logo. */}
-		<nav aria-label="Rechtliches">
-			<a href="/impressum">Impressum</a>
-			<a href="/datenschutz">Datenschutz</a>
-		</nav>
 	</div>
 </footer>
 
@@ -51,10 +58,9 @@
 		   zu Kante, ohne 100vw-Ausbrecher-Tricks (die um die Scrollbar-Breite
 		   überschießen und die Glyphen anschneiden würden). */
 		padding-top: 24px;
-		padding-bottom: 20px;
+		padding-bottom: 12px;
 		display: flex;
 		flex-direction: column;
-		gap: 24px;
 		/* Einblenden beim Freilegen — Endwerte 1:1 aus BBHs Markup (versteckt:
 		   opacity 0.2 + scale 1.015, offen: 1/1). WICHTIG (Fred 30.08. nachts,
 		   "spiegelbildlich"): BBH nutzt KEINE CSS-Transition (live geprüft:
@@ -77,21 +83,26 @@
 
 
 	nav {
-		/* Der Content-Rahmen liegt jetzt hier (siehe __inner-Kommentar). */
-		width: 100%;
-		max-width: 1728px;
-		margin: 0 auto;
-		padding: 0 16px;
+		/* Im Freiraum rechts neben dem "e" von "The" (Fred 31.08.): absolut
+		   im Wortmarken-Container. Erst Grundlinien-Ausrichtung probiert,
+		   dann Freds Korrektur: Oberkante der Links = Oberkante der
+		   Buchstaben. Wermutstropfen dabei: sticky bottom-0 kappt den Footer
+		   OBEN, ganz oben sitzende Links verschwinden bei flachen Fenstern
+		   zuerst (bei 1920 Breite ab < ~1040px Fensterhöhe angeschnitten) —
+		   bewusst in Kauf genommen, die Ausrichtung ist eine Sichtentscheidung. */
+		position: absolute;
+		/* Oberkante der Links = Oberkante der Buchstaben (Fred 31.08.,
+		   "oben an den Buchstaben orientieren"): die Versalien der oberen
+		   Zeile beginnen direkt an der viewBox-Oberkante des SVG → top: 0
+		   im Wortmarken-Container. */
+		top: 0;
+		right: clamp(16px, 3vw, 56px);
 		display: flex;
-		gap: 24px;
-		font-size: 0.85rem;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 6px;
+		font-size: clamp(0.7rem, 1.1vw, 1rem);
 		color: var(--gray);
-	}
-
-	@media (min-width: 1024px) {
-		nav {
-			padding: 0 32px;
-		}
 	}
 
 	a {
@@ -106,12 +117,25 @@
 	   Seitenverhältnis 1986.93×1057.41, bei 1920 also ~1022px hoch. */
 	.site-footer__logo {
 		width: 100%;
+		/* Anker für die absolut positionierten Rechts-Links im Freiraum. */
+		position: relative;
 	}
 
 	.site-footer__text {
 		display: block;
 		width: 100%;
 		height: auto;
+		/* Höhen-Deckel (Fred 31.08., "Impressum wieder weg"): der Footer darf
+		   nie höher werden als das Fenster — sonst kappt sticky bottom-0 die
+		   OBERKANTE, und die oben an den Buchstaben ausgerichteten Links
+		   liegen außerhalb des Bildes (auf großen Monitoren: 1920er Marke ist
+		   ~1022px hoch, typischer Browser-Viewport ~950). Bei flachen
+		   Fenstern skaliert die Marke also leicht runter und bekommt etwas
+		   Seitenluft; object-fit hält die Glyphen im Element zentriert, die
+		   Oberkante der Buchstaben bleibt die Oberkante des Elements. 36px =
+		   Innenpolster des Footers (24 oben + 12 unten). */
+		max-height: calc(100dvh - 36px);
+		object-fit: contain;
 	}
 </style>
 
