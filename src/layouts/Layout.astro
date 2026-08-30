@@ -9,6 +9,7 @@ import { ClientRouter } from "astro:transitions";
 // entfällt). TileMenu.astro (BBH-Kachelmenü) bleibt weiter archiviert.
 import MenuTile from "../components/MenuTile.astro";
 import PageWipe from "../components/PageWipe.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 
 interface Props {
 	title: string;
@@ -41,7 +42,22 @@ const {
 	<body>
 		<PageWipe />
 		<MenuTile gateBehindHero={gateMenuBehindHero} />
-		<slot />
+		{/* Sticky-Reveal-Stapel (BBH-/Nuxt-Muster, siehe SiteFooter.astro):
+		   Inhalt auf Ebene 10 mit eigenem schwarzen Grund, Footer klebt auf
+		   Ebene 0 darunter und wird beim Zuendescrollen freigelegt. Der
+		   Wrapper braucht die eigene Hintergrundfarbe zwingend — sonst
+		   schiene der Footer durch die transparenten Sektionen durch. */}
+		<div class="site-content">
+			<slot />
+			{/* Sentinel fürs Footer-Einblenden (siehe SiteFooter.astro): der
+			   Footer selbst ist per sticky IMMER geometrisch im Viewport —
+			   ein IntersectionObserver direkt auf ihm feuert deshalb sofort
+			   beim Laden (der Bug "Footer ist sofort weiß"). Beobachtet wird
+			   stattdessen dieses Element am ENDE des Inhalts: erst wenn das
+			   Inhalts-Ende in den Viewport scrollt, beginnt das Freilegen. */}
+			<div data-content-end aria-hidden="true"></div>
+		</div>
+		<SiteFooter />
 	</body>
 </html>
 
@@ -79,6 +95,13 @@ const {
 
 	* {
 		box-sizing: border-box;
+	}
+
+	/* Inhalts-Ebene des Sticky-Reveal-Stapels (siehe body-Markup oben). */
+	.site-content {
+		position: relative;
+		z-index: 10;
+		background: var(--black);
 	}
 
 	html {

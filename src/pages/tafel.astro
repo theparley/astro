@@ -1,0 +1,43 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SplitFlap from "../components/SplitFlap.astro";
+
+// Demo-Seite für die Fallblattanzeige (SplitFlap.astro) — autonom gebaut,
+// siehe dortige Kommentare für die Technik-Entscheidungen. Zwei-Schritt-
+// Hero-Erzählung: erst die Ausgangslage, dann der Markenclaim.
+const sequence = [
+	["Ihr habt die Expertise.", "Wir verteidigen sie.", "Mit Augenzeugen."],
+	["Kein Business", "ohne Witness."],
+];
+---
+
+<Layout
+	title="Tafel"
+	description="Kein Business ohne Witness. Fallblattanzeige-Demo für The Parley."
+>
+	<main class="tafel-stage">
+		<SplitFlap lines={sequence} holdMs={4000} loop={true} />
+	</main>
+	<script is:inline>
+		// Vergleichs-Schalter (Fred 30.08. nachts): ?ohnekacheln blendet die
+		// Kachel-Flächen/Scharniere aus — nur die klappernden Buchstaben auf
+		// dem nackten Schwarz (Styles: .sf-bare in SplitFlap.astro).
+		document.addEventListener("astro:page-load", function () {
+			var stage = document.querySelector(".tafel-stage");
+			if (stage) stage.classList.toggle("sf-bare", location.search.includes("ohnekacheln"));
+		});
+	</script>
+</Layout>
+
+<style>
+	/* Hero-artige Bühne: die Tafel bekommt den ganzen sichtbaren Viewport,
+	   zentriert. Die Kachelgröße selbst regelt SplitFlap.astro fluid über
+	   --sf-cols/--sf-rows — hier nur die Bühne drumherum. */
+	.tafel-stage {
+		min-height: 100svh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 32px 16px;
+	}
+</style>

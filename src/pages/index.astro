@@ -1,7 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BrandLogo from "../components/BrandLogo.astro";
-import SiteFooter from "../components/SiteFooter.astro";
 
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
 // buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
@@ -28,7 +27,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   drei Zeilen (Spans mit display:block statt text-balance — die
 		   Umbrüche sind hier Bedeutung, nicht Layout). */}
 		<div class="hero-headline">
-			<h1><span>Ihr habt die Expertise.</span><span>Wir verteidigen sie.</span><span>Mit Augenzeugen.</span></h1>
+			{/* Drei-Sätze-Fassung bestätigt (Fred 30.08. nachts, nach Probe der
+		   Ein-Satz-Variante "Wir verteidigen eure Expertise mit Augenzeugen."
+		   — die war "eindrucksvoller", aber die drei Sätze haben "die bessere
+		   Wirkung"; Ein-Satz-Fassung bleibt Vorrat für Flächen mit nur einer
+		   Zeile). */}
+		<h1><span>Ihr habt die Expertise.</span><span>Wir verteidigen sie.</span><span>Mit Augenzeugen.</span></h1>
 		</div>
 		{/* Logo bleibt Markenpräsenz OHNE Menü-Funktion (Website-Brief
 		   "Entscheidung 29.08."), ist aber wieder fixiert unten Mitte und
@@ -94,8 +98,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   behauptung. "könnte … sein" macht die Zeile juristisch sauber
 			   (Verdacht = Möglichkeit) und nimmt die Härte raus, ohne den
 			   Stich zu verlieren. */}
-			<p class="plaedoyer-text">Der Generalverdacht des Marktes:<br />Eure behauptete Expertise könnte durch KI vorgetäuscht sein.</p>
-			<p class="plaedoyer-text">Der Gegenbeweis eures Marketings:<br />Das echte Gespräch eurer Experten. Verlässlich festgehalten in Bild und Ton.</p>
+		{/* Rollen-Umbau (Fred 30.08. nachts): das MARKETING wandert aus der
+			   Verteidiger-Rolle in die Anklage ("durch Marketing mit KI
+			   vorgetäuscht") — der Gegenbeweis kommt jetzt von den EXPERTEN
+			   selbst, nicht von ihrem Marketing. Logisch schärfer: verdächtig
+			   ist die Vermittlungsschicht, glaubwürdig der Mensch dahinter. */}
+			<p class="plaedoyer-text">Der Generalverdacht des Marktes:<br />Eure behauptete Expertise könnte durch Marketing mit KI vorgetäuscht sein.</p>
+			<p class="plaedoyer-text">Der Gegenbeweis eurer Experten:<br />Das echte Gespräch. Verlässlich festgehalten in Bild und Ton.</p>
 		{/* Urteil in zwei Sätzen (Fred 30.08.): Satz 1 = wer urteilt (jeder
 			   einzelne Zuschauer, nicht mehr nur "Auftragsentscheider" — das
 			   Urteil trifft auch die Unsichtbaren, Hidden-Buyer-Logik), Satz 2 =
@@ -114,7 +123,11 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   späteren Marketings (Zuschauerzahlen, Zuschauer pro Clip) — die
 			   Seite soll das Wort früh setzen, damit die Messgrößen später
 			   an eine eingeführte Figur andocken. */}
-			<p class="plaedoyer-text">Das Urteil eures Publikums:<br />Fällt jeder Zuschauer für sich, als Augenzeuge. Noch bevor er Kunde wird und euren nächsten Auftrag entscheidet.</p>
+		{/* Verb-Schliff (Fred 30.08. nachts, "zweimal entscheiden"): Auftrag
+			   wird VERGEBEN statt entschieden — löst die Dopplung, und "bevor
+			   er sich entscheidet" braucht kein eigenes Glied, weil "fällt
+			   sein Urteil" genau diese Entscheidung schon ist. */}
+			<p class="plaedoyer-text">Das Urteil des Publikums:<br />Jeder eurer Zuschauer erlebt eure Expertise als Augenzeuge, bevor er sich für euch entscheidet und Kunde wird.</p>
 		</div>
 		<div class="plaedoyer-half plaedoyer-half--essence">
 			{/* Rollentausch in der Essenz-Hälfte (Fred 30.08.): die
@@ -151,16 +164,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		</div>
 	</section>
 
-	<section class="produkte wrap">
-		<p>{produkteZeile}</p>
-	</section>
+	{/* Produkte-Zeile + In-Flow-CTA entfernt (Fred 30.08. nachts, "erstmal
+	   komplett raus"): die Seite ist auf drei Segmente reduziert — Hero,
+	   Plädoyer+Essenz, Clip-Platzhalter — plus Footer. Wortlaut der Produkte-
+	   Zeile lebt weiter in der produkteZeile-Konstante oben (Vorrat), der
+	   CTA-Wortlaut im Website-Brief (Konversions-Kapitel). */}
 
-	<section class="cta wrap">
-		<p class="cta-line">Ein kleines Gespräch? 30 Minuten, nichts vorbereiten.</p>
-		<a href="/buchen" class="cta-button-inline">Let's parley →</a>
-	</section>
-
-	<SiteFooter />
 </Layout>
 
 <style>
@@ -241,8 +250,51 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	.hero h1 span {
 		/* Drei Sätze = drei Zeilen — die Umbrüche sind Bedeutung, kein
-		   Balance-Layout. */
+		   Balance-Layout. Beim Laden erscheinen sie ZEITVERSETZT und WISCHEN
+		   herein wie der Seitenübergang (Fred 30.08. nachts: "wie die Seite
+		   auch reinwischt, auf die einzelnen Sätze übertragen"): gleiche
+		   Technik (clip-path legt von links frei), gleiche Dauer (800ms) und
+		   exakt PageWipes symmetrische BBH-Kurve. Mehr Luft zwischen den
+		   Sätzen als beim ersten Wurf — jeder Satz darf kurz allein stehen,
+		   bevor der nächste antwortet. */
 		display: block;
+		animation: hero-line-wipe 800ms cubic-bezier(0.76, 0, 0.24, 1) both;
+	}
+
+	.hero h1 span:nth-child(1) {
+		animation-delay: 100ms;
+	}
+
+	.hero h1 span:nth-child(2) {
+		animation-delay: 1300ms;
+	}
+
+	.hero h1 span:nth-child(3) {
+		/* Längere Pause vor der Pointe (Fred 30.08. nachts) — "Mit
+		   Augenzeugen." darf sich ankündigen. */
+		animation-delay: 3300ms;
+	}
+
+	@keyframes hero-line-wipe {
+		/* Oben/unten -0.35em Luft im Zuschnitt (Fred-Befund 30.08. nachts):
+		   die Zeilenhöhe (0.92) ist enger als die Schrift — Unterlängen wie
+		   das g von "verteidigen" ragen aus der Satz-Box heraus, und ein
+		   Zuschnitt auf exakt die Box (inset 0) schnitt sie ab: an der Stelle
+		   erschien das Seiten-Schwarz "über" dem g. Mit negativem Inset
+		   wischt der Effekt nur horizontal und lässt Über-/Unterlängen in
+		   Ruhe — auch im Endzustand (fill: both). */
+		from {
+			clip-path: inset(-0.35em 100% -0.35em 0);
+		}
+		to {
+			clip-path: inset(-0.35em 0 -0.35em 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hero h1 span {
+			animation: none;
+		}
 	}
 
 	/* Plädoyer-Sektion, ZWEIGETEILT (Website-Brief, Layout-Update 29.08. spät:
@@ -427,51 +479,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		justify-content: center;
 		color: var(--gray);
 		font-size: 0.9rem;
-	}
-
-	/* Produkte-Zeile: BBHs .text-md-original (clamp(20px,18.1928px+.4518vw,26px)) —
-	   eine Stufe über dem Fließtext, weil es die vier Formate als eigene
-	   Zeile trägt statt als Fußnote. */
-	.produkte {
-		padding: 48px 0 64px;
-	}
-
-	.produkte p {
-		font-size: clamp(1.25rem, 1.1371rem + 0.4518vw, 1.625rem);
-		font-weight: 500;
-		letter-spacing: -0.005em;
-		text-wrap: balance;
-	}
-
-	.cta {
-		padding: 80px 0 96px;
-		text-align: center;
-	}
-
-	.cta-line {
-		font-size: clamp(1.25rem, 1.1371rem + 0.4518vw, 1.625rem);
-		margin-bottom: 32px;
-		text-wrap: balance;
-	}
-
-	/* Eigenständiger In-Flow-CTA (Website-Brief, Dramaturgie-Prinzip 3-Backlog:
-	   "zusätzlicher In-Flow-CTA am Seitenende, gleicher Wortlaut") — dupliziert
-	   NICHT die fixe Let's-Parley-Kachel unten rechts (die bleibt bestehen),
-	   sondern bedient dieselbe eine Tür am Ende der Argumentation. Gleiche
-	   helle Fläche (--surface) wie der Logo-/CTA-Chip, damit die Formsprache
-	   verwandt bleibt. */
-	.cta-button-inline {
-		display: inline-block;
-		background: var(--surface);
-		color: var(--black);
-		font-weight: 900;
-		font-size: clamp(1.1rem, 1.02rem + 0.35vw, 1.375rem);
-		padding: 18px 40px;
-		text-decoration: none;
-	}
-
-	.cta-button-inline:hover {
-		opacity: 0.85;
 	}
 
 	footer {

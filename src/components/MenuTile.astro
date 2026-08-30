@@ -80,10 +80,16 @@ const { gateBehindHero = false } = Astro.props;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		justify-content: center;
-		gap: 14px;
+		/* Korrektur (Fred 30.08. nachts): das WORT bleibt stehen, nur das
+		   Strich-Icon wandert beim Breiter-werden nach außen — und rechts
+		   vom Wort entsteht der neue Raum. Icon hängt deshalb am linken
+		   Rand (der beim zentrierten Wachsen nach außen zieht), das Wort ist
+		   absolut auf die Kachel-MITTE geankert (die Kachel ist viewport-
+		   zentriert, ihre Mitte bewegt sich nie — das Wort steht damit fest,
+		   egal wie breit die Kachel ist; Offset siehe .menu-tile__word). */
+		justify-content: flex-start;
 		border: none;
-		padding: 0;
+		padding: 0 16px;
 		cursor: pointer;
 		background-color: rgba(237, 237, 237, 0.95);
 		color: var(--black);
@@ -175,17 +181,39 @@ const { gateBehindHero = false } = Astro.props;
 	}
 
 	.menu-tile__burger {
+		/* Die drei Striche sitzen in einer eigenen SCHWARZEN Kachel (Fred
+		   30.08. nachts, Zwetschke-Anordnung: dort dunkler Kreis + MENÜ
+		   daneben — bei uns eckig). Striche darin weiß.
+		   Strich-Spreizung beim Hovern 1:1 von Zwetschke gemessen:
+		   .line margin 3px→5px (Abstand 6→10px), Transition 0.4s — hier über
+		   gap statt margins gelöst, gleicher Effekt. */
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		justify-content: center;
 		gap: 6px;
+		width: 56px;
+		height: 56px;
+		background: var(--black);
+		flex: none;
+	}
+
+	.menu-tile:hover .menu-tile__burger,
+	.menu-root.is-open .menu-tile__burger {
+		gap: 10px;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-tile__burger {
+			transition: gap 400ms ease;
+		}
 	}
 
 	.menu-tile__line {
 		display: block;
 		width: 32px;
 		height: 3px;
-		background: currentColor;
+		background: var(--white);
 		flex: none;
 	}
 
@@ -202,7 +230,7 @@ const { gateBehindHero = false } = Astro.props;
 	   ?keinkreuz-Vergleichsschalter unterbindet beides. */
 	.menu-root.is-open .menu-tile__line:nth-child(1),
 	.menu-root:not(.menu-root--no-x) .menu-tile:hover .menu-tile__line:nth-child(1) {
-		transform: translateY(9px) rotate(45deg);
+		transform: translateY(13px) rotate(45deg);
 	}
 
 	.menu-root.is-open .menu-tile__line:nth-child(2),
@@ -212,19 +240,26 @@ const { gateBehindHero = false } = Astro.props;
 
 	.menu-root.is-open .menu-tile__line:nth-child(3),
 	.menu-root:not(.menu-root--no-x) .menu-tile:hover .menu-tile__line:nth-child(3) {
-		transform: translateY(-9px) rotate(-45deg);
+		transform: translateY(-13px) rotate(-45deg);
 	}
 
 	.menu-tile__word {
-		/* Auf dem breiten Knopf steht das Wort neben den Strichen (Zwetschke-
-		   Anordnung) und darf Textgröße tragen statt Beschriftungsgröße.
-		   VERSAL (Fred 30.08.) — wie Zwetschkes "MENÜ"; per CSS statt im
-		   Markup, damit Screenreader weiter "Menü" lesen statt Buchstaben
-		   zu buchstabieren. */
+		/* Steht FEST (Fred-Korrektur 30.08. nachts): absolut auf die
+		   Kachel-Mitte geankert — da die Kachel viewport-zentriert ist und
+		   ihre Mitte beim Breiter-werden nicht wandert, bleibt das Wort auf
+		   dem Bildschirm exakt stehen, während Icon und Ränder nach außen
+		   ziehen. Offset -17px = Ruhe-Optik (Icon-Wort-Lücke ~28px).
+		   VERSAL per CSS statt im Markup, damit Screenreader weiter "Menü"
+		   lesen statt Buchstaben zu buchstabieren. */
+		position: absolute;
+		left: calc(50% - 17px);
+		top: 50%;
+		transform: translateY(-50%);
 		font-weight: 900;
-		/* 26px statt 20 (Fred 30.08., "zu klein") — Feinkalibrierung folgt,
-		   sobald das längste Menü-Wort feststeht. */
-		font-size: 26px;
+		/* 28px (Fred 30.08. nachts: "fast so groß wie die drei Striche hoch
+		   sind") — Versalhöhe ≈ 20px, knapp unter den 21px des
+		   Strich-Stapels (3×3px + 2×6px). */
+		font-size: 28px;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 	}
@@ -276,8 +311,9 @@ const { gateBehindHero = false } = Astro.props;
 		background: rgba(237, 237, 237, 0.95);
 		color: var(--black);
 		font-weight: 900;
-		/* 26px wie das Knopf-Wort (Fred 30.08., "zu klein") */
-		font-size: 26px;
+		/* 28px wie das Knopf-Wort (Fred 30.08. nachts, an Strich-Stapel-Höhe
+		   kalibriert) */
+		font-size: 28px;
 		/* VERSAL wie das Knopf-Wort (Fred 30.08.) */
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
@@ -343,6 +379,61 @@ const { gateBehindHero = false } = Astro.props;
 	   gebündelt bei .menu-panel a:hover; hier bewusst KEIN zweiter
 	   transition-Block mehr, der den Shorthand überschreiben würde.) */
 
+	/* ── VARIANTE "GROSSE FLÄCHE" (Fred 30.08. nachts, ?gross zum Vergleich):
+	   wie Zwetschkes geöffnetes Menü — statt einzelner Zeilen-Kacheln geht
+	   EINE große helle Fläche auf, die Wörter stehen GROSS darin, und der
+	   Hover legt eine schwarze Fläche hinter die Schrift, die dabei auf
+	   unser Weiß wechselt. Der klebrige Schleier-Mechanismus (is-preselected)
+	   wird 1:1 weiterverwendet, nur der markierte Look ist hier
+	   Schwarz-Weiß-Umkehrung statt Grau-Schleier. */
+	.menu-root--grand .menu-panel {
+		/* Rastermaß statt frei gegriffener 560px (Fred 30.08.: "zu groß"):
+		   drei Kacheln + zwei Fugen = 272px, wie Knopf-Hover und die
+		   Standard-Zeilen — die große Fläche bleibt in der Säulen-Flucht. */
+		width: min(calc(88px * 3 + 4px * 2), calc(100vw - 32px));
+		background: rgba(237, 237, 237, 0.95);
+		padding: 8px;
+		gap: 0;
+		/* Die Fläche selbst wächst aus dem Knopf (Fläche aus Fläche) — ein
+		   Wisch fürs Ganze statt gestaffelter Einzelzeilen. */
+		clip-path: inset(100% 0 0 0);
+	}
+
+	.menu-root--grand.is-open .menu-panel {
+		clip-path: inset(0 0 0 0);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-root--grand .menu-panel {
+			transition: clip-path 350ms cubic-bezier(0.22, 0.61, 0.36, 1);
+		}
+	}
+
+	.menu-root--grand .menu-panel a {
+		/* Schriftgröße = das MENÜ-Wort auf dem Knopf (Fred 30.08.: bei
+		   Zwetschke sind Knopf-Wort und Menü-Wörter gleich groß), gemeinsam
+		   auf 28px angehoben (an Strich-Stapel-Höhe kalibriert). */
+		height: 64px;
+		font-size: 28px;
+		background-color: transparent;
+		/* Grau-Schleier der Standard-Variante aus — hier übernimmt die
+		   schwarze Fläche (unten). Kein eigener Zeilen-Wisch mehr, die
+		   Panel-Fläche bringt alles mit. */
+		background-image: none;
+		clip-path: none;
+		transition: background-color 250ms ease, color 250ms ease;
+	}
+
+	.menu-root--grand.is-open .menu-panel a {
+		clip-path: none;
+	}
+
+	.menu-root--grand .menu-panel a:hover,
+	.menu-root--grand .menu-panel a.is-preselected {
+		background-color: var(--black);
+		color: var(--white);
+	}
+
 	.menu-backdrop {
 		position: fixed;
 		inset: 0;
@@ -388,6 +479,9 @@ const { gateBehindHero = false } = Astro.props;
 		// .menu-root--no-x): ?keinkreuz in der URL lässt die Striche beim
 		// Öffnen Striche bleiben.
 		root.classList.toggle("menu-root--no-x", location.search.includes("keinkreuz"));
+		// Vergleichs-Schalter "große Fläche" (Zwetschke-Panel, siehe
+		// CSS-Kommentar .menu-root--grand): ?gross in der URL.
+		root.classList.toggle("menu-root--grand", location.search.includes("gross"));
 
 		const setOpen = (open: boolean) => {
 			root.classList.toggle("is-open", open);

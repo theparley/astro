@@ -1,43 +1,178 @@
-{/* Gemeinsame Footer-Komponente (Audit-Fix A1, 2026-08-30) — vereinheitlicht
-   den kleinen Text-Footer, der vorher nur inline in index.astro lebte.
-   Eingebunden auf /buchen, /impressum, /datenschutz UND index.astro (dort
-   ersetzt sie den bisherigen Inline-Block 1:1, gleicher Stil: kleine
-   Sekundär-Grau-Links am Seitenende, oberer Trennstrich in --line). */}
+{/* Sticky-Reveal-Footer (Fred 30.08. nachts, "bau den Footer") — exakt das
+   BBH-Muster, das Maximilian auf der Nuxt-Seite 1:1 kopiert hat und das wir
+   dort nachgemessen haben: der Footer klebt mit sticky/bottom:0 auf Ebene 0
+   am Viewport-Boden, der gesamte Seiteninhalt liegt auf Ebene 10 darüber
+   (Wrapper in Layout.astro) — beim Zuendescrollen legt der wegrutschende
+   Inhalt den Footer frei wie ein Vorhang. Kein Skript, keine Animation,
+   reine Stapel-Logik.
+
+   Das große Zeichen ist aus unseren AKTUELLEN Logo-Assets gesetzt (Fahne +
+   Wortmarke, Anordnung wie Header/BrandLogo) — das fertige sticky-logo.svg
+   der Nuxt-Seite zeigt noch den alten Logo-Stand (Text über volle Höhe) und
+   wurde deshalb bewusst NICHT übernommen.
+
+   Wird von Layout.astro NACH dem Inhalts-Wrapper gerendert — Seiten binden
+   den Footer nicht mehr selbst ein. */}
 <footer class="site-footer">
-	<nav>
-		<a href="/">Start</a>
-		<a href="/impressum">Impressum</a>
-		<a href="/datenschutz">Datenschutz</a>
-	</nav>
+	<div class="site-footer__inner">
+		{/* Nur die Wortmarke, volle Breite (Fred 30.08. nachts: "Fahne weg" —
+		   mit Fahne passte die Komposition nicht vollständig ins Bild). */}
+		<div class="site-footer__logo" aria-hidden="true">
+			<img src="/parley/parley-text.svg" alt="" class="site-footer__text" />
+		</div>
+		{/* Pflicht-Links UNTER der Wortmarke (Bugfix 30.08. nachts: über ihr
+		   ragten sie aus dem Bild — die randlose Wortmarke macht den Footer
+		   höher als den Viewport, und sticky bottom-0 schiebt dann die
+		   OBERKANTE über den Bildrand hinaus. Die Unterkante ist dagegen auf
+		   jeder Bildschirmhöhe garantiert sichtbar). Nur Impressum/
+		   Datenschutz (Fred: "Start weg") — zur Startseite führen Menü/Logo. */}
+		<nav aria-label="Rechtliches">
+			<a href="/impressum">Impressum</a>
+			<a href="/datenschutz">Datenschutz</a>
+		</nav>
+	</div>
 </footer>
 
 <style>
 	.site-footer {
-		max-width: var(--max-width);
-		margin: 0 auto;
-		/* Kein oberer Trennstrich mehr (BBH-Prüfung 30.08.: BBH nutzt nirgends
-		   Linien zwischen Sektionen, nur Abstand — live auf /about verifiziert,
-		   0 Elemente mit horizontaler Border). Etwas mehr oberer Abstand als
-		   Ersatz für die entfallene optische Trennung. */
-		padding: 48px 16px 64px;
+		/* Das BBH-/Nuxt-Rezept, drei Klassen: sticky + bottom:0 + z-index:0.
+		   overflow-clip wie beim Vorbild, damit nichts aus dem Footer ragt. */
+		position: sticky;
+		bottom: 0;
+		z-index: 0;
+		overflow: clip;
+		background: var(--black);
 	}
 
-	@media (min-width: 1024px) {
-		.site-footer {
-			padding-left: 32px;
-			padding-right: 32px;
+	.site-footer__inner {
+		/* Kein eigener Rahmen mehr (Fred 30.08. nachts, randlose Wortmarke):
+		   der Content-Rahmen (max-width + Seitenpolster) liegt jetzt NUR auf
+		   der Link-Zeile — die Wortmarke darunter läuft natürlich von Kante
+		   zu Kante, ohne 100vw-Ausbrecher-Tricks (die um die Scrollbar-Breite
+		   überschießen und die Glyphen anschneiden würden). */
+		padding-top: 24px;
+		padding-bottom: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		/* Einblenden beim Freilegen — Endwerte 1:1 aus BBHs Markup (versteckt:
+		   opacity 0.2 + scale 1.015, offen: 1/1). WICHTIG (Fred 30.08. nachts,
+		   "spiegelbildlich"): BBH nutzt KEINE CSS-Transition (live geprüft:
+		   transition-duration 0s) — Opacity/Zoom werden pro Scroll-Frame
+		   direkt aus dem Freilege-Fortschritt berechnet (Skript unten setzt
+		   Inline-Werte). Dadurch ist die Bewegung eine reine Funktion der
+		   Scroll-Position: rückwärts scrollen = exakt dieselben Werte
+		   rückwärts, automatisch spiegelbildlich. Hier nur der Startzustand
+		   für die Zeit vor dem ersten Skript-Frame. */
+		opacity: 0.2;
+		transform: scale(1.015);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.site-footer__inner {
+			opacity: 1 !important;
+			transform: none !important;
 		}
 	}
 
+
 	nav {
+		/* Der Content-Rahmen liegt jetzt hier (siehe __inner-Kommentar). */
+		width: 100%;
+		max-width: 1728px;
+		margin: 0 auto;
+		padding: 0 16px;
 		display: flex;
 		gap: 24px;
 		font-size: 0.85rem;
 		color: var(--gray);
 	}
 
+	@media (min-width: 1024px) {
+		nav {
+			padding: 0 32px;
+		}
+	}
+
 	a {
 		text-decoration: none;
 		color: inherit;
 	}
+
+	/* Nur die Wortmarke "The Parley", randlos von Kante zu Kante (Fred 30.08.
+	   nachts, "volle Breite, nicht den Content-Rahmen"): der Ausbrecher-Trick
+	   width:100vw + margin-left:calc(50% - 50vw) sprengt den zentrierten,
+	   gepolsterten Innenrahmen — die Links darüber behalten ihn.
+	   Seitenverhältnis 1986.93×1057.41, bei 1920 also ~1022px hoch. */
+	.site-footer__logo {
+		width: 100%;
+	}
+
+	.site-footer__text {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
 </style>
+
+<script>
+	// Einblenden beim Freilegen (Nuxt-Muster): sobald der Sticky-Reveal den
+	// Footer-Inhalt in den Viewport bringt, fadet er ein (Klasse statt
+	// Inline-Style wie bei Maximilian — gleiche Optik, sauberer rückbaubar).
+	// An astro:page-load gekoppelt wie alle Skripte (ClientRouter).
+	let cleanup: (() => void) | null = null;
+
+	function initFooterReveal() {
+		cleanup?.();
+		cleanup = null;
+
+		const inner = document.querySelector<HTMLElement>(".site-footer__inner");
+		const content = document.querySelector<HTMLElement>(".site-content");
+		if (!inner || !content) return;
+
+		// Dritter Anlauf (Fred 30.08. nachts, "es fehlt immer noch"):
+		// 1. Observer auf dem Footer → feuerte sofort (sticky = geometrisch
+		//    immer im Viewport).
+		// 2. Observer auf einem Inhalts-Ende-Sentinel → feuerte, sobald der
+		//    ERSTE Footer-Pixel frei wurde; die 800ms Fade waren durchgelaufen,
+		//    lange bevor die große Wortmarke überhaupt sichtbar wurde — der
+		//    Nutzer bekam vom Faden nie etwas zu sehen.
+		// Jetzt: Scroll-Fortschritt selbst rechnen — wie viele Pixel des
+		// Footers sind freigelegt (Viewport-Unterkante minus Inhalts-
+		// Unterkante)? Erst wenn ~45% des Footers offen liegen (die Wortmarke
+		// ist dann im Bild), startet der Fade — und passiert damit VOR den
+		// Augen des Betrachters.
+		const footer = inner.closest<HTMLElement>(".site-footer");
+		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+		let rafId = 0;
+		const check = () => {
+			rafId = 0;
+			if (reduceMotion.matches) return; // CSS zeigt statisch den Endzustand
+			// BBH-Prinzip (live nachgemessen, Fred 30.08. nachts
+			// "spiegelbildlich"): KEINE getriggerte Animation — Opacity und
+			// Zoom sind eine reine Funktion des Freilege-Fortschritts, pro
+			// Scroll-Frame als Inline-Stil gesetzt. Fortschritt 0 = Footer
+			// ganz zugedeckt (opacity 0.2, scale 1.015), Fortschritt 1 =
+			// ganz freigelegt (1 / 1). Rückwärts scrollen durchläuft dieselben
+			// Werte rückwärts — spiegelbildlich per Konstruktion.
+			const uncovered = window.innerHeight - content.getBoundingClientRect().bottom;
+			const footerH = footer?.offsetHeight ?? window.innerHeight;
+			const p = Math.max(0, Math.min(1, uncovered / footerH));
+			const opacity = 0.2 + p * 0.8;
+			const scale = 1.015 - p * 0.015;
+			inner.style.opacity = String(opacity);
+			inner.style.transform = `scale(${scale})`;
+		};
+		const onScroll = () => {
+			if (!rafId) rafId = requestAnimationFrame(check);
+		};
+		window.addEventListener("scroll", onScroll, { passive: true });
+		check();
+		cleanup = () => {
+			window.removeEventListener("scroll", onScroll);
+			if (rafId) cancelAnimationFrame(rafId);
+		};
+	}
+
+	document.addEventListener("astro:page-load", initFooterReveal);
+</script>
