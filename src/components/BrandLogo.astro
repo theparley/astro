@@ -221,7 +221,10 @@
 		// Die CTA-Kachel wird hier direkt geschaltet (Klasse an/aus statt
 		// eines eigenen Beobachters in CtaTile.astro) — genau EIN Skript
 		// treibt die ganze Sequenz.
-		const cta = document.querySelector<HTMLElement>(".cta-tile--gated");
+		// Seit dem Menü-Umbau (Fred 30.08. abends) ist die geborene Kachel der
+		// Menü-Knopf (MenuTile.astro), nicht mehr der Let's-Parley-CTA — die
+		// Choreografie ist identisch, nur die Klassennamen sind umgezogen.
+		const cta = document.querySelector<HTMLElement>(".menu-tile--gated");
 		const logo = document.querySelector<HTMLElement>(".brand-logo");
 
 		let rafId = 0;
@@ -300,7 +303,7 @@
 
 			// CTA-Kachel: diskretes Ereignis bei dock>=1 (Einfahr-Animation
 			// fertig, Stange bereit für die Geburt), NICHT proportional.
-			cta?.classList.toggle("cta-tile--revealed", revealed);
+			cta?.classList.toggle("menu-tile--revealed", revealed);
 			// Stange ausblenden, sobald die Kachel sie "übernommen" hat
 			// (sonst scheint sie durch die 95%-Deckkraft der Kachel durch)
 			logo?.classList.toggle("brand-logo--handedover", revealed);

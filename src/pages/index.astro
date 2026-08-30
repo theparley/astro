@@ -20,10 +20,15 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 // (Zahlen-Fassung, für Beiträge/Splitflap), "KI ist kein Augenzeuge."
 ---
 
-<Layout title="Start" gateCtaBehindHero>
+<Layout title="Start" gateMenuBehindHero>
 	<header class="hero">
+		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler aus der Essenz-Spalte
+		   wird der Hero ("echt starker Hero"), "Kein Business ohne Witness."
+		   wandert dafür in die Essenz-Spalte der Plädoyer-Sektion. Drei Sätze =
+		   drei Zeilen (Spans mit display:block statt text-balance — die
+		   Umbrüche sind hier Bedeutung, nicht Layout). */}
 		<div class="hero-headline">
-			<h1>Kein Business ohne Witness.</h1>
+			<h1><span>Ihr habt die Expertise.</span><span>Wir verteidigen sie.</span><span>Mit Augenzeugen.</span></h1>
 		</div>
 		{/* Logo bleibt Markenpräsenz OHNE Menü-Funktion (Website-Brief
 		   "Entscheidung 29.08."), ist aber wieder fixiert unten Mitte und
@@ -54,28 +59,89 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   weiterhin im ersten Satz selbst. */}
 	<section class="plaedoyer wrap">
 		<div class="plaedoyer-half plaedoyer-half--text">
-			{/* Feinschliff Fred (Zuruf während des Bau-Schritts, nach dem Paket
-			   vom 29.08.): zur besseren Lesbarkeit in DREI Absätze gegliedert,
-			   Wortlaut selbst unverändert — nur die Gliederung ist neu. */}
-			<p class="plaedoyer-text">Der Generalverdacht: »Die behauptete Expertise ist durch KI vorgetäuscht.«</p>
-			<p class="plaedoyer-text">Eure Kunden müssen deshalb so früh wie möglich zu Augenzeugen eurer Expertise werden.</p>
-			<p class="plaedoyer-text">Der stärkste Beweis ist ein echtes Gespräch. Und genau das skalieren wir.</p>
+			{/* Neuer Dreiklang (Wording-Session 30.08.): echte Verfahrenslogik
+			   Verdacht → Verteidigung → Urteil, alle drei in derselben Bauform
+			   (Etikett, Doppelpunkt, Inhalt — Zeile 3 bricht die Form bewusst,
+			   weil das Urteil kein Etikett trägt, sondern gefällt wird). Ersetzt
+			   die 3-Satz-Fassung mit "…skalieren wir" — kein "wir" mehr in der
+			   Treppe, The Parley tritt erst nach dem Urteil auf (Anschlusszeile
+			   noch offen, Kandidaten in der Wording-Session besprochen). Die
+			   »…«-Anführung der alten Zeile 1 ist der einheitlichen Bauform
+			   gewichen — falls die Anklage wieder als Zitat markiert werden
+			   soll, einfach wieder ergänzen. */}
+		{/* Zweizeilige Bauform (Fred 30.08.): Etikett auf eigener Zeile,
+			   Inhalt darunter — der Doppelpunkt wird zum Zeilenschluss, wie
+			   eine Akten-Überschrift über ihrem Eintrag. */}
+		{/* "Der Gegenbeweis" (Fred 30.08.): Verteidigung + Beweis zu EINER
+			   Stufe verschmolzen — echtes Rechtswort, spiegelt den General-
+			   verdacht direkt (Verdacht ↔ Gegenbeweis ↔ Urteil). Inhalt trägt
+			   jetzt auch das Video, über die Gesetzesformel "in Bild und Ton"
+			   (§ 58a/247a StPO) statt "videobasiert" (Lastenheft-Sprache). */}
+		{/* Genitiv-Etiketten (Fred 30.08. spät): jede Stufe bekommt ihren
+			   Akteur — der Markt verdächtigt, euer Marketing beweist, das
+			   Publikum urteilt. Zeile 3 musste dafür umgebaut werden ("Fällen
+			   die einzelnen Zuschauer" hätte das Publikum doppelt benannt). */}
+		{/* Personalisierung (Fred 30.08. spät): durchgehende eure/eurer-
+			   Anaphora — die Expertise, die Experten, das Marketing, das
+			   Publikum, der Auftrag: alles gehört dem Leser. Beim Urteils-
+			   Etikett bewusst "eures Publikums" statt "eurer Kunden" (Freds
+			   Alternativ-Idee): das Urteil fällt VOR der Kundwerdung — wer da
+			   urteilt, ist noch kein Kunde, sondern entscheidet gerade, ob er
+			   einer wird. "Kunden" würde die Pointe vorwegnehmen und den
+			   Urteilskreis auf Bestandskunden verengen. */}
+		{/* Abschwächung (Fred 30.08. abends): "ist vorgetäuscht" sprach ein
+			   fertiges Urteil — ein Verdacht ist aber gerade KEINE Tatsachen-
+			   behauptung. "könnte … sein" macht die Zeile juristisch sauber
+			   (Verdacht = Möglichkeit) und nimmt die Härte raus, ohne den
+			   Stich zu verlieren. */}
+			<p class="plaedoyer-text">Der Generalverdacht des Marktes:<br />Eure behauptete Expertise könnte durch KI vorgetäuscht sein.</p>
+			<p class="plaedoyer-text">Der Gegenbeweis eures Marketings:<br />Das echte Gespräch eurer Experten. Verlässlich festgehalten in Bild und Ton.</p>
+		{/* Urteil in zwei Sätzen (Fred 30.08.): Satz 1 = wer urteilt (jeder
+			   einzelne Zuschauer, nicht mehr nur "Auftragsentscheider" — das
+			   Urteil trifft auch die Unsichtbaren, Hidden-Buyer-Logik), Satz 2 =
+			   die Dramatik der Frühe/Unsichtbarkeit. Anrede ihr/euch wie im
+			   restlichen Block. "als Augenzeuge" ist hier rausgefallen — das
+			   Wort trägt die Essenz-Spalte daneben ("Mit Augenzeugen."). */}
+		{/* Satz 2 = die Marketing-Kurve (Fred 30.08.): raus aus der Gerichts-
+			   sprache, rein in das, was den Geschäftsführer interessiert —
+			   aus dem stillen Zuschauer-Urteil werden Aufträge. "Zuschauer"
+			   statt "Auftragsentscheider" in Satz 1 bleibt bewusst (leichter
+			   Einstieg), Satz 2 löst auf, warum das Urteil zählt. */}
+		{/* Zeitliche Dimension zurück (Fred 30.08. spät): "Bevor er Kunde
+			   wird…" löst das Kunden-Wort UND die Frühe in einem Zug — der
+			   Zuschauer urteilt zuerst, Kunde wird er danach (oder nie). */}
+		{/* "Zuschauer" bewusst benannt (Fred 30.08.): Schlüsselwort des
+			   späteren Marketings (Zuschauerzahlen, Zuschauer pro Clip) — die
+			   Seite soll das Wort früh setzen, damit die Messgrößen später
+			   an eine eingeführte Figur andocken. */}
+			<p class="plaedoyer-text">Das Urteil eures Publikums:<br />Fällt jeder Zuschauer für sich, als Augenzeuge. Noch bevor er Kunde wird und euren nächsten Auftrag entscheidet.</p>
 		</div>
 		<div class="plaedoyer-half plaedoyer-half--essence">
-			{/* Fünfte Nachbesserung (Fred): die Essenz-Zeile war "deutlich zu
-			   klein" (~37px) — gegen bartleboglehegarty.com gemessen (siehe
-			   .essence-line-Kommentar unten für die Referenzklasse + px-Werte)
-			   und auf eine deutlich größere Stufe gehoben. Bei dieser Größe
-			   passt "mit tausend Augenzeugen." nicht mehr einzeilig in die
-			   50%-Spalte — Fred selbst hat deshalb den Wechsel auf den
-			   DREIZEILER angeordnet, mit bewusst gesetzten Umbrüchen ("Ein
-			   Gespräch" / "mit tausend" / "Augenzeugen."). Das hebt die
-			   vorherige "tausend Augenzeugen bleibt zusammen"-Regel bewusst
-			   auf — Größe hat jetzt Priorität, Freds eigene, spätere Vorgabe.
-			   Jede Zeile ein eigenes Textelement, kein &nbsp; mehr nötig. */}
-			<p class="essence-line">Ein Gespräch</p>
-			<p class="essence-line">mit tausend</p>
-			<p class="essence-line">Augenzeugen.</p>
+			{/* Rollentausch in der Essenz-Hälfte (Fred 30.08.): die
+			   Anschlusszeile "Ihr habt die Expertise. Wir verteidigen sie."
+			   wandert aus der Text-Spalte hierher und wird das GROSSE
+			   Statement (zwei Sätze = zwei Zeilen); "Ein Gespräch mit tausend
+			   Augenzeugen." rückt darunter als Unterschrift in klein. Der
+			   frühere Dreizeiler ("Ein Gespräch" / "mit tausend" /
+			   "Augenzeugen.") ist damit Geschichte — die Größen-Historie in
+			   den Style-Kommentaren unten gilt sinngemäß weiter, nur mit
+			   längeren Zeilen und deshalb neu kalibriertem cqw-Koeffizienten. */}
+			{/* Finale Fassung (Fred 30.08.): "mit Augenzeugen" ins große
+			   Statement, die Unterschrift "Ein Gespräch mit tausend
+			   Augenzeugen." entfällt dafür ganz (bleibt als Vorrats-Zeile für
+			   Beiträge/Splitflap dokumentiert, siehe soloLine oben). Drei
+			   Zeilen mit bewusst gesetzten Umbrüchen; längste bleibt "Ihr habt
+			   die Expertise.", die 8.3cqw-Kalibrierung gilt also weiter. */}
+		{/* "Mit Augenzeugen." als EIGENER Satz (Fred-Zuruf direkt danach):
+			   der Nachklapp bekommt Punkt + Großschreibung — drei vollwertige
+			   Schläge statt Satz mit Umbruch. */}
+		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler ist zum Hero
+			   aufgestiegen, "Kein Business ohne Witness." übernimmt dafür die
+			   Essenz-Spalte — in den zwei Zeilen, in denen es als Hero
+			   umbrach. Die Abwechsel-Regel bleibt gewahrt: beide Sätze stehen
+			   nie auf derselben Fläche… jetzt eben in getauschten Rollen. */}
+			<p class="essence-line">Kein Business</p>
+			<p class="essence-line">ohne Witness.</p>
 		</div>
 	</section>
 
@@ -121,9 +187,31 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	}
 
 	.hero-headline {
-		container-type: inline-size;
+		/* Hero-Korrektur nach BBHs Statement-Rezept (Fred 30.08., live auf der
+		   BBH-Startseite gemessen — deren Original-Hero ist ein vollbreites
+		   Video, die SCHRIFT-Statements laufen aber nie bis an den Rand):
+		   (1) site-container-Deckel 1728px, mittig — bei 1920er-Viewport
+		   entstehen dadurch allein 96px Luft je Seite, plus 32px px-site-
+		   Padding = 128px gemessener Zeilen-Einzug. (2) text-center (BBHs
+		   Statements sind zentriert, nicht linksbündig — daher wirkte unseres
+		   "bis an den Rand gezogen"). */
+		width: 100%;
+		max-width: 1728px;
+		margin: auto;
 		padding: 0 16px;
-		margin: auto 0;
+		text-align: center;
+		/* Optischer Ausgleich (Fred 30.08.): geometrisch war der Block exakt
+		   mittig (320px oben wie unten, gemessen), wirkte aber leicht zu tief —
+		   Unterlängen wiegen unten schwerer, und das fixierte Logo füllt die
+		   untere Bildhälfte zusätzlich. Leichter Hub nach oben, skaliert mit
+		   der Viewport-Höhe (~16px bei 1080er-Höhe). */
+		transform: translateY(-2.5vh);
+		/* Schrift skaliert wieder mit dem CONTAINER (cqw), nicht dem Viewport —
+		   dadurch füllt die Zeile die Deckel-Breite exakt aus (Fred 30.08.:
+		   "größer, bis sie bei der Breite ist") und hört bei 1728px einfach
+		   auf zu wachsen: ab da entsteht die BBH-Luft (96px Deckel-Rand + 32px
+		   Padding = 128px Zeilen-Einzug bei 1920, exakt BBHs Messwert). */
+		container-type: inline-size;
 	}
 
 	@media (min-width: 1024px) {
@@ -135,12 +223,26 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.hero h1 {
 		/* Wie auf bartleboglehegarty.com: text-wrap:balance statt fester <br>-Umbrüche.
 		   Der Browser entscheidet selbst, wie viele Zeilen und welche Wortgruppen —
-		   kein manuelles Umschalten zwischen Zeilenzahlen nötig. */
-		font-size: 15.6cqw;
+		   kein manuelles Umschalten zwischen Zeilenzahlen nötig.
+		   Größe füllt die Zeilen auf die Container-Breite; der Container ist
+		   bei 1728px gedeckelt, die Schrift wächst ab da nicht mehr mit und
+		   die BBH-Randluft entsteht von selbst. Nach dem Hero-Tausch (Fred
+		   30.08. spät) neu kalibriert: längste Zeile ist jetzt "Ihr habt die
+		   Expertise." statt "Kein Business" — 9.6cqw statt 15.6 (gleiche
+		   Auslastungs-Logik wie zuvor bei der Essenz-Spalte gemessen: diese
+		   Zeile erreicht damit ~97% ihres Containers). Zeilenhöhe bleibt 0.92
+		   statt BBHs 0.82: deren Statements sind VERSAL (keine Unterlängen),
+		   unsere Mischschrift würde bei 0.82 kollidieren. */
+		font-size: 9.6cqw;
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;
-		text-wrap: balance;
+	}
+
+	.hero h1 span {
+		/* Drei Sätze = drei Zeilen — die Umbrüche sind Bedeutung, kein
+		   Balance-Layout. */
+		display: block;
 	}
 
 	/* Plädoyer-Sektion, ZWEIGETEILT (Website-Brief, Layout-Update 29.08. spät:
@@ -181,12 +283,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   vorweg. */
 	.plaedoyer {
 		padding: 56px 0 64px;
-		border-top: 1px solid var(--line);
-		/* BBH-Stil (Fred 30.08.): Statement-Sektionen atmen breiter als der
-		   1100er-Standardrahmen — bis 1400px, dadurch wächst die Essenz-
-		   Spalte auf ~640px und die cqw-gekoppelte Schrift erreicht auf
-		   breiten Monitoren BBHs 80px-Maß (Deckel s. .essence-line). */
-		max-width: 1400px;
+		/* BBH-Maß 1:1 (Fred 30.08., Vergleich /about): BBHs site-container
+		   deckelt bei 1728px, nicht 1400 — mit 1400 blieb unsere Halbspalte
+		   bei 1920er-Viewport ~200px schmaler als BBHs (~620 vs ~830px), und
+		   die cqw-gekoppelte Essenz-Schrift entsprechend unter deren 80px-
+		   Niveau (gemessen: 51px vs. 42px bei 921er-Pane). Mit 1728 trifft
+		   9.6cqw × ~830px-Spalte fast exakt BBHs 80px-Maximum. */
+		max-width: 1728px;
 		display: flex;
 		flex-direction: column;
 		gap: 48px;
@@ -203,14 +306,14 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	.plaedoyer-text {
 		max-width: 46rem;
-		/* BBH-Rezept 1:1 (Fred 30.08., „übernimm das mal") — gemessen am
-		   About-Body-Block (`text-md -tracking-20 leading-120`):
-		   Schrift clamp(20px → 26px, deren fluid-Formel), Zeilenhöhe 1.2
-		   statt vorher 1.55 (DAS war Freds „Abstand wirkt zu groß"-Gefühl:
-		   der luftige Zeilenfall, nicht der Absatz-Abstand), Laufweite
-		   -0.02em. */
-		font-size: clamp(1.25rem, 1.137rem + 0.4518vw, 1.625rem);
-		line-height: 1.2;
+		/* Referenz-Wechsel (Fred 30.08., Vergleich /offices/bbh-studios):
+		   BBHs LEAD-Absätze sind größer als das About-Body-Rezept, das hier
+		   vorher galt (20→26px) — live an zwei Breiten gemessen (921px:
+		   23.38px / 1920px: 31.11px, Fluid-Deckel bei 1728) und daraus die
+		   Gerade rekonstruiert: clamp(18px, 14.55px + 0.9583vw, 31.11px).
+		   Zeilenhöhe dort 1.3 (nicht 1.2), Laufweite -0.02em unverändert. */
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+		line-height: 1.3;
 		letter-spacing: -0.02em;
 		color: var(--white);
 	}
@@ -286,12 +389,30 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   wieder überlaufen — Passung hat Vorrang. */
 	.essence-line {
 		/* Deckel exakt auf BBHs text-2xl-Maximum (80px) statt vorher 100px —
-		   „Stil von BBH übernehmen", Fred 30.08. */
-		font-size: clamp(1.5rem, 12.3cqw, 5rem);
+		   „Stil von BBH übernehmen", Fred 30.08.
+		   cqw-Koeffizient neu kalibriert für den Statement-Tausch (Fred 30.08.):
+		   längste Zeile ist jetzt "Ihr habt die Expertise." (~23 Zeichen statt
+		   12 beim alten "Augenzeugen.") — 12.3cqw würde weit überlaufen.
+		   Startwert rechnerisch (12.3 × 12/23 ≈ 6.4, plus Luft) und dann live
+		   nachgemessen, siehe Fortschritts-Protokoll. */
+		/* Nach dem Hero-Tausch neu kalibriert (Fred 30.08. spät): "Kein
+		   Business ohne Witness." soll in seinem neuen Zuhause die grafische
+		   Wucht behalten, die es als Hero hatte (Fred: "grafisch fast besser
+		   als Hero") — Füllgrad ~85% der Spalte auf jeder Breite. Herleitung
+		   aus der Live-Messung (bei 80px füllte "Kein Business" 62% einer
+		   816px-Spalte): 13.4cqw ≈ 85% Füllung, breitenunabhängig. Der
+		   BBH-text-2xl-Deckel (5rem) ist dafür bewusst auf 6.875rem (110px)
+		   angehoben — die Abbinder-Zeile darf größer sein als BBHs
+		   Statement-Maß, sie ist der degradierte Ex-Hero. */
+		font-size: clamp(1.5rem, 13.4cqw, 6.875rem);
 		font-weight: 900;
 		line-height: 1.05;
 		letter-spacing: -0.01em;
 	}
+
+	/* (.essence-sub entfernt — die Unterschrift "Ein Gespräch mit tausend
+	   Augenzeugen." ist zugunsten von "mit Augenzeugen" im großen Statement
+	   entfallen, Fred 30.08.) */
 
 	.proof {
 		padding: 24px 0 64px;
@@ -313,7 +434,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Zeile trägt statt als Fußnote. */
 	.produkte {
 		padding: 48px 0 64px;
-		border-top: 1px solid var(--line);
 	}
 
 	.produkte p {
@@ -326,7 +446,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.cta {
 		padding: 80px 0 96px;
 		text-align: center;
-		border-top: 1px solid var(--line);
 	}
 
 	.cta-line {
@@ -357,7 +476,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	footer {
 		padding: 32px 0 64px;
-		border-top: 1px solid var(--line);
 	}
 
 	footer nav {

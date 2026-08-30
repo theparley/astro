@@ -1,0 +1,453 @@
+---
+// Menü-Knopf unten Mitte (Fred 30.08. abends, "grundlegend andere
+// Entscheidung"): die Kachel, die beim Scrollen aus der Logo-Stange geboren
+// wird, ist KEIN "Let's Parley"-CTA mehr, sondern ein Menü-Knopf im
+// Zwetschke-Modell — Hamburger-Striche + Wort "Menü", Klick klappt große
+// Listenzeilen nach OBEN auf (zwetschke.de-Mechanik), aber ECKIG statt
+// Zwetschkes Pillen-Rundung (unsere Kachel-Formsprache). "Let's Parley"
+// ist vorerst weg (Fred: "überlegen wir später"); seine Tür übernimmt der
+// Menüpunkt Kontakt (→ /buchen — /buchen IST die Kontakt-Seite, Website-
+// Brief: "Es braucht NIE eine eigene Kontakt-Seite").
+//
+// Ersetzt CtaTile.astro im Layout. Die komplette Geburts-Choreografie
+// (gated/revealed-Klassen, Transition aus der Stangen-Form, Schrift-Sequenz)
+// ist 1:1 von dort übernommen — BrandLogo.astro bleibt das EINE Skript, das
+// die Verwandlung treibt, nur die Klassennamen sind auf .menu-tile
+// umgezogen. Anders als der CTA erscheint der Menü-Knopf auch auf /buchen
+// (er ist Navigation, kein Verkaufsknopf — die hideCta-Logik entfällt).
+interface Props {
+	// true nur auf der Startseite: die Kachel wird von BrandLogo.astro per
+	// Klasse sichtbar geschaltet (Geburt aus der Stange bei dock>=1).
+	// Unterseiten haben kein Hero-Logo und zeigen die Kachel sofort
+	// (zeitgekoppelt an den PageWipe).
+	gateBehindHero?: boolean;
+}
+
+const { gateBehindHero = false } = Astro.props;
+---
+
+<div class="menu-root">
+	<button
+		type="button"
+		class={`menu-tile${gateBehindHero ? " menu-tile--gated" : ""}`}
+		aria-label="Menü öffnen"
+		aria-expanded="false"
+	>
+		<span class="menu-tile__burger" aria-hidden="true">
+			<span class="menu-tile__line"></span>
+			<span class="menu-tile__line"></span>
+			<span class="menu-tile__line"></span>
+		</span>
+		<span class="menu-tile__word" aria-hidden="true">Menü</span>
+	</button>
+	{/* Große Listenzeilen, klappen nach OBEN auf (Zwetschke-Modell) — jede
+	   Zeile eine eigene eckige Kachel in der Flächenfarbe, gestaffelt über
+	   --in-delay (unterste zuerst, am Klick-Ursprung). Reihenfolge im
+	   Markup = optisch von oben nach unten. Weitere Punkte (Format, Studio)
+	   docken in Phase 2 hier an. */}
+	<nav class="menu-panel" aria-label="Hauptmenü">
+		<a href="/" style="--in-delay: 60ms">Home</a>
+		<a href="/buchen" style="--in-delay: 0ms">Kontakt</a>
+	</nav>
+	{/* Dimmt/verwischt die Seite, solange das Menü offen ist (BBH-Backdrop-
+	   Werte wie im archivierten TileMenu) — Tipp darauf schließt (Zwetschke/
+	   BBH-Touch-Modell). */}
+	<button type="button" class="menu-backdrop" aria-label="Menü schließen" tabindex="-1"></button>
+</div>
+
+<style>
+	.menu-root {
+		display: contents;
+	}
+
+	.menu-tile {
+		--tile-size: 88px;
+		--tile-gap: 4px;
+		position: fixed;
+		left: 50%;
+		bottom: 0;
+		transform: translateX(-50%);
+		/* Ruhegröße aus Zwetschkes Hover-Verhältnis abgeleitet (Fred 30.08.,
+		   "Vergrößerung zu arg"): live gemessen wächst deren Knopf von 273px
+		   auf 317px (#toggle-main-menu:hover { width:100% } im 317px-Parent)
+		   = Faktor 1.163 (+16%). Unser ZIEL bleibt rastertreu bei drei
+		   Kacheln + zwei Fugen (272px, Hover) — die Ruhegröße ergibt sich
+		   rückwärts daraus: 272 / 1.163 ≈ 234px. Vorher 180px Ruhe (+51%
+		   Sprung) — das zog zu viel Aufmerksamkeit.
+		   Hamburger + "Menü" sitzen NEBENeinander wie bei Zwetschke. */
+		width: calc((var(--tile-size) * 3 + var(--tile-gap) * 2) / 1.163);
+		height: var(--tile-size);
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 14px;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		background-color: rgba(237, 237, 237, 0.95);
+		color: var(--black);
+		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
+		z-index: 100;
+		clip-path: inset(100% 0 0 0);
+		/* Gleicher BBH-Hover-Schleier wie auf den Menü-Zeilen (siehe dort). */
+		background-image: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15));
+		background-repeat: no-repeat;
+		background-position: left center;
+		background-size: 0% 100%;
+	}
+
+	.menu-tile:hover {
+		background-size: 100% 100%;
+		/* Zwetschke-Hover (Fred 30.08.): der Knopf wächst auf drei Kacheln +
+		   zwei Fugen — dank left:50% + translateX(-50%) bleibt er dabei von
+		   selbst zentriert. */
+		width: calc(var(--tile-size) * 3 + var(--tile-gap) * 2);
+	}
+
+	/* Ungated (Unterseiten): erscheint zeitgekoppelt nach dem PageWipe. */
+	.menu-tile:not(.menu-tile--gated) {
+		animation: menu-tile-in 400ms cubic-bezier(0.77, 0, 0.18, 1) 900ms both;
+	}
+
+	/* Gated (Startseite): geschlossener Zustand = auf Stangen-Breite
+	   zusammengezogen (senkrechter Strich in der Mitte, exakt wo
+	   BrandLogo.astro's Stange steht) — Geburt per transition, bidirektional.
+	   Doppelklasse für Spezifität (siehe CtaTile-Historie: die transition-
+	   Shorthand-Falle). */
+	.menu-tile.menu-tile--gated {
+		animation: none;
+		clip-path: inset(0 50% 0 50%);
+		/* opacity mit in der Liste: transition ist ein Shorthand — eine reine
+		   clip-path-Transition hier würde das Knopf-Ausblenden beim Öffnen
+		   (Zwetschke-Verhalten, .is-open-Regel unten) hart springen lassen
+		   (dieselbe Falle wie in der CtaTile-Historie dokumentiert). */
+		transition:
+			clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1) 150ms,
+			opacity 150ms ease,
+			background-size 250ms ease-in-out,
+			width 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+	}
+
+	.menu-tile--gated.menu-tile--revealed {
+		clip-path: inset(0 0 0 0);
+		transition:
+			clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1),
+			opacity 150ms ease,
+			background-size 250ms ease-in-out,
+			width 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+	}
+
+	/* Inhalt (Striche + Wort) erst nach vollständiger Öffnung einblenden,
+	   beim Schließen zuerst ausblenden — gleiche Sequenz wie beim CTA. */
+	.menu-tile--gated:not(.menu-tile--revealed) .menu-tile__burger,
+	.menu-tile--gated:not(.menu-tile--revealed) .menu-tile__word {
+		opacity: 0;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-tile--gated .menu-tile__burger,
+		.menu-tile--gated .menu-tile__word {
+			transition: opacity 150ms ease;
+		}
+
+		.menu-tile--gated.menu-tile--revealed .menu-tile__burger,
+		.menu-tile--gated.menu-tile--revealed .menu-tile__word {
+			transition: opacity 200ms ease 400ms;
+		}
+	}
+
+	@keyframes menu-tile-in {
+		to {
+			clip-path: inset(0 0 0 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.menu-tile:not(.menu-tile--gated) {
+			animation: none;
+			clip-path: inset(0 0 0 0);
+		}
+
+		.menu-tile.menu-tile--gated {
+			transition: none;
+		}
+	}
+
+	.menu-tile__burger {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.menu-tile__line {
+		display: block;
+		width: 32px;
+		height: 3px;
+		background: currentColor;
+		flex: none;
+	}
+
+	/* Offen: Hamburger wird zum X (mittlere Linie weg, äußere kreuzen) —
+	   das Wort bleibt "Menü", der Knopf bleibt an Ort und Stelle. */
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-tile__line {
+			transition: transform 350ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 200ms ease;
+		}
+	}
+
+	/* Kreuz-Verwandlung schon beim HOVERN über den Knopf (Fred 30.08.,
+	   Zwetschke-Deko-Hover) — zusätzlich zum offenen Zustand. Der
+	   ?keinkreuz-Vergleichsschalter unterbindet beides. */
+	.menu-root.is-open .menu-tile__line:nth-child(1),
+	.menu-root:not(.menu-root--no-x) .menu-tile:hover .menu-tile__line:nth-child(1) {
+		transform: translateY(9px) rotate(45deg);
+	}
+
+	.menu-root.is-open .menu-tile__line:nth-child(2),
+	.menu-root:not(.menu-root--no-x) .menu-tile:hover .menu-tile__line:nth-child(2) {
+		opacity: 0;
+	}
+
+	.menu-root.is-open .menu-tile__line:nth-child(3),
+	.menu-root:not(.menu-root--no-x) .menu-tile:hover .menu-tile__line:nth-child(3) {
+		transform: translateY(-9px) rotate(-45deg);
+	}
+
+	.menu-tile__word {
+		/* Auf dem breiten Knopf steht das Wort neben den Strichen (Zwetschke-
+		   Anordnung) und darf Textgröße tragen statt Beschriftungsgröße.
+		   VERSAL (Fred 30.08.) — wie Zwetschkes "MENÜ"; per CSS statt im
+		   Markup, damit Screenreader weiter "Menü" lesen statt Buchstaben
+		   zu buchstabieren. */
+		font-weight: 900;
+		/* 26px statt 20 (Fred 30.08., "zu klein") — Feinkalibrierung folgt,
+		   sobald das längste Menü-Wort feststeht. */
+		font-size: 26px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	/* Vergleichs-Schalter (Fred 30.08.: "ob wir die Striche mit dem Kreuz
+	   lassen, müsste ich im Vergleich sehen"): mit ?keinkreuz in der URL
+	   bleiben die Striche beim Öffnen einfach Striche — das Skript setzt
+	   dafür die Klasse. Nach dem Entscheid fliegt einer der beiden Wege raus. */
+	.menu-root--no-x.is-open .menu-tile__line:nth-child(1),
+	.menu-root--no-x.is-open .menu-tile__line:nth-child(3) {
+		transform: none;
+	}
+
+	.menu-root--no-x.is-open .menu-tile__line:nth-child(2) {
+		opacity: 1;
+	}
+
+	/* Aufklapp-Menü: große Listenzeilen über dem Knopf, nach oben wachsend.
+	   Zeilen wischen von OBEN auf (inset(0 0 100% 0) → 0), gestaffelt —
+	   dieselbe Kacheltechnik wie überall. */
+	.menu-panel {
+		position: fixed;
+		left: 50%;
+		/* Zwetschke-Verhalten (Fred 30.08.): beim Öffnen verschwindet der
+		   MENÜ-Knopf und die Zeilen setzen AM BODEN an — die unterste Zeile
+		   (Kontakt) landet exakt dort, wo eben noch der Knopf war. Wer
+		   gerade "Menü" getippt hat, hat den Finger/Cursor damit schon auf
+		   Kontakt. Deshalb bottom:0 statt oberhalb des Knopfs. */
+		bottom: 0;
+		transform: translateX(-50%);
+		/* Gleiche Breite wie der Knopf: drei Kacheln + zwei Fugen (272px) —
+		   Knopf und Zeilen bilden eine bündige Säule. */
+		width: min(calc(88px * 3 + 4px * 2), calc(100vw - 32px));
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		z-index: 95;
+		pointer-events: none;
+	}
+
+	.menu-panel a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		/* Zeilen genauso hoch wie der MENÜ-Knopf, aus dem sie entstehen
+		   (Fred 30.08.): eine Kachel (88px) statt der halben Zeilenhöhe —
+		   die Kontakt-Zeile ersetzt den Knopf dadurch 1:1 deckungsgleich. */
+		height: 88px;
+		background: rgba(237, 237, 237, 0.95);
+		color: var(--black);
+		font-weight: 900;
+		/* 26px wie das Knopf-Wort (Fred 30.08., "zu klein") */
+		font-size: 26px;
+		/* VERSAL wie das Knopf-Wort (Fred 30.08.) */
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		text-decoration: none;
+		/* Hover 1:1 von BBHs Nav-Buttons (aus deren Markup gelesen:
+		   before:w-0 → group-hover:before:w-full, bg-current opacity-15,
+		   150ms ease-in-out): ein 15%-Schleier in der Textfarbe rutscht von
+		   links über die Fläche. Hier als animierte background-size statt
+		   ::before — gleicher Look, aber ohne Stacking-Gefrickel (der
+		   Schleier liegt so immer sicher UNTER der Schrift). */
+		background-image: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15));
+		background-repeat: no-repeat;
+		background-position: left center;
+		background-size: 0% 100%;
+		/* BBHs Flächen-Logik (Fred 30.08.): neue Flächen kommen vom Bildrand
+		   ODER wachsen aus einer vorhandenen Fläche. Hier ist der Knopf der
+		   Ursprung — die Zeilen wischen deshalb von UNTEN nach oben auf
+		   (inset(100% …) lässt die Unterkante zuerst erscheinen), gestaffelt
+		   von der untersten Zeile (am Knopf) nach oben. */
+		clip-path: inset(100% 0 0 0);
+	}
+
+	.menu-panel a:hover,
+	.menu-panel a.is-preselected {
+		background-size: 100% 100%;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-panel a {
+			transition:
+				clip-path 300ms cubic-bezier(0.77, 0, 0.18, 1) var(--in-delay, 0ms),
+				background-size 250ms ease-in-out;
+		}
+	}
+
+	.menu-root.is-open .menu-panel {
+		pointer-events: auto;
+	}
+
+	/* Zwetschke-Verhalten Teil 2: der Knopf selbst verschwindet, sobald das
+	   Menü offen ist — es bleiben nur die Zeilen. Schnelles Ausblenden (die
+	   Kontakt-Zeile wischt ohnehin sofort über seine Fläche). Beim Schließen
+	   kommt er zurück. */
+	.menu-root.is-open .menu-tile {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-tile {
+			transition:
+				opacity 150ms ease,
+				background-size 250ms ease-in-out,
+				width 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+		}
+	}
+
+	.menu-root.is-open .menu-panel a {
+		clip-path: inset(0 0 0 0);
+	}
+
+	/* (Die transition der Zeilen — clip-path + Hover-Schleier — steht oben
+	   gebündelt bei .menu-panel a:hover; hier bewusst KEIN zweiter
+	   transition-Block mehr, der den Shorthand überschreiben würde.) */
+
+	.menu-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 90;
+		border: none;
+		padding: 0;
+		background: rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+		opacity: 0;
+		pointer-events: none;
+		cursor: default;
+	}
+
+	.menu-root.is-open .menu-backdrop {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.menu-backdrop {
+			transition: opacity 300ms;
+		}
+	}
+</style>
+
+<script>
+	// An astro:page-load gekoppelt (Muster wie BrandLogo/PageWipe) — Menü
+	// öffnen/schließen; BrandLogo.astro steuert weiterhin NUR die Geburt der
+	// Kachel (menu-tile--revealed), dieses Skript nur das Auf/Zu.
+	let cleanup: (() => void) | null = null;
+
+	function initMenuTile() {
+		cleanup?.();
+		cleanup = null;
+
+		const root = document.querySelector<HTMLElement>(".menu-root");
+		const tile = root?.querySelector<HTMLButtonElement>(".menu-tile");
+		const backdrop = root?.querySelector<HTMLElement>(".menu-backdrop");
+		if (!root || !tile) return;
+
+		// Vergleichs-Schalter für Freds Kreuz-Entscheid (siehe CSS-Kommentar
+		// .menu-root--no-x): ?keinkreuz in der URL lässt die Striche beim
+		// Öffnen Striche bleiben.
+		root.classList.toggle("menu-root--no-x", location.search.includes("keinkreuz"));
+
+		const setOpen = (open: boolean) => {
+			root.classList.toggle("is-open", open);
+			tile.setAttribute("aria-expanded", String(open));
+			tile.setAttribute("aria-label", open ? "Menü schließen" : "Menü öffnen");
+
+			// Klebriger Schleier (Fred 30.08., BBH-Logik nachgeschaut): der
+			// Hover-Schleier verschwindet NICHT beim Verlassen der Zeile,
+			// sondern wandert erst weiter, wenn eine ANDERE Zeile gehovert
+			// wird — die zuletzt markierte bleibt markiert. Beim Öffnen startet
+			// die Markierung auf der untersten Zeile (Kontakt), die exakt
+			// unter dem Cursor landet (Browser werten :hover erst bei der
+			// nächsten Mausbewegung neu aus, deshalb per Klasse statt :hover).
+			const rows = [...root.querySelectorAll<HTMLElement>(".menu-panel a")];
+			const markOnly = (target: HTMLElement | null) => {
+				rows.forEach((r) => r.classList.toggle("is-preselected", r === target));
+			};
+			if (open) {
+				markOnly(rows[rows.length - 1] ?? null);
+			} else {
+				markOnly(null);
+			}
+		};
+
+		const onTile = () => setOpen(!root.classList.contains("is-open"));
+		const onBackdrop = () => setOpen(false);
+		// Klebriger Schleier: Hovern einer Zeile zieht die Markierung dorthin
+		// und lässt sie dort, bis eine andere Zeile gehovert wird (BBH-Logik).
+		const rowEls = [...root.querySelectorAll<HTMLElement>(".menu-panel a")];
+		const onRowEnter = (e: Event) => {
+			const target = e.currentTarget as HTMLElement;
+			rowEls.forEach((r) => r.classList.toggle("is-preselected", r === target));
+		};
+		rowEls.forEach((r) => r.addEventListener("mouseenter", onRowEnter));
+		// Escape schließt — wichtig, weil der Knopf selbst bei offenem Menü
+		// ausgeblendet ist (Zwetschke-Verhalten) und Tastatur-Nutzer sonst
+		// nur den unsichtbaren Backdrop hätten.
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setOpen(false);
+		};
+		window.addEventListener("keydown", onKey);
+		// Beim Zurückscrollen (Kachel schließt sich zur Stange) auch das Menü
+		// schließen — sonst schwebten die Zeilen über einer Stange.
+		const observer = new MutationObserver(() => {
+			if (tile.classList.contains("menu-tile--gated") && !tile.classList.contains("menu-tile--revealed")) {
+				setOpen(false);
+			}
+		});
+		observer.observe(tile, { attributes: true, attributeFilter: ["class"] });
+
+		tile.addEventListener("click", onTile);
+		backdrop?.addEventListener("click", onBackdrop);
+		cleanup = () => {
+			tile.removeEventListener("click", onTile);
+			backdrop?.removeEventListener("click", onBackdrop);
+			window.removeEventListener("keydown", onKey);
+			rowEls.forEach((r) => r.removeEventListener("mouseenter", onRowEnter));
+			observer.disconnect();
+		};
+	}
+
+	document.addEventListener("astro:page-load", initMenuTile);
+</script>

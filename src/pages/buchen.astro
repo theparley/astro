@@ -6,9 +6,10 @@ import SiteFooter from "../components/SiteFooter.astro";
 {/* Eigenbau-Kalender auf Basis der meetergo-API (Website-Brief, /buchen-
    Kapitel + FINALE UI-Spec 29.08. abends) — PAT bleibt server-seitig in den
    Cloudflare Pages Functions unter functions/api/{slots,book}.js, siehe
-   functions/_lib/meetergo.js. hideCta: "Let's Parley" verschwindet hier,
-   die Tür ist schon erreicht. */}
-<Layout title="Buchen" description="Ein kleines Gespräch. 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley." hideCta>
+   functions/_lib/meetergo.js. Der Menü-Knopf (MenuTile) erscheint seit dem
+   Menü-Umbau 30.08. auch hier — er ist Navigation; die frühere hideCta-
+   Ausblendung galt nur dem Let's-Parley-CTA. */}
+<Layout title="Buchen" description="Ein kleines Gespräch. 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley.">
 	<main class="buchen">
 		<h1>Ein kleines Gespräch.</h1>
 		<p class="sub">30 Minuten, nichts vorbereiten.</p>

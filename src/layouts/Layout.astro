@@ -1,31 +1,28 @@
 ---
 import { ClientRouter } from "astro:transitions";
-// Phase-1-Menü-Rückbau (Website-Brief, "Entscheidung 29.08."): das Kachel-
-// Menü-System ist archiviert in TileMenu.astro (aktuell nicht eingebunden,
-// Kommentar-Kopf dort erklärt die Reaktivierung für Phase 2). Aktiv bleibt
-// nur noch der eigenständige CTA-Button (CtaTile.astro); das Logo lebt jetzt
-// nur noch im Hero der Startseite (BrandLogo.astro, siehe index.astro).
-import CtaTile from "../components/CtaTile.astro";
+// Menü-Umbau (Fred 30.08. abends, "grundlegend andere Entscheidung"): der
+// Let's-Parley-CTA (CtaTile.astro, jetzt unbenutzt/archiviert) ist durch den
+// Zwetschke-artigen Menü-Knopf ersetzt (MenuTile.astro — Hamburger + "Menü",
+// eckig, klappt große Listenzeilen nach oben auf; "Kontakt" übernimmt darin
+// die Tür zu /buchen). Der Knopf ist Navigation, kein Verkaufsknopf — er
+// erscheint deshalb auf JEDER Seite, auch /buchen (die frühere hideCta-Logik
+// entfällt). TileMenu.astro (BBH-Kachelmenü) bleibt weiter archiviert.
+import MenuTile from "../components/MenuTile.astro";
 import PageWipe from "../components/PageWipe.astro";
 
 interface Props {
 	title: string;
 	description?: string;
-	// true nur auf /buchen: "Let's Parley" verschwindet, weil die Tür, auf die
-	// der Button zeigt, schon erreicht ist (Website-Brief, Konversions-Kapitel).
-	hideCta?: boolean;
-	// true nur auf der Startseite: der CTA bleibt verdeckt, bis das Hero-Logo
-	// (BrandLogo.astro) aus dem Viewport gescrollt ist — siehe Bugfix-
-	// Kommentar in CtaTile.astro. Unterseiten haben keinen Hero und zeigen
-	// den CTA deshalb sofort.
-	gateCtaBehindHero?: boolean;
+	// true nur auf der Startseite: der Menü-Knopf bleibt verdeckt, bis das
+	// Hero-Logo (BrandLogo.astro) eingefahren ist und ihn aus der Stange
+	// "gebiert". Unterseiten haben keinen Hero und zeigen ihn sofort.
+	gateMenuBehindHero?: boolean;
 }
 
 const {
 	title,
 	description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.",
-	hideCta = false,
-	gateCtaBehindHero = false,
+	gateMenuBehindHero = false,
 } = Astro.props;
 ---
 
@@ -43,7 +40,7 @@ const {
 	</head>
 	<body>
 		<PageWipe />
-		<CtaTile hideCta={hideCta} gateBehindHero={gateCtaBehindHero} />
+		<MenuTile gateBehindHero={gateMenuBehindHero} />
 		<slot />
 	</body>
 </html>
