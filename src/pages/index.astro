@@ -147,41 +147,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	}
 
 	.hero h1 span {
-		/* Drei Sätze = drei Zeilen — die Umbrüche sind Bedeutung, kein
-		   Balance-Layout. Beim Laden erscheinen sie ZEITVERSETZT und WISCHEN
-		   herein wie der Seitenübergang (Fred 30.08. nachts: "wie die Seite
-		   auch reinwischt, auf die einzelnen Sätze übertragen"): gleiche
-		   Technik (clip-path legt von links frei), gleiche Dauer (800ms) und
-		   exakt PageWipes symmetrische BBH-Kurve. Mehr Luft zwischen den
-		   Sätzen als beim ersten Wurf — jeder Satz darf kurz allein stehen,
-		   bevor der nächste antwortet. */
+		/* Beide Zeilen WISCHEN gemeinsam herein wie der Seitenübergang
+		   (Fred 2026-06-14: "der ganze Text mit diesem schwarzen Swipe von
+		   links nach rechts" — die frühere Von-oben-Animation der zweiten
+		   Zeile ist raus): gleiche Technik (clip-path legt von links frei),
+		   gleiche Dauer (800ms) und exakt PageWipes symmetrische BBH-Kurve. */
 		display: block;
-		animation: hero-line-wipe 800ms cubic-bezier(0.76, 0, 0.24, 1) both;
-	}
-
-	.hero h1 span:nth-child(1) {
-		animation-delay: 100ms;
-	}
-
-	.hero h1 span:nth-child(2),
-	.hero h1 span:nth-child(3) {
-		/* Wisch-Achse gedreht (Fred 31.08., "wie wenn sie aus dem Text
-		   rauskommen"): nur Zeile 1 wischt seitlich herein — Zeile 2 und 3
-		   wischen VON OBEN NACH UNTEN auf, dieselbe Logik wie die
-		   Menü-Zeilen (reiner clip-Wisch, gleiche Kurve, gleiche 800ms),
-		   nur in Fallrichtung: jede Zeile materialisiert sich unter der
-		   vorigen, als käme sie aus deren Text. */
-		animation-name: hero-line-drop;
-	}
-
-	.hero h1 span:nth-child(2) {
-		animation-delay: 1300ms;
-	}
-
-	.hero h1 span:nth-child(3) {
-		/* Längere Pause vor der Pointe (Fred 30.08. nachts) — "Mit
-		   Augenzeugen." darf sich ankündigen. */
-		animation-delay: 2500ms;
+		animation: hero-line-wipe 800ms cubic-bezier(0.76, 0, 0.24, 1) 100ms both;
 	}
 
 	@keyframes hero-line-wipe {
@@ -197,19 +169,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		}
 		to {
 			clip-path: inset(-0.35em 0 -0.35em 0);
-		}
-	}
-
-	/* Vertikale Variante für Zeile 2+3: von oben nach unten freilegen.
-	   Gleiche negative Seiten-Puffer wie beim horizontalen Wisch, damit
-	   Über-/Unterlängen und der letzte Buchstabe nie angeschnitten werden
-	   (line-height 0.92 < Glyphen-Ausdehnung, siehe hero-line-wipe). */
-	@keyframes hero-line-drop {
-		from {
-			clip-path: inset(-0.35em -0.05em 100% -0.05em);
-		}
-		to {
-			clip-path: inset(-0.35em -0.05em -0.35em -0.05em);
 		}
 	}
 
