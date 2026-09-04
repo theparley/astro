@@ -10,11 +10,14 @@
 
 export const API_BASE = "https://api.meetergo.com/v4";
 
-// Terminart, wie sie bei meetergo angelegt ist (Website-Brief: "Terminart
-// 'Studiotermin The Parley' ist dort bereits angelegt"). Der Name ist nicht
-// geheim — die ID wird bei Bedarf per Lookup aufgelöst und kurz gecacht,
-// damit nicht jede Slot-/Buchungs-Anfrage einen extra API-Call auslöst.
-export const MEETING_TYPE_NAME = "Studiotermin The Parley";
+// Terminart, wie sie bei meetergo angelegt ist. Am 2026-06-14 mit Fred
+// entschieden und in meetergo umbenannt: das 30-Min-Gespräch (meetergo
+// Connect) heißt jetzt "Ein kleines Gespräch (30 Min)" — brief-konform
+// (Geleit-Zeile /buchen). Der alte Name "Studiotermin The Parley" existiert
+// nicht mehr. ACHTUNG: Name-Matching — bei Umbenennung in meetergo MUSS
+// diese Konstante mitziehen. Der Name ist nicht geheim — die ID wird per
+// Lookup aufgelöst und kurz gecacht.
+export const MEETING_TYPE_NAME = "Ein kleines Gespräch (30 Min)";
 
 const MEETING_TYPE_CACHE_KEY = "https://cache.internal.the-parley/meetergo-meeting-type";
 const MEETING_TYPE_CACHE_TTL_SECONDS = 3600; // Terminarten ändern sich praktisch nie
