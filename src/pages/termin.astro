@@ -15,12 +15,9 @@ import Layout from "../layouts/Layout.astro";
 <Layout title="Termin" description="Let's Parley: ein kleines Gespräch. 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley.">
 	<main class="buchen">
 		{/* Headline = Name der Terminart (Fred 2026-06-14): "Let's Parley" —
-		   identisch mit meetergo-Terminart und künftigem CTA.
-		   Intro-Text erstmal RAUS (Fred 2026-06-14, "später neuen Text
-		   eintragen"). Vorrat der entfernten Zeilen:
-		   sub:    "Ein kleines Gespräch. 30 Minuten, nichts vorbereiten."
-		   geleit: "Parley heißt Verhandlungsgespräch. Wer es ausruft, bekommt
-		           sicheres Geleit: kein Pitch, keine Unterlagen, ein Gespräch." */}
+		   identisch mit meetergo-Terminart und künftigem CTA. Intro-Text
+		   bewusst leer (Fred 2026-06-14: alter Text verworfen, kein Vorrat —
+		   neuer Text folgt in einer Wording-Runde). */}
 		<h1>Let's Parley</h1>
 
 		<div id="kalenderTeil">
@@ -387,6 +384,17 @@ import Layout from "../layouts/Layout.astro";
 		color: var(--black);
 	}
 
+	/* Belegte Uhrzeiten mit anzeigen, ausgegraut (Fred 2026-06-14): wiederholt
+	   die Balken-Semantik der Tages-Kacheln (Raster sichtbar, Lücken ehrlich)
+	   und macht Distanzen zwischen freien Zeiten sofort lesbar. Gleiche
+	   Behandlung wie volle Tage: füllungslos, grau, durchgestrichen. */
+	.slot.taken {
+		background: none;
+		color: #555;
+		cursor: default;
+		text-decoration: line-through;
+	}
+
 	/* Formular */
 	.chosen {
 		font-size: 1.15rem;
@@ -580,16 +588,18 @@ import Layout from "../layouts/Layout.astro";
 		desktopMq.addEventListener("change", redock);
 		wideMq.addEventListener("change", redock);
 
-		// 6 grobe Tagesabschnitte für den Balken (9–18 Uhr Arbeitsfenster) —
-		// ehrlich aus der echten Slot-Antwort abgeleitet: ein Abschnitt gilt
-		// als frei, sobald mindestens ein echter freier Termin hineinfällt.
+		// 6 grobe Tagesabschnitte für den Balken (8–17 Uhr, Freds meetergo-
+		// Verfügbarkeit — korrigiert 2026-06-14, vorher 9–18: der 8-Uhr-Slot
+		// fiel in keinen Abschnitt). Ehrlich aus der echten Slot-Antwort
+		// abgeleitet: ein Abschnitt gilt als frei, sobald mindestens ein
+		// echter freier Termin hineinfällt.
 		const BUCKETS = [
-			[9 * 60, 10 * 60 + 30],
-			[10 * 60 + 30, 12 * 60],
-			[12 * 60, 13 * 60 + 30],
-			[13 * 60 + 30, 15 * 60],
-			[15 * 60, 16 * 60 + 30],
-			[16 * 60 + 30, 18 * 60],
+			[8 * 60, 9 * 60 + 30],
+			[9 * 60 + 30, 11 * 60],
+			[11 * 60, 12 * 60 + 30],
+			[12 * 60 + 30, 14 * 60],
+			[14 * 60, 15 * 60 + 30],
+			[15 * 60 + 30, 17 * 60],
 		];
 
 		const timeFmt = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Berlin" });
@@ -627,6 +637,12 @@ import Layout from "../layouts/Layout.astro";
 		let chosenLabelText = "";
 		let chosenStart = "";
 
+		// Das praktizierte Stunden-Raster des Fensters (Fred 2026-06-14):
+		// Union aller angebotenen Startzeiten über alle Tage. Dient der
+		// Uhrzeiten-Liste als Grundgerüst — pro Tag werden ALLE Raster-Zeiten
+		// gezeigt, die nicht verfügbaren ausgegraut (siehe renderSlots).
+		let hourGrid: string[] = [];
+
 		async function fetchSlots(refresh: boolean) {
 			const params = new URLSearchParams({
 				start: today.toISOString(),
@@ -637,6 +653,9 @@ import Layout from "../layouts/Layout.astro";
 			if (!res.ok) throw new Error(`slots_failed_${res.status}`);
 			const data = await res.json();
 			datesByIso = new Map((data.dates || []).map((d: any) => [d.date, d.spots || []]));
+			const gridSet = new Set<string>();
+			datesByIso.forEach((spots) => spots.forEach((s) => gridSet.add(timeFmt.format(new Date(s.startTime)))));
+			hourGrid = [...gridSet].sort();
 		}
 
 		function cellState(year: number, month: number, day: number) {
@@ -736,17 +755,23 @@ import Layout from "../layouts/Layout.astro";
 
 		function renderSlots(spots: Array<{ startTime: string }>) {
 			slotsGrid.innerHTML = "";
-			spots
-				.slice()
-				.sort((a, b) => a.startTime.localeCompare(b.startTime))
-				.forEach((spot) => {
-					const btn = document.createElement("button");
-					btn.type = "button";
+			const freeByTime = new Map(spots.map((s) => [timeFmt.format(new Date(s.startTime)), s.startTime]));
+			const grid = hourGrid.length ? hourGrid : [...freeByTime.keys()].sort();
+			grid.forEach((label) => {
+				const startTime = freeByTime.get(label);
+				const btn = document.createElement("button");
+				btn.type = "button";
+				btn.textContent = label;
+				if (startTime) {
 					btn.className = "slot";
-					btn.textContent = timeFmt.format(new Date(spot.startTime));
-					btn.addEventListener("click", () => pickSlot(btn, spot.startTime));
-					slotsGrid.appendChild(btn);
-				});
+					btn.addEventListener("click", () => pickSlot(btn, startTime));
+				} else {
+					btn.className = "slot taken";
+					btn.disabled = true;
+					btn.setAttribute("aria-label", `${label} Uhr — bereits vergeben`);
+				}
+				slotsGrid.appendChild(btn);
+			});
 		}
 
 		function pickSlot(btn: HTMLButtonElement, startTime: string) {
