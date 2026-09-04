@@ -59,6 +59,10 @@ import Layout from "../layouts/Layout.astro";
 		max-width: 520px;
 		margin: 0 auto;
 		padding: 64px 16px 140px;
+		/* Gleicher Fix wie /termin (Fred-Befund 2026-06-14): Inhalt füllt
+		   mindestens den Viewport, damit der Sticky-Footer beim Laden nicht
+		   durchblitzt. */
+		min-height: 100dvh;
 	}
 
 	@media (min-width: 1024px) {

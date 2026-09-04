@@ -36,6 +36,11 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
+		{/* Font-Preload (Fred-Befund 2026-06-14, "Kontaktseite springt nach dem
+		   Laden"): Forma DJR lädt sonst nach dem ersten Render nach (font-display:
+		   swap) und reflowt die Seite — der kleine Sprung. Mit Preload ist die
+		   Schrift beim ersten Paint da. */}
+		<link rel="preload" href="/fonts/FormaDJRVariable.woff2" as="font" type="font/woff2" crossorigin />
 		<title>{title} · The Parley</title>
 		<ClientRouter />
 	</head>

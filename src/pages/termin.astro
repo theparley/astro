@@ -123,6 +123,13 @@ import Layout from "../layouts/Layout.astro";
 		max-width: 520px;
 		margin: 0 auto;
 		padding: 64px 16px 140px;
+		/* Mindesthöhe = Viewport (Fred-Befund 2026-06-14): Während der Kalender
+		   lädt, war die Seite nur wenige hundert Pixel hoch — der Sticky-Footer
+		   (Parley-Monument, z-0) stand dadurch beim Laden im Viewport und wurde
+		   nach dem Slot-Fetch weggeschoben (Flackern + durchguckende P-Spitze).
+		   Mit min-height füllt der Inhalt den Viewport von Anfang an, der
+		   Footer bleibt bis zum echten Zuendescrollen verdeckt. */
+		min-height: 100dvh;
 	}
 
 	@media (min-width: 1024px) {
