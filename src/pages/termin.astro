@@ -39,6 +39,11 @@ import Layout from "../layouts/Layout.astro";
 		<aside id="sidePanel">
 			<p class="side-hint" id="sideHint">Wähle links einen Tag —<br />die freien Uhrzeiten erscheinen hier.</p>
 		</aside>
+		{/* Dritte Spalte (Fred 2026-06-14): ab 1150px wandert Schritt 3
+		   (Formular) in eine eigene Spalte — 1 Tag · 2 Uhrzeit · 3 Daten
+		   nebeneinander. Zwischen 900 und 1150px bleibt das Formular unter
+		   den Uhrzeiten im sidePanel, mobil unterm Monat. */}
+		<aside id="sideForm"></aside>
 		</div>
 
 		{/* Schritt 2: Uhrzeit — wird per JS in die inline-{Monat}-Andockstelle
@@ -145,6 +150,22 @@ import Layout from "../layouts/Layout.astro";
 		}
 
 		#sidePanel {
+			position: sticky;
+			top: 32px;
+		}
+	}
+
+	/* Drei Spalten (Fred 2026-06-14): 1 Tag · 2 Uhrzeit · 3 Formular. */
+	@media (min-width: 1150px) {
+		.buchen {
+			max-width: 1200px;
+		}
+
+		.kalender-grid {
+			grid-template-columns: minmax(0, 500px) minmax(200px, 280px) minmax(260px, 1fr);
+		}
+
+		#sideForm {
 			position: sticky;
 			top: 32px;
 		}
@@ -522,28 +543,40 @@ import Layout from "../layouts/Layout.astro";
 		const btnBack = document.getElementById("btnBack") as HTMLButtonElement;
 		const btnConfirm = document.getElementById("btnConfirm") as HTMLButtonElement;
 		const sidePanel = document.getElementById("sidePanel") as HTMLElement;
+		const sideForm = document.getElementById("sideForm") as HTMLElement;
 		const sideHint = document.getElementById("sideHint") as HTMLElement;
 
-		// Desktop-Zweispalter (Fred 2026-06-14): dieselbe 900px-Schwelle wie im
-		// CSS. Auf Desktop docken Uhrzeiten+Formular in die Seitenspalte, auf
-		// Mobil in die inline-Andockstelle unterm gewählten Monat. Bei einem
-		// Wechsel (Fenster ziehen, Tablet drehen) dockt der Listener unten um.
+		// Desktop-Spalten (Fred 2026-06-14): dieselben Schwellen wie im CSS.
+		// ≥1150px: Uhrzeiten in die Seitenspalte, Formular in die DRITTE Spalte
+		// (1 Tag · 2 Uhrzeit · 3 Daten nebeneinander). ≥900px: beide zusammen
+		// in die Seitenspalte. Darunter (Mobil): inline unterm gewählten Monat.
+		// Bei einem Wechsel (Fenster ziehen, Tablet drehen) docken die
+		// Listener unten um.
 		const desktopMq = window.matchMedia("(min-width: 900px)");
+		const wideMq = window.matchMedia("(min-width: 1150px)");
 		let chosenMonthMeta: { year: number; month: number; name: string } | null = null;
 
 		function dockSteps() {
 			const inline = chosenMonthMeta
 				? document.getElementById("inline-" + chosenMonthMeta.year + "-" + chosenMonthMeta.month)
 				: null;
-			const target = desktopMq.matches ? sidePanel : inline;
-			if (!target) return;
-			target.appendChild(stepTime);
-			target.appendChild(stepForm);
+			if (wideMq.matches) {
+				sidePanel.appendChild(stepTime);
+				sideForm.appendChild(stepForm);
+			} else if (desktopMq.matches) {
+				sidePanel.appendChild(stepTime);
+				sidePanel.appendChild(stepForm);
+			} else if (inline) {
+				inline.appendChild(stepTime);
+				inline.appendChild(stepForm);
+			}
 		}
 
-		desktopMq.addEventListener("change", () => {
+		function redock() {
 			if (chosenMonthMeta && !stepTime.classList.contains("hidden")) dockSteps();
-		});
+		}
+		desktopMq.addEventListener("change", redock);
+		wideMq.addEventListener("change", redock);
 
 		// 6 grobe Tagesabschnitte für den Balken (9–18 Uhr Arbeitsfenster) —
 		// ehrlich aus der echten Slot-Antwort abgeleitet: ein Abschnitt gilt
