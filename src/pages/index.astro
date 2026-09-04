@@ -50,34 +50,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Business ohne Witness." ist zurück im Hero; die Akten-Fassung des
 	   Plädoyers und der Dreizeiler leben in Brief-Fortschritt + Git-Historie
 	   (bewusst kein Code-Vorrat). Wortlaut = Freds Diktat, wörtlich. */}
-	<section class="paragraph wrap">
+	<section class="paragraph">
 		<p class="plaedoyer-text">Alle sind plötzlich Experten. Wissen gibt es auf Knopfdruck. Das geschriebene Wort im Marketing steht damit unter Generalverdacht.</p>
 		<p class="plaedoyer-text">Wir übernehmen die Verteidigung eurer Expertise. Mit Formaten aus echten Gesprächen, die den Beweis liefern.</p>
 		<p class="plaedoyer-text">Der Zuschauer wird zum Augenzeugen eurer Expertise, noch vor dem ersten Kontakt.</p>
-	</section>
-
-	{/* Segment 2 "Das Gespräch" (Fred 31.08.): dieselbe zweigeteilte Bauform
-	   wie das Plädoyer, GESPIEGELT — das große Statement steht diesmal
-	   RECHTS ("Filmreif / ohne Kamerastress.", aus dem Tour-Claim, "echte
-	   Gespräche" bewusst weggelassen: das Wort Gespräch trägt schon der
-	   Plädoyer-Schluss darüber). Markup-Reihenfolge Text→Essenz = mobil
-	   steht der Text oben (beim Plädoyer ist es andersrum — die beiden
-	   Segmente wechseln sich auch mobil ab).
-	   Textspalte (Wording-Runde 2026-06-14): Fred-gewordetes Material aus dem
-	   Profiltext-Ast (LinkedIn_Profil_Strategie, About-Kandidat 27./28.08. —
-	   die "Verzweigung", nach der Fred fragte). Der dortige Absatz endet
-	   wörtlich auf "Filmreif, ohne Kamerastress" — hier weggelassen, weil das
-	   Statement rechts daneben steht. "Blickkontaktstudio" im Singular (die
-	   Website hat EIN Studio; der Profiltext nutzt den Plural als Kategorie). */}
-	<section class="plaedoyer plaedoyer--gespraech wrap">
-		<div class="plaedoyer-half plaedoyer-half--text">
-			<p class="plaedoyer-text">Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man in unserem Blickkontaktstudio keine.</p>
-			<p class="plaedoyer-text">Ihr sprecht mit eurem Gegenüber, entspannt im Gesprächsmodus — und der Zuschauer erlebt das Gespräch aus der echten Gesprächspartner-Perspektive.</p>
-		</div>
-		<div class="plaedoyer-half plaedoyer-half--essence">
-			<p class="essence-line">Filmreif.</p>
-			<p class="essence-line">Ohne Kamerastress.</p>
-		</div>
 	</section>
 
 	<section class="proof wrap">
@@ -243,63 +219,23 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		}
 	}
 
-	/* Plädoyer-Sektion, ZWEIGETEILT (Website-Brief, Layout-Update 29.08. spät:
-	   "das Split-Muster von Nuxt-Seite und BBH" — eine Hälfte der 4-Satz-Text,
-	   die andere die Essenz groß; das ursprünglich geplante Eyebrow-Label
-	   "Unser Eröffnungsplädoyer" ist per spätem Auftrags-Update wieder
-	   entfernt, siehe Kommentar oben am Markup). Fließtext-Größe weiterhin
-	   1:1 aus BBHs ausgeliefertem CSS gemessen (ea792231b42826ae.css, fetch +
-	   Regex auf .text-*-original — die dortigen statischen px-Fallbacks der
-	   fluid()-Kette, siehe Fortschritts-Eintrag 2026-08-29 für die Rohwerte):
-	   .text-base-original: clamp(18px,16.7952px+.3012vw,22px) → Fließtext.
-	   Essenz-Zeile hat eine eigene, größere Stufe bekommen (siehe Kommentar
-	   bei .essence-line unten, überschreibt die ursprünglich geplante
-	   BBH-text-xl-Übernahme).
-
-	   Gewichtung Desktop (Website-Brief, Layout-Spec 29.08. nachts: "Teilung
-	   EXAKT 50/50 — nicht nach Schriftgröße gewichtet — Muster: alte
-	   Nuxt-Seite/BBH"): grid-template-columns minmax(0, 1fr) minmax(0, 1fr).
-	   Bugfix beim Bau: reines "1fr 1fr" reicht NICHT für exakt gleiche
-	   Spalten — fr-Tracks haben implizit eine min-width:auto-Untergrenze, und
-	   die Essenz-Zeile (bis 6.25rem, ein einzelnes langes Wort als
-	   Min-Content) zwang ihre Spalte dadurch messbar breiter als die
-	   Text-Spalte (487.9px vs. 535.3px bei 1280px Viewport, live in der
-	   Browser-Pane nachgemessen statt nur angenommen). minmax(0, 1fr) setzt
-	   die Untergrenze explizit auf 0 und erzwingt echte 50/50-Gleichheit,
-	   unabhängig vom Inhalt. max-width:46rem auf .plaedoyer-text bleibt als
-	   reine Lesbarkeits-Zeilenlängen-Bremse bestehen (verhindert nur zu lange
-	   Zeilen innerhalb der 50%-Spalte, ändert nichts an der Spaltenbreite
-	   selbst).
-
-	   Mobil (< 800px): untereinander, Reihenfolge = Markup-Reihenfolge, Text
-	   VOR Essenz (Entscheidung, dokumentiert im Website-Brief-Fortschritt):
-	   das ist die gleiche Argument-vor-Fazit-Reihenfolge, die die Seite schon
-	   als zwei getrennte Sektionen hatte (Plädoyer, danach Solo-Zeile) — der
-	   4-Satz-Absatz ist als Treppen-Stufe (nicken → Stich → zweites Nicken →
-	   Entlastung) auf Vorwissen angewiesen, das die Essenz erst zusammenfasst;
-	   umgekehrt gelesen (Essenz zuerst) nimmt der Pointe die eigene Herleitung
-	   vorweg. */
-	.plaedoyer {
-		padding: 56px 0 64px;
-		/* BBH-Maß 1:1 (Fred 30.08., Vergleich /about): BBHs site-container
-		   deckelt bei 1728px, nicht 1400 — mit 1400 blieb unsere Halbspalte
-		   bei 1920er-Viewport ~200px schmaler als BBHs (~620 vs ~830px), und
-		   die cqw-gekoppelte Essenz-Schrift entsprechend unter deren 80px-
-		   Niveau (gemessen: 51px vs. 42px bei 921er-Pane). Mit 1728 trifft
-		   9.6cqw × ~830px-Spalte fast exakt BBHs 80px-Maximum. */
-		max-width: 1728px;
-		display: flex;
-		flex-direction: column;
-		gap: 48px;
+	/* "Der Paragraph" (Fred 2026-06-14, zweite Runde: "Container breiter,
+	   zu abgeschnitten — über die ganze Breite"): bewusst KEIN .wrap und keine
+	   max-width auf den Absätzen — die Zeilen laufen bis auf den BBH-Randabstand
+	   an die Bildschirmkanten. Fred bricht selbst runter, wie weit das bleibt;
+	   die 46rem-Lesebremse von .plaedoyer-text ist hier deshalb aufgehoben. */
+	.paragraph {
+		padding: 56px 16px 64px;
 	}
 
-	@media (min-width: 800px) {
-		.plaedoyer {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-			gap: clamp(40px, 6vw, 96px);
-			align-items: center;
+	@media (min-width: 1024px) {
+		.paragraph {
+			padding: 56px 32px 64px;
 		}
+	}
+
+	.paragraph .plaedoyer-text {
+		max-width: none;
 	}
 
 	.plaedoyer-text {
@@ -329,90 +265,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			margin-top: 2rem;
 		}
 	}
-
-	/* Essenz-Hälfte in sich MITTIG gesetzt (Website-Brief, Layout-Spec: "die
-	   Essenz-Zeile in sich MITTIG gesetzt — text-align center in ihrer
-	   Hälfte"), unabhängig vom linksbündigen Fließtext in der Nachbarspalte.
-	   container-type:inline-size (Nachbesserung Fred): macht die Hälfte zum
-	   Bezugsrahmen für cqw-Einheiten IHRER Kinder — die Essenz-Schrift skaliert
-	   dadurch mit der tatsächlichen Spaltenbreite, nicht mehr mit dem
-	   Viewport (siehe .essence-line-Kommentar unten für die Fehlerursache). */
-	.plaedoyer-half--essence {
-		text-align: center;
-		container-type: inline-size;
-	}
-
-	/* Essenz-Zeile — Größen-Historie (kurz): erst an BBHs text-xl orientiert
-	   (max 50px), dann auf eine vw-geclampte Zwischenstufe angehoben (zweite
-	   Nachbesserung überlief bei breiten Monitoren, siehe unten), dann auf
-	   cqw umgestellt (an die Spalte statt den Viewport gekoppelt).
-
-	   ZWEITE Nachbesserung (Fred, Screenshot bei ~2000px Viewport): bei sehr
-	   breiten Monitoren lief die Zeile rechts aus dem Bild, weil font-size
-	   mit dem VIEWPORT skalierte (vw-Anteil im Clamp), während die Spalte
-	   selbst bei --max-width:1100px gedeckelt ist. Fix: font-size in cqw,
-	   bezogen auf .plaedoyer-half--essence als eigenen Query-Container
-	   (container-type:inline-size dort) — skaliert seither mit der
-	   TATSÄCHLICHEN Spaltenbreite, kann bei keiner Breite mehr überlaufen.
-
-	   FÜNFTE Nachbesserung (Fred): bei jener Kalibrierung (7.3cqw, ~37px bei
-	   1280px) war die Zeile "deutlich zu klein". Referenz-Recherche gegen
-	   bartleboglehegarty.com (ausgeliefertes CSS-Bundle
-	   ea792231b42826ae.css, live gefetcht + auf .text-*-original-Klassen
-	   durchsucht, UND live im Markup verifiziert, welche Klasse BBH
-	   tatsächlich für "große Statement-Zeilen in halbbreiten Sektionen"
-	   einsetzt — nicht nur die CSS-Definition, sondern echte Verwendung):
-	   auf /about steht in einem `w-full md:w-1/2`-Split (Signatur-Bild
-	   links, Text rechts — strukturell fast identisch zu unserer
-	   Plädoyer-Sektion) der Eröffnungssatz "We are a global creative
-	   company…" in `text-2xl`. text-xl (die vorherige Referenz, max. 50px)
-	   wird auf allen geprüften Case-Study-Seiten nur für Seitentitel/Stat-
-	   Zahlen verwendet, NICHT für Statement-Fließtext — text-2xl ist die
-	   richtigere Referenz. .text-2xl-original: clamp(30px,14.9398px+
-	   3.7651vw,80px) → bei 1280px Viewport: 14.9398+3.7651*12.8 ≈ 63,1px.
-	   Cqw-Koeffizient neu kalibriert, um diesen Zielwert bei unserer
-	   Spaltenbreite (511.6px bei 1280px Viewport) zu treffen: 63.1/511.6*100
-	   ≈ 12.3cqw — live gemessen ergibt das 62.93px (praktisch exakt der
-	   BBH-Zielwert).
-	   Bei dieser Größe passt "mit tausend Augenzeugen." nicht mehr einzeilig
-	   in die Spalte (Fred: "Priorität hat die GRÖSSE") — auf Freds Anweisung
-	   deshalb DREIZEILER mit bewusst gesetzten Umbrüchen im Markup ("Ein
-	   Gespräch" / "mit tausend" / "Augenzeugen.", siehe dort), die frühere
-	   "tausend Augenzeugen bleibt zusammen"-Regel ist damit aufgehoben.
-	   Breiten-Check je Zeile bei 1280px (Spalte 511.6px): "Ein Gespräch"
-	   382.5px, "mit tausend" 344.3px, "Augenzeugen." 415.6px (die breiteste,
-	   ~81% der Spalte — komfortabler Puffer). line-height 1.05 unverändert
-	   (weiterhin in Freds Spanne 1.05–1.15). Min-Bound weiterhin niedrig
-	   (1.5rem): eine harte Mindestgröße würde bei sehr schmalen Spalten
-	   wieder überlaufen — Passung hat Vorrang. */
-	.essence-line {
-		/* Deckel exakt auf BBHs text-2xl-Maximum (80px) statt vorher 100px —
-		   „Stil von BBH übernehmen", Fred 30.08.
-		   cqw-Koeffizient neu kalibriert für den Statement-Tausch (Fred 30.08.):
-		   längste Zeile ist jetzt "Ihr habt die Expertise." (~23 Zeichen statt
-		   12 beim alten "Augenzeugen.") — 12.3cqw würde weit überlaufen.
-		   Startwert rechnerisch (12.3 × 12/23 ≈ 6.4, plus Luft) und dann live
-		   nachgemessen, siehe Fortschritts-Protokoll. */
-		/* GESETZTE REGEL (Fred 31.08.): ALLE großen Segment-Statements der
-		   Seite teilen EINE Größe — sie dürfen zwischen den Segmenten nicht
-		   variieren. Kalibriert wird diese eine Zahl auf die längste
-		   Statement-Zeile des gesamten Auftritts; kommt später ein längerer
-		   Text dazu, wird HIER global gesenkt (keine Sonderregeln pro
-		   Segment!). Aktuell längste Zeile: "Ohne Kamerastress." (Segment 2,
-		   Canvas-Messung: 9.34× Schriftgröße breit → Maximum 10.7cqw, gesetzt
-		   10.5 mit Sicherheitsmarge). "Kein Business ohne Witness." füllt
-		   damit ~66% seiner Spalte — die frühere Kantenfüllungs-Kalibrierung
-		   (13.4cqw, Historie im Git) ist der Gleichheits-Regel gewichen.
-		   Deckel bewusst 6.875rem (110px) statt BBHs text-2xl (80px). */
-		font-size: clamp(1.5rem, 10.5cqw, 6.875rem);
-		font-weight: 900;
-		line-height: 1.05;
-		letter-spacing: -0.01em;
-	}
-
-	/* (.essence-sub entfernt — die Unterschrift "Ein Gespräch mit tausend
-	   Augenzeugen." ist zugunsten von "mit Augenzeugen" im großen Statement
-	   entfallen, Fred 30.08.) */
 
 	.proof {
 		padding: 24px 0 64px;
