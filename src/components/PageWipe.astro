@@ -66,10 +66,15 @@
 	// eigentlichen Wechsel um die Animationsdauer — genau das Muster, das Maximilian
 	// bei Nuxt über Vue-Router-Hooks gebaut hat, hier über Astros eigenen
 	// astro:before-preparation-Hook mit überschriebenem Loader.
+	// Merkt sich die Navigations-Art: bei Vor/Zurück (traverse) soll der
+	// Browser seine Scroll-Restauration behalten, bei Link-Klicks nicht.
+	let lastNavWasTraverse = false;
+
 	document.addEventListener("astro:before-preparation", (event: any) => {
 		const el = document.getElementById("page-wipe");
 		const originalLoader = event.loader;
 		const skip = reduceMotion();
+		lastNavWasTraverse = event.navigationType === "traverse";
 
 		event.loader = async function () {
 			if (el && !skip) {
@@ -77,5 +82,16 @@
 			}
 			await Promise.all([originalLoader(), skip ? Promise.resolve() : wait(DURATION)]);
 		};
+	});
+
+	// Scroll-Reset SELBST und SOFORT beim DOM-Tausch (Fred-Befund 2026-06-14,
+	// Repro "Menü → Seite anklicken"): Durch unseren verzögerten Loader kam
+	// Astros eigener Reset erst ~1,5s NACH dem Wipe — die neue Seite stand
+	// solange auf der alten Scroll-Position. Auf kurzen Seiten lag damit der
+	// Footer im Bild (Buchstaben-Spitzen oben links), bis der späte Reset den
+	// sichtbaren "Sprung" machte. astro:after-swap feuert, während der Wipe
+	// noch voll deckt — der Reset passiert also unsichtbar hinterm Vorhang.
+	document.addEventListener("astro:after-swap", () => {
+		if (!lastNavWasTraverse) window.scrollTo(0, 0);
 	});
 </script>
