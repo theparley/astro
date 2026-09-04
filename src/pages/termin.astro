@@ -139,43 +139,35 @@ import Layout from "../layouts/Layout.astro";
 		}
 	}
 
-	/* Desktop-Zweispalter: Kalender links (max. 520px wie gehabt), Uhrzeiten/
-	   Formular rechts als sticky Panel — bleibt beim Scrollen durch die zwei
-	   Monatsblöcke im Blick. Auf Mobil ist .kalender-grid ein normaler
-	   Block-Fluss und #sidePanel leer (die Schritte docken unterm Monat an). */
+	/* EIN Breakpoint (Fred-Entscheid 2026-06-14, "900"): ab 900px direkt DREI
+	   fluide Spalten — 1 Tag · 2 Uhrzeit · 3 Formular. Der frühere
+	   Zwischenzustand (900–1150px: Kalender allein + Zeit/Formular gestapelt)
+	   ist gestrichen — die Treppe liegt entweder nebeneinander oder
+	   untereinander. Bricht das Fluid-Design nicht, sondern nutzt es: die
+	   Kalender-Kacheln skalieren per Container-Einheiten mit ihrer Spalte
+	   (ein schmaler Kalender rendert wie auf dem Handy), Slot-Liste und
+	   Formular sind 100% ihrer Spalte — alles atmet von 900 bis 1200 einfach
+	   mit. Auf Mobil ist .kalender-grid normaler Block-Fluss und die Panels
+	   sind leer (die Schritte docken unterm Monat an). */
 	@media (min-width: 900px) {
-		.buchen {
-			max-width: 960px;
-		}
-
-		.kalender-grid {
-			display: grid;
-			grid-template-columns: minmax(0, 520px) minmax(280px, 1fr);
-			gap: 0 48px;
-			align-items: start;
-		}
-
-		#sidePanel {
-			position: sticky;
-			top: 32px;
-		}
-	}
-
-	/* Drei Spalten (Fred 2026-06-14): 1 Tag · 2 Uhrzeit · 3 Formular. */
-	@media (min-width: 1150px) {
 		.buchen {
 			max-width: 1200px;
 		}
 
 		.kalender-grid {
-			grid-template-columns: minmax(0, 500px) minmax(200px, 280px) minmax(260px, 1fr);
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(170px, 0.55fr) minmax(200px, 0.62fr);
+			gap: 0 clamp(24px, 3.5vw, 48px);
+			align-items: start;
 		}
 
+		#sidePanel,
 		#sideForm {
 			position: sticky;
 			top: 32px;
 		}
 	}
+
 
 	.side-hint {
 		display: none;
@@ -563,26 +555,21 @@ import Layout from "../layouts/Layout.astro";
 		const sideForm = document.getElementById("sideForm") as HTMLElement;
 		const sideHint = document.getElementById("sideHint") as HTMLElement;
 
-		// Desktop-Spalten (Fred 2026-06-14): dieselben Schwellen wie im CSS.
-		// ≥1150px: Uhrzeiten in die Seitenspalte, Formular in die DRITTE Spalte
-		// (1 Tag · 2 Uhrzeit · 3 Daten nebeneinander). ≥900px: beide zusammen
-		// in die Seitenspalte. Darunter (Mobil): inline unterm gewählten Monat.
-		// Bei einem Wechsel (Fenster ziehen, Tablet drehen) docken die
-		// Listener unten um.
+		// EIN Breakpoint (Fred-Entscheid 2026-06-14, "900" — Zwischenzustand
+		// gestrichen): ≥900px docken die Schritte in die Spalten 2 und 3
+		// (1 Tag · 2 Uhrzeit · 3 Daten nebeneinander), darunter inline unterm
+		// gewählten Monat. Bei einem Wechsel (Fenster ziehen, Tablet drehen)
+		// dockt der Listener um.
 		const desktopMq = window.matchMedia("(min-width: 900px)");
-		const wideMq = window.matchMedia("(min-width: 1150px)");
 		let chosenMonthMeta: { year: number; month: number; name: string } | null = null;
 
 		function dockSteps() {
 			const inline = chosenMonthMeta
 				? document.getElementById("inline-" + chosenMonthMeta.year + "-" + chosenMonthMeta.month)
 				: null;
-			if (wideMq.matches) {
+			if (desktopMq.matches) {
 				sidePanel.appendChild(stepTime);
 				sideForm.appendChild(stepForm);
-			} else if (desktopMq.matches) {
-				sidePanel.appendChild(stepTime);
-				sidePanel.appendChild(stepForm);
 			} else if (inline) {
 				inline.appendChild(stepTime);
 				inline.appendChild(stepForm);
@@ -593,7 +580,6 @@ import Layout from "../layouts/Layout.astro";
 			if (chosenMonthMeta && !stepTime.classList.contains("hidden")) dockSteps();
 		}
 		desktopMq.addEventListener("change", redock);
-		wideMq.addEventListener("change", redock);
 
 		// 6 grobe Tagesabschnitte für den Balken (8–17 Uhr, Freds meetergo-
 		// Verfügbarkeit — korrigiert 2026-06-14, vorher 9–18: der 8-Uhr-Slot
