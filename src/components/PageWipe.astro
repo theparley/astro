@@ -93,5 +93,29 @@
 	// noch voll deckt — der Reset passiert also unsichtbar hinterm Vorhang.
 	document.addEventListener("astro:after-swap", () => {
 		if (!lastNavWasTraverse) window.scrollTo(0, 0);
+
+		// Verteidigung gegen Extension-Injektionen (Befund 2026-06-14: Apollo.io
+		// injizierte ein 45px hohes DIV.zp-open-popup-button, das nach dem Swap
+		// VOR .site-content im Fluss landete und die ganze Seite runterschob —
+		// die obersten 45px zeigten die Footer-Wortmarke). Fremde Body-Kinder,
+		// die im normalen Fluss VOR unserem Inhalt stehen, wandern ans Body-
+		// Ende — dort verschieben sie nichts; fixed/absolute positionierte
+		// Elemente sind davon optisch unberührt (Listener bleiben erhalten).
+		const content = document.querySelector(".site-content");
+		if (!content) return;
+		for (const child of [...document.body.children]) {
+			if (child === content) break; // alles danach ist unkritisch
+			const known =
+				child.id === "page-wipe" ||
+				child.tagName === "SCRIPT" ||
+				child.classList.contains("menu-root") ||
+				child.classList.contains("astro-route-announcer");
+			if (known) continue;
+			const pos = getComputedStyle(child).position;
+			const inFlow = pos === "static" || pos === "relative";
+			if (inFlow && (child as HTMLElement).offsetHeight > 0) {
+				document.body.appendChild(child);
+			}
+		}
 	});
 </script>
