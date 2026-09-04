@@ -5,15 +5,16 @@
 // Zwetschke-Modell — Hamburger-Striche + Wort "Menü", Klick klappt große
 // Listenzeilen nach OBEN auf (zwetschke.de-Mechanik), aber ECKIG statt
 // Zwetschkes Pillen-Rundung (unsere Kachel-Formsprache). "Let's Parley"
-// ist vorerst weg (Fred: "überlegen wir später"); seine Tür übernimmt der
-// Menüpunkt Kontakt (→ /buchen — /buchen IST die Kontakt-Seite, Website-
-// Brief: "Es braucht NIE eine eigene Kontakt-Seite").
+// ist vorerst weg (Fred: "überlegen wir später"). Struktur-Entscheid
+// 2026-06-14: drei Menüpunkte Home / Termin (/termin, die eine Tür) /
+// Kontakt (/kontakt, stilles Fallnetz mit Formular + Kontaktdaten) —
+// revidiert den früheren Brief-Satz "nie eine eigene Kontakt-Seite".
 //
 // Ersetzt CtaTile.astro im Layout. Die komplette Geburts-Choreografie
 // (gated/revealed-Klassen, Transition aus der Stangen-Form, Schrift-Sequenz)
 // ist 1:1 von dort übernommen — BrandLogo.astro bleibt das EINE Skript, das
 // die Verwandlung treibt, nur die Klassennamen sind auf .menu-tile
-// umgezogen. Anders als der CTA erscheint der Menü-Knopf auch auf /buchen
+// umgezogen. Anders als der CTA erscheint der Menü-Knopf auf JEDER Seite
 // (er ist Navigation, kein Verkaufsknopf — die hideCta-Logik entfällt).
 interface Props {
 	// true nur auf der Startseite: die Kachel wird von BrandLogo.astro per
@@ -46,8 +47,9 @@ const { gateBehindHero = false } = Astro.props;
 	   Markup = optisch von oben nach unten. Weitere Punkte (Format, Studio)
 	   docken in Phase 2 hier an. */}
 	<nav class="menu-panel" aria-label="Hauptmenü">
-		<a href="/" style="--in-delay: 60ms">Home</a>
-		<a href="/buchen" style="--in-delay: 0ms">Kontakt</a>
+		<a href="/" style="--in-delay: 120ms">Home</a>
+		<a href="/termin" style="--in-delay: 60ms">Termin</a>
+		<a href="/kontakt" style="--in-delay: 0ms">Kontakt</a>
 	</nav>
 	{/* Dimmt/verwischt die Seite, solange das Menü offen ist (BBH-Backdrop-
 	   Werte wie im archivierten TileMenu) — Tipp darauf schließt (Zwetschke/

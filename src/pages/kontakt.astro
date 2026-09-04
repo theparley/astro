@@ -1,0 +1,309 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+{/* /kontakt — das stille Fallnetz (Struktur-Entscheid Fred 2026-06-14:
+   Home + /termin + /kontakt). Hier lebt das Anfrage-Formular (1:1-Port des
+   Nuxt-Formulars → functions/api/contact.js → MailerLite-Gruppe "The First
+   Parley Anfragen" + Bestätigungs-Automation) plus die Kontaktdaten.
+   WICHTIG (Ein-Tür-Konvention aus dem Brief): Diese Seite wird NIE als CTA
+   beworben — sie ist über Menü/Footer auffindbar (Konvention "Kontakt"),
+   die beworbene Tür ist /termin. Die Fastlane-Zeile oben führt dorthin
+   zurück. */}
+<Layout title="Kontakt" description="Schickt uns eine Anfrage oder erreicht uns direkt: Telefon, E-Mail, Adresse. The Parley, Alter Schlachthof 33, Karlsruhe.">
+	<main class="buchen kontakt">
+		<h1>Anfrage.</h1>
+		<p class="sub">Erzählt uns von eurem Vorhaben.</p>
+		<p class="fastlane">Am schnellsten geht’s im Gespräch: <a href="/termin">Termin wählen →</a></p>
+
+		<div id="anfrageTeil">
+			<form id="anfrageForm" novalidate>
+				<div class="field-row">
+					<div class="field"><label for="a-vorname">Vorname *</label><input id="a-vorname" type="text" autocomplete="given-name" /></div>
+					<div class="field"><label for="a-nachname">Nachname *</label><input id="a-nachname" type="text" autocomplete="family-name" /></div>
+				</div>
+				<div class="field"><label for="a-email">E-Mail *</label><input id="a-email" type="email" autocomplete="email" /></div>
+				<div class="field"><label for="a-telefon">Telefon</label><input id="a-telefon" type="tel" autocomplete="tel" placeholder="optional" /></div>
+				<div class="field"><label for="a-vorhaben">Euer Vorhaben *</label><textarea id="a-vorhaben" rows="4" placeholder="Worüber wollt ihr sprechen?"></textarea></div>
+				{/* Honeypot, gleiches Muster wie im Kalender-Formular (book.js). */}
+				<div class="hp-field" aria-hidden="true">
+					<label for="a-website">Website</label>
+					<input id="a-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+				</div>
+				<p class="privacy">Mit dem Absenden seid ihr einverstanden, dass eure Daten zur Beantwortung eurer Anfrage verarbeitet und zu Dokumentationszwecken gespeichert werden. Mehr in der <a href="/datenschutz">Datenschutzerklärung</a>.<br />Antwort meist innerhalb von 24 Stunden.</p>
+				<p class="status error hidden" id="anfrageError" role="alert" aria-live="assertive"></p>
+				<div class="actions">
+					<button type="submit" class="btn-confirm" id="btnAnfrage">Anfrage senden</button>
+				</div>
+			</form>
+			<div id="anfrageDone" class="hidden done">
+				<div class="flag">⚑</div>
+				<h2>Parley angenommen.</h2>
+				<p>Danke, eure Anfrage ist angekommen. Die Bestätigung ist unterwegs in euer Postfach, wir melden uns.</p>
+			</div>
+		</div>
+
+		<div class="direct">
+			Direkt erreichen:<br />
+			<a href="tel:+497219574304">0721 957 43 04</a> · <a href="mailto:eckert@theparley.de">eckert@theparley.de</a><br />
+			<span class="adresse">The Parley · Alter Schlachthof 33 · 76131 Karlsruhe</span>
+		</div>
+	</main>
+</Layout>
+
+<style is:global>
+	/* Gleiche Grundspalte wie /termin (Klasse .buchen — geerbtes CSS-Vokabular
+	   der alten /buchen-Seite). Dieser Style-Block lädt nur auf /kontakt. */
+	.buchen {
+		max-width: 520px;
+		margin: 0 auto;
+		padding: 64px 16px 140px;
+	}
+
+	@media (min-width: 1024px) {
+		.buchen {
+			padding-left: 32px;
+			padding-right: 32px;
+		}
+	}
+
+	h1 {
+		font-size: 1.9rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		line-height: 1.1;
+	}
+
+	.sub {
+		color: var(--gray);
+		margin-top: 6px;
+		font-size: 1rem;
+	}
+
+	/* Fastlane: die leise Rückführung zur einen Tür (/termin) — bewusst kein
+	   Button, nur eine Zeile im Geleit-Stil. */
+	.fastlane {
+		margin-top: 14px;
+		font-size: 0.85rem;
+		color: var(--gray);
+		border-left: 2px solid var(--line);
+		padding-left: 10px;
+		line-height: 1.45;
+	}
+
+	.fastlane a {
+		color: var(--white);
+		text-decoration: none;
+		border-bottom: 1px solid var(--gray);
+	}
+
+	.status {
+		font-size: 0.85rem;
+		color: var(--gray);
+		padding: 12px 0;
+	}
+
+	/* #e0a0a0: gleicher dokumentierter Sonder-Ton wie auf /termin (Audit-Fix B8). */
+	.status.error {
+		color: #e0a0a0;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	/* Formular */
+	.field {
+		margin-bottom: 12px;
+	}
+
+	/* Anfrage-Formular: Vorname/Nachname nebeneinander, mobil untereinander. */
+	.field-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0 12px;
+	}
+	@media (max-width: 480px) {
+		.field-row {
+			grid-template-columns: 1fr;
+		}
+	}
+	#anfrageForm {
+		margin-top: 28px;
+	}
+	#anfrageForm .actions {
+		justify-content: flex-end;
+	}
+
+	/* Honeypot (Audit-Fix A4): per CSS unsichtbar (nicht display:none/
+	   visibility:hidden — manche Bots überspringen genau diese beiden
+	   Eigenschaften gezielt), aber weiterhin Teil des DOM-Renderflows. */
+	.hp-field {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+	}
+
+	.field label {
+		display: block;
+		font-size: 0.75rem;
+		color: var(--gray);
+		margin-bottom: 4px;
+	}
+
+	.field input,
+	.field textarea {
+		width: 100%;
+		background: var(--panel);
+		border: 1px solid var(--line);
+		color: var(--white);
+		font-family: inherit;
+		font-size: 1rem;
+		padding: 12px;
+	}
+
+	.field input:focus,
+	.field textarea:focus {
+		outline: none;
+		border-color: var(--white);
+	}
+
+	.privacy {
+		font-size: 0.7rem;
+		color: var(--gray);
+		line-height: 1.5;
+		margin: 14px 0 18px;
+	}
+
+	.privacy a {
+		color: var(--gray);
+	}
+
+	.actions {
+		display: flex;
+		gap: 10px;
+	}
+
+	.btn-confirm {
+		flex: 1;
+		border: none;
+		background: var(--surface);
+		color: var(--black);
+		font-family: inherit;
+		font-size: 1rem;
+		font-weight: 800;
+		padding: 14px 0;
+		cursor: pointer;
+	}
+
+	.btn-confirm:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	/* Bestätigung */
+	.done {
+		text-align: center;
+		padding: 60px 0;
+	}
+
+	.done .flag {
+		font-size: 2.5rem;
+		margin-bottom: 16px;
+	}
+
+	.done h2 {
+		font-size: 1.5rem;
+		font-weight: 800;
+		margin-bottom: 10px;
+	}
+
+	.done p {
+		color: var(--gray);
+		line-height: 1.5;
+	}
+
+	/* Kontaktdaten */
+	.direct {
+		margin-top: 34px;
+		padding-top: 18px;
+		border-top: 1px solid var(--line);
+		font-size: 0.85rem;
+		color: var(--gray);
+		line-height: 1.6;
+	}
+
+	.direct a {
+		color: var(--white);
+		text-decoration: none;
+		border-bottom: 1px solid var(--gray);
+	}
+
+	.direct .adresse {
+		color: var(--gray);
+	}
+</style>
+
+<script>
+	// Anfrage-Formular (Port des Nuxt-Formulars) gegen functions/api/contact.js.
+	// An astro:page-load gekoppelt (Muster wie MenuTiles/PageWipe), damit das
+	// Formular auch nach Client-Side-Navigation initialisiert wird.
+	function initKontakt() {
+		const form = document.getElementById("anfrageForm") as HTMLFormElement | null;
+		if (!form) return; // nicht auf dieser Seite
+		const done = document.getElementById("anfrageDone") as HTMLElement;
+		const fehler = document.getElementById("anfrageError") as HTMLElement;
+		const btn = document.getElementById("btnAnfrage") as HTMLButtonElement;
+		const feld = (id: string) => document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
+		const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+		form.addEventListener("submit", async (ev) => {
+			ev.preventDefault();
+			const daten = {
+				firstName: feld("a-vorname").value.trim(),
+				lastName: feld("a-nachname").value.trim(),
+				email: feld("a-email").value.trim(),
+				phone: feld("a-telefon").value.trim(),
+				message: feld("a-vorhaben").value.trim(),
+				website: feld("a-website").value,
+			};
+			if (!daten.firstName || !daten.lastName || !daten.email || !daten.message) {
+				fehler.textContent = "Bitte füllt alle Pflichtfelder aus.";
+				fehler.classList.remove("hidden");
+				return;
+			}
+			if (!EMAIL_RE.test(daten.email)) {
+				fehler.textContent = "Bitte gebt eine gültige E-Mail-Adresse ein.";
+				fehler.classList.remove("hidden");
+				return;
+			}
+			fehler.classList.add("hidden");
+			btn.disabled = true;
+			btn.textContent = "Wird gesendet …";
+			try {
+				const res = await fetch("/api/contact", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(daten),
+				});
+				if (!res.ok) {
+					const data = await res.json().catch(() => ({}));
+					throw new Error(data.message || "Das Formular konnte nicht gesendet werden. Bitte versucht es später erneut.");
+				}
+				form.classList.add("hidden");
+				done.classList.remove("hidden");
+			} catch (err) {
+				fehler.textContent = err instanceof Error ? err.message : "Das Formular konnte nicht gesendet werden. Bitte versucht es später erneut.";
+				fehler.classList.remove("hidden");
+			} finally {
+				btn.disabled = false;
+				btn.textContent = "Anfrage senden";
+			}
+		});
+	}
+
+	document.addEventListener("astro:page-load", initKontakt);
+</script>

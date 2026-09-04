@@ -2,54 +2,23 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-{/* Eigenbau-Kalender auf Basis der meetergo-API (Website-Brief, /buchen-
-   Kapitel + FINALE UI-Spec 29.08. abends) — PAT bleibt server-seitig in den
-   Cloudflare Pages Functions unter functions/api/{slots,book}.js, siehe
-   functions/_lib/meetergo.js. Der Menü-Knopf (MenuTile) erscheint seit dem
-   Menü-Umbau 30.08. auch hier — er ist Navigation; die frühere hideCta-
-   Ausblendung galt nur dem Let's-Parley-CTA. */}
-<Layout title="Buchen" description="Ein kleines Gespräch. 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley.">
+{/* /termin — DIE eine Tür der Seite (Struktur-Entscheid Fred 2026-06-14:
+   Home + /termin + /kontakt; ersetzt /buchen, das per Redirect hierher
+   zeigt). Eigenbau-Kalender auf Basis der meetergo-API (Website-Brief,
+   /buchen-Kapitel + FINALE UI-Spec 29.08. abends) — PAT bleibt server-
+   seitig in den Cloudflare Pages Functions unter functions/api/
+   {slots,book}.js, siehe functions/_lib/meetergo.js. Der ?kalender-
+   Schalter ist Geschichte: Secrets sind gesetzt, Strecke Ende-zu-Ende
+   getestet (Brief-Fortschritt 2026-06-14), der Kalender ist scharf.
+   Das Anfrage-Formular lebt jetzt auf /kontakt (stilles Fallnetz, nie
+   als CTA beworben — Ein-Tür-Konvention bleibt intakt). */}
+<Layout title="Termin" description="Ein kleines Gespräch. 30 Minuten, nichts vorbereiten. Buche direkt einen Termin mit The Parley.">
 	<main class="buchen">
 		<h1>Ein kleines Gespräch.</h1>
 		<p class="sub">30 Minuten, nichts vorbereiten.</p>
 		<p class="geleit">Parley heißt Verhandlungsgespräch. Wer es ausruft, bekommt sicheres Geleit: kein Pitch, keine Unterlagen, ein Gespräch.</p>
 
-		{/* Anfrage-Formular (Fred 31.08., "schneller online stellen"): 1:1-Port
-		   des bewährten Nuxt-Formulars (ParleyContactForm.vue → MailerLite-
-		   Gruppe "The First Parley Anfragen" + Bestätigungs-Automation), hier
-		   gegen functions/api/contact.js. Der meetergo-Kalender darunter ist
-		   fertig gebaut, wartet aber auf das METERGO_PAT-Secret — bis dahin
-		   hinter dem URL-Schalter ?kalender (Muster wie ?gross am Menü).
-		   Sobald meetergo live ist: Schalter-Logik unten im Script entfernen
-		   und entscheiden, ob Formular UND Kalender zusammen stehen. */}
-		<div id="anfrageTeil">
-			<form id="anfrageForm" novalidate>
-				<div class="field-row">
-					<div class="field"><label for="a-vorname">Vorname *</label><input id="a-vorname" type="text" autocomplete="given-name" /></div>
-					<div class="field"><label for="a-nachname">Nachname *</label><input id="a-nachname" type="text" autocomplete="family-name" /></div>
-				</div>
-				<div class="field"><label for="a-email">E-Mail *</label><input id="a-email" type="email" autocomplete="email" /></div>
-				<div class="field"><label for="a-telefon">Telefon</label><input id="a-telefon" type="tel" autocomplete="tel" placeholder="optional" /></div>
-				<div class="field"><label for="a-vorhaben">Euer Vorhaben *</label><textarea id="a-vorhaben" rows="4" placeholder="Worüber wollt ihr sprechen?"></textarea></div>
-				{/* Honeypot, gleiches Muster wie im Kalender-Formular (book.js). */}
-				<div class="hp-field" aria-hidden="true">
-					<label for="a-website">Website</label>
-					<input id="a-website" name="website" type="text" tabindex="-1" autocomplete="off" />
-				</div>
-				<p class="privacy">Mit dem Absenden seid ihr einverstanden, dass eure Daten zur Beantwortung eurer Anfrage verarbeitet und zu Dokumentationszwecken gespeichert werden. Mehr in der <a href="/datenschutz">Datenschutzerklärung</a>.<br />Antwort meist innerhalb von 24 Stunden.</p>
-				<p class="status error hidden" id="anfrageError" role="alert" aria-live="assertive"></p>
-				<div class="actions">
-					<button type="submit" class="btn-confirm" id="btnAnfrage">Anfrage senden</button>
-				</div>
-			</form>
-			<div id="anfrageDone" class="hidden done">
-				<div class="flag">⚑</div>
-				<h2>Parley angenommen.</h2>
-				<p>Danke, eure Anfrage ist angekommen. Die Bestätigung ist unterwegs in euer Postfach, wir melden uns.</p>
-			</div>
-		</div>
-
-		<div id="kalenderTeil" class="hidden">
+		<div id="kalenderTeil">
 		{/* Schritt 1: Tag */}
 		<div id="stepDay">
 			<p class="step-label">1 · Tag wählen</p>
@@ -114,10 +83,12 @@ import Layout from "../layouts/Layout.astro";
 	   JS erzeugt (Tage, Uhrzeiten, Balken) — dynamisch angelegte Elemente
 	   bekommen NIE Astros data-astro-cid-Attribut, scoped Selektoren würden
 	   sie also nie treffen. Kollisionsrisiko gering: dieser Style-Block lädt
-	   ohnehin nur auf /buchen, kein anderes Astro-Bundle bekommt ihn zu sehen.
+	   ohnehin nur auf /termin, kein anderes Astro-Bundle bekommt ihn zu sehen.
 	   Farb-Treppe kommt aus dem sitewiten Token-Satz (Layout.astro) — hier nur
 	   die Balken-Töne, die laut Website-Brief eigene "Fred-Token" sind statt
-	   Teil der allgemeinen Treppe. */
+	   Teil der allgemeinen Treppe. Wrapper-Klasse heißt weiterhin .buchen
+	   (geerbtes CSS-Vokabular der alten /buchen-Seite — bewusst nicht
+	   umbenannt, /kontakt nutzt dieselbe Grundspalte). */
 	.buchen {
 		--seg-free: #6e6e6e;
 		--seg-busy: #383838;
@@ -348,24 +319,6 @@ import Layout from "../layouts/Layout.astro";
 	   visibility:hidden — manche Bots überspringen genau diese beiden
 	   Eigenschaften gezielt), aber weiterhin Teil des DOM-Renderflows,
 	   damit einfache Formular-Bots es trotzdem ausfüllen. */
-	/* Anfrage-Formular: Vorname/Nachname nebeneinander, mobil untereinander. */
-	.field-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0 12px;
-	}
-	@media (max-width: 480px) {
-		.field-row {
-			grid-template-columns: 1fr;
-		}
-	}
-	#anfrageForm {
-		margin-top: 28px;
-	}
-	#anfrageForm .actions {
-		justify-content: flex-end;
-	}
-
 	.hp-field {
 		position: absolute;
 		width: 1px;
@@ -484,84 +437,12 @@ import Layout from "../layouts/Layout.astro";
 <script>
 	// Eigenbau-Kalender über die meetergo-API (via /api/slots, /api/book —
 	// PAT bleibt server-seitig, siehe functions/). An astro:page-load
-	// gekoppelt (Muster wie MenuTiles/PageWipe), damit ein Zurück-zu-/buchen
-	// per Client-Side-Navigation den Kalender frisch aufbaut.
-	// Anfrage-Formular (Fred 31.08.): Port des Nuxt-Formulars gegen
-	// functions/api/contact.js. Läuft im Standard-Modus von /buchen; der
-	// meetergo-Kalender liegt hinter ?kalender, bis METERGO_PAT gesetzt ist.
-	function initAnfrage() {
-		const form = document.getElementById("anfrageForm") as HTMLFormElement | null;
-		if (!form) return;
-		const done = document.getElementById("anfrageDone") as HTMLElement;
-		const fehler = document.getElementById("anfrageError") as HTMLElement;
-		const btn = document.getElementById("btnAnfrage") as HTMLButtonElement;
-		const feld = (id: string) => document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
-		const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-		form.addEventListener("submit", async (ev) => {
-			ev.preventDefault();
-			const daten = {
-				firstName: feld("a-vorname").value.trim(),
-				lastName: feld("a-nachname").value.trim(),
-				email: feld("a-email").value.trim(),
-				phone: feld("a-telefon").value.trim(),
-				message: feld("a-vorhaben").value.trim(),
-				website: feld("a-website").value,
-			};
-			if (!daten.firstName || !daten.lastName || !daten.email || !daten.message) {
-				fehler.textContent = "Bitte füllt alle Pflichtfelder aus.";
-				fehler.classList.remove("hidden");
-				return;
-			}
-			if (!EMAIL_RE.test(daten.email)) {
-				fehler.textContent = "Bitte gebt eine gültige E-Mail-Adresse ein.";
-				fehler.classList.remove("hidden");
-				return;
-			}
-			fehler.classList.add("hidden");
-			btn.disabled = true;
-			btn.textContent = "Wird gesendet …";
-			try {
-				const res = await fetch("/api/contact", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(daten),
-				});
-				if (!res.ok) {
-					const data = await res.json().catch(() => ({}));
-					throw new Error(data.message || "Das Formular konnte nicht gesendet werden. Bitte versucht es später erneut.");
-				}
-				form.classList.add("hidden");
-				done.classList.remove("hidden");
-			} catch (err) {
-				fehler.textContent = err instanceof Error ? err.message : "Das Formular konnte nicht gesendet werden. Bitte versucht es später erneut.";
-				fehler.classList.remove("hidden");
-			} finally {
-				btn.disabled = false;
-				btn.textContent = "Anfrage senden";
-			}
-		});
-	}
-
-	function initBuchen() {
+	// gekoppelt (Muster wie MenuTiles/PageWipe), damit ein Zurück-zu-/termin
+	// per Client-Side-Navigation den Kalender frisch aufbaut. Der frühere
+	// ?kalender-Schalter ist entfernt — der Kalender ist die Seite.
+	function initTermin() {
 		const monthsContainer = document.getElementById("monthsContainer");
 		if (!monthsContainer) return; // nicht auf dieser Seite
-
-		// ?kalender-Schalter (Fred 31.08., "schneller online stellen"): ohne
-		// den Schalter zeigt /buchen NUR das Anfrage-Formular — der fertige
-		// meetergo-Kalender wartet auf sein Pages-Secret und lädt dann auch
-		// keine Slots (kein Fehlerbanner beim Besucher, keine toten Requests).
-		const kalenderModus = new URLSearchParams(window.location.search).has("kalender");
-		const anfrageTeil = document.getElementById("anfrageTeil");
-		const kalenderTeil = document.getElementById("kalenderTeil");
-		if (anfrageTeil && kalenderTeil) {
-			anfrageTeil.classList.toggle("hidden", kalenderModus);
-			kalenderTeil.classList.toggle("hidden", !kalenderModus);
-		}
-		if (!kalenderModus) {
-			initAnfrage();
-			return;
-		}
 
 		const stepDay = document.getElementById("stepDay") as HTMLElement;
 		const stepTime = document.getElementById("stepTime") as HTMLElement;
@@ -864,5 +745,5 @@ import Layout from "../layouts/Layout.astro";
 		})();
 	}
 
-	document.addEventListener("astro:page-load", initBuchen);
+	document.addEventListener("astro:page-load", initTermin);
 </script>

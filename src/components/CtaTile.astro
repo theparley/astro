@@ -49,7 +49,7 @@
 //    dieses eine Skript die Kachel steuert, hat sich mit jeder Nachbesserung
 //    verfeinert (jetzt: Klasse + CSS-transition statt Klasse + Animation).
 interface Props {
-	// true nur auf /buchen: die Tür ist schon erreicht, der Button verschwindet.
+	// true nur auf /termin: die Tür ist schon erreicht, der Button verschwindet.
 	hideCta?: boolean;
 	// true nur auf der Startseite: die Kachel wird per Klasse (siehe oben)
 	// statt zeitgesteuert sichtbar. Unterseiten haben keinen Hero/kein
@@ -62,7 +62,7 @@ const { hideCta = false, gateBehindHero = false } = Astro.props;
 ---
 
 {!hideCta && (
-	<a href="/buchen" class={`cta-tile${gateBehindHero ? " cta-tile--gated" : ""}`} aria-label="Let's Parley. Gespräch buchen.">
+	<a href="/termin" class={`cta-tile${gateBehindHero ? " cta-tile--gated" : ""}`} aria-label="Let's Parley. Termin buchen.">
 		{/* Das P ist das Marken-P mit Play-Kerbe (aus dem Logo/Favicon,
 		   public/parley/parley-p-glyph.svg — hier inline mit currentColor,
 		   damit es Textfarbe und ALLE Text-Animationen erbt). Der Rest
