@@ -47,6 +47,10 @@ export async function onRequestGet({ request, env }) {
 		end,
 		timezone: "Europe/Berlin",
 	});
+	// meetergo verlangt bei 1-on-1-Terminarten ohne Queue "hostIds oder queueId"
+	// (Upstream-400 "Expected hostIds or queueId", Test 2026-06-14). Der Host ist
+	// der Besitzer der Terminart — book.js macht es genauso.
+	if (meetingType.userId) params.append("hostIds", meetingType.userId);
 	if (refresh) params.set("refreshCache", "true");
 
 	// Audit-Fix B10: echten Upstream-Status durchreichen (wie book.js es schon
