@@ -27,12 +27,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   drei Zeilen (Spans mit display:block statt text-balance — die
 		   Umbrüche sind hier Bedeutung, nicht Layout). */}
 		<div class="hero-headline">
-			{/* Drei-Sätze-Fassung bestätigt (Fred 30.08. nachts, nach Probe der
-		   Ein-Satz-Variante "Wir verteidigen eure Expertise mit Augenzeugen."
-		   — die war "eindrucksvoller", aber die drei Sätze haben "die bessere
-		   Wirkung"; Ein-Satz-Fassung bleibt Vorrat für Flächen mit nur einer
-		   Zeile). */}
-		<h1><span>Ihr habt die Expertise.</span><span>Wir verteidigen sie.</span><span>Mit Augenzeugen.</span></h1>
+			{/* Hero-Rücktausch (Fred 2026-06-14): "Kein Business ohne Witness."
+			   ist wieder der Hauptclaim groß oben — in den zwei bewährten
+			   Zeilen. Der Dreizeiler ("Ihr habt die Expertise. / Wir
+			   verteidigen sie. / Mit Augenzeugen.") ist raus; sein Inhalt lebt
+			   sinngemäß im neuen Paragraph darunter ("Wir übernehmen die
+			   Verteidigung eurer Expertise … Augenzeuge"). */}
+		<h1><span>Kein Business</span><span>ohne Witness.</span></h1>
 		</div>
 		{/* Logo bleibt Markenpräsenz OHNE Menü-Funktion (Website-Brief
 		   "Entscheidung 29.08."), ist aber wieder fixiert unten Mitte und
@@ -43,151 +44,16 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		<BrandLogo />
 	</header>
 
-	{/* "Das Plädoyer" (Website-Brief, GELOCKT 29.08. spät, FINAL 29.08. nachts
-	   "zweiter Schliff: Anklage-Einstieg", Layout-Update 29.08. spät
-	   ZWEIGETEILT) — eine Hälfte trägt den finalen 4-Satz-Wortlaut
-	   (Anklage-Einstieg "Der Generalverdacht:", Anrede jetzt ihr/euch statt
-	   du, siehe Brief-Begründung), die andere Hälfte die Essenz GROSS
-	   (bisherige eigenständige Solo-Zeilen-Sektion, siehe soloLine oben —
-	   entfällt dadurch als eigene Sektion). Reihenfolge im Markup =
-	   Reihenfolge mobil (untereinander): Text vor Essenz, siehe Begründung
-	   in der .plaedoyer-Regel unten.
-
-	   Eyebrow-Label "Unser Eröffnungsplädoyer" ENTFERNT (spätes Auftrags-
-	   Update, noch nicht im Brief nachgezogen zum Zeitpunkt dieses Commits —
-	   siehe Fortschritts-Eintrag): "Eröffnungsplädoyer" ist im deutschen
-	   Recht kein sauberer Begriff (ein Plädoyer ist der Schlussvortrag,
-	   "Eröffnungsplädoyer" ein US-Import) — Fred will kein unsauberes
-	   Rechtswort auf der Seite. Absatz beginnt jetzt direkt mit "Der
-	   Generalverdacht: …", trägt den Gerichts-Register-Einstieg also
-	   weiterhin im ersten Satz selbst. */}
-	<section class="plaedoyer wrap">
-		{/* Seiten-Tausch (Fred 31.08.): "Kein Business ohne Witness." wandert
-		   nach LINKS, der Plädoyer-Text nach RECHTS — Markup-Reihenfolge =
-		   mobile Stapel-Reihenfolge, die Essenz steht mobil also jetzt oben. */}
-		<div class="plaedoyer-half plaedoyer-half--essence">
-			{/* Rollentausch in der Essenz-Hälfte (Fred 30.08.): die
-			   Anschlusszeile "Ihr habt die Expertise. Wir verteidigen sie."
-			   wandert aus der Text-Spalte hierher und wird das GROSSE
-			   Statement (zwei Sätze = zwei Zeilen); "Ein Gespräch mit tausend
-			   Augenzeugen." rückt darunter als Unterschrift in klein. Der
-			   frühere Dreizeiler ("Ein Gespräch" / "mit tausend" /
-			   "Augenzeugen.") ist damit Geschichte — die Größen-Historie in
-			   den Style-Kommentaren unten gilt sinngemäß weiter, nur mit
-			   längeren Zeilen und deshalb neu kalibriertem cqw-Koeffizienten. */}
-			{/* Finale Fassung (Fred 30.08.): "mit Augenzeugen" ins große
-			   Statement, die Unterschrift "Ein Gespräch mit tausend
-			   Augenzeugen." entfällt dafür ganz (bleibt als Vorrats-Zeile für
-			   Beiträge/Splitflap dokumentiert, siehe soloLine oben). Drei
-			   Zeilen mit bewusst gesetzten Umbrüchen; längste bleibt "Ihr habt
-			   die Expertise.", die 8.3cqw-Kalibrierung gilt also weiter. */}
-		{/* "Mit Augenzeugen." als EIGENER Satz (Fred-Zuruf direkt danach):
-			   der Nachklapp bekommt Punkt + Großschreibung — drei vollwertige
-			   Schläge statt Satz mit Umbruch. */}
-		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler ist zum Hero
-			   aufgestiegen, "Kein Business ohne Witness." übernimmt dafür die
-			   Essenz-Spalte — in den zwei Zeilen, in denen es als Hero
-			   umbrach. Die Abwechsel-Regel bleibt gewahrt: beide Sätze stehen
-			   nie auf derselben Fläche… jetzt eben in getauschten Rollen. */}
-			<p class="essence-line">Kein Business</p>
-			<p class="essence-line">ohne Witness.</p>
-		</div>
-		<div class="plaedoyer-half plaedoyer-half--text">
-			{/* Neuer Dreiklang (Wording-Session 30.08.): echte Verfahrenslogik
-			   Verdacht → Verteidigung → Urteil, alle drei in derselben Bauform
-			   (Etikett, Doppelpunkt, Inhalt — Zeile 3 bricht die Form bewusst,
-			   weil das Urteil kein Etikett trägt, sondern gefällt wird). Ersetzt
-			   die 3-Satz-Fassung mit "…skalieren wir" — kein "wir" mehr in der
-			   Treppe, The Parley tritt erst nach dem Urteil auf (Anschlusszeile
-			   noch offen, Kandidaten in der Wording-Session besprochen). Die
-			   »…«-Anführung der alten Zeile 1 ist der einheitlichen Bauform
-			   gewichen — falls die Anklage wieder als Zitat markiert werden
-			   soll, einfach wieder ergänzen. */}
-		{/* Zweizeilige Bauform (Fred 30.08.): Etikett auf eigener Zeile,
-			   Inhalt darunter — der Doppelpunkt wird zum Zeilenschluss, wie
-			   eine Akten-Überschrift über ihrem Eintrag. */}
-		{/* "Der Gegenbeweis" (Fred 30.08.): Verteidigung + Beweis zu EINER
-			   Stufe verschmolzen — echtes Rechtswort, spiegelt den General-
-			   verdacht direkt (Verdacht ↔ Gegenbeweis ↔ Urteil). Inhalt trägt
-			   jetzt auch das Video, über die Gesetzesformel "in Bild und Ton"
-			   (§ 58a/247a StPO) statt "videobasiert" (Lastenheft-Sprache). */}
-		{/* Genitiv-Etiketten (Fred 30.08. spät): jede Stufe bekommt ihren
-			   Akteur — der Markt verdächtigt, euer Marketing beweist, das
-			   Publikum urteilt. Zeile 3 musste dafür umgebaut werden ("Fällen
-			   die einzelnen Zuschauer" hätte das Publikum doppelt benannt). */}
-		{/* Personalisierung (Fred 30.08. spät): durchgehende eure/eurer-
-			   Anaphora — die Expertise, die Experten, das Marketing, das
-			   Publikum, der Auftrag: alles gehört dem Leser. Beim Urteils-
-			   Etikett bewusst "eures Publikums" statt "eurer Kunden" (Freds
-			   Alternativ-Idee): das Urteil fällt VOR der Kundwerdung — wer da
-			   urteilt, ist noch kein Kunde, sondern entscheidet gerade, ob er
-			   einer wird. "Kunden" würde die Pointe vorwegnehmen und den
-			   Urteilskreis auf Bestandskunden verengen. */}
-		{/* Abschwächung (Fred 30.08. abends): "ist vorgetäuscht" sprach ein
-			   fertiges Urteil — ein Verdacht ist aber gerade KEINE Tatsachen-
-			   behauptung. "könnte … sein" macht die Zeile juristisch sauber
-			   (Verdacht = Möglichkeit) und nimmt die Härte raus, ohne den
-			   Stich zu verlieren. */}
-		{/* Rollen-Umbau (Fred 30.08. nachts): das MARKETING wandert aus der
-			   Verteidiger-Rolle in die Anklage ("durch Marketing mit KI
-			   vorgetäuscht") — der Gegenbeweis kommt jetzt von den EXPERTEN
-			   selbst, nicht von ihrem Marketing. Logisch schärfer: verdächtig
-			   ist die Vermittlungsschicht, glaubwürdig der Mensch dahinter. */}
-		{/* Satz-Varianten geprüft, Überschrift-Fassung bestätigt (Fred 31.08.).
-			   Probe 1 (Akteur+Verb-Sätze: "Der Markt stellt jede behauptete
-			   Expertise unter Generalverdacht. Auch eure könnte …") —
-			   leserfreundlicher, aber "flutscht beim Lesen noch nicht".
-			   Probe 2, Freds Diktat, als VORRAT für Fließtext-Flächen
-			   (LinkedIn-Profil, Beiträge):
-			   "Im Zeitalter von KI-Marketing steht die Behauptung eurer
-			   Expertise unter Generalverdacht. Der Markt fordert den Gegenbeweis.
-			   Das echte Gespräch eurer Experten, beweisbar festgehalten in
-			   Bild und Ton, macht aus jedem Zuschauer einen Augenzeugen, der
-			   eure Expertise unmittelbar erlebt." (2. Diktat: die BEHAUPTUNG
-			   steht unter Verdacht, nicht die Expertise; "KI-Marketing" als
-			   Ankläger; Singular-Augenzeuge. "Gegenbeweis" geprüft und
-			   BEHALTEN, Fred 31.08.: streng juristisch richtet sich ein
-			   Gegenbeweis gegen geführten Beweis, ein Verdacht wird nur
-			   ausgeräumt — aber die feste Wendung "den Gegenbeweis antreten"
-			   funktioniert auch gegen Vermutungen, niemand liest es falsch,
-			   und das Wort ist stärker + spiegelt den Generalverdacht. Gilt
-			   für Fließtext UND Seiten-Überschrift.) — flutscht, aber die Seite
-			   behält die Akten-Form (Etikett + Eintrag).
-			   Wort-Entscheide dieser Runde, gelten in BEIDEN Fassungen:
-			   "beweisbar" statt "verlässlich" (eigenes Vokabular der
-			   Verhandlungs-Bildwelt, Echo auf den Gegenbeweis — "darum geht
-			   es"); "Urteilsbildung" statt "Urteil" (Vorgang statt Ergebnis,
-			   Redewendung "sich ein Urteil bilden"); "unmittelbar" neu;
-			   Schluss endet auf "Augenzeuge" (Kauf-Brücke "…, bevor er sich
-			   für euch entscheidet und Kunde wird." komplett raus — "jeder
-			   wird Kunde" wäre übertrieben, Rest-Vorrat). */}
-			<p class="plaedoyer-text">Im Zeitalter von KI-Marketing steht die Behauptung eurer Expertise unter Generalverdacht. Der Markt fordert den Gegenbeweis.</p>
-		{/* Urteil in zwei Sätzen (Fred 30.08.): Satz 1 = wer urteilt (jeder
-			   einzelne Zuschauer, nicht mehr nur "Auftragsentscheider" — das
-			   Urteil trifft auch die Unsichtbaren, Hidden-Buyer-Logik), Satz 2 =
-			   die Dramatik der Frühe/Unsichtbarkeit. Anrede ihr/euch wie im
-			   restlichen Block. "als Augenzeuge" ist hier rausgefallen — das
-			   Wort trägt die Essenz-Spalte daneben ("Mit Augenzeugen."). */}
-		{/* Satz 2 = die Marketing-Kurve (Fred 30.08.): raus aus der Gerichts-
-			   sprache, rein in das, was den Geschäftsführer interessiert —
-			   aus dem stillen Zuschauer-Urteil werden Aufträge. "Zuschauer"
-			   statt "Auftragsentscheider" in Satz 1 bleibt bewusst (leichter
-			   Einstieg), Satz 2 löst auf, warum das Urteil zählt. */}
-		{/* Zeitliche Dimension zurück (Fred 30.08. spät): "Bevor er Kunde
-			   wird…" löst das Kunden-Wort UND die Frühe in einem Zug — der
-			   Zuschauer urteilt zuerst, Kunde wird er danach (oder nie). */}
-		{/* "Zuschauer" bewusst benannt (Fred 30.08.): Schlüsselwort des
-			   späteren Marketings (Zuschauerzahlen, Zuschauer pro Clip) — die
-			   Seite soll das Wort früh setzen, damit die Messgrößen später
-			   an eine eingeführte Figur andocken. */}
-		{/* Verb-Schliff (Fred 30.08. nachts, "zweimal entscheiden"): Auftrag
-			   wird VERGEBEN statt entschieden — löst die Dopplung, und "bevor
-			   er sich entscheidet" braucht kein eigenes Glied, weil "fällt
-			   sein Urteil" genau diese Entscheidung schon ist. */}
-			<p class="plaedoyer-text">Das echte Gespräch eurer Experten wird zu eurer Verteidigung.</p>
-			<p class="plaedoyer-text">Die beweisbare Aufzeichnung in Bild und Ton macht das Gespräch skalierbar und aus jedem Zuschauer einen Augenzeugen, der eure Expertise unmittelbar erlebt.</p>
-		</div>
-
+	{/* "Der Paragraph" (Fred 2026-06-14): Fließtext über die ganze Breite,
+	   Paragraph-Größe (gleiche BBH-Lead-Typo wie bisher) — ersetzt die
+	   zweigeteilte Plädoyer-Sektion (Akten-Form + Essenz-Spalte). "Kein
+	   Business ohne Witness." ist zurück im Hero; die Akten-Fassung des
+	   Plädoyers und der Dreizeiler leben in Brief-Fortschritt + Git-Historie
+	   (bewusst kein Code-Vorrat). Wortlaut = Freds Diktat, wörtlich. */}
+	<section class="paragraph wrap">
+		<p class="plaedoyer-text">Alle sind plötzlich Experten. Wissen gibt es auf Knopfdruck. Das geschriebene Wort im Marketing steht damit unter Generalverdacht.</p>
+		<p class="plaedoyer-text">Wir übernehmen die Verteidigung eurer Expertise. Mit Formaten aus echten Gesprächen, die den Beweis liefern.</p>
+		<p class="plaedoyer-text">Der Zuschauer wird zum Augenzeugen eurer Expertise, noch vor dem ersten Kontakt.</p>
 	</section>
 
 	{/* Segment 2 "Das Gespräch" (Fred 31.08.): dieselbe zweigeteilte Bauform
@@ -291,14 +157,14 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   kein manuelles Umschalten zwischen Zeilenzahlen nötig.
 		   Größe füllt die Zeilen auf die Container-Breite; der Container ist
 		   bei 1728px gedeckelt, die Schrift wächst ab da nicht mehr mit und
-		   die BBH-Randluft entsteht von selbst. Nach dem Hero-Tausch (Fred
-		   30.08. spät) neu kalibriert: längste Zeile ist jetzt "Ihr habt die
-		   Expertise." statt "Kein Business" — 9.6cqw statt 15.6 (gleiche
-		   Auslastungs-Logik wie zuvor bei der Essenz-Spalte gemessen: diese
-		   Zeile erreicht damit ~97% ihres Containers). Zeilenhöhe bleibt 0.92
-		   statt BBHs 0.82: deren Statements sind VERSAL (keine Unterlängen),
-		   unsere Mischschrift würde bei 0.82 kollidieren. */
-		font-size: 9.6cqw;
+		   die BBH-Randluft entsteht von selbst. Hero-Rücktausch (Fred
+		   2026-06-14): "Kein Business / ohne Witness." ist zurück — damit gilt
+		   wieder die historische Kalibrierung 15.6cqw (längste Zeile "Kein
+		   Business", ~97% Container-Auslastung; für den zwischenzeitlichen
+		   Dreizeiler galten 9.6cqw). Zeilenhöhe bleibt 0.92 statt BBHs 0.82:
+		   deren Statements sind VERSAL (keine Unterlängen), unsere
+		   Mischschrift würde bei 0.82 kollidieren. */
+		font-size: 15.6cqw;
 		font-weight: 900;
 		line-height: 0.92;
 		letter-spacing: -0.01em;
