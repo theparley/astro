@@ -102,11 +102,18 @@ const {
 		box-sizing: border-box;
 	}
 
-	/* Inhalts-Ebene des Sticky-Reveal-Stapels (siehe body-Markup oben). */
+	/* Inhalts-Ebene des Sticky-Reveal-Stapels (siehe body-Markup oben).
+	   min-height (Fred-Befund 2026-06-14, systemischer Fix): Der Footer ist
+	   ungewöhnlich groß — jede Seite, deren Inhalt kürzer als der Viewport
+	   ist (oder es während eines Ladevorgangs kurz ist), legt ihn sonst
+	   sofort frei (Flackern, durchblitzende Buchstaben-Spitzen). Hier im
+	   Layout garantiert, damit auch jede KÜNFTIGE Seite automatisch safe
+	   ist — nicht nur die, an die man beim Bauen denkt. */
 	.site-content {
 		position: relative;
 		z-index: 10;
 		background: var(--black);
+		min-height: 100dvh;
 	}
 
 	html {
