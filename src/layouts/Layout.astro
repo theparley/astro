@@ -127,6 +127,29 @@ const {
 		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
 		font-weight: 400;
 		-webkit-font-smoothing: antialiased;
+		/* Extension-Panzerung (Befund 2026-06-14): Browser-Extensions (konkret
+		   Apollo.io, DIV.zp-open-popup-button, 45px) injizieren Elemente in den
+		   Body — nach Astros View-Transition-Swap landete das VOR .site-content
+		   im Fluss und schob die ganze Seite runter (Footer-Spitzen oben links).
+		   Body als Flex-Spalte mit expliziter Ordnung: unsere Bausteine haben
+		   feste order-Werte, ALLES Fremde bekommt order:9999 und landet
+		   layoutmäßig am Ende — egal wann/wo eine Extension es einfügt.
+		   Relevant auch für echte Besucher mit solchen Extensions (Sales-Tools
+		   im ICP). */
+		display: flex;
+		flex-direction: column;
+	}
+
+	body > * {
+		order: 9999;
+	}
+
+	body > .site-content {
+		order: 1;
+	}
+
+	body > .site-footer {
+		order: 2;
 	}
 
 	a {
