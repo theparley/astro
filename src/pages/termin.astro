@@ -19,12 +19,23 @@ import Layout from "../layouts/Layout.astro";
 		<p class="geleit">Parley heißt Verhandlungsgespräch. Wer es ausruft, bekommt sicheres Geleit: kein Pitch, keine Unterlagen, ein Gespräch.</p>
 
 		<div id="kalenderTeil">
+		{/* Desktop-Zweispalter (Fred 2026-06-14, revidiert FINALE-Spec-Punkt
+		   "Uhrzeiten docken unter dem Monat an"): ab 900px sitzen Uhrzeiten +
+		   Formular als sticky Seitenspalte RECHTS neben dem Kalender — alles
+		   auf einen Blick, kein Scrollen. Unter 900px (Handy) bleibt das
+		   bewährte Andocken unterm gewählten Monat. Das Umdocken macht
+		   dockSteps() im Script anhand derselben 900px-Media-Query. */}
+		<div class="kalender-grid">
 		{/* Schritt 1: Tag */}
 		<div id="stepDay">
 			<p class="step-label">1 · Tag wählen</p>
 			<div id="monthsContainer">
 				<p class="status" id="loadingStatus" role="status" aria-live="polite">Termine werden geladen …</p>
 			</div>
+		</div>
+		<aside id="sidePanel">
+			<p class="side-hint" id="sideHint">Wähle links einen Tag —<br />die freien Uhrzeiten erscheinen hier.</p>
+		</aside>
 		</div>
 
 		{/* Schritt 2: Uhrzeit — wird per JS in die inline-{Monat}-Andockstelle
@@ -95,8 +106,10 @@ import Layout from "../layouts/Layout.astro";
 		--seg-free-selected: #0a0a0a;
 	}
 
-	/* Eine zentrierte Spalte, fluid bis Deckel 520px (FINALE Spec Punkt 4) —
-	   kein Struktur-Breakpoint nötig, alles atmet über cqw an der Kachel. */
+	/* Eine zentrierte Spalte, fluid bis Deckel 520px (FINALE Spec Punkt 4).
+	   NEU (Fred 2026-06-14): ab 900px weitet sich die Seite und der Kalender
+	   bekommt eine Seitenspalte — der einzige Struktur-Breakpoint der Seite,
+	   bewusst gesetzt ("wenn die Fläche es hergibt"). */
 	.buchen {
 		max-width: 520px;
 		margin: 0 auto;
@@ -107,6 +120,48 @@ import Layout from "../layouts/Layout.astro";
 		.buchen {
 			padding-left: 32px;
 			padding-right: 32px;
+		}
+	}
+
+	/* Desktop-Zweispalter: Kalender links (max. 520px wie gehabt), Uhrzeiten/
+	   Formular rechts als sticky Panel — bleibt beim Scrollen durch die zwei
+	   Monatsblöcke im Blick. Auf Mobil ist .kalender-grid ein normaler
+	   Block-Fluss und #sidePanel leer (die Schritte docken unterm Monat an). */
+	@media (min-width: 900px) {
+		.buchen {
+			max-width: 960px;
+		}
+
+		.kalender-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 520px) minmax(280px, 1fr);
+			gap: 0 48px;
+			align-items: start;
+		}
+
+		#sidePanel {
+			position: sticky;
+			top: 32px;
+		}
+	}
+
+	.side-hint {
+		display: none;
+	}
+
+	@media (min-width: 900px) {
+		.side-hint {
+			display: block;
+			margin-top: 26px;
+			font-size: 0.85rem;
+			color: var(--gray);
+			border-left: 2px solid var(--line);
+			padding-left: 10px;
+			line-height: 1.45;
+		}
+
+		.side-hint.hidden {
+			display: none;
 		}
 	}
 
@@ -461,6 +516,29 @@ import Layout from "../layouts/Layout.astro";
 		const websiteInput = document.getElementById("f-website") as HTMLInputElement;
 		const btnBack = document.getElementById("btnBack") as HTMLButtonElement;
 		const btnConfirm = document.getElementById("btnConfirm") as HTMLButtonElement;
+		const sidePanel = document.getElementById("sidePanel") as HTMLElement;
+		const sideHint = document.getElementById("sideHint") as HTMLElement;
+
+		// Desktop-Zweispalter (Fred 2026-06-14): dieselbe 900px-Schwelle wie im
+		// CSS. Auf Desktop docken Uhrzeiten+Formular in die Seitenspalte, auf
+		// Mobil in die inline-Andockstelle unterm gewählten Monat. Bei einem
+		// Wechsel (Fenster ziehen, Tablet drehen) dockt der Listener unten um.
+		const desktopMq = window.matchMedia("(min-width: 900px)");
+		let chosenMonthMeta: { year: number; month: number; name: string } | null = null;
+
+		function dockSteps() {
+			const inline = chosenMonthMeta
+				? document.getElementById("inline-" + chosenMonthMeta.year + "-" + chosenMonthMeta.month)
+				: null;
+			const target = desktopMq.matches ? sidePanel : inline;
+			if (!target) return;
+			target.appendChild(stepTime);
+			target.appendChild(stepForm);
+		}
+
+		desktopMq.addEventListener("change", () => {
+			if (chosenMonthMeta && !stepTime.classList.contains("hidden")) dockSteps();
+		});
 
 		// 6 grobe Tagesabschnitte für den Balken (9–18 Uhr Arbeitsfenster) —
 		// ehrlich aus der echten Slot-Antwort abgeleitet: ein Abschnitt gilt
@@ -601,17 +679,19 @@ import Layout from "../layouts/Layout.astro";
 			btn.classList.add("selected");
 			chosenIso = isoDate(m.year, m.month, d);
 			chosenLabelText = `${d}. ${m.name}`;
+			chosenMonthMeta = m;
 
-			const inline = document.getElementById("inline-" + m.year + "-" + m.month);
-			inline?.appendChild(stepTime);
-			inline?.appendChild(stepForm);
+			sideHint.classList.add("hidden");
+			dockSteps();
 
 			timeDayLabel.textContent = chosenLabelText;
 			slotsError.classList.add("hidden");
 			renderSlots(spots);
 			stepTime.classList.remove("hidden");
 			stepForm.classList.add("hidden");
-			stepTime.scrollIntoView({ behavior: "smooth", block: "nearest" });
+			// Nur mobil zum angedockten Schritt scrollen — auf Desktop steht die
+			// Seitenspalte ohnehin im Blick (sticky).
+			if (!desktopMq.matches) stepTime.scrollIntoView({ behavior: "smooth", block: "nearest" });
 		}
 
 		function renderSlots(spots: Array<{ startTime: string }>) {
@@ -636,7 +716,7 @@ import Layout from "../layouts/Layout.astro";
 			chosenLabel.textContent = `${chosenLabelText}, ${timeFmt.format(new Date(startTime))} Uhr · 30 Minuten`;
 			formError.classList.add("hidden");
 			stepForm.classList.remove("hidden");
-			stepForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+			if (!desktopMq.matches) stepForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
 		}
 
 		btnBack.addEventListener("click", () => {
