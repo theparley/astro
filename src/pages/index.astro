@@ -53,9 +53,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   (neue Fassung 2. Runde 14.06.: KI-Generalverdacht, videobasierte
 	   Formate, Schluss verkürzt auf den Augenzeugen-Satz). */}
 	<section class="paragraph">
-		<p class="plaedoyer-text">Jeder ist plötzlich Experte. Denn fertig formuliertes Wissen gibt es jetzt auf Knopfdruck. Kunden stellen deshalb jede Expertise erstmal unter KI-Generalverdacht.</p>
-		<p class="plaedoyer-text">Wir übernehmen die Verteidigung eurer Expertise. Denn Expertise ist die Anwendung von Wissen. Den Beweis liefern videobasierte Formate echter Gespräche.</p>
 		<p class="plaedoyer-text">Euer Kunde wird zum Augenzeugen, noch vor dem ersten Kontakt.</p>
+		<p class="plaedoyer-text">Jeder ist plötzlich Experte. Denn Wissen gibt es jetzt auf Knopfdruck. Kunden stellen deshalb jede Expertise erstmal unter KI-Generalverdacht.</p>
+		<p class="plaedoyer-text">Wir übernehmen die Verteidigung eurer Expertise. Denn Expertise ist die Anwendung von Wissen. Den Beweis liefern videobasierte Formate echter Gespräche.</p>
 	</section>
 
 	<section class="proof wrap">
@@ -214,7 +214,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Zeilenhöhe dort 1.3 (nicht 1.2), Laufweite -0.02em unverändert. */
 		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
 		line-height: 1.3;
-		letter-spacing: -0.02em;
+		/* Laufweiten-Korrektur (Fred 2026-06-15, "minimal zu eng"): BBH fährt
+		   -0.02em auf GEIST SANS — Forma DJR läuft von Haus aus enger zu,
+		   dasselbe em-Maß drückt hier spürbar mehr. Halbe Stufe zurück. */
+		letter-spacing: -0.01em;
 		color: var(--white);
 	}
 
