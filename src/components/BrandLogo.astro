@@ -65,11 +65,13 @@
 		   positionierten Kinder weg (der "Logo komplett unsichtbar"-Bug vom
 		   29.08. nachts). Stattdessen translateY auf dem Anker selbst: bewegt
 		   alle Kinder mit, clippt nichts. */
-		/* Verzögerung an die Hero-Sequenz gekoppelt (Fred 30.08. nachts): das
-		   Logo fährt erst hoch, NACHDEM "Mit Augenzeugen." fertig eingewischt
-		   ist (Zeile 3: 2500ms Verzögerung + 800ms Wisch = 3300ms; Staffelung seit 31.08. gleichmäßig 1200ms) — der
-		   Schlussakkord der Ladedramaturgie. Vorher 150ms. */
-		animation: brand-logo-rise 700ms cubic-bezier(0.22, 0.61, 0.36, 1) 3400ms both;
+		/* Verzögerung an die Hero-Sequenz gekoppelt: das Logo fährt erst hoch,
+		   NACHDEM der Hero fertig eingewischt ist — der Schlussakkord der
+		   Ladedramaturgie. Seit dem Hero-Rücktausch (Fred 2026-06-14/15, "Logo
+		   kommt zu spät") wischen BEIDE Zeilen gemeinsam (100ms Verzögerung +
+		   800ms Wisch = 900ms) — Logo direkt danach bei 1000ms. Die alten
+		   3400ms galten für den gestaffelten Dreizeiler (Zeile 3 endete 3300ms). */
+		animation: brand-logo-rise 700ms cubic-bezier(0.22, 0.61, 0.36, 1) 1000ms both;
 	}
 
 	@keyframes brand-logo-rise {

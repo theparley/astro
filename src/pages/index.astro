@@ -49,11 +49,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   zweigeteilte Plädoyer-Sektion (Akten-Form + Essenz-Spalte). "Kein
 	   Business ohne Witness." ist zurück im Hero; die Akten-Fassung des
 	   Plädoyers und der Dreizeiler leben in Brief-Fortschritt + Git-Historie
-	   (bewusst kein Code-Vorrat). Wortlaut = Freds Diktat, wörtlich. */}
+	   (bewusst kein Code-Vorrat). Wortlaut = Freds Diktat, wörtlich
+	   (neue Fassung 2. Runde 14.06.: KI-Generalverdacht, videobasierte
+	   Formate, Schluss verkürzt auf den Augenzeugen-Satz). */}
 	<section class="paragraph">
-		<p class="plaedoyer-text">Alle sind plötzlich Experten. Wissen gibt es auf Knopfdruck. Das geschriebene Wort im Marketing steht damit unter Generalverdacht.</p>
-		<p class="plaedoyer-text">Wir übernehmen die Verteidigung eurer Expertise. Mit Formaten aus echten Gesprächen, die den Beweis liefern.</p>
-		<p class="plaedoyer-text">Der Zuschauer wird zum Augenzeugen eurer Expertise, noch vor dem ersten Kontakt.</p>
+		<p class="plaedoyer-text">Jeder ist plötzlich Experte. Denn fertig formuliertes Wissen gibt es jetzt auf Knopfdruck. Kunden stellen deshalb jede Expertise erstmal unter KI-Generalverdacht.</p>
+		<p class="plaedoyer-text">Wir übernehmen die Verteidigung eurer Expertise. Denn Expertise ist die Anwendung von Wissen. Den Beweis liefern videobasierte Formate echter Gespräche.</p>
+		<p class="plaedoyer-text">Euer Kunde wird zum Augenzeugen, noch vor dem ersten Kontakt.</p>
 	</section>
 
 	<section class="proof wrap">
@@ -193,10 +195,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		}
 	}
 
-	/* Zweite Sichtungs-Runde (Fred): nicht volle Breite — 50% der Breite,
-	   zum Ansehen. Linksbündig am Randabstand, die rechte Hälfte bleibt frei. */
+	/* Sichtungs-Runden (Fred, lokal — ab hier NICHT mehr pushen, Design wird
+	   erst in HTML direkt geklärt): aktuell 50% der Breite, MITTIG im
+	   Bildschirm zentriert. */
 	.paragraph .plaedoyer-text {
 		max-width: 50%;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
 	.plaedoyer-text {
@@ -213,18 +218,16 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		color: var(--white);
 	}
 
-	/* Absatz-Abstand ebenfalls BBH (`space-y-5 md:space-y-8`): 1.25rem
-	   mobil, 2rem ab Desktop — wirkt durch den dichten Zeilenfall kompakt.
-	   (Globales p{margin:0} in Layout.astro würde die drei Absätze sonst
+	/* Absatz-Abstand — Referenz-Korrektur (Fred 2026-06-14, "kommt mir zu
+	   groß vor"): live auf BBHs /offices/bbh-studios nachgemessen — deren
+	   Lead-Absatz-Gruppe nutzt ein flaches space-y-6 = 24px auf ALLEN
+	   Breiten (bei 26,8px Schrift → Verhältnis 0,9), nicht das
+	   space-y-5/md:space-y-8 (20/32px) der About-Seite, das hier vorher
+	   galt. 32px ab Desktop war dadurch spürbar luftiger als das Original.
+	   (Globales p{margin:0} in Layout.astro würde die Absätze sonst
 	   zusammenkleben lassen.) */
 	.plaedoyer-text + .plaedoyer-text {
-		margin-top: 1.25rem;
-	}
-
-	@media (min-width: 800px) {
-		.plaedoyer-text + .plaedoyer-text {
-			margin-top: 2rem;
-		}
+		margin-top: 1.5rem;
 	}
 
 	.proof {
