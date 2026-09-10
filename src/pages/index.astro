@@ -53,22 +53,65 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   (neue Fassung 2. Runde 14.06.: KI-Generalverdacht, videobasierte
 	   Formate, Schluss verkürzt auf den Augenzeugen-Satz). */}
 	<section class="paragraph">
-		<p class="plaedoyer-text">Euer Kunde wird zum Augenzeugen eurer Expertise. Noch vor dem ersten Kontakt.</p>
-		<p class="plaedoyer-text">Jeder ist plötzlich Experte. Denn Wissen gibt es jetzt auf Knopfdruck. Und Kunden stellen jede Expertise erstmal unter KI-Generalverdacht.</p>
-		<p class="plaedoyer-text">Wir übernehmen die Verteidigung. Denn Expertise ist nicht Wissen, sondern die Anwendung davon. Den Beweis liefern videobasierte Formate echter Gespräche. Filmreif, ohne Kamerastress.</p>
+		<p class="plaedoyer-text">Aus Kunden werden Augenzeugen eurer Expertise. Noch vor dem ersten Kontakt.</p>
+		<p class="plaedoyer-text">Jeder ist plötzlich „Experte“.<br />Seitdem es Fachwissen auf Knopfdruck gibt, ist das geschriebene Wort allein kein Indiz mehr für Expertise. Damit stellen Kunden jede Kompetenz erst einmal unter KI-Generalverdacht.</p>
+		<p class="plaedoyer-text">Wir übernehmen die Verteidigung.<br />Den Beweis liefern echte Gespräche. Denn Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle Fragen. Wir skalieren das mit Formaten von Videopodcast bis Kundenstimme.</p>
 	</section>
 
-	<section class="proof wrap">
+	{/* Clip VOLLBREIT (Fred 2026-06-15, "übernehmen wir von BBH"): deren
+	   Startseiten-Video läuft randlos von Kante zu Kante — kein .wrap, kein
+	   Seitenabstand. */}
+	<section class="proof">
 		<div class="clip-placeholder">
 			<span>Clip folgt</span>
 		</div>
 	</section>
 
-	{/* Produkte-Zeile + In-Flow-CTA entfernt (Fred 30.08. nachts, "erstmal
-	   komplett raus"): die Seite ist auf drei Segmente reduziert — Hero,
-	   Plädoyer+Essenz, Clip-Platzhalter — plus Footer. Wortlaut der Produkte-
-	   Zeile lebt weiter in der produkteZeile-Konstante oben (Vorrat), der
-	   CTA-Wortlaut im Website-Brief (Konversions-Kapitel). */}
+	{/* Bausteine-Sektion (Fred 2026-06-15 abends, Demo-Runde bausteine-demo.html,
+	   Entscheid "d2"): DREI Medien-Kacheln nebeneinander (BBHs visual-grid-Muster,
+	   16px Fuge, auf drei verbreitert; Panel-Grund, 4:5) — nebeneinander liest
+	   das Auge sie als EIN Ensemble, das ein Problem löst (Freds Beobachtung;
+	   gestapelt wirkten sie als Abfolge). Große Sektions-Überschrift nach
+	   BBH-Regel (KEINE Eyebrows — live verifiziert: BBH kennt nur große
+	   Versal-Sektionszeilen ODER kleine Überschriften direkt am Text, nie
+	   klein-über-groß). Namen ohne Artikel; "Studios" PLURAL (drei Formen:
+	   Blickkontaktstudio Karlsruhe / mobiles Studio / Inhouse-Bau beim
+	   Kunden — nie aufs feste Studio verengen, hat schon einen Auftrag
+	   gekostet; "Aufnahme" als Name verworfen, Zuschalt-Fälle laufen unter
+	   Regie). Unterschriften erzählen die Zeitachse: zuerst → live → danach.
+	   Die Sektion beantwortet den Filmreif-Cliffhanger des Paragraphs. */}
+	<section class="bausteine">
+		<h2 class="bausteine-titel">Wie wir das machen</h2>
+		<div class="bausteine-grid">
+			<div class="baustein">
+				<div>
+					<h3>Studios</h3>
+					<p class="baustein-sub">Das Gespräch zuerst</p>
+				</div>
+				<p class="baustein-text">Zuerst stellen wir das echte Gespräch her, dann läuft die Aufnahme. Im Blickkontaktstudio in Karlsruhe, mit dem mobilen Studio bei euch oder im Inhouse-Studio, das wir euch bauen.</p>
+			</div>
+			<div class="baustein">
+				<div>
+					<h3>Regie</h3>
+					<p class="baustein-sub">Live, während ihr sprecht</p>
+				</div>
+				<p class="baustein-text">Während ihr sprecht, hält die Regie die Technik unsichtbar, den Inhalt auf Kurs und die Wirkung im Blick.</p>
+			</div>
+			<div class="baustein">
+				<div>
+					<h3>Redaktion</h3>
+					<p class="baustein-sub">Die Formatredaktion danach</p>
+				</div>
+				<p class="baustein-text">Aus der Aufnahme werden eure Formate: Videopodcast, Webinar, Clip, Kundentestimonial. Jede Produktion liefert ihr Stück, inklusive Text.</p>
+			</div>
+		</div>
+	</section>
+
+	{/* Produkte-Zeile + In-Flow-CTA weiter draußen (Fred 30.08. nachts,
+	   "erstmal komplett raus"); Wortlaut der Produkte-Zeile lebt in der
+	   produkteZeile-Konstante oben (Vorrat), der CTA-Wortlaut im
+	   Website-Brief (Konversions-Kapitel). Nächste Treppen-Stufen laut
+	   Brief: Pakete, dann Tür. */}
 
 </Layout>
 
@@ -235,6 +278,8 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	.proof {
 		padding: 24px 0 64px;
+		/* vollbreit: die Sektion liegt außerhalb von .wrap, das Video füllt
+		   die komplette Viewport-Breite (BBH-Startseiten-Muster). */
 	}
 
 	.clip-placeholder {
@@ -246,6 +291,75 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		justify-content: center;
 		color: var(--gray);
 		font-size: 0.9rem;
+	}
+
+	/* Bausteine-Sektion (Maße aus der Demo-Runde bausteine-demo.html, D2):
+	   eigener Container auf Plädoyer-Deckelbreite 1728px; Kacheln = BBHs
+	   visual-grid (16px Fuge), Panel-Grund, Hochformat 4:5; Kachel-Schrift
+	   an der KACHELbreite (cqw), kalibriert auf "Redaktion" als längste
+	   Zeile. Unter 800px stapeln die Kacheln. */
+	.bausteine {
+		max-width: 1728px;
+		margin: 0 auto;
+		padding: 24px 16px 96px;
+	}
+
+	@media (min-width: 1024px) {
+		.bausteine {
+			padding: 24px 32px 96px;
+		}
+	}
+
+	.bausteine-titel {
+		margin: 0 0 40px;
+		font-weight: 900;
+		text-transform: uppercase;
+		line-height: 0.85;
+		letter-spacing: -0.01em;
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+	}
+
+	.bausteine-grid {
+		display: grid;
+		gap: 16px;
+	}
+
+	@media (min-width: 800px) {
+		.bausteine-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	.baustein {
+		background: var(--panel);
+		aspect-ratio: 4 / 5;
+		padding: clamp(18px, 2.2vw, 32px);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		container-type: inline-size;
+	}
+
+	.baustein h3 {
+		margin: 0;
+		font-weight: 900;
+		text-transform: uppercase;
+		line-height: 0.85;
+		letter-spacing: -0.01em;
+		font-size: 16.5cqw;
+	}
+
+	.baustein-sub {
+		color: var(--gray);
+		font-size: clamp(0.85rem, 3.2cqw, 1.05rem);
+		margin: 10px 0 0;
+	}
+
+	.baustein-text {
+		font-size: clamp(0.95rem, 0.85rem + 0.35vw, 1.1rem);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
+		margin: 0;
 	}
 
 	footer {
