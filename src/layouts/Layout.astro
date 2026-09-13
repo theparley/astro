@@ -93,6 +93,14 @@ const {
 		--gray: #999894;
 		--line: #2a2a2a;
 		--max-width: 1100px;
+		/* Abstands-Treppe 1:1 aus BBHs ausgeliefertem CSS (--spacing-md/lg/xl,
+		   ea792231…css, gezogen 2026-09-14): XL ist deren SEKTIONS-Abstand
+		   (space-y-xl zwischen allen Sektionen), lg/md die kleineren Stufen.
+		   Für alle künftigen Sektions-Übergänge DIESE Tokens nutzen statt
+		   je Fläche neu zu clampen. */
+		--abstand-md: clamp(30px, 14.9398px + 3.7651vw, 80px);
+		--abstand-lg: clamp(60px, 29.8795px + 7.5301vw, 160px);
+		--abstand-xl: clamp(120px, 59.759px + 15.0602vw, 320px);
 		/* Nur noch von den archivierten Komponenten gelesen (Header.astro,
 		   TileMenu.astro — beide "nirgends eingebunden", siehe deren eigene
 		   Archiv-Kommentare). BrandLogo.astro, das aktive Hero-Logo, definiert

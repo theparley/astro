@@ -63,10 +63,17 @@ const kernaussage =
 	data-flip-ms={flipMs}
 >
 	<div class="mo-kopf">
-		{/* Überschrift FINAL (Fred 14.09.) + Sub-Zeile wörtlich aus dem
-		   Entwurf — beide NICHT ohne Fred anfassen. */}
+		{/* Überschrift FINAL (Fred 14.09.); Sub-Zeile dritte Fassung (Fred
+		   14.09. nachts, Diktat): Zahlen-Staccato "Zwei. Ein. Eine." (passt
+		   zur Zahlenkolonnen-Ästhetik der Tafel) + Satz 2 kündigt BEIDE Akte
+		   an (Content-Output = Akt 1, Zuschauerzeit = Akt 2). ⚠️ "Content"
+		   steht hier erstmals auf der EIGENEN Seite (Register-Regel: Content
+		   = Wort der KI-/Flut-Seite) — als bewusste Fred-Entscheidung
+		   umgesetzt und im Brief geflaggt; schlanke Alternative ohne Content:
+		   "Der Output und die Zuschauerzeit …". Kamera-Wort bleibt weiter
+		   komplett draußen. Beide Zeilen NICHT ohne Fred anfassen. */}
 		<h2>Der Multi-Output echter&nbsp;Gespräche</h2>
-		<p>Eine Stunde im Monat vor der Kamera reicht. Hier der Output unseres Live-Q&amp;A-Session-Formats.</p>
+		<p>Zwei Experten. Ein Gespräch. Eine Stunde. Der Content-Output und die Zuschauerzeit eines Live-Q&amp;A-Session-Formats.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -197,7 +204,13 @@ const kernaussage =
 		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "+100 STUNDEN", t);
 		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t);
 		t += 300 + lese;
-		addClearAll(t); t += 800;
+		// Schluss-Abbau + ATEMPAUSE vor dem Loop-Neustart (Fred 14.09.: der
+		// Neustart kam, bevor die weißen Kacheln ganz weg waren). Der Abbau
+		// selbst dauert (ROWS-1)*90 + (COLS-1)*6 ≈ 1,5s — erst NACH seinem
+		// Ende plus einer knappen Sekunde Leere beginnt die Wand von vorn.
+		addClearAll(t);
+		const abbauDauer = (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6;
+		t += abbauDauer + 900;
 
 		events.sort((a, b) => a.t - b.t);
 		return { events, total: t, akt1EndeT };
@@ -335,7 +348,11 @@ const kernaussage =
 	   zur Laufzeit — gescopte Selektoren träfen diese neu erzeugten Elemente
 	   nie (kein data-astro-cid). Maße/Formeln 1:1 aus dem Entwurf. */
 	.mo-sektion {
-		padding: clamp(32px, 5vh, 72px) clamp(16px, 3vw, 56px);
+		/* Sektions-Abstand oben = BBHs Original-XL (Fred 14.09.: Übergang vom
+		   Paragraph war zu eng; BBH fährt zwischen Sektionen 120–320px fluid —
+		   Token --abstand-xl in Layout.astro). Unten bleibt das Entwurfs-Maß,
+		   die Formatfrage-Sektion holt sich ihren eigenen Abstand. */
+		padding: var(--abstand-xl) clamp(16px, 3vw, 56px) 0;
 		display: flex;
 		flex-direction: column;
 		gap: clamp(28px, 4vh, 56px);
