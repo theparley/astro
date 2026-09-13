@@ -341,20 +341,38 @@ const kernaussage =
 		gap: clamp(28px, 4vh, 56px);
 	}
 
+	/* Kopf MITTIG (Fred 13.09.) + Haus-Vorgaben statt Entwurfs-Maße:
+	   Überschrift = EXAKT das Sektions-Titel-Rezept der Seite (identisch mit
+	   .bausteine-titel "Wie wir das machen" — zwei Sektionstitel auf einer
+	   Seite teilen EINE Größe, analog der Statement-Einheitsgröße-Regel);
+	   Sub-Zeile = EXAKT die .plaedoyer-text-Lead-Typo (BBH-gemessen, weiß
+	   statt des Entwurfs-Graus — "Helligkeit wie die Texte oben"). */
+	.mo-kopf {
+		text-align: center;
+	}
+
 	.mo-kopf h2 {
-		font-size: clamp(30px, 4.6vw, 64px);
-		line-height: 1.02;
-		margin: 0 0 0.35em;
-		font-weight: 800;
-		letter-spacing: -0.015em;
+		margin: 0 0 40px;
+		font-weight: 900;
+		text-transform: uppercase;
+		/* 0.95 statt der 0.85 des Sektions-Titel-Rezepts (Fred 13.09.): dieser
+		   Titel ist ZWEIZEILIG mit Umlaut — die Ä-Punkte ragen über die
+		   Versalhöhe und kollidierten bei 0.85 mit der ersten Zeile.
+		   ("Wie wir das machen" bleibt einzeilig bei 0.85 — dort kann nichts
+		   kollidieren.) */
+		line-height: 0.95;
+		letter-spacing: -0.01em;
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+		text-wrap: balance;
 	}
 
 	.mo-kopf p {
-		font-size: clamp(15px, 1.5vw, 21px);
-		color: var(--gray);
-		margin: 0;
-		line-height: 1.4;
-		max-width: 60ch;
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
+		color: var(--white);
+		margin: 0 auto;
+		max-width: 46rem;
 	}
 
 	.mo-fallback {
@@ -401,7 +419,15 @@ const kernaussage =
 		   deren "-Testing"-Lizenz ist aber eine offene Flagge (Brief). */
 		font-family: ui-monospace, "SF Mono", Menlo, monospace;
 		font-weight: 800;
-		font-size: calc(var(--mo-k) * 0.6);
+		/* Von der Kachel ENTKOPPELT (Fred 13.09., dritte Runde): die Zeichen
+		   haben exakt die Paragraph-/Lead-Schrifthoehe der Seite (gleiche
+		   clamp-Formel wie .plaedoyer-text und die Sub-Zeile darueber) —
+		   auch wenn sie damit groesser laufen, als die Kachel-Kopplung
+		   (frueher 0.6/0.72 der Kachelbreite) hergaebe. Auf Desktop-Breiten
+		   bleibt das innerhalb der Kachelhoehe (31px Schrift in 41px Kachel
+		   bei 1920); auf sehr schmalen Viewports kann overflow:hidden
+		   beschneiden — Mobil-Form der Wand ist ohnehin offene Flagge. */
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
 		overflow: hidden;
 		flex: 0 0 auto;
 	}
@@ -447,7 +473,7 @@ const kernaussage =
 	.mo-logo-text {
 		font-family: -apple-system, "Helvetica Neue", sans-serif;
 		font-weight: 800;
-		font-size: calc(var(--mo-k) * 0.55);
+		font-size: calc(var(--mo-k) * 0.62);
 		letter-spacing: -0.03em;
 	}
 

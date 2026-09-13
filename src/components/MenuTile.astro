@@ -47,7 +47,11 @@ const { gateBehindHero = false } = Astro.props;
 	   Markup = optisch von oben nach unten. Weitere Punkte (Format, Studio)
 	   docken in Phase 2 hier an. */}
 	<nav class="menu-panel" aria-label="Hauptmenü">
-		<a href="/" style="--in-delay: 120ms">Home</a>
+		<a href="/" style="--in-delay: 180ms">Home</a>
+		{/* "Studios" statt "Blickkontaktstudio" (Fred 2026-09-13): Platzgründe
+		   im 272px-Panel + konsistent mit der Studios-Kachel der Startseite
+		   (Plural = drei Formen). Zielseite /studio trägt den vollen Namen. */}
+		<a href="/studio" style="--in-delay: 120ms">Studios</a>
 		<a href="/termin" style="--in-delay: 60ms">Termin</a>
 		<a href="/kontakt" style="--in-delay: 0ms">Kontakt</a>
 	</nav>
