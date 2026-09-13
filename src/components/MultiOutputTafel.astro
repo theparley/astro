@@ -55,6 +55,11 @@ const kernaussage =
 	"1 Stunde Aufwand steht gegen +100 Stunden Zuschauerzeit.";
 ---
 
+{/* MOBIL-FORM ENTSCHIEDEN (Fred 14.09.): unterhalb eines Breakpoints
+   sollen INPUT-Haelfte und OUTPUT-Haelfte der Wand UEBEREINANDER stehen
+   statt nebeneinander (die 41er-Wand wird dazu in zwei ~20er-Boards
+   zerlegt, Timeline entsprechend). UMGESETZT 14.09. (drei Teil-Wände,
+   Breakpoint 760px — Schwellwert ungelockt). */}
 <section
 	class="mo-sektion"
 	data-mo-tafel
@@ -72,8 +77,18 @@ const kernaussage =
 		   umgesetzt und im Brief geflaggt; schlanke Alternative ohne Content:
 		   "Der Output und die Zuschauerzeit …". Kamera-Wort bleibt weiter
 		   komplett draußen. Beide Zeilen NICHT ohne Fred anfassen. */}
-		<h2>Der Multi-Output echter&nbsp;Gespräche</h2>
-		<p>Zwei Experten. Ein Gespräch. Eine Stunde. Der Content-Output und die Zuschauerzeit eines Live-Q&amp;A-Session-Formats.</p>
+		{/* &#8209; = geschützter Bindestrich (Fred 14.09.: der Umbruch „DER
+		   MULTI- / OUTPUT" mitten im Kompositum sah nicht schön aus) —
+		   „Multi-Output" bricht damit auf keiner Breite mehr auseinander;
+		   das &nbsp; hält wie gehabt „echter Gespräche" zusammen. Mögliche
+		   Zeilenfälle nur noch: Einzeiler oder der gewollte Zweizeiler. */}
+		<h2>Der Multi&#8209;Output echter&nbsp;Gespräche</h2>
+		{/* Vierte Fassung (Fred 14.09., Diktat): „am Beispiel des Formats
+		   einer Live-Q&A-Session" — löst das Dreifach-Kompositum
+		   „Live-Q&A-Session-Formats" auf und macht ehrlich, dass die Tafel
+		   EIN Beispiel zeigt (nicht jedes Format liefert exakt diese
+		   Stückzahlen — entlastet still die Zahlen-Flagge). */}
+		<p>Zwei Experten. Ein Gespräch. Eine Stunde. Der Content-Output und die Zuschauerzeit am Beispiel des Formats einer Live&#8209;Q&amp;A&#8209;Session.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -81,15 +96,36 @@ const kernaussage =
 	{/* Kachelwand: server-gerendert (kein Layout-Sprung, Raster steht auch
 	   ohne JS), Inhalte leer — die Timeline flappt sie ein. Rein dekorativ,
 	   der Lesetext steht in .mo-fallback. */}
+	{/* Wand in DREI Teil-Wänden (Mobil-Umbau Fred 14.09.): links 20,
+	   Trenner-Spalte 1, rechts 20 — auf Desktop nebeneinander (optisch
+	   identisch zur alten 41er-Wand), unterm Breakpoint stapeln Input-
+	   und Output-Hälfte übereinander, der Trenner verschwindet. Die
+	   Engine adressiert weiter global tiles[r][0..40] (Mapping unten). */}
 	<div class="mo-wand-wrap">
 		<div class="mo-wand" aria-hidden="true" data-mo-wand>
-			{Array.from({ length: ROWS }).map(() => (
-				<div class="mo-zeile">
-					{Array.from({ length: GESAMT_COLS }).map(() => (
-						<div class="mo-kachel"><div class="mo-inhalt">&nbsp;</div></div>
-					))}
-				</div>
-			))}
+			<div class="mo-halbwand" data-halb="links">
+				{Array.from({ length: ROWS }).map(() => (
+					<div class="mo-zeile">
+						{Array.from({ length: HALB }).map(() => (
+							<div class="mo-kachel"><div class="mo-inhalt">&nbsp;</div></div>
+						))}
+					</div>
+				))}
+			</div>
+			<div class="mo-trennspalte" data-halb="mitte">
+				{Array.from({ length: ROWS }).map(() => (
+					<div class="mo-kachel"><div class="mo-inhalt">&nbsp;</div></div>
+				))}
+			</div>
+			<div class="mo-halbwand" data-halb="rechts">
+				{Array.from({ length: ROWS }).map(() => (
+					<div class="mo-zeile">
+						{Array.from({ length: HALB }).map(() => (
+							<div class="mo-kachel"><div class="mo-inhalt">&nbsp;</div></div>
+						))}
+					</div>
+				))}
+			</div>
 		</div>
 	</div>
 </section>
@@ -117,7 +153,11 @@ const kernaussage =
 	};
 
 	// ── Zeilen-Wortlaute (Freds Diktat, NICHT ohne ihn ändern) ──
-	const INPUT_ZEILE = "1 GESPRÄCH";
+	// Zahlen-Spalte auch im INPUT (Fred 14.09., Mobil-Sicht): die 1 rückt
+	// eine Kachel nach rechts, damit sie mit den rechtsbündigen Zahlen der
+	// Output-Liste fluchtet (Einser in Spalte 1, Wörter ab Spalte 3);
+	// AUFWAND zieht unter STUNDE mit (Muster "   WÄCHST.").
+	const INPUT_ZEILE = " 1 GESPRÄCH";
 	const INPUT_COLS = 16;
 	const ZEILEN: Array<{ text: string; logos: string[] }> = [
 		{ text: " 1 LIVESTREAM",    logos: ["linkedin", "youtube"] },
@@ -189,8 +229,8 @@ const kernaussage =
 		// ── Akt 2: 1 Stunde Aufwand gegen +100 Stunden Zuschauerzeit ──
 		addText(0, 0, INPUT_COLS, "INPUT", t); t += 500;
 		add(t, 2, 0, { weiss: true }); t += 500;
-		addText(4, 0, INPUT_COLS, "1 STUNDE", t);
-		addText(5, 0, INPUT_COLS, "AUFWAND", t); t += 600;
+		addText(4, 0, INPUT_COLS, " 1 STUNDE", t);
+		addText(5, 0, INPUT_COLS, "   AUFWAND", t); t += 600;
 		addText(0, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
@@ -223,8 +263,15 @@ const kernaussage =
 	function setupTafel(sektion: HTMLElement): () => void {
 		const wand = sektion.querySelector<HTMLElement>("[data-mo-wand]");
 		if (!wand) return () => {};
-		const zeilen = Array.from(wand.children) as HTMLElement[];
-		const tiles: HTMLElement[][] = zeilen.map((z) => Array.from(z.children) as HTMLElement[]);
+		// Drei Teil-Wände → globale tiles[r][0..40]-Matrix (Mobil-Umbau):
+		const rowsL = Array.from(wand.querySelector('[data-halb="links"]')!.children) as HTMLElement[];
+		const rowsR = Array.from(wand.querySelector('[data-halb="rechts"]')!.children) as HTMLElement[];
+		const trennTiles = Array.from(wand.querySelector('[data-halb="mitte"]')!.children) as HTMLElement[];
+		const tiles: HTMLElement[][] = rowsL.map((zl, r) => [
+			...(Array.from(zl.children) as HTMLElement[]),
+			trennTiles[r],
+			...(Array.from(rowsR[r].children) as HTMLElement[]),
+		]);
 		const inhalt = (r: number, c: number) =>
 			tiles[r]?.[c]?.querySelector<HTMLElement>(".mo-inhalt") ?? null;
 
@@ -411,11 +458,58 @@ const kernaussage =
 
 	.mo-wand {
 		display: flex;
-		flex-direction: column;
 		gap: clamp(3px, 0.35vw, 6px);
 		--mo-k: clamp(11px, 1.75vw, 30px);
 		width: max-content;
 		margin: 0 auto;
+	}
+
+	.mo-halbwand,
+	.mo-trennspalte {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(3px, 0.35vw, 6px);
+	}
+
+	/* BREAKPOINT (Fred 14.09., entschieden): unterm Schwellwert stapeln
+	   Input- und Output-Hälfte übereinander, der Trenner entfällt, die
+	   Kacheln füllen mit 20 Spalten die Viewport-Breite, und die Schrift
+	   koppelt sich wieder an die Kachelgröße (die Lead-Typo-Entkopplung
+	   gilt nur für die breite Wand). Schwellwert ungelockt, am Objekt. */
+	@media (max-width: 760px) {
+		.mo-wand {
+			flex-direction: column;
+			gap: clamp(14px, 5vw, 28px);
+			--mo-k: calc((100vw - 92px) / 20);
+		}
+
+		.mo-trennspalte {
+			display: none;
+		}
+
+		.mo-wand .mo-kachel {
+			/* Faktor 1,0 = Kachelbreite (Fred 14.09.): im Stapel-Modus
+			   wirkten die Buchstaben kleiner im Verhältnis zur Kachel als
+			   auf Desktop (dort läuft die Schrift entkoppelt in Lead-Typo,
+			   ≈ Kachelbreite). Doppel-Selektor nötig: die Basis-Regel steht
+			   SPÄTER im Stylesheet und gewann sonst die Spezifität. */
+			font-size: var(--mo-k);
+		}
+
+		/* Überschrift lief rechts aus dem Bild (das &nbsp; hält "echter
+		   Gespräche" als Block zusammen) — kleiner statt umbrechen, damit
+		   der gewollte Zeilenfall erhalten bleibt. */
+		.mo-kopf h2 {
+			font-size: clamp(1.7rem, 9vw, 2.6rem);
+		}
+
+		/* Die Input-Hälfte bespielt in beiden Akten nur die Zeilen 0–5
+		   (INPUT, 1 GESPRÄCH, weiße Kachel, 1 STUNDE/AUFWAND) — gestapelt
+		   wären die leeren Rest-Zeilen ein halber Bildschirm tote Kacheln.
+		   Die Engine schreibt weiter in die versteckten Kacheln (harmlos). */
+		.mo-halbwand[data-halb="links"] .mo-zeile:nth-child(n + 7) {
+			display: none;
+		}
 	}
 
 	.mo-zeile {

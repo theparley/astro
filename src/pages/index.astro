@@ -75,7 +75,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   verteidigen sie. / Mit Augenzeugen.") ist raus; sein Inhalt lebt
 			   sinngemäß im neuen Paragraph darunter ("Wir übernehmen die
 			   Verteidigung eurer Expertise … Augenzeuge"). */}
-		<h1><span>Kein Business</span><span>ohne Witness.</span></h1>
+			{/* Hero-Breakpoint (Fred 14.09.): unterm Schwellwert wird aus den
+			   zwei Zeilen ein VIERZEILER — jedes Wort eine Zeile, die Schrift
+			   darf dafür größer (kalibriert auf "Business" als längste
+			   Zeile). Wort-Spans inline auf Desktop (unsichtbar), block am
+			   Breakpoint; die Wipe-Animation bleibt an den ZEILEN-Spans. */}
+		<h1><span><span class="hero-wort">Kein</span> <span class="hero-wort">Business</span></span><span><span class="hero-wort">ohne</span> <span class="hero-wort">Witness.</span></span></h1>
 		</div>
 		{/* Logo bleibt Markenpräsenz OHNE Menü-Funktion (Website-Brief
 		   "Entscheidung 29.08."), ist aber wieder fixiert unten Mitte und
@@ -434,14 +439,29 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		letter-spacing: -0.01em;
 	}
 
-	.hero h1 span {
+	.hero h1 > span {
 		/* Beide Zeilen WISCHEN gemeinsam herein wie der Seitenübergang
 		   (Fred 2026-06-14: "der ganze Text mit diesem schwarzen Swipe von
 		   links nach rechts" — die frühere Von-oben-Animation der zweiten
 		   Zeile ist raus): gleiche Technik (clip-path legt von links frei),
-		   gleiche Dauer (800ms) und exakt PageWipes symmetrische BBH-Kurve. */
+		   gleiche Dauer (800ms) und exakt PageWipes symmetrische BBH-Kurve.
+		   Selektor auf DIREKTE Kinder verengt (Hero-Breakpoint 14.09.):
+		   die inneren Wort-Spans dürfen nicht mitanimieren. */
 		display: block;
 		animation: hero-line-wipe 800ms cubic-bezier(0.76, 0, 0.24, 1) 100ms both;
+	}
+
+	/* Hero-Breakpoint (Fred 14.09., Schwellwert ungelockt): vier Wort-
+	   Zeilen, Schrift neu kalibriert — längste Zeile ist jetzt "Business"
+	   (8 Zeichen statt 13), die Schrift darf entsprechend wachsen. */
+	@media (max-width: 640px) {
+		.hero h1 {
+			font-size: 24cqw;
+		}
+
+		.hero h1 .hero-wort {
+			display: block;
+		}
 	}
 
 	@keyframes hero-line-wipe {
@@ -461,7 +481,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.hero h1 span {
+		.hero h1 > span {
 			animation: none;
 		}
 	}
@@ -491,6 +511,15 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		max-width: 50%;
 		margin-left: auto;
 		margin-right: auto;
+	}
+
+	/* Mobil-Korrektur (Fred 14.09.: "sieht sehr schmal aus"): die 50%-
+	   Halbspalte ist eine Desktop-Entscheidung — unterm Breakpoint läuft
+	   der Text auf volle Breite (der BBH-Randabstand bleibt). */
+	@media (max-width: 760px) {
+		.paragraph .plaedoyer-text {
+			max-width: 100%;
+		}
 	}
 
 	/* Tür-Knopf unterm Paragraph: Kachel-Sprache des Menü-Systems (helle
