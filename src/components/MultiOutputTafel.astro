@@ -1,0 +1,459 @@
+---
+// MultiOutputTafel.astro — Sektion „Der Multi-Output echter Gespräche".
+// PORT des von Fred am Objekt abgenommenen Entwurfs
+// `letitbeam Marketing/website/Ein_Gespraech_Sektion_Entwurf.html`
+// (BAU-ANWEISUNG im Website-Brief, Abschnitt „Der Multi-Output echter
+// Gespräche", 14.09.2026). Der Entwurf ist die gestalterische Quelle der
+// Wahrheit — Ablauf, Zeilen-Inhalte, Wandgeometrie (41 Spalten, Trenner
+// exakt Mitte), Zahlenkolonne, rechtsbündige Logos, 10×10-Block, Abbau von
+// oben nach unten sind 1:1 übernommen. Eigene Komponente nach dem
+// SplitFlap-Muster (SSG-Raster + sr-only-Kernaussage) — SplitFlap.astro
+// selbst bleibt unberührt (Format-Tafel).
+//
+// Beim Port ENTFERNT (reine Entwurfs-Werkzeuge): Timeline-Scrubber, Takt-/
+// Lese-Regler, Pause, rote Mitte-Hilfslinie, Entwurfs-Banner. Stattdessen:
+// Start per IntersectionObserver beim Viewport-Eintritt, danach Endlos-Loop;
+// prefers-reduced-motion zeigt den fertigen Akt-1-Endzustand statisch.
+//
+// KLAPPER-QUALITÄT (Port-Checkliste Punkt 2, bewusst entschieden): Version 1
+// nutzt den vereinfachten Flap des Entwurfs (eine 85ms-Kippbewegung pro
+// Wechsel), NICHT die Zeichentrommel von SplitFlap.astro. Die Trommel-
+// Mechanik in die Timeline-Engine zu heben ist eine spätere Angleichung —
+// bis dahin sind zwei Klapper-Qualitäten auf der Seite sichtbar (Tafel
+// klappert durch, diese Wand kippt einfach).
+//
+// NICHT ANFASSEN ohne Fred (BAU-ANWEISUNG Punkt 6): Zeilen-Wortlaute und
+// Zahlen (ungelockt, aber Freds Diktat), Überschrift, Sub-Zeile,
+// Logo-Zuordnungen. Offene Flaggen (Zahlen rechenfest, echte Brand-Logos
+// nach Markenrichtlinien, Forma-DJR-Mono-Lizenz, Mobil-Form der 41er-Wand)
+// stehen in der Port-Checkliste im Website-Brief — hier nicht gelöst.
+
+interface Props {
+	/** Zeilen-Takt in Akt 1 (ms je Listenzeile). Fred 14.09.: bewusst schnell — wird am Objekt feingetunt, NICHT gelockt. */
+	taktMs?: number;
+	/** Lese-Pause am Ende jedes Akts (ms). Ebenfalls ungelockt. */
+	leseMs?: number;
+	/** Dauer der einzelnen Kipp-Bewegung einer Kachel (ms). */
+	flipMs?: number;
+}
+
+const { taktMs = 400, leseMs = 2500, flipMs = 85 } = Astro.props;
+
+// Wandgeometrie — identisch zum Entwurf: exakt halbierte Wand, 20 Kacheln
+// je Hälfte, EINE Trenner-Spalte auf der Bildmitte.
+const HALB = 20;
+const GESAMT_COLS = HALB + 1 + HALB; // 41
+const ROWS = 12 + 3; // 12 Listen-Zeilen + Kopfzeile, Leerzeile, Reserve
+
+// sr-only-Kernaussage (Port-Checkliste Punkt 1): echte Lesefassung der
+// Tafel-Botschaft für Crawler/Screenreader — das Kachel-Raster selbst ist
+// aria-hidden. Inhalte = Freds Zeilen-Diktat in Satzform.
+const kernaussage =
+	"Aus einem Gespräch im Monat entstehen: 1 Livestream, 1 Videopodcast, " +
+	"1 Audio-Podcast, 10 Beiträge, 10 Clips, 10 Shorts, 1 Newsletter, " +
+	"1 Transkript und 10 Zitate für KI. Eure Bibliothek wächst. " +
+	"1 Stunde Aufwand steht gegen +100 Stunden Zuschauerzeit.";
+---
+
+<section
+	class="mo-sektion"
+	data-mo-tafel
+	data-takt-ms={taktMs}
+	data-lese-ms={leseMs}
+	data-flip-ms={flipMs}
+>
+	<div class="mo-kopf">
+		{/* Überschrift FINAL (Fred 14.09.) + Sub-Zeile wörtlich aus dem
+		   Entwurf — beide NICHT ohne Fred anfassen. */}
+		<h2>Der Multi-Output echter&nbsp;Gespräche</h2>
+		<p>Eine Stunde im Monat vor der Kamera reicht. Hier der Output unseres Live-Q&amp;A-Session-Formats.</p>
+	</div>
+
+	<p class="mo-fallback">{kernaussage}</p>
+
+	{/* Kachelwand: server-gerendert (kein Layout-Sprung, Raster steht auch
+	   ohne JS), Inhalte leer — die Timeline flappt sie ein. Rein dekorativ,
+	   der Lesetext steht in .mo-fallback. */}
+	<div class="mo-wand-wrap">
+		<div class="mo-wand" aria-hidden="true" data-mo-wand>
+			{Array.from({ length: ROWS }).map(() => (
+				<div class="mo-zeile">
+					{Array.from({ length: GESAMT_COLS }).map(() => (
+						<div class="mo-kachel"><div class="mo-inhalt">&nbsp;</div></div>
+					))}
+				</div>
+			))}
+		</div>
+	</div>
+</section>
+
+<script>
+	// Timeline-Engine — Port aus dem Entwurf (Ein_Gespraech_Sektion_Entwurf
+	// .html); die Ablauf-Logik ist bewusst 1:1 übernommen, nur Entwurfs-
+	// Steuerung (Scrubber/Regler/Pause) ist durch IntersectionObserver-Start
+	// + Endlos-Loop ersetzt. astro:page-load-Muster mit Cleanup wie
+	// SplitFlap.astro (ClientRouter-Wechsel würden sonst verwaiste
+	// rAF-Schleifen zurücklassen).
+
+	// ── Vereinfachte Plattform-Logos (Entwurf 1:1; Flagge „echte Brand-Logos
+	//    nach Markenrichtlinien" bleibt offen, siehe Website-Brief). ──
+	const LOGOS: Record<string, string> = {
+		linkedin: '<span class="mo-logo-text">in</span>',
+		youtube: '<svg viewBox="0 0 24 24" fill="none"><rect x="1" y="4" width="22" height="16" rx="4.5" stroke="white" stroke-width="1.8"/><path d="M10 8.8v6.4l5.6-3.2z" fill="white"/></svg>',
+		instagram: '<svg viewBox="0 0 24 24" fill="none"><rect x="2.2" y="2.2" width="19.6" height="19.6" rx="5.5" stroke="white" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="white" stroke-width="1.8"/><circle cx="17.6" cy="6.4" r="1.4" fill="white"/></svg>',
+		tiktok: '<svg viewBox="0 0 24 24" fill="white"><path d="M14.5 3h2.2c.2 1.8 1.4 3.3 3.8 3.7v2.5c-1.5 0-2.8-.5-3.8-1.2v6.6c0 3.4-2.3 5.9-5.6 5.9-3.1 0-5.6-2.3-5.6-5.5 0-3.4 2.9-5.8 6.2-5.4v2.6c-1.9-.5-3.6.8-3.6 2.7 0 1.7 1.3 3 3 3 1.9 0 3.4-1.4 3.4-3.7V3z"/></svg>',
+		spotify: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.8"/><path d="M6.8 9.6c3.4-1 7.2-.7 10.2 1M7.4 12.6c2.8-.8 5.8-.5 8.2.8M8 15.4c2.2-.6 4.4-.4 6.3.6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>',
+		apple: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" stroke="white" stroke-width="1.6"/><circle cx="12" cy="8.8" r="2.5" fill="white"/><path d="M9.3 17.8c.3-3.2 1.1-4.8 2.7-4.8s2.4 1.6 2.7 4.8a6.9 6.9 0 0 1-5.4 0z" fill="white"/></svg>',
+		web: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4.2" ry="9.5"/><path d="M2.8 12h18.4M4 7h16M4 17h16"/></svg>',
+		mail: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M3 6.5l9 7 9-7"/></svg>',
+		ki: '<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.5l1.9 6.2 6.2 1.9-6.2 1.9L12 18.7l-1.9-6.2-6.2-1.9 6.2-1.9z"/><path d="M19 15.5l.9 2.8 2.8.9-2.8.9-.9 2.8-.9-2.8-2.8-.9 2.8-.9z" opacity="0.85"/></svg>',
+	};
+
+	// ── Zeilen-Wortlaute (Freds Diktat, NICHT ohne ihn ändern) ──
+	const INPUT_ZEILE = "1 GESPRÄCH";
+	const INPUT_COLS = 16;
+	const ZEILEN: Array<{ text: string; logos: string[] }> = [
+		{ text: " 1 LIVESTREAM",    logos: ["linkedin", "youtube"] },
+		{ text: " 1 VIDEOPODCAST",  logos: ["youtube", "web"] },
+		{ text: " 1 AUDIO-PODCAST", logos: ["spotify", "apple", "web"] },
+		{ text: "10 BEITRÄGE",      logos: ["linkedin"] },
+		{ text: "10 CLIPS",         logos: ["linkedin", "instagram", "tiktok", "youtube"] },
+		{ text: "10 SHORTS",        logos: ["youtube", "instagram", "tiktok"] },
+		{ text: " 1 NEWSLETTER",    logos: ["mail"] },
+		{ text: " 1 TRANSKRIPT",    logos: ["web"] },
+		{ text: "10 ZITATE FÜR KI", logos: ["ki"] },
+		{ text: "", logos: [] },
+		{ text: " + EURE BIBLIOTHEK", logos: [] },
+		{ text: "   WÄCHST.", logos: [] },
+	];
+	const TEXT_COLS = Math.max(...ZEILEN.map((z) => z.text.length));
+	const ROWS = ZEILEN.length + 3;
+	const HALB = 20;
+	const GESAMT_COLS = HALB + 1 + HALB; // 41, Trenner = Spalte 20
+	const MITTE_RECHTS = HALB + 1;
+	const SUMME_ROW = 13;
+	const BLOCK_BREITE = 10;
+
+	type Ev = { t: number; r: number; c: number; html?: string; weiss?: boolean };
+
+	// Deterministischer "Zufalls"-Versatz je Kachel (Entwurf) — Aufbau
+	// organisch, Abbau (addClearAll) diszipliniert von oben nach unten.
+	function stag(r: number, c: number) {
+		return ((r * 37 + c * 23) % 9) * 26;
+	}
+
+	function buildTimeline(takt: number, lese: number) {
+		const events: Ev[] = [];
+		const add = (t: number, r: number, c: number, props: Partial<Ev>) =>
+			events.push({ t, r, c, ...props });
+		const addText = (r: number, startCol: number, breite: number, text: string, base: number) => {
+			const voll = text.padEnd(breite, " ");
+			[...voll].forEach((ch, i) =>
+				add(base + stag(r, startCol + i), r, startCol + i, { html: ch === " " ? "&nbsp;" : ch }),
+			);
+		};
+		const addClearAll = (base: number) => {
+			for (let r = 0; r < ROWS; r++)
+				for (let c = 0; c < GESAMT_COLS; c++) {
+					const tAb = base + r * 90 + c * 6;
+					add(tAb, r, c, { html: "&nbsp;" });
+					add(tAb, r, c, { weiss: false });
+				}
+		};
+
+		let t = 200;
+		// ── Akt 1: INPUT → 1 GESPRÄCH → OUTPUT → Monats-Output-Liste ──
+		addText(0, 0, INPUT_COLS, "INPUT", t); t += 500;
+		addText(2, 0, INPUT_COLS, INPUT_ZEILE, t); t += 600;
+		addText(0, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
+		ZEILEN.forEach((def, i) => {
+			const r = 2 + i;
+			addText(r, MITTE_RECHTS, TEXT_COLS, def.text, t);
+			// Logos rechtsbündig am Wandrand (Gleis-Kolonne), geflappt einzeln:
+			def.logos.forEach((name, l) => {
+				add(t + 260 + l * 150, r, GESAMT_COLS - def.logos.length + l, { html: LOGOS[name] });
+			});
+			t += Math.max(takt, 60);
+		});
+		t += 500 + lese;
+		const akt1EndeT = t - 1; // Moment „Liste steht komplett" (reduced-motion-Standbild)
+		addClearAll(t); t += 800;
+
+		// ── Akt 2: 1 Stunde Aufwand gegen +100 Stunden Zuschauerzeit ──
+		addText(0, 0, INPUT_COLS, "INPUT", t); t += 500;
+		add(t, 2, 0, { weiss: true }); t += 500;
+		addText(4, 0, INPUT_COLS, "1 STUNDE", t);
+		addText(5, 0, INPUT_COLS, "AUFWAND", t); t += 600;
+		addText(0, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
+		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
+		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
+		let i = 0;
+		for (let r = 2; r < ROWS && i < 100; r++)
+			for (let c = 0; c < BLOCK_BREITE && i < 100; c++) {
+				add(t + i * 18, r, MITTE_RECHTS + c, { weiss: true });
+				i++;
+			}
+		t += 100 * 18 + 400;
+		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "+100 STUNDEN", t);
+		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t);
+		t += 300 + lese;
+		addClearAll(t); t += 800;
+
+		events.sort((a, b) => a.t - b.t);
+		return { events, total: t, akt1EndeT };
+	}
+
+	function reduceMotion(): boolean {
+		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	}
+
+	function setupTafel(sektion: HTMLElement): () => void {
+		const wand = sektion.querySelector<HTMLElement>("[data-mo-wand]");
+		if (!wand) return () => {};
+		const zeilen = Array.from(wand.children) as HTMLElement[];
+		const tiles: HTMLElement[][] = zeilen.map((z) => Array.from(z.children) as HTMLElement[]);
+		const inhalt = (r: number, c: number) =>
+			tiles[r]?.[c]?.querySelector<HTMLElement>(".mo-inhalt") ?? null;
+
+		const takt = Number(sektion.dataset.taktMs) || 400;
+		const lese = Number(sektion.dataset.leseMs) || 2500;
+		const flip = Number(sektion.dataset.flipMs) || 85;
+
+		const { events, total, akt1EndeT } = buildTimeline(takt, lese);
+
+		// Pro Kachel indizierte Event-Listen für seekInstant:
+		const textEv: Ev[][][] = tiles.map((row) => row.map(() => []));
+		const weissEv: Ev[][][] = tiles.map((row) => row.map(() => []));
+		events.forEach((ev) => {
+			(ev.html !== undefined ? textEv : weissEv)[ev.r][ev.c].push(ev);
+		});
+
+		function seekInstant(T: number) {
+			for (let r = 0; r < tiles.length; r++)
+				for (let c = 0; c < tiles[r].length; c++) {
+					const k = tiles[r][c];
+					const el = inhalt(r, c);
+					if (!el) continue;
+					let te: Ev | null = null;
+					for (const ev of textEv[r][c]) { if (ev.t <= T) te = ev; else break; }
+					const html = te ? te.html! : "&nbsp;";
+					if (el.innerHTML !== html) el.innerHTML = html;
+					let we: Ev | null = null;
+					for (const ev of weissEv[r][c]) { if (ev.t <= T) we = ev; else break; }
+					k.classList.toggle("mo-weiss", !!(we && we.weiss));
+					k.classList.remove("mo-flip");
+				}
+		}
+
+		// Vereinfachter Flap (Entwurf): Inhalt kippt weg, wechselt, kippt zurück.
+		function fireFlip(ev: Ev) {
+			const k = tiles[ev.r]?.[ev.c];
+			const el = inhalt(ev.r, ev.c);
+			if (!k || !el) return;
+			k.classList.add("mo-flip");
+			window.setTimeout(() => {
+				if (ev.html !== undefined) {
+					if (el.innerHTML !== ev.html) el.innerHTML = ev.html;
+				} else {
+					k.classList.toggle("mo-weiss", !!ev.weiss);
+				}
+				k.classList.remove("mo-flip");
+			}, flip);
+		}
+
+		let cancelled = false;
+		let rafId = 0;
+		let started = false;
+
+		function startLoop() {
+			if (started || cancelled) return;
+			started = true;
+			let T = 0;
+			let gIdx = 0;
+			let last = performance.now();
+			seekInstant(0);
+			const loop = (now: number) => {
+				if (cancelled) return;
+				T += now - last;
+				last = now;
+				if (T > total) {
+					T = 0;
+					gIdx = 0;
+					seekInstant(0);
+				}
+				while (gIdx < events.length && events[gIdx].t <= T) {
+					fireFlip(events[gIdx]);
+					gIdx++;
+				}
+				rafId = requestAnimationFrame(loop);
+			};
+			rafId = requestAnimationFrame(loop);
+		}
+
+		if (reduceMotion()) {
+			// Fertiger Akt-1-Endzustand statisch (BAU-ANWEISUNG Punkt 3).
+			seekInstant(akt1EndeT);
+		} else {
+			// Start erst beim Viewport-Eintritt — die Sektion liegt unter dem
+			// Fold; wer hinscrollt, sieht die Wand von Anfang an flappen.
+			const io = new IntersectionObserver(
+				(entries) => {
+					if (entries.some((e) => e.isIntersecting)) {
+						io.disconnect();
+						startLoop();
+					}
+				},
+				{ threshold: 0.2 },
+			);
+			io.observe(sektion);
+			return () => {
+				cancelled = true;
+				io.disconnect();
+				cancelAnimationFrame(rafId);
+			};
+		}
+		return () => {
+			cancelled = true;
+			cancelAnimationFrame(rafId);
+		};
+	}
+
+	let cleanupFns: Array<() => void> = [];
+	function mountAll() {
+		cleanupFns.forEach((fn) => fn());
+		cleanupFns = [];
+		document.querySelectorAll<HTMLElement>("[data-mo-tafel]").forEach((el) => {
+			cleanupFns.push(setupTafel(el));
+		});
+	}
+	document.addEventListener("astro:page-load", mountAll);
+</script>
+
+<style is:global>
+	/* is:global + mo--Präfix (gleiche Astro-Falle wie bei SplitFlap.astro
+	   dokumentiert): das Skript injiziert Logo-Markup (.mo-logo-text, svg)
+	   zur Laufzeit — gescopte Selektoren träfen diese neu erzeugten Elemente
+	   nie (kein data-astro-cid). Maße/Formeln 1:1 aus dem Entwurf. */
+	.mo-sektion {
+		padding: clamp(32px, 5vh, 72px) clamp(16px, 3vw, 56px);
+		display: flex;
+		flex-direction: column;
+		gap: clamp(28px, 4vh, 56px);
+	}
+
+	.mo-kopf h2 {
+		font-size: clamp(30px, 4.6vw, 64px);
+		line-height: 1.02;
+		margin: 0 0 0.35em;
+		font-weight: 800;
+		letter-spacing: -0.015em;
+	}
+
+	.mo-kopf p {
+		font-size: clamp(15px, 1.5vw, 21px);
+		color: var(--gray);
+		margin: 0;
+		line-height: 1.4;
+		max-width: 60ch;
+	}
+
+	.mo-fallback {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		border: 0;
+	}
+
+	/* Mobil-Form der 41er-Wand ist eine OFFENE Objekt-Entscheidung (Brief);
+	   bis dahin scrollt die Wand horizontal statt das Raster zu brechen. */
+	.mo-wand-wrap {
+		overflow-x: auto;
+	}
+
+	.mo-wand {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(3px, 0.35vw, 6px);
+		--mo-k: clamp(11px, 1.75vw, 30px);
+		width: max-content;
+		margin: 0 auto;
+	}
+
+	.mo-zeile {
+		display: flex;
+		gap: clamp(3px, 0.35vw, 6px);
+	}
+
+	.mo-kachel {
+		width: var(--mo-k);
+		height: calc(var(--mo-k) * 1.38);
+		background: var(--panel);
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		/* ui-monospace wie im Entwurf; Forma DJR Mono wäre die Haus-Schwester,
+		   deren "-Testing"-Lizenz ist aber eine offene Flagge (Brief). */
+		font-family: ui-monospace, "SF Mono", Menlo, monospace;
+		font-weight: 800;
+		font-size: calc(var(--mo-k) * 0.6);
+		overflow: hidden;
+		flex: 0 0 auto;
+	}
+
+	.mo-kachel::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 50%;
+		height: 1px;
+		background: rgba(0, 0, 0, 0.65);
+	}
+
+	.mo-inhalt {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		transition: transform 85ms ease-in;
+		backface-visibility: hidden;
+	}
+
+	.mo-kachel.mo-flip .mo-inhalt {
+		transform: rotateX(90deg);
+	}
+
+	.mo-kachel.mo-weiss {
+		background: #ededed;
+	}
+
+	.mo-kachel.mo-weiss::after {
+		background: rgba(0, 0, 0, 0.18);
+	}
+
+	.mo-kachel svg {
+		width: 62%;
+		height: 62%;
+		display: block;
+	}
+
+	.mo-logo-text {
+		font-family: -apple-system, "Helvetica Neue", sans-serif;
+		font-weight: 800;
+		font-size: calc(var(--mo-k) * 0.55);
+		letter-spacing: -0.03em;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.mo-inhalt {
+			transition: none;
+		}
+	}
+</style>
