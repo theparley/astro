@@ -1,6 +1,47 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BrandLogo from "../components/BrandLogo.astro";
+import SplitFlap from "../components/SplitFlap.astro";
+
+// ZIEL→FORMAT-TAFEL (Fred 13.09., Probe-Einbau "nur dass ich es mal sehe"):
+// Ziel links, Pfeil, Format rechts — BEWUSST EIN SplitFlap-Board statt zwei
+// nebeneinander: zwei getrennte Boards laufen zeitlich auseinander (jeder
+// Zustandswechsel dauert je nach Trommel-Distanz unterschiedlich lang), und
+// dann stünde ein falsches Paar nebeneinander. Ein Board = immer synchron;
+// die Zwei-Tafeln-Optik machen die festen Feldbreiten + der konstante Pfeil
+// (nicht in der Trommel → klappert nie, steht wie eine Stanze in der Mitte).
+// Ziel-Wortlaute = UNGELOCKTER Vorrat aus dem Website-Brief (Ziel→Format-
+// Paare, MBS-Kaufmotive-Muster) — hier bewusst kurz gehalten, damit die
+// Tafel nicht zu breit wird; am Objekt schärfen.
+// Vierte Iteration (Fred 13.09. spät): Ziel-Zeilen und Pfeil VERWORFEN —
+// die Tafel rattert NUR die Formate durch, eine Zeile. Dafür übernimmt sie
+// die Aufzählungs-Funktion des Paragraph-Schlusssatzes (die Frage-Liste
+// dort entfällt): mehr Formate ohne Satz-Platzkosten, und das Durchrattern
+// selbst erzählt "es gibt mehr als eines". Liste = Sortiment + Kandidaten
+// aus der Format-Recherche 13.09. (UNGELOCKT — Fred streicht/ergänzt).
+// Fünfte Iteration (Fred 13.09. nacht, Wort-Diktat): Gattungs-Wörter, die
+// jeder Leser sofort kennt — "Kundentestimonial" voll ausgeschrieben
+// (Produktname), "Live-Webinar" statt Webinar (das "Live" adressiert Freds
+// Billig-Vorbehalt und zieht die Grenze zur Folien-Konserve), "Interview"
+// und "Online-Event" neu (Verstehens-Wörter; dass "Interview" kein
+// SUCH-Begriff ist, ist hier egal — die Tafel ist eine Verstehens-Fläche).
+// Sechste Iteration (Fred 13.09. nacht): Tafel MAXIMAL DREIZEILIG, bei
+// Mehrwort-Formaten steht jedes Wort auf einer eigenen Zeile (Leerzeichen
+// = Zeilentrenner; Bindestrich-Komposita bleiben EIN Wort/eine Zeile).
+// padState() der Komponente zentriert kürzere Zustände vertikal im
+// 3-Zeilen-Raster. "THOUGHT LEADER INTERVIEW" ersetzt das nackte
+// "INTERVIEW" (Thought Leadership = bestätigtes Kunden-Vokabular).
+const tafelFormate = [
+	"VIDEOPODCAST",
+	"KUNDENTESTIMONIAL",
+	"LIVE-WEBINAR",
+	"EXPERTENTALK",
+	"ONLINE-EVENT",
+	"RECRUITING-VIDEO",
+	"LIVE Q&A-SESSION",
+	"MITARBEITERINTERVIEW",
+];
+const tafelZustaende = tafelFormate.map((format) => format.split(" "));
 
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
 // buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
@@ -54,8 +95,33 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Formate, Schluss verkürzt auf den Augenzeugen-Satz). */}
 	<section class="paragraph">
 		<p class="plaedoyer-text">Aus Kunden werden Augenzeugen eurer Expertise. Noch vor dem ersten Kontakt.</p>
-		<p class="plaedoyer-text">Jeder ist plötzlich „Experte“.<br />Seitdem es Fachwissen auf Knopfdruck gibt, ist das geschriebene Wort allein kein Indiz mehr für Expertise. Damit stellen Kunden jede Kompetenz erst einmal unter KI-Generalverdacht.</p>
-		<p class="plaedoyer-text">Wir übernehmen die Verteidigung.<br />Den Beweis liefern echte Gespräche. Denn Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle Fragen. Wir skalieren das mit Formaten von Videopodcast bis Kundenstimme.</p>
+		<p class="plaedoyer-text">Fachwissen als Texte, Slides und Videos gibt es heute auf Knopfdruck. Plötzlich ist jeder Experte.</p>
+		<p class="plaedoyer-text">Der Kunde braucht einen Vertrauensbeweis: einen Moment gelebter Expertise. Den liefern echte Gespräche. Denn Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle Fragen.</p>
+		{/* "ohne Kamerastress" statt "mit Video" (Fred 13.09. nacht): die
+		   Kamera sagt Video, ohne es zu sagen — das Wort "Video" steht damit
+		   wieder NUR auf der Knopfdruck-Seite (bewusste Eigenschaft, s. Brief);
+		   zugleich steht die gelockte Formel "filmreif ohne Kamerastress"
+		   wörtlich im Kopf und trägt beide Filmreif-Schichten (Umsetzung +
+		   Situation der Sprecher). */}
+		<p class="plaedoyer-text">Diese Momente fangen wir mit unserer Blickkontakt-Aufnahmetechnik ein: filmreif und ohne Kamerastress. Der erste Schritt ist die Wahl des passenden Formats für eure Ziele, das wir dann auf alle Kanäle skalieren.</p>
+	</section>
+
+	{/* FORMAT-TAFEL (Fred 13.09. spät, vierte Iteration): rattert die
+	   Formate durch und ÜBERNIMMT die Aufzählungs-Funktion des Paragraph-
+	   Schlusssatzes (die Frage-Liste dort ist raus) — mehr Formate ohne
+	   Satz-Platz, das Durchrattern erzählt "mehr als eines". Der
+	   Formatberatung-Knopf rutscht mit UNTER die Tafel (Fred): Satz → Tafel
+	   (die Auswahl) → Knopf (die Tür). Wortlaute/Tempo ungelockt. */}
+	<section class="ziel-format-tafel">
+		{/* flipMs 30 (Fred 13.09.: "Flappern schneller") — Dauer EINER
+		   Klapp-Bewegung; Default war 55. Noch schneller geht bis ~15,
+		   darunter frisst der Browser Frames. */}
+		<SplitFlap lines={tafelZustaende} flipMs={30} holdMs={2400} />
+		{/* In-Flow-Tür (Fred 2026-09-13, "am Ende könnte ein Knopf stehen"):
+		   "Formatberatung" löst "Die Wahl des passenden Formats ist der erste
+		   Schritt" wörtlich ein. Wortlaut verspricht ein ERGEBNIS (Klarheit
+		   übers Format), keinen Aufwand (Termin). Ziel /termin. */}
+		<a class="format-cta" href="/termin">Formatberatung</a>
 	</section>
 
 	{/* Clip VOLLBREIT (Fred 2026-06-15, "übernehmen wir von BBH"): deren
@@ -130,6 +196,19 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		.wrap {
 			padding: 0 32px;
 		}
+	}
+
+	/* Ziel→Format-Tafel (Probe 13.09.): mittig, großzügige Luft; auf schmalen
+	   Viewports scrollt die Tafel horizontal, statt das Raster zu brechen
+	   (Probe-Kompromiss — die Mobil-Form ist eine eigene Objekt-Entscheidung,
+	   Kandidat: zwei Zeilen übereinander statt links/rechts). */
+	.ziel-format-tafel {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: clamp(32px, 5vh, 56px);
+		padding: clamp(48px, 8vh, 96px) 16px;
+		overflow-x: auto;
 	}
 
 	.hero {
@@ -245,6 +324,34 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		max-width: 50%;
 		margin-left: auto;
 		margin-right: auto;
+	}
+
+	/* Tür-Knopf unterm Paragraph: Kachel-Sprache des Menü-Systems (helle
+	   Fläche, eckig, versal, BBH-Hover-Schleier), mittig unter der
+	   50%-Textspalte. */
+	.format-cta {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: min(272px, 100%);
+		height: 88px;
+		margin: 40px auto 0;
+		background: var(--tile-surface);
+		color: var(--black);
+		font-weight: 900;
+		font-size: 22px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		text-decoration: none;
+		background-image: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15));
+		background-repeat: no-repeat;
+		background-position: left center;
+		background-size: 0% 100%;
+		transition: background-size 250ms ease-in-out;
+	}
+
+	.format-cta:hover {
+		background-size: 100% 100%;
 	}
 
 	.plaedoyer-text {

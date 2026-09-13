@@ -93,7 +93,7 @@ const { gateBehindHero = false } = Astro.props;
 		border: none;
 		padding: 0 16px;
 		cursor: pointer;
-		background-color: rgba(237, 237, 237, 0.95);
+		background-color: var(--tile-surface);
 		color: var(--black);
 		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
 		z-index: 100;
@@ -310,7 +310,7 @@ const { gateBehindHero = false } = Astro.props;
 		   (Fred 30.08.): eine Kachel (88px) statt der halben Zeilenhöhe —
 		   die Kontakt-Zeile ersetzt den Knopf dadurch 1:1 deckungsgleich. */
 		height: 88px;
-		background: rgba(237, 237, 237, 0.95);
+		background: var(--tile-surface);
 		color: var(--black);
 		font-weight: 900;
 		/* 28px wie das Knopf-Wort (Fred 30.08. nachts, an Strich-Stapel-Höhe
@@ -393,7 +393,7 @@ const { gateBehindHero = false } = Astro.props;
 		   drei Kacheln + zwei Fugen = 272px, wie Knopf-Hover und die
 		   Standard-Zeilen — die große Fläche bleibt in der Säulen-Flucht. */
 		width: min(calc(88px * 3 + 4px * 2), calc(100vw - 32px));
-		background: rgba(237, 237, 237, 0.95);
+		background: var(--tile-surface);
 		padding: 8px;
 		gap: 0;
 		/* Die Fläche selbst wächst aus dem Knopf (Fläche aus Fläche) — ein

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DEMO · Bausteine-Kacheln — D-Varianten</title>
+<style>
+	/* Lokale DEMO-Seite (nicht committen/pushen!) — nur noch Varianten der
+	   Medien-Kachel-Dreiteilung (D), nach Freds Entscheid 15.06. abends. */
+	@font-face {
+		font-family: "Forma DJR";
+		src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations");
+		font-weight: 100 900;
+		font-display: swap;
+	}
+	:root { --black:#000; --white:#fff; --gray:#999894; --line:#2a2a2a; --panel:#0d0d0d; }
+	* { box-sizing: border-box; }
+	body {
+		margin: 0; background: var(--black); color: var(--white);
+		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
+		-webkit-font-smoothing: antialiased;
+	}
+	.wrap { padding: 0 16px; }
+	@media (min-width: 1024px) { .wrap { padding: 0 32px; } }
+
+	.demo-label {
+		margin: 96px 0 40px; padding-top: 24px; border-top: 1px solid var(--line);
+		color: var(--gray); font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+	}
+	.demo-label small { display:block; margin-top:6px; text-transform:none; letter-spacing:0; }
+
+	.sektion-titel {
+		margin: 0 0 40px; font-weight: 900; text-transform: uppercase;
+		line-height: 0.85; letter-spacing: -0.01em;
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+	}
+
+	/* Grund-Kachel (BBHs visual grid, 3 statt 2, 16px Fuge) */
+	.vd { display: grid; gap: 16px; }
+	@media (min-width: 800px) { .vd { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+	.mkachel {
+		background: var(--panel); aspect-ratio: 4 / 5;
+		padding: clamp(18px, 2.2vw, 32px);
+		display: flex; flex-direction: column; justify-content: space-between;
+		container-type: inline-size;
+	}
+	.mkachel .baustein-text {
+		font-size: clamp(0.95rem, 0.85rem + 0.35vw, 1.1rem);
+		line-height: 1.3; letter-spacing: -0.01em; margin: 0;
+	}
+
+	/* D1: zweizeilige Namen — Schrift an die Kachelbreite gekoppelt (cqw),
+	   kalibriert auf die längste Zeile "Blickkontakt". */
+	.d1 h3 {
+		margin: 0; font-weight: 900; text-transform: uppercase;
+		line-height: 0.9; letter-spacing: -0.01em;
+		font-size: 16.5cqw;
+	}
+	.d1 h3 span { display: block; }
+
+	/* D2: Kurzwort gross + kleine Unterschrift (voller Name). */
+	.d2 h3 {
+		margin: 0; font-weight: 900; text-transform: uppercase;
+		line-height: 0.85; letter-spacing: -0.01em;
+		font-size: 16.5cqw; /* laengste Zeile 'Redaktion' */
+	}
+	.d2 .untertitel { color: var(--gray); font-size: clamp(0.85rem, 3.2cqw, 1.05rem); margin: 10px 0 0; }
+
+	.hinweis { margin: 96px 0 64px; color: var(--gray); font-size: 0.9rem; max-width: 46rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+	<p class="demo-label">Variante D1 — Zweizeilige Namen<small>Ohne Artikel, ohne Unterschrift: Studios, Regie, Redaktion.</small></p>
+	<h2 class="sektion-titel">Wie wir das machen</h2>
+	<div class="vd d1">
+		<div class="mkachel">
+			<h3><span>Studios</span></h3>
+			<p class="baustein-text">Zuerst stellen wir das echte Gespräch her, dann läuft die Aufnahme. Im Blickkontaktstudio in Karlsruhe, mit dem mobilen Studio bei euch oder im Inhouse-Studio, das wir euch bauen.</p>
+		</div>
+		<div class="mkachel">
+			<h3><span>Regie</span></h3>
+			<p class="baustein-text">Während ihr sprecht, hält die Regie die Technik unsichtbar, den Inhalt auf Kurs und die Wirkung im Blick.</p>
+		</div>
+		<div class="mkachel">
+			<h3><span>Redaktion</span></h3>
+			<p class="baustein-text">Aus der Aufnahme werden eure Formate: Videopodcast, Webinar, Clip, Kundentestimonial. Jede Produktion liefert ihr Stück, inklusive Text.</p>
+		</div>
+	</div>
+
+	<p class="demo-label">Variante D2 — Kurzwort + kleine Unterschrift<small>Studios / Regie / Redaktion, Unterschrift klein darunter.</small></p>
+	<h2 class="sektion-titel">Wie wir das machen</h2>
+	<div class="vd d2">
+		<div class="mkachel">
+			<div>
+				<h3>Studios</h3>
+				<p class="untertitel">Das Gespräch zuerst</p>
+			</div>
+			<p class="baustein-text">Zuerst stellen wir das echte Gespräch her, dann läuft die Aufnahme. Im Blickkontaktstudio in Karlsruhe, mit dem mobilen Studio bei euch oder im Inhouse-Studio, das wir euch bauen.</p>
+		</div>
+		<div class="mkachel">
+			<div>
+				<h3>Regie</h3>
+				<p class="untertitel">Live, während ihr sprecht</p>
+			</div>
+			<p class="baustein-text">Während ihr sprecht, hält die Regie die Technik unsichtbar, den Inhalt auf Kurs und die Wirkung im Blick.</p>
+		</div>
+		<div class="mkachel">
+			<div>
+				<h3>Redaktion</h3>
+				<p class="untertitel">Die Formatredaktion danach</p>
+			</div>
+			<p class="baustein-text">Aus der Aufnahme werden eure Formate: Videopodcast, Webinar, Clip, Kundentestimonial. Jede Produktion liefert ihr Stück, inklusive Text.</p>
+		</div>
+	</div>
+
+	<p class="hinweis">Demo, nur lokal. Beide Varianten mit Sektions-Überschrift im Zusammenhang. Kachel-Schrift hängt an der Kachelbreite (cqw) — Fenster schmal/breit ziehen zum Prüfen; unter 800px stapeln die Kacheln.</p>
+
+</div>
+</body>
+</html>
