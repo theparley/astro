@@ -526,10 +526,14 @@ const kernaussage =
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		/* ui-monospace wie im Entwurf; Forma DJR Mono wäre die Haus-Schwester,
-		   deren "-Testing"-Lizenz ist aber eine offene Flagge (Brief). */
-		font-family: ui-monospace, "SF Mono", Menlo, monospace;
-		font-weight: 800;
+		/* Forma DJR Mono wie die SplitFlap-Boards (Fred 14.09. abends: die
+		   Boards sahen nach anderer Schrift aus — stimmte, hier lief noch
+		   ui-monospace aus dem Entwurf). Gleicher Stack + gleiches Gewicht
+		   (900, "die Fetteste") = EIN Tafel-Material auf der ganzen Seite.
+		   @font-face kommt aus SplitFlap.astro (is:global, gleiche Seite);
+		   Lizenz-Flagge "-Testing" bleibt offen (Brief). */
+		font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
+		font-weight: 900;
 		/* Von der Kachel ENTKOPPELT (Fred 13.09., dritte Runde): die Zeichen
 		   haben exakt die Paragraph-/Lead-Schrifthoehe der Seite (gleiche
 		   clamp-Formel wie .plaedoyer-text und die Sub-Zeile darueber) —
