@@ -1,0 +1,155 @@
+---
+// FlapWort.astro — EIN Wort als Fallblatt-Kachelzeile MITTEN IM FLIESSTEXT
+// (Fred 14.09. abends: "in den normalen Text so ein Flipperboard einbauen",
+// Beispiel Multi-Output-Subclaim, die Zahlwörter). Nutzt dasselbe
+// Fallblatt-Material wie alle Boards (lib/fallblatt.ts + styles/
+// fallblatt.css) — gleiche Schichten, gleiche Trommel, gleiches Tempo.
+//
+// Verhalten im Text: display:inline-flex → das Wort läuft als EIN Element
+// im Zeilenfluss mit, bricht also an Breakpoints wie ein geschütztes Wort
+// um (nie mitten durchs Wort). Größe hängt am umgebenden font-size
+// (em-Einheiten), das Wort passt sich also jeder Textstelle an.
+//
+// Animation: SSG rendert das fertige Wort (ohne JS steht es einfach da);
+// mit JS wird es beim ersten Sichtbarwerden auf leer gesetzt und rattert
+// herein (IntersectionObserver, einmalig). prefers-reduced-motion lässt
+// es ungeklappert stehen.
+
+import "../styles/fallblatt.css";
+
+interface Props {
+	/** Das Wort (wird versal gesetzt — die Trommel kennt nur Großbuchstaben). */
+	text: string;
+}
+
+const { text } = Astro.props;
+const wort = text.toUpperCase();
+const chars = [...wort];
+---
+
+<span class="fw-wort" data-flap-wort>
+	{/* sr-only-Lesetext; die Kacheln selbst sind rein dekorativ. */}
+	<span class="fw-sr">{text}</span>
+	<span class="fw-tiles" aria-hidden="true">
+		{chars.map((ch) => (
+			<span class="sf-tile" data-char={ch}>
+				<span class="sf-static sf-static--top">
+					<span class="sf-glyph" data-layer="top-static">{ch}</span>
+				</span>
+				<span class="sf-static sf-static--bottom">
+					<span class="sf-glyph" data-layer="bottom-static">{ch}</span>
+				</span>
+				<span class="sf-flap sf-flap--front" data-layer="front-flap">
+					<span class="sf-glyph">{ch}</span>
+				</span>
+				<span class="sf-flap sf-flap--back" data-layer="back-flap">
+					<span class="sf-glyph">{ch}</span>
+				</span>
+				<span class="sf-hinge"></span>
+			</span>
+		))}
+	</span>
+</span>
+
+<script>
+	import {
+		type FlapTile,
+		wireTileLayers,
+		resetInstant,
+		flapTo,
+		wait,
+		reduceMotion,
+	} from "../lib/fallblatt";
+
+	// Kleiner Streuversatz wie bei den Boards, aber kürzer — ein Wort soll
+	// zackig dastehen, nicht sekundenlang tröpfeln.
+	const STAGGER_MAX_MS = 180;
+
+	let cleanupFns: Array<() => void> = [];
+
+	function setupWort(el: HTMLElement): () => void {
+		const tiles: { tile: FlapTile; ziel: string }[] = Array.from(
+			el.querySelectorAll<HTMLElement>(".sf-tile"),
+		).map((t) => ({ tile: wireTileLayers(t), ziel: t.dataset.char || " " }));
+
+		if (reduceMotion()) return () => {};
+
+		// Erst leeren (SSG zeigt das fertige Wort), dann beim ersten
+		// Sichtbarwerden hereinrattern.
+		tiles.forEach(({ tile }) => resetInstant(tile, " "));
+
+		const io = new IntersectionObserver(
+			(entries) => {
+				if (!entries.some((e) => e.isIntersecting)) return;
+				io.disconnect();
+				tiles.forEach(({ tile, ziel }) => {
+					wait(Math.random() * STAGGER_MAX_MS).then(() => flapTo(tile, ziel));
+				});
+			},
+			{ threshold: 0.5 },
+		);
+		io.observe(el);
+
+		return () => {
+			io.disconnect();
+			tiles.forEach(({ tile }) => tile.gen++);
+		};
+	}
+
+	function mountAll() {
+		cleanupFns.forEach((fn) => fn());
+		cleanupFns = [];
+		document.querySelectorAll<HTMLElement>("[data-flap-wort]").forEach((el) => {
+			cleanupFns.push(setupWort(el));
+		});
+	}
+
+	document.addEventListener("astro:page-load", mountAll);
+</script>
+
+<style is:global>
+	/* is:global + fw--Präfix (gleiche Astro-Falle wie bei den Boards
+	   dokumentiert; Kachel-Ebene kommt ohnehin global aus fallblatt.css). */
+
+	.fw-wort {
+		display: inline-flex;
+		vertical-align: middle;
+		/* Winzig tiefer als die echte Mitte: gleicht aus, dass Versalien
+		   ohne Unterlängen optisch über der x-Mitte des Fließtexts sitzen. */
+		transform: translateY(-0.06em);
+	}
+
+	.fw-sr {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		border: 0;
+	}
+
+	.fw-tiles {
+		display: inline-flex;
+		gap: 1px;
+		/* GRÖSSEN-REGEL (Fred 14.09. abends, gelockt als Prinzip): die
+		   Glyphe in der Inline-Kachel ist EXAKT so groß wie die umgebende
+		   Paragraphenschrift — wie ein fettgedrucktes Wort im Satz, nur
+		   auf der Kachel. Damit sind Kachel-Glyphen ÜBERALL auf der Seite
+		   gleich hoch wie die Lead-Schrift (Wand und Boards folgen
+		   derselben Regel über die Lead-Formel). Kachel-zu-Glyphe-
+		   Verhältnis = die Board-Relation am Referenz-Desktop
+		   (Kachel 26.6px zu Glyphe 31.1px = 0.86), Höhe = Material-
+		   Proportion 1:1.38.
+		   TECHNIK (Bugfix "die 2 sieht komisch aus"): em in einer CSS-
+		   Variable wird erst beim var()-Einsetzen im jeweiligen Element
+		   aufgelöst — deshalb EIN Schrift-Anker (font-size hier) und alle
+		   Maße in derselben em-Basis, sonst klaffen die Kachelhälften an
+		   der Scharnier-Naht. */
+		font-size: 1em;
+		--sf-font-size: 1em;
+		--sf-tile-w: 0.86em;
+		--sf-tile-h: 1.19em;
+	}
+</style>

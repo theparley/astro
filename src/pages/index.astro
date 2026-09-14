@@ -186,7 +186,18 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Beweis); Objekt-Frage („Inhalte"/„Content"/ohne Objekt) blieb
 	   ungelöst, Favorit war die objektlose Form. Herleitung:
 	   Recherchedoc Vertrauensthese, Aufwertungs-Kleid. */}
-		<p class="plaedoyer-text">Der Kunde sucht einen fälschungssicheren Beweis. Eine Momentaufnahme einer gelebten Expertise, die er in Augenschein nehmen kann. Den liefern echte Gespräche. Denn Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle Fragen.</p>
+		{/* PROBE (Fred 14.09. abends, Diktat): Absatz 2 öffnet mit der
+		   Gegenthese zu Absatz 1 (generiert vs. gelebt), Dreischritt
+		   Gespräch → Antworten beweisen Kompetenz → Momentaufnahme wird zum
+		   Beweis. Diktat-Glättungen (geflaggt): "beweisen Sie die" →
+		   "beweisen die" (Plural-Kongruenz zu "Antworten"),
+		   "Fälschungssicheren" klein, Schlusspunkt ergänzt. Ersetzt die
+		   Fassung "Der Kunde sucht einen fälschungssicheren Beweis. …
+		   in Augenschein nehmen kann. Den liefern echte Gespräche. Denn
+		   Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle
+		   Fragen." (Vorrat in Git-Historie; "in Augenschein nehmen" und
+		   "aktuelle Fragen" → "spontane Fragen" sind mit raus). */}
+		<p class="plaedoyer-text">Gelebte Expertise zeigt sich im echten Gespräch. Die unmittelbare Antwort auf eine spontane Frage beweist die Kompetenz. Und die Momentaufnahme davon wird zum fälschungssicheren Beweis für den Kunden.</p>
 		{/* "ohne Kamerastress" statt "mit Video" (Fred 13.09. nacht): die
 		   Kamera sagt Video, ohne es zu sagen — das Wort "Video" steht damit
 		   wieder NUR auf der Knopfdruck-Seite (bewusste Eigenschaft, s. Brief);
@@ -225,7 +236,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   lässt sich jetzt Vertrauen skalieren" — „Wirkung" holt erstmals ein
 	   Wort der Wirkungs-Säule in den Kopf (Bezug: filmreif + ohne
 	   Kamerastress = die Wirkung, die skaliert wird). */}
-		<p class="plaedoyer-text">Diese Gespräche fangen wir filmreif ein, bringen sie in das passende Format und skalieren mit ihrer Wirkung das Vertrauen in eure Marke. Auf allen Kanälen.</p>
+		<p class="plaedoyer-text">Genau solche Gespräche fangen wir filmreif ein, bringen sie in das passende Format und skalieren mit ihrer Wirkung das Vertrauen in eure Marke. Auf allen Kanälen.</p>
 		</div>
 	</section>
 
@@ -330,11 +341,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Breite. */}
 		<div class="format-split">
 			<div class="tafel-kopf">
-			<p class="tafel-intro">Das Start-Format muss passen: zum Ziel, zur Branche, zur Firma, zu den Menschen, zum Budget. Und es muss angepasst werden, während es sich entwickelt.</p>
-			<p class="tafel-intro">Nicht immer passt eine Live-Q&amp;A-Session für den Start. Es gibt Formate für den Solo-Entrepreneur, der eine Personal Brand aufbauen will. Und es gibt Formate für Unternehmen, die zur Brancheninstanz werden wollen.</p>
+			<p class="tafel-intro">Das Start-Format muss passen: zum Ziel, zum Budget, zur Branche und zu den Menschen. Und es muss angepasst werden, während es sich entwickelt.</p>
+			<p class="tafel-intro">Nicht immer passt eine Live-Q&amp;A-Session für den Start. Es gibt Formate für den Solo-Entrepreneur, der eine Personal Brand aufbauen will. Und es gibt Formate für Unternehmen, die mit ihrem Team zur Brancheninstanz werden wollen.</p>
 			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Am besten in regelmäßigen Abständen. Euer Format finden wir gemeinsam.</p>
-			{/* Tür LINKS unterm Text (Fred 14.09.) — direkt nach "gemeinsam." */}
-			<a class="format-cta" href="/termin">Formatberatung</a>
 		</div>
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
@@ -348,6 +357,16 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 				<SplitFlap lines={tafelZustaende} holdMs={2400} />
 			</div>
 		</div>
+		{/* Die EINE Tür als SCHWEBE-KACHEL (Fred 14.09. abends, vierte
+		   Position: mittig unterm Split biss sich mit der Menü-Kachel unten
+		   Mitte): fixiert am RECHTEN Viewport-Rand, vertikal mittig — fährt
+		   herein, sobald die Formatfrage-Sektion im Bild ist, und wieder
+		   raus, wenn man sie verlässt (IntersectionObserver unten).
+		   Material-System bleibt: WEISSE Kachel = anfassbar. */}
+		{/* Wort zweizeilig (Fred 14.09. abends: "als Button zu lang") —
+		   FORMAT/BERATUNG als Mini-Wort-Turm, wie die Turm-Muster der
+		   Sektionen. Kachel wird dadurch kompakt statt bandwurmig. */}
+		<a class="format-cta format-cta-schwebend" href="/termin" data-format-tuer><span class="cta-zeile">Format</span><span class="cta-zeile">beratung</span></a>
 	</section>
 
 	{/* Produkte-Zeile + In-Flow-CTA weiter draußen (Fred 30.08. nachts,
@@ -628,9 +647,25 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		align-self: center;
 	}
 
-	.tafel-kopf .format-cta {
-		margin: 24px 0 0;
-		align-self: flex-start;
+	.format-cta-schwebend {
+		position: fixed;
+		/* Rechte Kante DOCKT am Bildschirmrand an (Fred: kein Abstand). */
+		right: 0;
+		top: 50%;
+		margin: 0;
+		z-index: 40;
+		/* Versteckt: nach rechts aus dem Bild gefahren + durchsichtig;
+		   sichtbar wird per .ist-sichtbar (Scroll in die Sektion). */
+		transform: translate(calc(100% + 64px), -50%);
+		opacity: 0;
+		pointer-events: none;
+		transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease;
+	}
+
+	.format-cta-schwebend.ist-sichtbar {
+		transform: translate(0, -50%);
+		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.statement-zeile {
@@ -670,10 +705,17 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   50%-Textspalte. */
 	.format-cta {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		align-items: flex-start;
 		justify-content: center;
-		width: min(272px, 100%);
-		height: 88px;
+		line-height: 1.1;
+		/* Feste 272px quetschten den Schriftzug randlos (Fred-Screenshot
+		   14.09. abends: Text ragt optisch aus der Kachel) — jetzt
+		   Mindestbreite + Luft links/rechts, die Kachel wächst mit. */
+		min-width: 0;
+		padding: 22px 28px;
+		box-sizing: border-box;
+		height: auto;
 		margin: 40px auto 0;
 		background: var(--tile-surface);
 		color: var(--black);
@@ -841,3 +883,29 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		--sf-font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
 	}
 </style>
+
+<script>
+	// Schwebe-Tür FORMATBERATUNG (Fred 14.09. abends): sichtbar nur, solange
+	// die Formatfrage-Sektion im Viewport ist. astro:page-load-Muster mit
+	// Cleanup wie bei den Boards.
+	let tuerCleanup: (() => void) | null = null;
+
+	function mountTuer() {
+		if (tuerCleanup) tuerCleanup();
+		tuerCleanup = null;
+		const tuer = document.querySelector<HTMLElement>("[data-format-tuer]");
+		const sektion = document.querySelector<HTMLElement>(".ziel-format-tafel");
+		if (!tuer || !sektion) return;
+		const io = new IntersectionObserver(
+			(entries) => {
+				const drin = entries.some((e) => e.isIntersecting);
+				tuer.classList.toggle("ist-sichtbar", drin);
+			},
+			{ threshold: 0.15 },
+		);
+		io.observe(sektion);
+		tuerCleanup = () => io.disconnect();
+	}
+
+	document.addEventListener("astro:page-load", mountTuer);
+</script>

@@ -31,6 +31,7 @@
 // stehen in der Port-Checkliste im Website-Brief — hier nicht gelöst.
 
 import "../styles/fallblatt.css";
+import FlapWort from "./FlapWort.astro";
 
 interface Props {
 	/** Zeilen-Takt in Akt 1 (ms je Listenzeile). Fred 14.09.: bewusst schnell — wird am Objekt feingetunt, NICHT gelockt. */
@@ -92,7 +93,11 @@ const kernaussage =
 		   „Live-Q&A-Session-Formats" auf und macht ehrlich, dass die Tafel
 		   EIN Beispiel zeigt (nicht jedes Format liefert exakt diese
 		   Stückzahlen — entlastet still die Zahlen-Flagge). */}
-		<p>Zwei Experten. Ein Gespräch. Eine Stunde.<br />Der Content-Output und die Zuschauerzeit am Beispiel des Formats einer Live&#8209;Q&amp;A&#8209;Session.</p>
+		{/* PROBE Inline-Fallblatt (Fred 14.09. abends, zweite Runde: "nur
+		   Zahlen"): die ZIFFERN als einzelne Kacheln im Fließtext — 2
+		   Experten, 1 Gespräch, 1 Stunde. Passt zur Zahlenkolonne der
+		   Wand; die Wort-Fassung (ZWEI/EIN/EINE) war die erste Probe. */}
+		<p><FlapWort text="2" /> Experten. <FlapWort text="1" /> Gespräch. <FlapWort text="1" /> Stunde.<br />Der Content-Output und die Zuschauerzeit am Beispiel des Formats einer Live&#8209;Q&amp;A&#8209;Session.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
