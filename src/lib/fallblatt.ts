@@ -225,6 +225,11 @@ export function queueFlap(
 // echten Nutzer-Geste (Klick/Taste/Touch) — bis dahin klappern die Tafeln
 // stumm. Global gedrosselt (max. ein Klick je 18ms, über ALLE Boards),
 // damit parallel klappernde Kacheln ein Rattern ergeben statt eines Breis.
+//
+// SOUND VORERST AUS (Fred 14.09. abends, vor dem Live-Push: "den Sound
+// lassen wir mal noch draußen") — der Schalter lässt die Mechanik samt
+// Geste-Arming im Code, aber stumm. Zum Reaktivieren auf true setzen.
+const SOUND_AN = false;
 let audioCtx: AudioContext | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let lastKlickAt = 0;
@@ -246,14 +251,14 @@ function armAudio() {
 /** Einmal pro Seite aufrufen (idempotent): rüstet den Sound scharf, sobald
  *  die erste Nutzer-Geste kommt. */
 export function armSound() {
-	if (armed) return;
+	if (!SOUND_AN || armed) return;
 	armed = true;
 	document.addEventListener("pointerdown", armAudio, { once: true, passive: true });
 	document.addEventListener("keydown", armAudio, { once: true });
 }
 
 export function klick() {
-	if (!audioCtx || !noiseBuf || audioCtx.state !== "running") return;
+	if (!SOUND_AN || !audioCtx || !noiseBuf || audioCtx.state !== "running") return;
 	const now = performance.now();
 	if (now - lastKlickAt < 18) return;
 	lastKlickAt = now;
