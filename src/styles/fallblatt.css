@@ -85,6 +85,13 @@
 	line-height: 1;
 	color: var(--white, #ffffff);
 	white-space: pre;
+	/* Optische Zentrierung (Fred 14.09. abends: "der Strich hängt zu
+	   tief"): das Scharnier sitzt EXAKT auf Kachelmitte (nachgemessen),
+	   aber die Versalien der Forma DJR Mono sitzen 0.05em ÜBER der
+	   Box-Mitte, mit der Flexbox zentriert (Cap-Mitte 35/100 über der
+	   Baseline, Em-Box-Mitte 30/100 — Canvas-TextMetrics). Der Shift
+	   holt die TINTE auf die Scharnier-Achse. */
+	transform: translateY(0.05em);
 }
 
 .sf-static--bottom .sf-glyph,
