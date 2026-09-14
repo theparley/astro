@@ -243,6 +243,44 @@ let noiseBuf: AudioBuffer | null = null;
 let lastKlickAt = 0;
 let armed = false;
 
+// ── Sichtbare Sound-Diagnose (nur im ?sound-Probemodus) ──
+// Fred hört nichts, obwohl die Kette laut Tests steht (14.09. abends) —
+// das Feld unten rechts macht die Kette ABLESBAR: Gesten, Kontext-Status,
+// ausgelöste vs. gespielte Klicks. Zähler liegen auf window, damit die
+// (gebündelt doppelten) Modul-Instanzen der beiden Tafel-Skripte in
+// DASSELBE Feld schreiben.
+type SoundDebug = {
+	gesten: number;
+	versuche: number;
+	gespielt: number;
+	gedrosselt: number;
+};
+function dbg(): SoundDebug {
+	const w = window as any;
+	if (!w.__sfSoundDbg) w.__sfSoundDbg = { gesten: 0, versuche: 0, gespielt: 0, gedrosselt: 0 };
+	return w.__sfSoundDbg as SoundDebug;
+}
+function dbgZeig() {
+	if (!SOUND_AN) return;
+	let el = document.getElementById("sf-sound-debug");
+	if (!el) {
+		el = document.createElement("div");
+		el.id = "sf-sound-debug";
+		el.style.cssText =
+			"position:fixed;right:8px;bottom:8px;z-index:99999;background:#111;color:#0f0;" +
+			"font:11px/1.5 ui-monospace,monospace;padding:6px 9px;border:1px solid #333;" +
+			"pointer-events:none;white-space:pre;";
+		document.body.appendChild(el);
+	}
+	const d = dbg();
+	el.textContent =
+		"SOUND-PROBE\n" +
+		"Gesten: " + d.gesten + "\n" +
+		"Kontext: " + (audioCtx ? audioCtx.state : "noch keiner") + "\n" +
+		"Klicks ausgelöst: " + d.versuche + "\n" +
+		"Klicks gespielt: " + d.gespielt + " (gedrosselt: " + d.gedrosselt + ")";
+}
+
 function armAudio() {
 	if (audioCtx) return;
 	try {
@@ -265,18 +303,30 @@ export function armSound() {
 	if (!SOUND_AN || armed) return;
 	armed = true;
 	const geste = () => {
+		dbg().gesten++;
 		armAudio();
 		if (audioCtx && audioCtx.state === "suspended") void audioCtx.resume();
+		dbgZeig();
 	};
 	document.addEventListener("pointerdown", geste, { passive: true });
 	document.addEventListener("keydown", geste);
 }
 
 export function klick() {
-	if (!SOUND_AN || !audioCtx || !noiseBuf || audioCtx.state !== "running") return;
+	if (!SOUND_AN) return;
+	dbg().versuche++;
+	if (!audioCtx || !noiseBuf || audioCtx.state !== "running") {
+		dbgZeig();
+		return;
+	}
 	const now = performance.now();
-	if (now - lastKlickAt < 18) return;
+	if (now - lastKlickAt < 18) {
+		dbg().gedrosselt++;
+		return;
+	}
 	lastKlickAt = now;
+	dbg().gespielt++;
+	dbgZeig();
 	const t = audioCtx.currentTime;
 	const src = audioCtx.createBufferSource();
 	src.buffer = noiseBuf;
