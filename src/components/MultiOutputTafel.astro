@@ -234,13 +234,26 @@ const kernaussage =
 		addText(0, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
+		//
+		// DIAGONAL-WELLE (Fred 14.09. abends): vorher fuellte der Block
+		// zeilenweise (18ms je Kachel = Zeile in 0,18s voll → las sich als
+		// Zeilen-Vorhang ohne Links-rechts-Bewegung). Jetzt laeuft die Welle
+		// ueber BEIDE Achsen: Verzoegerung = (Zeile × Versatz + Spalte) × Takt.
+		// Der ZEILEN-VERSATZ (in Kachel-Schritten) ist Freds Regler-Achse:
+		//   10 = jede Zeile rendert fertig, bevor die naechste anfaengt
+		//    1 = Kachel 2 der Zeile animiert, waehrend Kachel 1 der naechsten
+		//        Zeile schon startet (steilste Diagonale)
+		// Startwert 3 = sichtbare Welle zwischen beiden Extremen. UNGELOCKT.
+		const BLOCK_TAKT = 30;
+		const BLOCK_ZEILEN_VERSATZ = 3;
 		let i = 0;
 		for (let r = 2; r < ROWS && i < 100; r++)
 			for (let c = 0; c < BLOCK_BREITE && i < 100; c++) {
-				add(t + i * 18, r, MITTE_RECHTS + c, { weiss: true });
+				add(t + ((r - 2) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, MITTE_RECHTS + c, { weiss: true });
 				i++;
 			}
-		t += 100 * 18 + 400;
+		const blockDauer = (9 * BLOCK_ZEILEN_VERSATZ + 9) * BLOCK_TAKT;
+		t += blockDauer + 400;
 		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "+100 STUNDEN", t);
 		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t);
 		t += 300 + lese;
