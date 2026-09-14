@@ -44,10 +44,21 @@ interface Props {
 	holdsMs?: number[];
 	/** Endlosschleife durch die Sequenz. Bei false bleibt der letzte Zustand stehen. */
 	loop?: boolean;
+	/** Mindest-Spaltenzahl: das Raster wird mit Leerkacheln auf diese Breite
+	 * aufgefüllt (Inhalte bleiben mittig). Fred 14.09. nacht: das
+	 * Formatfrage-Board soll über die Kachel-Anzahl so breit sein wie der
+	 * Titel-Text darüber. */
+	minCols?: number;
+	/** Mindest-Zeilenzahl, gleiches Prinzip vertikal (padState zentriert
+	 * kürzere Zustände im Zeilenblock — bei 4 Zeilen steht ein Zweizeiler
+	 * exakt mittig). */
+	minRows?: number;
+	/** Gehäuse-Zarge (Fred 14.09. nacht) — schmale dunkle Einfassung. */
+	rahmen?: boolean;
 }
 
 // Default = der eine Tempo-Regler des Fallblatt-Moduls.
-const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true } = Astro.props;
+const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true, minCols = 1, minRows = 1, rahmen = false } = Astro.props;
 
 // Zeichentrommel — Build-Zeit-Kopie der Modul-Konstante (das Frontmatter
 // läuft in Node, src/lib/fallblatt.ts wird ins Browser-Bundle importiert;
@@ -67,9 +78,9 @@ const normalizedStates = lines.map((state) => state.map(normalizeLine));
 // hinweg fix an Ort und Stelle; nur die Zeichen darin wechseln. Das ist
 // näher am Vorbild einer echten Bahnhofstafel (fixe Zeilen/Spalten, der
 // Text darin wechselt) als ein Raster, das bei jedem Zustand neu umbricht.
-const rows = Math.max(1, ...normalizedStates.map((state) => state.length));
+const rows = Math.max(minRows, ...normalizedStates.map((state) => state.length));
 const cols = Math.max(
-	1,
+	minCols,
 	...normalizedStates.flatMap((state) => state.map((line) => line.length)),
 );
 
@@ -106,7 +117,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 ---
 
 <div
-	class="sf-board"
+	class={`sf-board${rahmen ? " sf-board--rahmen" : ""}`}
 	data-sf-board
 	data-flip-ms={flipMs}
 	data-hold-ms={holdMs}
@@ -344,6 +355,24 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		display: flex;
 		justify-content: center;
 		gap: var(--sf-gap);
+	}
+
+	/* Gehäuse-Zarge, DUNKEL (Fred 14.09. nacht, dritte Farbrunde: #2a2a2a
+	   war "zu farbig", gewünscht dunkler): #141414 = der Kachel-Grundwert
+	   aus diesem Stylesheet, eine leise Stufe über der real gerenderten
+	   Kachelfläche (--panel #0d0d0d) — Schattenkante statt Rahmenfarbe. */
+	.sf-board--rahmen .sf-grid {
+		/* Gefüllte Zarge (Fred 14.09. nacht, nach Umrandungs-Probe zurück:
+		   "die Wand wieder rein") — Fläche in der BBH-Zwischenstufe
+		   #1a1a1a, der geeinigte Ton der Farb-Treppe. */
+		/* Zwei Token-Rollen in einem Element (Fred 14.09. nacht): der
+		   content-box-Layer ist die WAND hinter den Kacheln (Fugen), der
+		   border-box-Layer die ZARGE im Padding-Ring — Tokens in
+		   Layout.astro. */
+		padding: calc(var(--sf-tile-w) * 0.24); /* 0.16 + 50% (Fred 14.09. nacht) */
+		background:
+			linear-gradient(var(--tafel-wand, #1a1a1a), var(--tafel-wand, #1a1a1a)) content-box,
+			var(--tafel-zarge, #1a1a1a) border-box;
 	}
 </style>
 

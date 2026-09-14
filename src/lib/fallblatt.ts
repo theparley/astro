@@ -89,7 +89,10 @@ function grab(el: HTMLElement): FlapTile {
 		backFlapEl: el.querySelector(".sf-flap--back") as HTMLElement,
 		frontGlyph: el.querySelector(".sf-flap--front .sf-glyph") as HTMLElement,
 		backGlyph: el.querySelector(".sf-flap--back .sf-glyph") as HTMLElement,
-		current: el.dataset.char || "&nbsp;",
+		// Fallback " " statt "&nbsp;" (Review 14.09.): das Leerzeichen IST
+		// das Trommel-Blank — so rattert auch der allererste Wechsel einer
+		// client-gebauten Kachel durch die Trommel statt hart zu tauschen.
+		current: el.dataset.char || " ",
 		gen: 0,
 		queue: Promise.resolve(),
 	};

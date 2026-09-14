@@ -92,6 +92,16 @@ const {
 		--white: #ffffff;
 		--gray: #999894;
 		--line: #2a2a2a;
+		/* Falltafel-Material (Fred 14.09. nacht): Zarge = Einfassung außen,
+		   Wand = Grundfläche hinter den Kacheln (Fugen). ABGELEITET aus der
+		   Kachelfarbe (Fred: "den Farbwert von der Kachel, dann die
+		   Helligkeit ändern") — die Prozente sind die Helligkeits-Regler:
+		   white X% = heller als die Kachel, black X% = dunkler. Stand nach
+		   Freds Regler-Runde: 50% Richtung Schwarz (≈ #070707, halber Weg
+		   zwischen Kachel #0d0d0d und Seitengrund). Ändert sich die
+		   Kachelfarbe, wandern Zarge und Wand automatisch mit. */
+		--tafel-zarge: color-mix(in srgb, var(--panel), black 50%);
+		--tafel-wand: color-mix(in srgb, var(--panel), black 50%);
 		--max-width: 1100px;
 		/* Abstands-Treppe 1:1 aus BBHs ausgeliefertem CSS (--spacing-md/lg/xl,
 		   ea792231…css, gezogen 2026-09-14): XL ist deren SEKTIONS-Abstand

@@ -52,24 +52,13 @@ const tafelZustaende = [
 	["EXPERTEN", "TALK"],
 	["ONLINE", "EVENT"],
 	["RECRUITING", "VIDEO"],
-	["LIVE", "Q&A", "SESSION"],
+	["LIVE Q&A", "SESSION"],
 	["MITARBEITER", "INTERVIEW"],
 ];
 
 // Kontakt-Board unter dem Augenzeugen-Turm (Fred 14.09.): startet leer und
 // flappt EINMAL "NOCH VOR DEM / ERSTEN KONTAKT." ein (loop=false hält den
 // Endzustand; sr-only-Fallback der Komponente trägt den Lesetext).
-// Zweiter Text-Zustand (Fred 14.09. abends, Diktat: "auch die Hidden
-// Buyers") — das Board flappt jetzt direkt vom Kontakt-Satz weiter zu den
-// Hidden Buyers (Freds Vokabular aus der Hidden-Buyer-Recherche: die
-// stillen Mitentscheider, die nie anfragen). Gesetzt mit Punkt, Zeilen-
-// Split vor HIDDEN — beide Lesungen geflaggt.
-const kontaktZustaende = [
-	[" "],
-	["NOCH VOR DEM", "ERSTEN KONTAKT."],
-	["AUCH DIE", "HIDDEN BUYERS."],
-];
-
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
 // buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
 // Produktseiten live (Phase 1), deshalb reiner Text ohne Links.
@@ -140,13 +129,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   der Split liest sich versal als Doppel-Wort (AUGEN ZEUGEN). */}
 		<div class="paragraph-links">
 			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kunden</span><span class="statement-zeile">werden</span><span class="statement-zeile">Augen</span><span class="statement-zeile">zeugen.</span></span></h2>
-			{/* Kontakt-Board (Fred 14.09., abends als LOOP): rattert herein,
-			   steht eine Weile, flappt weg, kurze Pause auf der Leertafel,
-			   rattert wieder herein. Klapp-Tempo: bewusst KEIN flipMs mehr —
-			   alle Boards folgen dem einen Regler FLAP_STEP_MS im
-			   Fallblatt-Modul (sichtbare Lamellen statt Blenden; Deckel
-			   MAX_FLAPS gegen sekundenlange Trommelwege). */}
-			<SplitFlap lines={kontaktZustaende} holdsMs={[900, 4200, 4200]} />
+			{/* Kontakt-Board VERWORFEN (Fred 14.09. nacht): die Kachel-Zeile
+			   unterm Turm ist wieder raus (samt AUCH DIE HIDDEN BUYERS als
+			   zweitem Zustand — Wortlaut-Vorrat in der Git-Historie).
+			   Stattdessen wieder die KLEINE TEXT-Zeile, ganz nah an den
+			   Turm gerückt; die Abstände IM Turm bleiben unangetastet. */}
+			<p class="kontakt-zeile">Noch vor dem ersten Kontakt.</p>
 		</div>
 		<div class="paragraph-text">
 		{/* Indiz-Satz (Fred 13.09. nacht, Diktat; Drittfassung): „vor kurzem
@@ -354,13 +342,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
 			   Kunden-Statement links oben. */}
-				<h2 class="format-titel">Eine<br />Frage<br />des<br />Formats</h2>
+				<h2 class="format-titel">Eine Frage<br />des<br />Formats</h2>
 				{/* Format-Board in der Hälfte (Fred 14.09.): gleiche Kachelgröße
 				   wie die Multi-Output-Wand, Formate max. dreizeilig. flipMs 30
 				   (Fred 13.09. "Flappern schneller"). */}
 				{/* Klapp-Tempo aus dem Fallblatt-Modul (FLAP_STEP_MS) —
 				   gleiche Material-Physik auf allen Boards. */}
-				<SplitFlap lines={tafelZustaende} holdMs={2400} />
+				<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={23} minRows={4} rahmen />
 			</div>
 		</div>
 		{/* Die EINE Tür: MITTIG unter dem Split (Fred 14.09. abends, fünfte
@@ -441,6 +429,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		/* Titel+Board rechts sind EINE Einheit (Fred 14.09. nacht) — der
+		   Text hier steht vertikal MITTIG zu dieser Einheit. */
+		align-self: center;
 	}
 
 	.tafel-intro {
@@ -638,18 +629,28 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		/* Board = TEIL des Schriftblocks (Fred 14.09.): mittig auf derselben
-		   Achse wie der Turm, mit knapper Fuge statt Sektions-Luft. */
-		gap: 14px;
+		/* GANZ NAHE Fuge zwischen Turm und Kontakt-Zeile (Fred 14.09.
+		   nacht) — die Zeilenabstände IM Turm bleiben unverändert. */
+		gap: 6px;
+	}
+
+	/* "Noch vor dem ersten Kontakt." als kleine Text-Zeile unterm Turm
+	   (zurück von der Board-Variante): BBH-Lead-Referenz wie die Absätze
+	   rechts, normale Schreibung, normales Gewicht. */
+	.kontakt-zeile {
+		margin: 0;
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
 	}
 
 	.format-rechts {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		/* Board klebt als Teil des Titel-Blocks (14px), der Knopf darunter
-		   bekommt eigene Luft (eigener margin statt Flex-Gap). */
-		gap: 14px;
+		/* Fuge Titel→Board verdoppelt (Fred 14.09. nacht: "doppelt so
+		   groß wie jetzt"): 28px statt der klebenden 14px. */
+		gap: 28px;
 		align-self: center;
 	}
 
