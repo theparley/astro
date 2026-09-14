@@ -230,9 +230,14 @@ export function queueFlap(
 // damit parallel klappernde Kacheln ein Rattern ergeben statt eines Breis.
 //
 // SOUND VORERST AUS (Fred 14.09. abends, vor dem Live-Push: "den Sound
-// lassen wir mal noch draußen") — der Schalter lässt die Mechanik samt
-// Geste-Arming im Code, aber stumm. Zum Reaktivieren auf true setzen.
-const SOUND_AN = false;
+// lassen wir mal noch draußen") — aber als PROBE-SCHALTER erreichbar:
+// ?sound an der URL macht ihn an (Fred will die Kopplung anhören können,
+// ohne dass die Live-Seite für Besucher klackert). Der typeof-Guard
+// schützt den Node-Build (SplitFlap-Frontmatter importiert FLAP_STEP_MS
+// aus diesem Modul — dort gibt es kein location).
+const SOUND_AN =
+	typeof location !== "undefined" &&
+	new URLSearchParams(location.search).has("sound");
 let audioCtx: AudioContext | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let lastKlickAt = 0;
