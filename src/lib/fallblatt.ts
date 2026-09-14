@@ -285,7 +285,10 @@ export function klick() {
 	bp.frequency.value = 2200 + Math.random() * 1600;
 	bp.Q.value = 1.4;
 	const g = audioCtx.createGain();
-	g.gain.setValueAtTime(0.1, t);
+	// 0.1 war fuers Probehoeren zu leise (Fred 14.09.: "ich hoere nichts",
+	// auch als die Kette nachweislich stand) — Klicks sind 20ms-Transienten,
+	// die brauchen Pegel.
+	g.gain.setValueAtTime(0.3, t);
 	g.gain.exponentialRampToValueAtTime(0.001, t + 0.022);
 	src.connect(bp);
 	bp.connect(g);
