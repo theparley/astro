@@ -4,7 +4,9 @@
 //
 // Hier lebt alles, was eine Tafel zur Tafel macht: die Zeichentrommel, die
 // zweiphasige Lamellen-Klappe (Ober-/Unterklappe wie eine echte Solari-
-// Lamelle), der MAX_FLAPS-Deckel, der Klacker-Sound. Die Komponenten
+// Lamelle), der MAX_FLAPS-Deckel. (Der Klacker-Sound von der Proberunde
+// 14.09. ist auf Freds Entscheidung KOMPLETT entfernt — Fassung mit
+// WebAudio-Synthese steht in der Git-Historie, Commit 2da084b.) Die Komponenten
 // (SplitFlap.astro = Sequenz-Boards, MultiOutputTafel.astro = Timeline-
 // Wand) steuern nur noch WAS wann auf welcher Kachel steht — WIE geklappt
 // wird, entscheidet ausschließlich dieses Modul. Das zugehörige Layer-CSS
@@ -132,7 +134,6 @@ export async function flapOnce(
 	halfMs: number,
 	onMid?: () => void,
 ) {
-	klick();
 	setGlyph(tile.topStaticGlyph, html);
 	tile.frontFlapEl.style.transitionTimingFunction = "ease-in";
 	tile.frontFlapEl.style.transitionDuration = halfMs + "ms";
@@ -217,82 +218,4 @@ export function queueFlap(
 	onMid?: () => void,
 ) {
 	enqueue(tile, () => flapTo(tile, targetHtml, stepMs, onMid));
-}
-
-// ── Klapper-Sound (Fred 14.09. abends: "jetzt brauche ich nur noch den
-// Sound von so einem Flipperboard") ──
-// Synthetisch per WebAudio statt Sample: ein ~20ms-Rauschimpuls durch
-// einen Bandpass mit leicht zufälliger Mittenfrequenz — klingt wie das
-// mechanische Klacken einer Lamelle, braucht keine Datei und keine Lizenz.
-// Browser-Autoplay-Regel: ein AudioContext läuft erst nach der ersten
-// echten Nutzer-Geste (Klick/Taste/Touch) — bis dahin klappern die Tafeln
-// stumm. Global gedrosselt (max. ein Klick je 18ms, über ALLE Boards),
-// damit parallel klappernde Kacheln ein Rattern ergeben statt eines Breis.
-//
-// SOUND AUS (Fred-Entscheidung 14.09. abends nach dem Probehören: "ich
-// nehme den Sound wieder raus") — die Mechanik bleibt komplett im Code
-// und ist über ?sound an der URL jederzeit probehörbar; für Besucher
-// bleibt die Seite stumm. Der typeof-Guard schützt den Node-Build
-// (SplitFlap-Frontmatter importiert FLAP_STEP_MS aus diesem Modul —
-// dort gibt es kein location).
-const SOUND_AN =
-	typeof location !== "undefined" &&
-	new URLSearchParams(location.search).has("sound");
-let audioCtx: AudioContext | null = null;
-let noiseBuf: AudioBuffer | null = null;
-let lastKlickAt = 0;
-let armed = false;
-
-function armAudio() {
-	if (audioCtx) return;
-	try {
-		audioCtx = new AudioContext();
-		const len = Math.floor(audioCtx.sampleRate * 0.03);
-		noiseBuf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
-		const data = noiseBuf.getChannelData(0);
-		for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-	} catch {
-		audioCtx = null;
-	}
-}
-
-/** Einmal pro Seite aufrufen (idempotent): rüstet den Sound scharf, sobald
- *  eine Nutzer-Geste kommt. Bewusst NICHT once: falls der Kontext ohne
- *  echte Aktivierung entstand (Autofill, synthetische Events), holt jede
- *  weitere Geste das resume() nach — sonst bliebe er für immer stumm
- *  "suspended". */
-export function armSound() {
-	if (!SOUND_AN || armed) return;
-	armed = true;
-	const geste = () => {
-		armAudio();
-		if (audioCtx && audioCtx.state === "suspended") void audioCtx.resume();
-	};
-	document.addEventListener("pointerdown", geste, { passive: true });
-	document.addEventListener("keydown", geste);
-}
-
-export function klick() {
-	if (!SOUND_AN || !audioCtx || !noiseBuf || audioCtx.state !== "running") return;
-	const now = performance.now();
-	if (now - lastKlickAt < 18) return;
-	lastKlickAt = now;
-	const t = audioCtx.currentTime;
-	const src = audioCtx.createBufferSource();
-	src.buffer = noiseBuf;
-	const bp = audioCtx.createBiquadFilter();
-	bp.type = "bandpass";
-	bp.frequency.value = 2200 + Math.random() * 1600;
-	bp.Q.value = 1.4;
-	const g = audioCtx.createGain();
-	// 0.1 war fuers Probehoeren zu leise (Fred 14.09.: "ich hoere nichts",
-	// auch als die Kette nachweislich stand) — Klicks sind 20ms-Transienten,
-	// die brauchen Pegel.
-	g.gain.setValueAtTime(0.3, t);
-	g.gain.exponentialRampToValueAtTime(0.001, t + 0.022);
-	src.connect(bp);
-	bp.connect(g);
-	g.connect(audioCtx.destination);
-	src.start(t);
-	src.stop(t + 0.03);
 }

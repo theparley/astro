@@ -20,8 +20,7 @@
 // nutzt jetzt dieselbe Lamellen-Mechanik wie SplitFlap.astro aus dem
 // gemeinsamen Modul src/lib/fallblatt.ts (+ styles/fallblatt.css):
 // Zeichentrommel mit MAX_FLAPS-Deckel für Einzelzeichen, EINE echte
-// Doppelklappe für Logos/Uhr-Kacheln, gleicher Takt (FLAP_STEP_MS),
-// gleicher Klacker-Sound. Die Schichten-Struktur baut buildTileLayers
+// Doppelklappe für Logos/Uhr-Kacheln, gleicher Takt (FLAP_STEP_MS). Die Schichten-Struktur baut buildTileLayers
 // client-seitig in die leeren SSG-Kacheln (kein sichtbarer Sprung — die
 // Wand startet ohnehin leer).
 //
@@ -151,7 +150,6 @@ const kernaussage =
 		queueFlap,
 		enqueue,
 		reduceMotion,
-		armSound,
 		FLAP_STEP_MS,
 	} from "../lib/fallblatt";
 
@@ -289,7 +287,6 @@ const kernaussage =
 	function setupTafel(sektion: HTMLElement): () => void {
 		const wand = sektion.querySelector<HTMLElement>("[data-mo-wand]");
 		if (!wand) return () => {};
-		armSound();
 		// Drei Teil-Wände → globale tiles[r][0..40]-Matrix (Mobil-Umbau);
 		// jede Kachel bekommt client-seitig die Vier-Schichten-Struktur des
 		// Fallblatt-Moduls (die SSG-Kacheln sind leer — kein Sprung).

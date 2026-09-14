@@ -170,7 +170,6 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		flapTo,
 		wait,
 		reduceMotion,
-		armSound,
 		FLAP_STEP_MS,
 	} from "../lib/fallblatt";
 
@@ -274,7 +273,6 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 	function mountAll() {
 		cleanupFns.forEach((fn) => fn());
 		cleanupFns = [];
-		armSound();
 		document.querySelectorAll<HTMLElement>("[data-sf-board]").forEach((boardEl) => {
 			cleanupFns.push(setupBoard(boardEl));
 		});
