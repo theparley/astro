@@ -23,9 +23,12 @@ export const DRUM = " ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ.,!?'-0123456789";
 // Klappbewegung, gedreht wird optisch weiterhin nur vorwärts.
 export const MAX_FLAPS = 6;
 
-// Der eine Takt für ALLE Boards: 170ms pro Klappschritt = 85ms je
-// Halbklappe (das abgenommene Wand-Tempo).
-export const FLAP_STEP_MS = 170;
+// Der eine Takt für ALLE Boards. Untergrenze der Sichtbarkeit: eine
+// Halbklappe braucht ~3 Bildschirm-Frames (≥50ms), sonst kippt der
+// Eindruck wieder ins Blenden (die 30/60ms-Lektion vom 14.09.).
+// 170 (Wand-Tempo) war Fred "ein bisschen langsam" → 110 = 55ms je
+// Halbklappe, knapp über der Frame-Grenze.
+export const FLAP_STEP_MS = 110;
 
 export function wait(ms: number): Promise<void> {
 	return new Promise((resolve) => window.setTimeout(resolve, ms));

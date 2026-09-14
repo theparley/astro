@@ -136,13 +136,11 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kunden</span><span class="statement-zeile">werden</span><span class="statement-zeile">Augen</span><span class="statement-zeile">zeugen.</span></span></h2>
 			{/* Kontakt-Board (Fred 14.09., abends als LOOP): rattert herein,
 			   steht eine Weile, flappt weg, kurze Pause auf der Leertafel,
-			   rattert wieder herein. flipMs 170 = Wand-Tempo (85ms je
-			   Halbklappe wie .mo-inhalt): erst ab dieser Dauer zeichnet der
-			   Browser die Lamellen-Drehung wirklich — 30/60ms lasen sich als
-			   Ein-/Ausblenden (Fred-Beobachtung, 2x). Damit der Wechsel
-			   trotzdem nicht sekundenlang dauert, deckelt SplitFlap die
-			   sichtbaren Klappen pro Wechsel (MAX_FLAPS). */}
-			<SplitFlap lines={kontaktZustaende} flipMs={170} holdsMs={[900, 4200]} />
+			   rattert wieder herein. Klapp-Tempo: bewusst KEIN flipMs mehr —
+			   alle Boards folgen dem einen Regler FLAP_STEP_MS im
+			   Fallblatt-Modul (sichtbare Lamellen statt Blenden; Deckel
+			   MAX_FLAPS gegen sekundenlange Trommelwege). */}
+			<SplitFlap lines={kontaktZustaende} holdsMs={[900, 4200]} />
 		</div>
 		<div class="paragraph-text">
 		{/* Indiz-Satz (Fred 13.09. nacht, Diktat; Drittfassung): „vor kurzem
@@ -345,9 +343,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 				{/* Format-Board in der Hälfte (Fred 14.09.): gleiche Kachelgröße
 				   wie die Multi-Output-Wand, Formate max. dreizeilig. flipMs 30
 				   (Fred 13.09. "Flappern schneller"). */}
-				{/* flipMs 170 wie das Kontakt-Board (Wand-Tempo, sichtbare
-				   Lamellen — gleiche Material-Physik auf allen Boards). */}
-				<SplitFlap lines={tafelZustaende} flipMs={170} holdMs={2400} />
+				{/* Klapp-Tempo aus dem Fallblatt-Modul (FLAP_STEP_MS) —
+				   gleiche Material-Physik auf allen Boards. */}
+				<SplitFlap lines={tafelZustaende} holdMs={2400} />
 			</div>
 		</div>
 	</section>

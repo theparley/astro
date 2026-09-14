@@ -29,6 +29,7 @@
 // Lesetext ungeeignet).
 
 import "../styles/fallblatt.css";
+import { FLAP_STEP_MS } from "../lib/fallblatt";
 
 interface Props {
 	/** Sequenz von Tafel-Zuständen; jeder Zustand ist ein Array von Textzeilen. */
@@ -45,7 +46,8 @@ interface Props {
 	loop?: boolean;
 }
 
-const { lines, flipMs = 170, holdMs = 2600, holdsMs, loop = true } = Astro.props;
+// Default = der eine Tempo-Regler des Fallblatt-Moduls.
+const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true } = Astro.props;
 
 // Zeichentrommel — Build-Zeit-Kopie der Modul-Konstante (das Frontmatter
 // läuft in Node, src/lib/fallblatt.ts wird ins Browser-Bundle importiert;
@@ -169,6 +171,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		wait,
 		reduceMotion,
 		armSound,
+		FLAP_STEP_MS,
 	} from "../lib/fallblatt";
 
 	// Organischer Versatz je Kachel (nicht als Prop gedacht, reine
@@ -194,7 +197,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		}
 		if (!Array.isArray(states) || states.length === 0) return () => {};
 
-		const flipMs = Number(boardEl.dataset.flipMs) || 170;
+		const flipMs = Number(boardEl.dataset.flipMs) || FLAP_STEP_MS;
 		const holdMs = Number(boardEl.dataset.holdMs) || 2600;
 		const loop = boardEl.dataset.loop === "1";
 		// Standzeit je Zustand (optional, Index = Zustands-Index); fehlt der
