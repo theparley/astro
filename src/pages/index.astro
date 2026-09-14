@@ -59,9 +59,15 @@ const tafelZustaende = [
 // Kontakt-Board unter dem Augenzeugen-Turm (Fred 14.09.): startet leer und
 // flappt EINMAL "NOCH VOR DEM / ERSTEN KONTAKT." ein (loop=false hält den
 // Endzustand; sr-only-Fallback der Komponente trägt den Lesetext).
+// Zweiter Text-Zustand (Fred 14.09. abends, Diktat: "auch die Hidden
+// Buyers") — das Board flappt jetzt direkt vom Kontakt-Satz weiter zu den
+// Hidden Buyers (Freds Vokabular aus der Hidden-Buyer-Recherche: die
+// stillen Mitentscheider, die nie anfragen). Gesetzt mit Punkt, Zeilen-
+// Split vor HIDDEN — beide Lesungen geflaggt.
 const kontaktZustaende = [
 	[" "],
 	["NOCH VOR DEM", "ERSTEN KONTAKT."],
+	["AUCH DIE", "HIDDEN BUYERS."],
 ];
 
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
@@ -140,7 +146,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   alle Boards folgen dem einen Regler FLAP_STEP_MS im
 			   Fallblatt-Modul (sichtbare Lamellen statt Blenden; Deckel
 			   MAX_FLAPS gegen sekundenlange Trommelwege). */}
-			<SplitFlap lines={kontaktZustaende} holdsMs={[900, 4200]} />
+			<SplitFlap lines={kontaktZustaende} holdsMs={[900, 4200, 4200]} />
 		</div>
 		<div class="paragraph-text">
 		{/* Indiz-Satz (Fred 13.09. nacht, Diktat; Drittfassung): „vor kurzem
@@ -357,16 +363,16 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 				<SplitFlap lines={tafelZustaende} holdMs={2400} />
 			</div>
 		</div>
-		{/* Die EINE Tür als SCHWEBE-KACHEL (Fred 14.09. abends, vierte
-		   Position: mittig unterm Split biss sich mit der Menü-Kachel unten
-		   Mitte): fixiert am RECHTEN Viewport-Rand, vertikal mittig — fährt
-		   herein, sobald die Formatfrage-Sektion im Bild ist, und wieder
-		   raus, wenn man sie verlässt (IntersectionObserver unten).
-		   Material-System bleibt: WEISSE Kachel = anfassbar. */}
-		{/* Wort zweizeilig (Fred 14.09. abends: "als Button zu lang") —
-		   FORMAT/BERATUNG als Mini-Wort-Turm, wie die Turm-Muster der
-		   Sektionen. Kachel wird dadurch kompakt statt bandwurmig. */}
-		<a class="format-cta format-cta-schwebend" href="/termin" data-format-tuer><span class="cta-zeile">Format</span><span class="cta-zeile">beratung</span></a>
+		{/* Die EINE Tür: MITTIG unter dem Split (Fred 14.09. abends, fünfte
+		   Runde — zurück von der Schwebe-Kachel rechts), aber ohne Kollision
+		   mit der fixierten Menü-Kachel unten Mitte: die Tür blendet sich
+		   erst ein, wenn sie beim Scrollen ÜBER dem Menüknopf steht, und
+		   beim Zurückscrollen wieder aus, bevor sie ihn berührt
+		   (IntersectionObserver mit Menü-Sperrzone unten, Script am
+		   Dateiende). Wort zweizeilig FORMAT/BERATUNG (Turm-Muster). */}
+		<div class="format-schluss">
+			<a class="format-cta" href="/termin" data-format-tuer><span class="cta-zeile">Format</span><span class="cta-zeile">beratung</span></a>
+		</div>
 	</section>
 
 	{/* Produkte-Zeile + In-Flow-CTA weiter draußen (Fred 30.08. nachts,
@@ -647,25 +653,25 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		align-self: center;
 	}
 
-	.format-cta-schwebend {
-		position: fixed;
-		/* Rechte Kante DOCKT am Bildschirmrand an (Fred: kein Abstand). */
-		right: 0;
-		top: 50%;
-		margin: 0;
-		z-index: 40;
-		/* Versteckt: nach rechts aus dem Bild gefahren + durchsichtig;
-		   sichtbar wird per .ist-sichtbar (Scroll in die Sektion). */
-		transform: translate(calc(100% + 64px), -50%);
-		opacity: 0;
-		pointer-events: none;
-		transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease;
+	.format-schluss {
+		display: flex;
+		justify-content: center;
+		margin-top: clamp(40px, 6vh, 72px);
 	}
 
-	.format-cta-schwebend.ist-sichtbar {
-		transform: translate(0, -50%);
-		opacity: 1;
-		pointer-events: auto;
+	.format-schluss .format-cta {
+		margin: 0;
+		/* SCROLL-GEKOPPELTER WISCH (Fred 14.09. spät, dritte Bauform nach
+		   Fade und Zeit-Wisch): das Script setzt den clip-path DIREKT aus
+		   der Entfernung zum Menüknopf — die Tür wischt sich proportional
+		   zur Annäherung weg, physikalisch immer synchron, egal wie
+		   schnell gescrollt wird. Wer mitten in der Übergangszone stehen
+		   bleibt, sieht eine halb aufgewischte Kachel — von Fred bewusst
+		   abgenickt. KEINE clip-transition (Position steuert, Zeit nicht);
+		   der Hover-Schleier bleibt animiert. */
+		clip-path: inset(100% 0 0 0);
+		pointer-events: none;
+		transition: background-size 250ms ease-in-out;
 	}
 
 	.statement-zeile {
@@ -706,21 +712,22 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.format-cta {
 		display: flex;
 		flex-direction: column;
-		align-items: flex-start;
+		align-items: center;
 		justify-content: center;
 		line-height: 1.1;
-		/* Feste 272px quetschten den Schriftzug randlos (Fred-Screenshot
-		   14.09. abends: Text ragt optisch aus der Kachel) — jetzt
-		   Mindestbreite + Luft links/rechts, die Kachel wächst mit. */
-		min-width: 0;
-		padding: 22px 28px;
+		/* EXAKT das Maß der aufgeklappten Menü-Zeilen (Fred 14.09. abends:
+		   "so groß wie die anderen Knöpfe im Menü"): 272×88 (drei Kacheln
+		   plus zwei Fugen), 28px-Versalwort, mittig — Tür und Menü sind
+		   damit dasselbe Bedien-Material in derselben Konfektion. Wort
+		   bleibt zweizeilig FORMAT/BERATUNG (einzeilig bräuchte ~293px). */
+		width: min(calc(88px * 3 + 4px * 2), calc(100vw - 32px));
 		box-sizing: border-box;
-		height: auto;
+		height: 88px;
 		margin: 40px auto 0;
 		background: var(--tile-surface);
 		color: var(--black);
 		font-weight: 900;
-		font-size: 22px;
+		font-size: 28px;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		text-decoration: none;
@@ -885,26 +892,57 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 </style>
 
 <script>
-	// Schwebe-Tür FORMATBERATUNG (Fred 14.09. abends): sichtbar nur, solange
-	// die Formatfrage-Sektion im Viewport ist. astro:page-load-Muster mit
-	// Cleanup wie bei den Boards.
+	// Tür FORMATBERATUNG: Wisch DIREKT ans Scrollen gekoppelt (Fred 14.09.
+	// spät). Der Fortschritt der Aufwisch-Animation ist eine reine Funktion
+	// der Position: Unterkante der Tür vs. Oberkante des Menüknopfs.
+	// BAND px darüber beginnt die Übergangszone — beim Runterscrollen
+	// wischt die Tür über diese Strecke auf, beim Zurückscrollen exakt
+	// spiegelbildlich wieder zu. Kein Beobachter, keine Zeit-Animation,
+	// kein Wettrennen gegen Scroll-Flicks. astro:page-load-Muster mit
+	// Cleanup wie überall.
 	let tuerCleanup: (() => void) | null = null;
 
 	function mountTuer() {
 		if (tuerCleanup) tuerCleanup();
 		tuerCleanup = null;
 		const tuer = document.querySelector<HTMLElement>("[data-format-tuer]");
-		const sektion = document.querySelector<HTMLElement>(".ziel-format-tafel");
-		if (!tuer || !sektion) return;
-		const io = new IntersectionObserver(
-			(entries) => {
-				const drin = entries.some((e) => e.isIntersecting);
-				tuer.classList.toggle("ist-sichtbar", drin);
-			},
-			{ threshold: 0.15 },
-		);
-		io.observe(sektion);
-		tuerCleanup = () => io.disconnect();
+		if (!tuer) return;
+		const BAND = 160; // Wisch-Strecke in px (ungelockt, am Objekt tunen)
+		// LUFT 140 statt 8 (Fred 14.09. spät, "beim schnellen Scrollen
+		// schafft es das nicht"): Chromes Compositor-Scrolling ist dem
+		// Skript bei Flicks 1-3 Frames voraus — die Tür wird mit altem
+		// Clip-Stand mitgeschoben, bevor die Rechnung greift. Der
+		// Sicherheitsabstand legt die Wisch-Zone so hoch, dass selbst der
+		// Frame-Rückstand nie bis zum Menüknopf reicht: komplett weg ist
+		// die Tür schon 140px über dessen Oberkante.
+		const LUFT = 140;
+		let angefordert = false;
+
+		const update = () => {
+			angefordert = false;
+			const menue = document.querySelector<HTMLElement>(".menu-tile");
+			const grenze = menue
+				? menue.getBoundingClientRect().top - LUFT
+				: window.innerHeight - 160;
+			const unten = tuer.getBoundingClientRect().bottom;
+			const p = Math.min(1, Math.max(0, (grenze - unten) / BAND));
+			tuer.style.clipPath = `inset(${(1 - p) * 100}% 0 0 0)`;
+			tuer.style.pointerEvents = p >= 1 ? "auto" : "none";
+		};
+		const anfordern = () => {
+			if (!angefordert) {
+				angefordert = true;
+				requestAnimationFrame(update);
+			}
+		};
+
+		window.addEventListener("scroll", anfordern, { passive: true });
+		window.addEventListener("resize", anfordern);
+		update();
+		tuerCleanup = () => {
+			window.removeEventListener("scroll", anfordern);
+			window.removeEventListener("resize", anfordern);
+		};
 	}
 
 	document.addEventListener("astro:page-load", mountTuer);

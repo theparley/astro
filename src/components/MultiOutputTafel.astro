@@ -31,7 +31,6 @@
 // stehen in der Port-Checkliste im Website-Brief — hier nicht gelöst.
 
 import "../styles/fallblatt.css";
-import FlapWort from "./FlapWort.astro";
 
 interface Props {
 	/** Zeilen-Takt in Akt 1 (ms je Listenzeile). Fred 14.09.: bewusst schnell — wird am Objekt feingetunt, NICHT gelockt. */
@@ -48,7 +47,10 @@ const { taktMs = 400, leseMs = 2500, flipMs = 85 } = Astro.props;
 // je Hälfte, EINE Trenner-Spalte auf der Bildmitte.
 const HALB = 20;
 const GESAMT_COLS = HALB + 1 + HALB; // 41
-const ROWS = 12 + 3; // 12 Listen-Zeilen + Kopfzeile, Leerzeile, Reserve
+// +3 KOPF-Zeilen (Fred 14.09. spät: VIDEOPODCAST wandert IN die Wand
+// statt als separate Zeile darüber — Titel-Zeile + 2 Zeilen Luft).
+const KOPF = 3;
+const ROWS = 12 + 3 + KOPF; // Kopf + 12 Listen-Zeilen + Kopfzeile, Leerzeile, Reserve
 
 // sr-only-Kernaussage (Port-Checkliste Punkt 1): echte Lesefassung der
 // Tafel-Botschaft für Crawler/Screenreader — das Kachel-Raster selbst ist
@@ -57,7 +59,7 @@ const kernaussage =
 	"Aus einem Gespräch im Monat entstehen: 1 Livestream, 1 Videopodcast, " +
 	"1 Audio-Podcast, 10 Beiträge, 10 Clips, 10 Shorts, 1 Newsletter, " +
 	"1 Transkript und 10 Zitate für KI. Eure Bibliothek wächst. " +
-	"1 Stunde Aufwand steht gegen +100 Stunden Zuschauerzeit.";
+	"1 Stunde Aufwand steht gegen 100+ Stunden Zuschauerzeit.";
 ---
 
 {/* MOBIL-FORM ENTSCHIEDEN (Fred 14.09.): unterhalb eines Breakpoints
@@ -97,7 +99,13 @@ const kernaussage =
 		   Zahlen"): die ZIFFERN als einzelne Kacheln im Fließtext — 2
 		   Experten, 1 Gespräch, 1 Stunde. Passt zur Zahlenkolonne der
 		   Wand; die Wort-Fassung (ZWEI/EIN/EINE) war die erste Probe. */}
-		<p><FlapWort text="2" /> Experten. <FlapWort text="1" /> Gespräch. <FlapWort text="1" /> Stunde.<br />Der Content-Output und die Zuschauerzeit am Beispiel des Formats einer Live&#8209;Q&amp;A&#8209;Session.</p>
+		{/* Beispiel-Satz ERSATZLOS raus (Fred 14.09. spät); VIDEOPODCAST
+		   steht in der Wand selbst (Kopf-Zeile der Timeline). Die
+		   Ziffern-Kacheln (FlapWort 2/1/1) sind nach Sichtung wieder
+		   VERWORFEN (Fred: "als Wörter hinschreiben") — es gilt der
+		   gelockte Zahlen-Staccato-Wortlaut. Die Inline-Kachel-Komponente
+		   FlapWort.astro bleibt als Baustein im Repo. */}
+		<p>Zwei Experten. Ein Gespräch. Eine Stunde.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -110,6 +118,24 @@ const kernaussage =
 	   identisch zur alten 41er-Wand), unterm Breakpoint stapeln Input-
 	   und Output-Hälfte übereinander, der Trenner verschwindet. Die
 	   Engine adressiert weiter global tiles[r][0..40] (Mapping unten). */}
+	{/* AKT-SCHALTER (Fred 14.09. spät: "hin- und herschalten zwischen
+	   Content Output und Zuschauerzeit"): zwei Kachel-Schalter in der
+	   Haus-Grammatik (dunkel = tippbar, weiß gefüllt = gewählt/aktiv).
+	   Im Automatik-Lauf zeigen sie den gerade spielenden Akt an; ein
+	   Klick übernimmt, spielt den Akt von vorn und hält auf dessen
+	   Endbild. Rausscrollen setzt auf Automatik zurück. */}
+	<div class="mo-schalter">
+		{/* "Content-Output" (Fred 14.09. spät) — und Fred hat die
+		   Register-Regel dabei präzisiert: Content ist für The Parley NICHT
+		   verboten, sondern ein Angebot ("wir bieten das eben auch an, wir
+		   können das auch"). Die Regel meint: Content nicht als EIGENES
+		   Identitätswort für die Gesprächs-These verwenden — als Kategorie
+		   des Outputs, den der Markt kennt und wir liefern, ist es korrekt.
+		   Genau das benennt der Schalter. */}
+		<button type="button" class="mo-schalt" data-akt="1">Content-Output</button>
+		<button type="button" class="mo-schalt" data-akt="2">Zuschauerzeit</button>
+	</div>
+
 	<div class="mo-wand-wrap">
 		<div class="mo-wand" aria-hidden="true" data-mo-wand>
 			<div class="mo-halbwand" data-halb="links">
@@ -194,12 +220,18 @@ const kernaussage =
 		{ text: "   WÄCHST.", logos: [] },
 	];
 	const TEXT_COLS = Math.max(...ZEILEN.map((z) => z.text.length));
-	const ROWS = ZEILEN.length + 3;
+	// KOPF-Zeilen (Fred 14.09. spät): Zeile 0 = VIDEOPODCAST mittig über
+	// der ganzen Wand, zwei Zeilen Luft, dann der bisherige Aufbau um
+	// KOPF nach unten verschoben.
+	const KOPF = 3;
+	const ROWS = ZEILEN.length + 3 + KOPF;
 	const HALB = 20;
 	const GESAMT_COLS = HALB + 1 + HALB; // 41, Trenner = Spalte 20
 	const MITTE_RECHTS = HALB + 1;
-	const SUMME_ROW = 13;
+	const SUMME_ROW = 13 + KOPF;
 	const BLOCK_BREITE = 10;
+	const FORMAT_TITEL = "VIDEOPODCAST";
+	const FORMAT_START = Math.floor((GESAMT_COLS - FORMAT_TITEL.length) / 2);
 
 	type Ev = { t: number; r: number; c: number; html?: string; weiss?: boolean };
 
@@ -229,12 +261,13 @@ const kernaussage =
 		};
 
 		let t = 200;
-		// ── Akt 1: INPUT → 1 GESPRÄCH → OUTPUT → Monats-Output-Liste ──
-		addText(0, 0, INPUT_COLS, "INPUT", t); t += 500;
-		addText(2, 0, INPUT_COLS, INPUT_ZEILE, t); t += 600;
-		addText(0, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
+		// ── Akt 1: FORMAT-TITEL → INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
+		addText(0, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 600;
+		addText(KOPF, 0, INPUT_COLS, "INPUT", t); t += 500;
+		addText(KOPF + 2, 0, INPUT_COLS, INPUT_ZEILE, t); t += 600;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
 		ZEILEN.forEach((def, i) => {
-			const r = 2 + i;
+			const r = KOPF + 2 + i;
 			addText(r, MITTE_RECHTS, TEXT_COLS, def.text, t);
 			// Logos rechtsbündig am Wandrand (Gleis-Kolonne), geflappt einzeln:
 			def.logos.forEach((name, l) => {
@@ -244,49 +277,58 @@ const kernaussage =
 		});
 		t += 500 + lese;
 		const akt1EndeT = t - 1; // Moment „Liste steht komplett" (reduced-motion-Standbild)
-		addClearAll(t); t += 800;
+		// Auch hier: Kaskade + echte Trommel-Klappzeit (s. Abbau unten).
+		addClearAll(t); t += (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS + 500;
 
 		// ── Akt 2: 1 Stunde Aufwand gegen +100 Stunden Zuschauerzeit ──
-		addText(0, 0, INPUT_COLS, "INPUT", t); t += 500;
-		add(t, 2, 0, { weiss: true }); t += 500;
-		addText(4, 0, INPUT_COLS, " 1 STUNDE", t);
-		addText(5, 0, INPUT_COLS, "   AUFWAND", t); t += 600;
-		addText(0, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
+		// (Die Von-unten-Dramaturgie vom 14.09. spät ist VERWORFEN — Fred
+		// nach Sichtung: "sieht doch nicht so gut aus, zurück auf die
+		// alte". Es gilt wieder: alles baut von oben nach unten.)
+		const akt2StartT = t;
+		addText(0, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 600;
+		addText(KOPF, 0, INPUT_COLS, "INPUT", t); t += 500;
+		add(t, KOPF + 2, 0, { weiss: true }); t += 500;
+		// Kein Einrück-Leerzeichen mehr (Fred 14.09. spät): Kreis, Zahl und
+		// Wort stehen bündig an Spalte 0 — wie die Output-Seite.
+		addText(KOPF + 4, 0, INPUT_COLS, "1 STUNDE", t);
+		addText(KOPF + 5, 0, INPUT_COLS, "AUFWAND", t); t += 600;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
-		//
-		// DIAGONAL-WELLE (Fred 14.09. abends): vorher fuellte der Block
-		// zeilenweise (18ms je Kachel = Zeile in 0,18s voll → las sich als
-		// Zeilen-Vorhang ohne Links-rechts-Bewegung). Jetzt laeuft die Welle
-		// ueber BEIDE Achsen: Verzoegerung = (Zeile × Versatz + Spalte) × Takt.
-		// Der ZEILEN-VERSATZ (in Kachel-Schritten) ist Freds Regler-Achse:
-		//   10 = jede Zeile rendert fertig, bevor die naechste anfaengt
-		//    1 = Kachel 2 der Zeile animiert, waehrend Kachel 1 der naechsten
-		//        Zeile schon startet (steilste Diagonale)
-		// Startwert 3 = sichtbare Welle zwischen beiden Extremen. UNGELOCKT.
+		// DIAGONAL-WELLE (Fred 14.09. abends): Verzögerung = (Zeile ×
+		// Versatz + Spalte) × Takt, von oben nach unten. ZEILEN-VERSATZ =
+		// Freds Regler-Achse (10 = Zeile fertig, dann nächste; 1 =
+		// steilste Diagonale). UNGELOCKT.
 		const BLOCK_TAKT = 30;
 		const BLOCK_ZEILEN_VERSATZ = 3;
 		let i = 0;
-		for (let r = 2; r < ROWS && i < 100; r++)
+		for (let r = KOPF + 2; r < ROWS && i < 100; r++)
 			for (let c = 0; c < BLOCK_BREITE && i < 100; c++) {
-				add(t + ((r - 2) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, MITTE_RECHTS + c, { weiss: true });
+				add(t + ((r - KOPF - 2) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, MITTE_RECHTS + c, { weiss: true });
 				i++;
 			}
 		const blockDauer = (9 * BLOCK_ZEILEN_VERSATZ + 9) * BLOCK_TAKT;
 		t += blockDauer + 400;
-		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "+100 STUNDEN", t);
+		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
 		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t);
 		t += 300 + lese;
+		const akt2EndeT = t - 1; // Standbild-Moment für den Schalter-Modus
 		// Schluss-Abbau + ATEMPAUSE vor dem Loop-Neustart (Fred 14.09.: der
 		// Neustart kam, bevor die weißen Kacheln ganz weg waren). Der Abbau
 		// selbst dauert (ROWS-1)*90 + (COLS-1)*6 ≈ 1,5s — erst NACH seinem
 		// Ende plus einer knappen Sekunde Leere beginnt die Wand von vorn.
 		addClearAll(t);
-		const abbauDauer = (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6;
+		// Abbau-Dauer REAL rechnen (Bugfix 14.09. abends): seit dem
+		// Fallblatt-Umbau rattert jede Kachel bis zu MAX_FLAPS Klappen
+		// zur Leertafel (statt einem 170ms-Kipp) — die Kaskade allein
+		// unterschätzte den Abbau, Nachzügler klapperten in den nächsten
+		// Akt hinein.
+		const abbauDauer =
+			(ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS;
 		t += abbauDauer + 900;
 
 		events.sort((a, b) => a.t - b.t);
-		return { events, total: t, akt1EndeT };
+		return { events, total: t, akt1EndeT, akt2StartT, akt2EndeT };
 	}
 
 	function setupTafel(sektion: HTMLElement): () => void {
@@ -309,7 +351,8 @@ const kernaussage =
 		const takt = Number(sektion.dataset.taktMs) || 400;
 		const lese = Number(sektion.dataset.leseMs) || 2500;
 
-		const { events, total, akt1EndeT } = buildTimeline(takt, lese);
+		const { events, total, akt1EndeT, akt2StartT, akt2EndeT } = buildTimeline(takt, lese);
+		const schalter = Array.from(sektion.querySelectorAll<HTMLButtonElement>(".mo-schalt"));
 
 		// Pro Kachel indizierte Event-Listen für seekInstant:
 		const textEv: Ev[][][] = tiles.map((row) => row.map(() => []));
@@ -322,6 +365,15 @@ const kernaussage =
 		// eine Übersetzungsstelle.
 		const asDrum = (html: string) => (html === "&nbsp;" ? " " : html);
 
+		// Uhr-Kachel: der Kreis ist das TROMMEL-SONDERZEICHEN ● (Fred 14.09.
+		// abends, dritte Runde: "einfach in die Kette einfügen") — die
+		// Kachel rattert dadurch wie ein Buchstabe durch die Trommel und
+		// endet auf dem Kreis. Gerendert wird ● als Kreis-Span (lib,
+		// SONDERZEICHEN); den Aufbau-Winkel liest jede Schicht per
+		// var(--mo-uhr) von der KACHEL (inherits:true), deshalb laufen
+		// Ober- und Unterhälfte nie auseinander.
+		const UHR = "●";
+
 		function seekInstant(T: number) {
 			for (let r = 0; r < tiles.length; r++)
 				for (let c = 0; c < tiles[r].length; c++) {
@@ -331,7 +383,9 @@ const kernaussage =
 					resetInstant(tile, asDrum(te ? te.html! : " "));
 					let we: Ev | null = null;
 					for (const ev of weissEv[r][c]) { if (ev.t <= T) we = ev; else break; }
-					tile.el.classList.toggle("mo-weiss", !!(we && we.weiss));
+					const weiss = !!(we && we.weiss);
+					if (weiss) resetInstant(tile, UHR);
+					tile.el.classList.toggle("mo-weiss", weiss);
 				}
 		}
 
@@ -348,10 +402,10 @@ const kernaussage =
 			if (ev.html !== undefined) {
 				queueFlap(tile, asDrum(ev.html), FLAP_STEP_MS);
 			} else if (ev.weiss) {
-				enqueue(tile, () =>
-					flapOnce(tile, tile.current, FLAP_STEP_MS / 2, () =>
-						tile.el.classList.add("mo-weiss"),
-					),
+				// Die Uhr rattert als Trommel-Zeichen herein; die Klasse
+				// startet am letzten Phasenwechsel den Winkel-Aufbau.
+				queueFlap(tile, UHR, FLAP_STEP_MS, () =>
+					tile.el.classList.add("mo-weiss"),
 				);
 			} else {
 				enqueue(tile, () => {
@@ -362,44 +416,93 @@ const kernaussage =
 
 		let cancelled = false;
 		let rafId = 0;
-		let started = false;
+		let laufend = false;
+		// 0 = Automatik (Endlos-Loop beider Akte); 1/2 = Fred-Schalter —
+		// gewählter Akt spielt von vorn und hält auf seinem Endbild.
+		let modus: 0 | 1 | 2 = 0;
+		let T = 0;
+		let gIdx = 0;
+		let last = 0;
 
-		function startLoop() {
-			if (started || cancelled) return;
-			started = true;
-			let T = 0;
-			let gIdx = 0;
-			let last = performance.now();
-			seekInstant(0);
+		function zeigeAktivenAkt() {
+			const aktiv = modus !== 0 ? modus : T >= akt2StartT ? 2 : 1;
+			schalter.forEach((b) =>
+				b.classList.toggle("aktiv", Number(b.dataset.akt) === aktiv),
+			);
+		}
+
+		function springeZu(startT: number) {
+			T = startT;
+			gIdx = events.findIndex((e) => e.t >= startT);
+			if (gIdx === -1) gIdx = events.length;
+			last = performance.now();
+			seekInstant(startT);
+		}
+
+		function startLoop(vonT = 0) {
+			if (cancelled) return;
+			springeZu(vonT);
 			const loop = (now: number) => {
-				if (cancelled) return;
+				if (cancelled || !laufend) return;
 				T += now - last;
 				last = now;
+				const halt = modus === 1 ? akt1EndeT : modus === 2 ? akt2EndeT : null;
+				if (halt !== null && T >= halt) {
+					// Standbild am Akt-Ende: restliche Ereignisse bis zum
+					// Halt feuern, dann anhalten (kein weiterer rAF).
+					while (gIdx < events.length && events[gIdx].t <= halt) {
+						fireEvent(events[gIdx]);
+						gIdx++;
+					}
+					T = halt;
+					zeigeAktivenAkt();
+					return;
+				}
 				if (T > total) {
-					T = 0;
-					gIdx = 0;
-					seekInstant(0);
+					springeZu(0);
 				}
 				while (gIdx < events.length && events[gIdx].t <= T) {
 					fireEvent(events[gIdx]);
 					gIdx++;
 				}
+				zeigeAktivenAkt();
 				rafId = requestAnimationFrame(loop);
 			};
 			rafId = requestAnimationFrame(loop);
 		}
 
+		schalter.forEach((b) => {
+			b.addEventListener("click", () => {
+				modus = Number(b.dataset.akt) === 2 ? 2 : 1;
+				cancelAnimationFrame(rafId);
+				laufend = true;
+				startLoop(modus === 2 ? akt2StartT : 0);
+				zeigeAktivenAkt();
+			});
+		});
+
 		if (reduceMotion()) {
 			// Fertiger Akt-1-Endzustand statisch (BAU-ANWEISUNG Punkt 3).
 			seekInstant(akt1EndeT);
 		} else {
-			// Start erst beim Viewport-Eintritt — die Sektion liegt unter dem
-			// Fold; wer hinscrollt, sieht die Wand von Anfang an flappen.
+			// VOLL an die Sichtbarkeit gekoppelt (Fred 14.09. abends: "wenn
+			// der Viewport neu rein gescrollt wird, immer von vorne"): beim
+			// Eintritt startet die Wand frisch bei T=0, beim Austritt hält
+			// sie an und wird geleert (seekInstant killt via Generation auch
+			// alle in der Luft hängenden Klappen). Kein Weiterlaufen mehr im
+			// Verborgenen — das war zugleich die Quelle der Geister-Effekte
+			// beim Hoch-/Runterscrollen.
 			const io = new IntersectionObserver(
 				(entries) => {
-					if (entries.some((e) => e.isIntersecting)) {
-						io.disconnect();
+					const drin = entries.some((e) => e.isIntersecting);
+					if (drin && !laufend) {
+						laufend = true;
 						startLoop();
+					} else if (!drin && laufend) {
+						laufend = false;
+						modus = 0;
+						cancelAnimationFrame(rafId);
+						seekInstant(0);
 					}
 				},
 				{ threshold: 0.2 },
@@ -452,6 +555,47 @@ const kernaussage =
 	   statt des Entwurfs-Graus — "Helligkeit wie die Texte oben"). */
 	.mo-kopf {
 		text-align: center;
+	}
+
+	/* Akt-Schalter: Kachel-Grammatik der Seite — #404040 = tippbar,
+	   #ededed gefüllt = gewählt (Terminkalender-System). */
+	.mo-schalter {
+		/* Zwei GLEICH BREITE Schalter (Fred 14.09. spät) — Grid mit zwei
+		   1fr-Spalten statt Inhaltsbreite; Gesamtbreite an der Menü-Säule
+		   orientiert. */
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 4px;
+		width: min(420px, calc(100vw - 32px));
+		margin: 0 auto 14px;
+	}
+
+	.mo-schalt {
+		border: 0;
+		cursor: pointer;
+		font-family: inherit;
+		font-weight: 900;
+		font-size: 14px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		padding: 14px 20px;
+		/* MENÜ-GRAMMATIK (Fred 14.09. spät, ersetzt die dunkel/hell-
+		   Kalender-Logik): BEIDE Schalter weiß wie die Menü-Zeilen; die
+		   Auswahl zeigt der GRAUE SCHLEIER — beim Drüberfahren rutscht er
+		   von links herein (Hover), auf dem AKTIVEN Schalter bleibt er
+		   liegen (wie is-preselected im Menü). */
+		background-color: var(--tile-surface, #ededed);
+		color: var(--black, #000);
+		background-image: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15));
+		background-repeat: no-repeat;
+		background-position: left center;
+		background-size: 0% 100%;
+		transition: background-size 250ms ease-in-out;
+	}
+
+	.mo-schalt:hover,
+	.mo-schalt.aktiv {
+		background-size: 100% 100%;
 	}
 
 	.mo-kopf h2 {
@@ -591,7 +735,10 @@ const kernaussage =
 	@property --mo-uhr {
 		syntax: "<angle>";
 		initial-value: 0deg;
-		inherits: false;
+		/* inherits:true ist der Kern der Schichten-Synchronität: die
+		   Kachel animiert den Winkel, alle vier Kreis-Kopien in den
+		   Klapp-Schichten erben denselben Momentanwert. */
+		inherits: true;
 	}
 
 	/* KOMBINIERT mit dem Kachel-Klapp (Fred 14.09., zweite Runde): die
@@ -600,19 +747,15 @@ const kernaussage =
 	   (animation-delay ≈ Rest-Klappdauer, fill both hält den Kreis vorher
 	   unsichtbar leer). Seit dem Fallblatt-Umbau ist die Uhr ein Overlay
 	   auf der KACHEL (über den Klapp-Schichten, z-index 4 > Scharnier 3). */
-	.mo-kachel.mo-weiss::before {
-		content: "";
-		position: absolute;
+	.mo-kachel.mo-weiss {
+		animation: mo-uhr-aufbau 700ms linear 140ms both;
+	}
+
+	.mo-uhr {
 		width: 70%;
 		aspect-ratio: 1;
-		left: 15%;
-		top: 50%;
-		transform: translateY(-50%);
 		border-radius: 50%;
 		background: conic-gradient(#ededed var(--mo-uhr), transparent 0);
-		animation: mo-uhr-aufbau 700ms linear 140ms both;
-		z-index: 4;
-		pointer-events: none;
 	}
 
 	@keyframes mo-uhr-aufbau {
@@ -621,9 +764,9 @@ const kernaussage =
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.mo-kachel.mo-weiss::before {
+		.mo-kachel.mo-weiss {
 			animation: none;
-			background: #ededed;
+			--mo-uhr: 360deg;
 		}
 	}
 

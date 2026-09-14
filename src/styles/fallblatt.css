@@ -94,6 +94,17 @@
 	transform: translateY(0.05em);
 }
 
+/* AUSNAHME (Fred 14.09. abends, zweite Runde: "Kreise und Logos nicht
+   mehr in der Mitte"): der 0.05em-Shift kompensiert eine SCHRIFT-Metrik
+   (Versalien ohne Unterlängen). Grafik-Inhalte — SVG-Logos, der
+   Uhr-Kreis der Wand, das Logo-Textzeichen — sind geometrisch exakt
+   mittig gebaut und dürfen NICHT mitverschoben werden. */
+.sf-glyph:has(svg),
+.sf-glyph:has(.mo-uhr),
+.sf-glyph:has(.mo-logo-text) {
+	transform: none;
+}
+
 .sf-static--bottom .sf-glyph,
 .sf-flap--back .sf-glyph {
 	top: calc(var(--sf-tile-h) * -0.5);

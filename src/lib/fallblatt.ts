@@ -14,7 +14,18 @@
 
 // Zeichentrommel — Reihenfolge = Klapper-Richtung: eine echte
 // Fallblattanzeige dreht nur VORWÄRTS, nie zurück.
-export const DRUM = " ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ.,!?'-0123456789";
+// Das letzte Zeichen ist das SONDERZEICHEN ● (Fred 14.09. abends: die
+// Uhr-Kachel soll wie ein Buchstabe durch die Kette laufen) — es rendert
+// nicht als Text, sondern als Kreis-Span (siehe SONDERZEICHEN unten);
+// die Wand nutzt es für die Stunden-Uhr.
+export const DRUM = " ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ.,!?'-&0123456789●";
+
+// Trommel-Zeichen mit eigener Darstellung: Zeichen in der Kette, aber als
+// Markup gerendert (setGlyph übersetzt beim Schreiben; tile.current und
+// die Trommel-Logik rechnen weiter mit dem Zeichen selbst).
+const SONDERZEICHEN: Record<string, string> = {
+	"●": '<span class="mo-uhr"></span>',
+};
 
 // Sichtbare Klappen pro Wechsel deckeln (Fred 14.09. abends: "es blendet
 // rein statt zu flippern"): damit die Lamellen-Drehung wirklich GEZEICHNET
@@ -99,7 +110,8 @@ export function buildTileLayers(el: HTMLElement): FlapTile {
 }
 
 function setGlyph(g: HTMLElement, html: string) {
-	if (g.innerHTML !== html) g.innerHTML = html;
+	const dargestellt = SONDERZEICHEN[html] ?? html;
+	if (g.innerHTML !== dargestellt) g.innerHTML = dargestellt;
 }
 
 export function setInstant(tile: FlapTile, html: string) {
@@ -134,6 +146,13 @@ export async function flapOnce(
 	halfMs: number,
 	onMid?: () => void,
 ) {
+	// Generations-Wache IN der Klappe (Bugfix 14.09. abends, Fred: "beim
+	// Hochscrollen bleiben Buchstaben stehen"): eine Klappe, die beim
+	// Reset (seekInstant/Loop-Neustart) gerade in der Luft ist, darf nach
+	// ihren waits NICHTS mehr schreiben — sonst überschreibt sie den
+	// frisch gesetzten Zustand mit ihrem alten Ziel und der Buchstabe
+	// steht als Geist in der leeren Wand.
+	const gen = tile.gen;
 	setGlyph(tile.topStaticGlyph, html);
 	tile.frontFlapEl.style.transitionTimingFunction = "ease-in";
 	tile.frontFlapEl.style.transitionDuration = halfMs + "ms";
@@ -141,6 +160,7 @@ export async function flapOnce(
 	void tile.frontFlapEl.offsetHeight;
 	tile.frontFlapEl.style.transform = "rotateX(-90deg)";
 	await wait(halfMs);
+	if (tile.gen !== gen) return;
 
 	tile.frontFlapEl.style.transitionDuration = "0ms";
 	tile.frontFlapEl.style.transform = "rotateX(0deg)";
@@ -155,6 +175,7 @@ export async function flapOnce(
 	tile.backFlapEl.style.transitionDuration = halfMs + "ms";
 	tile.backFlapEl.style.transform = "rotateX(0deg)";
 	await wait(halfMs);
+	if (tile.gen !== gen) return;
 
 	setGlyph(tile.bottomStaticGlyph, html);
 	tile.current = html;
