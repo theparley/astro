@@ -42,7 +42,27 @@ const tafelFormate = [
 	"LIVE Q&A-SESSION",
 	"MITARBEITERINTERVIEW",
 ];
-const tafelZustaende = tafelFormate.map((format) => format.split(" "));
+// Zeilen-Aufteilung NEU (Fred 14.09.): Tafel wandert in die HALBE Spalte
+// mit der Wand-Kachelgröße — dafür lange Wörter geteilt, max. DREI Zeilen,
+// längste Zeile 11 Zeichen (TESTIMONIAL/MITARBEITER).
+const tafelZustaende = [
+	["VIDEO", "PODCAST"],
+	["KUNDEN", "TESTIMONIAL"],
+	["LIVE", "WEBINAR"],
+	["EXPERTEN", "TALK"],
+	["ONLINE", "EVENT"],
+	["RECRUITING", "VIDEO"],
+	["LIVE", "Q&A", "SESSION"],
+	["MITARBEITER", "INTERVIEW"],
+];
+
+// Kontakt-Board unter dem Augenzeugen-Turm (Fred 14.09.): startet leer und
+// flappt EINMAL "NOCH VOR DEM / ERSTEN KONTAKT." ein (loop=false hält den
+// Endzustand; sr-only-Fallback der Komponente trägt den Lesetext).
+const kontaktZustaende = [
+	[" "],
+	["NOCH VOR DEM", "ERSTEN KONTAKT."],
+];
 
 // Produkte-Zeile (Website-Brief, gelockte Treppe 29.08. spät) — die vier
 // buchbaren Formate als knappe Zeile nach dem Clip-Beweis. Noch keine
@@ -105,7 +125,23 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   mit „Noch vor dem ersten Kontakt") ist VERWORFEN — „Gespräch" bleibt
 	   als Wort fürs Produkt reserviert (echte Gespräche), der Erstkontakt
 	   heißt Kontakt. Stand hier = die bewährte Fassung. */}
-		<p class="plaedoyer-text">Kunden werden Augenzeugen. Noch vor dem ersten Kontakt.</p>
+		{/* SPLIT-UMBAU (Fred 14.09., Optik-Probe paragraph-split-demo.html
+		   übernommen): Zeile 1 als VERSAL-Statement in der linken Hälfte
+		   (beide Achsen mittig, Sätze als eigene Blöcke mit 0.5em Luft),
+		   die drei Absätze rechts. 50/50-Split nach BBH-Regel. */}
+		{/* "Augenzeugen" als ZWEI Zeilen AUGEN / ZEUGEN (Fred 14.09.) — das
+		   Wort war bei Sektionstitel-Größe die Sprengzeile der Halbspalte;
+		   der Split liest sich versal als Doppel-Wort (AUGEN ZEUGEN). */}
+		<div class="paragraph-links">
+			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kunden</span><span class="statement-zeile">werden</span><span class="statement-zeile">Augen</span><span class="statement-zeile">zeugen.</span></span></h2>
+			{/* Kontakt-Board (Fred 14.09., abends als LOOP): rattert herein,
+			   steht eine Weile, flappt weg, kurze Pause auf der Leertafel,
+			   rattert wieder herein. flipMs 60: unter ~2 Frames pro Halbklappe
+			   zeichnet der Browser die Lamellen-Rotation nicht mehr — bei 30ms
+			   las sich das Klappen als Ein-/Ausblenden (Fred-Beobachtung). */}
+			<SplitFlap lines={kontaktZustaende} flipMs={60} holdsMs={[900, 4200]} />
+		</div>
+		<div class="paragraph-text">
 		{/* Indiz-Satz (Fred 13.09. nacht, Diktat; Drittfassung): „vor kurzem
 	   noch/jetzt" erzählt den Kipp-Punkt der Entwertung; „ohne Nachweis"
 	   (statt hart „wertlos" allein) sagt: für sich allein gestellt wertlos,
@@ -189,6 +225,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Wort der Wirkungs-Säule in den Kopf (Bezug: filmreif + ohne
 	   Kamerastress = die Wirkung, die skaliert wird). */}
 		<p class="plaedoyer-text">Diese Gespräche fangen wir filmreif ein, bringen sie in das passende Format und skalieren mit ihrer Wirkung das Vertrauen in eure Marke. Auf allen Kanälen.</p>
+		</div>
 	</section>
 
 	{/* NEUE SEITEN-REIHENFOLGE (Fred 14.09.): Hero → Kopf → CLIP →
@@ -286,26 +323,30 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Frage des Formats" + Subclaim als Frage — ersetzt die frühere
 		   Arbeitsstand-Zeile. Gleiche Bauform wie der Multi-Output-Kopf:
 		   Titel im Sektions-Titel-Rezept, Sub in der Lead-Typo, beides mittig. */}
-		{/* Fester Zweizeiler (Fred 13.09.) — wie der Multi-Output-Titel. */}
-		<h2 class="format-titel">Eine Frage<br />des Formats</h2>
-		{/* Sub-Text (Fred 2026-09-13 abends, ERSTE FORMULIERUNGS-RUNDE aus
-		   seinem Input — Kern: die Pass-Aufzählung ist ihm wichtig (Ziel/
-		   Branche/Menschen/Budget), die Scheiter-Warnung POSITIV gedreht
-		   (wohlwollender Blick statt Video-Verteufelung), Solopreneur-bis-
-		   Mittelstand-Spanne, Schluss führt zum Formatberatung-Knopf). */}
-		<div class="tafel-kopf">
-			<p class="tafel-intro">Das Start-Format muss passen: zum Ziel, zur Branche, zu Menschen, Budget, Firma. Und es muss angepasst werden, während es sich entwickelt.</p>
-			<p class="tafel-intro">Nicht immer passt eine Live-Q&amp;A-Session für den Start. Es gibt Formate für den Solo-Entrepreneur, der eine Personal Brand aufbauen will. Und es gibt Formate für Unternehmen, die zur Brancheninstanz werden wollen. Im Zentrum steht immer das echte Gespräch. Am besten in regelmäßigen Abständen. Euer Format finden wir gemeinsam.</p>
+		{/* Split-Umbau (Fred 14.09.): wie die Paragraph-Sektion, GESPIEGELT —
+		   kleiner Text LINKS, großes Statement RECHTS (beide Achsen mittig);
+		   Tafel + Formatberatung laufen darunter weiter über die volle
+		   Breite. */}
+		<div class="format-split">
+			<div class="tafel-kopf">
+			<p class="tafel-intro">Das Start-Format muss passen: zum Ziel, zur Branche, zur Firma, zu den Menschen, zum Budget. Und es muss angepasst werden, während es sich entwickelt.</p>
+			<p class="tafel-intro">Nicht immer passt eine Live-Q&amp;A-Session für den Start. Es gibt Formate für den Solo-Entrepreneur, der eine Personal Brand aufbauen will. Und es gibt Formate für Unternehmen, die zur Brancheninstanz werden wollen.</p>
+			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Am besten in regelmäßigen Abständen. Euer Format finden wir gemeinsam.</p>
+			{/* Tür LINKS unterm Text (Fred 14.09.) — direkt nach "gemeinsam." */}
+			<a class="format-cta" href="/termin">Formatberatung</a>
 		</div>
-		{/* flipMs 30 (Fred 13.09.: "Flappern schneller") — Dauer EINER
-		   Klapp-Bewegung; Default war 55. Noch schneller geht bis ~15,
-		   darunter frisst der Browser Frames. */}
-		<SplitFlap lines={tafelZustaende} flipMs={30} holdMs={2400} />
-		{/* In-Flow-Tür (Fred 2026-09-13, "am Ende könnte ein Knopf stehen"):
-		   "Formatberatung" löst "Die Wahl des passenden Formats ist der erste
-		   Schritt" wörtlich ein. Wortlaut verspricht ein ERGEBNIS (Klarheit
-		   übers Format), keinen Aufwand (Termin). Ziel /termin. */}
-		<a class="format-cta" href="/termin">Formatberatung</a>
+			<div class="format-rechts">
+				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
+			   Kunden-Statement links oben. */}
+				<h2 class="format-titel">Eine<br />Frage<br />des<br />Formats</h2>
+				{/* Format-Board in der Hälfte (Fred 14.09.): gleiche Kachelgröße
+				   wie die Multi-Output-Wand, Formate max. dreizeilig. flipMs 30
+				   (Fred 13.09. "Flappern schneller"). */}
+				{/* flipMs 60 wie das Kontakt-Board (sichtbare Lamellen statt
+				   Blenden — gleiche Material-Physik auf allen Boards). */}
+				<SplitFlap lines={tafelZustaende} flipMs={60} holdMs={2400} />
+			</div>
+		</div>
 	</section>
 
 	{/* Produkte-Zeile + In-Flow-CTA weiter draußen (Fred 30.08. nachts,
@@ -340,6 +381,24 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	/* Sektions-Titel "Eine Frage des Formats": dasselbe Rezept wie die
 	   anderen Sektionstitel (Einheitsgrößen-Prinzip); ohne Umlaut in der
 	   Zeile reicht die enge 0.85er-Zeilenhöhe. */
+	.format-split {
+		width: 100%;
+		max-width: 1728px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column-reverse;
+		gap: 48px;
+	}
+
+	@media (min-width: 800px) {
+		.format-split {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: clamp(40px, 6vw, 96px);
+			align-items: start;
+		}
+	}
+
 	.format-titel {
 		margin: 0;
 		font-weight: 900;
@@ -349,13 +408,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
 		text-wrap: balance;
 		text-align: center;
+		align-self: center;
 	}
 
 	.tafel-kopf {
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
-		align-items: center;
 	}
 
 	.tafel-intro {
@@ -496,8 +555,91 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   liegt EXAKT ein --abstand-xl und sonst nichts — die Folgesektion
 		   bringt den kompletten Abstand als eigenes padding-top mit). */
 		padding: 56px 16px 0;
+		/* Split-Deckel wie die alte Plädoyer-Spec: 1728px, mittig. */
+		max-width: 1728px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 48px;
 	}
 
+	@media (min-width: 800px) {
+		.paragraph {
+			display: grid;
+			/* BBH-Regel: Splits EXAKT 50/50 — minmax(0,1fr) gegen die
+			   implizite min-width-Untergrenze der fr-Tracks. */
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: clamp(40px, 6vw, 96px);
+			align-items: start;
+		}
+	}
+
+	/* Statement links: versal, Größe = BBHs text-2xl (Referenz für
+	   Statements in Halbspalten, 30→80px), in der Hälfte horizontal UND
+	   vertikal mittig; die zwei Sätze als Blöcke mit 0.5em Luft. */
+	.paragraph-statement {
+		margin: 0;
+		font-weight: 900;
+		text-transform: uppercase;
+		/* EIN Überschriften-Stil (Fred 14.09. abends): Zeilenabstand wie
+		   Multi-Output und Formatfrage (0.85) — der 0-Abstand über
+		   text-box-trim ist raus. */
+		line-height: 0.85;
+		letter-spacing: -0.01em;
+		/* Volle Sektionstitel-Größe (Fred 14.09.: "so groß wie Multi-Output,
+		   auch wenn jedes Wort einzeln in der Zeile steht") — statt der
+		   BBH-text-2xl-Halbspalten-Referenz. */
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+		text-wrap: balance;
+		text-align: center;
+		align-self: center;
+		/* Auf Turm-Breite eingeschnürt (Fred 14.09.): der Block ist genau so
+		   breit wie die längste Zeile (ZEUGEN.) — damit kann die kleine
+		   Unterzeile rechtsbündig exakt unter deren Punkt enden. Mittig in
+		   der Hälfte bleibt er über die Auto-Ränder. */
+		width: max-content;
+		max-width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.statement-satz {
+		display: block;
+	}
+
+	.paragraph-links {
+		align-self: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		/* Board = TEIL des Schriftblocks (Fred 14.09.): mittig auf derselben
+		   Achse wie der Turm, mit knapper Fuge statt Sektions-Luft. */
+		gap: 14px;
+	}
+
+	.format-rechts {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		/* Board klebt als Teil des Titel-Blocks (14px), der Knopf darunter
+		   bekommt eigene Luft (eigener margin statt Flex-Gap). */
+		gap: 14px;
+		align-self: center;
+	}
+
+	.tafel-kopf .format-cta {
+		margin: 24px 0 0;
+		align-self: flex-start;
+	}
+
+	.statement-zeile {
+		display: block;
+	}
+
+	/* Variante (Fred 14.09.): "Noch vor dem ersten Kontakt." KLEIN unter
+	   dem Turm — Größe nach der BBH-Lead-Referenz (dieselbe gemessene
+	   Formel wie .plaedoyer-text und die Multi-Output-Subzeile), normale
+	   Schreibung statt versal, normales Gewicht. */
 	@media (min-width: 1024px) {
 		.paragraph {
 			padding: 56px 32px 0;
@@ -508,9 +650,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   erst in HTML direkt geklärt): aktuell 50% der Breite, MITTIG im
 	   Bildschirm zentriert. */
 	.paragraph .plaedoyer-text {
-		max-width: 50%;
-		margin-left: auto;
-		margin-right: auto;
+		max-width: 46rem;
+		margin-left: 0;
+		margin-right: 0;
 	}
 
 	/* Mobil-Korrektur (Fred 14.09.: "sieht sehr schmal aus"): die 50%-
@@ -681,4 +823,20 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		color: inherit;
 	}
 
+</style>
+
+<style is:global>
+	/* sf-grid-wandmass: Die beiden Seiten-Boards (Kontakt-Board im Paragraph,
+	   Format-Board in der Formatfrage-Hälfte) übernehmen die KACHELGRÖSSE der
+	   Multi-Output-Wand (--mo-k-Formel) statt der viewport-füllenden
+	   SplitFlap-Automatik. is:global nötig: .sf-grid trägt kein Scope-Attribut
+	   dieser Seite. */
+	.paragraph .sf-grid,
+	.ziel-format-tafel .sf-grid {
+		--sf-tile-w: clamp(11px, 1.75vw, 30px);
+		/* Schrift wie in der Multi-Output-Wand (Fred 14.09.: "Schrift wirkt
+		   kleiner"): dieselbe von der Kachel ENTKOPPELTE Lead-Formel statt
+		   der 0.62-Kachel-Kopplung der Komponente. */
+		--sf-font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+	}
 </style>

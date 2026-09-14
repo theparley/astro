@@ -82,13 +82,13 @@ const kernaussage =
 		   „Multi-Output" bricht damit auf keiner Breite mehr auseinander;
 		   das &nbsp; hält wie gehabt „echter Gespräche" zusammen. Mögliche
 		   Zeilenfälle nur noch: Einzeiler oder der gewollte Zweizeiler. */}
-		<h2>Der Multi&#8209;Output echter&nbsp;Gespräche</h2>
+		<h2>Der Multi&#8209;Output eines&nbsp;Gesprächs</h2>
 		{/* Vierte Fassung (Fred 14.09., Diktat): „am Beispiel des Formats
 		   einer Live-Q&A-Session" — löst das Dreifach-Kompositum
 		   „Live-Q&A-Session-Formats" auf und macht ehrlich, dass die Tafel
 		   EIN Beispiel zeigt (nicht jedes Format liefert exakt diese
 		   Stückzahlen — entlastet still die Zahlen-Flagge). */}
-		<p>Zwei Experten. Ein Gespräch. Eine Stunde. Der Content-Output und die Zuschauerzeit am Beispiel des Formats einer Live&#8209;Q&amp;A&#8209;Session.</p>
+		<p>Zwei Experten. Ein Gespräch. Eine Stunde.<br />Der Content-Output und die Zuschauerzeit am Beispiel des Formats einer Live&#8209;Q&amp;A&#8209;Session.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -567,12 +567,52 @@ const kernaussage =
 		transform: rotateX(90deg);
 	}
 
-	.mo-kachel.mo-weiss {
-		background: #ededed;
+	/* UHR-AUFBAU (Fred 14.09., "Animation in der Animation"): die
+	   Weiss-Kachel ist kein voller weisser Block mehr, sondern eine
+	   KLEINE UHR — ein gefüllter weisser Kreis, der sich beim Aufklappen
+	   der Kachel im Uhrzeigersinn aufbaut (conic-gradient über eine
+	   registrierte @property-Winkelvariable). Passt zur Bedeutung: jede
+	   Kachel in Akt 2 IST eine Stunde (1 Stunde Aufwand / +100 Stunden
+	   Zuschauerzeit). Kachel-Grund bleibt dunkel, nur der Kreis ist weiss. */
+	@property --mo-uhr {
+		syntax: "<angle>";
+		initial-value: 0deg;
+		inherits: false;
 	}
 
-	.mo-kachel.mo-weiss::after {
-		background: rgba(0, 0, 0, 0.18);
+	/* KOMBINIERT mit dem Kachel-Klapp (Fred 14.09., zweite Runde): die Uhr
+	   sitzt IM Kachel-Inhalt (klappt also mit der Kachel auf, gleiche
+	   Kipp-Animation wie jeder Wertewechsel) und läuft erst NACH dem
+	   Aufklappen los (animation-delay ≈ Flip-Dauer, fill both hält den
+	   Kreis vorher leer). */
+	.mo-inhalt {
+		position: relative;
+	}
+
+	.mo-kachel.mo-weiss .mo-inhalt::before {
+		content: "";
+		position: absolute;
+		width: 70%;
+		aspect-ratio: 1;
+		left: 15%;
+		top: 50%;
+		transform: translateY(-50%);
+		border-radius: 50%;
+		background: conic-gradient(#ededed var(--mo-uhr), transparent 0);
+		animation: mo-uhr-aufbau 700ms linear 140ms both;
+		z-index: 1;
+	}
+
+	@keyframes mo-uhr-aufbau {
+		from { --mo-uhr: 0deg; }
+		to { --mo-uhr: 360deg; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.mo-kachel.mo-weiss .mo-inhalt::before {
+			animation: none;
+			background: #ededed;
+		}
 	}
 
 	.mo-kachel svg {

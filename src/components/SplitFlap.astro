@@ -28,11 +28,15 @@ interface Props {
 	flipMs?: number;
 	/** Standzeit je Zustand, bevor zum nächsten weitergeklappert wird, in ms. */
 	holdMs?: number;
+	/** Standzeit PRO Zustand (gleicher Index wie lines) — überschreibt holdMs
+	 * für den jeweiligen Zustand. Damit kann z. B. die Leertafel kurz und die
+	 * Pointe lang stehen (Kontakt-Board: hin, stehen, weg, kurze Pause). */
+	holdsMs?: number[];
 	/** Endlosschleife durch die Sequenz. Bei false bleibt der letzte Zustand stehen. */
 	loop?: boolean;
 }
 
-const { lines, flipMs = 55, holdMs = 2600, loop = true } = Astro.props;
+const { lines, flipMs = 55, holdMs = 2600, holdsMs, loop = true } = Astro.props;
 
 // Zeichentrommel — eigene Definition (NICHT von der Referenzimplementierung
 // übernommen). Reihenfolge = Klapper-Richtung: eine echte Fallblattanzeige
@@ -99,6 +103,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 	data-sf-board
 	data-flip-ms={flipMs}
 	data-hold-ms={holdMs}
+	data-holds-ms={holdsMs ? JSON.stringify(holdsMs) : undefined}
 	data-loop={loop ? "1" : "0"}
 	style={`--sf-cols:${cols};--sf-rows:${rows};`}
 >
@@ -266,6 +271,16 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		const flipMs = Number(boardEl.dataset.flipMs) || 55;
 		const holdMs = Number(boardEl.dataset.holdMs) || 2600;
 		const loop = boardEl.dataset.loop === "1";
+		// Standzeit je Zustand (optional, Index = Zustands-Index); fehlt der
+		// Eintrag, gilt die globale holdMs.
+		let holds: number[] | null = null;
+		try {
+			holds = JSON.parse(boardEl.dataset.holdsMs || "null");
+		} catch {
+			holds = null;
+		}
+		const holdFor = (i: number) =>
+			holds && typeof holds[i] === "number" ? holds[i] : holdMs;
 
 		const tileEls = Array.from(gridEl.querySelectorAll<HTMLElement>(".sf-tile"));
 		const tiles: Tile[] = tileEls.map((el) => ({
@@ -305,7 +320,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 			}
 			// Der erste Zustand steht schon (server-gerendert) — erst die
 			// Standzeit abwarten, dann weiterklappern.
-			await wait(holdMs);
+			await wait(holdFor(0));
 			let index = 0;
 			while (!cancelled) {
 				const next = index + 1;
@@ -317,7 +332,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 				}
 				await goToState(index, true);
 				if (cancelled) break;
-				await wait(holdMs);
+				await wait(holdFor(index));
 			}
 		}
 
