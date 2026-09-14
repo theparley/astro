@@ -89,7 +89,10 @@ const kernaussage =
 		   „Multi-Output" bricht damit auf keiner Breite mehr auseinander;
 		   das &nbsp; hält wie gehabt „echter Gespräche" zusammen. Mögliche
 		   Zeilenfälle nur noch: Einzeiler oder der gewollte Zweizeiler. */}
-		<h2>Der Multi&#8209;Output eines&nbsp;Gesprächs</h2>
+		{/* IMMER zweizeilig (Fred 14.09. nacht): der gewollte Zeilenfall
+		   „Der Multi-Output / eines Gesprächs" ist jetzt fest gesetzt —
+		   auch wenn Platz für einen Einzeiler wäre. */}
+		<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs</h2>
 		{/* Vierte Fassung (Fred 14.09., Diktat): „am Beispiel des Formats
 		   einer Live-Q&A-Session" — löst das Dreifach-Kompositum
 		   „Live-Q&A-Session-Formats" auf und macht ehrlich, dass die Tafel
@@ -105,7 +108,9 @@ const kernaussage =
 		   VERWORFEN (Fred: "als Wörter hinschreiben") — es gilt der
 		   gelockte Zahlen-Staccato-Wortlaut. Die Inline-Kachel-Komponente
 		   FlapWort.astro bleibt als Baustein im Repo. */}
-		<p>Zwei Experten. Ein Gespräch. Eine Stunde.</p>
+		{/* Zahlwörter fett auf 900 (Fred 14.09. nacht) — gleiche Bauform
+		   wie die Expertise-Öffner im Paragraph. */}
+		<p><strong>Zwei</strong> Experten. <strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -547,12 +552,9 @@ const kernaussage =
 		margin: 0 0 40px;
 		font-weight: 900;
 		text-transform: uppercase;
-		/* 0.95 statt der 0.85 des Sektions-Titel-Rezepts (Fred 13.09.): dieser
-		   Titel ist ZWEIZEILIG mit Umlaut — die Ä-Punkte ragen über die
-		   Versalhöhe und kollidierten bei 0.85 mit der ersten Zeile.
-		   ("Wie wir das machen" bleibt einzeilig bei 0.85 — dort kann nichts
-		   kollidieren.) */
-		line-height: 0.95;
+		/* 0.9 — seit Fred 14.09. nacht der EINHEITLICHE Zeilenabstand
+		   aller Sektionstitel (Regler-Runde 0.85 → 0.95 → 0.9). */
+		line-height: 0.9;
 		letter-spacing: -0.01em;
 		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
 		text-wrap: balance;
@@ -565,6 +567,10 @@ const kernaussage =
 		color: var(--white);
 		margin: 0 auto;
 		max-width: 46rem;
+	}
+
+	.mo-kopf p strong {
+		font-weight: 900;
 	}
 
 	.mo-fallback {
