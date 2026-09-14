@@ -6,6 +6,13 @@
 // Repo github.com/hardikpandya/solari-split-flap — NUR die Grundidee
 // abgeschaut, Code, Trommel, Optik und Themes sind hier komplett eigen.
 //
+// SEIT 14.09. ABENDS: die eigentliche Klapp-Mechanik (Trommel, Lamellen-
+// Physik, MAX_FLAPS-Deckel, Klacker-Sound) lebt NICHT mehr hier, sondern im
+// gemeinsamen Modul src/lib/fallblatt.ts + src/styles/fallblatt.css —
+// Freds Anweisung: EINE Logik hinter allen Boards (diese Sequenz-Boards,
+// die Multi-Output-Wand, alle zukünftigen). Diese Komponente steuert nur
+// noch die Zustands-Sequenz (was wann steht).
+//
 // Architektur-Entscheidung: Anders als eine "klassische" JS-Canvas-Lösung
 // baut NICHT das Client-Skript die Kacheln, sondern Astro rendert das
 // komplette Kachel-Raster bereits server-seitig (SSG) für den ERSTEN
@@ -20,6 +27,8 @@
 // Absatz im HTML — das Kachel-Raster selbst ist aria-hidden (rein
 // dekorativ, klappert ja munter durch die Zeichentrommel und ist als
 // Lesetext ungeeignet).
+
+import "../styles/fallblatt.css";
 
 interface Props {
 	/** Sequenz von Tafel-Zuständen; jeder Zustand ist ein Array von Textzeilen. */
@@ -36,16 +45,12 @@ interface Props {
 	loop?: boolean;
 }
 
-const { lines, flipMs = 55, holdMs = 2600, holdsMs, loop = true } = Astro.props;
+const { lines, flipMs = 170, holdMs = 2600, holdsMs, loop = true } = Astro.props;
 
-// Zeichentrommel — eigene Definition (NICHT von der Referenzimplementierung
-// übernommen). Reihenfolge = Klapper-Richtung: eine echte Fallblattanzeige
-// dreht nur VORWÄRTS, nie zurück. Enthält deutsche Umlaute, Satzzeichen und
-// Ziffern; alles darüber hinaus (Emoji, Akzentbuchstaben etc.) wird von
-// normalizeLine() nicht entfernt, sondern im Client-Skript unverändert und
-// OHNE Durchklappern angezeigt (siehe dortiger Kommentar).
-const DRUM = " ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ.,!?'-0123456789";
-
+// Zeichentrommel — Build-Zeit-Kopie der Modul-Konstante (das Frontmatter
+// läuft in Node, src/lib/fallblatt.ts wird ins Browser-Bundle importiert;
+// hier braucht es die Trommel nur fürs Normalisieren gar nicht — nur die
+// Versal-Regel bleibt).
 function normalizeLine(line: string): string {
 	// Kleinbuchstaben (inkl. äöü) auf Versalien mappen — die Trommel kennt
 	// nur Großbuchstaben, echte Fallblattanzeigen kannten meist auch keine
@@ -112,7 +117,9 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 	<p class="sf-fallback">{fallbackText}</p>
 
 	{/* Kachel-Raster: server-gerendert mit dem ERSTEN Zustand. Rein
-	   dekorativ (aria-hidden) — der Lesetext kommt aus .sf-fallback oben. */}
+	   dekorativ (aria-hidden) — der Lesetext kommt aus .sf-fallback oben.
+	   Schichten-Struktur = LAYER_HTML aus src/lib/fallblatt.ts (SSG-Zwilling:
+	   Klassen/data-layer müssen dort und hier identisch bleiben). */}
 	<div class="sf-grid" aria-hidden="true" data-sf-grid>
 		{initialGrid.map((rowStr, r) => (
 			<div class="sf-row-line" data-row={r}>
@@ -144,130 +151,34 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 </div>
 
 <script>
-	// Steuerskript für ALLE SplitFlap-Boards einer Seite (Astro bündelt/dedupt
-	// dieses Modul-Script automatisch über mehrere Komponenten-Instanzen
-	// hinweg — es sucht sich per querySelectorAll selbst alle Boards, statt
-	// sich auf eine einzelne Instanz zu beziehen).
+	// Sequenz-Steuerung für ALLE SplitFlap-Boards einer Seite (Astro bündelt
+	// dieses Modul-Script über die Instanzen hinweg — es sucht sich per
+	// querySelectorAll selbst alle Boards). Die Klapp-Mechanik selbst kommt
+	// aus dem gemeinsamen Fallblatt-Modul.
 	//
 	// Muster astro:page-load (statt DOMContentLoaded) wie in PageWipe.astro:
 	// feuert bei jedem Seitenaufruf, auch nach einem Client-Side-Wechsel via
 	// ClientRouter. Cleanup ist nötig, weil loop:true sonst nach mehrfachem
 	// Hin-und-Zurück-Navigieren verwaiste, unsichtbare Klapper-Schleifen auf
 	// abgehängten DOM-Knoten weiterlaufen ließe (kleiner, aber echter Leak).
+	import {
+		type FlapTile,
+		wireTileLayers,
+		resetInstant,
+		flapTo,
+		wait,
+		reduceMotion,
+		armSound,
+	} from "../lib/fallblatt";
 
-	// Zeichentrommel — Duplikat der Definition im Frontmatter oben. Kein
-	// Import möglich: das Frontmatter läuft zur Build-Zeit in Node (Astro-
-	// Kompiler), dieses <script> läuft im Browser-Bundle — zwei getrennte
-	// Umgebungen ohne gemeinsames Modul.
-	const DRUM = " ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ.,!?'-0123456789";
-
-	// Organischer Versatz je Kachel (kein bewusst als Prop gedacht, reine
+	// Organischer Versatz je Kachel (nicht als Prop gedacht, reine
 	// Optik-Konstante): echte Fallblattanzeigen klappern nie im Gleichtakt.
 	const STAGGER_MAX_MS = 350;
 
-	function reduceMotion(): boolean {
-		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	}
-
-	function wait(ms: number): Promise<void> {
-		return new Promise((resolve) => window.setTimeout(resolve, ms));
-	}
-
-	interface Tile {
-		el: HTMLElement;
+	interface BoardTile {
+		tile: FlapTile;
 		r: number;
 		c: number;
-		topStaticGlyph: HTMLElement;
-		bottomStaticGlyph: HTMLElement;
-		frontFlapEl: HTMLElement;
-		backFlapEl: HTMLElement;
-		frontGlyph: HTMLElement;
-		backGlyph: HTMLElement;
-		current: string;
-	}
-
-	function setInstant(tile: Tile, ch: string) {
-		tile.topStaticGlyph.textContent = ch;
-		tile.bottomStaticGlyph.textContent = ch;
-		tile.frontGlyph.textContent = ch;
-		tile.backGlyph.textContent = ch;
-		tile.frontFlapEl.style.transitionDuration = "0ms";
-		tile.backFlapEl.style.transitionDuration = "0ms";
-		tile.frontFlapEl.style.transform = "rotateX(0deg)";
-		tile.backFlapEl.style.transform = "rotateX(0deg)";
-		tile.current = ch;
-	}
-
-	// Ein einzelner Klapp-Schritt (ein Zeichen weiter), zweiphasig wie eine
-	// echte Fallblatt-Lamelle:
-	// Phase 1 — Oberklappe fällt (zeigt weiterhin ALT), während die
-	//   statische obere Hälfte darunter schon lautlos auf NEU umspringt
-	//   (unsichtbar, weil die Klappe bei rotateX(0) exakt darüber liegt).
-	// Phase 2 — Unterklappe schwingt hoch in die Endposition (zeigt NEU),
-	//   während die statische untere Hälfte bis zuletzt ALT zeigt.
-	// Am Ende beider Phasen liegen Klappen und Statik wieder deckungsgleich
-	// auf NEU — für den nächsten Schritt unsichtbar in Ruheposition.
-	async function flipStep(tile: Tile, toChar: string, halfMs: number) {
-		tile.topStaticGlyph.textContent = toChar;
-		tile.frontFlapEl.style.transitionTimingFunction = "ease-in";
-		tile.frontFlapEl.style.transitionDuration = halfMs + "ms";
-		// Reflow erzwingen, damit der Übergang wirklich vom aktuellen
-		// Transform-Wert (0deg) aus startet und nicht übersprungen wird.
-		void tile.frontFlapEl.offsetHeight;
-		tile.frontFlapEl.style.transform = "rotateX(-90deg)";
-		await wait(halfMs);
-
-		tile.frontFlapEl.style.transitionDuration = "0ms";
-		tile.frontFlapEl.style.transform = "rotateX(0deg)";
-		tile.frontGlyph.textContent = toChar;
-
-		tile.backGlyph.textContent = toChar;
-		tile.backFlapEl.style.transitionDuration = "0ms";
-		tile.backFlapEl.style.transform = "rotateX(90deg)";
-		void tile.backFlapEl.offsetHeight;
-		tile.backFlapEl.style.transitionTimingFunction = "ease-out";
-		tile.backFlapEl.style.transitionDuration = halfMs + "ms";
-		tile.backFlapEl.style.transform = "rotateX(0deg)";
-		await wait(halfMs);
-
-		tile.bottomStaticGlyph.textContent = toChar;
-		tile.current = toChar;
-	}
-
-	// Klappert eine Kachel vom aktuellen Zeichen zum Zielzeichen — kürzester
-	// Weg VORWÄRTS durch die Trommel (Modulo-Distanz), wie bei einer echten
-	// Fallblattanzeige, die nur in eine Richtung dreht. Zeichen außerhalb der
-	// Trommel (nicht Teil von DRUM) werden direkt gesetzt, ohne zu klappern.
-	// Sichtbare Klappen pro Wechsel deckeln (Fred 14.09. abends: "es blendet
-	// rein statt zu flippern"): damit die Lamellen-Drehung wirklich
-	// GEZEICHNET wird, braucht eine Halbklappe Wand-Tempo (~75-85ms wie
-	// .mo-inhalt der Multi-Output-Wand) — bei vollem Trommelweg (bis zu 45
-	// Zeichen, etwa von A zurück zum Leerzeichen) würde ein Wechsel damit
-	// aber sekundenlang rattern. Deshalb springt die Trommel lautlos bis
-	// kurz vors Ziel und die ERSTE Klappe überbrückt den Rest — jede
-	// sichtbare Änderung bleibt eine echte Klappbewegung, gedreht wird
-	// optisch weiterhin nur vorwärts.
-	const MAX_FLAPS = 6;
-
-	async function animateTileTo(tile: Tile, targetChar: string, stepMs: number) {
-		if (tile.current === targetChar) return;
-		const fromIdx = DRUM.indexOf(tile.current);
-		const toIdx = DRUM.indexOf(targetChar);
-		if (fromIdx === -1 || toIdx === -1) {
-			setInstant(tile, targetChar);
-			return;
-		}
-		let distance = (toIdx - fromIdx + DRUM.length) % DRUM.length;
-		let cursor = fromIdx;
-		if (distance > MAX_FLAPS) {
-			cursor = (toIdx - MAX_FLAPS + DRUM.length) % DRUM.length;
-			distance = MAX_FLAPS;
-		}
-		const halfMs = Math.max(8, stepMs / 2);
-		for (let i = 0; i < distance; i++) {
-			cursor = (cursor + 1) % DRUM.length;
-			await flipStep(tile, DRUM[cursor], halfMs);
-		}
 	}
 
 	function setupBoard(boardEl: HTMLElement): () => void {
@@ -283,7 +194,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		}
 		if (!Array.isArray(states) || states.length === 0) return () => {};
 
-		const flipMs = Number(boardEl.dataset.flipMs) || 55;
+		const flipMs = Number(boardEl.dataset.flipMs) || 170;
 		const holdMs = Number(boardEl.dataset.holdMs) || 2600;
 		const loop = boardEl.dataset.loop === "1";
 		// Standzeit je Zustand (optional, Index = Zustands-Index); fehlt der
@@ -297,32 +208,26 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		const holdFor = (i: number) =>
 			holds && typeof holds[i] === "number" ? holds[i] : holdMs;
 
-		const tileEls = Array.from(gridEl.querySelectorAll<HTMLElement>(".sf-tile"));
-		const tiles: Tile[] = tileEls.map((el) => ({
-			el,
+		const tiles: BoardTile[] = Array.from(
+			gridEl.querySelectorAll<HTMLElement>(".sf-tile"),
+		).map((el) => ({
+			tile: wireTileLayers(el),
 			r: Number(el.dataset.r),
 			c: Number(el.dataset.c),
-			topStaticGlyph: el.querySelector('[data-layer="top-static"]') as HTMLElement,
-			bottomStaticGlyph: el.querySelector('[data-layer="bottom-static"]') as HTMLElement,
-			frontFlapEl: el.querySelector(".sf-flap--front") as HTMLElement,
-			backFlapEl: el.querySelector(".sf-flap--back") as HTMLElement,
-			frontGlyph: el.querySelector(".sf-flap--front .sf-glyph") as HTMLElement,
-			backGlyph: el.querySelector(".sf-flap--back .sf-glyph") as HTMLElement,
-			current: el.dataset.char || " ",
 		}));
 
 		let cancelled = false;
 
 		async function goToState(stateIndex: number, animate: boolean) {
 			const grid = states[stateIndex];
-			const jobs = tiles.map((tile) => {
-				const targetChar = (grid[tile.r] && grid[tile.r][tile.c]) || " ";
+			const jobs = tiles.map(({ tile, r, c }) => {
+				const targetChar = (grid[r] && grid[r][c]) || " ";
 				if (!animate) {
-					setInstant(tile, targetChar);
+					resetInstant(tile, targetChar);
 					return Promise.resolve();
 				}
 				const delay = Math.random() * STAGGER_MAX_MS;
-				return wait(delay).then(() => animateTileTo(tile, targetChar, flipMs));
+				return wait(delay).then(() => flapTo(tile, targetChar, flipMs));
 			});
 			await Promise.all(jobs);
 		}
@@ -355,6 +260,9 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 
 		return () => {
 			cancelled = true;
+			// Generation hochzählen, damit gestreute flapTo-Aufträge auf dem
+			// abgehängten Board sofort verhungern.
+			tiles.forEach(({ tile }) => tile.gen++);
 		};
 	}
 
@@ -363,6 +271,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 	function mountAll() {
 		cleanupFns.forEach((fn) => fn());
 		cleanupFns = [];
+		armSound();
 		document.querySelectorAll<HTMLElement>("[data-sf-board]").forEach((boardEl) => {
 			cleanupFns.push(setupBoard(boardEl));
 		});
@@ -372,33 +281,19 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 </script>
 
 <style is:global>
-	/* is:global + sf--Präfix (Astro-Falle, siehe buchen.astro): in dieser
-	   Version rendert Astro die Kacheln zwar server-seitig (nicht per JS neu
-	   erzeugt), das Skript ändert nur Text/Transform bestehender Elemente —
-	   scoped Styles würden hier also technisch reichen. is:global bleibt
-	   trotzdem bewusst stehen: falls die Komponente später um dynamisches
-	   Neuaufbauen des Rasters (z. B. Prop-Wechsel ohne Seitenreload)
-	   erweitert wird, treffen gescopte Selektoren neu erzeugte Elemente NIE
-	   (kein data-astro-cid-Attribut) — mit is:global + sf--Präfix bleibt die
-	   Komponente robust gegen diese Falle, ganz gleich wie die Kacheln
-	   entstehen.
+	/* is:global + sf--Präfix (Astro-Falle, siehe buchen.astro): das Skript
+	   ändert nur Text/Transform bestehender Elemente, aber die Wand baut
+	   ihre Schichten CLIENT-seitig (buildTileLayers) — gescopte Selektoren
+	   träfen solche Elemente nie (kein data-astro-cid-Attribut). Kachel-
+	   Ebene liegt deshalb in src/styles/fallblatt.css (echter Import, von
+	   beiden Tafel-Komponenten geteilt); hier nur die BOARD-Ebene dieser
+	   Komponente.
 
 	   Größenlogik: --sf-tile-w wird NICHT über feste Breakpoints, sondern
 	   inhaltsbezogen berechnet (Spalten-/Zeilenzahl stehen als --sf-cols/
 	   --sf-rows pro Board fest, aus dem Frontmatter). So passt sich JEDE
 	   Zeichenkette automatisch an jede Viewport-Breite an, ohne dass man für
 	   jeden Text im Component-Aufruf eigene Breakpoints nachpflegen müsste. */
-
-	/* Forma DJR Mono als eigener @font-face (nur diese Komponente nutzt ihn) —
-	   Variable-Font wght 1–900, konvertiert aus Freds lokalem Bestand
-	   (Lizenz-Hinweis siehe .sf-glyph unten). */
-	@font-face {
-		font-family: "Forma DJR Mono";
-		src: url("/fonts/FormaDJRMonoVariable.woff2") format("woff2-variations");
-		font-weight: 1 900;
-		font-style: normal;
-		font-display: swap;
-	}
 
 	.sf-board {
 		display: inline-flex;
@@ -437,7 +332,7 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		--sf-font-size: calc(var(--sf-tile-w) * 0.62);
 		/* Kachel-Fuge minimal (Fred 14.09. abends: "so klein wie möglich",
 		   beide Achsen, alle Boards) — 1px Hairline statt mitwachsender
-		   Fuge; die Kachel-Trennung übernimmt der Inset-Schein der Kachel. */
+		   Fuge. */
 		--sf-gap: 1px;
 		display: flex;
 		flex-direction: column;
@@ -448,104 +343,6 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		display: flex;
 		justify-content: center;
 		gap: var(--sf-gap);
-	}
-
-	.sf-tile {
-		position: relative;
-		flex: 0 0 auto;
-		width: var(--sf-tile-w);
-		height: var(--sf-tile-h);
-		perspective: calc(var(--sf-tile-h) * 3.2);
-	}
-
-	.sf-static,
-	.sf-flap {
-		position: absolute;
-		left: 0;
-		width: 100%;
-		height: 50%;
-		overflow: hidden;
-		background: var(--panel, #141414);
-		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-	}
-
-	.sf-static--top,
-	.sf-flap--front {
-		top: 0;
-	}
-
-	.sf-static--bottom,
-	.sf-flap--back {
-		bottom: 0;
-	}
-
-	.sf-flap {
-		backface-visibility: hidden;
-		will-change: transform;
-		transform: rotateX(0deg);
-		z-index: 2;
-	}
-
-	.sf-flap--front {
-		transform-origin: bottom center;
-		box-shadow: inset 0 -4px 6px -4px rgba(0, 0, 0, 0.6);
-	}
-
-	.sf-flap--back {
-		transform-origin: top center;
-		box-shadow: inset 0 4px 6px -4px rgba(0, 0, 0, 0.6);
-	}
-
-	.sf-glyph {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
-		height: var(--sf-tile-h);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		/* Forma DJR MONO (Fred 30.08. nachts): die Mono-Schwester löst das
-		   Kachelbreiten-Problem an der Wurzel — jedes Zeichen ist gleich
-		   breit, das Raster kann nie springen. Datei aus Freds lokalem
-		   Font-Bestand nach woff2 konvertiert (public/fonts/), Variable-Font
-		   wght 1–900. ACHTUNG Lizenz: die Quelldatei ist eine
-		   "-Testing"-Fassung (DJR-Trial) — vor Go-live der Tafel die
-		   Mono-Webfont-Lizenz klären! */
-		font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
-		/* Fetteste Stufe der Variable-Achse (wght 1–900, Fred 30.08. nachts:
-		   "mach mal die Fetteste") — die Achse ist stufenlos, jeder Wert
-		   dazwischen ist jederzeit probierbar. */
-		font-weight: 900;
-		font-size: var(--sf-font-size);
-		line-height: 1;
-		color: var(--white, #ffffff);
-		white-space: pre;
-	}
-
-	.sf-static--bottom .sf-glyph,
-	.sf-flap--back .sf-glyph {
-		top: calc(var(--sf-tile-h) * -0.5);
-	}
-
-	/* Scharnier: dezente Trennlinie in der Kachelmitte, immer oben auf (auch
-	   während des Klapperns sichtbar — genau wie bei einer echten Lamelle). */
-	.sf-hinge {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 50%;
-		height: 1px;
-		background: rgba(0, 0, 0, 0.65);
-		transform: translateY(-0.5px);
-		z-index: 3;
-		pointer-events: none;
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.sf-flap {
-			transition: none !important;
-		}
 	}
 </style>
 

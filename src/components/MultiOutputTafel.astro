@@ -15,18 +15,23 @@
 // Start per IntersectionObserver beim Viewport-Eintritt, danach Endlos-Loop;
 // prefers-reduced-motion zeigt den fertigen Akt-1-Endzustand statisch.
 //
-// KLAPPER-QUALITÄT (Port-Checkliste Punkt 2, bewusst entschieden): Version 1
-// nutzt den vereinfachten Flap des Entwurfs (eine 85ms-Kippbewegung pro
-// Wechsel), NICHT die Zeichentrommel von SplitFlap.astro. Die Trommel-
-// Mechanik in die Timeline-Engine zu heben ist eine spätere Angleichung —
-// bis dahin sind zwei Klapper-Qualitäten auf der Seite sichtbar (Tafel
-// klappert durch, diese Wand kippt einfach).
+// KLAPPER-QUALITÄT: SEIT 14.09. ABENDS VEREINHEITLICHT (Fred: "bei allen
+// drei Boards und allen zukünftigen Boards die gleiche Logik") — die Wand
+// nutzt jetzt dieselbe Lamellen-Mechanik wie SplitFlap.astro aus dem
+// gemeinsamen Modul src/lib/fallblatt.ts (+ styles/fallblatt.css):
+// Zeichentrommel mit MAX_FLAPS-Deckel für Einzelzeichen, EINE echte
+// Doppelklappe für Logos/Uhr-Kacheln, gleicher Takt (FLAP_STEP_MS),
+// gleicher Klacker-Sound. Die Schichten-Struktur baut buildTileLayers
+// client-seitig in die leeren SSG-Kacheln (kein sichtbarer Sprung — die
+// Wand startet ohnehin leer).
 //
 // NICHT ANFASSEN ohne Fred (BAU-ANWEISUNG Punkt 6): Zeilen-Wortlaute und
 // Zahlen (ungelockt, aber Freds Diktat), Überschrift, Sub-Zeile,
 // Logo-Zuordnungen. Offene Flaggen (Zahlen rechenfest, echte Brand-Logos
 // nach Markenrichtlinien, Forma-DJR-Mono-Lizenz, Mobil-Form der 41er-Wand)
 // stehen in der Port-Checkliste im Website-Brief — hier nicht gelöst.
+
+import "../styles/fallblatt.css";
 
 interface Props {
 	/** Zeilen-Takt in Akt 1 (ms je Listenzeile). Fred 14.09.: bewusst schnell — wird am Objekt feingetunt, NICHT gelockt. */
@@ -136,7 +141,19 @@ const kernaussage =
 	// Steuerung (Scrubber/Regler/Pause) ist durch IntersectionObserver-Start
 	// + Endlos-Loop ersetzt. astro:page-load-Muster mit Cleanup wie
 	// SplitFlap.astro (ClientRouter-Wechsel würden sonst verwaiste
-	// rAF-Schleifen zurücklassen).
+	// rAF-Schleifen zurücklassen). Die Klapp-Mechanik kommt seit 14.09.
+	// abends aus dem gemeinsamen Fallblatt-Modul (EINE Logik, alle Boards).
+	import {
+		type FlapTile,
+		buildTileLayers,
+		resetInstant,
+		flapOnce,
+		queueFlap,
+		enqueue,
+		reduceMotion,
+		armSound,
+		FLAP_STEP_MS,
+	} from "../lib/fallblatt";
 
 	// ── Vereinfachte Plattform-Logos (Entwurf 1:1; Flagge „echte Brand-Logos
 	//    nach Markenrichtlinien" bleibt offen, siehe Website-Brief). ──
@@ -269,28 +286,26 @@ const kernaussage =
 		return { events, total: t, akt1EndeT };
 	}
 
-	function reduceMotion(): boolean {
-		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	}
-
 	function setupTafel(sektion: HTMLElement): () => void {
 		const wand = sektion.querySelector<HTMLElement>("[data-mo-wand]");
 		if (!wand) return () => {};
-		// Drei Teil-Wände → globale tiles[r][0..40]-Matrix (Mobil-Umbau):
+		armSound();
+		// Drei Teil-Wände → globale tiles[r][0..40]-Matrix (Mobil-Umbau);
+		// jede Kachel bekommt client-seitig die Vier-Schichten-Struktur des
+		// Fallblatt-Moduls (die SSG-Kacheln sind leer — kein Sprung).
 		const rowsL = Array.from(wand.querySelector('[data-halb="links"]')!.children) as HTMLElement[];
 		const rowsR = Array.from(wand.querySelector('[data-halb="rechts"]')!.children) as HTMLElement[];
 		const trennTiles = Array.from(wand.querySelector('[data-halb="mitte"]')!.children) as HTMLElement[];
-		const tiles: HTMLElement[][] = rowsL.map((zl, r) => [
-			...(Array.from(zl.children) as HTMLElement[]),
-			trennTiles[r],
-			...(Array.from(rowsR[r].children) as HTMLElement[]),
-		]);
-		const inhalt = (r: number, c: number) =>
-			tiles[r]?.[c]?.querySelector<HTMLElement>(".mo-inhalt") ?? null;
+		const tiles: FlapTile[][] = rowsL.map((zl, r) =>
+			[
+				...(Array.from(zl.children) as HTMLElement[]),
+				trennTiles[r],
+				...(Array.from(rowsR[r].children) as HTMLElement[]),
+			].map((el) => buildTileLayers(el)),
+		);
 
 		const takt = Number(sektion.dataset.taktMs) || 400;
 		const lese = Number(sektion.dataset.leseMs) || 2500;
-		const flip = Number(sektion.dataset.flipMs) || 85;
 
 		const { events, total, akt1EndeT } = buildTimeline(takt, lese);
 
@@ -301,37 +316,46 @@ const kernaussage =
 			(ev.html !== undefined ? textEv : weissEv)[ev.r][ev.c].push(ev);
 		});
 
+		// Timeline-Blanks heißen "&nbsp;", die Trommel kennt " " — hier die
+		// eine Übersetzungsstelle.
+		const asDrum = (html: string) => (html === "&nbsp;" ? " " : html);
+
 		function seekInstant(T: number) {
 			for (let r = 0; r < tiles.length; r++)
 				for (let c = 0; c < tiles[r].length; c++) {
-					const k = tiles[r][c];
-					const el = inhalt(r, c);
-					if (!el) continue;
+					const tile = tiles[r][c];
 					let te: Ev | null = null;
 					for (const ev of textEv[r][c]) { if (ev.t <= T) te = ev; else break; }
-					const html = te ? te.html! : "&nbsp;";
-					if (el.innerHTML !== html) el.innerHTML = html;
+					resetInstant(tile, asDrum(te ? te.html! : " "));
 					let we: Ev | null = null;
 					for (const ev of weissEv[r][c]) { if (ev.t <= T) we = ev; else break; }
-					k.classList.toggle("mo-weiss", !!(we && we.weiss));
-					k.classList.remove("mo-flip");
+					tile.el.classList.toggle("mo-weiss", !!(we && we.weiss));
 				}
 		}
 
-		// Vereinfachter Flap (Entwurf): Inhalt kippt weg, wechselt, kippt zurück.
-		function fireFlip(ev: Ev) {
-			const k = tiles[ev.r]?.[ev.c];
-			const el = inhalt(ev.r, ev.c);
-			if (!k || !el) return;
-			k.classList.add("mo-flip");
-			window.setTimeout(() => {
-				if (ev.html !== undefined) {
-					if (el.innerHTML !== ev.html) el.innerHTML = ev.html;
-				} else {
-					k.classList.toggle("mo-weiss", !!ev.weiss);
-				}
-				k.classList.remove("mo-flip");
-			}, flip);
+		// Ereignis → Kachel-Warteschlange (pro Kachel strikt geordnet):
+		// Einzelzeichen rattern durch die Trommel (MAX_FLAPS-Deckel im
+		// Modul), Logos wechseln mit EINER Doppelklappe. Uhr-Kacheln
+		// klappen einmal echt auf; die mo-weiss-Klasse kippt am
+		// Phasenwechsel, damit der Uhr-Aufbau (animation-delay) mit dem
+		// Aufklappen startet. Weiss-AUS räumt nur die Klasse — der Abbau
+		// klappt die Kachel ohnehin über sein paralleles Text-Event.
+		function fireEvent(ev: Ev) {
+			const tile = tiles[ev.r]?.[ev.c];
+			if (!tile) return;
+			if (ev.html !== undefined) {
+				queueFlap(tile, asDrum(ev.html), FLAP_STEP_MS);
+			} else if (ev.weiss) {
+				enqueue(tile, () =>
+					flapOnce(tile, tile.current, FLAP_STEP_MS / 2, () =>
+						tile.el.classList.add("mo-weiss"),
+					),
+				);
+			} else {
+				enqueue(tile, () => {
+					tile.el.classList.remove("mo-weiss");
+				});
+			}
 		}
 
 		let cancelled = false;
@@ -355,7 +379,7 @@ const kernaussage =
 					seekInstant(0);
 				}
 				while (gIdx < events.length && events[gIdx].t <= T) {
-					fireFlip(events[gIdx]);
+					fireEvent(events[gIdx]);
 					gIdx++;
 				}
 				rafId = requestAnimationFrame(loop);
@@ -536,52 +560,23 @@ const kernaussage =
 		background: var(--panel);
 		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 		position: relative;
+		/* PERSPEKTIVE (Fred 14.09. abends, "immer noch Ein-/Ausblenden"):
+		   rotateX OHNE perspective auf dem Elternelement ist mathematisch
+		   nur ein vertikales Stauchen — genau der Blend-Eindruck. Gleiches
+		   Verhaeltnis wie .sf-tile (Hoehe × 3.2 = Kachelbreite × 4.4). */
+		perspective: calc(var(--mo-k) * 4.4);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		/* Forma DJR Mono wie die SplitFlap-Boards (Fred 14.09. abends: die
-		   Boards sahen nach anderer Schrift aus — stimmte, hier lief noch
-		   ui-monospace aus dem Entwurf). Gleicher Stack + gleiches Gewicht
-		   (900, "die Fetteste") = EIN Tafel-Material auf der ganzen Seite.
-		   @font-face kommt aus SplitFlap.astro (is:global, gleiche Seite);
-		   Lizenz-Flagge "-Testing" bleibt offen (Brief). */
-		font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
-		font-weight: 900;
-		/* Von der Kachel ENTKOPPELT (Fred 13.09., dritte Runde): die Zeichen
-		   haben exakt die Paragraph-/Lead-Schrifthoehe der Seite (gleiche
-		   clamp-Formel wie .plaedoyer-text und die Sub-Zeile darueber) —
-		   auch wenn sie damit groesser laufen, als die Kachel-Kopplung
-		   (frueher 0.6/0.72 der Kachelbreite) hergaebe. Auf Desktop-Breiten
-		   bleibt das innerhalb der Kachelhoehe (31px Schrift in 41px Kachel
-		   bei 1920); auf sehr schmalen Viewports kann overflow:hidden
-		   beschneiden — Mobil-Form der Wand ist ohnehin offene Flagge. */
-		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
-		overflow: hidden;
+		/* Schrift/Schichten kommen aus dem Fallblatt-Material (fallblatt.css:
+		   Forma DJR Mono 900 auf .sf-glyph — EIN Tafel-Material, Fred
+		   14.09. abends). Hier nur die Größen-Variablen des Moduls:
+		   Kachelhöhe + Glyphengröße (= Lead-Formel der Seite, „Von der
+		   Kachel ENTKOPPELT", Fred 13.09. dritte Runde). Scharnier-Linie
+		   liefert der .sf-hinge-Layer. */
+		--sf-tile-h: calc(var(--mo-k) * 1.38);
+		--sf-font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
 		flex: 0 0 auto;
-	}
-
-	.mo-kachel::after {
-		content: "";
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 50%;
-		height: 1px;
-		background: rgba(0, 0, 0, 0.65);
-	}
-
-	.mo-inhalt {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-		transition: transform 85ms ease-in;
-		backface-visibility: hidden;
-	}
-
-	.mo-kachel.mo-flip .mo-inhalt {
-		transform: rotateX(90deg);
 	}
 
 	/* UHR-AUFBAU (Fred 14.09., "Animation in der Animation"): die
@@ -597,16 +592,13 @@ const kernaussage =
 		inherits: false;
 	}
 
-	/* KOMBINIERT mit dem Kachel-Klapp (Fred 14.09., zweite Runde): die Uhr
-	   sitzt IM Kachel-Inhalt (klappt also mit der Kachel auf, gleiche
-	   Kipp-Animation wie jeder Wertewechsel) und läuft erst NACH dem
-	   Aufklappen los (animation-delay ≈ Flip-Dauer, fill both hält den
-	   Kreis vorher leer). */
-	.mo-inhalt {
-		position: relative;
-	}
-
-	.mo-kachel.mo-weiss .mo-inhalt::before {
+	/* KOMBINIERT mit dem Kachel-Klapp (Fred 14.09., zweite Runde): die
+	   mo-weiss-Klasse kippt am Phasenwechsel der echten Doppelklappe
+	   (fireEvent), die Uhr läuft erst NACH dem Aufklappen los
+	   (animation-delay ≈ Rest-Klappdauer, fill both hält den Kreis vorher
+	   unsichtbar leer). Seit dem Fallblatt-Umbau ist die Uhr ein Overlay
+	   auf der KACHEL (über den Klapp-Schichten, z-index 4 > Scharnier 3). */
+	.mo-kachel.mo-weiss::before {
 		content: "";
 		position: absolute;
 		width: 70%;
@@ -617,7 +609,8 @@ const kernaussage =
 		border-radius: 50%;
 		background: conic-gradient(#ededed var(--mo-uhr), transparent 0);
 		animation: mo-uhr-aufbau 700ms linear 140ms both;
-		z-index: 1;
+		z-index: 4;
+		pointer-events: none;
 	}
 
 	@keyframes mo-uhr-aufbau {
@@ -626,7 +619,7 @@ const kernaussage =
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.mo-kachel.mo-weiss .mo-inhalt::before {
+		.mo-kachel.mo-weiss::before {
 			animation: none;
 			background: #ededed;
 		}
@@ -645,9 +638,4 @@ const kernaussage =
 		letter-spacing: -0.03em;
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.mo-inhalt {
-			transition: none;
-		}
-	}
 </style>

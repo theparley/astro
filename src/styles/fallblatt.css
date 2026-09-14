@@ -1,0 +1,113 @@
+/* fallblatt.css — Kachel-CSS des gemeinsamen Fallblatt-Materials (Gegenstück
+   zu src/lib/fallblatt.ts; Fred 14.09. abends: EINE Logik hinter allen
+   Boards). Von SplitFlap.astro UND MultiOutputTafel.astro importiert —
+   Astro dedupt den Import. Hier liegt alles auf KACHEL-Ebene (Schichten,
+   Klappen, Glyphe, Scharnier, Schrift); Board-Layout (Raster, Fugen,
+   Wandgeometrie) bleibt in den Komponenten.
+
+   Erwartete Custom Properties auf dem Kachel-Container oder darüber:
+   --sf-tile-h (Kachelhöhe), --sf-font-size (Glyphengröße), --panel
+   (Kachelgrund). Der Container selbst braucht position:relative + eine
+   perspective (SplitFlap: .sf-tile, Wand: .mo-kachel). */
+
+/* Forma DJR Mono — Variable-Font wght 1–900, konvertiert aus Freds lokalem
+   Bestand. ACHTUNG Lizenz: Quelldatei ist eine "-Testing"-Fassung
+   (DJR-Trial) — Mono-Webfont-Lizenz vor dem Feinschliff klären (Brief). */
+@font-face {
+	font-family: "Forma DJR Mono";
+	src: url("/fonts/FormaDJRMonoVariable.woff2") format("woff2-variations");
+	font-weight: 1 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+.sf-tile {
+	position: relative;
+	flex: 0 0 auto;
+	width: var(--sf-tile-w);
+	height: var(--sf-tile-h);
+	perspective: calc(var(--sf-tile-h) * 3.2);
+}
+
+.sf-static,
+.sf-flap {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: 50%;
+	overflow: hidden;
+	background: var(--panel, #141414);
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.sf-static--top,
+.sf-flap--front {
+	top: 0;
+}
+
+.sf-static--bottom,
+.sf-flap--back {
+	bottom: 0;
+}
+
+.sf-flap {
+	backface-visibility: hidden;
+	will-change: transform;
+	transform: rotateX(0deg);
+	z-index: 2;
+}
+
+.sf-flap--front {
+	transform-origin: bottom center;
+	box-shadow: inset 0 -4px 6px -4px rgba(0, 0, 0, 0.6);
+}
+
+.sf-flap--back {
+	transform-origin: top center;
+	box-shadow: inset 0 4px 6px -4px rgba(0, 0, 0, 0.6);
+}
+
+.sf-glyph {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: var(--sf-tile-h);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* Forma DJR MONO (Fred 30.08. nachts): die Mono-Schwester löst das
+	   Kachelbreiten-Problem an der Wurzel — jedes Zeichen ist gleich breit,
+	   das Raster kann nie springen. Gewicht 900 ("mach mal die Fetteste"). */
+	font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
+	font-weight: 900;
+	font-size: var(--sf-font-size);
+	line-height: 1;
+	color: var(--white, #ffffff);
+	white-space: pre;
+}
+
+.sf-static--bottom .sf-glyph,
+.sf-flap--back .sf-glyph {
+	top: calc(var(--sf-tile-h) * -0.5);
+}
+
+/* Scharnier: dezente Trennlinie in der Kachelmitte, immer oben auf (auch
+   während des Klapperns sichtbar — genau wie bei einer echten Lamelle). */
+.sf-hinge {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: 1px;
+	background: rgba(0, 0, 0, 0.65);
+	transform: translateY(-0.5px);
+	z-index: 3;
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sf-flap {
+		transition: none !important;
+	}
+}
