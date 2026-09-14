@@ -238,6 +238,17 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 	// Weg VORWÄRTS durch die Trommel (Modulo-Distanz), wie bei einer echten
 	// Fallblattanzeige, die nur in eine Richtung dreht. Zeichen außerhalb der
 	// Trommel (nicht Teil von DRUM) werden direkt gesetzt, ohne zu klappern.
+	// Sichtbare Klappen pro Wechsel deckeln (Fred 14.09. abends: "es blendet
+	// rein statt zu flippern"): damit die Lamellen-Drehung wirklich
+	// GEZEICHNET wird, braucht eine Halbklappe Wand-Tempo (~75-85ms wie
+	// .mo-inhalt der Multi-Output-Wand) — bei vollem Trommelweg (bis zu 45
+	// Zeichen, etwa von A zurück zum Leerzeichen) würde ein Wechsel damit
+	// aber sekundenlang rattern. Deshalb springt die Trommel lautlos bis
+	// kurz vors Ziel und die ERSTE Klappe überbrückt den Rest — jede
+	// sichtbare Änderung bleibt eine echte Klappbewegung, gedreht wird
+	// optisch weiterhin nur vorwärts.
+	const MAX_FLAPS = 6;
+
 	async function animateTileTo(tile: Tile, targetChar: string, stepMs: number) {
 		if (tile.current === targetChar) return;
 		const fromIdx = DRUM.indexOf(tile.current);
@@ -246,9 +257,13 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 			setInstant(tile, targetChar);
 			return;
 		}
-		const distance = (toIdx - fromIdx + DRUM.length) % DRUM.length;
-		const halfMs = Math.max(8, stepMs / 2);
+		let distance = (toIdx - fromIdx + DRUM.length) % DRUM.length;
 		let cursor = fromIdx;
+		if (distance > MAX_FLAPS) {
+			cursor = (toIdx - MAX_FLAPS + DRUM.length) % DRUM.length;
+			distance = MAX_FLAPS;
+		}
+		const halfMs = Math.max(8, stepMs / 2);
 		for (let i = 0; i < distance; i++) {
 			cursor = (cursor + 1) % DRUM.length;
 			await flipStep(tile, DRUM[cursor], halfMs);
@@ -420,7 +435,10 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		);
 		--sf-tile-h: calc(var(--sf-tile-w) * 1.38);
 		--sf-font-size: calc(var(--sf-tile-w) * 0.62);
-		--sf-gap: clamp(2px, calc(var(--sf-tile-w) * 0.12), 8px);
+		/* Kachel-Fuge minimal (Fred 14.09. abends: "so klein wie möglich",
+		   beide Achsen, alle Boards) — 1px Hairline statt mitwachsender
+		   Fuge; die Kachel-Trennung übernimmt der Inset-Schein der Kachel. */
+		--sf-gap: 1px;
 		display: flex;
 		flex-direction: column;
 		gap: var(--sf-gap);
