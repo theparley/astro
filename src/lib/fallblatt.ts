@@ -257,12 +257,19 @@ function armAudio() {
 }
 
 /** Einmal pro Seite aufrufen (idempotent): rüstet den Sound scharf, sobald
- *  die erste Nutzer-Geste kommt. */
+ *  eine Nutzer-Geste kommt. Bewusst NICHT once: falls der Kontext ohne
+ *  echte Aktivierung entstand (Autofill, synthetische Events), holt jede
+ *  weitere Geste das resume() nach — sonst bliebe er für immer stumm
+ *  "suspended". */
 export function armSound() {
 	if (!SOUND_AN || armed) return;
 	armed = true;
-	document.addEventListener("pointerdown", armAudio, { once: true, passive: true });
-	document.addEventListener("keydown", armAudio, { once: true });
+	const geste = () => {
+		armAudio();
+		if (audioCtx && audioCtx.state === "suspended") void audioCtx.resume();
+	};
+	document.addEventListener("pointerdown", geste, { passive: true });
+	document.addEventListener("keydown", geste);
 }
 
 export function klick() {
