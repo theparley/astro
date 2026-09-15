@@ -46,8 +46,14 @@ const { gateBehindHero = false } = Astro.props;
 	   --in-delay (unterste zuerst, am Klick-Ursprung). Reihenfolge im
 	   Markup = optisch von oben nach unten. Weitere Punkte (Format, Studio)
 	   docken in Phase 2 hier an. */}
+	{/* Zwei Versätze je Zeile (Fred 15.09.): --in-delay staffelt das
+	   AUFklappen von unten nach oben (Kontakt am Knopf zuerst), --out-delay
+	   das ZUklappen von oben nach unten (Home zuerst) — so fällt der Stapel
+	   Richtung Knopf zusammen, statt sich spiegelverkehrt nach oben
+	   abzubauen. Kommt Studios zurück: in 120 / out 60, Termin out 120,
+	   Kontakt out 180. */}
 	<nav class="menu-panel" aria-label="Hauptmenü">
-		<a href="/" style="--in-delay: 180ms">Home</a>
+		<a href="/" style="--in-delay: 180ms; --out-delay: 0ms">Home</a>
 		{/* "Studios" statt "Blickkontaktstudio" (Fred 2026-09-13): Platzgründe
 		   im 272px-Panel + konsistent mit der Studios-Kachel der Startseite
 		   (Plural = drei Formen). Zielseite /studio trägt den vollen Namen. */}
@@ -56,8 +62,8 @@ const { gateBehindHero = false } = Astro.props;
 		   und per Direktlink erreichbar, nur unverlinkt. Zeile unten wieder
 		   einkommentieren, sobald /studio steht. */}
 		{/* <a href="/studio" style="--in-delay: 120ms">Studios</a> */}
-		<a href="/termin" style="--in-delay: 60ms">Termin</a>
-		<a href="/kontakt" style="--in-delay: 0ms">Kontakt</a>
+		<a href="/termin" style="--in-delay: 60ms; --out-delay: 60ms">Termin</a>
+		<a href="/kontakt" style="--in-delay: 0ms; --out-delay: 120ms">Kontakt</a>
 	</nav>
 	{/* Dimmt/verwischt die Seite, solange das Menü offen ist (BBH-Backdrop-
 	   Werte wie im archivierten TileMenu) — Tipp darauf schließt (Zwetschke/
@@ -353,8 +359,11 @@ const { gateBehindHero = false } = Astro.props;
 
 	@media (prefers-reduced-motion: no-preference) {
 		.menu-panel a {
+			/* Grundzustand = ZU: der Versatz hier gilt fürs Zuklappen
+			   (--out-delay, oben zuerst). Der Aufklapp-Versatz (--in-delay)
+			   wird im .is-open-Zustand unten gesetzt. */
 			transition:
-				clip-path 300ms cubic-bezier(0.77, 0, 0.18, 1) var(--in-delay, 0ms),
+				clip-path 300ms cubic-bezier(0.77, 0, 0.18, 1) var(--out-delay, 0ms),
 				background-size 250ms ease-in-out;
 		}
 	}
@@ -383,6 +392,8 @@ const { gateBehindHero = false } = Astro.props;
 
 	.menu-root.is-open .menu-panel a {
 		clip-path: inset(0 0 0 0);
+		/* Aufklappen: unten zuerst (--in-delay); zweiter Wert = Hover-Schleier */
+		transition-delay: var(--in-delay, 0ms), 0ms;
 	}
 
 	/* (Die transition der Zeilen — clip-path + Hover-Schleier — steht oben
