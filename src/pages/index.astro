@@ -232,7 +232,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   lässt sich jetzt Vertrauen skalieren" — „Wirkung" holt erstmals ein
 	   Wort der Wirkungs-Säule in den Kopf (Bezug: filmreif + ohne
 	   Kamerastress = die Wirkung, die skaliert wird). */}
-		<p class="plaedoyer-text">Genau solche Gesprächsmomente fangen wir filmreif ein.<br />Ins passende Format gebracht skalieren sie das Vertrauen in eure Marke. Auf allen Kanälen.</p>
+		<p class="plaedoyer-text">Genau solche Gesprächsmomente fangen wir filmreif ein.<br />Wir bringen sie ins passende Format. So skalieren sie das Vertrauen in eure Marke. Auf allen Kanälen.</p>
 		</div>
 	</section>
 
@@ -339,19 +339,19 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		<div class="format-split">
 			<div class="tafel-kopf">
 			<p class="tafel-intro">Das <strong>Start-Format</strong> muss passen.<br />Zum Ziel und seinem Budget, zur Branche und ihren Themen, zur Firmenkultur und ihren Menschen. Und es muss angepasst werden, während es sich entwickelt.</p>
+			{/* BOARD IM FLIESSTEXT (Fred 15.09. früh): das Format-Board sitzt
+			   jetzt ZWISCHEN Absatz 1 und 2 der Textspalte — Kachelanzahl auf
+			   Textbreite kalibriert (Text = min(46rem,100%)). Der Titel rechts
+			   steht wieder allein. */}
+			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={4} rahmen />
 			<p class="tafel-intro">Es gibt Formate für Solopreneure, die eine Personal Brand aufbauen. Und es gibt Formate für Unternehmen, die mit ihrem Team zur Brancheninstanz werden wollen.</p>
 			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Am besten in regelmäßigen Abständen. Euer Format finden wir gemeinsam.</p>
 		</div>
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
 			   Kunden-Statement links oben. */}
-				<h2 class="format-titel">Eine Frage<br />des<br />Formats</h2>
-				{/* Format-Board in der Hälfte (Fred 14.09.): gleiche Kachelgröße
-				   wie die Multi-Output-Wand, Formate max. dreizeilig. flipMs 30
-				   (Fred 13.09. "Flappern schneller"). */}
-				{/* Klapp-Tempo aus dem Fallblatt-Modul (FLAP_STEP_MS) —
-				   gleiche Material-Physik auf allen Boards. */}
-				<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={23} minRows={4} rahmen />
+				<h2 class="format-titel">Eine<br />Frage<br />des<br />Formats</h2>
+
 			</div>
 		</div>
 		{/* Die EINE Tür: MITTIG unter dem Split (Fred 14.09. abends, fünfte
