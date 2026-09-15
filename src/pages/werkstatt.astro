@@ -46,6 +46,12 @@ OHNE WITNESS.
 KUNDEN WERDEN
 AUGENZEUGEN.</textarea>
 			</label>
+			<label class="wk-feld"><span>Format (füllt mit Leerkacheln auf)</span>
+				<select data-wk-format>
+					<option value="frei">Frei — aus dem Text</option>
+					<option value="hoch45">LinkedIn Hochkant 4:5</option>
+					<option value="quadrat">Quadrat 1:1</option>
+				</select></label>
 			<label class="wk-feld"><span>Tempo-Faktor (1 = Website)</span>
 				<input data-wk-tempo type="number" step="0.1" min="0.2" max="4" value="1" /></label>
 			<label class="wk-feld"><span>Standzeit je Folie, ms</span>
@@ -93,18 +99,44 @@ AUGENZEUGEN.</textarea>
 		return folien.length ? folien : [["PARLEY"]];
 	}
 
-	function raster(folien: string[][]) {
-		const rows = Math.max(1, ...folien.map((f) => f.length));
-		const cols = Math.max(1, ...folien.flatMap((f) => f.map((z) => z.length)));
+	function raster(folien: string[][], minRows = 1, minCols = 1) {
+		const rows = Math.max(minRows, ...folien.map((f) => f.length));
+		const cols = Math.max(minCols, ...folien.flatMap((f) => f.map((z) => z.length)));
+		// Block-Zentrierung statt Zeilen-Zentrierung: alle Zeilen einer
+		// Folie teilen EINEN linken Anschlag (wie eine echte Tafel), damit
+		// führende Leerzeichen Spalten ausrichten (" 1 X" unter "10 Y").
 		const pad = (f: string[]) => {
 			const top = Math.floor((rows - f.length) / 2);
+			const blockBreite = Math.max(1, ...f.map((z) => z.length));
+			const left = Math.floor((cols - blockBreite) / 2);
 			return Array.from({ length: rows }, (_, r) => {
 				const line = f[r - top] ?? "";
-				const left = Math.floor((cols - line.length) / 2);
 				return Array.from({ length: cols }, (_, c) => line[c - left] ?? " ").join("");
 			});
 		};
 		return { rows, cols, grids: folien.map(pad) };
+	}
+
+	// ── Format-Presets: Board per Leerkachel-Rand auf ein Ziel-
+	// Seitenverhältnis auffüllen (Breite/Höhe in EXPORT-Pixeln gerechnet,
+	// damit Vorschau-Raster und GIF dasselbe Format haben). ──
+	const FORMATE: Record<string, number | null> = { frei: null, hoch45: 4 / 5, quadrat: 1 };
+	function padFormat(natRows: number, natCols: number, ziel: number | null, kw: number, zargeAn: boolean) {
+		if (!ziel) return { rows: natRows, cols: natCols };
+		const fuge = 1;
+		const rand = zargeAn ? Math.round(kw * 0.24) : 0;
+		let best = { rows: natRows, cols: natCols, err: Infinity };
+		for (let r = natRows; r <= natRows + 40; r++) {
+			const h = r * Math.round(kw * 1.38 + fuge) - fuge + 2 * rand;
+			const c = Math.max(natCols, Math.round((ziel * h + fuge - 2 * rand) / (kw + fuge)));
+			const w = c * (kw + fuge) - fuge + 2 * rand;
+			const err = Math.abs(w / h - ziel);
+			// kleinstes Board innerhalb der Toleranz gewinnt — sonst würde
+			// die Suche für Mini-Fehler immer weiter Leerzeilen anbauen
+			if (err <= 0.02) return { rows: r, cols: c, err };
+			if (err < best.err) best = { rows: r, cols: c, err };
+		}
+		return best;
 	}
 
 	// ── Zeitplan (geteilt von Vorschau und Export): je Kachel die Liste
@@ -156,6 +188,7 @@ AUGENZEUGEN.</textarea>
 	const boardEl = document.querySelector<HTMLElement>("[data-wk-board]")!;
 	const eingaben = {
 		text: document.querySelector<HTMLTextAreaElement>("[data-wk-text]")!,
+		format: document.querySelector<HTMLSelectElement>("[data-wk-format]")!,
 		tempo: document.querySelector<HTMLInputElement>("[data-wk-tempo]")!,
 		hold: document.querySelector<HTMLInputElement>("[data-wk-hold]")!,
 		kachel: document.querySelector<HTMLInputElement>("[data-wk-kachel]")!,
@@ -169,7 +202,11 @@ AUGENZEUGEN.</textarea>
 
 	function lesen() {
 		const folien = parseFolien(eingaben.text.value);
-		const { rows, cols, grids } = raster(folien);
+		const nat = raster(folien);
+		const kw = Math.max(16, Number(eingaben.kachel.value) || 56);
+		const ziel = FORMATE[eingaben.format.value] ?? null;
+		const { rows, cols } = padFormat(nat.rows, nat.cols, ziel, kw, eingaben.zarge.checked);
+		const { grids } = raster(folien, rows, cols);
 		const flipMs = Math.round(FLAP_STEP_MS / Math.max(0.2, Number(eingaben.tempo.value) || 1));
 		const holdMs = Math.max(200, Number(eingaben.hold.value) || 2400);
 		return { folien, rows, cols, grids, flipMs, holdMs };
