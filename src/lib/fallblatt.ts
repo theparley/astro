@@ -243,3 +243,12 @@ export function queueFlap(
 ) {
 	enqueue(tile, () => flapTo(tile, targetHtml, stepMs, onMid));
 }
+
+// ── Kachel-Versätze (geteilt Website ↔ GIF-Werkstatt) ──
+// Streu: deterministischer "Zufalls"-Versatz je Kachel — organisches
+// Klappern, echte Anlagen laufen nie im Gleichtakt.
+// Welle: disziplinierter Ablauf von oben nach unten (Zeile führt,
+// Spalte schiebt leicht nach) — der Wand-Abbau und Freds gewünschter
+// Folien-Wechsel im GIF-Creator.
+export const stagStreu = (r: number, c: number) => ((r * 37 + c * 23) % 9) * 26;
+export const stagWelle = (r: number, c: number) => r * 90 + c * 6;

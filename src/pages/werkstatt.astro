@@ -83,11 +83,13 @@ AUGENZEUGEN.</textarea>
 		resetInstant,
 		flapTo,
 		wait,
+		stagWelle,
 	} from "../lib/fallblatt";
 
-	// Deterministischer Streuversatz (Alt-Werkzeug-Lektion „Vorschau =
-	// Export"): dieselbe Formel wie die Wand, kein Math.random.
-	const stag = (r: number, c: number) => ((r * 37 + c * 23) % 9) * 26;
+	// Folien-Versatz = Website-Welle von oben nach unten (Fred 15.09.,
+	// Formel im gemeinsamen Modul — dieselbe wie der Wand-Abbau).
+	// Deterministisch, kein Math.random: Vorschau = Export.
+	const stag = stagWelle;
 
 	// ── Folien-Parser ──
 	function parseFolien(text: string): string[][] {
@@ -387,18 +389,43 @@ AUGENZEUGEN.</textarea>
 			}
 	}
 
+	// Feste Ausgabegrößen je Format = LinkedIns empfohlene Maximalmaße.
+	// Das Board wird so groß wie möglich eingepasst, der Rest außenrum
+	// bleibt schwarz (Fred 15.09.: „dann machen wir außenrum eben ein
+	// bisschen einfach schwarz").
+	const ZIEL_PX: Record<string, [number, number]> = { hoch45: [1080, 1350], quadrat: [1080, 1080] };
+
 	async function exportGif() {
 		const { rows, cols, grids, flipMs, holdMs } = lesen();
-		const kw = Math.max(16, Number(eingaben.kachel.value) || 56);
 		const fps = Math.min(50, Math.max(10, Number(eingaben.fps.value) || 25));
 		const zarge = eingaben.zarge.checked;
 		const { plan, gesamt } = bauePlan(grids, rows, cols, flipMs, holdMs);
 
 		await document.fonts.load(`900 40px "Forma DJR Mono"`);
 		const fuge = 1;
+		const fest = ZIEL_PX[eingaben.format.value];
+		let kw = Math.max(16, Number(eingaben.kachel.value) || 56);
+		if (fest) {
+			// Kachelbreite automatisch: die größte, deren Board in den
+			// festen Rahmen passt (der Regler gilt nur im Format „Frei").
+			kw = 16;
+			for (let k = 16; k <= 200; k++) {
+				const rd = zarge ? Math.round(k * 0.24) : 0;
+				const w = cols * (k + fuge) - fuge + 2 * rd;
+				const h = rows * Math.round(k * 1.38 + fuge) - fuge + 2 * rd;
+				if (w <= fest[0] && h <= fest[1]) kw = k;
+				else break;
+			}
+		}
 		const rand = zarge ? Math.round(kw * 0.24) : 0;
-		const W = cols * (kw + fuge) - fuge + 2 * rand;
-		const H = rows * Math.round(kw * 1.38 + fuge) - fuge + 2 * rand;
+		const BW = cols * (kw + fuge) - fuge + 2 * rand;
+		const BH = rows * Math.round(kw * 1.38 + fuge) - fuge + 2 * rand;
+		const W = fest ? fest[0] : BW;
+		const H = fest ? fest[1] : BH;
+		const ox = Math.floor((W - BW) / 2), oy = Math.floor((H - BH) / 2);
+		const board = document.createElement("canvas");
+		board.width = BW; board.height = BH;
+		const bctx = board.getContext("2d")!;
 		const canvas = document.createElement("canvas");
 		canvas.width = W; canvas.height = H;
 		const ctx = canvas.getContext("2d")!;
@@ -409,7 +436,10 @@ AUGENZEUGEN.</textarea>
 		const frames = Math.ceil(gesamt / delay);
 		status.textContent = `rendere ${frames} Bilder …`;
 		for (let f = 0; f < frames; f++) {
-			zeichneFrame(ctx, f * delay, plan, rows, cols, flipMs, kw, zarge);
+			zeichneFrame(bctx, f * delay, plan, rows, cols, flipMs, kw, zarge);
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0, 0, W, H);
+			ctx.drawImage(board, ox, oy);
 			gif.addFrame(ctx, { copy: true, delay });
 			if (f % 20 === 0) { status.textContent = `rendere ${f}/${frames} …`; await wait(0); }
 		}
@@ -419,7 +449,7 @@ AUGENZEUGEN.</textarea>
 			a.href = URL.createObjectURL(blob);
 			a.download = `parley-tafel-${Date.now()}.gif`;
 			a.click();
-			status.textContent = `fertig — ${(blob.size / 1024 / 1024).toFixed(1)} MB, ${(gesamt / 1000).toFixed(1)} s`;
+			status.textContent = `fertig — ${(blob.size / 1024 / 1024).toFixed(1)} MB, ${(gesamt / 1000).toFixed(1)} s, ${W}×${H}px`;
 		});
 		gif.render();
 	}
