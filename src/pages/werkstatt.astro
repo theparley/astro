@@ -147,31 +147,26 @@ AUGENZEUGEN.</textarea>
 		return folien.length ? folien : [[[..."PARLEY"]]];
 	}
 
+	// Raster-Regeln:
+	// - ÜBERSCHRIFT (Fred 15.09.): folgt auf die erste Zeile eine Leerzeile,
+	//   ist sie die Überschrift — immer Zeile 0, mittig, auf jeder Folie an
+	//   derselben Stelle (INPUT/OUTPUT wechseln ohne zu springen).
+	// - GEMEINSAMER BLOCK-ANKER (Fred 15.09., dritte Runde): ALLE Folien
+	//   teilen EINEN linken Anschlag (den der breitesten Folie) und beginnen
+	//   OBEN direkt unter der Überschrift — der Input steht an denselben
+	//   Positionen wie später der Output, nichts schwebt mittig.
+	// - Plattform-Logos am Zeilenende: rechtsbündig an der Blockkante,
+	//   sortiert nach Häufigkeit (häufigste außen an der gemeinsamen rechten
+	//   Kante), Gleichstand nach kanonischer Reihenfolge.
 	function raster(folien: Zelle[][][], minRows = 1, minCols = 1) {
-		const rows = Math.max(minRows, ...folien.map((f) => f.length));
-		const cols = Math.max(minCols, ...folien.flatMap((f) => f.map((z) => z.length)));
-		// Block-Zentrierung statt Zeilen-Zentrierung: alle Zeilen einer
-		// Folie teilen EINEN linken Anschlag (wie eine echte Tafel), damit
-		// führende Leerzeichen Spalten ausrichten (" 1 X" unter "10 Y").
-		// ÜBERSCHRIFT-Regel (Fred 15.09.): folgt auf die erste Zeile eine
-		// Leerzeile, ist sie die Überschrift — sie steht IMMER oben in
-		// Zeile 0 und mittig, auf jeder Folie an derselben Stelle
-		// (INPUT/OUTPUT wechseln ohne zu springen). Der Rest-Block wird
-		// im Raum darunter zentriert.
-		const pad = (f: Zelle[][]) => {
+		const KANON = ["linkedin", "youtube", "instagram", "tiktok", "spotify", "apple", "web", "mail", "ki", "chatgpt", "claude", "gemini", "perplexity"];
+		const verarbeitet = folien.map((f) => {
 			let kopf: Zelle[] | null = null;
 			let rest = f;
 			if (f.length > 1 && f[0].length > 0 && f[1].length === 0) {
 				kopf = f[0];
 				rest = f.slice(2);
 			}
-			// Plattform-Logos am Zeilenende: rechtsbündig an der Blockkante
-			// (wie die Website-Wand). Sortierordnung (Fred 15.09., zweite
-			// Runde): die HÄUFIGSTE Plattform der Folie sitzt außen an der
-			// gemeinsamen rechten Kante — dort teilen sich alle Zeilen die
-			// Spalte, gleiche Marke = ruhiges Bild; seltene wandern nach
-			// innen. Gleichstand entscheidet die kanonische Reihenfolge.
-			const KANON = ["linkedin", "youtube", "instagram", "tiktok", "spotify", "apple", "web", "mail", "ki", "chatgpt", "claude", "gemini", "perplexity"];
 			const haeufig: Record<string, number> = {};
 			for (const line of rest)
 				for (const z of line)
@@ -192,18 +187,23 @@ AUGENZEUGEN.</textarea>
 				const fill = Math.max(1, blockBreite - text.length - logos.length);
 				return [...text, ...Array(fill).fill(" "), ...logos];
 			});
-			const left = Math.floor((cols - blockBreite) / 2);
+			return { kopf, rest, blockBreite };
+		});
+		const maxBlock = Math.max(1, ...verarbeitet.map((v) => v.blockBreite));
+		const rows = Math.max(minRows, ...verarbeitet.map((v) => (v.kopf ? 2 : 0) + v.rest.length));
+		const cols = Math.max(minCols, maxBlock, ...verarbeitet.map((v) => (v.kopf ? v.kopf.length : 1)));
+		const left = Math.floor((cols - maxBlock) / 2);
+		const grids = verarbeitet.map(({ kopf, rest }) => {
 			const start = kopf ? 2 : 0;
-			const top = start + Math.floor((rows - start - rest.length) / 2);
 			const kopfLeft = kopf ? Math.floor((cols - kopf.length) / 2) : 0;
 			return Array.from({ length: rows }, (_, r) => {
 				if (kopf && r === 0)
 					return Array.from({ length: cols }, (_, c) => kopf![c - kopfLeft] ?? " ");
-				const line = rest[r - top] ?? [];
+				const line = rest[r - start] ?? [];
 				return Array.from({ length: cols }, (_, c) => line[c - left] ?? " ");
 			});
-		};
-		return { rows, cols, grids: folien.map(pad) };
+		});
+		return { rows, cols, grids };
 	}
 
 	// ── Format-Presets: Board per Leerkachel-Rand auf ein Ziel-
@@ -604,10 +604,10 @@ AUGENZEUGEN.</textarea>
 		const top = bodenY - hl;
 		ctx.filter = "brightness(0.9294)";
 		ctx.fillStyle = "#fff";
-		// Stab: wächst aus dem Boden; bei pPole 0 bleibt der Punkt stehen
-		const punkt = poleW;
-		const poleH = Math.round(punkt + (hl - punkt) * pPole);
-		ctx.fillRect(Math.round(cx - poleW / 2), bodenY - poleH, poleW, poleH);
+		// Stab: wächst aus dem Boden; auf Schwarz komplett weg, kein
+		// Punkt mehr (Fred 15.09., zweite Runde).
+		const poleH = Math.round(hl * pPole);
+		if (poleH > 0) ctx.fillRect(Math.round(cx - poleW / 2), bodenY - poleH, poleW, poleH);
 		const bw = 1072.97 * U;
 		const bh = 459.85 * U;
 		const fx = cx - poleW / 2 - gap - bw;
@@ -749,9 +749,9 @@ AUGENZEUGEN.</textarea>
 	   Choreografie (Fahne fährt rechts in die Stange, Text links hinein;
 	   heraus in umgekehrter Reihenfolge — Fahne zuerst, dann Text). */
 	.wk-logo { --wl-h: 56px; position: relative; height: var(--wl-h); width: calc(var(--wl-h) * 1.6); }
-	/* Stab: wächst aus dem Boden (wk-logo--stab); zusammengefahren bleibt
-	   ein Punkt stehen (Freds „vielleicht ist das witzig"). */
-	.wk-logo-stange { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: calc(var(--wl-h) * 52.36 / 2018.08); height: calc(var(--wl-h) * 52.36 / 2018.08); background: #ededed; transition: height 220ms cubic-bezier(0.77, 0, 0.18, 1); }
+	/* Stab: wächst aus dem Boden (wk-logo--stab); zusammengefahren
+	   komplett weg, kein Punkt (Fred 15.09., zweite Runde). */
+	.wk-logo-stange { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: calc(var(--wl-h) * 52.36 / 2018.08); height: 0; background: #ededed; transition: height 220ms cubic-bezier(0.77, 0, 0.18, 1); }
 	.wk-logo--stab .wk-logo-stange { height: var(--wl-h); }
 	.wk-logo-fahne-wrap { position: absolute; right: calc(50% + var(--wl-h) * 52.36 / 4036.16 + 4px); top: calc(var(--wl-h) * 40.9736 / 2018.08); width: calc(var(--wl-h) * 1072.97 / 2018.08); height: calc(var(--wl-h) * 459.85 / 2018.08); overflow: hidden; }
 	.wk-logo-fahne { display: block; width: 100%; height: 100%; filter: brightness(0.9294); transform: translateX(110%); transition: transform 300ms cubic-bezier(0.77, 0, 0.18, 1); }
