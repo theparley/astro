@@ -34,7 +34,16 @@ import "../styles/fallblatt.css";
 		<p class="wk-sub">Dieselbe Tafel wie auf der Website. Folien unten eintragen, Vorschau läuft; „GIF bauen" rendert die Schleife.</p>
 
 		<div class="wk-buehne">
-			<div class="wk-board" data-wk-board></div>
+			<div class="wk-buehne-stapel">
+				<div class="wk-board" data-wk-board></div>
+				{/* Logo unten Mitte = die Website-Fahne (BrandLogo.astro-Geometrie:
+				   Fahne links, Stange, Text rechts — Maße als Anteile von 2018.08). */}
+				<div class="wk-logo" data-wk-logoblock aria-hidden="true">
+					<div class="wk-logo-fahne-wrap"><img src="/parley/parley-flag-banner.svg" alt="" class="wk-logo-fahne" /></div>
+					<div class="wk-logo-stange"></div>
+					<div class="wk-logo-text-wrap"><img src="/parley/parley-text.svg" alt="" class="wk-logo-text" /></div>
+				</div>
+			</div>
 		</div>
 
 		<div class="wk-regler">
@@ -62,6 +71,8 @@ AUGENZEUGEN.</textarea>
 				<input data-wk-fps type="number" step="1" min="10" max="50" value="25" /></label>
 			<label class="wk-feld wk-feld--check"><span>Zarge</span>
 				<input data-wk-zarge type="checkbox" checked /></label>
+			<label class="wk-feld wk-feld--check"><span>Logo unten</span>
+				<input data-wk-logo type="checkbox" checked /></label>
 			<button class="wk-cta" data-wk-export type="button">GIF bauen</button>
 			<span class="wk-status" data-wk-status></span>
 		</div>
@@ -84,6 +95,7 @@ AUGENZEUGEN.</textarea>
 		flapTo,
 		wait,
 		stagWelle,
+		LOGOS,
 	} from "../lib/fallblatt";
 
 	// Folien-Versatz = Website-Welle von oben nach unten (Fred 15.09.,
@@ -92,28 +104,90 @@ AUGENZEUGEN.</textarea>
 	const stag = stagWelle;
 
 	// ── Folien-Parser ──
-	function parseFolien(text: string): string[][] {
+	// Eine Zelle = ein Zeichen ODER ein Plattform-Logo. Logos schreibt man
+	// als {in} {yt} {ig} {tt} {sp} {ap} {web} {mail} {ki} — jede Marke
+	// belegt eine Kachel und klappt wie ein Zeichen (Material = LOGOS aus
+	// dem gemeinsamen Modul, dieselben wie auf der Website-Wand).
+	// Intern: Logo-Zelle = "\0" + Name.
+	const TOKENS: Record<string, string> = {
+		in: "linkedin", linkedin: "linkedin",
+		yt: "youtube", youtube: "youtube",
+		ig: "instagram", instagram: "instagram",
+		tt: "tiktok", tiktok: "tiktok",
+		sp: "spotify", spotify: "spotify",
+		ap: "apple", apple: "apple",
+		web: "web", mail: "mail", ki: "ki",
+	};
+	type Zelle = string;
+	function zellen(line: string): Zelle[] {
+		const out: Zelle[] = [];
+		const re = /\{([A-Z]+)\}/g;
+		let i = 0;
+		let m: RegExpExecArray | null;
+		while ((m = re.exec(line))) {
+			for (const ch of line.slice(i, m.index)) out.push(ch);
+			const name = TOKENS[m[1].toLowerCase()];
+			out.push(name ? "\0" + name : "?");
+			i = m.index + m[0].length;
+		}
+		for (const ch of line.slice(i)) out.push(ch);
+		while (out.length && out[out.length - 1] === " ") out.pop();
+		return out;
+	}
+	function parseFolien(text: string): Zelle[][][] {
 		const folien = text
 			.toUpperCase()
 			.split(/\n---+\n?/)
-			.map((f) => f.split("\n").map((z) => z.trimEnd()).filter((z, i, a) => z !== "" || i < a.length - 1))
-			.filter((f) => f.some((z) => z.trim() !== ""));
-		return folien.length ? folien : [["PARLEY"]];
+			.map((f) => f.split("\n").map(zellen).filter((z, i, a) => z.length > 0 || i < a.length - 1))
+			.filter((f) => f.some((z) => z.some((c) => c !== " ")));
+		return folien.length ? folien : [[[..."PARLEY"]]];
 	}
 
-	function raster(folien: string[][], minRows = 1, minCols = 1) {
+	function raster(folien: Zelle[][][], minRows = 1, minCols = 1) {
 		const rows = Math.max(minRows, ...folien.map((f) => f.length));
 		const cols = Math.max(minCols, ...folien.flatMap((f) => f.map((z) => z.length)));
 		// Block-Zentrierung statt Zeilen-Zentrierung: alle Zeilen einer
 		// Folie teilen EINEN linken Anschlag (wie eine echte Tafel), damit
 		// führende Leerzeichen Spalten ausrichten (" 1 X" unter "10 Y").
-		const pad = (f: string[]) => {
-			const top = Math.floor((rows - f.length) / 2);
-			const blockBreite = Math.max(1, ...f.map((z) => z.length));
+		// ÜBERSCHRIFT-Regel (Fred 15.09.): folgt auf die erste Zeile eine
+		// Leerzeile, ist sie die Überschrift — sie steht IMMER oben in
+		// Zeile 0 und mittig, auf jeder Folie an derselben Stelle
+		// (INPUT/OUTPUT wechseln ohne zu springen). Der Rest-Block wird
+		// im Raum darunter zentriert.
+		const pad = (f: Zelle[][]) => {
+			let kopf: Zelle[] | null = null;
+			let rest = f;
+			if (f.length > 1 && f[0].length > 0 && f[1].length === 0) {
+				kopf = f[0];
+				rest = f.slice(2);
+			}
+			// Plattform-Logos am Zeilenende: rechtsbündig an der Blockkante
+			// (wie die Website-Wand) und in KANONISCHER Reihenfolge sortiert
+			// (Fred 15.09., „Sortierordnung": nicht die Position, nur die
+			// Reihenfolge — gleiche Abfolge in jeder Zeile).
+			const KANON = ["linkedin", "youtube", "instagram", "tiktok", "spotify", "apple", "web", "mail", "ki"];
+			const blockBreite = Math.max(1, ...rest.map((z) => z.length));
+			rest = rest.map((line) => {
+				let i = line.length;
+				while (i > 0 && line[i - 1].charCodeAt(0) === 0) i--;
+				if (i === line.length || i === 0) return line;
+				const logos = line
+					.slice(i)
+					.sort((a, b) => KANON.indexOf(a.slice(1)) - KANON.indexOf(b.slice(1)));
+				const text = line.slice(0, i);
+				while (text.length && text[text.length - 1] === " ") text.pop();
+				const fill = Math.max(1, blockBreite - text.length - logos.length);
+				return [...text, ...Array(fill).fill(" "), ...logos];
+			});
 			const left = Math.floor((cols - blockBreite) / 2);
+			const start = kopf ? 2 : 0;
+			const top = start + Math.floor((rows - start - rest.length) / 2);
+			const kopfLeft = kopf ? Math.floor((cols - kopf.length) / 2) : 0;
 			return Array.from({ length: rows }, (_, r) => {
-				const line = f[r - top] ?? "";
-				return Array.from({ length: cols }, (_, c) => line[c - left] ?? " ").join("");
+				if (kopf && r === 0)
+					return Array.from({ length: cols }, (_, c) => kopf![c - kopfLeft] ?? " ");
+				const line = rest[r - top] ?? [];
+				return Array.from({ length: cols }, (_, c) => line[c - left] ?? " ");
 			});
 		};
 		return { rows, cols, grids: folien.map(pad) };
@@ -145,14 +219,26 @@ AUGENZEUGEN.</textarea>
 	// der Klapp-Schritte durch die Trommel (MAX_FLAPS-Deckel wie die
 	// Website), mit Startversatz. ──
 	type Schritt = { t: number; von: string; zu: string };
-	function bauePlan(grids: string[][], rows: number, cols: number, flipMs: number, holdMs: number) {
+	// SCHLEIFEN-REGEL (Fred 15.09.): zwischen allen Folien liegt Schwarz —
+	// Text klappt rein, steht, klappt raus bis zur leeren Tafel, kurze
+	// schwarze Pause, dann die nächste Folie. Dadurch schließt auch die
+	// GIF-Schleife sauber (endet leer, beginnt leer).
+	const BLACK_HOLD = 600;
+	function bauePlan(grids: Zelle[][][], rows: number, cols: number, flipMs: number, holdMs: number) {
 		const plan: Schritt[][][] = Array.from({ length: rows }, () =>
 			Array.from({ length: cols }, () => []),
 		);
+		const fenster: Array<{ steht: number; bis: number }> = [];
 		const aktuell: string[][] = Array.from({ length: rows }, () => Array(cols).fill(" "));
+		const leer: Zelle[][] = Array.from({ length: rows }, () => Array(cols).fill(" "));
+		const seq: Array<{ grid: Zelle[][]; hold: number; text: boolean }> = [];
+		for (const g of grids) {
+			seq.push({ grid: g, hold: holdMs, text: true });
+			seq.push({ grid: leer, hold: BLACK_HOLD, text: false });
+		}
 		let t = 400;
 		let ende = t;
-		for (const grid of grids) {
+		for (const { grid, hold, text } of seq) {
 			for (let r = 0; r < rows; r++)
 				for (let c = 0; c < cols; c++) {
 					const ziel = grid[r][c];
@@ -180,10 +266,14 @@ AUGENZEUGEN.</textarea>
 					}
 					aktuell[r][c] = ziel;
 				}
-			t = ende + holdMs;
+			// Folien-Fenster: von „Folie steht" bis Ende der Standzeit —
+			// das Logo unten lebt in diesen Fenstern (aus- und einfahren);
+			// nur Text-Folien, auf Schwarz bleibt allein die Stange.
+			if (text) fenster.push({ steht: ende, bis: ende + hold });
+			t = ende + hold;
 			ende = t;
 		}
-		return { plan, gesamt: t };
+		return { plan, gesamt: t, fenster };
 	}
 
 	// ── Vorschau: echtes DOM-Material ──
@@ -196,9 +286,14 @@ AUGENZEUGEN.</textarea>
 		kachel: document.querySelector<HTMLInputElement>("[data-wk-kachel]")!,
 		fps: document.querySelector<HTMLInputElement>("[data-wk-fps]")!,
 		zarge: document.querySelector<HTMLInputElement>("[data-wk-zarge]")!,
+		logo: document.querySelector<HTMLInputElement>("[data-wk-logo]")!,
 	};
+	const logoBlock = document.querySelector<HTMLElement>("[data-wk-logoblock]")!;
 	const status = document.querySelector<HTMLElement>("[data-wk-status]")!;
 	const laengeEl = document.querySelector<HTMLElement>("[data-wk-laenge]")!;
+
+	// Logo-Zelle → Anzeige-HTML (Vorschau); Zeichen bleiben Zeichen.
+	const zellHtml = (z: Zelle) => (z.charCodeAt(0) === 0 ? LOGOS[z.slice(1)] ?? "?" : z);
 
 	let vorschauGen = 0;
 
@@ -216,6 +311,7 @@ AUGENZEUGEN.</textarea>
 
 	async function vorschau() {
 		const gen = ++vorschauGen;
+		logoBlock.hidden = !eingaben.logo.checked;
 		const { rows, cols, grids, flipMs, holdMs } = lesen();
 		const { gesamt } = bauePlan(grids, rows, cols, flipMs, holdMs);
 		laengeEl.textContent = `Schleife: ${(gesamt / 1000).toFixed(1)} s` + (gesamt > 15000 ? " — über 15 s, im Feed sieht kaum jemand so lange zu." : "");
@@ -241,21 +337,38 @@ AUGENZEUGEN.</textarea>
 
 		// Endlos-Vorschau über die Folien
 		(async () => {
+			const flapAlle = (grid: Zelle[][] | null) =>
+				Promise.all(
+					tiles.flatMap((tr, r) =>
+						tr.map((tile, c) =>
+							wait(stag(r, c)).then(() =>
+								gen === vorschauGen ? flapTo(tile, grid ? zellHtml(grid[r][c]) : " ", flipMs) : undefined,
+							),
+						),
+					),
+				);
 			while (gen === vorschauGen) {
 				for (const grid of grids) {
 					if (gen !== vorschauGen) return;
-					await Promise.all(
-						tiles.flatMap((tr, r) =>
-							tr.map((tile, c) =>
-								wait(stag(r, c)).then(() => (gen === vorschauGen ? flapTo(tile, grid[r][c], flipMs) : undefined)),
-							),
-						),
-					);
-					await wait(holdMs);
+					await flapAlle(grid);
+					if (gen !== vorschauGen) return;
+					// Folie steht → Stab wächst, dann Fahne+Text gleichzeitig
+					if (eingaben.logo.checked) {
+						logoBlock.classList.add("wk-logo--stab");
+						await wait(220);
+						logoBlock.classList.add("wk-logo--da");
+					}
+					await wait(Math.max(200, holdMs - 220));
+					if (gen !== vorschauGen) return;
+					// Rückweg ZUSAMMEN mit dem Rausflappern: beide rein,
+					// dann Stab auf den Punkt zusammen
+					const raus = flapAlle(null);
+					logoBlock.classList.remove("wk-logo--da");
+					await wait(300);
+					logoBlock.classList.remove("wk-logo--stab");
+					await raus;
+					await wait(600);
 				}
-				if (gen !== vorschauGen) return;
-				await Promise.all(tiles.flatMap((tr, r) => tr.map((tile, c) => wait(stag(r, c)).then(() => (gen === vorschauGen ? flapTo(tile, " ", flipMs) : undefined)))));
-				await wait(600);
 			}
 		})();
 	}
@@ -275,6 +388,29 @@ AUGENZEUGEN.</textarea>
 		const rgb = getComputedStyle(d).color;
 		d.remove();
 		return rgb;
+	}
+
+	// Plattform-Logos als Bitmaps für den Painter (aus den geteilten
+	// LOGOS-SVGs gerastert; linkedin ist Text und braucht kein Bild).
+	let logoImgs: Record<string, HTMLImageElement> = {};
+	async function ladeLogoImgs(grids: Zelle[][][]) {
+		const braucht = new Set<string>();
+		grids.forEach((g) => g.forEach((row) => row.forEach((z) => {
+			if (z.charCodeAt(0) === 0) braucht.add(z.slice(1));
+		})));
+		await Promise.all(
+			[...braucht].filter((n) => n !== "linkedin" && !logoImgs[n]).map(
+				(n) =>
+					new Promise<void>((res) => {
+						const img = new Image();
+						img.onload = () => { logoImgs[n] = img; res(); };
+						img.onerror = () => res();
+						img.src = "data:image/svg+xml;utf8," + encodeURIComponent(
+							(LOGOS[n] ?? "").replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '),
+						);
+					}),
+			),
+		);
 	}
 
 	function zeichneFrame(
@@ -333,7 +469,19 @@ AUGENZEUGEN.</textarea>
 					ctx.beginPath();
 					ctx.rect(x, clipOben ? y : y + kh / 2, kw, kh / 2);
 					ctx.clip();
-					if (ch === "●") {
+					if (ch.charCodeAt(0) === 0) {
+						// Plattform-Logo (Material wie die Website: 62 % der
+						// Kachelbreite, mittig; linkedin ist Text „in").
+						const name = ch.slice(1);
+						if (name === "linkedin") {
+							ctx.fillStyle = "#fff";
+							ctx.font = `800 ${kw * 0.62}px -apple-system, "Helvetica Neue", sans-serif`;
+							ctx.fillText("in", x + kw / 2, y + kh / 2 + kw * 0.62 * 0.36);
+						} else if (logoImgs[name]) {
+							const s = kw * 0.62;
+							ctx.drawImage(logoImgs[name], x + (kw - s) / 2, y + (kh - s) / 2, s, s);
+						}
+					} else if (ch === "●") {
 						ctx.fillStyle = "#ededed";
 						ctx.beginPath();
 						ctx.arc(x + kw / 2, y + kh / 2, kw * 0.35, 0, Math.PI * 2);
@@ -395,34 +543,139 @@ AUGENZEUGEN.</textarea>
 	// bisschen einfach schwarz").
 	const ZIEL_PX: Record<string, [number, number]> = { hoch45: [1080, 1350], quadrat: [1080, 1080] };
 
+	// Logo am Boden = die Website-Fahne (Geometrie 1:1 aus BrandLogo.astro,
+	// alle Maße Anteile von 2018.08 je Logo-Höhe; Flächen-Ton #ededed via
+	// brightness-Filter wie auf der Website). ANIMIERT wie der Website-
+	// Rückweg vom Menü (Fred 15.09.): Folie steht → Fahne fährt links aus
+	// der Stange, dann Text rechts; vor dem Folien-Wechsel Text zuerst
+	// hinein, Fahne danach. Die Stange steht immer.
+	const LOGO_GLIDE = 300;
+	const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+	const easeGlide = (p: number) => (p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2);
+	// Choreografie (Fred 15.09., GIF-Fassung): der Stab wächst zuerst aus
+	// dem Boden; steht er, fahren Fahne und Text GLEICHZEITIG heraus.
+	// Rückweg spiegelbildlich: beide rein, dann fährt der Stab nach unten
+	// zusammen. Auf Schwarz bleibt ein Punkt vom Stab stehen (Freds
+	// „vielleicht ist das witzig").
+	const POLE_MS = 220;
+	function logoPhasen(tMs: number, fenster: Array<{ steht: number; bis: number }>) {
+		// Out-Animation läuft ZUSAMMEN mit dem Rausflappern des Texts
+		// (Fred 15.09.): ab w.bis fahren Fahne+Text rein, danach der Stab
+		// runter — während die Kacheln auf Schwarz klappen.
+		let p = 0, pPole = 0;
+		for (const w of fenster) {
+			const poleRaus = clamp01((tMs - w.steht) / POLE_MS);
+			const poleRein = 1 - clamp01((tMs - (w.bis + LOGO_GLIDE)) / POLE_MS);
+			pPole = Math.max(pPole, Math.min(poleRaus, poleRein));
+			const raus = clamp01((tMs - w.steht - POLE_MS) / LOGO_GLIDE);
+			const rein = 1 - clamp01((tMs - w.bis) / LOGO_GLIDE);
+			p = Math.max(p, Math.min(raus, rein));
+		}
+		return { p: easeGlide(p), pPole: easeGlide(pPole) };
+	}
+	function zeichneLogo(
+		ctx: CanvasRenderingContext2D,
+		cx: number,
+		bodenY: number,
+		hl: number,
+		bilder: { fahne: HTMLImageElement; text: HTMLImageElement },
+		p: number,
+		pPole: number,
+	) {
+		const U = hl / 2018.08;
+		const gap = Math.max(3, Math.round(hl * 0.048));
+		const poleW = Math.max(2, Math.round(52.36 * U));
+		const top = bodenY - hl;
+		ctx.filter = "brightness(0.9294)";
+		ctx.fillStyle = "#fff";
+		// Stab: wächst aus dem Boden; bei pPole 0 bleibt der Punkt stehen
+		const punkt = poleW;
+		const poleH = Math.round(punkt + (hl - punkt) * pPole);
+		ctx.fillRect(Math.round(cx - poleW / 2), bodenY - poleH, poleW, poleH);
+		const bw = 1072.97 * U;
+		const bh = 459.85 * U;
+		const fx = cx - poleW / 2 - gap - bw;
+		const fy = top + 40.9736 * U;
+		if (p > 0) {
+			ctx.save();
+			ctx.beginPath();
+			ctx.rect(fx, fy, bw, bh);
+			ctx.clip();
+			ctx.drawImage(bilder.fahne, fx + (1 - p) * 1.1 * bw, fy, bw, bh);
+			ctx.restore();
+			const th = 1057.41 * U;
+			const ta = bilder.text.width && bilder.text.height ? bilder.text.width / bilder.text.height : 1986.93 / 1057.41;
+			const tw = ta * th;
+			const tx = cx + poleW / 2 + gap;
+			const ty = bodenY - th;
+			ctx.save();
+			ctx.beginPath();
+			ctx.rect(tx, ty, tw, th);
+			ctx.clip();
+			ctx.drawImage(bilder.text, tx - (1 - p) * 1.1 * tw, ty, tw, th);
+			ctx.restore();
+		}
+		ctx.filter = "none";
+	}
+
 	async function exportGif() {
 		const { rows, cols, grids, flipMs, holdMs } = lesen();
 		const fps = Math.min(50, Math.max(10, Number(eingaben.fps.value) || 25));
 		const zarge = eingaben.zarge.checked;
-		const { plan, gesamt } = bauePlan(grids, rows, cols, flipMs, holdMs);
 
 		await document.fonts.load(`900 40px "Forma DJR Mono"`);
+		await ladeLogoImgs(grids);
 		const fuge = 1;
 		const fest = ZIEL_PX[eingaben.format.value];
+		const logoAn = eingaben.logo.checked;
+		const { plan, gesamt, fenster } = bauePlan(grids, rows, cols, flipMs, holdMs);
+		const LOGO_PAD = 28;
+		// Logo-Band am Boden: Logo-Höhe = 7,5 % der Ausgabehöhe + Luft.
+		const bandFuer = (hoehe: number) => (logoAn ? Math.round(hoehe * 0.075) + 2 * LOGO_PAD : 0);
 		let kw = Math.max(16, Number(eingaben.kachel.value) || 56);
 		if (fest) {
 			// Kachelbreite automatisch: die größte, deren Board in den
-			// festen Rahmen passt (der Regler gilt nur im Format „Frei").
+			// festen Rahmen passt (der Regler gilt nur im Format „Frei");
+			// das Logo-Band unten wird vorab abgezogen.
+			const avail = fest[1] - bandFuer(fest[1]);
 			kw = 16;
 			for (let k = 16; k <= 200; k++) {
 				const rd = zarge ? Math.round(k * 0.24) : 0;
 				const w = cols * (k + fuge) - fuge + 2 * rd;
 				const h = rows * Math.round(k * 1.38 + fuge) - fuge + 2 * rd;
-				if (w <= fest[0] && h <= fest[1]) kw = k;
+				if (w <= fest[0] && h <= avail) kw = k;
 				else break;
 			}
 		}
 		const rand = zarge ? Math.round(kw * 0.24) : 0;
 		const BW = cols * (kw + fuge) - fuge + 2 * rand;
 		const BH = rows * Math.round(kw * 1.38 + fuge) - fuge + 2 * rand;
+		const band = bandFuer(fest ? fest[1] : BH);
 		const W = fest ? fest[0] : BW;
-		const H = fest ? fest[1] : BH;
-		const ox = Math.floor((W - BW) / 2), oy = Math.floor((H - BH) / 2);
+		const H = fest ? fest[1] : BH + band;
+		const ox = Math.floor((W - BW) / 2);
+		const oy = fest ? Math.max(0, Math.floor((H - band - BH) / 2)) : 0;
+		const logoH = logoAn ? band - 2 * LOGO_PAD : 0;
+		// Logo-Bilder = dieselben SVGs wie die Website (public/parley/)
+		let logoBilder: { fahne: HTMLImageElement; text: HTMLImageElement } | null = null;
+		if (logoAn) {
+			const lade = (src: string) =>
+				new Promise<HTMLImageElement>((res, rej) => {
+					const i = new Image();
+					i.onload = () => res(i);
+					i.onerror = rej;
+					i.src = src;
+				});
+			try {
+				const [fahne, text] = await Promise.all([
+					lade("/parley/parley-flag-banner.svg"),
+					lade("/parley/parley-text.svg"),
+				]);
+				logoBilder = { fahne, text };
+			} catch {
+				logoBilder = null;
+			}
+		}
 		const board = document.createElement("canvas");
 		board.width = BW; board.height = BH;
 		const bctx = board.getContext("2d")!;
@@ -440,6 +693,10 @@ AUGENZEUGEN.</textarea>
 			ctx.fillStyle = "#000";
 			ctx.fillRect(0, 0, W, H);
 			ctx.drawImage(board, ox, oy);
+			if (logoBilder) {
+				const { p, pPole } = logoPhasen(f * delay, fenster);
+				zeichneLogo(ctx, W / 2, H - LOGO_PAD, logoH, logoBilder, p, pPole);
+			}
 			gif.addFrame(ctx, { copy: true, delay });
 			if (f % 20 === 0) { status.textContent = `rendere ${f}/${frames} …`; await wait(0); }
 		}
@@ -469,6 +726,21 @@ AUGENZEUGEN.</textarea>
 	.wk-titel { font-weight: 900; text-transform: uppercase; line-height: 0.9; font-size: clamp(2rem, 1rem + 4vw, 5rem); margin: 0 0 8px; }
 	.wk-sub { font-size: 1rem; color: var(--gray, #999894); margin: 0 0 32px; }
 	.wk-buehne { display: flex; justify-content: center; padding: 32px 0; overflow-x: auto; }
+	.wk-buehne-stapel { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+	/* Vorschau-Logo: BrandLogo.astro-Geometrie + die Website-Einfahr-
+	   Choreografie (Fahne fährt rechts in die Stange, Text links hinein;
+	   heraus in umgekehrter Reihenfolge — Fahne zuerst, dann Text). */
+	.wk-logo { --wl-h: 56px; position: relative; height: var(--wl-h); width: calc(var(--wl-h) * 1.6); }
+	/* Stab: wächst aus dem Boden (wk-logo--stab); zusammengefahren bleibt
+	   ein Punkt stehen (Freds „vielleicht ist das witzig"). */
+	.wk-logo-stange { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: calc(var(--wl-h) * 52.36 / 2018.08); height: calc(var(--wl-h) * 52.36 / 2018.08); background: #ededed; transition: height 220ms cubic-bezier(0.77, 0, 0.18, 1); }
+	.wk-logo--stab .wk-logo-stange { height: var(--wl-h); }
+	.wk-logo-fahne-wrap { position: absolute; right: calc(50% + var(--wl-h) * 52.36 / 4036.16 + 4px); top: calc(var(--wl-h) * 40.9736 / 2018.08); width: calc(var(--wl-h) * 1072.97 / 2018.08); height: calc(var(--wl-h) * 459.85 / 2018.08); overflow: hidden; }
+	.wk-logo-fahne { display: block; width: 100%; height: 100%; filter: brightness(0.9294); transform: translateX(110%); transition: transform 300ms cubic-bezier(0.77, 0, 0.18, 1); }
+	.wk-logo-text-wrap { position: absolute; left: calc(50% + var(--wl-h) * 52.36 / 4036.16 + 4px); bottom: 0; width: calc(var(--wl-h) * 1986.93 / 2018.08); height: calc(var(--wl-h) * 1057.41 / 2018.08); overflow: hidden; }
+	.wk-logo-text { display: block; height: 100%; width: auto; filter: brightness(0.9294); transform: translateX(-110%); transition: transform 300ms cubic-bezier(0.77, 0, 0.18, 1); }
+	.wk-logo--da .wk-logo-fahne { transform: none; }
+	.wk-logo--da .wk-logo-text { transform: none; }
 	.wk-board {
 		--sf-tile-w: clamp(18px, 3vw, 44px);
 		--sf-tile-h: calc(var(--sf-tile-w) * 1.38);
@@ -480,6 +752,14 @@ AUGENZEUGEN.</textarea>
 			var(--tafel-zarge, #070707) border-box;
 	}
 	.wk-zeile { display: flex; gap: 1px; }
+	/* Plattform-Logos auf Kacheln: dieselben Maße wie die Website-Wand */
+	.wk-kachel svg { width: 62%; height: 62%; display: block; }
+	.wk-board .mo-logo-text {
+		font-family: -apple-system, "Helvetica Neue", sans-serif;
+		font-weight: 800;
+		font-size: calc(var(--sf-tile-w) * 0.62);
+		letter-spacing: -0.03em;
+	}
 	.wk-regler { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
 	.wk-feld { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--gray, #999894); }
 	.wk-feld--breit { flex: 1 1 100%; }
