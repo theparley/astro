@@ -63,7 +63,7 @@ const kernaussage =
 	"Aus einem Gespräch im Monat entstehen: 1 Livestream, 1 Videopodcast, " +
 	"1 Audio-Podcast, 10 Beiträge, 10 Clips, 10 Shorts, 1 Newsletter, " +
 	"1 Transkript und 10 Zitate für KI. Eure Bibliothek wächst. " +
-	"1 Stunde Aufnahme steht gegen 100+ Stunden Zuschauerzeit.";
+	"1 Stunde Aufnahme steht gegen 100+ Stunden Watchtime.";
 ---
 
 {/* MOBIL-FORM ENTSCHIEDEN (Fred 14.09.): unterhalb eines Breakpoints
@@ -225,6 +225,11 @@ const kernaussage =
 	const BLOCK_BREITE = 10;
 	const FORMAT_TITEL = "VIDEOPODCAST";
 	const FORMAT_START = Math.floor((GESAMT_COLS - FORMAT_TITEL.length) / 2);
+	// Akt-Anzeige IN der Wand (Fred 15.09. früh, ersetzt die entfernten
+	// Schalter als reine Anzeige): die freie Zeile unter VIDEOPODCAST
+	// zeigt, welcher Akt läuft.
+	const AKT_LABELS = ["CONTENT-OUTPUT", "WATCHTIME"]; // Watchtime statt Zuschauerzeit (Fred 15.09.)
+	const mittig = (text: string) => Math.floor((GESAMT_COLS - text.length) / 2);
 
 	type Ev = { t: number; r: number; c: number; html?: string; weiss?: boolean };
 
@@ -255,10 +260,11 @@ const kernaussage =
 
 		let t = 200;
 		// ── Akt 1: FORMAT-TITEL → INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
-		addText(RAND, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 600;
-		addText(KOPF, RAND, INPUT_COLS, "INPUT", t); t += 500;
+		addText(RAND, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 400;
+		addText(RAND + 1, mittig(AKT_LABELS[0]), AKT_LABELS[0].length, AKT_LABELS[0], t); t += 600;
+		addText(KOPF, RAND, INPUT_COLS, "IN", t); t += 500;
 		addText(KOPF + 2, RAND, INPUT_COLS, INPUT_ZEILE, t); t += 600;
-		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUT", t); t += 500;
 		ZEILEN.forEach((def, i) => {
 			const r = KOPF + 2 + i;
 			addText(r, MITTE_RECHTS, TEXT_COLS, def.text, t);
@@ -281,10 +287,11 @@ const kernaussage =
 		// (1 STUNDE/AUFWAND links, 100+ STUNDEN/ZUSCHAUERZEIT rechts,
 		// beide auf den Summen-Zeilen — Lesung "unten" auf beide Seiten
 		// bezogen; AUFWAND/ZUSCHAUERZEIT als Zweitzeilen beibehalten).
-		addText(RAND, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 600;
-		addText(KOPF, RAND, INPUT_COLS, "INPUT", t); t += 500;
+		addText(RAND, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 400;
+		addText(RAND + 1, mittig(AKT_LABELS[1]), AKT_LABELS[1].length, AKT_LABELS[1], t); t += 600;
+		addText(KOPF, RAND, INPUT_COLS, "IN", t); t += 500;
 		add(t, KOPF + 2, RAND, { weiss: true }); t += 600;
-		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUTPUT", t); t += 500;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUT", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
 		// DIAGONAL-WELLE (Fred 14.09. abends): Verzögerung = (Zeile ×
@@ -309,7 +316,7 @@ const kernaussage =
 		addText(SUMME_ROW, RAND, INPUT_COLS, "1 STUNDE", t);
 		addText(SUMME_ROW + 1, RAND, INPUT_COLS, "AUFNAHME", t);
 		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
-		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t);
+		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "WATCHTIME", t);
 		t += 300 + lese;
 		// Schluss-Abbau + ATEMPAUSE vor dem Loop-Neustart (Fred 14.09.: der
 		// Neustart kam, bevor die weißen Kacheln ganz weg waren). Der Abbau

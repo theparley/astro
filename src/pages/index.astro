@@ -148,7 +148,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   mit Nachweis wieder etwas wert — der Beweis wertet die Indizien auf,
 	   ersetzt sie nicht. Zugleich Steigerungs-Treppe im Juristen-Register:
 	   INDIZ (Satz 3) → NACHWEIS (fehlt) → BEWEIS (Absatz darunter). */}
-	<p class="plaedoyer-text"><strong>Generierte Expertise</strong> gibt es auf Knopfdruck. Jeder Text, jedes Bild, jedes Video steht unter Generalverdacht. Inhalte, die vor kurzem noch ein Indiz für Kompetenz waren, wirken nicht mehr.</p>
+	<p class="plaedoyer-text"><strong>Generierte Expertise</strong> gibt es auf Knopfdruck.<br />Jeder Text, jedes Bild, jedes Video steht unter Generalverdacht. Inhalte, die vor kurzem noch ein Indiz für Kompetenz waren, wirken nicht mehr.</p>
 		{/* „Beweis" statt „Vertrauensbeweis" (Fred 13.09. nacht): das Kompositum
 	   war ihm im Kopf zu schwer/feierlich — und seit „ohne Nachweis" im
 	   Absatz darüber steht, trägt die Treppe rein: INDIZ → NACHWEIS → BEWEIS,
@@ -196,7 +196,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle
 		   Fragen." (Vorrat in Git-Historie; "in Augenschein nehmen" und
 		   "aktuelle Fragen" → "spontane Fragen" sind mit raus). */}
-		<p class="plaedoyer-text"><strong>Gelebte Expertise</strong> zeigt sich im echten Gespräch. Die unmittelbare Antwort auf eine spontane Frage beweist Kompetenz. Und die Momentaufnahme davon wird zum fälschungssicheren Beweis für den Kunden.</p>
+		<p class="plaedoyer-text"><strong>Gelebte Expertise</strong> zeigt sich im echten Gespräch.<br />Die unmittelbare Antwort auf eine spontane Frage beweist Kompetenz. Und die Momentaufnahme davon wird zum fälschungssicheren Beweis für den Kunden.</p>
 		{/* "ohne Kamerastress" statt "mit Video" (Fred 13.09. nacht): die
 		   Kamera sagt Video, ohne es zu sagen — das Wort "Video" steht damit
 		   wieder NUR auf der Knopfdruck-Seite (bewusste Eigenschaft, s. Brief);
@@ -235,7 +235,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   lässt sich jetzt Vertrauen skalieren" — „Wirkung" holt erstmals ein
 	   Wort der Wirkungs-Säule in den Kopf (Bezug: filmreif + ohne
 	   Kamerastress = die Wirkung, die skaliert wird). */}
-		<p class="plaedoyer-text">Genau solche Gespräche fangen wir filmreif ein. Mit dem passenden Format skalieren sie das Vertrauen in eure Marke. Auf allen Kanälen.</p>
+		<p class="plaedoyer-text">Genau solche Gesprächsmomente fangen wir filmreif ein.<br />Ins passende Format gebracht skalieren sie das Vertrauen in eure Marke. Auf allen Kanälen.</p>
 		</div>
 	</section>
 
@@ -267,9 +267,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	{/* Multi-Output-Sektion (Fred 2026-09-13/14): "Was aus einer Stunde
 	   Gespräch entstehen kann" — als MultiOutputTafel.astro portiert aus dem
 	   abgenommenen Entwurf (Website-Brief: Sektion "Der Multi-Output echter
-	   Gespräche" + BAU-ANWEISUNG). Erzähl-Reihenfolge: Paragraph (endet auf
-	   dem Skalieren) → DIESE Sektion (das Ergebnis) → Formatfrage mit Tafel
-	   + Formatberatung (der erste Schritt). */}
+	   Gespräche" + BAU-ANWEISUNG). Erzähl-Reihenfolge (Fred 15.09. früh,
+	   nach Hin-und-Zurück-Tausch bestätigt): Paragraph (endet auf "Auf
+	   allen Kanälen") → DIESE Sektion (der Output auf den Kanälen) →
+	   Formatfrage als Seitenschluss (endet auf der Tür Formatberatung). */}
 	<MultiOutputTafel />
 
 
@@ -340,8 +341,8 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Breite. */}
 		<div class="format-split">
 			<div class="tafel-kopf">
-			<p class="tafel-intro">Das Start-Format muss passen: zum Ziel, zum Budget, zur Branche und zu den Menschen. Und es muss angepasst werden, während es sich entwickelt.</p>
-			<p class="tafel-intro">Nicht immer passt eine Live-Q&amp;A-Session für den Start. Es gibt Formate für den Solo-Entrepreneur, der eine Personal Brand aufbauen will. Und es gibt Formate für Unternehmen, die mit ihrem Team zur Brancheninstanz werden wollen.</p>
+			<p class="tafel-intro">Das <strong>Start-Format</strong> muss passen.<br />Zum Ziel und seinem Budget, zur Branche und ihren Themen, zur Firmenkultur und ihren Menschen. Und es muss angepasst werden, während es sich entwickelt.</p>
+			<p class="tafel-intro">Es gibt Formate für Solopreneure, die eine Personal Brand aufbauen. Und es gibt Formate für Unternehmen, die mit ihrem Team zur Brancheninstanz werden wollen.</p>
 			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Am besten in regelmäßigen Abständen. Euer Format finden wir gemeinsam.</p>
 		</div>
 			<div class="format-rechts">
@@ -490,7 +491,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Statements sind zentriert, nicht linksbündig — daher wirkte unseres
 		   "bis an den Rand gezogen"). */
 		width: 100%;
-		max-width: 1728px;
+		/* Deckel ENTFERNT (Fred 15.09. früh: der Hero soll den Viewport
+		   IMMER zu füllen versuchen — vorher stoppte die Schrift am
+		   1728px-site-container und ab da wuchs nur noch die Randluft).
+		   Die 15.6cqw-Kalibrierung skaliert damit unbegrenzt mit der
+		   Fensterbreite; die BBH-Randluft-Messung von 30.08. gilt für die
+		   ÜBRIGEN Sektionen weiter. */
+		max-width: none;
 		margin: auto;
 		padding: 0 16px;
 		text-align: center;
@@ -649,7 +656,8 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	/* Fette Absatz-Öffner (Fred 14.09. nacht, zweite Stufe: Standard-Fett
 	   700 "reicht nicht"): 900 = die Fetteste der Variable-Achse, dasselbe
 	   Gewicht wie die Versaltürme — Lauftext bleibt Regular 400. */
-	.plaedoyer-text strong {
+	.plaedoyer-text strong,
+	.tafel-intro strong {
 		font-weight: 900;
 	}
 
