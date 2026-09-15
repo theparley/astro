@@ -266,4 +266,12 @@ export const LOGOS: Record<string, string> = {
 	web: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4.2" ry="9.5"/><path d="M2.8 12h18.4M4 7h16M4 17h16"/></svg>',
 	mail: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M3 6.5l9 7 9-7"/></svg>',
 	ki: '<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.5l1.9 6.2 6.2 1.9-6.2 1.9L12 18.7l-1.9-6.2-6.2-1.9 6.2-1.9z"/><path d="M19 15.5l.9 2.8 2.8.9-2.8.9-.9 2.8-.9-2.8-2.8-.9 2.8-.9z" opacity="0.85"/></svg>',
+	// KI-Assistenten (Fred 15.09., „Zitate für KI"-Zeile): die vier
+	// bekanntesten im deutschen Sprachraum, als vereinfachte Zeichen wie
+	// der Rest des Sets — chatgpt Doppel-Sechseck, claude Strahlenkranz,
+	// gemini geschwungener Vierstern, perplexity Winkel-Knoten.
+	chatgpt: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7"><path d="M12 3.2l6.8 3.9v7.8L12 18.8l-6.8-3.9V7.1z"/><path d="M12 8.2l3.3 1.9v3.8L12 15.8l-3.3-1.9v-3.8z"/></svg>',
+	claude: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><path d="M12 3.6v3.2M12 17.2v3.2M3.6 12h3.2M17.2 12h3.2M6.1 6.1l2.2 2.2M15.7 15.7l2.2 2.2M17.9 6.1l-2.2 2.2M8.3 15.7l-2.2 2.2"/></svg>',
+	gemini: '<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.6c.6 5.3 4.1 8.8 9.4 9.4-5.3.6-8.8 4.1-9.4 9.4-.6-5.3-4.1-8.8-9.4-9.4 5.3-.6 8.8-4.1 9.4-9.4z"/></svg>',
+	perplexity: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3v18M12 9L5 4.4V13h14V4.4L12 9zM5 13v6.6L12 15l7 4.6V13"/></svg>',
 };

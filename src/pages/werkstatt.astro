@@ -117,6 +117,10 @@ AUGENZEUGEN.</textarea>
 		sp: "spotify", spotify: "spotify",
 		ap: "apple", apple: "apple",
 		web: "web", mail: "mail", ki: "ki",
+		gpt: "chatgpt", chatgpt: "chatgpt",
+		cl: "claude", claude: "claude",
+		gm: "gemini", gemini: "gemini",
+		px: "perplexity", perplexity: "perplexity",
 	};
 	type Zelle = string;
 	function zellen(line: string): Zelle[] {
@@ -162,10 +166,16 @@ AUGENZEUGEN.</textarea>
 				rest = f.slice(2);
 			}
 			// Plattform-Logos am Zeilenende: rechtsbündig an der Blockkante
-			// (wie die Website-Wand) und in KANONISCHER Reihenfolge sortiert
-			// (Fred 15.09., „Sortierordnung": nicht die Position, nur die
-			// Reihenfolge — gleiche Abfolge in jeder Zeile).
-			const KANON = ["linkedin", "youtube", "instagram", "tiktok", "spotify", "apple", "web", "mail", "ki"];
+			// (wie die Website-Wand). Sortierordnung (Fred 15.09., zweite
+			// Runde): die HÄUFIGSTE Plattform der Folie sitzt außen an der
+			// gemeinsamen rechten Kante — dort teilen sich alle Zeilen die
+			// Spalte, gleiche Marke = ruhiges Bild; seltene wandern nach
+			// innen. Gleichstand entscheidet die kanonische Reihenfolge.
+			const KANON = ["linkedin", "youtube", "instagram", "tiktok", "spotify", "apple", "web", "mail", "ki", "chatgpt", "claude", "gemini", "perplexity"];
+			const haeufig: Record<string, number> = {};
+			for (const line of rest)
+				for (const z of line)
+					if (z.charCodeAt(0) === 0) haeufig[z.slice(1)] = (haeufig[z.slice(1)] ?? 0) + 1;
 			const blockBreite = Math.max(1, ...rest.map((z) => z.length));
 			rest = rest.map((line) => {
 				let i = line.length;
@@ -173,7 +183,10 @@ AUGENZEUGEN.</textarea>
 				if (i === line.length || i === 0) return line;
 				const logos = line
 					.slice(i)
-					.sort((a, b) => KANON.indexOf(a.slice(1)) - KANON.indexOf(b.slice(1)));
+					.sort((a, b) =>
+						(haeufig[a.slice(1)] ?? 0) - (haeufig[b.slice(1)] ?? 0) ||
+						KANON.indexOf(a.slice(1)) - KANON.indexOf(b.slice(1)),
+					);
 				const text = line.slice(0, i);
 				while (text.length && text[text.length - 1] === " ") text.pop();
 				const fill = Math.max(1, blockBreite - text.length - logos.length);
@@ -228,7 +241,7 @@ AUGENZEUGEN.</textarea>
 		const plan: Schritt[][][] = Array.from({ length: rows }, () =>
 			Array.from({ length: cols }, () => []),
 		);
-		const fenster: Array<{ steht: number; bis: number }> = [];
+		const fenster: Array<{ steht: number; bis: number; reinAb: number }> = [];
 		const aktuell: string[][] = Array.from({ length: rows }, () => Array(cols).fill(" "));
 		const leer: Zelle[][] = Array.from({ length: rows }, () => Array(cols).fill(" "));
 		const seq: Array<{ grid: Zelle[][]; hold: number; text: boolean }> = [];
@@ -269,7 +282,9 @@ AUGENZEUGEN.</textarea>
 			// Folien-Fenster: von „Folie steht" bis Ende der Standzeit —
 			// das Logo unten lebt in diesen Fenstern (aus- und einfahren);
 			// nur Text-Folien, auf Schwarz bleibt allein die Stange.
-			if (text) fenster.push({ steht: ende, bis: ende + hold });
+			// reinAb = wenn die LETZTE Zeile anfängt rauszuflappern
+			// (Fred 15.09.): Welle-Versatz der untersten Zeile nach bis.
+			if (text) fenster.push({ steht: ende, bis: ende + hold, reinAb: ende + hold + stagWelle(rows - 1, 0) });
 			t = ende + hold;
 			ende = t;
 		}
@@ -360,9 +375,10 @@ AUGENZEUGEN.</textarea>
 					}
 					await wait(Math.max(200, holdMs - 220));
 					if (gen !== vorschauGen) return;
-					// Rückweg ZUSAMMEN mit dem Rausflappern: beide rein,
-					// dann Stab auf den Punkt zusammen
+					// Rückweg startet, wenn die unterste Zeile rausflappert:
+					// beide rein, dann Stab auf den Punkt zusammen
 					const raus = flapAlle(null);
+					await wait(stag(rows - 1, 0));
 					logoBlock.classList.remove("wk-logo--da");
 					await wait(300);
 					logoBlock.classList.remove("wk-logo--stab");
@@ -558,17 +574,17 @@ AUGENZEUGEN.</textarea>
 	// zusammen. Auf Schwarz bleibt ein Punkt vom Stab stehen (Freds
 	// „vielleicht ist das witzig").
 	const POLE_MS = 220;
-	function logoPhasen(tMs: number, fenster: Array<{ steht: number; bis: number }>) {
-		// Out-Animation läuft ZUSAMMEN mit dem Rausflappern des Texts
-		// (Fred 15.09.): ab w.bis fahren Fahne+Text rein, danach der Stab
-		// runter — während die Kacheln auf Schwarz klappen.
+	function logoPhasen(tMs: number, fenster: Array<{ steht: number; bis: number; reinAb: number }>) {
+		// Out-Animation startet, wenn die LETZTE Zeile anfängt rauszu-
+		// flappern (w.reinAb, Fred 15.09.): Fahne+Text fahren rein,
+		// danach der Stab runter — während die Kacheln auf Schwarz klappen.
 		let p = 0, pPole = 0;
 		for (const w of fenster) {
 			const poleRaus = clamp01((tMs - w.steht) / POLE_MS);
-			const poleRein = 1 - clamp01((tMs - (w.bis + LOGO_GLIDE)) / POLE_MS);
+			const poleRein = 1 - clamp01((tMs - (w.reinAb + LOGO_GLIDE)) / POLE_MS);
 			pPole = Math.max(pPole, Math.min(poleRaus, poleRein));
 			const raus = clamp01((tMs - w.steht - POLE_MS) / LOGO_GLIDE);
-			const rein = 1 - clamp01((tMs - w.bis) / LOGO_GLIDE);
+			const rein = 1 - clamp01((tMs - w.reinAb) / LOGO_GLIDE);
 			p = Math.max(p, Math.min(raus, rein));
 		}
 		return { p: easeGlide(p), pPole: easeGlide(pPole) };
