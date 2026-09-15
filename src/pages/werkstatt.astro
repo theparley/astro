@@ -1,0 +1,432 @@
+---
+// /werkstatt — GIF-WERKSTATT für Fallblatt-Tafeln (Fred 15.09. früh):
+// der Nachfolger des Ein-Datei-Werkzeugs Tafel_Generator.html (Marketing-
+// Ordner, eingefroren als Alt-Stand). KERNIDEE: dieselbe Basis wie die
+// Website-Boards — diese Seite importiert das ECHTE Fallblatt-Modul
+// (src/lib/fallblatt.ts) und -CSS (src/styles/fallblatt.css). Trommel,
+// MAX_FLAPS, Tempo, Farben und Proportionen kommen aus der einen Quelle;
+// Material-Änderungen wirken damit automatisch in beide Richtungen
+// (Website ↔ GIF), ohne Abgleich-Arbeit.
+//
+// ZWEI RENDERER, EINE SPEZIFIKATION: die Vorschau ist das echte
+// DOM-Material (buildTileLayers + flapTo, wie die Wand). Der GIF-Export
+// braucht Bitmaps und malt deshalb mit einem Canvas-Painter — derselbe
+// Zeitplan, dieselben Parameter, die Faltung als vertikale Stauchung mit
+// Falz-Schatten. ⚠️ PAINTER-CHECKLISTE bei Material-Änderungen (das ist
+// der eine Ort, der nicht automatisch mitzieht): Kachelfarbe/--panel,
+// Zarge/Wand-Tokens, Fugenbreite, Scharnier-Deckung, Glyphen-Shift
+// (0.05em), Proportion 1:1.38, Kachel-zu-Glyphe 0.86 — unten im Painter
+// als Konstanten-Block markiert.
+//
+// Aus dem Alt-Werkzeug ÜBERNOMMEN: deterministischer Streuversatz
+// (Vorschau = Export, keine Zufalls-Differenz), Folien-Textfeld mit
+// Versal-Zwang, Schleifenlängen-Warnung ab 15s. VERSCHOBEN auf V2
+// (dokumentiert in Tafel_Generator_NOTIZEN.md): P-Sonderblatt, weiße
+// Logo-Fläche als Rahmen-Folien, Wölbungs-Graustufen.
+// Nicht im Menü verlinkt; internes Werkzeug wie /wand.
+import Layout from "../layouts/Layout.astro";
+import "../styles/fallblatt.css";
+---
+
+<Layout title="Werkstatt">
+	<main class="wk">
+		<h1 class="wk-titel">GIF-Werkstatt</h1>
+		<p class="wk-sub">Dieselbe Tafel wie auf der Website. Folien unten eintragen, Vorschau läuft; „GIF bauen" rendert die Schleife.</p>
+
+		<div class="wk-buehne">
+			<div class="wk-board" data-wk-board></div>
+		</div>
+
+		<div class="wk-regler">
+			<label class="wk-feld wk-feld--breit">
+				<span>Folien (eine Zeile je Kachelzeile, Folien mit „---" trennen)</span>
+				<textarea data-wk-text rows="8" spellcheck="false">KEIN BUSINESS
+OHNE WITNESS.
+---
+KUNDEN WERDEN
+AUGENZEUGEN.</textarea>
+			</label>
+			<label class="wk-feld"><span>Tempo-Faktor (1 = Website)</span>
+				<input data-wk-tempo type="number" step="0.1" min="0.2" max="4" value="1" /></label>
+			<label class="wk-feld"><span>Standzeit je Folie, ms</span>
+				<input data-wk-hold type="number" step="100" min="200" value="2400" /></label>
+			<label class="wk-feld"><span>Kachelbreite Export, px</span>
+				<input data-wk-kachel type="number" step="2" min="16" max="120" value="56" /></label>
+			<label class="wk-feld"><span>Bilder je Sekunde</span>
+				<input data-wk-fps type="number" step="1" min="10" max="50" value="25" /></label>
+			<label class="wk-feld wk-feld--check"><span>Zarge</span>
+				<input data-wk-zarge type="checkbox" checked /></label>
+			<button class="wk-cta" data-wk-export type="button">GIF bauen</button>
+			<span class="wk-status" data-wk-status></span>
+		</div>
+		<p class="wk-hinweis" data-wk-laenge></p>
+	</main>
+</Layout>
+
+{/* gif.js (MIT) lokal unter public/werkzeug/ — Worker dürfen nur
+   same-origin laden, CDN-Worker scheitert (SecurityError). */}
+<script src="/werkzeug/gif.js" is:inline></script>
+
+<script>
+	import {
+		type FlapTile,
+		DRUM,
+		MAX_FLAPS,
+		FLAP_STEP_MS,
+		buildTileLayers,
+		resetInstant,
+		flapTo,
+		wait,
+	} from "../lib/fallblatt";
+
+	// Deterministischer Streuversatz (Alt-Werkzeug-Lektion „Vorschau =
+	// Export"): dieselbe Formel wie die Wand, kein Math.random.
+	const stag = (r: number, c: number) => ((r * 37 + c * 23) % 9) * 26;
+
+	// ── Folien-Parser ──
+	function parseFolien(text: string): string[][] {
+		const folien = text
+			.toUpperCase()
+			.split(/\n---+\n?/)
+			.map((f) => f.split("\n").map((z) => z.trimEnd()).filter((z, i, a) => z !== "" || i < a.length - 1))
+			.filter((f) => f.some((z) => z.trim() !== ""));
+		return folien.length ? folien : [["PARLEY"]];
+	}
+
+	function raster(folien: string[][]) {
+		const rows = Math.max(1, ...folien.map((f) => f.length));
+		const cols = Math.max(1, ...folien.flatMap((f) => f.map((z) => z.length)));
+		const pad = (f: string[]) => {
+			const top = Math.floor((rows - f.length) / 2);
+			return Array.from({ length: rows }, (_, r) => {
+				const line = f[r - top] ?? "";
+				const left = Math.floor((cols - line.length) / 2);
+				return Array.from({ length: cols }, (_, c) => line[c - left] ?? " ").join("");
+			});
+		};
+		return { rows, cols, grids: folien.map(pad) };
+	}
+
+	// ── Zeitplan (geteilt von Vorschau und Export): je Kachel die Liste
+	// der Klapp-Schritte durch die Trommel (MAX_FLAPS-Deckel wie die
+	// Website), mit Startversatz. ──
+	type Schritt = { t: number; von: string; zu: string };
+	function bauePlan(grids: string[][], rows: number, cols: number, flipMs: number, holdMs: number) {
+		const plan: Schritt[][][] = Array.from({ length: rows }, () =>
+			Array.from({ length: cols }, () => []),
+		);
+		const aktuell: string[][] = Array.from({ length: rows }, () => Array(cols).fill(" "));
+		let t = 400;
+		let ende = t;
+		for (const grid of grids) {
+			for (let r = 0; r < rows; r++)
+				for (let c = 0; c < cols; c++) {
+					const ziel = grid[r][c];
+					const von = aktuell[r][c];
+					if (ziel === von) continue;
+					let vi = DRUM.indexOf(von);
+					const zi = DRUM.indexOf(ziel);
+					let start = t + stag(r, c);
+					if (vi === -1 || zi === -1) {
+						plan[r][c].push({ t: start, von, zu: ziel });
+						ende = Math.max(ende, start + flipMs);
+					} else {
+						let dist = (zi - vi + DRUM.length) % DRUM.length;
+						if (dist > MAX_FLAPS) {
+							vi = (zi - MAX_FLAPS + DRUM.length) % DRUM.length;
+							dist = MAX_FLAPS;
+						}
+						for (let i = 0; i < dist; i++) {
+							const naechst = DRUM[(vi + 1) % DRUM.length];
+							plan[r][c].push({ t: start, von: DRUM[vi], zu: naechst });
+							vi = (vi + 1) % DRUM.length;
+							start += flipMs;
+						}
+						ende = Math.max(ende, start);
+					}
+					aktuell[r][c] = ziel;
+				}
+			t = ende + holdMs;
+			ende = t;
+		}
+		return { plan, gesamt: t };
+	}
+
+	// ── Vorschau: echtes DOM-Material ──
+	const boardEl = document.querySelector<HTMLElement>("[data-wk-board]")!;
+	const eingaben = {
+		text: document.querySelector<HTMLTextAreaElement>("[data-wk-text]")!,
+		tempo: document.querySelector<HTMLInputElement>("[data-wk-tempo]")!,
+		hold: document.querySelector<HTMLInputElement>("[data-wk-hold]")!,
+		kachel: document.querySelector<HTMLInputElement>("[data-wk-kachel]")!,
+		fps: document.querySelector<HTMLInputElement>("[data-wk-fps]")!,
+		zarge: document.querySelector<HTMLInputElement>("[data-wk-zarge]")!,
+	};
+	const status = document.querySelector<HTMLElement>("[data-wk-status]")!;
+	const laengeEl = document.querySelector<HTMLElement>("[data-wk-laenge]")!;
+
+	let vorschauGen = 0;
+
+	function lesen() {
+		const folien = parseFolien(eingaben.text.value);
+		const { rows, cols, grids } = raster(folien);
+		const flipMs = Math.round(FLAP_STEP_MS / Math.max(0.2, Number(eingaben.tempo.value) || 1));
+		const holdMs = Math.max(200, Number(eingaben.hold.value) || 2400);
+		return { folien, rows, cols, grids, flipMs, holdMs };
+	}
+
+	async function vorschau() {
+		const gen = ++vorschauGen;
+		const { rows, cols, grids, flipMs, holdMs } = lesen();
+		const { gesamt } = bauePlan(grids, rows, cols, flipMs, holdMs);
+		laengeEl.textContent = `Schleife: ${(gesamt / 1000).toFixed(1)} s` + (gesamt > 15000 ? " — über 15 s, im Feed sieht kaum jemand so lange zu." : "");
+		laengeEl.classList.toggle("wk-warn", gesamt > 15000);
+
+		boardEl.innerHTML = "";
+		boardEl.style.setProperty("--wk-cols", String(cols));
+		const tiles: FlapTile[][] = [];
+		for (let r = 0; r < rows; r++) {
+			const zeile = document.createElement("div");
+			zeile.className = "wk-zeile";
+			const tr: FlapTile[] = [];
+			for (let c = 0; c < cols; c++) {
+				const k = document.createElement("span");
+				k.className = "sf-tile wk-kachel";
+				zeile.appendChild(k);
+				tr.push(buildTileLayers(k));
+			}
+			boardEl.appendChild(zeile);
+			tiles.push(tr);
+		}
+		tiles.flat().forEach((t) => resetInstant(t, " "));
+
+		// Endlos-Vorschau über die Folien
+		(async () => {
+			while (gen === vorschauGen) {
+				for (const grid of grids) {
+					if (gen !== vorschauGen) return;
+					await Promise.all(
+						tiles.flatMap((tr, r) =>
+							tr.map((tile, c) =>
+								wait(stag(r, c)).then(() => (gen === vorschauGen ? flapTo(tile, grid[r][c], flipMs) : undefined)),
+							),
+						),
+					);
+					await wait(holdMs);
+				}
+				if (gen !== vorschauGen) return;
+				await Promise.all(tiles.flatMap((tr, r) => tr.map((tile, c) => wait(stag(r, c)).then(() => (gen === vorschauGen ? flapTo(tile, " ", flipMs) : undefined)))));
+				await wait(600);
+			}
+		})();
+	}
+
+	// ── Export-Painter: malt die geteilte Spezifikation als Bitmap.
+	// ⚠️ PAINTER-KONSTANTEN = Spiegel des Material-CSS (bei Änderungen an
+	// fallblatt.css / Tokens HIER nachziehen — der eine manuelle Ort): ──
+	function tokenFarbe(name: string, fallback: string) {
+		const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+		return v || fallback;
+	}
+	function aufloesen(farbe: string): string {
+		// color-mix & Co. über den Browser in RGB auflösen
+		const d = document.createElement("div");
+		d.style.color = farbe;
+		document.body.appendChild(d);
+		const rgb = getComputedStyle(d).color;
+		d.remove();
+		return rgb;
+	}
+
+	function zeichneFrame(
+		ctx: CanvasRenderingContext2D,
+		tMs: number,
+		plan: Schritt[][][],
+		rows: number,
+		cols: number,
+		flipMs: number,
+		kw: number,
+		zarge: boolean,
+	) {
+		const kh = kw * 1.38; // Material-Proportion
+		const fuge = 1;
+		const rand = zarge ? Math.round(kw * 0.24) : 0;
+		const fontPx = kw * 0.86 * 1.16; // Kachel:Glyphe 0.86 → Glyphe = kw/0.86? Nein: Glyphe ≈ kw/0.86*... (siehe Notiz unten)
+		// Notiz: auf der Website ist die Glyphe ~1.16x der Kachelbreite
+		// (31.1px Schrift auf 26.6px Kachel = Verhältnis 0.86 Kachel:Glyphe).
+		const wandF = aufloesen(tokenFarbe("--tafel-wand", "#070707"));
+		const zargeF = aufloesen(tokenFarbe("--tafel-zarge", "#070707"));
+		const panel = aufloesen(tokenFarbe("--panel", "#0d0d0d"));
+
+		const W = ctx.canvas.width, H = ctx.canvas.height;
+		ctx.fillStyle = zarge ? zargeF : "#000";
+		ctx.fillRect(0, 0, W, H);
+		if (zarge) {
+			ctx.fillStyle = wandF;
+			ctx.fillRect(rand, rand, W - 2 * rand, H - 2 * rand);
+		}
+
+		ctx.textAlign = "center";
+		const halfMs = Math.max(8, flipMs / 2);
+
+		for (let r = 0; r < rows; r++)
+			for (let c = 0; c < cols; c++) {
+				const x = rand + c * (kw + fuge);
+				const y = rand + r * (kh + fuge);
+				// aktuellen Schritt finden
+				let von = " ", zu = " ", phase = -1; // -1 = ruhend
+				const liste = plan[r][c];
+				let ruhend = " ";
+				for (const s of liste) {
+					if (tMs >= s.t + flipMs) { ruhend = s.zu; continue; }
+					if (tMs >= s.t) { von = s.von; zu = s.zu; phase = (tMs - s.t) / flipMs; }
+					break;
+				}
+				const zeigeOben = phase >= 0 ? zu : ruhend;
+				const zeigeUnten = phase >= 0 ? von : ruhend;
+
+				// Kachelgrund
+				ctx.fillStyle = panel;
+				ctx.fillRect(x, y, kw, kh);
+
+				const glyph = (ch: string, clipOben: boolean) => {
+					ctx.save();
+					ctx.beginPath();
+					ctx.rect(x, clipOben ? y : y + kh / 2, kw, kh / 2);
+					ctx.clip();
+					if (ch === "●") {
+						ctx.fillStyle = "#ededed";
+						ctx.beginPath();
+						ctx.arc(x + kw / 2, y + kh / 2, kw * 0.35, 0, Math.PI * 2);
+						ctx.fill();
+					} else if (ch !== " ") {
+						ctx.fillStyle = "#fff";
+						ctx.font = `900 ${fontPx}px "Forma DJR Mono", monospace`;
+						// vertikal: Cap-Mitte auf Kachelmitte + 0.05em-Shift
+						const capH = fontPx * 0.7;
+						const grundlinie = y + kh / 2 + capH / 2 + fontPx * 0.05;
+						ctx.fillText(ch, x + kw / 2, grundlinie);
+					}
+					ctx.restore();
+				};
+
+				// Statik: oben NEU, unten ALT
+				glyph(zeigeOben, true);
+				glyph(zeigeUnten, false);
+
+				if (phase >= 0) {
+					if (phase < 0.5) {
+						// Vorderklappe fällt: obere Hälfte zeigt ALT, vertikal gestaucht
+						const p = phase / 0.5;
+						const s = Math.cos(p * Math.PI / 2);
+						ctx.save();
+						ctx.translate(0, (y + kh / 2) * (1 - s));
+						ctx.scale(1, s);
+						ctx.fillStyle = panel;
+						ctx.fillRect(x, y, kw, kh / 2);
+						glyph(zeigeUnten === " " && von === " " ? von : von, true);
+						ctx.fillStyle = `rgba(0,0,0,${0.35 * p})`;
+						ctx.fillRect(x, y, kw, kh / 2);
+						ctx.restore();
+					} else {
+						// Rückklappe schwingt hoch: untere Hälfte zeigt NEU
+						const p = (phase - 0.5) / 0.5;
+						const s = Math.sin(p * Math.PI / 2);
+						ctx.save();
+						ctx.translate(0, (y + kh / 2) * (1 - s));
+						ctx.scale(1, s);
+						ctx.fillStyle = panel;
+						ctx.fillRect(x, y + kh / 2, kw, kh / 2);
+						glyph(zu, false);
+						ctx.fillStyle = `rgba(0,0,0,${0.35 * (1 - p)})`;
+						ctx.fillRect(x, y + kh / 2, kw, kh / 2);
+						ctx.restore();
+					}
+				}
+
+				// Scharnier (immer obenauf, wie .sf-hinge)
+				ctx.fillStyle = "rgba(0,0,0,0.65)";
+				ctx.fillRect(x, y + kh / 2 - 0.5, kw, 1);
+			}
+	}
+
+	async function exportGif() {
+		const { rows, cols, grids, flipMs, holdMs } = lesen();
+		const kw = Math.max(16, Number(eingaben.kachel.value) || 56);
+		const fps = Math.min(50, Math.max(10, Number(eingaben.fps.value) || 25));
+		const zarge = eingaben.zarge.checked;
+		const { plan, gesamt } = bauePlan(grids, rows, cols, flipMs, holdMs);
+
+		await document.fonts.load(`900 40px "Forma DJR Mono"`);
+		const fuge = 1;
+		const rand = zarge ? Math.round(kw * 0.24) : 0;
+		const W = cols * (kw + fuge) - fuge + 2 * rand;
+		const H = rows * Math.round(kw * 1.38 + fuge) - fuge + 2 * rand;
+		const canvas = document.createElement("canvas");
+		canvas.width = W; canvas.height = H;
+		const ctx = canvas.getContext("2d")!;
+
+		// @ts-expect-error gif.js kommt als globales Script (CDN, s. oben)
+		const gif = new GIF({ workers: 2, quality: 8, width: W, height: H, workerScript: "/werkzeug/gif.worker.js" });
+		const delay = Math.round(1000 / fps);
+		const frames = Math.ceil(gesamt / delay);
+		status.textContent = `rendere ${frames} Bilder …`;
+		for (let f = 0; f < frames; f++) {
+			zeichneFrame(ctx, f * delay, plan, rows, cols, flipMs, kw, zarge);
+			gif.addFrame(ctx, { copy: true, delay });
+			if (f % 20 === 0) { status.textContent = `rendere ${f}/${frames} …`; await wait(0); }
+		}
+		status.textContent = "kodiere GIF …";
+		gif.on("finished", (blob: Blob) => {
+			const a = document.createElement("a");
+			a.href = URL.createObjectURL(blob);
+			a.download = `parley-tafel-${Date.now()}.gif`;
+			a.click();
+			status.textContent = `fertig — ${(blob.size / 1024 / 1024).toFixed(1)} MB, ${(gesamt / 1000).toFixed(1)} s`;
+		});
+		gif.render();
+	}
+
+	let tippTimer = 0;
+	function neuStarten() {
+		window.clearTimeout(tippTimer);
+		tippTimer = window.setTimeout(vorschau, 400);
+	}
+	Object.values(eingaben).forEach((el) => el.addEventListener("input", neuStarten));
+	document.querySelector("[data-wk-export]")!.addEventListener("click", exportGif);
+	document.addEventListener("astro:page-load", vorschau);
+</script>
+
+<style is:global>
+	.wk { max-width: 1100px; margin: 0 auto; padding: 48px 16px 96px; }
+	.wk-titel { font-weight: 900; text-transform: uppercase; line-height: 0.9; font-size: clamp(2rem, 1rem + 4vw, 5rem); margin: 0 0 8px; }
+	.wk-sub { font-size: 1rem; color: var(--gray, #999894); margin: 0 0 32px; }
+	.wk-buehne { display: flex; justify-content: center; padding: 32px 0; overflow-x: auto; }
+	.wk-board {
+		--sf-tile-w: clamp(18px, 3vw, 44px);
+		--sf-tile-h: calc(var(--sf-tile-w) * 1.38);
+		--sf-font-size: calc(var(--sf-tile-w) * 1.16);
+		display: flex; flex-direction: column; gap: 1px;
+		padding: calc(var(--sf-tile-w) * 0.24);
+		background:
+			linear-gradient(var(--tafel-wand, #070707), var(--tafel-wand, #070707)) content-box,
+			var(--tafel-zarge, #070707) border-box;
+	}
+	.wk-zeile { display: flex; gap: 1px; }
+	.wk-regler { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+	.wk-feld { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--gray, #999894); }
+	.wk-feld--breit { flex: 1 1 100%; }
+	.wk-feld textarea, .wk-feld input[type="number"] {
+		background: var(--panel, #0d0d0d); border: 1px solid var(--line, #2a2a2a);
+		color: #fff; font: 500 15px/1.4 ui-monospace, monospace; padding: 10px;
+	}
+	.wk-feld textarea { text-transform: uppercase; }
+	.wk-feld--check { flex-direction: row; align-items: center; gap: 8px; }
+	.wk-cta {
+		background: var(--tile-surface, #ededed); color: #000; border: 0; cursor: pointer;
+		font: 900 15px/1 inherit; letter-spacing: 0.04em; text-transform: uppercase; padding: 16px 24px;
+	}
+	.wk-status { font-size: 13px; color: var(--gray, #999894); }
+	.wk-hinweis { font-size: 13px; color: var(--gray, #999894); margin-top: 12px; }
+	.wk-warn { color: #e0a0a0; }
+</style>

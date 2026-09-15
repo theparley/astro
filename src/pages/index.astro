@@ -128,18 +128,15 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Wort war bei Sektionstitel-Größe die Sprengzeile der Halbspalte;
 		   der Split liest sich versal als Doppel-Wort (AUGEN ZEUGEN). */}
 		<div class="paragraph-links">
-			{/* Turm + Kontakt-Zeile in EINEM Block (Fred 14.09. nacht): der
-			   Block ist so breit wie der Turm, die Zeile darin rechtsbündig —
-			   sie endet unter dem Punkt von ZEUGEN. */}
-			<div class="turm-block">
+			{/* "Noch vor dem ersten Kontakt." UMGEZOGEN (Fred 15.09. früh):
+			   die Zeile steht jetzt am ENDE von Absatz 2 (nach dem
+			   fälschungssicheren Beweis). RÜCKBAU-ZEIGER für schnelles
+			   Zurücktauschen (Fred: "merk dir die vorherige Lösung"):
+			   Commit 2c977b4 = Zeile rechtsbündig unterm Punkt von ZEUGEN.,
+			   im .turm-block (width max-content, gap 0), Abstand 0.2 Turm-Em
+			   via text-box-trim + margin-top 0.05 Turm-Em (@supports-Wache).
+			   Ein `git show 2c977b4 -- src/pages/index.astro` zeigt alles. */}
 			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kunden</span><span class="statement-zeile">werden</span><span class="statement-zeile">Augen</span><span class="statement-zeile">zeugen.</span></span></h2>
-			{/* Kontakt-Board VERWORFEN (Fred 14.09. nacht): die Kachel-Zeile
-			   unterm Turm ist wieder raus (samt AUCH DIE HIDDEN BUYERS als
-			   zweitem Zustand — Wortlaut-Vorrat in der Git-Historie).
-			   Stattdessen wieder die KLEINE TEXT-Zeile, ganz nah an den
-			   Turm gerückt; die Abstände IM Turm bleiben unangetastet. */}
-			<p class="kontakt-zeile">Noch vor dem ersten Kontakt.</p>
-			</div>
 		</div>
 		<div class="paragraph-text">
 		{/* Indiz-Satz (Fred 13.09. nacht, Diktat; Drittfassung): „vor kurzem
@@ -196,7 +193,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Kompetenz zeigt sich in unmittelbaren Antworten auf aktuelle
 		   Fragen." (Vorrat in Git-Historie; "in Augenschein nehmen" und
 		   "aktuelle Fragen" → "spontane Fragen" sind mit raus). */}
-		<p class="plaedoyer-text"><strong>Gelebte Expertise</strong> zeigt sich im echten Gespräch.<br />Die unmittelbare Antwort auf eine spontane Frage beweist Kompetenz. Und die Momentaufnahme davon wird zum fälschungssicheren Beweis für den Kunden.</p>
+		<p class="plaedoyer-text"><strong>Gelebte Expertise</strong> zeigt sich im echten Gespräch.<br />Die unmittelbare Antwort auf eine spontane Frage beweist Kompetenz. Und die Momentaufnahme davon wird zum fälschungssicheren Beweis für den Kunden. Noch vor dem ersten Kontakt.</p>
 		{/* "ohne Kamerastress" statt "mit Video" (Fred 13.09. nacht): die
 		   Kamera sagt Video, ohne es zu sagen — das Wort "Video" steht damit
 		   wieder NUR auf der Knopfdruck-Seite (bewusste Eigenschaft, s. Brief);
@@ -616,10 +613,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			align-items: start;
 		}
 
-		.turm-block {
-			margin-left: auto;
-			margin-right: 0;
-		}
 	}
 
 	/* Statement links: versal, Größe = BBHs text-2xl (Referenz für
@@ -672,52 +665,6 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		align-items: center;
 	}
 
-	/* Turm-Block: exakt so breit wie der Turm (max-content), darin die
-	   Kontakt-Zeile RECHTSBÜNDIG (Fred 14.09. nacht) — sie endet unter dem
-	   Punkt von ZEUGEN. Fuge 6px, Turm-Zeilenabstände unangetastet. */
-	.turm-block {
-		display: flex;
-		flex-direction: column;
-		/* (Mitte-Anschlag-Probe nach BBH-Muster 14.09. nacht direkt wieder
-		   verworfen — Fred: zurück auf mittig.) */
-		/* Fuge AUF NULL (Fred 14.09. nacht, dritte Stufe: "ganz an die
-		   ZEUGEN, dass sie sich berühren") — die Zeile sitzt direkt an der
-		   Unterkante der Turm-Zeilenbox. Vorstufen 6px und Lead-Zwischenraum
-		   in der Git-Historie. */
-		gap: 0;
-		width: max-content;
-		max-width: 100%;
-		margin: 0 auto;
-	}
-
-	.turm-block .kontakt-zeile {
-		text-align: right;
-	}
-
-	/* ABSTAND = TURM-RHYTHMUS (Fred 14.09. nacht, dritte Stufe nach
-	   Berührung): zwischen ZEUGEN. und der Kontakt-Zeile liegt jetzt
-	   exakt der sichtbare Tinten-Abstand zweier Turm-Zeilen — beim
-	   Zeilenabstand 0.9 und Versal-Kappe 0.7 sind das 0.2 Turm-Em.
-	   Rechnung (mit text-box-trim an der Zeile): Turm-Überhang −0.15 +
-	   gewünschte Lücke 0.2 = +0.05 Turm-Em. @supports-Wache: Browser
-	   ohne text-box lassen die Zeile mit ähnlicher Luft stehen — nie
-	   Überschneidung. */
-	@supports (text-box: trim-both cap alphabetic) {
-		.turm-block .kontakt-zeile {
-			text-box: trim-both cap alphabetic;
-			margin-top: calc(clamp(2.5rem, 1rem + 7vw, 8rem) * 0.05);
-		}
-	}
-
-	/* "Noch vor dem ersten Kontakt." als kleine Text-Zeile unterm Turm
-	   (zurück von der Board-Variante): BBH-Lead-Referenz wie die Absätze
-	   rechts, normale Schreibung, normales Gewicht. */
-	.kontakt-zeile {
-		margin: 0;
-		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
-		line-height: 1.3;
-		letter-spacing: -0.01em;
-	}
 
 	.format-rechts {
 		display: flex;
