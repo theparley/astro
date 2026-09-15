@@ -189,16 +189,21 @@ const kernaussage =
 	// AUFWAND zieht unter STUNDE mit (Muster "   WÄCHST.").
 	const INPUT_ZEILE = " 1 GESPRÄCH";
 	const INPUT_COLS = 16;
+	// Logo-Reihenfolge je Zeile (Fred 15.09., wie im GIF-Creator): die
+	// HÄUFIGSTE Plattform sitzt außen an der gemeinsamen rechten Kante
+	// (dort teilen sich alle Zeilen die Spalte), seltene wandern nach
+	// innen; Gleichstand nach Set-Reihenfolge. KI-Zeile trägt die vier
+	// bekanntesten Assistenten statt des generischen Funkens.
 	const ZEILEN: Array<{ text: string; logos: string[] }> = [
 		{ text: " 1 LIVESTREAM",    logos: ["linkedin", "youtube"] },
-		{ text: " 1 VIDEOPODCAST",  logos: ["youtube", "web"] },
+		{ text: " 1 VIDEOPODCAST",  logos: ["web", "youtube"] },
 		{ text: " 1 AUDIO-PODCAST", logos: ["spotify", "apple", "web"] },
 		{ text: "10 BEITRÄGE",      logos: ["linkedin"] },
-		{ text: "10 CLIPS",         logos: ["linkedin", "instagram", "tiktok", "youtube"] },
-		{ text: "10 SHORTS",        logos: ["youtube", "instagram", "tiktok"] },
+		{ text: "10 CLIPS",         logos: ["instagram", "tiktok", "linkedin", "youtube"] },
+		{ text: "10 SHORTS",        logos: ["instagram", "tiktok", "youtube"] },
 		{ text: " 1 NEWSLETTER",    logos: ["mail"] },
 		{ text: " 1 TRANSKRIPT",    logos: ["web"] },
-		{ text: "10 ZITATE FÜR KI", logos: ["ki"] },
+		{ text: "10 ZITATE FÜR KI", logos: ["chatgpt", "claude", "gemini", "perplexity"] },
 		{ text: "", logos: [] },
 		{ text: " + EURE BIBLIOTHEK", logos: [] },
 		{ text: "   WÄCHST.", logos: [] },
