@@ -646,8 +646,10 @@ AUGENZEUGEN.</textarea>
 		const logoAn = eingaben.logo.checked;
 		const { plan, gesamt, fenster } = bauePlan(grids, rows, cols, flipMs, holdMs);
 		const LOGO_PAD = 28;
-		// Logo-Band am Boden: Logo-Höhe = 7,5 % der Ausgabehöhe + Luft.
-		const bandFuer = (hoehe: number) => (logoAn ? Math.round(hoehe * 0.075) + 2 * LOGO_PAD : 0);
+		// Logo-Band am Boden: Logo-Höhe = 7,5 % der Ausgabehöhe, Luft nur
+		// OBEN zum Board — die Fahne dockt ohne schwarzes Pixel direkt am
+		// unteren Bildrand an (Fred 15.09.).
+		const bandFuer = (hoehe: number) => (logoAn ? Math.round(hoehe * 0.075) + LOGO_PAD : 0);
 		let kw = Math.max(16, Number(eingaben.kachel.value) || 56);
 		if (fest) {
 			// Kachelbreite automatisch: die größte, deren Board in den
@@ -671,7 +673,7 @@ AUGENZEUGEN.</textarea>
 		const H = fest ? fest[1] : BH + band;
 		const ox = Math.floor((W - BW) / 2);
 		const oy = fest ? Math.max(0, Math.floor((H - band - BH) / 2)) : 0;
-		const logoH = logoAn ? band - 2 * LOGO_PAD : 0;
+		const logoH = logoAn ? band - LOGO_PAD : 0;
 		// Logo-Bilder = dieselben SVGs wie die Website (public/parley/)
 		let logoBilder: { fahne: HTMLImageElement; text: HTMLImageElement } | null = null;
 		if (logoAn) {
@@ -711,7 +713,7 @@ AUGENZEUGEN.</textarea>
 			ctx.drawImage(board, ox, oy);
 			if (logoBilder) {
 				const { p, pPole } = logoPhasen(f * delay, fenster);
-				zeichneLogo(ctx, W / 2, H - LOGO_PAD, logoH, logoBilder, p, pPole);
+				zeichneLogo(ctx, W / 2, H, logoH, logoBilder, p, pPole);
 			}
 			gif.addFrame(ctx, { copy: true, delay });
 			if (f % 20 === 0) { status.textContent = `rendere ${f}/${frames} …`; await wait(0); }
