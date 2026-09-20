@@ -44,7 +44,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">1:9</p>
+					<p class="verhaeltnis">1 zu 9</p>
 					<p class="bezug">Ein Gespräch im Monat zu neun Ausspielungen.</p>
 				</div>
 				<div class="kachel-mitte kachel-mitte--flap">
@@ -59,7 +59,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			   Fläche — das Bild behauptete dann hundertmal mehr als die Zahl. */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">1:100+</p>
+					<p class="verhaeltnis">1 zu 100+</p>
 					<p class="bezug">Eine Stunde Aufnahmezeit zu mehr als hundert Stunden Zuschauerzeit.</p>
 				</div>
 				<div class="kachel-mitte">
@@ -84,7 +84,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			   — kein einziger zusätzlicher Knoten für tausend Leute. */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">2:1000+</p>
+					<p class="verhaeltnis">2 zu 1000+</p>
 					<p class="bezug">Zwei Experten zu mehr als tausend Zuschauern.</p>
 				</div>
 				<div class="kachel-mitte">
@@ -156,14 +156,17 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	   ("Ein Gespräch im Monat zu neun Ausspielungen."). Die Ziffern oben
 	   sind das Signal, der Satz darunter die Auflösung; wer nur das
 	   Verhältnis sieht, hat es schon, wer liest, bekommt es bestätigt.
-	   Größe so gewählt, dass die längste Fassung ("2:1000+", sieben
-	   Zeichen) noch in die Kachelbreite passt. */
+	   Der Doppelpunkt ist ausgeschrieben (Fred 20.09. abends): "1 zu 9"
+	   statt "1:9" — das Verhältnis wird damit selbst schon gesprochen und
+	   nicht erst in der Zeile darunter. Kostet Größe: die längste Fassung
+	   ist jetzt "2 zu 1000+", die Schrift musste entsprechend kleiner. */
 	.verhaeltnis {
 		margin: 0;
 		font-weight: 900;
 		line-height: 0.85;
 		letter-spacing: -0.03em;
-		font-size: 27cqw;
+		font-size: 21cqw;
+		white-space: nowrap;
 	}
 
 	.bezug {
