@@ -144,31 +144,15 @@ const personSvgSchwarz = doppel(
 	"fill='#0d0d0d' stroke='#ffffff' stroke-width='34' paint-order='stroke' " +
 	"stroke-linejoin='round'",
 ).replace(/"/g, "'");
-// DIE MENGE SIND NICHT MEHR PERSONEN, SONDERN BLICKE (Fred 20.09. abends).
-// Tausend Figuren behaupten tausend verschiedene Menschen — messbar ist
-// aber, wie oft geschaut wurde, nicht von wie vielen. Ein Auge zaehlt genau
-// das: ein Blick, kein Kopf. Die zwei Experten in der Mitte bleiben
-// Personen, weil sie es sind.
-// Auge statt Fernglas (Freds Vorschlag), aus zwei Gruenden: es ist das
-// eingefuehrte Zeichen fuer genau diese Kennzahl, und es traegt bei 8 px
-// Figurenhoehe — ein Fernglas hat dort zu viel Kleinteiliges. Dazu passt es
-// auf das Hauswort: Augenzeuge.
-const augeLinse =
-	"M50 24c-21 0-36 15-43 26 7 11 22 26 43 26s36-15 43-26c-7-11-22-26-43-26Z";
-const augeStern = "M50 37a13 13 0 1 1 0 26 13 13 0 0 1 0-26Z";
-const augeSvg = (
-	"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'>" +
-	"<g transform='translate(-4 4) scale(0.72)' fill='#ffffff'><path d='" +
-	augeLinse + "'/></g>" +
-	"<g transform='translate(-4 4) scale(0.72)' fill='#0d0d0d'><path d='" +
-	augeStern + "'/></g>" +
-	"<g transform='translate(96 4) scale(0.72)' fill='#ffffff'><path d='" +
-	augeLinse + "'/></g>" +
-	"<g transform='translate(96 4) scale(0.72)' fill='#0d0d0d'><path d='" +
-	augeStern + "'/></g>" +
-	"</svg>"
-).replace(/"/g, "'");
-const personSvgWeiss = augeSvg;
+// AUGEN WIEDER RAUS (Fred 20.09. abends: "das wird ja bedrohlich"). Ein
+// Feld aus tausend Augen liest sich als Ueberwachung, nicht als Publikum —
+// die Bedeutung stimmte, die Wirkung nicht. Die Menge sind wieder Figuren.
+// Damit steht allerdings die Frage wieder offen, die zum Auge gefuehrt
+// hatte: tausend Figuren behaupten tausend verschiedene Menschen, gemessen
+// sind aber Blicke. Freds Zahlen (160 je Beitrag gemessen, 400 bis 500
+// rekonstruiert) tragen die Tausend als PERSONEN nicht ohne Addition, und
+// beim Addieren kommt die Doppelzaehlung zurueck.
+const personSvgWeiss = doppel("fill='#ffffff'").replace(/"/g, "'");
 const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
 ---
@@ -266,10 +250,6 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			<div class="feld">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">2 <span class="zu">zu</span> 1000+</p>
-					{/* Wortlaut folgt dem Bild (20.09. abends): die Menge zeigt jetzt
-					   Blicke, nicht Koepfe — „gesehen" statt „erreicht", weil
-					   messbar ist, wie oft geschaut wurde, nicht von wie vielen.
-					   Vorschlag, Freds Entscheid steht aus. */}
 					<p class="bezug">Zwei Experten werden in einem Monat mehr als 1000 Mal gesehen.</p>
 				</div>
 				<div class="kachel">
