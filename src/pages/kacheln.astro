@@ -240,27 +240,21 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 				</div>
 			</div>
 
-			{/* ── Kachel 3: Experten → Zuschauer ───────────────────────────── */}
-			{/* RAUSZOOMEN (Freds Bild): erst steht EINE Figur formatfüllend da,
-			   wie durch ein Objektiv herangeholt. Dann fährt die Kamera zurück,
-			   die Figur wird kleiner, und aus der Wiederholung entstehen erst
-			   viele Menschen, am Ende fast Punkte. Technisch EIN Element:
-			   background-repeat macht die Menge, background-size ist der Zoom
-			   — kein einziger zusätzlicher Knoten für tausend Leute. */}
-			<div class="feld">
-				<div class="kachel-kopf">
-					<p class="verhaeltnis">2 <span class="zu">zu</span> 1000+</p>
-					<p class="bezug">Zwei Experten werden in einem Monat mehr als 1000 Mal gesehen.</p>
-				</div>
-				<div class="kachel">
-				<div class="kachel-mitte">
-					<div class="menge" data-menge>
-						<span class="menge-lage menge-weiss" style={`--person: ${uri(personSvgWeiss)}`}></span>
-						<span class="menge-lage menge-schwarz" style={`--person: ${uri(personSvgSchwarz)}`}></span>
-					</div>
-				</div>
-				</div>
-			</div>
+			{/* ── Kachel 3 VORERST RAUS (Fred 20.09. abends) ───────────────
+			   Sie behauptete „mehr als 1000 Zuschauer" und zeigte dazu tausend
+			   einzelne Figuren. Die Zahl ist nach eigener Rechnung konservativ
+			   (18.000 Views bei 100 Stunden Zuschauerzeit; um auf nur 1000
+			   Personen zu kommen, muesste jede Person 18 Mal im Monat
+			   geschaut haben — gemessen sind 2,2). Aber sie ist eine
+			   Herleitung, keine Messung: plattformuebergreifend kann niemand
+			   entdoppeln, auch keine Mediaagentur, und ein Figurenfeld
+			   behauptet staerker als eine Zahl.
+			   Dieselbe Entscheidung war beim Impact-Angebot schon einmal
+			   gefallen: Stunden und Aufrufe auf die Kacheln, Personenzahl nur
+			   in den Bericht. Herleitung und Spannen stehen dort, Zeiger im
+			   Kennzahlen-Glossar.
+			   Markup liegt in der Git-Historie (Stand 20.09.), samt der zwei
+			   Hintergrund-Ebenen und dem Zoom aus der Mitte. */}
 		</div>
 
 		<p class="probe-notiz">
@@ -302,9 +296,13 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		gap: 16px;
 	}
 
+	/* ZWEI statt drei Spalten (Fred 20.09. abends): seit Kachel 3 raus ist,
+	   duerfen die verbliebenen beiden groesser werden. Alles in den Kacheln
+	   ist in Container-Einheiten bemessen, waechst also mit — Schriften,
+	   Kreise, Laufband und Brett brauchen keine eigene Anpassung. */
 	@media (min-width: 800px) {
 		.kachel-reihe {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 
