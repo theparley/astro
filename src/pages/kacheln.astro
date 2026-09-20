@@ -428,8 +428,14 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		   oben mehr Luft (12cqw gegen 2,7), und diese Differenz wanderte
 		   ungesehen in die Rechnung — gemessen 305 px ueber dem Brett
 		   gegen 237 unter dem Band. */
+		/* OPTISCH statt rechnerisch mittig (Fred 20.09. abends: "gefuehlt
+		   koennte es noch ein bisschen hoeher"). Ein Block, der genau in
+		   der Mitte sitzt, wirkt in einem stehenden Format zu tief — das
+		   Auge nimmt die untere Kante staerker wahr. Die untere Polsterung
+		   ist deshalb um 7,8cqw groesser, das hebt den Block um die Haelfte
+		   davon, rund 27 px oder ein Zehntel des freien Raums. */
 		padding-top: 2.7cqw;
-		padding-bottom: 2.7cqw;
+		padding-bottom: 10.5cqw;
 	}
 
 	:global(body.brett) .laufband {
