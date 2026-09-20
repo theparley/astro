@@ -691,9 +691,16 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   conic-gradient animieren — eine gewoehnliche Variable waere fuer den
 	   Browser bloss ein Text und wuerde springen statt zu laufen.
 	   @property gehoert auf Dokumentebene, deshalb hier im globalen Block. */
+	/* MUSS vererben (Fehler 20.09. abends, Fred: "ich sehe nur noch einen
+	   Strich"): der Winkel wird auf der Uhr animiert, gebraucht wird er
+	   aber in ihren KINDERN — im Bogen als Maske und in der laufenden
+	   Speiche als Drehung. Mit inherits:false bekamen die Kinder ihren
+	   eigenen Anfangswert 0turn: die Maske gab nichts frei (Bogen
+	   unsichtbar) und die Speiche drehte nie. Uebrig blieben genau die zwei
+	   senkrechten Striche, die er gesehen hat. */
 	@property --fuell {
 		syntax: "<angle>";
-		inherits: false;
+		inherits: true;
 		initial-value: 0turn;
 	}
 
