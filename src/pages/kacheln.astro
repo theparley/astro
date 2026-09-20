@@ -45,38 +45,39 @@ const kanalBand = [
 	"gemini",
 ];
 
-// FALLBLATT-FASSUNG (Fred 20.09. abends): dreizeiliges Brett ueber die
-// volle Breite, das die zehn Deliverys durchrattert. Zeile 1 traegt immer
-// die Stueckzahl, Zeile 2 und 3 den Namen — was laenger als elf Zeichen
-// ist, bricht in die dritte Zeile um. Elf Spalten, weil LANDINGPAGE genau
-// elf Zeichen hat und damit die breiteste ungebrochene Zeile ist.
-// Umbrueche sind von Hand gesetzt, nicht gerechnet: sie sollen an der
-// Wortfuge liegen (VIDEO / PODCAST), nicht dort, wo der Platz endet.
+// FALLBLATT-FASSUNG (Fred 20.09. abends, dritter Stand): dreizeiliges
+// Brett, das die Deliverys durchrattert — und zwar mit NAMEN DES KANALS.
+//     Zeile 1  die Zahl
+//     Zeile 2  das Format
+//     Zeile 3  der Kanal
+// Das loest den Aerger um Clips und Shorts an der Wurzel: nicht das
+// Zaehlen war das Problem, sondern das Verbergen. Steht der Kanal daneben,
+// ist offengelegt, was gezaehlt wird — „8 Shorts fuer YouTube" und
+// „8 Beitraege fuer Instagram" behaupten nichts Falsches, weil jeder selbst
+// sieht, dass es zwei Plattformen sind.
+// DREIZEHN Spalten statt elf: AUDIO-PODCAST hat dreizehn Zeichen und ist
+// damit der breiteste Eintrag. Elf haetten weder VIDEOPODCAST (12) noch
+// AUDIO-PODCAST (13) getragen.
+// Stueckzahlen: Freds Angaben (1 Livestream, 8 Shorts YouTube, 10 Beitraege
+// LinkedIn, 8 Beitraege Instagram). Die uebrigen sind FORTGESCHRIEBEN und
+// brauchen seine Bestaetigung.
+// Mehrkanalige Posten stehen vorerst mit EINEM Kanal — der Livestream laeuft
+// laut Fred auf YouTube, LinkedIn und der Website; dafuer braucht die dritte
+// Zeile eine Loesung.
 // Aufrufbar unter /kacheln?board; beide Fassungen liegen im Dokument.
 const brettZeilen = [
-	["1", "LIVESTREAM", ""],
-	["1", "VIDEO", "PODCAST"],
-	["1", "AUDIO-", "PODCAST"],
-	["10", "LINKEDIN-", "BEITRÄGE"],
-	// SHORTS RAUS (Fred 20.09. abends): Clips und Shorts sind dasselbe
-	// Stueck — kurzes Hochkant-Video aus derselben Aufnahme, nur andere
-	// Plattform. Zwei Zeilen daraus zu machen war eine
-	// Plattform-Unterscheidung im Kostuem einer Format-Unterscheidung, und
-	// bei einer Liste, die als Beweis gemeint ist, faellt der Verdacht dann
-	// auf alle uebrigen Zeilen. Das Brett zeigt jetzt neun Zustaende; der
-	// frei gewordene Platz ist offen (Recherche laeuft).
-	["10", "CLIPS", ""],
-	// Nimmt den Platz ein, den Shorts geraeumt hat (Fred 20.09. abends).
-	// Anders als ein Clip ist eine Q&A eine VOLLSTAENDIGE Einheit: eine
-	// Frage, eine Antwort, fertig — bisher wurden daraus nur Ausschnitte
-	// gezogen. Auf dem Brett steht sie ohne Plural-s: in Versalien liest
-	// sich "Q&AS" wie ein Wort, und die Zehn davor sagt ohnehin, dass es
-	// mehrere sind.
-	["10", "Q&A", ""],
-	["1", "NEWSLETTER", ""],
-	["1", "LANDINGPAGE", ""],
-	["1", "TRANSKRIPT", ""],
-	["10", "ZITATE", "FÜR KI"],
+	["1", "LIVESTREAM", "YOUTUBE"],
+	["1", "VIDEOPODCAST", "YOUTUBE"],
+	["1", "AUDIO-PODCAST", "SPOTIFY"],
+	["10", "BEITRÄGE", "LINKEDIN"],
+	["8", "BEITRÄGE", "INSTAGRAM"],
+	["8", "SHORTS", "YOUTUBE"],
+	["8", "CLIPS", "TIKTOK"],
+	["10", "Q&A", "YOUTUBE"],
+	["1", "NEWSLETTER", "E-MAIL"],
+	["1", "LANDINGPAGE", "WEBSITE"],
+	["1", "TRANSKRIPT", "WEBSITE"],
+	["10", "ZITATE", "KI"],
 ];
 
 const varianten: Array<[string, string, string[]]> = [
@@ -182,7 +183,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 				</div>
 				<div class="kachel">
 				<div class="kachel-mitte kachel-mitte--brett">
-					<SplitFlap lines={brettZeilen} holdMs={1800} minCols={11} minRows={3} />
+					<SplitFlap lines={brettZeilen} holdMs={1800} minCols={13} minRows={3} />
 				</div>
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
@@ -1218,11 +1219,11 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	/* Kachelgroesse des Fallblatts MUSS auf .sf-grid selbst stehen:
 	   SplitFlap rechnet --sf-tile-w dort per eigener Formel und
 	   ueberschreibt jede Vorgabe am Elternelement.
-	   Elf Spalten ueber die volle Breite: die Zarge des Bretts kommt mit
-	   2 × 0,24 Kachelbreiten obendrauf, es sind also 11,48 Kacheln, die in
-	   die 100cqw Innenbreite passen muessen — 8,6cqw je Kachel. */
+	   Dreizehn Spalten ueber die volle Breite. Die Zarge ist unsichtbar,
+	   belegt aber weiter Platz (2 × 0,24 Kachelbreiten), es sind also 13,48
+	   Kacheln fuer 100cqw Innenbreite — 7,4cqw je Kachel. */
 	.kachel-mitte--brett .sf-grid {
-		--sf-tile-w: 8.9cqw;
+		--sf-tile-w: 7.7cqw;
 		/* BUCHSTABEN NAEHER ZUSAMMEN (Fred 20.09. abends). Der Abstand
 		   kommt nicht von den Kacheln — die stossen mit einem Pixel Fuge
 		   ohnehin fast aneinander —, sondern vom Verhaeltnis Schrift zu
