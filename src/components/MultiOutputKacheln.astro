@@ -370,7 +370,15 @@ const { fassung = "brett" } = Astro.props;
 </section>
 
 <style>
-<style is:global>
+	/* ACHTUNG beim Kopieren aus MultiOutputTafel.astro: dort steht direkt
+	   ueber .mo-sektion die Zeile `<style is:global>`. Beim Umzug am 21.09.
+	   ist sie mit in diesen Block gerutscht — eine Tag-Zeile mitten im CSS
+	   laesst den Parser bis zur naechsten schliessenden Klammer springen
+	   und verschluckt damit genau die erste Regel, .mo-sektion. Folge:
+	   kein padding-top (--abstand-xl, 120–320px) und kein Flex-Gap — die
+	   Ueberschrift klebte am Abschnitt darueber, die Kacheln am Kopf.
+	   Der Rest des Stylesheets lief normal weiter, deshalb sah es nach
+	   einem Abstands-Problem aus und nicht nach einem Syntaxfehler. */
 	/* is:global + mo--Präfix (gleiche Astro-Falle wie bei SplitFlap.astro
 	   dokumentiert): das Skript injiziert Logo-Markup (.mo-logo-text, svg)
 	   zur Laufzeit — gescopte Selektoren träfen diese neu erzeugten Elemente
@@ -383,7 +391,14 @@ const { fassung = "brett" } = Astro.props;
 		padding: var(--abstand-xl) clamp(16px, 3vw, 56px) 0;
 		display: flex;
 		flex-direction: column;
-		gap: clamp(28px, 4vh, 56px);
+		/* Abstand Kopf → Kacheln auf --abstand-md hoch (Fred 21.09.: „zu nah
+		   zusammengequetscht"). Das Mass der Wand (28–56px) galt zwischen
+		   Text und einer Grafik; jetzt steht unter dem Kopf wieder TEXT, und
+		   zwar sehr grosser. Bei 36px hing das Zahlen-Staccato naeher an
+		   „1 zu 10+" als an seiner eigenen Ueberschrift (h2-Rand 40px) —
+		   die Gruppe las sich falsch herum. --abstand-md ergibt 63px bei
+		   1280px Breite und stellt die Reihenfolge wieder her. */
+		gap: var(--abstand-md);
 	}
 
 	/* Kopf MITTIG (Fred 13.09.) + Haus-Vorgaben statt Entwurfs-Maße:
@@ -432,8 +447,19 @@ const { fassung = "brett" } = Astro.props;
 	.kachel-reihe {
 		display: grid;
 		gap: 16px;
+		/* width + align-self statt `margin: 0 auto` (Fehler vom 21.09.):
+		   .mo-sektion ist ein FLEX-Container (Spalte). Ein auto-Rand auf der
+		   Querachse hebt dort das Strecken auf, das Element schrumpft auf
+		   seinen Inhalt — und weil die Spalten minmax(0, 1fr) sind, war das
+		   0. Die Reihe stand mit 16px Breite da, die Kacheln mit 0.
+		   Aufgefallen ist es erst, als der Sektions-Abstand repariert war:
+		   vorher hatte ein verirrtes Tag die ganze .mo-sektion-Regel
+		   verschluckt, also gab es gar kein Flex, und der auto-Rand tat
+		   genau das, was man von ihm erwartet. Ein Fehler hat den anderen
+		   verdeckt. */
+		width: 100%;
 		max-width: var(--max-width);
-		margin: 0 auto;
+		align-self: center;
 	}
 
 	/* ZWEI statt drei Spalten (Fred 20.09. abends): seit Kachel 3 raus ist,
