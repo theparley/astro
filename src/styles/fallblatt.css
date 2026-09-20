@@ -124,6 +124,22 @@
 	pointer-events: none;
 }
 
+/* SCHARNIER-STRICH AUF DEM TELEFON WEG (Fred 20.09. abends, Befund an der
+   Live-Seite): die Linie liegt auf halber Kachelhöhe und schneidet damit
+   genau durch die Mitte der Versalien. Auf dem Desktop trägt sie die
+   Fallblatt-Anmutung, weil der Buchstabe groß genug ist. Auf dem Telefon
+   ist eine Kachel rund 14 px breit, der Buchstabe etwa 9 px hoch — der
+   eine Strich (auf Retina zwei Gerätepixel) frisst dort ein Viertel der
+   Schrifthöhe und macht sie schwer lesbar.
+   Breakpoint 760 px = derselbe, an dem die Multi-Output-Wand ihre Hälften
+   stapelt. Gilt für ALLE Boards, weil das hier das gemeinsame Material
+   ist (Wand, Format-Tafel, /tafel, /wand). */
+@media (max-width: 760px) {
+	.sf-hinge {
+		display: none;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.sf-flap {
 		transition: none !important;
