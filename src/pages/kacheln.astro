@@ -326,10 +326,14 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		height: 70cqw;
 	}
 
+	/* Auch die kleine Stunde ohne Saum (Fred 20.09. abends): die Kachel ist
+	   am Anfang leer, und der Kuchen malt die Scheibe erst. Kein Umriss
+	   verrät vorher, wie groß sie wird — gleiche Regel wie beim großen
+	   Kreis. Sichtbar ist die kleine Stunde trotzdem sofort, weil der Zoom
+	   sie am Anfang zehnfach vergrößert zeigt. */
 	.uhr--klein {
 		width: 7cqw;
 		height: 7cqw;
-		box-shadow: 0 0 0 0.35cqw #ffffff inset;
 	}
 
 	/* Bleibt am Ende als Marke fuer die EINE Stunde im grossen Feld stehen
