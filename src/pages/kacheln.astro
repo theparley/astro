@@ -1167,21 +1167,20 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		     0,62 → Zeichen 23 px, Luecke 39 px   (Vorgabe der Komponente)
 		     1,0  → Zeichen 37 px, Luecke 25 px
 		     1,2  → Zeichen 45 px, Luecke 17 px
-		     1,4  → Zeichen 52 px, Luecke 10 px   ← gesetzt
-		     1,5  → Zeichen 56 px, Luecke  6 px
+		     1,4  → Zeichen 52 px, Luecke 10 px
+		     1,5  → Zeichen 56 px, Luecke  6 px   ← gesetzt (Fred)
 		     1,6  → Zeichen 59 px, Luecke  2,5 px
 		     1,67 → Zeichen 62 px, Luecke  0      (Zeichen stossen an)
 		   Senkrecht ist bis 1,67 alles frei: die Versalhoehe waechst dabei
 		   auf 72 px und bleibt unter der Kachelhoehe von 85. Die Grenze ist
 		   also die Waagerechte.
-		   1,4 ist die engste Stufe, auf der die Buchstaben noch als
-		   einzelne Zeichen in einzelnen Kacheln lesbar sind. Darueber
-		   verschwindet der Fallblatt-Charakter, weil die Kachelfugen dann
-		   durch beruehrende Buchstaben laufen.
+		   Fred hat 1,5 gewaehlt. 1,4 war mein Vorschlag als engste Stufe mit
+		   klarem Abstand; ab 1,6 kleben die Zeichen, und die Kachelfugen
+		   laufen dann durch beruehrende Buchstaben.
 		   Die Kacheln selbst zu verschmaelern brachte nichts: dann
 		   schrumpft die Schrift im selben Verhaeltnis mit, das Bild sieht
 		   genauso aus, nur kleiner. */
-		--sf-font-size: calc(var(--sf-tile-w) * 1.4);
+		--sf-font-size: calc(var(--sf-tile-w) * 1.5);
 	}
 
 	.kachel-mitte--brett .sf-row-line {
