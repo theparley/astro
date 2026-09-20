@@ -564,6 +564,22 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   sondern die Obergrenze.
 	   Senkrecht geprueft: Mitte bei 53,7 % der Hoehe, oben 126 px, unten
 	   856 px von 914 — passt. Der Zoomweg betraegt 10 zu 1,5, also 6,7. */
+	/* ── BESTIMMUNGSPUNKTE DER BEIDEN KACHELN (Fred 20.09. abends) ──────
+	   Damit spaetere Aenderungen nicht raten muessen, woran ausgerichtet
+	   wird, sind die Ankerpunkte hier festgehalten:
+	     Kachel 2 → der MITTELPUNKT DES KREISES.
+	     Kachel 3 → der MITTELPUNKT ZWISCHEN DEN BEIDEN PERSONEN,
+	                waagerecht wie senkrecht.
+	   Beide muessen an zwei Momenten uebereinstimmen: am ANFANG und in der
+	   MITTE der Animation (dem Wendepunkt bei 50 %). Nachgemessen bei einer
+	   Kachel von 731 × 914 px:
+	     Anfang  Kachel 2 (366 | 491)   Kachel 3 (366 | 490)
+	     Mitte   Kachel 2 (366 | 457)   Kachel 3 (366 | 457)
+	   Waagerecht ergibt sich die Deckung von selbst: beide Bilder sitzen
+	   mittig, und weil die Kachelung der dritten Kachel ZWEI Figuren
+	   enthaelt, liegt ihre Mitte zwischen den beiden. Senkrecht muss die
+	   Buehne der zweiten Kachel dafuer mitfahren — siehe unten. ────────── */
+
 	/* Die Hoehe WANDERT MIT (Fred 20.09. abends): am Anfang soll die kleine
 	   Stunde auf Figurenhoehe der dritten Kachel stehen (53,7 % der
 	   Kachelhoehe), im Scheitel soll der grosse Kreis mittig in der Kachel
