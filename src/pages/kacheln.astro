@@ -125,8 +125,12 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
 			<div class="feld">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">1 <span class="zu">zu</span> 10</p>
-					<p class="bezug">Ein Gespräch im Monat. Zehn Varianten für alle Kanäle.</p>
+					<p class="verhaeltnis">1 <span class="zu">zu</span> 10+</p>
+					{/* „Mehr als zehn" statt „Zehn" (20.09. abends): die Ueberschrift
+					   traegt seit Freds Aenderung ein Plus, und eine Zeile
+					   darunter, die auf genau zehn festlegt, wuerde ihr
+					   widersprechen. Wortlaut sonst unveraendert. */}
+					<p class="bezug">Ein Gespräch im Monat. Mehr als zehn Varianten für alle Kanäle.</p>
 				</div>
 				<div class="kachel">
 				<div class="kachel-mitte kachel-mitte--liste">
@@ -557,12 +561,12 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Kopfoberkante (313 px) folgt ein Radius von 177 px, also 2,55cqw
 	   unskaliert und 5,1cqw Durchmesser. Der grosse Kreis behaelt das
 	   Verhaeltnis 1:10, ist also 51cqw breit.
-	   ZOOMFAKTOR IM SCHEITEL 2,3 (Fred 20.09. abends, "noch weniger raus"):
-	   der Kreis misst damit 815 px bei einer Kachel von 731 x 914 — er wird
-	   links und rechts um je 42 px BESCHNITTEN, oben und unten bleiben je
-	   50 px Luft. Er drueckt also gegen den Rahmen, statt in ihm zu sitzen.
-	   Die Spanne: 2,06 passt genau hinein, 2,58 fuellt die Hoehe und
-	   schneidet 92 px je Seite ab. */
+	   ZOOM ZWEISTUFIG: beim Entstehen steht der Kreis auf Faktor 2,3 und ist
+	   links und rechts um je 42 px beschnitten — das laesst ihn gross
+	   wirken. Fertig gezeichnet faehrt die Kamera auf 2,0 zurueck, dann
+	   steht er mit 11 px Luft je Seite vollstaendig im Bild.
+	   Zur Orientierung: 2,06 beruehrt die Seitenkanten genau, 2,58 fuellt
+	   die Hoehe und schneidet 92 px je Seite ab. */
 	.uhr--gross {
 		width: 51cqw;
 		height: 51cqw;
@@ -699,9 +703,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   MESS-WARNUNG: Werte nur an einer FRISCH GELADENEN Seite nachmessen.
 	   Nach einem scrollIntoView liefert das Browser-Fenster hier andere
 	   Kachelmasse (424 statt 457 Mitte). */
+	/* NACHFAHREN AM SCHEITEL (Fred 20.09. abends): waehrend der Kreis
+	   entsteht, ist er noch angeschnitten — das laesst ihn gross wirken.
+	   Ist er fertig (38 %), faehrt die Kamera noch ein Stueck weiter
+	   zurueck, bis er GERADE VOLLSTAENDIG im Bild steht (Faktor 2,0 = 709
+	   px bei 731 px Kachel, also 11 px Luft je Seite). Erst dann wendet die
+	   Runde. Die Bewegung wird dadurch zweistufig: gross werden, dann
+	   freistellen. */
 	@keyframes kreis-zoom {
 		0%, 4% { transform: scale(10); }
-		38%, 50% { transform: scale(2.3); }
+		38% { transform: scale(2.3); }
+		50% { transform: scale(2); }
 		88%, 100% { transform: scale(10); }
 	}
 
@@ -775,7 +787,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: scale(2.3);
+			transform: scale(2);
 		}
 	}
 </style>
