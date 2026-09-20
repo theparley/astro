@@ -500,9 +500,22 @@ const kernaussage =
 			// alle in der Luft hängenden Klappen). Kein Weiterlaufen mehr im
 			// Verborgenen — das war zugleich die Quelle der Geister-Effekte
 			// beim Hoch-/Runterscrollen.
+			// START ERST BEI HALBER SICHTBARKEIT (Fred 20.09.: "wenn ich
+			// runterscrolle, war die Wand schon bei den Stunden"): der Lauf
+			// beginnt erst, wenn die Sektion zur Hälfte im Blick ist. Zwei
+			// Bedingungen, damit es auf jeder Höhe funktioniert — entweder
+			// die halbe Sektion ist sichtbar (kurze Sektion) ODER sie füllt
+			// die halbe Bildschirmhöhe (Sektion höher als der Viewport,
+			// sonst würde threshold 0.5 dort nie auslösen). Beendet wird wie
+			// gehabt erst beim vollständigen Verlassen.
+			const halbDrin = (e: IntersectionObserverEntry) =>
+				e.isIntersecting &&
+				(e.intersectionRatio >= 0.5 ||
+					e.intersectionRect.height >= window.innerHeight * 0.5);
 			const io = new IntersectionObserver(
 				(entries) => {
-					const drin = entries.some((e) => e.isIntersecting);
+					const drin = entries.some(halbDrin);
+					const ganzDraussen = entries.every((e) => !e.isIntersecting);
 					if (drin && !laufend) {
 						laufend = true;
 						if (entstehen) {
@@ -512,7 +525,7 @@ const kernaussage =
 						} else {
 							startLoop();
 						}
-					} else if (!drin && laufend) {
+					} else if (ganzDraussen && laufend) {
 						laufend = false;
 						cancelAnimationFrame(rafId);
 						window.clearTimeout(entstehTimer);
@@ -522,7 +535,10 @@ const kernaussage =
 						if (entstehen) sektion.classList.remove("ist-entstanden");
 					}
 				},
-				{ threshold: 0.2 },
+				// Viele Schwellen, damit die Halb-Sichtbarkeit beim Scrollen
+				// zuverlässig gemeldet wird (ein einzelner Wert feuert nur
+				// beim Überqueren genau dieser Marke).
+				{ threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
 			);
 			io.observe(sektion);
 			return () => {
