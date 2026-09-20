@@ -557,11 +557,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	/* Strichstaerke am ZOOM bemessen: die kleine Stunde wird am Anfang
 	   zehnfach vergroessert gezeigt, ihre Linie erscheint also zehnfach
 	   dick. 0,12cqw sind im Zoom rund 8 px und spaeter, in Ruhe, noch knapp
-	   ein Pixel — beides traegt. */
+	   ein Pixel — beides traegt.
+	   ZURUECK auf 0,12 (Fred 20.09. abends: "der Startstrich ist dicker
+	   geworden, warum?"). Er war es: beim Verkleinern des Kreises von 7 auf
+	   5,1cqw hatte ich die Linie auf 0,16 mitgezogen, damit sie im
+	   Verhaeltnis zum kleineren Kreis gleich bleibt. Sichtbar ist am Anfang
+	   aber nicht das Verhaeltnis, sondern die absolute Dicke — und die ist
+	   damit um ein Drittel gewachsen. Ungefragt, deshalb zurueck. */
 	.uhr--klein {
 		width: 5.1cqw;
 		height: 5.1cqw;
-		--strich: 0.16cqw;
+		--strich: 0.12cqw;
 		z-index: 1;
 	}
 
