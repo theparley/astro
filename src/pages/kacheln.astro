@@ -490,8 +490,13 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Stunde, zehnfach vergroessert — aus Figurenmitte (490 px) minus
 	   Kopfoberkante (313 px) folgt ein Radius von 177 px, also 2,55cqw
 	   unskaliert und 5,1cqw Durchmesser. Der grosse Kreis behaelt das
-	   Verhaeltnis 1:10, ist also 51cqw breit; damit er im Scheitel weiter an
-	   die Kachelkante stoesst, waechst der Zoomfaktor dort auf 2,06. */
+	   Verhaeltnis 1:10, ist also 51cqw breit.
+	   ZOOMFAKTOR IM SCHEITEL 2,3 (Fred 20.09. abends, "noch weniger raus"):
+	   der Kreis misst damit 815 px bei einer Kachel von 731 x 914 — er wird
+	   links und rechts um je 42 px BESCHNITTEN, oben und unten bleiben je
+	   50 px Luft. Er drueckt also gegen den Rahmen, statt in ihm zu sitzen.
+	   Die Spanne: 2,06 passt genau hinein, 2,58 fuellt die Hoehe und
+	   schneidet 92 px je Seite ab. */
 	.uhr--gross {
 		width: 51cqw;
 		height: 51cqw;
@@ -624,7 +629,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Kachelmasse (424 statt 457 Mitte). */
 	@keyframes kreis-zoom {
 		0%, 4% { transform: scale(10); }
-		38%, 50% { transform: scale(2.06); }
+		38%, 50% { transform: scale(2.3); }
 		88%, 100% { transform: scale(10); }
 	}
 
@@ -698,7 +703,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: scale(2.06);
+			transform: scale(2.3);
 		}
 	}
 </style>
