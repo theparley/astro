@@ -457,6 +457,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		/* Titel+Board rechts sind EINE Einheit (Fred 14.09. nacht) — der
 		   Text hier steht vertikal MITTIG zu dieser Einheit. */
 		align-self: center;
+		/* Board linksbündig zum Text (Fred 20.09.): die Kinder der Spalte
+		   beginnen alle an derselben linken Kante — sonst zentriert das
+		   inline-flex-Board sich in der Spaltenbreite. */
+		align-items: flex-start;
 	}
 
 	.tafel-intro {
