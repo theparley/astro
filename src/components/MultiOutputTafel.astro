@@ -514,8 +514,17 @@ const kernaussage =
 					e.intersectionRect.height >= window.innerHeight * 0.5);
 			const io = new IntersectionObserver(
 				(entries) => {
-					const drin = entries.some(halbDrin);
-					const ganzDraussen = entries.every((e) => !e.isIntersecting);
+					// NUR DER NEUESTE EINTRAG zählt (Bugfix 20.09.): beim
+					// schnellen Scrollen liefert der Observer mehrere
+					// Zustände in EINEM Paket. Mit some()/every() konnte ein
+					// ÄLTERER Eintrag "halb sichtbar" melden, während der
+					// jüngste schon "draußen" war — die Wand startete im
+					// Verborgenen, merkte sich "läuft" und schaltete beim
+					// Zurückscrollen nicht mehr um (Freds Befund: von oben
+					// zurück kein Neustart).
+					const letzte = entries[entries.length - 1];
+					const drin = halbDrin(letzte);
+					const ganzDraussen = !letzte.isIntersecting;
 					if (drin && !laufend) {
 						laufend = true;
 						if (entstehen) {
