@@ -347,7 +347,9 @@ const kernaussage =
 		// Akt hinein.
 		const abbauDauer =
 			(ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS;
-		t += abbauDauer + 900;
+		// Stille vor dem Loop-Neustart auf 0 (Fred 20.09., vorher 900 ms) —
+		// die Wand beginnt von vorn, sobald die letzte Kachel schwarz ist.
+		t += abbauDauer + 0;
 
 		events.sort((a, b) => a.t - b.t);
 		return { events, total: t, akt1EndeT };
