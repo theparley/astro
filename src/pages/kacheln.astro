@@ -527,7 +527,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	    16 %  sie steht, der grosse Kreis setzt an, die Kamera faehrt zurueck
 	    38 %  der grosse Kreis ist voll
 	    50 %  WENDEPUNKT — der Rueckweg beginnt
-	    79 %  beide Kreise sind ausgeblendet
+	    72,5–94 %  die Kreise blenden aus (synchron mit Kachel 3)
 	    88 %  die Kamera ist wieder ganz herangefahren
 	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen.
 	   GLEICHTAKT MIT KACHEL 3 (Fred 20.09. abends): beide Kacheln laufen in
@@ -549,7 +549,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	/* Das Ausblenden trifft nur die KREISE, nicht die Speichen — der Strich
 	   der Stunde bleibt stehen. */
 	[data-kreis].laeuft .bogen {
-		animation: bogen-aus 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: bogen-aus 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 
 	/* WENIGER WEIT RAUS (Fred 20.09. abends: "am Ende groesser machen, nur
@@ -630,9 +630,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		77.5%, 100% { opacity: 1; }
 	}
 
+	/* NACH KACHEL 3 GERICHTET (Fred 20.09. abends). Dort blendet die weisse
+	   Menge auf dem Rueckweg aus; ihre Opazitaets-Kurve laeuft im Hinweg von
+	   12 % auf 55 % der HAELFTE, gespiegelt also von 72,5 % auf 94 % der
+	   ganzen Runde. Genau dort blendet jetzt auch der weisse Kreis aus.
+	   Folge: die Kreise bleiben stehen, waehrend die Kamera schon
+	   zurueckfaehrt — erst danach verschwinden sie. Beim Rundenwechsel ist
+	   das unkritisch, weil der Fuellwinkel dann ohnehin auf null steht und
+	   nichts zu sehen waere. */
 	@keyframes bogen-aus {
-		0%, 50% { opacity: 1; }
-		79%, 100% { opacity: 0; }
+		0%, 72.5% { opacity: 1; }
+		94%, 100% { opacity: 0; }
 	}
 
 	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
