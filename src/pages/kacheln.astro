@@ -608,9 +608,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7 },
 			{ backgroundSize: endeB + "px " + endeH + "px", offset: 1 },
 		];
+		// HIN UND ZURUECK (Fred 20.09. abends): kein Sprung zurueck auf den
+		// Anfang, sondern derselbe Weg rueckwaerts — die Menge zieht sich
+		// wieder auf die zwei Experten zusammen, und die Schrift kommt mit.
+		// "alternate" spielt jede zweite Runde rueckwaerts; weil ALLE vier
+		// Animationen dieselbe Takt-Angabe teilen, kehren sie gemeinsam um
+		// und koennen nicht auseinanderlaufen. Eine volle Runde dauert damit
+		// zwoelf statt sechs Sekunden.
 		const takt = {
 			duration: 6000,
 			iterations: Infinity,
+			direction: "alternate",
 			easing: "cubic-bezier(0.4, 0, 0.2, 1)",
 		} as const;
 		// TEXT BLENDET AUS (Fred 20.09. abends, nach Sichtung: das Kippen ins
