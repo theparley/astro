@@ -478,6 +478,31 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		animation: uhr-gross 7s linear infinite;
 	}
 
+	/* Die Speichen sind IMMER gezeichnet — solange der zugehoerige Kreis
+	   noch gar nicht laeuft, stehen sie als senkrechter Strich im Bild
+	   (Fred 20.09. abends: "am Anfang ist schon der weisse Strich vom
+	   grossen Kreis senkrecht zu sehen"). Sie werden deshalb genau in dem
+	   Moment sichtbar, in dem ihr Kreis zu laufen beginnt: die kleine bei
+	   6 %, die grosse bei 44 % — dieselben Marken wie in uhr-klein und
+	   uhr-gross. */
+	[data-kreis].laeuft .uhr--klein .speiche {
+		animation: speichen-klein 7s linear infinite;
+	}
+
+	[data-kreis].laeuft .uhr--gross .speiche {
+		animation: speichen-gross 7s linear infinite;
+	}
+
+	@keyframes speichen-klein {
+		0%, 5.9% { opacity: 0; }
+		6%, 100% { opacity: 1; }
+	}
+
+	@keyframes speichen-gross {
+		0%, 43.9% { opacity: 0; }
+		44%, 100% { opacity: 1; }
+	}
+
 	/* Die kleine Stunde laeuft zuerst ab und bleibt dann voll stehen. */
 	@keyframes uhr-klein {
 		0%, 6% { --fuell: 0turn; }
@@ -530,7 +555,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	@media (prefers-reduced-motion: reduce) {
 		[data-kreis].laeuft,
 		[data-kreis].laeuft .uhr--klein,
-		[data-kreis].laeuft .uhr--gross {
+		[data-kreis].laeuft .uhr--gross,
+		[data-kreis].laeuft .speiche {
 			animation: none;
 		}
 		.uhr {
