@@ -266,13 +266,30 @@ export const LOGOS: Record<string, string> = {
 	web: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4.2" ry="9.5"/><path d="M2.8 12h18.4M4 7h16M4 17h16"/></svg>',
 	mail: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M3 6.5l9 7 9-7"/></svg>',
 	ki: '<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.5l1.9 6.2 6.2 1.9-6.2 1.9L12 18.7l-1.9-6.2-6.2-1.9 6.2-1.9z"/><path d="M19 15.5l.9 2.8 2.8.9-2.8.9-.9 2.8-.9-2.8-2.8-.9 2.8-.9z" opacity="0.85"/></svg>',
-	// Personen-Piktogramm (Fred 20.09., für den Zuschauer-Block der Wand):
-	// Material Symbols "person" (fill 1), Apache 2.0, keine Namensnennung
-	// nötig. Gewählt nach Piktogramm-Recherche: exakt quadratischer
-	// Zuschnitt (viewBox 160 -800 640 640), Kopf = halbe Figurenhöhe,
-	// Lücke zum Körper nur ~6 % — kein "langer Hals" wie bei Strich-Icons,
-	// kein Verschmelzen wie bei Phosphor. Trägt bis ~30 px.
+	// ── Männchen ──────────────────────────────────────────────────────
+	// ZWEI Bauweisen wurden am Objekt verglichen (Fred 20.09. abends):
+	//  · MATERIAL — Material Symbols "person" (Apache 2.0), Kopf und
+	//    Schulter durch eine Lücke von rund 6 % getrennt.
+	//  · GESCHLOSSEN — eigene Figur in Isotype-Bauweise (Neurath/Arntz),
+	//    Kopf läuft in die Schulter ein, EINE Form.
+	// Bei ACHT Figuren je Kachel (je ~10 Gerätepixel) fiel die Lücke zu und
+	// jede Person zerfiel in zwei Flecken — dort gewann GESCHLOSSEN. Seit
+	// der Block auf VIER je Kachel steht (~14 Gerätepixel), trägt die Lücke
+	// wieder, und Fred wollte die Material-Figur zurück. Umschalten =
+	// unten in dieser Datei die Pfade tauschen; die geschlossene Fassung
+	// steht in der Git-Historie (20.09.).
 	person: '<svg viewBox="160 -800 640 640" fill="white"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>',
+	// person1 trägt die Klasse sf-gross: die Boards rendern SVGs sonst auf
+	// 62 Prozent der Kachel, diese eine Figur auf 86.
+	person1: '<svg class="sf-gross" viewBox="160 -800 640 640" fill="white"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>',
+	personen2:
+		'<svg viewBox="0 0 100 138" fill="white"><g transform="translate(1.355 83.145) scale(0.10134)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(1.355 152.145) scale(0.10134)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g></svg>',
+	personen4:
+		'<svg viewBox="0 0 100 138" fill="white"><g transform="translate(-10.250 69.750) scale(0.07344)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(39.750 69.750) scale(0.07344)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(-10.250 138.750) scale(0.07344)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(39.750 138.750) scale(0.07344)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g></svg>',
+	personen8:
+		'<svg viewBox="0 0 100 138" fill="white"><g transform="translate(0.678 41.573) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(50.677 41.573) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(0.678 76.072) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(50.677 76.072) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(0.678 110.572) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(50.677 110.572) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(0.678 145.072) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g><g transform="translate(50.677 145.072) scale(0.05067)"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></g></svg>',
+	weiter:
+		'<svg class="sf-gross" viewBox="0 0 100 138" fill="white"><circle cx="18" cy="118" r="9"/><circle cx="50" cy="118" r="9"/><circle cx="82" cy="118" r="9"/></svg>',
 	// KI-Assistenten (Fred 15.09., „Zitate für KI"-Zeile): ECHTE Marken-
 	// Piktogramme (Pfade aus der Simple-Icons-Sammlung, CC0; Markenrechte
 	// liegen bei den Anbietern — Nutzung nach deren Richtlinien).

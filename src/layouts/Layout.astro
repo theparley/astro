@@ -41,6 +41,16 @@ const {
 		   swap) und reflowt die Seite — der kleine Sprung. Mit Preload ist die
 		   Schrift beim ersten Paint da. */}
 		<link rel="preload" href="/fonts/FormaDJRVariable.woff2" as="font" type="font/woff2" crossorigin />
+		{/* MONO ebenfalls vorladen (Fred-Befund 20.09. abends, "auf dem Handy
+		   läuft das Flipperboard ruckelig"): die Fallblatt-Kacheln setzen
+		   Forma DJR Mono. Ohne Preload wird die Datei erst entdeckt, wenn die
+		   erste Kachel beschriftet wird — also MITTEN in der Animation. Bis
+		   sie da ist, rendern alle Kacheln in ui-monospace, und beim Eintreffen
+		   stylt und misst der Browser die ganze Wand auf einen Schlag neu
+		   (rund 8.600 Knoten). Auf dem Desktop fällt das nicht auf, weil die
+		   Datei längst im Cache liegt. 107 KB, kommt vor dem 485-KB-Textschnitt
+		   an. */}
+		<link rel="preload" href="/fonts/FormaDJRMonoVariable.woff2" as="font" type="font/woff2" crossorigin />
 		<title>{title} · The Parley</title>
 		<ClientRouter />
 	</head>
