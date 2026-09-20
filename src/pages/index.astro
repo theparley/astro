@@ -341,17 +341,17 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Breite. */}
 		<div class="format-split">
 			<div class="tafel-kopf">
-			{/* NEUE ORDNUNG (Fred 20.09.): erst die drei Ziele, dann die
-			   Passungsfrage, DANN das Board mit den Formatnamen als Antwort.
-			   Vorher stand das Board zwischen den beiden Absätzen, und
-			   darüber "Das Format muss passen." (raus — die Ziele eröffnen
-			   jetzt). Kachelanzahl auf Textbreite kalibriert
-			   (Text = min(46rem,100%)). */}
+			{/* ORDNUNG (Fred 20.09., zweite Stufe): ALLE drei Absätze zuerst
+			   (Ziele → Passungsfrage → Gespräch/gemeinsam finden), das Board
+			   mit den Formatnamen steht GANZ UNTEN unter dem Text. Vorstufen:
+			   Board zwischen Absatz 1 und 2 (15.09.), dann zwischen 2 und 3.
+			   "Das Format muss passen." ist raus — die Ziele eröffnen.
+			   Kachelanzahl auf Textbreite kalibriert (Text = min(46rem,100%)). */}
 			{/* Drei Ziele je eine Zeile (Fred 20.09.) */}
 			<p class="tafel-intro">Das Personal Branding eines Solopreneurs.<br />Die Thought Leadership eines CEOs.<br />Die Brancheninstanz eines Expertenteams.</p>
 			<p class="tafel-intro">Welches Format passt? Das entscheiden Ziel und Budget, Branche und Themen, Firmenkultur und Menschen.</p>
-			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={4} rahmen />
 			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Es ist der fortlaufende Beweis eurer Expertise. Welche Formate zu euch passen, finden wir gemeinsam heraus.</p>
+			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={4} rahmen />
 		</div>
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
