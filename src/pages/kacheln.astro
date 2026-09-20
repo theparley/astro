@@ -1,0 +1,322 @@
+---
+// PROBE /kacheln — die Alternative zur Fallblatt-Wand (Fred-Diktat 20.09.
+// abends). Drei Kacheln NEBENEINANDER statt drei Akte NACHEINANDER: die Wand
+// zeigt die Verhältnisse in der Zeit, diese Reihe zeigt sie im Raum, der
+// Leser vergleicht selbst statt zu warten. Kachelform übernommen von der
+// Bausteine-Reihe der Startseite (4:5, container-type: inline-size).
+//
+// NICHT eingebunden — eigene Seite, damit die Startseite unberührt bleibt.
+// Konzept steht im Website-Dokument über dem Wand-Kapitel.
+import Layout from "../layouts/Layout.astro";
+import SplitFlap from "../components/SplitFlap.astro";
+import { LOGOS } from "../lib/fallblatt";
+
+// Die neun Ausspielungen als Fallblatt-Sequenz (Kachel 1): das Klappern ist
+// hier Akzent, nicht Träger — ein Streifen, kein Board.
+const ausspielungen = [
+	["LIVESTREAM"],
+	["VIDEOPODCAST"],
+	["AUDIO-PODCAST"],
+	["BEITRÄGE"],
+	["CLIPS"],
+	["SHORTS"],
+	["NEWSLETTER"],
+	["TRANSKRIPT"],
+	["ZITATE FÜR KI"],
+];
+
+// Männchen als Hintergrund-Kachelung (Kachel 3). Ein einziges DIV statt
+// tausend Knoten: background-repeat macht aus EINER Figur beliebig viele,
+// background-size ist der Zoom. Die Figur kommt aus dem gemeinsamen Modul,
+// damit Wand und Kachelreihe dieselbe zeigen.
+const personSvg = LOGOS.person.replace(/"/g, "'");
+const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
+---
+
+<Layout title="Kacheln (Probe)">
+	<section class="probe">
+		<h1>Drei Kacheln</h1>
+		<p class="probe-sub">
+			Probe der Alternative zur Fallblatt-Wand. Nicht verlinkt, nicht eingebunden.
+		</p>
+
+		<div class="kachel-reihe">
+			{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
+			<div class="kachel">
+				<div class="kachel-kopf">
+					<span class="zahl">1</span>
+					<span class="wort">Gespräch<br />im Monat</span>
+				</div>
+				<div class="kachel-mitte kachel-mitte--flap">
+					<SplitFlap lines={ausspielungen} holdMs={1100} minCols={13} minRows={1} />
+				</div>
+				<div class="kachel-fuss">
+					<span class="zahl">9</span>
+					<span class="wort">Ausspielungen</span>
+				</div>
+			</div>
+
+			{/* ── Kachel 2: Stunde → Zuschauerzeit ─────────────────────────── */}
+			{/* Der Kreis wächst auf die HUNDERTFACHE FLÄCHE, also den
+			   ZEHNFACHEN Durchmesser (Fred 20.09.: "berechnen das 100 mal nach
+			   Fläche"). Hundertfacher Durchmesser wäre die zehntausendfache
+			   Fläche — das Bild behauptete dann hundertmal mehr als die Zahl. */}
+			<div class="kachel">
+				<div class="kachel-kopf">
+					<span class="zahl">1</span>
+					<span class="wort">Stunde<br />Aufnahmezeit</span>
+				</div>
+				<div class="kachel-mitte">
+					<div class="kreis-buehne" data-kreis>
+						<span class="kreis kreis--klein"></span>
+						<span class="kreis kreis--gross"></span>
+					</div>
+				</div>
+				<div class="kachel-fuss">
+					<span class="zahl">100+</span>
+					<span class="wort">Stunden<br />Zuschauerzeit</span>
+				</div>
+			</div>
+
+			{/* ── Kachel 3: Experten → Zuschauer ───────────────────────────── */}
+			{/* RAUSZOOMEN (Freds Bild): erst steht EINE Figur formatfüllend da,
+			   wie durch ein Objektiv herangeholt. Dann fährt die Kamera zurück,
+			   die Figur wird kleiner, und aus der Wiederholung entstehen erst
+			   viele Menschen, am Ende fast Punkte. Technisch EIN Element:
+			   background-repeat macht die Menge, background-size ist der Zoom
+			   — kein einziger zusätzlicher Knoten für tausend Leute. */}
+			<div class="kachel">
+				<div class="kachel-kopf">
+					<span class="zahl">2</span>
+					<span class="wort">Experten</span>
+				</div>
+				<div class="kachel-mitte">
+					<div class="menge" data-menge style={`--person: ${personUri}`}></div>
+				</div>
+				<div class="kachel-fuss">
+					<span class="zahl">1000+</span>
+					<span class="wort">Zuschauer</span>
+				</div>
+			</div>
+		</div>
+
+		<p class="probe-notiz">
+			Kachel 2 rechnet nach Fläche: hundertfache Fläche = zehnfacher Durchmesser.
+			Kachel 3 zoomt aus einer Figur auf rund tausend heraus.
+		</p>
+	</section>
+</Layout>
+
+<style>
+	.probe {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: clamp(60px, 10vw, 140px) 24px 120px;
+	}
+
+	h1 {
+		font-weight: 900;
+		text-transform: uppercase;
+		line-height: 0.9;
+		letter-spacing: -0.01em;
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+		margin: 0 0 12px;
+	}
+
+	.probe-sub,
+	.probe-notiz {
+		color: var(--gray);
+		font-size: 0.95rem;
+		margin: 0 0 48px;
+	}
+
+	.probe-notiz {
+		margin: 40px 0 0;
+	}
+
+	.kachel-reihe {
+		display: grid;
+		gap: 16px;
+	}
+
+	@media (min-width: 800px) {
+		.kachel-reihe {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	/* Kachelform 1:1 aus der Bausteine-Reihe der Startseite. */
+	.kachel {
+		background: var(--panel);
+		aspect-ratio: 4 / 5;
+		padding: clamp(18px, 2.2vw, 32px);
+		display: grid;
+		grid-template-rows: auto 1fr auto;
+		gap: 12px;
+		container-type: inline-size;
+		overflow: hidden;
+	}
+
+	.kachel-kopf,
+	.kachel-fuss {
+		display: flex;
+		align-items: baseline;
+		gap: 0.4em;
+	}
+
+	.kachel-fuss {
+		align-items: flex-end;
+	}
+
+	.zahl {
+		font-weight: 900;
+		line-height: 0.85;
+		letter-spacing: -0.02em;
+		font-size: 22cqw;
+	}
+
+	.wort {
+		font-weight: 300;
+		line-height: 1.05;
+		font-size: 5.5cqw;
+		color: var(--gray);
+	}
+
+	.kachel-fuss .wort {
+		color: var(--white);
+	}
+
+	.kachel-mitte {
+		display: grid;
+		place-items: center;
+		min-height: 0;
+		position: relative;
+	}
+
+	.kachel-mitte--flap {
+		/* Der Streifen soll die Kachelbreite nicht sprengen. */
+		--sf-tile-w: 6cqw;
+		--sf-font-size: 4.2cqw;
+		overflow: hidden;
+	}
+
+	/* ── Kachel 2: Kreis ───────────────────────────────────────────────── */
+	.kreis-buehne {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
+	}
+
+	.kreis {
+		position: absolute;
+		border-radius: 50%;
+		background: var(--white);
+	}
+
+	/* Bezugsgröße ist der große Kreis: er füllt die Kachelbreite fast aus,
+	   der kleine ist exakt ein Zehntel davon (Fläche 1:100). */
+	.kreis--gross {
+		width: 70cqw;
+		height: 70cqw;
+		transform: scale(0.1);
+		transform-origin: center;
+	}
+
+	.kreis--klein {
+		width: 7cqw;
+		height: 7cqw;
+		opacity: 0;
+	}
+
+	[data-kreis].laeuft .kreis--gross {
+		animation: kreis-wachsen 4.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+	}
+
+	@keyframes kreis-wachsen {
+		0%,
+		12% {
+			transform: scale(0.1);
+		}
+		62%,
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
+	/* Startgröße: EINE Figur füllt die Kachel. Endgröße: rund tausend
+	   Figuren passen hinein — bei 4:5 sind das etwa 28 × 35 Zellen, also
+	   Zellbreite = Kachelbreite / 28 ≈ 3,6 cqw. */
+	.menge {
+		width: 100%;
+		height: 100%;
+		background-image: var(--person);
+		background-repeat: repeat;
+		background-position: center;
+		background-size: 80cqw 80cqw;
+	}
+
+	[data-menge].laeuft {
+		animation: menge-rauszoomen 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	}
+
+	@keyframes menge-rauszoomen {
+		0%,
+		10% {
+			background-size: 80cqw 80cqw;
+		}
+		70%,
+		100% {
+			background-size: 3.6cqw 3.6cqw;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		[data-kreis].laeuft .kreis--gross,
+		[data-menge].laeuft {
+			animation: none;
+		}
+		.kreis--gross {
+			transform: scale(1);
+		}
+		.menge {
+			background-size: 3.6cqw 3.6cqw;
+		}
+	}
+</style>
+
+<script>
+	// Animationen erst starten, wenn die Reihe im Blick ist — gleiche Regel
+	// wie bei der Wand, damit niemand den Anfang verpasst.
+	let ab: (() => void) | null = null;
+
+	function mount() {
+		ab?.();
+		const ziele = [
+			...document.querySelectorAll<HTMLElement>("[data-kreis], [data-menge]"),
+		];
+		if (!ziele.length) return;
+		// Zwei Bedingungen statt einer festen Schwelle (Lektion aus der Wand,
+		// 20.09.): ist die Kachel höher als der Bildschirm, erreicht das
+		// Verhältnis nie 0,35 und der Beobachter meldet sich nie. Deshalb
+		// zusätzlich: ein Drittel Bildschirmhöhe sichtbar zählt auch.
+		const sichtbar = (e: IntersectionObserverEntry) =>
+			e.isIntersecting &&
+			(e.intersectionRatio >= 0.35 ||
+				e.intersectionRect.height >= window.innerHeight * 0.35);
+		const io = new IntersectionObserver(
+			(eintraege) => {
+				eintraege.forEach((e) => {
+					e.target.classList.toggle("laeuft", sichtbar(e));
+				});
+			},
+			{ threshold: Array.from({ length: 11 }, (_, i) => i / 10) },
+		);
+		ziele.forEach((z) => io.observe(z));
+		ab = () => io.disconnect();
+	}
+
+	document.addEventListener("astro:page-load", mount);
+</script>
