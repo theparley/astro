@@ -607,25 +607,25 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   enthaelt, liegt ihre Mitte zwischen den beiden. Senkrecht muss die
 	   Buehne der zweiten Kachel dafuer mitfahren — siehe unten. ────────── */
 
-	/* Die Hoehe WANDERT MIT (Fred 20.09. abends): am Anfang soll die kleine
-	   Stunde auf Figurenhoehe der dritten Kachel stehen (53,7 % der
-	   Kachelhoehe), im Scheitel soll der grosse Kreis mittig in der Kachel
-	   sitzen (50 %). Beides zugleich geht nicht mit einem festen Versatz —
-	   also faehrt die Buehne mit.
-	   Seit der Kopf UEBER der Kachel steht, faellt die Ruhelage der
-	   Buehnenmitte mit der Kachelmitte zusammen (457 px von 914) — im
-	   Scheitel braucht es deshalb gar keinen Versatz. Am Anfang schieben
-	   4,75cqw sie auf 490 px, die Figurenhoehe der dritten Kachel.
-	   MESS-WARNUNG: diese Werte nur an einer FRISCH GELADENEN Seite
-	   nachmessen. Nach einem scrollIntoView liefert das Browser-Fenster hier
-	   andere Kachelmasse (424 statt 457) — daran habe ich mich zweimal
-	   verrechnet.
-	   Die Verschiebung steht VOR der Skalierung, wird also nicht
-	   mitvergroessert. */
+	/* KEIN VERSATZ MEHR (Fred 20.09. abends, neue Regel): das Zentrum der
+	   Kreise — es ist fuer beide dasselbe — sitzt zu JEDEM Zeitpunkt in der
+	   Mitte der Kachel, waagerecht wie senkrecht. Am Anfang, im Scheitel und
+	   am Ende.
+	   Seit der Kopf ueber der Kachel steht, faellt die Ruhelage der Buehne
+	   ohnehin mit der Kachelmitte zusammen — es genuegt also, gar nicht zu
+	   verschieben und nur zu skalieren.
+	   DAMIT ENTFAELLT die vorherige Regel, die Strichoberkante am Anfang auf
+	   Kopfhoehe der Figuren in Kachel 3 zu legen: der Strich beginnt jetzt
+	   bei 280 px, die Koepfe liegen bei 313. Die Kreisgroessen (5,1 und
+	   51cqw) stammen noch aus jener Rechnung und koennen bleiben oder neu
+	   bemessen werden.
+	   MESS-WARNUNG: Werte nur an einer FRISCH GELADENEN Seite nachmessen.
+	   Nach einem scrollIntoView liefert das Browser-Fenster hier andere
+	   Kachelmasse (424 statt 457 Mitte). */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: translateY(4.75cqw) scale(10); }
-		38%, 50% { transform: translateY(0cqw) scale(2.06); }
-		88%, 100% { transform: translateY(4.75cqw) scale(10); }
+		0%, 4% { transform: scale(10); }
+		38%, 50% { transform: scale(2.06); }
+		88%, 100% { transform: scale(10); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
@@ -698,7 +698,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: translateY(0cqw) scale(2.06);
+			transform: scale(2.06);
 		}
 	}
 </style>
