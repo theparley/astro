@@ -370,9 +370,25 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   beim Zurückscrollen wieder aus, bevor sie ihn berührt
 		   (IntersectionObserver mit Menü-Sperrzone unten, Script am
 		   Dateiende). Wort zweizeilig FORMAT/BERATUNG (Turm-Muster). */}
-		<div class="format-schluss">
-			<a class="format-cta" href="/termin" data-format-tuer><span class="cta-zeile">Format</span><span class="cta-zeile">finden</span></a>
-		</div>
+		{/* TÜR VORERST KOMPLETT RAUS (Fred 20.09. abends, Befund am Telefon
+		   auf der LIVE-Seite): der Knopf ließ sich dort nicht drücken. Der
+		   Wisch ist an die Position gekoppelt — die Tür wischt erst auf,
+		   wenn ihre Unterkante BAND(160)px über dem Menüknopf steht, und
+		   trägt bis dahin pointer-events:none. Auf dem Telefon ist der
+		   Viewport so niedrig, dass der Zustand p=1 kaum erreicht wird: der
+		   Knopf steht halb aufgewischt da und nimmt keine Klicks an. Das ist
+		   kein Tippfehler, sondern eine Geometrie, die für Desktop-Höhen
+		   gerechnet wurde.
+		   Markup als Vorrat, wortgleich wiedereinsetzbar:
+		   <div class="format-schluss">
+		     <a class="format-cta" href="/termin" data-format-tuer><span class="cta-zeile">Format</span><span class="cta-zeile">finden</span></a>
+		   </div>
+		   CSS (.format-schluss / .format-cta / .cta-zeile) und das
+		   Wisch-Skript am Dateiende bleiben stehen; das Skript steigt bei
+		   fehlendem [data-format-tuer] von selbst aus. Wenn die Tür
+		   zurückkommt, braucht sie eine Mobil-Regel: entweder ohne Wisch
+		   (einfach sichtbar) oder mit einer an die Viewport-Höhe gebundenen
+		   Zone statt der festen 160/140 px. */}
 	</section>
 
 	{/* Produkte-Zeile + In-Flow-CTA weiter draußen (Fred 30.08. nachts,
