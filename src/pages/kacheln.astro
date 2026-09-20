@@ -388,8 +388,25 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	}
 
 	/* ── Kachel 2: Kreis ───────────────────────────────────────────────── */
+	/* Die Buehne sitzt HOEHER als die Rasterzeile sie stellen wuerde (Fred
+	   20.09. abends): der kleine Kreis soll auf derselben Hoehe stehen wie
+	   die zwei Personen in Kachel 3.
+	   Aus dem LAYOUT gerechnet, nicht aus einer Momentaufnahme der
+	   Animation (die Buehne ist zeitweise zehnfach skaliert, ihre gemessenen
+	   Kanten taugen dann nicht): die Buehne fuellt die mittlere
+	   Rasterzeile, deren Mitte liegt bei 62,4 % der Kachelhoehe. Die Figuren
+	   in Kachel 3 sitzen bei 53,7 % — Position 58 % auf eine Grafik im
+	   Verhaeltnis 2:1, die ueber die ganze Kachel laeuft. Differenz 6,6 %
+	   der Hoehe, bei 4:5 und cqw auf die Inhaltsbreite bezogen sind das
+	   11,44cqw.
+	   Der Versatz sitzt auf der BUEHNE, nicht auf den Kreisen: die Buehne
+	   traegt den Zoom, und weil sie um ihre eigene Mitte skaliert, wandert
+	   der Kreis dadurch bei jeder Zoomstufe mit — ein Versatz an den
+	   Kreisen selbst wuerde dagegen mitskaliert und am Anfang zehnfach
+	   ausschlagen. */
 	.kreis-buehne {
 		position: relative;
+		top: -11.44cqw;
 		width: 100%;
 		height: 100%;
 		display: grid;
@@ -536,10 +553,20 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		animation: bogen-aus 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
+	/* WENIGER WEIT RAUS (Fred 20.09. abends: "am Ende groesser machen, nur
+	   so weit heraus, dass man gerade den Kreis erkennt"). Der grosse Kreis
+	   misst 70cqw; bei Faktor 1,3 sind das 91 von 100 Kachelbreiten, er
+	   fuellt die Kachel also fast aus.
+	   Der Startfaktor zieht mit: 13 statt 10, damit das VERHAELTNIS der
+	   beiden Zoomstufen bei genau 10 bleibt — dem Durchmesser-Verhaeltnis
+	   der beiden Kreise. Dadurch nimmt die kleine Stunde am Anfang exakt
+	   dieselbe Flaeche ein wie der grosse Kreis am Ende: derselbe
+	   Bildausschnitt, hundertfacher Inhalt. Wer einen der beiden Werte
+	   aendert, muss den anderen mitnehmen. */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: scale(10); }
-		38%, 50% { transform: scale(1); }
-		88%, 100% { transform: scale(10); }
+		0%, 4% { transform: scale(13); }
+		38%, 50% { transform: scale(1.3); }
+		88%, 100% { transform: scale(13); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
@@ -552,6 +579,22 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	@keyframes uhr-gross {
 		0%, 16% { --fuell: 0turn; }
 		38%, 100% { --fuell: 1turn; }
+	}
+
+	/* Der Text weicht dem Ergebnis (Fred 20.09. abends), wie in Kachel 3.
+	   Er geht, bevor der grosse Kreis voll ist, und kommt auf dem Rueckweg
+	   wieder — so steht das fertige Bild einen Moment allein.
+	   :has() statt eines eigenen Markers: der Kopf ist ein GESCHWISTER der
+	   Buehne, von [data-kreis] aus also nicht erreichbar. Ueber die Kachel
+	   als gemeinsamen Vorfahren geht es. */
+	.kachel:has([data-kreis].laeuft) .kachel-kopf {
+		animation: kopf-kreis 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+	}
+
+	@keyframes kopf-kreis {
+		0%, 28% { opacity: 1; }
+		40%, 60% { opacity: 0; }
+		78%, 100% { opacity: 1; }
 	}
 
 	@keyframes bogen-aus {
@@ -600,7 +643,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		[data-kreis].laeuft,
 		[data-kreis].laeuft .uhr--klein,
 		[data-kreis].laeuft .uhr--gross,
-		[data-kreis].laeuft .bogen {
+		[data-kreis].laeuft .bogen,
+		.kachel:has([data-kreis].laeuft) .kachel-kopf {
 			animation: none;
 		}
 		.uhr {
