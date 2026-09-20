@@ -423,6 +423,13 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	:global(body.brett) .kachel:has(.laufband) {
 		grid-template-rows: auto auto;
 		align-content: center;
+		/* Gleiche Polsterung oben wie unten, sonst sitzt der Block nicht
+		   wirklich mittig (Fred 20.09. abends): die Listenfassung braucht
+		   oben mehr Luft (12cqw gegen 2,7), und diese Differenz wanderte
+		   ungesehen in die Rechnung — gemessen 305 px ueber dem Brett
+		   gegen 237 unter dem Band. */
+		padding-top: 2.7cqw;
+		padding-bottom: 2.7cqw;
 	}
 
 	:global(body.brett) .laufband {
