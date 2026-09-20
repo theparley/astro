@@ -303,7 +303,15 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		height: 100%;
 		background-image: var(--person);
 		background-repeat: repeat;
-		background-position: center;
+		/* WAAGERECHT AN DER KANTE ANSETZEN (Fred 20.09. abends): bei
+		   "center" liegt die MITTE einer Zelle auf der Mitte der Fläche —
+		   man sieht dann eine ganze Figur in der Mitte und links und rechts
+		   je eine halbe, also gefühlt drei. Mit 0 beginnt die Kachelung an
+		   der linken Kante, zwei Zellen füllen die Breite genau aus, und in
+		   der Mitte liegt die Fuge zwischen den beiden. Senkrecht bleibt es
+		   mittig, damit die Menge beim Rauszoomen aus der Mitte heraus
+		   wächst. */
+		background-position: 0 center;
 		background-size: 50% 100%;
 	}
 
@@ -343,7 +351,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		// Seitenverhältnis und sitzt mittig in der hohen Zelle, deshalb
 		// werden sie beim Zoom nicht verzerrt, sondern die Zelle wird nur
 		// quadratisch.
-		const startB = Math.round(r.width / 2);
+		const startB = Math.floor(r.width / 2);
 		const startH = Math.round(r.height);
 		const ende = Math.max(4, Math.round(r.width / ZELLEN_QUER));
 		return el.animate(
