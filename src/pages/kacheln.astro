@@ -508,12 +508,16 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   eigenen Rueckweg. Stattdessen beschreibt eine einzige, vorwaerts
 	   laufende Runde von 14 Sekunden beides. Die Marken:
 	     4 %  die Stunde beginnt zu zeichnen
-	    17 %  sie steht, der grosse Kreis setzt an, die Kamera faehrt zurueck
-	    40 %  der grosse Kreis ist voll
-	    52 %  Ende der Lesezeit, der Rueckweg beginnt
-	    80 %  beide Kreise sind ausgeblendet
+	    16 %  sie steht, der grosse Kreis setzt an, die Kamera faehrt zurueck
+	    38 %  der grosse Kreis ist voll
+	    50 %  WENDEPUNKT — der Rueckweg beginnt
+	    79 %  beide Kreise sind ausgeblendet
 	    88 %  die Kamera ist wieder ganz herangefahren
-	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen. */
+	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen.
+	   GLEICHTAKT MIT KACHEL 3 (Fred 20.09. abends): beide Kacheln laufen in
+	   14 Sekunden und wenden bei 50 %. Kachel 3 erreicht das ueber zwei
+	   Haelften von je 7 Sekunden mit "alternate", diese hier ueber eine
+	   durchlaufende Runde — die Zahlen muessen zusammen geaendert werden. */
 	[data-kreis].laeuft {
 		animation: kreis-zoom 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
@@ -534,7 +538,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 	@keyframes kreis-zoom {
 		0%, 4% { transform: scale(10); }
-		40%, 52% { transform: scale(1); }
+		38%, 50% { transform: scale(1); }
 		88%, 100% { transform: scale(10); }
 	}
 
@@ -542,17 +546,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   nicht, sie blendet aus (siehe bogen-aus). */
 	@keyframes uhr-klein {
 		0%, 4% { --fuell: 0turn; }
-		17%, 100% { --fuell: 1turn; }
+		16%, 100% { --fuell: 1turn; }
 	}
 
 	@keyframes uhr-gross {
-		0%, 17% { --fuell: 0turn; }
-		40%, 100% { --fuell: 1turn; }
+		0%, 16% { --fuell: 0turn; }
+		38%, 100% { --fuell: 1turn; }
 	}
 
 	@keyframes bogen-aus {
-		0%, 52% { opacity: 1; }
-		80%, 100% { opacity: 0; }
+		0%, 50% { opacity: 1; }
+		79%, 100% { opacity: 0; }
 	}
 
 	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
@@ -669,9 +673,13 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		// "alternate" spielt jede zweite Runde rueckwaerts; weil ALLE vier
 		// Animationen dieselbe Takt-Angabe teilen, kehren sie gemeinsam um
 		// und koennen nicht auseinanderlaufen. Eine volle Runde dauert damit
-		// zwoelf statt sechs Sekunden.
+		// vierzehn Sekunden — im Gleichtakt mit Kachel 2.
 		const takt = {
-			duration: 6000,
+			// 7000 statt 6000 (Fred 20.09. abends): mit "alternate" ergibt
+			// das eine Runde von 14 Sekunden mit Wendepunkt bei 50 % —
+			// dieselbe Laenge und derselbe Wendepunkt wie Kachel 2. Beide
+			// starten beim Einhaengen der Kacheln, laufen also im Gleichtakt.
+			duration: 7000,
 			iterations: Infinity,
 			direction: "alternate",
 			easing: "linear",
