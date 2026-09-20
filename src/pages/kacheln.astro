@@ -406,7 +406,6 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   ausschlagen. */
 	.kreis-buehne {
 		position: relative;
-		top: -11.44cqw;
 		width: 100%;
 		height: 100%;
 		display: grid;
@@ -565,10 +564,19 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   sondern die Obergrenze.
 	   Senkrecht geprueft: Mitte bei 53,7 % der Hoehe, oben 126 px, unten
 	   856 px von 914 — passt. Der Zoomweg betraegt 10 zu 1,5, also 6,7. */
+	/* Die Hoehe WANDERT MIT (Fred 20.09. abends): am Anfang soll die kleine
+	   Stunde auf Figurenhoehe der dritten Kachel stehen (53,7 % der
+	   Kachelhoehe), im Scheitel soll der grosse Kreis mittig in der Kachel
+	   sitzen (50 %). Beides zugleich geht nicht mit einem festen Versatz —
+	   also faehrt die Buehne mit.
+	   Gerechnet gegen die Ruhelage der Buehnenmitte bei 570 px von 914:
+	   -11,44cqw bringen sie auf 491 px (Figurenhoehe), -16,3cqw auf 457 px
+	   (Kachelmitte). Die Verschiebung steht VOR der Skalierung, wird also
+	   nicht mitvergroessert. */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: scale(10); }
-		38%, 50% { transform: scale(1.5); }
-		88%, 100% { transform: scale(10); }
+		0%, 4% { transform: translateY(-11.44cqw) scale(10); }
+		38%, 50% { transform: translateY(-16.3cqw) scale(1.5); }
+		88%, 100% { transform: translateY(-11.44cqw) scale(10); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
@@ -660,7 +668,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: scale(1);
+			transform: translateY(-16.3cqw) scale(1.5);
 		}
 	}
 </style>
