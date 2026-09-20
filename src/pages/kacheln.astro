@@ -354,7 +354,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		grid-template-rows: 1fr auto;
 		gap: 4cqw;
 		padding-top: 8cqw;
-		padding-bottom: 5cqw;
+		padding-bottom: 3.4cqw;
 	}
 
 	/* Die Liste ist ein LINKSBUENDIGER BLOCK, der als Ganzes in der
@@ -406,6 +406,13 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   allein — in der Mitte gross, zu den Raendern hin klein. */
 	.laufband {
 		align-self: end;
+		/* Luft fuer die Vergroesserung (Fred 20.09. abends: "oben und unten
+		   ganz leicht angeschnitten"). Der Kasten ist nur so hoch wie ein
+		   Zeichen in Normalgroesse; in der Bandmitte wachsen sie auf das
+		   1,25-fache und ragten deshalb oben und unten heraus, wo das
+		   overflow:hidden sie abschnitt. Die Polsterung gehoert zum
+		   sichtbaren Bereich, schafft also genau den fehlenden Platz. */
+		padding-block: 1.6cqw;
 		overflow: hidden;
 		/* Weiche Kanten: das Band soll nicht abgeschnitten wirken, sondern
 		   auslaufen. */
@@ -416,7 +423,13 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	.laufband-spur {
 		display: flex;
 		align-items: center;
-		gap: 3cqw;
+		/* Mehr Abstand, weil die Zeichen in der Bandmitte WACHSEN (Fred
+		   20.09. abends). Die Vergroesserung ist eine Transformation, der
+		   Abstand dagegen Layout — er waechst also nicht mit. Bei Faktor
+		   1,25 ragt ein Zeichen um knapp 1cqw je Seite ueber seinen Platz
+		   hinaus; von 3cqw Abstand blieben in der Mitte nur gut 1cqw
+		   uebrig. Mit 7cqw bleiben in der Mitte rund 5. */
+		gap: 7cqw;
 		width: max-content;
 		will-change: transform;
 	}
