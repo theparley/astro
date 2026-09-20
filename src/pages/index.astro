@@ -2,7 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import BrandLogo from "../components/BrandLogo.astro";
 import SplitFlap from "../components/SplitFlap.astro";
-import MultiOutputTafel from "../components/MultiOutputTafel.astro";
+// Fallblatt-WAND abgeloest (Fred 21.09.): die Startseite zeigt den
+// Multi-Output jetzt als zwei Kacheln. MultiOutputTafel.astro bleibt als
+// Datei im Repo, ist aber nirgends mehr eingebunden.
+import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 
 // ZIEL→FORMAT-TAFEL (Fred 13.09., Probe-Einbau "nur dass ich es mal sehe"):
 // Ziel links, Pfeil, Format rechts — BEWUSST EIN SplitFlap-Board statt zwei
@@ -274,7 +277,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   nach Hin-und-Zurück-Tausch bestätigt): Paragraph (endet auf "Auf
 	   allen Kanälen") → DIESE Sektion (der Output auf den Kanälen) →
 	   Formatfrage als Seitenschluss (endet auf der Tür Formatberatung). */}
-	<MultiOutputTafel />
+	{/* Bauform gewechselt (Fred 21.09.): „jetzt ist es an der Zeit, dass
+	   wir diese beiden Kacheln mit den Überschriften auf unsere Webseite
+	   nehmen und das Flipperboard dort rausschmeißen." Der Sektionskopf
+	   (Überschrift + Zahlen-Staccato) bleibt unverändert — gelockter
+	   Wortlaut, er kündigt den Multi-Output an, nicht die Bauform. */}
+	<MultiOutputKacheln />
 
 
 	
