@@ -367,9 +367,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		line-height: 1;
 	}
 
+	/* Spaltenbreite EXAKT zwei Ziffern (Fred 20.09. abends: "noch nicht weit
+	   genug aussen"). Vorher waren es 2,2em — deutlich mehr, als "10"
+	   braucht, weshalb selbst die Zehnerzeilen eingerueckt standen und die
+	   Liste nicht auf der Textkante der Ueberschrift sass. "ch" ist die
+	   Breite der Null, tabular-nums macht alle Ziffern gleich breit: damit
+	   fluchtet "10" genau mit dem Text darueber, und die Einser stehen eine
+	   Ziffer eingerueckt — dieselbe Zahlenspalte wie in der Wand. */
 	.anzahl {
 		display: inline-block;
-		width: 2.2em;
+		font-variant-numeric: tabular-nums;
+		width: 2ch;
 		margin-right: 0.45em;
 		text-align: right;
 		/* Kein Fettdruck (Fred 20.09. abends, nach Sichtung): die Zahlen
