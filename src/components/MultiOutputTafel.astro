@@ -44,10 +44,10 @@ interface Props {
 }
 
 // Takt = Abstand von Zeile zu Zeile beim Aufbau (Fred 20.09.: "läuft zu
-// langsam"): 400 → 260 ms. Das ist der Regler fürs Tempo-Gefühl; die
+// langsam"): 400 → 260 → 220 ms. Das ist der Regler fürs Tempo-Gefühl; die
 // Klappzeit je Kachel (FLAP_STEP_MS 110 im gemeinsamen Modul) sitzt schon
 // knapp über der Frame-Grenze und kann kaum schneller.
-const { taktMs = 260, leseMs = 2500, entstehen = false } = Astro.props;
+const { taktMs = 220, leseMs = 2500, entstehen = false } = Astro.props;
 
 // Wandgeometrie — identisch zum Entwurf: exakt halbierte Wand, 20 Kacheln
 // je Hälfte, EINE Trenner-Spalte auf der Bildmitte.
