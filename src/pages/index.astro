@@ -353,8 +353,8 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			{/* Drei Ziele je eine Zeile (Fred 20.09.) */}
 			<p class="tafel-intro">Das Personal Branding eines Solopreneurs.<br />Die Thought Leadership eines CEOs.<br />Die Brancheninstanz eines Expertenteams.</p>
 			<p class="tafel-intro">Welches Format passt? Das entscheiden Ziel und Budget, Branche und Themen, Firmenkultur und Menschen.</p>
-			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Es ist der fortlaufende Beweis eurer Expertise. Welche Formate zu euch passen, finden wir gemeinsam heraus.</p>
 			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={1} rahmen ausrichtung="links" />
+			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Es ist der fortlaufende Beweis eurer Expertise. Welche Formate zu euch passen, finden wir gemeinsam heraus.</p>
 		</div>
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
@@ -425,7 +425,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   der Mittellinie aneinander; Abstand entsteht nur durch die
 			   Innen-Lage der Inhalte). Gilt für ALLE Split-Sektionen. */
 			gap: 0;
-			align-items: start;
+			/* Beide Hälften vertikal auf EINER Mitte (Fred 20.09.): der
+			   Titel-Turm rechts steht mittig zur gesamten Textspalte samt
+			   Flipperband. Vorher: align-items start (beide oben bündig). */
+			align-items: center;
 		}
 
 		/* Spiegel der BBH-Regel für die gespiegelte Sektion: der TEXT
@@ -435,6 +438,18 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		.tafel-kopf {
 			width: min(46rem, 100%);
 			margin-left: auto;
+		}
+	}
+
+	/* TINTE STATT ZEILENRAUM (Fred 20.09.): der Titel-Turm trägt bei
+	   line-height 0.9 oben und unten je ein Stück leeren Zeilenraum mit.
+	   Dadurch ist sein Kasten 38px höher als die Textspalte daneben, und
+	   die Sektion wirkt trotz exakter Mittenausrichtung schief. text-box
+	   schneidet den Überhang ab: Kasten oben = Versalhöhe, unten =
+	   Grundlinie. @supports-Wache für Browser ohne die Eigenschaft. */
+	@supports (text-box: trim-both cap alphabetic) {
+		.format-titel {
+			text-box: trim-both cap alphabetic;
 		}
 	}
 
@@ -472,6 +487,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.tafel-kopf :global(.sf-grid) {
 		margin-left: calc(var(--sf-tile-w) * -0.24);
 	}
+
 
 	.tafel-intro {
 		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
