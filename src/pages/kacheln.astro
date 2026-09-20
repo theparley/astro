@@ -661,10 +661,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		// Mitte, damit das Endbild wieder symmetrisch steht. Beide Lagen
 		// teilen diese Keyframes, koennen also nicht verrutschen.
 		const START_TIEFE = "center 58%";
+		// KEINE HALTEZEIT AM DICHTEN ENDE mehr (Fred 20.09. abends: "du
+		// kannst mit dem Zurueckzoomen frueher beginnen, gleichzeitig mit dem
+		// Kreis"). Weil der Rueckweg hier ein Spiegelbild ist, wurde aus der
+		// Haltezeit am Ende des Hinwegs eine Wartezeit am Anfang des
+		// Rueckwegs — die Menge stand nach der Wende noch rund zwei Sekunden
+		// still, waehrend Kachel 2 schon zurueckfuhr. Jetzt endet die
+		// Bewegung genau auf der Wende, der Rueckzoom setzt also sofort an.
+		// PREIS: das dichte Bild steht nur noch einen Moment, es ist der
+		// Wendepunkt selbst und keine Lesepause mehr.
 		const groesse = [
 			{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: START_TIEFE, offset: 0, easing: "linear" },
-			{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: START_TIEFE, offset: 0.1, easing: WEICH },
-			{ backgroundSize: endeB + "px " + endeH + "px", backgroundPosition: "center 50%", offset: 0.7, easing: "linear" },
+			{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: START_TIEFE, offset: 0.12, easing: WEICH },
 			{ backgroundSize: endeB + "px " + endeH + "px", backgroundPosition: "center 50%", offset: 1 },
 		];
 		// HIN UND ZURUECK (Fred 20.09. abends): kein Sprung zurueck auf den
@@ -696,7 +704,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 						[
 							{ opacity: 1, offset: 0, easing: "linear" },
 							{ opacity: 1, offset: 0.45, easing: WEICH },
-							{ opacity: 0, offset: 0.72, easing: "linear" },
+							{ opacity: 0, offset: 0.8, easing: "linear" },
 							{ opacity: 0, offset: 1 },
 						],
 						takt,
@@ -718,8 +726,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			weiss.animate(
 				[
 					{ opacity: 0, offset: 0, easing: "linear" },
-					{ opacity: 0, offset: 0.1, easing: WEICH },
-					{ opacity: 1, offset: 0.45, easing: "linear" },
+					{ opacity: 0, offset: 0.12, easing: WEICH },
+					{ opacity: 1, offset: 0.55, easing: "linear" },
 					{ opacity: 1, offset: 1 },
 				],
 				takt,
