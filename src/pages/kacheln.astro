@@ -587,13 +587,20 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Buehne, von [data-kreis] aus also nicht erreichbar. Ueber die Kachel
 	   als gemeinsamen Vorfahren geht es. */
 	.kachel:has([data-kreis].laeuft) .kachel-kopf {
-		animation: kopf-kreis 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: kopf-kreis 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 
+	/* SYNCHRON MIT KACHEL 3 (Fred 20.09. abends), und zwar nach DEREN
+	   Zeiten gerichtet. Kachel 3 laeuft in zwei Haelften von je 7 Sekunden
+	   mit gespiegeltem Rueckweg; ihr Text haelt bis 45 % der Haelfte und
+	   ist bei 80 % weg. Auf die 14-Sekunden-Runde umgerechnet sind das
+	   22,5 % und 40 % — gespiegelt kommt er zwischen 60 % und 77,5 %
+	   wieder. Auch die Kurve ist von dort uebernommen. Wer an Kachel 3
+	   dreht, muss diese vier Zahlen nachrechnen. */
 	@keyframes kopf-kreis {
-		0%, 28% { opacity: 1; }
+		0%, 22.5% { opacity: 1; }
 		40%, 60% { opacity: 0; }
-		78%, 100% { opacity: 1; }
+		77.5%, 100% { opacity: 1; }
 	}
 
 	@keyframes bogen-aus {
