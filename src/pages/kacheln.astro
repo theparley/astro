@@ -340,19 +340,21 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		gap: 3cqw;
 	}
 
+	/* Die Liste ist ein LINKSBUENDIGER BLOCK, der als Ganzes in der
+	   waagerechten Kachelmitte sitzt (Fred 20.09. abends). Nicht zu
+	   verwechseln mit zentriertem Text: die Zeilen fluchten untereinander
+	   links, nur der Block als solcher steht mittig. Moeglich wurde das,
+	   seit die Piktogramme nicht mehr am rechten Rand haengen — vorher
+	   musste die Liste die volle Breite spannen. */
 	.kachel-mitte--liste {
 		align-content: start;
-		/* stretch statt start (Fred 20.09. abends): die Liste soll die volle
-		   Kachelbreite einnehmen, damit die Zahlenspalte ganz links am Rand
-		   sitzt und die Piktogramme ganz rechts am Anschlag. Vorher war die
-		   Liste nur so breit wie ihr längster Eintrag und hing als Block in
-		   der Mitte. */
-		justify-items: stretch;
+		justify-items: center;
 		overflow: hidden;
 	}
 
 	.varianten {
-		width: 100%;
+		width: max-content;
+		max-width: 100%;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -426,7 +428,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		display: inline-block;
 		font-variant-numeric: tabular-nums;
 		width: 2ch;
-		margin-right: 0.45em;
+		/* Enger an den Text (Fred 20.09. abends): 0,28em statt 0,45. */
+		margin-right: 0.28em;
 		text-align: right;
 		/* Kein Fettdruck (Fred 20.09. abends, nach Sichtung): die Zahlen
 		   sollen die Spalte halten, nicht die Zeile beherrschen. Die
