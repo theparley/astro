@@ -64,8 +64,19 @@ const kanalBand = [
 //
 // DIE DREI JAS (Fred 21.09., „Ich sage dreimal ja"): Q&A ist jetzt ein
 // fester Regie-Block in der Aufnahme, SHOWNOTES sind ein benannter Posten,
-// und die LANGFASSUNG fuer die Website ist ein EIGENER Schnitt. Damit sind
-// es zehn Formate, nicht sieben. Die frueheren Zeilen „LANDINGPAGE" und
+// und die Aufzeichnung fuer die Website ist ein EIGENER Schnitt. Damit sind
+// es zehn Formate, nicht sieben.
+//
+// WEBSITE-ZEILE (Fred 21.09., „Video-Podcast-Aufzeichnungen Webseite"): die
+// Website-Zeile heisst VIDEOPODCAST, nicht LANGFASSUNG — dasselbe Formwort
+// wie die YouTube-Zeile, nur ein anderes Ziel. Das ist kein Versehen,
+// sondern die Regel: die Form darf sich wiederholen, das Ziel nicht.
+// „LANGFASSUNG" war ein Agenturwort und beschrieb ausserdem nur die Laenge.
+// „VIDEOPODCAST-AUFZEICHNUNG" waere das vollstaendige Wort, passt mit 25
+// Zeichen aber nicht in die dreizehn Spalten; die Listen-Fassung schreibt
+// es aus.
+//
+// Die frueheren Zeilen „LANDINGPAGE" und
 // „AUDIO-PODCAST" sind ersetzt: geliefert wird das Video fuer die
 // Landingpage, nicht die Seite, und der Podcast heisst bei Spotify FOLGE.
 //
@@ -78,20 +89,37 @@ const kanalBand = [
 // DREIZEHN Spalten: PODCAST-FOLGE hat dreizehn Zeichen und ist der
 // breiteste Eintrag.
 // Aufrufbar unter /kacheln?board; beide Fassungen liegen im Dokument.
+// SORTIER-REGEL (Fred 21.09.): in keiner Spalte duerfen zwei gleiche Werte
+// direkt untereinander stehen — kein „LIVESTREAM YOUTUBE" gefolgt von
+// „LIVESTREAM LINKEDIN". Der Grund ist mechanisch: eine Spalte, deren Wert
+// sich nicht aendert, KLAPPT NICHT. Steht zweimal dasselbe Wort hinterein-
+// ander, steht die mittlere Zeile still, waehrend links und rechts fallen —
+// das sieht nach Fehler aus, nicht nach Rhythmus.
+// Geprueft ueber den Rand hinweg: die letzte Zeile geht wieder in die erste
+// ueber, also zaehlt auch dieses Paar.
+// Formen und Ziele sind vollstaendig entzerrt. Die ZAHLEN nicht ganz: acht
+// der vierzehn Zeilen tragen die 1, und acht gleiche Werte lassen sich auf
+// einem Ring aus vierzehn Plaetzen nicht ohne Beruehrung verteilen (es
+// braeuchte sieben Trenner, es gibt sechs). Zwei Beruehrungen sind das
+// Minimum, und genau zwei sind es: Zeile 3/4 und 8/9.
+// PREIS DIESER SORTIERUNG: die Reihe ist damit nicht mehr nach Laenge
+// geordnet (lang → kurz). Das war vorher ein System, jetzt ist es eine
+// Mischung. Fuer ein durchlaufendes Brett ist das eher ein Gewinn — es
+// verhindert, dass jemand Bloecke als „Kategorien" liest und nachzaehlt.
 const brettZeilen = [
 	["1", "LIVESTREAM", "YOUTUBE"],
-	["1", "LIVESTREAM", "LINKEDIN"],
-	["1", "VIDEOPODCAST", "YOUTUBE"],
-	["1", "PODCAST-FOLGE", "SPOTIFY"],
-	["1", "LANGFASSUNG", "WEBSITE"],
 	["9", "BEITRÄGE", "LINKEDIN"],
-	["9", "REELS", "INSTAGRAM"],
+	["1", "VIDEOPODCAST", "WEBSITE"],
+	["1", "PODCAST-FOLGE", "SPOTIFY"],
 	["9", "SHORTS", "YOUTUBE"],
+	["1", "LIVESTREAM", "LINKEDIN"],
+	["9", "REELS", "INSTAGRAM"],
+	["1", "TRANSKRIPT", "WEBSITE"],
+	["1", "VIDEOPODCAST", "YOUTUBE"],
 	["9", "VIDEOS", "TIKTOK"],
+	["1", "SHOWNOTES", "SPOTIFY"],
 	["10", "Q&A", "YOUTUBE"],
 	["1", "NEWSLETTER", "E-MAIL"],
-	["1", "SHOWNOTES", "SPOTIFY"],
-	["1", "TRANSKRIPT", "WEBSITE"],
 	["10", "ZITATE", "KI"],
 ];
 
@@ -99,18 +127,18 @@ const brettZeilen = [
 // beide Fassungen duerfen nie auseinanderlaufen.
 const varianten: Array<[string, string, string[]]> = [
 	["1", "Livestream für YouTube", ["youtube"]],
-	["1", "Livestream für LinkedIn", ["linkedin"]],
-	["1", "Videopodcast für YouTube", ["youtube"]],
-	["1", "Podcast-Folge für Spotify", ["spotify"]],
-	["1", "Langfassung für die Website", ["web"]],
 	["9", "Beiträge für LinkedIn", ["linkedin"]],
-	["9", "Reels für Instagram", ["instagram"]],
+	["1", "Videopodcast-Aufzeichnung für die Website", ["web"]],
+	["1", "Podcast-Folge für Spotify", ["spotify"]],
 	["9", "Shorts für YouTube", ["youtube"]],
+	["1", "Livestream für LinkedIn", ["linkedin"]],
+	["9", "Reels für Instagram", ["instagram"]],
+	["1", "Transkript für die Website", ["web"]],
+	["1", "Videopodcast für YouTube", ["youtube"]],
 	["9", "Videos für TikTok", ["tiktok"]],
+	["1", "Shownotes für Spotify", ["spotify"]],
 	["10", "Q&A für YouTube", ["youtube"]],
 	["1", "Newsletter per Mail", ["mail"]],
-	["1", "Shownotes für Spotify", ["spotify"]],
-	["1", "Transkript für die Website", ["web"]],
 	// „KI-lesbar" war Freds Vorschlag, die Recherche spricht dagegen: es ist
 	// ein Adjektiv („10 KI-lesbar" ist ungrammatisch, alle Nachbarzeilen
 	// sind Substantive) und behauptet nur Maschinenlesbarkeit, also die
