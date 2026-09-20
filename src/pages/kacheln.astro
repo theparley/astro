@@ -45,7 +45,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			<div class="kachel">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">1:9</p>
-					<p class="bezug">Gespräch im Monat zu Ausspielungen</p>
+					<p class="bezug">Ein Gespräch im Monat zu neun Ausspielungen.</p>
 				</div>
 				<div class="kachel-mitte kachel-mitte--flap">
 					<SplitFlap lines={ausspielungen} holdMs={1100} minCols={13} minRows={1} />
@@ -60,7 +60,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			<div class="kachel">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">1:100+</p>
-					<p class="bezug">Stunde Aufnahmezeit zu Stunden Zuschauerzeit</p>
+					<p class="bezug">Eine Stunde Aufnahmezeit zu mehr als hundert Stunden Zuschauerzeit.</p>
 				</div>
 				<div class="kachel-mitte">
 					<div class="kreis-buehne" data-kreis>
@@ -85,7 +85,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			<div class="kachel">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">2:1000+</p>
-					<p class="bezug">Experten zu Zuschauern</p>
+					<p class="bezug">Zwei Experten zu mehr als tausend Zuschauern.</p>
 				</div>
 				<div class="kachel-mitte">
 					<div class="menge" data-menge style={`--person: ${personUri}`}></div>
@@ -152,8 +152,12 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 
 	/* Überschrift ist das VERHÄLTNIS (Fred 20.09. abends): die Kachel sagt
 	   zuerst die Relation, erst darunter steht klein, was ins Verhältnis
-	   gesetzt wird. Größe so gewählt, dass die längste Fassung ("2:1000+",
-	   sieben Zeichen) noch in die Kachelbreite passt. */
+	   gesetzt wird — und zwar AUSGESCHRIEBEN, die Zahlen wiederholt
+	   ("Ein Gespräch im Monat zu neun Ausspielungen."). Die Ziffern oben
+	   sind das Signal, der Satz darunter die Auflösung; wer nur das
+	   Verhältnis sieht, hat es schon, wer liest, bekommt es bestätigt.
+	   Größe so gewählt, dass die längste Fassung ("2:1000+", sieben
+	   Zeichen) noch in die Kachelbreite passt. */
 	.verhaeltnis {
 		margin: 0;
 		font-weight: 900;
