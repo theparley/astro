@@ -662,12 +662,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		animation: kreis-zoom 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
+	/* Die Zeiger laufen nicht mehr gleichfoermig an und ab (Fred 20.09.
+	   abends), sondern weich in beide Richtungen — dieselbe symmetrische
+	   Kurve wie der Zoom, damit Kamera und Zeichnung denselben Charakter
+	   haben. CSS legt die Kurve auf JEDEN Abschnitt einzeln; die
+	   Haltezeiten davor und danach sind konstante Werte und bleiben davon
+	   unberuehrt, gedehnt wird also nur das Zeichnen selbst. */
 	[data-kreis].laeuft .uhr--klein {
-		animation: uhr-klein 14s linear infinite;
+		animation: uhr-klein 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	[data-kreis].laeuft .uhr--gross {
-		animation: uhr-gross 14s linear infinite;
+		animation: uhr-gross 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	/* Das Ausblenden trifft nur die KREISE, nicht die Speichen — der Strich
