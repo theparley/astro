@@ -128,15 +128,18 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Wort war bei Sektionstitel-Größe die Sprengzeile der Halbspalte;
 		   der Split liest sich versal als Doppel-Wort (AUGEN ZEUGEN). */}
 		<div class="paragraph-links">
-			{/* "Noch vor dem ersten Kontakt." UMGEZOGEN (Fred 15.09. früh):
-			   die Zeile steht jetzt am ENDE von Absatz 2 (nach dem
-			   fälschungssicheren Beweis). RÜCKBAU-ZEIGER für schnelles
-			   Zurücktauschen (Fred: "merk dir die vorherige Lösung"):
-			   Commit 2c977b4 = Zeile rechtsbündig unterm Punkt von ZEUGEN.,
-			   im .turm-block (width max-content, gap 0), Abstand 0.2 Turm-Em
-			   via text-box-trim + margin-top 0.05 Turm-Em (@supports-Wache).
-			   Ein `git show 2c977b4 -- src/pages/index.astro` zeigt alles. */}
+			{/* "Noch vor dem ersten Kontakt." WIEDER UNTERM TURM (Fred 19.09.,
+			   Rückbau auf den Stand von Commit 2c977b4): die Zeile war
+			   zwischenzeitlich am Ende von Absatz 2 und dann von Absatz 3;
+			   beide Absatz-Schlüsse ("Der Zuschauer wird zum Augenzeugen." +
+			   Zeitmarke) sind raus, weil der Turm den Augenzeugen-Satz schon
+			   groß sagt. Turm + Zeile in EINEM Block, so breit wie der Turm,
+			   die Zeile darin rechtsbündig — sie endet unter dem Punkt von
+			   ZEUGEN. Fred prüft noch, ob die Zeile überhaupt bleibt. */}
+			<div class="turm-block">
 			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kunden</span><span class="statement-zeile">werden</span><span class="statement-zeile">Augen</span><span class="statement-zeile">zeugen.</span></span></h2>
+			<p class="kontakt-zeile">Noch vor dem ersten Kontakt.</p>
+			</div>
 		</div>
 		<div class="paragraph-text">
 		{/* Indiz-Satz (Fred 13.09. nacht, Diktat; Drittfassung): „vor kurzem
@@ -232,7 +235,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   lässt sich jetzt Vertrauen skalieren" — „Wirkung" holt erstmals ein
 	   Wort der Wirkungs-Säule in den Kopf (Bezug: filmreif + ohne
 	   Kamerastress = die Wirkung, die skaliert wird). */}
-		<p class="plaedoyer-text">Genau solche Gesprächsmomente fangen wir mit Video filmreif ein und multiplizieren ihre Wirkung auf allen Kanälen. Als ganzes Gespräch. Als kurzer Clip. Als Teil eines Beitrags. Der Zuschauer wird zum Augenzeugen. Noch vor dem ersten Kontakt.</p>
+		<p class="plaedoyer-text">Genau solche Gesprächsmomente fangen wir mit Video filmreif ein und multiplizieren ihre Wirkung auf allen Kanälen. Als ganzes Gespräch. Als kurzer Clip. Als Teil eines Beitrags.</p>
 		</div>
 	</section>
 
@@ -663,6 +666,47 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+	}
+
+	/* Turm-Block (Rückbau 19.09. auf Commit 2c977b4): exakt so breit wie
+	   der Turm (max-content), darin die Kontakt-Zeile RECHTSBÜNDIG — sie
+	   endet unter dem Punkt von ZEUGEN. Fuge 0, Turm-Zeilenabstände
+	   unangetastet. */
+	.turm-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		width: max-content;
+		max-width: 100%;
+		margin: 0 auto;
+	}
+
+	.turm-block .kontakt-zeile {
+		text-align: right;
+	}
+
+	/* ABSTAND = TURM-RHYTHMUS (Fred 14.09. nacht): zwischen ZEUGEN. und der
+	   Kontakt-Zeile liegt exakt der sichtbare Tinten-Abstand zweier
+	   Turm-Zeilen — bei Zeilenabstand 0.9 und Versal-Kappe 0.7 sind das
+	   0.2 Turm-Em. Rechnung (mit text-box-trim an der Zeile): Turm-Überhang
+	   −0.15 + gewünschte Lücke 0.2 = +0.05 Turm-Em. @supports-Wache:
+	   Browser ohne text-box lassen die Zeile mit ähnlicher Luft stehen —
+	   nie Überschneidung. */
+	@supports (text-box: trim-both cap alphabetic) {
+		.turm-block .kontakt-zeile {
+			text-box: trim-both cap alphabetic;
+			margin-top: calc(clamp(2.5rem, 1rem + 7vw, 8rem) * 0.05);
+		}
+	}
+
+	/* "Noch vor dem ersten Kontakt." als kleine Text-Zeile unterm Turm:
+	   BBH-Lead-Referenz wie die Absätze rechts, normale Schreibung,
+	   normales Gewicht. */
+	.kontakt-zeile {
+		margin: 0;
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
 	}
 
 
