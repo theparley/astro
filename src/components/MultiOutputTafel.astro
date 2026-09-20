@@ -52,7 +52,10 @@ const GESAMT_COLS = HALB + 1 + HALB; // 41
 // +KOPF-Zeilen (Fred 14.09. spät: VIDEOPODCAST wandert IN die Wand) und
 // RAND (Fred 14.09. nacht: "Text klebt am Rand" — eine Leerzeile oben und
 // unten, eine Leerspalte links und rechts als Passepartout).
-const KOPF = 4; // Rand-Zeile + Titel + 2 Zeilen Luft
+// Fred 20.09.: VIDEOPODCAST-Titel und Akt-Label (CONTENT-OUTPUT/WATCHTIME)
+// sind raus — die Wand zeigt rechts selbst, was rauskommt. Kopf = Rand-
+// Zeile + eine Zeile Luft; die Wand wird dadurch zwei Zeilen kürzer.
+const KOPF = 2; // Rand-Zeile + 1 Zeile Luft
 const RAND_UNTEN = 1;
 const ROWS = 12 + 3 + KOPF + RAND_UNTEN;
 
@@ -209,25 +212,26 @@ const kernaussage =
 		{ text: "   WÄCHST.", logos: [] },
 	];
 	const TEXT_COLS = Math.max(...ZEILEN.map((z) => z.text.length));
-	// KOPF-Zeilen (Fred 14.09. spät) + RAND (Fred 14.09. nacht): Zeile 0
-	// bleibt LEER (Passepartout), Zeile 1 = VIDEOPODCAST mittig, zwei
-	// Zeilen Luft, dann der Aufbau; unten eine Leerzeile, links Spalte 0
-	// leer, rechts endet vor der letzten Spalte.
+	// KOPF-Zeilen + RAND (Fred 14.09. nacht): Zeile 0 bleibt LEER
+	// (Passepartout), eine Zeile Luft, dann der Aufbau; unten eine
+	// Leerzeile, links Spalte 0 leer, rechts endet vor der letzten Spalte.
+	// Fred 20.09.: der VIDEOPODCAST-Titel (Zeile 1) und das Akt-Label
+	// (Zeile 2) sind raus — man sieht rechts, was rauskommt; Kopf um zwei
+	// Zeilen geschrumpft. Wortlaut-Vorrat: FORMAT_TITEL "VIDEOPODCAST",
+	// AKT_LABELS ["CONTENT-OUTPUT","WATCHTIME"] in der Git-Historie.
 	const RAND = 1;
-	const KOPF = 3 + RAND;
+	const KOPF = 1 + RAND;
 	const ROWS = ZEILEN.length + 3 + KOPF + RAND;
 	const HALB = 20;
 	const GESAMT_COLS = HALB + 1 + HALB; // 41, Trenner = Spalte 20
 	const MITTE_RECHTS = HALB + 1;
 	const SUMME_ROW = 13 + KOPF;
 	const BLOCK_BREITE = 10;
-	const FORMAT_TITEL = "VIDEOPODCAST";
-	const FORMAT_START = Math.floor((GESAMT_COLS - FORMAT_TITEL.length) / 2);
-	// Akt-Anzeige IN der Wand (Fred 15.09. früh, ersetzt die entfernten
-	// Schalter als reine Anzeige): die freie Zeile unter VIDEOPODCAST
-	// zeigt, welcher Akt läuft.
-	const AKT_LABELS = ["CONTENT-OUTPUT", "WATCHTIME"]; // Watchtime statt Zuschauerzeit (Fred 15.09.)
-	const mittig = (text: string) => Math.floor((GESAMT_COLS - text.length) / 2);
+	// Spaltenköpfe ausgeschrieben (Fred 20.09.: INPUT/OUTPUT statt IN/OUT,
+	// weil der Absatz darüber von "multiplizieren" und die Sektion vom
+	// Multi-OUTPUT spricht).
+	const KOPF_LINKS = "INPUT";
+	const KOPF_RECHTS = "OUTPUT";
 
 	type Ev = { t: number; r: number; c: number; html?: string; weiss?: boolean };
 
@@ -256,12 +260,10 @@ const kernaussage =
 		};
 
 		let t = 200;
-		// ── Akt 1: FORMAT-TITEL → INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
-		addText(RAND, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 400;
-		addText(RAND + 1, mittig(AKT_LABELS[0]), AKT_LABELS[0].length, AKT_LABELS[0], t); t += 600;
-		addText(KOPF, RAND, INPUT_COLS, "IN", t); t += 500;
+		// ── Akt 1: INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
+		addText(KOPF, RAND, INPUT_COLS, KOPF_LINKS, t); t += 500;
 		addText(KOPF + 2, RAND, INPUT_COLS, INPUT_ZEILE, t); t += 600;
-		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUT", t); t += 500;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, KOPF_RECHTS, t); t += 500;
 		ZEILEN.forEach((def, i) => {
 			const r = KOPF + 2 + i;
 			addText(r, MITTE_RECHTS, TEXT_COLS, def.text, t);
@@ -284,11 +286,9 @@ const kernaussage =
 		// (1 STUNDE/AUFWAND links, 100+ STUNDEN/ZUSCHAUERZEIT rechts,
 		// beide auf den Summen-Zeilen — Lesung "unten" auf beide Seiten
 		// bezogen; AUFWAND/ZUSCHAUERZEIT als Zweitzeilen beibehalten).
-		addText(RAND, FORMAT_START, FORMAT_TITEL.length, FORMAT_TITEL, t); t += 400;
-		addText(RAND + 1, mittig(AKT_LABELS[1]), AKT_LABELS[1].length, AKT_LABELS[1], t); t += 600;
-		addText(KOPF, RAND, INPUT_COLS, "IN", t); t += 500;
+		addText(KOPF, RAND, INPUT_COLS, KOPF_LINKS, t); t += 500;
 		add(t, KOPF + 2, RAND, { weiss: true }); t += 600;
-		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "OUT", t); t += 500;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, KOPF_RECHTS, t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
 		// DIAGONAL-WELLE (Fred 14.09. abends): Verzögerung = (Zeile ×
