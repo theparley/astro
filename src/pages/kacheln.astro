@@ -557,16 +557,15 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   so weit heraus, dass man gerade den Kreis erkennt"). Der grosse Kreis
 	   misst 70cqw; bei Faktor 1,3 sind das 91 von 100 Kachelbreiten, er
 	   fuellt die Kachel also fast aus.
-	   Der Startfaktor zieht mit: 13 statt 10, damit das VERHAELTNIS der
-	   beiden Zoomstufen bei genau 10 bleibt — dem Durchmesser-Verhaeltnis
-	   der beiden Kreise. Dadurch nimmt die kleine Stunde am Anfang exakt
-	   dieselbe Flaeche ein wie der grosse Kreis am Ende: derselbe
-	   Bildausschnitt, hundertfacher Inhalt. Wer einen der beiden Werte
-	   aendert, muss den anderen mitnehmen. */
+	   NUR das Ende ist groesser geworden, der Anfang bleibt bei Faktor 10
+	   (Fred 20.09. abends, Korrektur). Der Zoomweg betraegt damit 10 zu 1,3,
+	   also 7,7 — die kleine Stunde am Anfang ist dadurch etwas kleiner im
+	   Bild als der grosse Kreis am Ende. Das ist gewollt: gefragt war ein
+	   groesserer Schluss, nicht ein gleich grosser Anfang. */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: scale(13); }
+		0%, 4% { transform: scale(10); }
 		38%, 50% { transform: scale(1.3); }
-		88%, 100% { transform: scale(13); }
+		88%, 100% { transform: scale(10); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
