@@ -1155,6 +1155,31 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   die 100cqw Innenbreite passen muessen — 8,6cqw je Kachel. */
 	.kachel-mitte--brett .sf-grid {
 		--sf-tile-w: 8.9cqw;
+		/* BUCHSTABEN NAEHER ZUSAMMEN (Fred 20.09. abends). Der Abstand
+		   kommt nicht von den Kacheln — die stossen mit einem Pixel Fuge
+		   ohnehin fast aneinander —, sondern vom Verhaeltnis Schrift zu
+		   Kachel: die Vorgabe der Komponente ist 0,62, ein Zeichen der
+		   Mono-Schrift ist dabei nur rund ein Drittel so breit wie seine
+		   Kachel, der Rest ist Luft. Hier 1,0 — die Kachelbreite bleibt,
+		   weil elf davon die Reihe fuellen sollen, aber das Zeichen nutzt
+		   sie aus. Gemessen sinkt die Luecke zwischen zwei Buchstaben damit
+		   von 38 px (Vorgabe) ueber 29 (0,88) auf 25 px.
+		   Weiter geht es nicht sinnvoll: die Mono-Schrift setzt ihre
+		   Zeichen auf 0,6 der Schriftgroesse, mehr als die Kachelbreite
+		   kann ein Zeichen also nicht fuellen, ohne in die Nachbarkachel zu
+		   ragen.
+		   Die Kacheln selbst zu verschmaelern brachte nichts: dann
+		   schrumpft die Schrift im selben Verhaeltnis mit, das Bild sieht
+		   genauso aus, nur kleiner. */
+		--sf-font-size: var(--sf-tile-w);
+	}
+
+	.kachel-mitte--brett .sf-row-line {
+		gap: 0;
+	}
+
+	.kachel-mitte--brett .sf-grid > * + * {
+		margin-top: 0;
 	}
 </style>
 
