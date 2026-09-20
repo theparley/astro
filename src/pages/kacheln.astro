@@ -137,7 +137,7 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 			<div class="kachel">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">1 <span class="zu">zu</span> 100+</p>
-					<p class="bezug">Eine Stunde Aufnahmezeit zu mehr als hundert Stunden Zuschauerzeit.</p>
+					<p class="bezug">Eine Stunde Aufnahme im Monat zu mehr als hundert Stunden Zuschauerzeit.</p>
 				</div>
 				<div class="kachel-mitte">
 					<div class="kreis-buehne" data-kreis>
@@ -147,7 +147,7 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 						   Stunde als kleiner Punkt in einem hundertmal größeren
 						   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
 						<span class="uhr uhr--gross"></span>
-						<span class="uhr uhr--klein"></span>
+						<span class="uhr uhr--klein"><span class="uhr-kern"></span></span>
 					</div>
 				</div>
 			</div>
@@ -162,7 +162,7 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 			<div class="kachel">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">2 <span class="zu">zu</span> 1000+</p>
-					<p class="bezug">Zwei Experten zu mehr als tausend Zuschauern.</p>
+					<p class="bezug">Zwei Experten erreichen mehr als tausend Zuschauer.</p>
 				</div>
 				<div class="kachel-mitte">
 					<div class="menge" data-menge style={`--person: ${personUri}`}></div>
@@ -274,17 +274,23 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 	   innerhalb der Kachel. */
 	.kachel-mitte--liste {
 		align-content: start;
-		justify-items: start;
+		/* stretch statt start (Fred 20.09. abends): die Liste soll die volle
+		   Kachelbreite einnehmen, damit die Zahlenspalte ganz links am Rand
+		   sitzt und die Piktogramme ganz rechts am Anschlag. Vorher war die
+		   Liste nur so breit wie ihr längster Eintrag und hing als Block in
+		   der Mitte. */
+		justify-items: stretch;
 		overflow: hidden;
 	}
 
 	.varianten {
+		width: 100%;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 		font-weight: 300;
 		font-size: 5.4cqw;
-		line-height: 1.5;
+		line-height: 1.62;
 		letter-spacing: -0.01em;
 	}
 
@@ -294,11 +300,12 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		/* Mindestabstand zwischen Namen und Piktogrammen = derselbe Wert,
-		   den die Kachel als Rand nach außen hält (Fred 20.09. abends).
-		   Damit atmet die Zeile innen so wie die Kachel außen, und die
-		   längste Zeile klebt nicht mehr an der Logo-Kolonne. */
-		gap: clamp(18px, 2.2vw, 32px);
+		/* Mindestabstand zwischen Namen und Piktogrammen. Der Kachelrand
+		   allein war zu knapp (Fred 20.09. abends, zweite Sichtung: "sieht
+		   immer noch zu eng aus") — bei dieser Schriftgröße sind 18 px
+		   weniger als eine halbe Zeilenhöhe. Jetzt an der SCHRIFT bemessen,
+		   nicht am Rand: 2,4 Zeichenhöhen, also rund das Doppelte. */
+		gap: 2.4em;
 	}
 
 	/* Kanal-Piktogramme rechtsbündig an der gemeinsamen Kante, wie die
@@ -375,19 +382,38 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 	}
 
 	/* Die kleine Stunde ist KEINE weiße Fläche, sondern eine schwarze mit
-	   weißem Rand (Fred 20.09. abends) — dieselbe Sprache wie die beiden
-	   schwarzen Figuren in Kachel 3. Damit sie trotzdem umlaufend ENTSTEHT,
-	   wird nicht gefüllt, sondern freigelegt: die Scheibe ist fertig da
-	   (schwarz mit weißem Saum) und eine Kegel-Maske gibt sie Stück für
-	   Stück frei. Man sieht den Saum wie einen Zeiger herumlaufen, und was
-	   er hinterlässt, ist die schwarze Stunde. Nebenwirkung, die uns passt:
-	   am Ende liegt sie als schwarze Scheibe im weißen Feld des großen
-	   Kreises — der frühere Extra-Punkt wird dadurch überflüssig. */
+	   weißem Rand — und der Rand läuft RINGSUM, auch an den beiden geraden
+	   Kanten zur Mitte hin (Fred 20.09. abends: "wie so ein Stück Kuchen
+	   gehört zum ganzen Kuchen"). Ein angeschnittenes Stück sieht damit aus
+	   wie ein Stück, nicht wie ein abgerissenes Feld.
+	   Gebaut aus zwei Lagen: außen eine weiße Scheibe, freigelegt von einer
+	   Kegel-Maske bis zum aktuellen Winkel — das ist die Umrisslinie. Darin
+	   ein schwarzer Kern, der ringsum kleiner ist (Abstand zur Rundung per
+	   inset, Abstand zu den geraden Kanten über einen Winkel-Versatz in
+	   seiner eigenen Maske). Was übrig bleibt, ist genau der Saum. */
 	.uhr--klein {
-		background: var(--panel);
-		box-shadow: 0 0 0 0.45cqw #ffffff inset;
+		background: #ffffff;
 		-webkit-mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
 		mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
+	}
+
+	.uhr-kern {
+		position: absolute;
+		inset: 0.45cqw;
+		border-radius: 50%;
+		background: var(--panel);
+		--kante: 5deg;
+		--bis: max(var(--kante), calc(var(--fuell, 0turn) - var(--kante)));
+		-webkit-mask-image: conic-gradient(
+			transparent 0 var(--kante),
+			#000 var(--kante) var(--bis),
+			transparent var(--bis)
+		);
+		mask-image: conic-gradient(
+			transparent 0 var(--kante),
+			#000 var(--kante) var(--bis),
+			transparent var(--bis)
+		);
 	}
 
 	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10.
@@ -511,7 +537,17 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 		// behält ihr Verhältnis, sitzt also mittig — zwei große Figuren.
 		const startB = Math.round(r.width);
 		const startH = Math.round(r.height);
-		const endeB = Math.max(8, Math.round(Math.sqrt((4 * r.width * r.height) / ZIEL_FIGUREN)));
+		// Die Kachelgröße wird nicht nur geschätzt, sondern nachgezählt: die
+		// Formel liefert einen Startwert, dann wird verkleinert, bis wirklich
+		// GANZE Figuren in der geforderten Zahl im Bild stehen (Fred
+		// 20.09. abends: "in dem Grid sieht man am Ende, wie viele es sind").
+		// Mit der reinen Formel waren es 928 statt 1000 — angeschnittene
+		// Figuren am Rand zählen eben nicht mit, und die Behauptung "mehr
+		// als tausend" soll man abzählen können.
+		const ganze = (t: number) =>
+			Math.floor(r.width / t) * Math.floor(r.height / Math.round(t / 2)) * 2;
+		let endeB = Math.max(8, Math.round(Math.sqrt((4 * r.width * r.height) / ZIEL_FIGUREN)));
+		while (endeB > 8 && ganze(endeB) < ZIEL_FIGUREN) endeB--;
 		const endeH = Math.round(endeB / 2);
 		// Beide Hintergrund-Ebenen bekommen dieselbe Größe, damit die
 		// schwarze Doppelfigur exakt auf den zwei mittleren der Menge liegt.
