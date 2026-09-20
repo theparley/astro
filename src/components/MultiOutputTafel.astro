@@ -281,7 +281,9 @@ const kernaussage =
 		t += 500 + lese;
 		const akt1EndeT = t - 1; // Moment „Liste steht komplett" (reduced-motion-Standbild)
 		// Auch hier: Kaskade + echte Trommel-Klappzeit (s. Abbau unten).
-		addClearAll(t); t += (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS + 500;
+		// Stille NACH dem Leerräumen auf 0 (Fred 20.09., Probe: vorher 500 ms)
+		// — Akt 2 beginnt jetzt direkt, sobald die letzte Kachel schwarz ist.
+		addClearAll(t); t += (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS + 0;
 
 		// ── Akt 2: 1 Stunde Aufnahme gegen 100+ Stunden Zuschauerzeit ──
 		// VIERTE Dramaturgie-Fassung (Fred 20.09.): Akt 2 wird PARALLEL zu
