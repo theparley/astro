@@ -45,13 +45,26 @@ const kanalBand = [
 	"gemini",
 ];
 
-// FALLBLATT-FASSUNG (Fred 20.09. abends, zweiter Anlauf). Nicht mehr die
-// ganze Liste als Brett — zehn Zeilen in Kachelschrift waren in der Kachel
-// zu klein —, sondern ein DREIZEILIGES Brett ueber die volle Breite mit
-// einem Wort in der Mitte. Elf Spalten, weil "LANDINGPAGE" genau elf
-// Zeichen hat und die Reihe damit ohne Rest fuellt.
+// FALLBLATT-FASSUNG (Fred 20.09. abends): dreizeiliges Brett ueber die
+// volle Breite, das die zehn Deliverys durchrattert. Zeile 1 traegt immer
+// die Stueckzahl, Zeile 2 und 3 den Namen — was laenger als elf Zeichen
+// ist, bricht in die dritte Zeile um. Elf Spalten, weil LANDINGPAGE genau
+// elf Zeichen hat und damit die breiteste ungebrochene Zeile ist.
+// Umbrueche sind von Hand gesetzt, nicht gerechnet: sie sollen an der
+// Wortfuge liegen (VIDEO / PODCAST), nicht dort, wo der Platz endet.
 // Aufrufbar unter /kacheln?board; beide Fassungen liegen im Dokument.
-const brettZeilen = [["", "LANDINGPAGE", ""]];
+const brettZeilen = [
+	["1", "LIVESTREAM", ""],
+	["1", "VIDEO", "PODCAST"],
+	["1", "AUDIO-", "PODCAST"],
+	["10", "LINKEDIN-", "BEITRÄGE"],
+	["10", "CLIPS", ""],
+	["10", "SHORTS", ""],
+	["1", "NEWSLETTER", ""],
+	["1", "LANDINGPAGE", ""],
+	["1", "TRANSKRIPT", ""],
+	["10", "ZITATE", "FÜR KI"],
+];
 
 const varianten: Array<[string, string, string[]]> = [
 	["1", "Livestream", ["linkedin", "youtube"]],
@@ -146,7 +159,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 				</div>
 				<div class="kachel">
 				<div class="kachel-mitte kachel-mitte--brett">
-					<SplitFlap lines={brettZeilen} loop={false} minCols={11} minRows={3} />
+					<SplitFlap lines={brettZeilen} holdMs={1800} minCols={11} minRows={3} />
 				</div>
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
@@ -972,7 +985,10 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	// Die Funktion ist an den Grenzen stetig UND gleich steil, deshalb gibt
 	// es keinen Ruck beim Uebergang von Schritt zu Schritt.
 	const BAND_SCHRITT_MS = 1800;
-	const BAND_BREMSE = 0.7;
+	// 0 = gleichmaessig durchfahren (Fred 20.09. abends, nach Sichtung:
+	// "mach das Stoppen wieder weg"). Die Bremse bleibt als Regler stehen;
+	// 0,7 war die Fassung mit dem Atmen im Scheitel.
+	const BAND_BREMSE = 0;
 	const BAND_GROSS = 1.5;
 	const BAND_KLEIN = 0.45;
 	function laufbandAnlegen(band: HTMLElement): { anims: Animation[]; stop: () => void } {
