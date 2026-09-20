@@ -491,8 +491,15 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   ungleichmaessig wirkte. Die Kamera faehrt damit noch ein Stueck
 	   weiter, nachdem der grosse Kreis bei 82 Prozent fertig ist: das Bild
 	   kommt zur Ruhe, statt zu stoppen. */
+	/* HIN UND ZURUECK wie in Kachel 3 (Fred 20.09. abends): kein Sprung auf
+	   den Anfang, sondern derselbe Weg rueckwaerts — der grosse Kreis
+	   leert sich wieder, danach die Stunde, und die Kamera faehrt zurueck
+	   an sie heran. "alternate" steht auf ALLEN fuenf Animationen dieser
+	   Kachel; faehrt eine davon nicht mit, laufen sie nach der ersten Runde
+	   gegeneinander. Eine volle Runde dauert damit vierzehn statt sieben
+	   Sekunden. */
 	[data-kreis].laeuft {
-		animation: kreis-zoom 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: kreis-zoom 7s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
 	}
 
 	/* OHNE HALT (Fred 20.09. abends: "da ist ein Stop drin"). Der grosse
@@ -506,11 +513,11 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	}
 
 	[data-kreis].laeuft .uhr--klein {
-		animation: uhr-klein 7s linear infinite;
+		animation: uhr-klein 7s linear infinite alternate;
 	}
 
 	[data-kreis].laeuft .uhr--gross {
-		animation: uhr-gross 7s linear infinite;
+		animation: uhr-gross 7s linear infinite alternate;
 	}
 
 	/* Die Speichen sind IMMER gezeichnet — solange der zugehoerige Kreis
@@ -521,11 +528,11 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   6 %, die grosse bei 44 % — dieselben Marken wie in uhr-klein und
 	   uhr-gross. */
 	[data-kreis].laeuft .uhr--klein .speiche {
-		animation: speichen-klein 7s linear infinite;
+		animation: speichen-klein 7s linear infinite alternate;
 	}
 
 	[data-kreis].laeuft .uhr--gross .speiche {
-		animation: speichen-gross 7s linear infinite;
+		animation: speichen-gross 7s linear infinite alternate;
 	}
 
 	@keyframes speichen-klein {
