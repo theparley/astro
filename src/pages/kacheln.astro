@@ -11,25 +11,57 @@ import Layout from "../layouts/Layout.astro";
 import SplitFlap from "../components/SplitFlap.astro";
 import { LOGOS } from "../lib/fallblatt";
 
-// Die neun Ausspielungen als Fallblatt-Sequenz (Kachel 1): das Klappern ist
-// hier Akzent, nicht Träger — ein Streifen, kein Board.
-const ausspielungen = [
-	["LIVESTREAM"],
-	["VIDEOPODCAST"],
-	["AUDIO-PODCAST"],
-	["BEITRÄGE"],
-	["CLIPS"],
-	["SHORTS"],
-	["NEWSLETTER"],
-	["TRANSKRIPT"],
-	["ZITATE FÜR KI"],
+// Die zehn Varianten als KLEINES BOARD (Fred 20.09. abends): nicht mehr ein
+// Name nach dem anderen, sondern alle zehn stehen gleichzeitig da und
+// klappern EINMAL herein. Ein Zustand, kein Durchlauf — loop={false}.
+//
+// Woher die Zehn kommt: es sind die neun Zeilen, die schon auf der Wand
+// stehen, plus die WEBSITE, die in Freds eigener Aufzählung vorkam und in
+// der Wand fehlt. Namen sind auf die Plattform verkürzt (LINKEDIN statt
+// LINKEDIN-BEITRÄGE), damit das Board in die Kachelbreite passt: längster
+// Eintrag ist AUDIO-PODCAST mit 13 Zeichen.
+// OFFEN: TRANSKRIPT und KI-ZITATE hat Fred als "keine Ausspielungen in dem
+// Sinn" bezeichnet — sie stehen hier drin, weil die Zehn sonst nicht
+// aufgeht. Sein Entscheid steht aus.
+const varianten = [
+	[
+		"LIVESTREAM",
+		"VIDEOPODCAST",
+		"AUDIO-PODCAST",
+		"LINKEDIN",
+		"CLIPS",
+		"SHORTS",
+		"NEWSLETTER",
+		"WEBSITE",
+		"TRANSKRIPT",
+		"KI-ZITATE",
+	],
 ];
 
 // Männchen als Hintergrund-Kachelung (Kachel 3). Ein einziges DIV statt
 // tausend Knoten: background-repeat macht aus EINER Figur beliebig viele,
 // background-size ist der Zoom. Die Figur kommt aus dem gemeinsamen Modul,
 // damit Wand und Kachelreihe dieselbe zeigen.
-const personSvg = LOGOS.person.replace(/"/g, "'");
+// ACHTUNG XML-NAMENSRAUM (Fehler gefunden 20.09. abends): im HTML ergänzt
+// der Browser das xmlns von selbst, eine SVG-Datei als BILD braucht es aber
+// zwingend. Ohne xmlns lädt die data-URI gar nicht — die Kachel blieb
+// schwarz, während die Animation im Hintergrund brav lief und eine
+// unsichtbare Größe verstellte. Genau Freds "funktioniert immer noch nicht".
+// LUFT UM DIE FIGUR (Fred 20.09. abends: "die kleben alle aneinander"): die
+// Material-Figur füllt ihre viewBox randlos aus, gekachelt stoßen die
+// Männchen deshalb Schulter an Schulter und Kopf an Fuß. Hier bekommt sie
+// eine eigene, größere Leinwand: 100 × 100 Einheiten, die Figur 72 davon,
+// mittig — also 14 Einheiten Rand ringsum und rund 28 Prozent Abstand
+// zwischen zwei Nachbarn. Die Zellenzahl ändert sich dadurch nicht, nur die
+// Figur darin wird kleiner.
+const personPfad = (LOGOS.person.match(/<path d="([^"]+)"/) || [])[1] ?? "";
+const personSvg = (
+	"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='white'>" +
+	// 72/640 = 0.1125; verschoben auf (14,14), weil die Figur bei
+	// x 160..800 / y -800..-160 sitzt.
+	"<g transform='translate(-4 104) scale(0.1125)'><path d='" + personPfad + "'/></g>" +
+	"</svg>"
+).replace(/"/g, "'");
 const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 ---
 
@@ -48,7 +80,13 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 					<p class="bezug">Ein Gespräch im Monat. Zehn Varianten für alle Kanäle.</p>
 				</div>
 				<div class="kachel-mitte kachel-mitte--flap">
-					<SplitFlap lines={ausspielungen} holdMs={1100} minCols={13} minRows={1} />
+					<SplitFlap
+						lines={varianten}
+						loop={false}
+						minCols={13}
+						minRows={10}
+						ausrichtung="links"
+					/>
 				</div>
 			</div>
 
@@ -191,11 +229,13 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		position: relative;
 	}
 
+	/* Das Board muss in die Resthöhe der Kachel passen: zehn Zeilen mal
+	   Kachelhöhe (Breite × 1,38) plus Fugen. 5,4cqw Kachelbreite ergibt
+	   rund 75cqw Boardhöhe und 70cqw Breite bei 13 Spalten — beides sitzt
+	   innerhalb der Kachel. */
 	.kachel-mitte--flap {
-		/* Der Streifen soll die Kachelbreite nicht sprengen. */
-		--sf-tile-w: 6cqw;
-		--sf-font-size: 4.2cqw;
 		overflow: hidden;
+		align-content: start;
 	}
 
 	/* ── Kachel 2: Kreis ───────────────────────────────────────────────── */
@@ -381,3 +421,17 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 
 	document.addEventListener("astro:page-load", mount);
 </script>
+
+<style is:global>
+	/* Kachelgröße des kleinen Boards. MUSS auf .sf-grid selbst gesetzt
+	   werden: SplitFlap definiert --sf-tile-w dort per eigener Formel, eine
+	   Vorgabe am Elternelement wird davon überschrieben (Fehler 20.09.
+	   abends — die Kacheln blieben stur gleich groß). is:global, weil
+	   .sf-grid kein Scope-Attribut dieser Seite trägt.
+	   Gerechnet: zehn Zeilen à 1,38 Kachelbreiten plus Fugen und Zarge
+	   müssen in die Resthöhe der Kachel passen; 6,2cqw ergibt rund 630 px
+	   bei 695 px Kachelbreite und bleibt damit unter den 651 px Platz. */
+	.kachel-mitte--flap .sf-grid {
+		--sf-tile-w: 6.2cqw;
+	}
+</style>
