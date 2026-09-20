@@ -44,15 +44,11 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<span class="zahl">1</span>
-					<span class="wort">Gespräch<br />im Monat</span>
+					<p class="verhaeltnis">1:9</p>
+					<p class="bezug">Gespräch im Monat zu Ausspielungen</p>
 				</div>
 				<div class="kachel-mitte kachel-mitte--flap">
 					<SplitFlap lines={ausspielungen} holdMs={1100} minCols={13} minRows={1} />
-				</div>
-				<div class="kachel-fuss">
-					<span class="zahl">9</span>
-					<span class="wort">Ausspielungen</span>
 				</div>
 			</div>
 
@@ -63,8 +59,8 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			   Fläche — das Bild behauptete dann hundertmal mehr als die Zahl. */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<span class="zahl">1</span>
-					<span class="wort">Stunde<br />Aufnahmezeit</span>
+					<p class="verhaeltnis">1:100+</p>
+					<p class="bezug">Stunde Aufnahmezeit zu Stunden Zuschauerzeit</p>
 				</div>
 				<div class="kachel-mitte">
 					<div class="kreis-buehne" data-kreis>
@@ -77,10 +73,6 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 						<span class="kreis kreis--punkt"></span>
 					</div>
 				</div>
-				<div class="kachel-fuss">
-					<span class="zahl">100+</span>
-					<span class="wort">Stunden<br />Zuschauerzeit</span>
-				</div>
 			</div>
 
 			{/* ── Kachel 3: Experten → Zuschauer ───────────────────────────── */}
@@ -92,15 +84,11 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			   — kein einziger zusätzlicher Knoten für tausend Leute. */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<span class="zahl">2</span>
-					<span class="wort">Experten</span>
+					<p class="verhaeltnis">2:1000+</p>
+					<p class="bezug">Experten zu Zuschauern</p>
 				</div>
 				<div class="kachel-mitte">
 					<div class="menge" data-menge style={`--person: ${personUri}`}></div>
-				</div>
-				<div class="kachel-fuss">
-					<span class="zahl">1000+</span>
-					<span class="wort">Zuschauer</span>
 				</div>
 			</div>
 		</div>
@@ -156,39 +144,30 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		aspect-ratio: 4 / 5;
 		padding: clamp(18px, 2.2vw, 32px);
 		display: grid;
-		grid-template-rows: auto 1fr auto;
+		grid-template-rows: auto 1fr;
 		gap: 12px;
 		container-type: inline-size;
 		overflow: hidden;
 	}
 
-	.kachel-kopf,
-	.kachel-fuss {
-		display: flex;
-		align-items: baseline;
-		gap: 0.4em;
-	}
-
-	.kachel-fuss {
-		align-items: flex-end;
-	}
-
-	.zahl {
+	/* Überschrift ist das VERHÄLTNIS (Fred 20.09. abends): die Kachel sagt
+	   zuerst die Relation, erst darunter steht klein, was ins Verhältnis
+	   gesetzt wird. Größe so gewählt, dass die längste Fassung ("2:1000+",
+	   sieben Zeichen) noch in die Kachelbreite passt. */
+	.verhaeltnis {
+		margin: 0;
 		font-weight: 900;
 		line-height: 0.85;
-		letter-spacing: -0.02em;
-		font-size: 22cqw;
+		letter-spacing: -0.03em;
+		font-size: 27cqw;
 	}
 
-	.wort {
+	.bezug {
+		margin: 8px 0 0;
 		font-weight: 300;
-		line-height: 1.05;
-		font-size: 5.5cqw;
+		line-height: 1.15;
+		font-size: 5.2cqw;
 		color: var(--gray);
-	}
-
-	.kachel-fuss .wort {
-		color: var(--white);
 	}
 
 	.kachel-mitte {
