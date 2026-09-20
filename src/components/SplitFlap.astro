@@ -55,10 +55,14 @@ interface Props {
 	minRows?: number;
 	/** Gehäuse-Zarge (Fred 14.09. nacht) — schmale dunkle Einfassung. */
 	rahmen?: boolean;
+	/** Textausrichtung IM Raster (Fred 20.09.): "mitte" (Standard, wie
+	 * bisher) oder "links" — dann beginnt jede Zeile an der ersten Kachel,
+	 * bündig mit dem Fließtext daneben. */
+	ausrichtung?: "mitte" | "links";
 }
 
 // Default = der eine Tempo-Regler des Fallblatt-Moduls.
-const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true, minCols = 1, minRows = 1, rahmen = false } = Astro.props;
+const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true, minCols = 1, minRows = 1, rahmen = false, ausrichtung = "mitte" } = Astro.props;
 
 // Zeichentrommel — Build-Zeit-Kopie der Modul-Konstante (das Frontmatter
 // läuft in Node, src/lib/fallblatt.ts wird ins Browser-Bundle importiert;
@@ -94,7 +98,7 @@ function padState(state: string[]): string[] {
 	for (let r = 0; r < rows; r++) {
 		const lineIndex = r - topPad;
 		const line = lineIndex >= 0 && lineIndex < state.length ? state[lineIndex] : "";
-		const leftPad = Math.floor((cols - line.length) / 2);
+		const leftPad = ausrichtung === "links" ? 0 : Math.floor((cols - line.length) / 2);
 		let rowStr = "";
 		for (let c = 0; c < cols; c++) {
 			const charIndex = c - leftPad;

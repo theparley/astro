@@ -354,7 +354,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			<p class="tafel-intro">Das Personal Branding eines Solopreneurs.<br />Die Thought Leadership eines CEOs.<br />Die Brancheninstanz eines Expertenteams.</p>
 			<p class="tafel-intro">Welches Format passt? Das entscheiden Ziel und Budget, Branche und Themen, Firmenkultur und Menschen.</p>
 			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Es ist der fortlaufende Beweis eurer Expertise. Welche Formate zu euch passen, finden wir gemeinsam heraus.</p>
-			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={1} rahmen />
+			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={1} rahmen ausrichtung="links" />
 		</div>
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
@@ -461,6 +461,16 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   beginnen alle an derselben linken Kante — sonst zentriert das
 		   inline-flex-Board sich in der Spaltenbreite. */
 		align-items: flex-start;
+	}
+
+	/* Die Zarge des Boards läuft um die Kacheln herum (Padding 0.24
+	   Kachelbreiten). Damit die ERSTE KACHEL — und damit der Text im Board —
+	   exakt auf der Textkante der Absätze beginnt (Fred 20.09.), wird das
+	   Board um genau diese Zargenbreite nach links gezogen. */
+	/* :global, weil .sf-board aus SplitFlap.astro stammt — Astros
+	   Scoped-CSS würde den Selektor sonst nie treffen. */
+	.tafel-kopf :global(.sf-grid) {
+		margin-left: calc(var(--sf-tile-w) * -0.24);
 	}
 
 	.tafel-intro {
