@@ -45,54 +45,72 @@ const kanalBand = [
 	"gemini",
 ];
 
-// FALLBLATT-FASSUNG (Fred 20.09. abends, dritter Stand): dreizeiliges
-// Brett, das die Deliverys durchrattert — und zwar mit NAMEN DES KANALS.
+// FALLBLATT-FASSUNG (Fred 20.09. abends + 21.09.): dreizeiliges Brett, das
+// die Auslieferungen durchrattert.
 //     Zeile 1  die Zahl
-//     Zeile 2  das Format
-//     Zeile 3  der Kanal
-// Das loest den Aerger um Clips und Shorts an der Wurzel: nicht das
-// Zaehlen war das Problem, sondern das Verbergen. Steht der Kanal daneben,
-// ist offengelegt, was gezaehlt wird — „8 Shorts fuer YouTube" und
-// „8 Beitraege fuer Instagram" behaupten nichts Falsches, weil jeder selbst
-// sieht, dass es zwei Plattformen sind.
-// DREIZEHN Spalten statt elf: AUDIO-PODCAST hat dreizehn Zeichen und ist
-// damit der breiteste Eintrag. Elf haetten weder VIDEOPODCAST (12) noch
-// AUDIO-PODCAST (13) getragen.
-// Stueckzahlen: alles, was Clip ist, steht auf NEUN (Fred 20.09. abends) —
-// LinkedIn, Instagram, YouTube-Shorts, TikTok. Eine Zahl fuer alle vier
-// macht nebenbei sichtbar, dass es dieselbe Arbeit an vier Orten ist, und
-// nimmt der Reihe den Anschein, hier waeren vier verschiedene Leistungen
-// gezaehlt. Die uebrigen Zahlen sind fortgeschrieben und brauchen noch
-// Freds Bestaetigung.
-// Mehrkanalige Posten stehen vorerst mit EINEM Kanal — der Livestream laeuft
-// laut Fred auf YouTube, LinkedIn und der Website; dafuer braucht die dritte
-// Zeile eine Loesung.
+//     Zeile 2  die FORM, im Wort der Plattform
+//     Zeile 3  das ZIEL, also die Plattform selbst
+//
+// ACHSE (Fred 21.09., entscheidend): jede Zeile ist ein Paar aus FORM und
+// ZIEL, und jedes Ziel kommt genau EINMAL vor. Die Form darf sich dabei
+// wiederholen — ein LinkedIn-Beitrag ist auch ein Short, ein Reel ist auch
+// einer. Genau deshalb steht hier nicht „Shortform": das waere ein
+// Sammelwort, das die vier Orte unter einer Zahl versteckt. Vier Zeilen mit
+// vier Zielen sind ehrlicher als eine Zeile mit „36 Clips".
+//
+// PLATTFORM-WORTE (Fred 21.09.): die Form heisst so, wie die Plattform sie
+// nennt — SHORTS bei YouTube, REELS bei Instagram, BEITRAEGE bei LinkedIn,
+// VIDEOS bei TikTok, FOLGE bei Spotify. Kein Agentur-Vokabular.
+//
+// DIE DREI JAS (Fred 21.09., „Ich sage dreimal ja"): Q&A ist jetzt ein
+// fester Regie-Block in der Aufnahme, SHOWNOTES sind ein benannter Posten,
+// und die LANGFASSUNG fuer die Website ist ein EIGENER Schnitt. Damit sind
+// es zehn Formate, nicht sieben. Die frueheren Zeilen „LANDINGPAGE" und
+// „AUDIO-PODCAST" sind ersetzt: geliefert wird das Video fuer die
+// Landingpage, nicht die Seite, und der Podcast heisst bei Spotify FOLGE.
+//
+// NEWSLETTER (Fred 21.09.): steht bewusst NICHT in der Textspalte — er
+// traegt das Video mit, ist also eine Ausspielung und keine Zusammenfassung.
+//
+// Stueckzahlen: alles, was Clip ist, steht auf NEUN (Fred 20.09. abends).
+// Eine Zahl fuer alle vier macht sichtbar, dass es dieselbe Arbeit an vier
+// Orten ist. Die uebrigen Zahlen sind fortgeschrieben.
+// DREIZEHN Spalten: PODCAST-FOLGE hat dreizehn Zeichen und ist der
+// breiteste Eintrag.
 // Aufrufbar unter /kacheln?board; beide Fassungen liegen im Dokument.
 const brettZeilen = [
 	["1", "LIVESTREAM", "YOUTUBE"],
+	["1", "LIVESTREAM", "LINKEDIN"],
 	["1", "VIDEOPODCAST", "YOUTUBE"],
-	["1", "AUDIO-PODCAST", "SPOTIFY"],
+	["1", "PODCAST-FOLGE", "SPOTIFY"],
+	["1", "LANGFASSUNG", "WEBSITE"],
 	["9", "BEITRÄGE", "LINKEDIN"],
-	["9", "BEITRÄGE", "INSTAGRAM"],
+	["9", "REELS", "INSTAGRAM"],
 	["9", "SHORTS", "YOUTUBE"],
-	["9", "CLIPS", "TIKTOK"],
+	["9", "VIDEOS", "TIKTOK"],
 	["10", "Q&A", "YOUTUBE"],
 	["1", "NEWSLETTER", "E-MAIL"],
-	["1", "LANDINGPAGE", "WEBSITE"],
+	["1", "SHOWNOTES", "SPOTIFY"],
 	["1", "TRANSKRIPT", "WEBSITE"],
 	["10", "ZITATE", "KI"],
 ];
 
+// Die Listen-Fassung von Kachel 1 (ohne Brett) traegt dieselben Paare —
+// beide Fassungen duerfen nie auseinanderlaufen.
 const varianten: Array<[string, string, string[]]> = [
-	["1", "Livestream", ["linkedin", "youtube"]],
-	["1", "Videopodcast", ["web", "youtube"]],
-	["1", "Audio-Podcast", ["spotify", "apple", "web"]],
-	["10", "LinkedIn-Beiträge", ["linkedin"]],
-	["10", "Clips", ["instagram", "tiktok", "linkedin", "youtube"]],
-	["10", "Shorts", ["instagram", "tiktok", "youtube"]],
-	["1", "Newsletter", ["mail"]],
-	["1", "Landingpage", ["web"]],
-	["1", "Transkript", ["web"]],
+	["1", "Livestream für YouTube", ["youtube"]],
+	["1", "Livestream für LinkedIn", ["linkedin"]],
+	["1", "Videopodcast für YouTube", ["youtube"]],
+	["1", "Podcast-Folge für Spotify", ["spotify"]],
+	["1", "Langfassung für die Website", ["web"]],
+	["9", "Beiträge für LinkedIn", ["linkedin"]],
+	["9", "Reels für Instagram", ["instagram"]],
+	["9", "Shorts für YouTube", ["youtube"]],
+	["9", "Videos für TikTok", ["tiktok"]],
+	["10", "Q&A für YouTube", ["youtube"]],
+	["1", "Newsletter per Mail", ["mail"]],
+	["1", "Shownotes für Spotify", ["spotify"]],
+	["1", "Transkript für die Website", ["web"]],
 	// „KI-lesbar" war Freds Vorschlag, die Recherche spricht dagegen: es ist
 	// ein Adjektiv („10 KI-lesbar" ist ungrammatisch, alle Nachbarzeilen
 	// sind Substantive) und behauptet nur Maschinenlesbarkeit, also die
@@ -477,8 +495,12 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		/* GENAUSO GROSS WIE DIE BEZUGSZEILE (Fred 20.09. abends). Die steht
 		   im Feld (volle Spaltenbreite) auf 5,2cqw, die Liste steht in der
 		   Kachel und misst ihre cqw an deren Innenbreite — die ist um den
-		   Rand schmaler. 5,2 / 0,95 = 5,47cqw gleicht das aus. */
-		font-size: 5.47cqw;
+		   Rand schmaler. 5,2 / 0,95 = 5,47cqw gleicht das aus.
+		   ABGESENKT auf 4,2cqw (21.09.): die Liste traegt jetzt vierzehn
+		   Zeilen statt zehn, und jede nennt zusaetzlich das Ziel. Bei
+		   5,47cqw war sie 610px hoch bei 491px Platz — die letzten drei
+		   Zeilen wurden abgeschnitten. 4,2cqw ergibt rund 469px. */
+		font-size: 4.2cqw;
 		line-height: 1.62;
 		letter-spacing: -0.01em;
 	}
