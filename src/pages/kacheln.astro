@@ -353,7 +353,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	.kachel:has(.laufband) {
 		grid-template-rows: 1fr auto;
 		gap: 4cqw;
-		padding-top: 5cqw;
+		padding-top: 8cqw;
 		padding-bottom: 5cqw;
 	}
 
@@ -706,16 +706,19 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   MESS-WARNUNG: Werte nur an einer FRISCH GELADENEN Seite nachmessen.
 	   Nach einem scrollIntoView liefert das Browser-Fenster hier andere
 	   Kachelmasse (424 statt 457 Mitte). */
-	/* NACHFAHREN AM SCHEITEL (Fred 20.09. abends): waehrend der Kreis
-	   entsteht, ist er noch angeschnitten — das laesst ihn gross wirken.
-	   Ist er fertig (38 %), faehrt die Kamera noch ein Stueck weiter
-	   zurueck, bis er GERADE VOLLSTAENDIG im Bild steht (Faktor 2,0 = 709
-	   px bei 731 px Kachel, also 11 px Luft je Seite). Erst dann wendet die
-	   Runde. Die Bewegung wird dadurch zweistufig: gross werden, dann
-	   freistellen. */
+	/* EINE Bewegung, kein Zwischenhalt (Fred 20.09. abends). Vorher stand
+	   bei 38 % ein Wegpunkt auf Faktor 2,3, damit der Kreis beim Entstehen
+	   angeschnitten wirkt. Das war unnoetig und sichtbar: CSS legt die
+	   Beschleunigungskurve auf JEDEN Abschnitt einzeln, die Kamera bremste
+	   also auf dem Wegpunkt bis zum Stillstand und fuhr danach neu an.
+	   Der Wegpunkt ist raus. Die Kamera faehrt durchgehend von Faktor 10
+	   auf 2,0 — und weil sie dabei ohnehin durch den angeschnittenen
+	   Bereich kommt (ab 2,06 stoesst der Kreis an die Kante), entsteht das
+	   grosse, beschnittene Bild von selbst, waehrend der Kreis gezeichnet
+	   wird. Am Scheitel steht er dann mit 11 px Luft je Seite
+	   vollstaendig im Bild. */
 	@keyframes kreis-zoom {
 		0%, 4% { transform: scale(10); }
-		38% { transform: scale(2.3); }
 		50% { transform: scale(2); }
 		88%, 100% { transform: scale(10); }
 	}
@@ -898,21 +901,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	// Phasenversatz, der zu seinem Startplatz gehoert. Dadurch genuegt EIN
 	// Anwerfen; es laeuft kein Bild-fuer-Bild-Rechner mit.
 	const BAND_DAUER = 18000;
-	const BAND_GROSS = 1;
-	const BAND_KLEIN = 0.5;
-	function laufbandAnlegen(band: HTMLElement): Animation[] {
+	const BAND_GROSS = 1.25;
+	const BAND_KLEIN = 0.45;
+	function laufbandAnlegen(band: HTMLElement): { anims: Animation[]; stop: () => void } {
 		const spur = band.querySelector<HTMLElement>("[data-spur]");
-		if (!spur) return [];
+		if (!spur) return { anims: [], stop: () => {} };
 		const zeichen = [...spur.children] as HTMLElement[];
-		if (!zeichen.length) return [];
+		if (!zeichen.length) return { anims: [], stop: () => {} };
 		const satz = zeichen.length / 3;
 		const luecke = parseFloat(getComputedStyle(spur).columnGap) || 0;
 		const breite = zeichen[0].getBoundingClientRect().width;
-		const schritt = breite + luecke;
-		const satzBreite = schritt * satz;
-		const bandKasten = band.getBoundingClientRect();
-		const mitte = bandKasten.width / 2;
-		const anims: Animation[] = [
+		const satzBreite = (breite + luecke) * satz;
+		const anims = [
 			spur.animate(
 				[
 					{ transform: "translateX(0px)" },
@@ -921,23 +921,32 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 				{ duration: BAND_DAUER, iterations: Infinity, easing: "linear" },
 			),
 		];
-		zeichen.forEach((el, i) => {
-			const start = i * schritt + breite / 2;
-			// Wann laeuft dieses Zeichen durch die Mitte?
-			let t = (BAND_DAUER * (((start - mitte) % satzBreite) + satzBreite)) / satzBreite;
-			t %= BAND_DAUER;
-			const a = el.animate(
-				[
-					{ transform: "scale(" + BAND_GROSS + ")", offset: 0 },
-					{ transform: "scale(" + BAND_KLEIN + ")", offset: 0.5 },
-					{ transform: "scale(" + BAND_GROSS + ")", offset: 1 },
-				],
-				{ duration: BAND_DAUER, iterations: Infinity, easing: "linear" },
-			);
-			a.currentTime = (BAND_DAUER - t) % BAND_DAUER;
-			anims.push(a);
-		});
-		return anims;
+		// GROESSE AUS DER POSITION, JEDES BILD NEU (20.09. abends, Fred:
+		// "kannst du die in der Mitte groesser machen?"). Vorher bekam jedes
+		// Zeichen eine eigene Groessen-Animation mit errechnetem
+		// Phasenversatz — eine Rechnung, die man nicht ansieht und deren
+		// Fehler genau so aussieht wie gar kein Effekt. Jetzt wird die
+		// Groesse aus der TATSAECHLICHEN Lage abgeleitet: Abstand zur
+		// Bandmitte, weich abfallend. Das kann nicht aus dem Takt geraten,
+		// stimmt bei jeder Breite und ueberlebt jede Aenderung an Tempo oder
+		// Abstaenden.
+		let laeuft = true;
+		const kurve = (d: number) => (1 + Math.cos(Math.min(1, d) * Math.PI)) / 2;
+		const takt = () => {
+			if (!laeuft) return;
+			const kasten = band.getBoundingClientRect();
+			const mitte = kasten.left + kasten.width / 2;
+			const halb = kasten.width / 2;
+			for (const el of zeichen) {
+				const r = el.getBoundingClientRect();
+				const d = Math.abs(r.left + r.width / 2 - mitte) / halb;
+				const s = BAND_KLEIN + (BAND_GROSS - BAND_KLEIN) * kurve(d);
+				el.style.transform = "scale(" + s.toFixed(3) + ")";
+			}
+			requestAnimationFrame(takt);
+		};
+		requestAnimationFrame(takt);
+		return { anims, stop: () => { laeuft = false; } };
 	}
 
 	function mount() {
@@ -1012,13 +1021,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 		// Laufbaender: laufen unabhaengig von den Kachel-Animationen.
 		let baender: Animation[] = [];
+		let baenderStop: Array<() => void> = [];
 		const baenderAnlegen = () => {
 			baender.forEach((a) => a.cancel());
+			baenderStop.forEach((f) => f());
 			baender = [];
+			baenderStop = [];
 			if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-			document
-				.querySelectorAll<HTMLElement>("[data-laufband]")
-				.forEach((b) => baender.push(...laufbandAnlegen(b)));
+			document.querySelectorAll<HTMLElement>("[data-laufband]").forEach((b) => {
+				const { anims, stop } = laufbandAnlegen(b);
+				baender.push(...anims);
+				baenderStop.push(stop);
+			});
 		};
 		baenderAnlegen();
 		const io = new IntersectionObserver(
