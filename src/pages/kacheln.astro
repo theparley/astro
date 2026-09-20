@@ -821,7 +821,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 						.map(([el]) => el),
 				);
 				zoomsAnlegen();
-				liefen.forEach((el) => zooms.get(el)?.forEach((a) => a.play()));
+				liefen.forEach((el) => anschalten(el));
 			}, 200);
 		};
 		window.addEventListener("resize", beiResize);
@@ -835,18 +835,36 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		// Jetzt laufen die Kacheln von Anfang an; der Beobachter PAUSIERT
 		// sie nur, wenn sie GANZ aus dem Bild sind. Das kann nicht fehlen:
 		// isIntersecting ist eindeutig, es braucht kein Verhältnis.
-		ziele.forEach((z) => {
-			z.classList.add("laeuft");
-			zooms.get(z)?.forEach((a) => a.play());
-		});
+		// VON VORN, NICHT WEITER (Fehler 20.09. abends, Fred: "das sieht
+		// nicht so aus, als ob die beiden Schriften synchron ein- und
+		// ausblenden"). Die beiden Kacheln werden verschieden angetrieben:
+		// Kachel 2 ueber CSS-Animationen an der Klasse .laeuft, Kachel 3
+		// ueber die Web-Animations-API. Verschwindet die Reihe kurz aus dem
+		// Bild und kommt zurueck, STARTET die CSS-Animation von vorn,
+		// waehrend die andere dort weiterlaeuft, wo sie stehengeblieben ist
+		// — ab da laufen sie gegeneinander, egal wie genau die Marken
+		// stimmen. Deshalb wird beim Einschalten IMMER auf null gesetzt:
+		// beide fangen dann zusammen an.
+		const anschalten = (el: HTMLElement) => {
+			el.classList.remove("laeuft");
+			void el.offsetWidth; // Neustart der CSS-Animation erzwingen
+			el.classList.add("laeuft");
+			zooms.get(el)?.forEach((a) => {
+				a.currentTime = 0;
+				a.play();
+			});
+		};
+		ziele.forEach(anschalten);
 		const io = new IntersectionObserver(
 			(eintraege) => {
 				eintraege.forEach((e) => {
 					const el = e.target as HTMLElement;
-					const an = e.isIntersecting;
-					el.classList.toggle("laeuft", an);
-					const zoom = zooms.get(el);
-					if (zoom) zoom.forEach((a) => (an ? a.play() : a.pause()));
+					if (e.isIntersecting) {
+						if (!el.classList.contains("laeuft")) anschalten(el);
+					} else {
+						el.classList.remove("laeuft");
+						zooms.get(el)?.forEach((a) => a.pause());
+					}
 				});
 			},
 			{ threshold: 0 },
