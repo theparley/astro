@@ -587,21 +587,20 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			iterations: Infinity,
 			easing: "cubic-bezier(0.4, 0, 0.2, 1)",
 		} as const;
-		// ÜBERSCHRIFT KIPPT INS SCHWARZE (Fred 20.09. abends): am Ende steht
-		// die Menge als dichtes weißes Feld hinter der Kachel — dann liest
-		// sich „2 zu 1000+" in Schwarz als Aussparung darin, statt darauf zu
-		// liegen. Die Schrift wird damit Teil des Bildes. Der Farbwechsel
-		// hängt an derselben Takt-Angabe wie der Zoom, kann also nicht
-		// auseinanderlaufen.
-		const kopf = el.closest(".kachel")?.querySelector<HTMLElement>(".verhaeltnis");
+		// TEXT BLENDET AUS (Fred 20.09. abends, nach Sichtung: das Kippen ins
+		// Schwarze sah nicht gut aus — schwarze Schrift auf dem weißen Feld
+		// wirkte wie ein Loch, nicht wie eine Aussparung). Jetzt verschwindet
+		// der ganze Kopf, Verhältnis und Bezugszeile zusammen, während die
+		// Menge dicht wird. Am Ende steht nur noch das Bild.
+		const kopf = el.closest(".kachel")?.querySelector<HTMLElement>(".kachel-kopf");
 		const kopfAnim = kopf
 			? [
 					kopf.animate(
 						[
-							{ color: "#ffffff", offset: 0 },
-							{ color: "#ffffff", offset: 0.45 },
-							{ color: "#0d0d0d", offset: 0.72 },
-							{ color: "#0d0d0d", offset: 1 },
+							{ opacity: 1, offset: 0 },
+							{ opacity: 1, offset: 0.45 },
+							{ opacity: 0, offset: 0.72 },
+							{ opacity: 0, offset: 1 },
 						],
 						takt,
 					),
