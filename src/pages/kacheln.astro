@@ -322,26 +322,34 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			window.clearTimeout(neuTimer);
 			neuTimer = window.setTimeout(() => {
 				const liefen = new Set(
-					[...zooms.entries()].filter(([, a]) => a.playState === "running").map(([el]) => el),
+					[...zooms.entries()]
+						.filter(([el, a]) => a.playState === "running" || el.classList.contains("laeuft"))
+						.map(([el]) => el),
 				);
 				zoomsAnlegen();
 				liefen.forEach((el) => zooms.get(el)?.play());
 			}, 200);
 		};
 		window.addEventListener("resize", beiResize);
-		// Zwei Bedingungen statt einer festen Schwelle (Lektion aus der Wand,
-		// 20.09.): ist die Kachel höher als der Bildschirm, erreicht das
-		// Verhältnis nie 0,35 und der Beobachter meldet sich nie. Deshalb
-		// zusätzlich: ein Drittel Bildschirmhöhe sichtbar zählt auch.
-		const sichtbar = (e: IntersectionObserverEntry) =>
-			e.isIntersecting &&
-			(e.intersectionRatio >= 0.35 ||
-				e.intersectionRect.height >= window.innerHeight * 0.35);
+		// STARTEN, NICHT WARTEN (Korrektur 20.09. abends, Fred: "die
+		// Animation funktioniert immer noch nicht"): erst lief der Start
+		// über eine Sichtbarkeits-SCHWELLE, und genau daran ist Kachel 3
+		// hängengeblieben — eine Kachel, die höher ist als der Bildschirm,
+		// überschreitet die Schwelle nie, der Beobachter meldet sich nicht,
+		// die Animation bleibt für immer pausiert. Eine Schwelle, die nur
+		// manchmal greift, ist als Startbedingung untauglich.
+		// Jetzt laufen die Kacheln von Anfang an; der Beobachter PAUSIERT
+		// sie nur, wenn sie GANZ aus dem Bild sind. Das kann nicht fehlen:
+		// isIntersecting ist eindeutig, es braucht kein Verhältnis.
+		ziele.forEach((z) => {
+			z.classList.add("laeuft");
+			zooms.get(z)?.play();
+		});
 		const io = new IntersectionObserver(
 			(eintraege) => {
 				eintraege.forEach((e) => {
 					const el = e.target as HTMLElement;
-					const an = sichtbar(e);
+					const an = e.isIntersecting;
 					el.classList.toggle("laeuft", an);
 					const zoom = zooms.get(el);
 					if (zoom) {
@@ -350,7 +358,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 					}
 				});
 			},
-			{ threshold: Array.from({ length: 11 }, (_, i) => i / 10) },
+			{ threshold: 0 },
 		);
 		ziele.forEach((z) => io.observe(z));
 		ab = () => {
