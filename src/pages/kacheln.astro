@@ -8,12 +8,12 @@
 // NICHT eingebunden — eigene Seite, damit die Startseite unberührt bleibt.
 // Konzept steht im Website-Dokument über dem Wand-Kapitel.
 import Layout from "../layouts/Layout.astro";
-import SplitFlap from "../components/SplitFlap.astro";
 import { LOGOS } from "../lib/fallblatt";
 
-// Die zehn Varianten als KLEINES BOARD (Fred 20.09. abends): nicht mehr ein
-// Name nach dem anderen, sondern alle zehn stehen gleichzeitig da und
-// klappern EINMAL herein. Ein Zustand, kein Durchlauf — loop={false}.
+// Die zehn Varianten als schlichte Liste (Fred 20.09. abends: "schreibt
+// ihr einfach mal normal, untereinander"). Das Fallblatt-Board davor trug
+// den Inhalt nicht — zehn Zeilen in Kachelschrift wurden in der kleinen
+// Kachel unleserlich, und das Klappern lenkte von der Aufzählung ab.
 //
 // Woher die Zehn kommt: es sind die neun Zeilen, die schon auf der Wand
 // stehen, plus die WEBSITE, die in Freds eigener Aufzählung vorkam und in
@@ -24,18 +24,16 @@ import { LOGOS } from "../lib/fallblatt";
 // Sinn" bezeichnet — sie stehen hier drin, weil die Zehn sonst nicht
 // aufgeht. Sein Entscheid steht aus.
 const varianten = [
-	[
-		"LIVESTREAM",
-		"VIDEOPODCAST",
-		"AUDIO-PODCAST",
-		"LINKEDIN",
-		"CLIPS",
-		"SHORTS",
-		"NEWSLETTER",
-		"WEBSITE",
-		"TRANSKRIPT",
-		"KI-ZITATE",
-	],
+	"Livestream",
+	"Videopodcast",
+	"Audio-Podcast",
+	"LinkedIn",
+	"Clips",
+	"Shorts",
+	"Newsletter",
+	"Website",
+	"Transkript",
+	"Zitate für KI",
 ];
 
 // Männchen als Hintergrund-Kachelung (Kachel 3). Ein einziges DIV statt
@@ -86,14 +84,12 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 					<p class="verhaeltnis">1 <span class="zu">zu</span> 10</p>
 					<p class="bezug">Ein Gespräch im Monat. Zehn Varianten für alle Kanäle.</p>
 				</div>
-				<div class="kachel-mitte kachel-mitte--flap">
-					<SplitFlap
-						lines={varianten}
-						loop={false}
-						minCols={13}
-						minRows={10}
-						ausrichtung="links"
-					/>
+				<div class="kachel-mitte kachel-mitte--liste">
+					<ul class="varianten">
+						{varianten.map((v) => (
+							<li>{v}</li>
+						))}
+					</ul>
 				</div>
 			</div>
 
@@ -114,7 +110,8 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 						   das als Punkt mit weißem Rand; am Ende steht dieselbe
 						   Stunde als kleiner Punkt in einem hundertmal größeren
 						   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
-						<span class="kreis kreis--gross"></span>
+						<span class="uhr uhr--gross"></span>
+						<span class="uhr uhr--klein"></span>
 						<span class="kreis kreis--punkt"></span>
 					</div>
 				</div>
@@ -240,9 +237,20 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	   Kachelhöhe (Breite × 1,38) plus Fugen. 5,4cqw Kachelbreite ergibt
 	   rund 75cqw Boardhöhe und 70cqw Breite bei 13 Spalten — beides sitzt
 	   innerhalb der Kachel. */
-	.kachel-mitte--flap {
-		overflow: hidden;
+	.kachel-mitte--liste {
 		align-content: start;
+		justify-items: start;
+		overflow: hidden;
+	}
+
+	.varianten {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-weight: 300;
+		font-size: 6.2cqw;
+		line-height: 1.34;
+		letter-spacing: -0.01em;
 	}
 
 	/* ── Kachel 2: Kreis ───────────────────────────────────────────────── */
@@ -254,44 +262,84 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		place-items: center;
 	}
 
-	.kreis {
+	.kreis,
+	.uhr {
 		position: absolute;
 		border-radius: 50%;
-		background: var(--white);
 	}
 
-	/* Bezugsgröße ist der große Kreis: er füllt die Kachelbreite fast aus,
-	   der kleine ist exakt ein Zehntel davon (Fläche 1:100). */
-	.kreis--gross {
+	/* UHRENLAUF statt Wachsen (Fred 20.09. abends): nicht ein Kreis, der
+	   groesser wird, sondern zwei Kreise, die sich FUELLEN wie eine
+	   ablaufende Stunde. Erst die kleine — das ist die Stunde, die die
+	   Experten liefern —, dann die grosse drumherum. Beide beginnen als
+	   schwarze Scheibe mit weissem Saum, damit man sieht, was noch leer
+	   ist. Technik: conic-gradient mit einem registrierten Winkel
+	   (--fuell), der sich als Winkel interpolieren laesst; ohne @property
+	   waere eine Gradient-Stelle nicht animierbar. */
+	.uhr {
+		background: conic-gradient(#ffffff var(--fuell, 0turn), transparent 0);
+	}
+
+	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10.
+	   KEIN Saum (Fred 20.09. abends): der grosse Kreis soll nicht schon als
+	   leere Scheibe dastehen und dann gefuellt werden, sondern ERST DURCH
+	   die Bewegung entstehen. Wer den Umriss vorher sieht, kennt das
+	   Ergebnis, bevor es da ist — die Ueberraschung ueber die Groesse waere
+	   weg. Nur die kleine Stunde behaelt ihren Saum, weil sie sonst am
+	   Anfang gar nicht sichtbar waere. */
+	.uhr--gross {
 		width: 70cqw;
 		height: 70cqw;
-		transform: scale(0.1);
-		transform-origin: center;
 	}
 
-	/* Fester schwarzer Punkt, wächst NICHT mit. Etwas kleiner als der
-	   kleine Weißkreis (7cqw), damit am Anfang ein weißer Rand stehen
-	   bleibt. */
+	.uhr--klein {
+		width: 7cqw;
+		height: 7cqw;
+		box-shadow: 0 0 0 0.35cqw #ffffff inset;
+	}
+
+	/* Bleibt am Ende als Marke fuer die EINE Stunde im grossen Feld stehen
+	   (Freds Setzung von vorhin) — blendet erst ein, wenn die grosse Uhr
+	   laeuft, vorher waere er nur ein Loch in der kleinen. */
 	.kreis--punkt {
 		width: 4.6cqw;
 		height: 4.6cqw;
 		background: var(--panel);
+		opacity: 0;
+		z-index: 2;
+	}
+
+	.uhr--klein {
 		z-index: 1;
 	}
 
-	[data-kreis].laeuft .kreis--gross {
-		animation: kreis-wachsen 4.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+	[data-kreis].laeuft .uhr--klein {
+		animation: uhr-klein 7s linear infinite;
 	}
 
-	@keyframes kreis-wachsen {
-		0%,
-		12% {
-			transform: scale(0.1);
-		}
-		62%,
-		100% {
-			transform: scale(1);
-		}
+	[data-kreis].laeuft .uhr--gross {
+		animation: uhr-gross 7s linear infinite;
+	}
+
+	[data-kreis].laeuft .kreis--punkt {
+		animation: punkt-ein 7s linear infinite;
+	}
+
+	/* Die kleine Stunde laeuft zuerst ab und bleibt dann voll stehen. */
+	@keyframes uhr-klein {
+		0%, 6% { --fuell: 0turn; }
+		32%, 100% { --fuell: 1turn; }
+	}
+
+	/* Die grosse beginnt erst, wenn die kleine steht. */
+	@keyframes uhr-gross {
+		0%, 42% { --fuell: 0turn; }
+		88%, 100% { --fuell: 1turn; }
+	}
+
+	@keyframes punkt-ein {
+		0%, 45% { opacity: 0; }
+		70%, 100% { opacity: 1; }
 	}
 
 	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
@@ -323,11 +371,16 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	   gerechnet. */
 
 	@media (prefers-reduced-motion: reduce) {
-		[data-kreis].laeuft .kreis--gross {
+		[data-kreis].laeuft .uhr--klein,
+		[data-kreis].laeuft .uhr--gross,
+		[data-kreis].laeuft .kreis--punkt {
 			animation: none;
 		}
-		.kreis--gross {
-			transform: scale(1);
+		.uhr {
+			--fuell: 1turn;
+		}
+		.kreis--punkt {
+			opacity: 1;
 		}
 	}
 </style>
@@ -354,12 +407,23 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		const startB = Math.floor(r.width / 2);
 		const startH = Math.round(r.height);
 		const ende = Math.max(4, Math.round(r.width / ZELLEN_QUER));
+		// AUS DER MITTE HERAUS ZOOMEN (Fred 20.09. abends: "du zoomst von
+		// der Seite"). Eine feste Startkante hält zwar am Anfang die Fuge
+		// mittig, aber beim Verkleinern rutscht alles zur linken Kante —
+		// die beiden Personen, mit denen man angefangen hat, wandern aus
+		// dem Bild. Deshalb wird für JEDE Zellgröße der Versatz so
+		// gerechnet, dass eine Zellfuge genau auf der Mitte liegt: dann
+		// bleibt die Mitte stehen und die Menge wächst nach beiden Seiten
+		// gleichmäßig um die beiden herum.
+		const fugeMittig = (zelle: number) =>
+			r.width / 2 - zelle * Math.round(r.width / 2 / zelle);
+		const pos = (zelle: number) => fugeMittig(zelle).toFixed(2) + "px center";
 		return el.animate(
 			[
-				{ backgroundSize: startB + "px " + startH + "px", offset: 0 },
-				{ backgroundSize: startB + "px " + startH + "px", offset: 0.1 },
-				{ backgroundSize: ende + "px " + ende + "px", offset: 0.7 },
-				{ backgroundSize: ende + "px " + ende + "px", offset: 1 },
+				{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: pos(startB), offset: 0 },
+				{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: pos(startB), offset: 0.1 },
+				{ backgroundSize: ende + "px " + ende + "px", backgroundPosition: pos(ende), offset: 0.7 },
+				{ backgroundSize: ende + "px " + ende + "px", backgroundPosition: pos(ende), offset: 1 },
 			],
 			{ duration: 6000, iterations: Infinity, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
 		);
@@ -445,15 +509,14 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 </script>
 
 <style is:global>
-	/* Kachelgröße des kleinen Boards. MUSS auf .sf-grid selbst gesetzt
-	   werden: SplitFlap definiert --sf-tile-w dort per eigener Formel, eine
-	   Vorgabe am Elternelement wird davon überschrieben (Fehler 20.09.
-	   abends — die Kacheln blieben stur gleich groß). is:global, weil
-	   .sf-grid kein Scope-Attribut dieser Seite trägt.
-	   Gerechnet: zehn Zeilen à 1,38 Kachelbreiten plus Fugen und Zarge
-	   müssen in die Resthöhe der Kachel passen; 6,2cqw ergibt rund 630 px
-	   bei 695 px Kachelbreite und bleibt damit unter den 651 px Platz. */
-	.kachel-mitte--flap .sf-grid {
-		--sf-tile-w: 6.2cqw;
+	/* Registrierter Winkel: nur so laesst sich eine Farbstelle im
+	   conic-gradient animieren — eine gewoehnliche Variable waere fuer den
+	   Browser bloss ein Text und wuerde springen statt zu laufen.
+	   @property gehoert auf Dokumentebene, deshalb hier im globalen Block. */
+	@property --fuell {
+		syntax: "<angle>";
+		inherits: false;
+		initial-value: 0turn;
 	}
+
 </style>
