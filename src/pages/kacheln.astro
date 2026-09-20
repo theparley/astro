@@ -23,25 +23,24 @@ import { LOGOS } from "../lib/fallblatt";
 // OFFEN: TRANSKRIPT und KI-ZITATE hat Fred als "keine Ausspielungen in dem
 // Sinn" bezeichnet — sie stehen hier drin, weil die Zehn sonst nicht
 // aufgeht. Sein Entscheid steht aus.
-const varianten: Array<[string, string]> = [
-	["1", "Livestream"],
-	["1", "Videopodcast"],
-	["1", "Audio-Podcast"],
-	["10", "LinkedIn-Beiträge"],
-	["10", "Clips"],
-	["10", "Shorts"],
-	["1", "Newsletter"],
-	["1", "Landingpage"],
-	["1", "Transkript"],
+// Logo-Reihenfolge je Zeile wie in der Wand: die HÄUFIGSTE Plattform sitzt
+// außen an der gemeinsamen rechten Kante (dort teilen sich alle Zeilen die
+// Spalte), seltenere wandern nach innen.
+const varianten: Array<[string, string, string[]]> = [
+	["1", "Livestream", ["linkedin", "youtube"]],
+	["1", "Videopodcast", ["web", "youtube"]],
+	["1", "Audio-Podcast", ["spotify", "apple", "web"]],
+	["10", "LinkedIn-Beiträge", ["linkedin"]],
+	["10", "Clips", ["instagram", "tiktok", "linkedin", "youtube"]],
+	["10", "Shorts", ["instagram", "tiktok", "youtube"]],
+	["1", "Newsletter", ["mail"]],
+	["1", "Landingpage", ["web"]],
+	["1", "Transkript", ["web"]],
 	// „KI-lesbar" war Freds Vorschlag, die Recherche spricht dagegen: es ist
 	// ein Adjektiv („10 KI-lesbar" ist ungrammatisch, alle Nachbarzeilen
 	// sind Substantive) und behauptet nur Maschinenlesbarkeit, also die
-	// Eintrittsbedingung statt der Redaktionsleistung. Feldbegriffe (GEO,
-	// AEO, LLMO, KI-Sichtbarkeit) sind Disziplinen oder Zustände, keine
-	// Sachen, die geliefert werden. „Zitierfähigkeit" bleibt der
-	// Angebotsebene vorbehalten (Position „KI-Zitierfähigkeit" im
-	// Angebots-Master). Also bleibt die Zeile, wie sie war.
-	["10", "Zitate für KI"],
+	// Eintrittsbedingung statt der Redaktionsleistung.
+	["10", "Zitate für KI", ["chatgpt", "claude", "gemini"]],
 ];
 
 // Männchen als Hintergrund-Kachelung (Kachel 3). Ein einziges DIV statt
@@ -74,17 +73,27 @@ const personPfad = (LOGOS.person.match(/<path d="([^"]+)"/) || [])[1] ?? "";
 // Figuren schwarz mit weißem Saum wie der Punkt in Kachel 2.
 // paint-order='stroke' legt den Strich unter die Füllung, sonst frisst er
 // die Figur von innen auf.
-const figur = (x: number) =>
-	"<g transform='translate(" + x + " 104) scale(0.1125)' fill='#0d0d0d' " +
-	"stroke='#ffffff' stroke-width='34' paint-order='stroke' " +
-	"stroke-linejoin='round'><path d='" + personPfad + "'/></g>";
-const personSvg = (
+const figur = (x: number, stil: string) =>
+	"<g transform='translate(" + x + " 104) scale(0.1125)' " + stil + ">" +
+	"<path d='" + personPfad + "'/></g>";
+const doppel = (stil: string) =>
 	"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'>" +
-	figur(-4) +
-	figur(96) +
-	"</svg>"
+	figur(-4, stil) +
+	figur(96, stil) +
+	"</svg>";
+// ZWEI EBENEN (Fred 20.09. abends): die beiden, mit denen wir starten,
+// bleiben SCHWARZ mit weißem Saum — alle anderen sind weiß. Oben liegt
+// deshalb eine einzelne, nicht wiederholte Doppelfigur in Schwarz, darunter
+// die weiße Menge als Kachelung. Beide sind mittig und werden gleich
+// skaliert, die schwarze deckt also immer genau die zwei mittleren der
+// Menge ab und zoomt mit ihnen mit.
+const personSvgSchwarz = doppel(
+	"fill='#0d0d0d' stroke='#ffffff' stroke-width='34' paint-order='stroke' " +
+	"stroke-linejoin='round'",
 ).replace(/"/g, "'");
-const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
+const personSvgWeiss = doppel("fill='#ffffff'").replace(/"/g, "'");
+const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 ---
 
 <Layout title="Kacheln (Probe)">
@@ -103,10 +112,17 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 				</div>
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
-						{varianten.map(([zahl, wort]) => (
+						{varianten.map(([zahl, wort, kanaele]) => (
 							<li>
-								<span class="anzahl">{zahl}</span>
-								{wort}
+								<span class="eintrag">
+									<span class="anzahl">{zahl}</span>
+									{wort}
+								</span>
+								<span class="kanaele">
+									{kanaele.map((k) => (
+										<span class="kanal" set:html={LOGOS[k]} />
+									))}
+								</span>
 							</li>
 						))}
 					</ul>
@@ -132,7 +148,6 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 						   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
 						<span class="uhr uhr--gross"></span>
 						<span class="uhr uhr--klein"></span>
-						<span class="kreis kreis--punkt"></span>
 					</div>
 				</div>
 			</div>
@@ -268,13 +283,59 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		padding: 0;
 		list-style: none;
 		font-weight: 300;
-		font-size: 6.2cqw;
-		line-height: 1.34;
+		font-size: 5.4cqw;
+		line-height: 1.5;
 		letter-spacing: -0.01em;
 	}
 
 	/* Zahlenspalte rechtsbündig wie in der Wand: die Einser fluchten unter
 	   den Zehnern, die Wörter beginnen alle auf derselben Kante. */
+	.varianten li {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		/* Mindestabstand zwischen Namen und Piktogrammen = derselbe Wert,
+		   den die Kachel als Rand nach außen hält (Fred 20.09. abends).
+		   Damit atmet die Zeile innen so wie die Kachel außen, und die
+		   längste Zeile klebt nicht mehr an der Logo-Kolonne. */
+		gap: clamp(18px, 2.2vw, 32px);
+	}
+
+	/* Kanal-Piktogramme rechtsbündig an der gemeinsamen Kante, wie die
+	   Logo-Kolonne der Wand. Größe an der Zeile ausgerichtet, damit sie die
+	   Liste begleiten statt sie zu dominieren. */
+	.kanaele {
+		display: flex;
+		align-items: center;
+		gap: 0.3em;
+		flex: none;
+	}
+
+	.kanal {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.05em;
+		height: 1.05em;
+	}
+
+	.kanal :global(svg) {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	/* LinkedIn ist bewusst Text („in"), kein SVG — dieselbe Setzung wie in
+	   der Wand. Das Styling dafür lebt dort im globalen Block der
+	   Wand-Komponente; die steht auf dieser Seite nicht, also hier nochmal. */
+	.kanal :global(.mo-logo-text) {
+		font-family: -apple-system, "Helvetica Neue", sans-serif;
+		font-weight: 800;
+		font-size: 0.95em;
+		letter-spacing: -0.03em;
+		line-height: 1;
+	}
+
 	.anzahl {
 		display: inline-block;
 		width: 2.2em;
@@ -296,7 +357,6 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		place-items: center;
 	}
 
-	.kreis,
 	.uhr {
 		position: absolute;
 		border-radius: 50%;
@@ -312,6 +372,22 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	   waere eine Gradient-Stelle nicht animierbar. */
 	.uhr {
 		background: conic-gradient(#ffffff var(--fuell, 0turn), transparent 0);
+	}
+
+	/* Die kleine Stunde ist KEINE weiße Fläche, sondern eine schwarze mit
+	   weißem Rand (Fred 20.09. abends) — dieselbe Sprache wie die beiden
+	   schwarzen Figuren in Kachel 3. Damit sie trotzdem umlaufend ENTSTEHT,
+	   wird nicht gefüllt, sondern freigelegt: die Scheibe ist fertig da
+	   (schwarz mit weißem Saum) und eine Kegel-Maske gibt sie Stück für
+	   Stück frei. Man sieht den Saum wie einen Zeiger herumlaufen, und was
+	   er hinterlässt, ist die schwarze Stunde. Nebenwirkung, die uns passt:
+	   am Ende liegt sie als schwarze Scheibe im weißen Feld des großen
+	   Kreises — der frühere Extra-Punkt wird dadurch überflüssig. */
+	.uhr--klein {
+		background: var(--panel);
+		box-shadow: 0 0 0 0.45cqw #ffffff inset;
+		-webkit-mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
+		mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
 	}
 
 	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10.
@@ -334,17 +410,6 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	.uhr--klein {
 		width: 7cqw;
 		height: 7cqw;
-	}
-
-	/* Bleibt am Ende als Marke fuer die EINE Stunde im grossen Feld stehen
-	   (Freds Setzung von vorhin) — blendet erst ein, wenn die grosse Uhr
-	   laeuft, vorher waere er nur ein Loch in der kleinen. */
-	.kreis--punkt {
-		width: 4.6cqw;
-		height: 4.6cqw;
-		background: var(--panel);
-		opacity: 0;
-		z-index: 2;
 	}
 
 	.uhr--klein {
@@ -374,10 +439,6 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		animation: uhr-gross 7s linear infinite;
 	}
 
-	[data-kreis].laeuft .kreis--punkt {
-		animation: punkt-ein 7s linear infinite;
-	}
-
 	/* Die kleine Stunde laeuft zuerst ab und bleibt dann voll stehen. */
 	@keyframes uhr-klein {
 		0%, 6% { --fuell: 0turn; }
@@ -390,11 +451,6 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		90%, 100% { --fuell: 1turn; }
 	}
 
-	@keyframes punkt-ein {
-		0%, 62% { opacity: 0; }
-		82%, 100% { opacity: 1; }
-	}
-
 	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
 	/* Startgröße: EINE Figur füllt die Kachel. Endgröße: rund tausend
 	   Figuren passen hinein — bei 4:5 sind das etwa 28 × 35 Zellen, also
@@ -403,12 +459,14 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		width: 100%;
 		height: 100%;
 		background-image: var(--person);
-		background-repeat: repeat;
+		/* Erste Ebene: die zwei schwarzen Start-Figuren, EINMAL, mittig.
+		   Zweite Ebene: die weiße Menge, gekachelt. */
+		background-repeat: no-repeat, repeat;
 		/* Fest mittig — das trägt jetzt, weil die Kachelung selbst zwei
 		   Figuren enthält: ihre Mitte liegt zwischen den beiden, und
 		   "center" hält diese Mitte bei jeder Größe an derselben Stelle. */
 		background-position: center;
-		background-size: 100% 100%;
+		background-size: 100% 100%, 100% 100%;
 	}
 
 	/* Der Zoom läuft NICHT über @keyframes: Container-Einheiten (cqw)
@@ -421,15 +479,11 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	@media (prefers-reduced-motion: reduce) {
 		[data-kreis].laeuft,
 		[data-kreis].laeuft .uhr--klein,
-		[data-kreis].laeuft .uhr--gross,
-		[data-kreis].laeuft .kreis--punkt {
+		[data-kreis].laeuft .uhr--gross {
 			animation: none;
 		}
 		.uhr {
 			--fuell: 1turn;
-		}
-		.kreis--punkt {
-			opacity: 1;
 		}
 		.kreis-buehne {
 			transform: scale(1);
@@ -459,12 +513,18 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		const startH = Math.round(r.height);
 		const endeB = Math.max(8, Math.round(Math.sqrt((4 * r.width * r.height) / ZIEL_FIGUREN)));
 		const endeH = Math.round(endeB / 2);
+		// Beide Hintergrund-Ebenen bekommen dieselbe Größe, damit die
+		// schwarze Doppelfigur exakt auf den zwei mittleren der Menge liegt.
+		const zwei = (b: number, h: number) => {
+			const eine = b + "px " + h + "px";
+			return eine + ", " + eine;
+		};
 		return el.animate(
 			[
-				{ backgroundSize: startB + "px " + startH + "px", offset: 0 },
-				{ backgroundSize: startB + "px " + startH + "px", offset: 0.1 },
-				{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7 },
-				{ backgroundSize: endeB + "px " + endeH + "px", offset: 1 },
+				{ backgroundSize: zwei(startB, startH), offset: 0 },
+				{ backgroundSize: zwei(startB, startH), offset: 0.1 },
+				{ backgroundSize: zwei(endeB, endeH), offset: 0.7 },
+				{ backgroundSize: zwei(endeB, endeH), offset: 1 },
 			],
 			{ duration: 6000, iterations: Infinity, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
 		);
