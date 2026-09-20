@@ -26,6 +26,24 @@ import { LOGOS } from "../lib/fallblatt";
 // Logo-Reihenfolge je Zeile wie in der Wand: die HÄUFIGSTE Plattform sitzt
 // außen an der gemeinsamen rechten Kante (dort teilen sich alle Zeilen die
 // Spalte), seltenere wandern nach innen.
+// Kanal-Band unten in der Kachel (Fred 20.09. abends): die Piktogramme
+// stehen nicht mehr neben ihrer Zeile, sondern als Reihe am unteren Rand.
+// Reihenfolge nach Haeufigkeit in der Liste, wie in der Wand — was oft
+// vorkommt, steht vorn.
+const kanalBand = [
+	"youtube",
+	"linkedin",
+	"web",
+	"instagram",
+	"tiktok",
+	"spotify",
+	"apple",
+	"mail",
+	"chatgpt",
+	"claude",
+	"gemini",
+];
+
 const varianten: Array<[string, string, string[]]> = [
 	["1", "Livestream", ["linkedin", "youtube"]],
 	["1", "Videopodcast", ["web", "youtube"]],
@@ -113,20 +131,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 				<div class="kachel">
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
-						{varianten.map(([zahl, wort, kanaele]) => (
+						{varianten.map(([zahl, wort]) => (
 							<li>
-								<span class="eintrag">
-									<span class="anzahl">{zahl}</span>
-									{wort}
-								</span>
-								<span class="kanaele">
-									{kanaele.map((k) => (
-										<span class="kanal" set:html={LOGOS[k]} />
-									))}
-								</span>
+								<span class="anzahl">{zahl}</span>
+								{wort}
 							</li>
 						))}
 					</ul>
+				</div>
+				<div class="kanalband">
+					{kanalBand.map((k) => (
+						<span class="kanal" set:html={LOGOS[k]} />
+					))}
 				</div>
 				</div>
 			</div>
@@ -319,6 +335,11 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Kachelhöhe (Breite × 1,38) plus Fugen. 5,4cqw Kachelbreite ergibt
 	   rund 75cqw Boardhöhe und 70cqw Breite bei 13 Spalten — beides sitzt
 	   innerhalb der Kachel. */
+	.kachel:has(.kanalband) {
+		grid-template-rows: 1fr auto;
+		gap: 3cqw;
+	}
+
 	.kachel-mitte--liste {
 		align-content: start;
 		/* stretch statt start (Fred 20.09. abends): die Liste soll die volle
@@ -350,7 +371,6 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	.varianten li {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		/* Mindestabstand zwischen Namen und Piktogrammen. Der Kachelrand
 		   allein war zu knapp (Fred 20.09. abends, zweite Sichtung: "sieht
 		   immer noch zu eng aus") — bei dieser Schriftgröße sind 18 px
@@ -359,22 +379,23 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		gap: 2.4em;
 	}
 
-	/* Kanal-Piktogramme rechtsbündig an der gemeinsamen Kante, wie die
-	   Logo-Kolonne der Wand. Größe an der Zeile ausgerichtet, damit sie die
-	   Liste begleiten statt sie zu dominieren. */
-	.kanaele {
+	/* Kanal-Band am unteren Kachelrand (Fred 20.09. abends): eine Reihe
+	   quer, nicht mehr je Zeile. Darf umbrechen — bei elf Zeichen und
+	   schmaler Kachel wird daraus von selbst ein zweizeiliger Block. */
+	.kanalband {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.3em;
-		flex: none;
+		align-self: end;
+		gap: 1.6cqw 2cqw;
 	}
 
 	.kanal {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 1.05em;
-		height: 1.05em;
+		width: 6.4cqw;
+		height: 6.4cqw;
 	}
 
 	.kanal :global(svg) {
@@ -389,7 +410,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	.kanal :global(.mo-logo-text) {
 		font-family: -apple-system, "Helvetica Neue", sans-serif;
 		font-weight: 800;
-		font-size: 0.95em;
+		font-size: 5.6cqw;
 		letter-spacing: -0.03em;
 		line-height: 1;
 	}
