@@ -123,11 +123,12 @@ const kernaussage =
 		   FlapWort.astro bleibt als Baustein im Repo. */}
 		{/* Zahlwörter fett auf 900 (Fred 14.09. nacht) — gleiche Bauform
 		   wie die Expertise-Öffner im Paragraph. */}
-		{/* Reihenfolge gedreht (Fred 20.09.): EIN Satz statt drei Fragmente —
-		   das Gespräch steht vorn, weil es der Kern ist; Stunde und Experten
-		   sind seine Bedingungen. Vorfassung: "Zwei Experten. Ein Gespräch.
-		   Eine Stunde." (Staccato, 14.09.). */}
-		<p><strong>Ein</strong> Gespräch in <strong>einer</strong> Stunde mit <strong>zwei</strong> Experten.</p>
+		{/* Staccato bleibt, nur die Reihenfolge ist neu (Fred 20.09.):
+		   Gespräch, Stunde, Experten — die Fließtext-Fassung ("Ein Gespräch
+		   in einer Stunde mit zwei Experten.") war ein Irrweg derselben
+		   Runde. Vorfassung 14.09.: "Zwei Experten. Ein Gespräch. Eine
+		   Stunde." */}
+		<p><strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde. <strong>Zwei</strong> Experten.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -282,6 +283,10 @@ const kernaussage =
 		// ── Akt 1: INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
 		addText(KOPF, RAND, INPUT_COLS, KOPF_LINKS, t); t += 500;
 		addText(KOPF + 2, RAND, INPUT_COLS, INPUT_ZEILE, t);
+		// PROBE (Fred 20.09.): Formatname unter dem Gespräch — zeigt, welches
+		// Format den Input liefert. "&" liegt auf der Trommel, kein
+		// Sonderzeichen nötig. Wieder raus: diese eine Zeile löschen.
+		addText(KOPF + 3, RAND, INPUT_COLS, "LIVE Q&A SESSION", t + 320);
 		// Linke Seite steht fertig geflappt → Seitenpause (Fred 20.09.)
 		t += FERTIG + seitePause;
 		addText(KOPF, MITTE_RECHTS, TEXT_COLS, KOPF_RECHTS, t); t += 500;
