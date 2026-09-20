@@ -602,10 +602,19 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		let endeB = Math.max(8, Math.round(Math.sqrt((4 * r.width * r.height) / ZIEL_FIGUREN)));
 		while (endeB > 8 && ganze(endeB) < ZIEL_FIGUREN) endeB--;
 		const endeH = Math.round(endeB / 2);
+		// WEICH IN BEIDE RICHTUNGEN (Fred 20.09. abends: "faengt schoen
+		// smooth an, endet aber hart"). Die Ursache war die Stelle, an der
+		// die Beschleunigung stand: als Takt-Angabe wirkt sie auf die GANZE
+		// Runde, also auch auf die beiden Haltezeiten am Anfang und Ende —
+		// die eigentliche Bewegung bekam davon nur ein schiefes Stueck ab
+		// und blieb am Schluss mitten im schnellen Teil stehen.
+		// Jetzt laeuft die Runde gleichmaessig, und die Weichzeichnung sitzt
+		// auf dem BEWEGUNGS-Abschnitt selbst: sanft los, sanft an.
+		const WEICH = "cubic-bezier(0.4, 0, 0.2, 1)";
 		const groesse = [
-			{ backgroundSize: startB + "px " + startH + "px", offset: 0 },
-			{ backgroundSize: startB + "px " + startH + "px", offset: 0.1 },
-			{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7 },
+			{ backgroundSize: startB + "px " + startH + "px", offset: 0, easing: "linear" },
+			{ backgroundSize: startB + "px " + startH + "px", offset: 0.1, easing: WEICH },
+			{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7, easing: "linear" },
 			{ backgroundSize: endeB + "px " + endeH + "px", offset: 1 },
 		];
 		// HIN UND ZURUECK (Fred 20.09. abends): kein Sprung zurueck auf den
@@ -619,7 +628,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			duration: 6000,
 			iterations: Infinity,
 			direction: "alternate",
-			easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+			easing: "linear",
 		} as const;
 		// TEXT BLENDET AUS (Fred 20.09. abends, nach Sichtung: das Kippen ins
 		// Schwarze sah nicht gut aus — schwarze Schrift auf dem weißen Feld
@@ -631,9 +640,9 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			? [
 					kopf.animate(
 						[
-							{ opacity: 1, offset: 0 },
-							{ opacity: 1, offset: 0.45 },
-							{ opacity: 0, offset: 0.72 },
+							{ opacity: 1, offset: 0, easing: "linear" },
+							{ opacity: 1, offset: 0.45, easing: WEICH },
+							{ opacity: 0, offset: 0.72, easing: "linear" },
 							{ opacity: 0, offset: 1 },
 						],
 						takt,
@@ -654,9 +663,9 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			weiss.animate(groesse, takt),
 			weiss.animate(
 				[
-					{ opacity: 0, offset: 0 },
-					{ opacity: 0, offset: 0.1 },
-					{ opacity: 1, offset: 0.45 },
+					{ opacity: 0, offset: 0, easing: "linear" },
+					{ opacity: 0, offset: 0.1, easing: WEICH },
+					{ opacity: 1, offset: 0.45, easing: "linear" },
 					{ opacity: 1, offset: 1 },
 				],
 				takt,
