@@ -68,8 +68,13 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 				</div>
 				<div class="kachel-mitte">
 					<div class="kreis-buehne" data-kreis>
-						<span class="kreis kreis--klein"></span>
+						{/* Die weiße Fläche wächst, der schwarze Punkt in ihrer
+						   Mitte bleibt (Fred 20.09. abends). Am Anfang liest sich
+						   das als Punkt mit weißem Rand; am Ende steht dieselbe
+						   Stunde als kleiner Punkt in einem hundertmal größeren
+						   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
 						<span class="kreis kreis--gross"></span>
+						<span class="kreis kreis--punkt"></span>
 					</div>
 				</div>
 				<div class="kachel-fuss">
@@ -224,10 +229,14 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		transform-origin: center;
 	}
 
-	.kreis--klein {
-		width: 7cqw;
-		height: 7cqw;
-		opacity: 0;
+	/* Fester schwarzer Punkt, wächst NICHT mit. Etwas kleiner als der
+	   kleine Weißkreis (7cqw), damit am Anfang ein weißer Rand stehen
+	   bleibt. */
+	.kreis--punkt {
+		width: 4.6cqw;
+		height: 4.6cqw;
+		background: var(--panel);
+		z-index: 1;
 	}
 
 	[data-kreis].laeuft .kreis--gross {
@@ -258,31 +267,19 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		background-size: 80cqw 80cqw;
 	}
 
-	[data-menge].laeuft {
-		animation: menge-rauszoomen 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	}
-
-	@keyframes menge-rauszoomen {
-		0%,
-		10% {
-			background-size: 80cqw 80cqw;
-		}
-		70%,
-		100% {
-			background-size: 3.6cqw 3.6cqw;
-		}
-	}
+	/* Der Zoom läuft NICHT über @keyframes: Container-Einheiten (cqw)
+	   lassen sich dort nicht zuverlässig interpolieren, die Animation fiel
+	   still aus (Befund 20.09. abends — Kachel 3 stand einfach still). Die
+	   Größen rechnet jetzt das Skript in echten Pixeln aus und gibt sie der
+	   Web-Animations-API; bei Größenänderung des Fensters wird neu
+	   gerechnet. */
 
 	@media (prefers-reduced-motion: reduce) {
-		[data-kreis].laeuft .kreis--gross,
-		[data-menge].laeuft {
+		[data-kreis].laeuft .kreis--gross {
 			animation: none;
 		}
 		.kreis--gross {
 			transform: scale(1);
-		}
-		.menge {
-			background-size: 3.6cqw 3.6cqw;
 		}
 	}
 </style>
@@ -292,12 +289,63 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	// wie bei der Wand, damit niemand den Anfang verpasst.
 	let ab: (() => void) | null = null;
 
+	// Kachel 3 — Rauszoomen in ECHTEN PIXELN.
+	// Start: eine Figur füllt die Kachel. Ende: rund tausend Figuren passen
+	// hinein. Die Kachel ist 4:5, also ergibt eine Zellkante von
+	// breite / 28 etwa 28 × 35 = 980 Figuren.
+	const ZELLEN_QUER = 28;
+	function zoomAnlegen(el: HTMLElement): Animation | null {
+		const breite = el.getBoundingClientRect().width;
+		if (!breite) return null;
+		const start = Math.round(breite * 0.92);
+		const ende = Math.max(4, Math.round(breite / ZELLEN_QUER));
+		return el.animate(
+			[
+				{ backgroundSize: start + "px " + start + "px", offset: 0 },
+				{ backgroundSize: start + "px " + start + "px", offset: 0.1 },
+				{ backgroundSize: ende + "px " + ende + "px", offset: 0.7 },
+				{ backgroundSize: ende + "px " + ende + "px", offset: 1 },
+			],
+			{ duration: 6000, iterations: Infinity, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+		);
+	}
+
 	function mount() {
 		ab?.();
 		const ziele = [
 			...document.querySelectorAll<HTMLElement>("[data-kreis], [data-menge]"),
 		];
 		if (!ziele.length) return;
+
+		// Zoom-Animationen je Mengen-Kachel, pausiert bis zur Sichtbarkeit;
+		// bei Fensteränderung mit neuen Pixelwerten neu aufgesetzt.
+		const mengen = ziele.filter((z) => z.hasAttribute("data-menge"));
+		let zooms = new Map<HTMLElement, Animation>();
+		const zoomsAnlegen = () => {
+			zooms.forEach((a) => a.cancel());
+			zooms = new Map();
+			if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+			mengen.forEach((el) => {
+				const a = zoomAnlegen(el);
+				if (a) {
+					a.pause();
+					zooms.set(el, a);
+				}
+			});
+		};
+		zoomsAnlegen();
+		let neuTimer = 0;
+		const beiResize = () => {
+			window.clearTimeout(neuTimer);
+			neuTimer = window.setTimeout(() => {
+				const liefen = new Set(
+					[...zooms.entries()].filter(([, a]) => a.playState === "running").map(([el]) => el),
+				);
+				zoomsAnlegen();
+				liefen.forEach((el) => zooms.get(el)?.play());
+			}, 200);
+		};
+		window.addEventListener("resize", beiResize);
 		// Zwei Bedingungen statt einer festen Schwelle (Lektion aus der Wand,
 		// 20.09.): ist die Kachel höher als der Bildschirm, erreicht das
 		// Verhältnis nie 0,35 und der Beobachter meldet sich nie. Deshalb
@@ -309,13 +357,25 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		const io = new IntersectionObserver(
 			(eintraege) => {
 				eintraege.forEach((e) => {
-					e.target.classList.toggle("laeuft", sichtbar(e));
+					const el = e.target as HTMLElement;
+					const an = sichtbar(e);
+					el.classList.toggle("laeuft", an);
+					const zoom = zooms.get(el);
+					if (zoom) {
+						if (an) zoom.play();
+						else zoom.pause();
+					}
 				});
 			},
 			{ threshold: Array.from({ length: 11 }, (_, i) => i / 10) },
 		);
 		ziele.forEach((z) => io.observe(z));
-		ab = () => io.disconnect();
+		ab = () => {
+			io.disconnect();
+			window.removeEventListener("resize", beiResize);
+			window.clearTimeout(neuTimer);
+			zooms.forEach((a) => a.cancel());
+		};
 	}
 
 	document.addEventListener("astro:page-load", mount);
