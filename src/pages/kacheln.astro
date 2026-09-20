@@ -66,6 +66,13 @@ const brettZeilen = [
 	// auf alle uebrigen Zeilen. Das Brett zeigt jetzt neun Zustaende; der
 	// frei gewordene Platz ist offen (Recherche laeuft).
 	["10", "CLIPS", ""],
+	// Nimmt den Platz ein, den Shorts geraeumt hat (Fred 20.09. abends).
+	// Anders als ein Clip ist eine Q&A eine VOLLSTAENDIGE Einheit: eine
+	// Frage, eine Antwort, fertig — bisher wurden daraus nur Ausschnitte
+	// gezogen. Auf dem Brett steht sie ohne Plural-s: in Versalien liest
+	// sich "Q&AS" wie ein Wort, und die Zehn davor sagt ohnehin, dass es
+	// mehrere sind.
+	["10", "Q&A", ""],
 	["1", "NEWSLETTER", ""],
 	["1", "LANDINGPAGE", ""],
 	["1", "TRANSKRIPT", ""],
@@ -233,7 +240,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			<div class="feld">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">2 <span class="zu">zu</span> 1000+</p>
-					<p class="bezug">Zwei Experten erreichen mehr als tausend Zuschauer.</p>
+					<p class="bezug">Zwei Experten erreichen in einem Monat mehr als tausend Zuschauer.</p>
 				</div>
 				<div class="kachel">
 				<div class="kachel-mitte">
