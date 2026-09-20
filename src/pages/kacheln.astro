@@ -437,11 +437,33 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		transform: rotate(var(--fuell, 0turn));
 	}
 
-	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10. */
+	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10.
+	   Der GROSSE Kreis wird flaechig weiss (Fred 20.09. abends) — er ist das
+	   Ergebnis, nicht die Zeichnung. Also keine Kontur, kein Speichenpaar,
+	   sondern ein Kuchenstueck, das sich mit Weiss fuellt. */
 	.uhr--gross {
 		width: 70cqw;
 		height: 70cqw;
-		--strich: 0.5cqw;
+		--strich: 0cqw;
+	}
+
+	.uhr--gross .bogen {
+		border: none;
+		background: #ffffff;
+	}
+
+	.uhr--gross .speiche {
+		display: none;
+	}
+
+	/* Die kleine Stunde bekommt eine schwarze Fuellung. Auf der schwarzen
+	   Kachel sieht man davon zunaechst nichts — sobald aber das weisse Feld
+	   des grossen Kreises darunter durchlaeuft, bleibt sie als schwarze
+	   Scheibe mit weissem Saum stehen (Fred: "wenn es geht, bleibt der
+	   schwarze Kreis innen drin schwarz"). Dieselbe Maske wie die Kontur,
+	   also erscheint die Fuellung im selben Takt wie der Rand. */
+	.uhr--klein .bogen {
+		background: var(--panel);
 	}
 
 	/* Strichstaerke am ZOOM bemessen: die kleine Stunde wird am Anfang
@@ -465,9 +487,14 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		animation: kreis-zoom 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 
+	/* OHNE HALT (Fred 20.09. abends: "da ist ein Stop drin"). Der grosse
+	   Kreis und die Kamera setzen exakt dort an, wo die kleine Stunde
+	   fertig ist — bei 32 %. Vorher lagen zehn Prozent Leerlauf dazwischen,
+	   in denen nichts passierte. Alle vier Marken haengen an derselben
+	   Zahl; wer eine verschiebt, muss die anderen mitnehmen. */
 	@keyframes kreis-zoom {
-		0%, 42% { transform: scale(10); }
-		75%, 100% { transform: scale(1); }
+		0%, 32% { transform: scale(10); }
+		70%, 100% { transform: scale(1); }
 	}
 
 	[data-kreis].laeuft .uhr--klein {
@@ -499,8 +526,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	}
 
 	@keyframes speichen-gross {
-		0%, 43.9% { opacity: 0; }
-		44%, 100% { opacity: 1; }
+		0%, 31.9% { opacity: 0; }
+		32%, 100% { opacity: 1; }
 	}
 
 	/* Die kleine Stunde laeuft zuerst ab und bleibt dann voll stehen. */
@@ -511,8 +538,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 	/* Die grosse beginnt erst, wenn die kleine steht. */
 	@keyframes uhr-gross {
-		0%, 44% { --fuell: 0turn; }
-		90%, 100% { --fuell: 1turn; }
+		0%, 32% { --fuell: 0turn; }
+		82%, 100% { --fuell: 1turn; }
 	}
 
 	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
@@ -611,11 +638,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		// Jetzt laeuft die Runde gleichmaessig, und die Weichzeichnung sitzt
 		// auf dem BEWEGUNGS-Abschnitt selbst: sanft los, sanft an.
 		const WEICH = "cubic-bezier(0.4, 0, 0.2, 1)";
+		// Am Anfang sitzen die beiden etwas TIEFER (Fred 20.09. abends) —
+		// oben steht die Ueberschrift, mittig gesetzt gerieten sie ihr zu
+		// nah. Bis die Menge dicht ist, wandert die Lage zurueck auf die
+		// Mitte, damit das Endbild wieder symmetrisch steht. Beide Lagen
+		// teilen diese Keyframes, koennen also nicht verrutschen.
+		const START_TIEFE = "center 58%";
 		const groesse = [
-			{ backgroundSize: startB + "px " + startH + "px", offset: 0, easing: "linear" },
-			{ backgroundSize: startB + "px " + startH + "px", offset: 0.1, easing: WEICH },
-			{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7, easing: "linear" },
-			{ backgroundSize: endeB + "px " + endeH + "px", offset: 1 },
+			{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: START_TIEFE, offset: 0, easing: "linear" },
+			{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: START_TIEFE, offset: 0.1, easing: WEICH },
+			{ backgroundSize: endeB + "px " + endeH + "px", backgroundPosition: "center 50%", offset: 0.7, easing: "linear" },
+			{ backgroundSize: endeB + "px " + endeH + "px", backgroundPosition: "center 50%", offset: 1 },
 		];
 		// HIN UND ZURUECK (Fred 20.09. abends): kein Sprung zurueck auf den
 		// Anfang, sondern derselbe Weg rueckwaerts — die Menge zieht sich
