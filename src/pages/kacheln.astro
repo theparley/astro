@@ -558,15 +558,16 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   misst 70cqw; bei Faktor 1,3 sind das 91 von 100 Kachelbreiten, er
 	   misst im Ruhezustand 70cqw.
 	   NUR das Ende ist groesser geworden, der Anfang bleibt bei Faktor 10
-	   (Fred 20.09. abends). Endfaktor jetzt 1,48: der Kreis misst damit
-	   rund 720 px bei 731 px Kacheloberflaeche — er reicht bis knapp an die
-	   Aussenkante und ragt ueber den Innenrand hinaus, bleibt aber ganz im
-	   Bild. Weiter waere er angeschnitten und keine Scheibe mehr.
-	   Senkrecht geprueft: Mitte bei 53,7 % der Hoehe, oben 131 px, unten
-	   851 px von 914 — passt. Der Zoomweg betraegt 10 zu 1,48, also 6,8. */
+	   (Fred 20.09. abends). Endfaktor 1,5: der Kreis misst damit 730 px bei
+	   731 px Kacheloberflaeche — er STOESST links und rechts an die Kante,
+	   ohne angeschnitten zu werden. Mehr geht nicht, ohne dass er seine
+	   Rundung verliert; der Wert ist damit keine Geschmacksfrage mehr,
+	   sondern die Obergrenze.
+	   Senkrecht geprueft: Mitte bei 53,7 % der Hoehe, oben 126 px, unten
+	   856 px von 914 — passt. Der Zoomweg betraegt 10 zu 1,5, also 6,7. */
 	@keyframes kreis-zoom {
 		0%, 4% { transform: scale(10); }
-		38%, 50% { transform: scale(1.48); }
+		38%, 50% { transform: scale(1.5); }
 		88%, 100% { transform: scale(10); }
 	}
 
