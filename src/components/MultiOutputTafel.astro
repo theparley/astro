@@ -44,10 +44,10 @@ interface Props {
 }
 
 // Takt = Abstand von Zeile zu Zeile beim Aufbau (Fred 20.09.: "läuft zu
-// langsam"): 400 → 260 → 220 ms. Das ist der Regler fürs Tempo-Gefühl; die
+// langsam"): 400 → 260 → 220 → 200 ms. Das ist der Regler fürs Tempo; die
 // Klappzeit je Kachel (FLAP_STEP_MS 110 im gemeinsamen Modul) sitzt schon
 // knapp über der Frame-Grenze und kann kaum schneller.
-const { taktMs = 220, leseMs = 2500, entstehen = false } = Astro.props;
+const { taktMs = 200, leseMs = 2500, entstehen = false } = Astro.props;
 
 // Wandgeometrie — identisch zum Entwurf: exakt halbierte Wand, 20 Kacheln
 // je Hälfte, EINE Trenner-Spalte auf der Bildmitte.
@@ -210,7 +210,9 @@ const kernaussage =
 		{ text: "10 SHORTS",        logos: ["instagram", "tiktok", "youtube"] },
 		{ text: " 1 NEWSLETTER",    logos: ["mail"] },
 		{ text: " 1 TRANSKRIPT",    logos: ["web"] },
-		{ text: "10 ZITATE FÜR KI", logos: ["chatgpt", "claude", "gemini", "perplexity"] },
+		// Perplexity raus (Fred 20.09.): mit vier Logos rückt die Kolonne so
+		// weit nach links, dass das I von KI überdeckt wird.
+		{ text: "10 ZITATE FÜR KI", logos: ["chatgpt", "claude", "gemini"] },
 		{ text: "", logos: [] },
 		{ text: " + EURE BIBLIOTHEK", logos: [] },
 		{ text: "   WÄCHST.", logos: [] },
@@ -229,7 +231,6 @@ const kernaussage =
 	const HALB = 20;
 	const GESAMT_COLS = HALB + 1 + HALB; // 41, Trenner = Spalte 20
 	const MITTE_RECHTS = HALB + 1;
-	const SUMME_ROW = 13 + KOPF;
 	const BLOCK_BREITE = 10;
 	// Spaltenköpfe ausgeschrieben (Fred 20.09.: INPUT/OUTPUT statt IN/OUT,
 	// weil der Absatz darüber von "multiplizieren" und die Sektion vom
@@ -282,17 +283,18 @@ const kernaussage =
 		// Auch hier: Kaskade + echte Trommel-Klappzeit (s. Abbau unten).
 		addClearAll(t); t += (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS + 500;
 
-		// ── Akt 2: 1 Stunde Aufwand gegen +100 Stunden Zuschauerzeit ──
-		// DRITTE Dramaturgie-Fassung (Fred 14.09. nacht, ersetzt die
-		// zurückgesetzte): VIDEOPODCAST → INPUT → der EINE Kreis flippt
-		// ein → Seitenwechsel zu OUTPUT → die 100 Kreise entstehen → ganz
-		// am ENDE erscheinen unten BEIDE Beschriftungen zusammen
-		// (1 STUNDE/AUFWAND links, 100+ STUNDEN/ZUSCHAUERZEIT rechts,
-		// beide auf den Summen-Zeilen — Lesung "unten" auf beide Seiten
-		// bezogen; AUFWAND/ZUSCHAUERZEIT als Zweitzeilen beibehalten).
-		addText(KOPF, RAND, INPUT_COLS, KOPF_LINKS, t); t += 500;
-		add(t, KOPF + 2, RAND, { weiss: true }); t += 600;
-		addText(KOPF, MITTE_RECHTS, TEXT_COLS, KOPF_RECHTS, t); t += 500;
+		// ── Akt 2: 1 Stunde Aufnahme gegen 100+ Stunden Watchtime ──
+		// VIERTE Dramaturgie-Fassung (Fred 20.09.): Akt 2 wird PARALLEL zu
+		// Akt 1 gebaut — die Beschriftungen stehen OBEN wie INPUT/OUTPUT
+		// (zweizeilig: 1 STUNDE / AUFNAHME links, 100+ STUNDEN / WATCHTIME
+		// rechts), darunter erscheinen die Kreise. Vorher standen beide
+		// Beschriftungen erst GANZ AM ENDE unten auf den Summen-Zeilen
+		// (Fassung 14.09. nacht, in der Git-Historie).
+		addText(KOPF, RAND, INPUT_COLS, "1 STUNDE", t);
+		addText(KOPF + 1, RAND, INPUT_COLS, "AUFNAHME", t); t += 500;
+		add(t, KOPF + 3, RAND, { weiss: true }); t += 600;
+		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
+		addText(KOPF + 1, MITTE_RECHTS, TEXT_COLS, "WATCHTIME", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
 		// DIAGONAL-WELLE (Fred 14.09. abends): Verzögerung = (Zeile ×
@@ -302,23 +304,21 @@ const kernaussage =
 		const BLOCK_TAKT = 30;
 		const BLOCK_ZEILEN_VERSATZ = 3;
 		let i = 0;
-		for (let r = KOPF + 2; r < ROWS && i < 100; r++)
+		// Block startet eine Zeile tiefer als früher: über ihm stehen jetzt
+		// die zwei Beschriftungszeilen + eine Leerzeile (wie in Akt 1).
+		const BLOCK_START = KOPF + 3;
+		for (let r = BLOCK_START; r < ROWS && i < 100; r++)
 			for (let c = 0; c < BLOCK_BREITE && i < 100; c++) {
-				add(t + ((r - KOPF - 2) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, MITTE_RECHTS + c, { weiss: true });
+				add(t + ((r - BLOCK_START) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, MITTE_RECHTS + c, { weiss: true });
 				i++;
 			}
 		const blockDauer = (9 * BLOCK_ZEILEN_VERSATZ + 9) * BLOCK_TAKT;
 		// Wahrnehmungs-Pause (Fred 14.09. nacht: "kommt zu schnell"):
 		// blockDauer ist nur der STARTVERSATZ der letzten Kachel — bis ihr
 		// Kreis wirklich steht, rattert sie noch bis zu 6 Klappen nach.
-		// Danach bewusst ~1,2s Stille auf dem fertigen 100er-Block, erst
-		// dann die Beschriftungen.
-		t += blockDauer + 6 * FLAP_STEP_MS + 1200;
-		addText(SUMME_ROW, RAND, INPUT_COLS, "1 STUNDE", t);
-		addText(SUMME_ROW + 1, RAND, INPUT_COLS, "AUFNAHME", t);
-		addText(SUMME_ROW, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
-		addText(SUMME_ROW + 1, MITTE_RECHTS, TEXT_COLS, "WATCHTIME", t);
-		t += 300 + lese;
+		// Danach die Lesezeit auf dem fertigen Bild (die Beschriftungen
+		// stehen seit 20.09. schon oben, es kommt nichts mehr nach).
+		t += blockDauer + 6 * FLAP_STEP_MS + 300 + lese;
 		// Schluss-Abbau + ATEMPAUSE vor dem Loop-Neustart (Fred 14.09.: der
 		// Neustart kam, bevor die weißen Kacheln ganz weg waren). Der Abbau
 		// selbst dauert (ROWS-1)*90 + (COLS-1)*6 ≈ 1,5s — erst NACH seinem
