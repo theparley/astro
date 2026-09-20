@@ -290,7 +290,12 @@ export const stagWelle = (r: number, c: number) => r * 90 + c * 6;
 // 1:1 — Flagge „echte Brand-Logos nach Markenrichtlinien" bleibt offen,
 // siehe Website-Brief). linkedin ist bewusst Text („in"), kein SVG. ──
 export const LOGOS: Record<string, string> = {
-	linkedin: '<span class="mo-logo-text">in</span>',
+	// LinkedIn als echtes Zeichen (Fred 20.09. abends). Vorher stand hier
+	// der Text „in" in einer Systemschrift — als einziges Logo der Reihe
+	// kein Vektor. Pfad aus der Simple-Icons-Sammlung (CC0), wie die
+	// KI-Marken weiter unten; die Markenrechte liegen bei LinkedIn,
+	// Nutzung nach deren Richtlinien.
+	linkedin: '<svg viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>',
 	youtube: '<svg viewBox="0 0 24 24" fill="none"><rect x="1" y="4" width="22" height="16" rx="4.5" stroke="white" stroke-width="1.8"/><path d="M10 8.8v6.4l5.6-3.2z" fill="white"/></svg>',
 	instagram: '<svg viewBox="0 0 24 24" fill="none"><rect x="2.2" y="2.2" width="19.6" height="19.6" rx="5.5" stroke="white" stroke-width="1.8"/><circle cx="12" cy="12" r="4.6" stroke="white" stroke-width="1.8"/><circle cx="17.6" cy="6.4" r="1.4" fill="white"/></svg>',
 	tiktok: '<svg viewBox="0 0 24 24" fill="white"><path d="M14.5 3h2.2c.2 1.8 1.4 3.3 3.8 3.7v2.5c-1.5 0-2.8-.5-3.8-1.2v6.6c0 3.4-2.3 5.9-5.6 5.9-3.1 0-5.6-2.3-5.6-5.5 0-3.4 2.9-5.8 6.2-5.4v2.6c-1.9-.5-3.6.8-3.6 2.7 0 1.7 1.3 3 3 3 1.9 0 3.4-1.4 3.4-3.7V3z"/></svg>',

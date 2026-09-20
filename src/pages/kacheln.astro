@@ -133,16 +133,21 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 					<ul class="varianten">
 						{varianten.map(([zahl, wort]) => (
 							<li>
-								<span class="anzahl">{zahl}</span>
-								{wort}
+								<span class="anzahl">{zahl}</span>{wort}
 							</li>
 						))}
 					</ul>
 				</div>
-				<div class="kanalband">
-					{kanalBand.map((k) => (
-						<span class="kanal" set:html={LOGOS[k]} />
-					))}
+				{/* LAUFBAND (Fred 20.09. abends): die Kanaele ziehen als Band
+				   durch, und zur Mitte hin werden sie groesser. Drei Saetze
+				   hintereinander, damit der Umlauf nahtlos ist; die Spur
+				   wandert um genau einen Satz und beginnt von vorn. */}
+				<div class="laufband" data-laufband>
+					<div class="laufband-spur" data-spur>
+						{[0, 1, 2].map(() =>
+							kanalBand.map((k) => <span class="kanal" set:html={LOGOS[k]} />),
+						)}
+					</div>
 				</div>
 				</div>
 			</div>
@@ -335,9 +340,14 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Kachelhöhe (Breite × 1,38) plus Fugen. 5,4cqw Kachelbreite ergibt
 	   rund 75cqw Boardhöhe und 70cqw Breite bei 13 Spalten — beides sitzt
 	   innerhalb der Kachel. */
-	.kachel:has(.kanalband) {
+	/* Mehr Luft oben und unten (Fred 20.09. abends: "dass es nicht so ganz
+	   am Bild dran haengt"). Nur senkrecht — die waagerechte Polsterung
+	   haelt das Verhaeltnis, an dem die Schriftgroessen abgeglichen sind. */
+	.kachel:has(.laufband) {
 		grid-template-rows: 1fr auto;
-		gap: 3cqw;
+		gap: 4cqw;
+		padding-top: 5cqw;
+		padding-bottom: 5cqw;
 	}
 
 	/* Die Liste ist ein LINKSBUENDIGER BLOCK, der als Ganzes in der
@@ -370,34 +380,48 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 	/* Zahlenspalte rechtsbündig wie in der Wand: die Einser fluchten unter
 	   den Zehnern, die Wörter beginnen alle auf derselben Kante. */
+	/* KEIN Flexbox mehr in der Zeile (Fehler 20.09. abends): als
+	   Flex-Container wurden Zahl, Leerzeichen und Wort zu drei eigenen
+	   Elementen, zwischen denen der alte Zeilen-Abstand von 32 px stand —
+	   zweimal, macht mit dem Leerzeichen rund 91 px statt der 6 px, die ein
+	   Leerzeichen dieser Schrift misst. Der Abstand kam also gar nicht von
+	   der Zahlenspalte. Als gewoehnliche Textzeile setzt die Schrift ihn
+	   selbst.
+	   Der Zeilen-Abstand stammte aus der Zeit, als die Piktogramme rechts in
+	   der Zeile standen; die stehen seit heute unten im Band. */
 	.varianten li {
-		display: flex;
-		align-items: center;
-		/* Mindestabstand zwischen Namen und Piktogrammen. Der Kachelrand
-		   allein war zu knapp (Fred 20.09. abends, zweite Sichtung: "sieht
-		   immer noch zu eng aus") — bei dieser Schriftgröße sind 18 px
-		   weniger als eine halbe Zeilenhöhe. Jetzt an der SCHRIFT bemessen,
-		   nicht am Rand: 2,4 Zeichenhöhen, also rund das Doppelte. */
-		gap: 2.4em;
+		display: block;
 	}
 
-	/* Kanal-Band am unteren Kachelrand (Fred 20.09. abends): eine Reihe
-	   quer, nicht mehr je Zeile. Darf umbrechen — bei elf Zeichen und
-	   schmaler Kachel wird daraus von selbst ein zweizeiliger Block. */
-	.kanalband {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
+	/* LAUFBAND am unteren Kachelrand (Fred 20.09. abends). Die Spur laeuft
+	   gleichmaessig durch; die Groesse der einzelnen Zeichen steuert das
+	   Skript, weil sie von der POSITION abhaengt und nicht von der Zeit
+	   allein — in der Mitte gross, zu den Raendern hin klein. */
+	.laufband {
 		align-self: end;
-		gap: 1.6cqw 2cqw;
+		overflow: hidden;
+		/* Weiche Kanten: das Band soll nicht abgeschnitten wirken, sondern
+		   auslaufen. */
+		-webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+		mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+	}
+
+	.laufband-spur {
+		display: flex;
+		align-items: center;
+		gap: 3cqw;
+		width: max-content;
+		will-change: transform;
 	}
 
 	.kanal {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 6.4cqw;
-		height: 6.4cqw;
+		width: 7.5cqw;
+		height: 7.5cqw;
+		flex: none;
+		transform-origin: center;
 	}
 
 	.kanal :global(svg) {
@@ -428,8 +452,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		display: inline-block;
 		font-variant-numeric: tabular-nums;
 		width: 2ch;
-		/* Enger an den Text (Fred 20.09. abends): 0,28em statt 0,45. */
-		margin-right: 0.28em;
+		/* Abstand = GENAU EIN LEERZEICHEN dieser Schrift (Fred 20.09.
+		   abends: "so wie wenn das nebeneinander geschrieben waere").
+		   Nachgemessen sind das 5,87 px bei 37,99 px Schriftgroesse, also
+		   0,155em. Vorher standen hier 0,28em, mehr als das Doppelte.
+		   Ein echtes Leerzeichen im Text statt dieses Wertes waere die
+		   naheliegende Loesung, funktioniert hier aber nicht: es wird zu
+		   einem eigenen Element neben der Zahlenspalte, und dadurch
+		   verschieben sich die Wortkanten zwischen Einser- und
+		   Zehner-Zeilen. Mit dem festen Rand fluchten sie.
+		   0,22em statt 0,155 (Fred 20.09. abends, nach Sichtung): ein
+		   Leerzeichen allein war zu knapp, 0,28 war zu viel. */
+		margin-right: 0.22em;
 		text-align: right;
 		/* Kein Fettdruck (Fred 20.09. abends, nach Sichtung): die Zahlen
 		   sollen die Spalte halten, nicht die Zeile beherrschen. Die
@@ -841,6 +875,56 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		];
 	}
 
+	// ── Laufband der Kanal-Zeichen ────────────────────────────────────
+	// Die Spur wandert um genau EINEN Satz und beginnt von vorn — bei drei
+	// Saetzen im Markup ist der Umlauf dadurch nahtlos. Die Groesse haengt
+	// an der Position, nicht an der Zeit: jedes Zeichen bekommt dieselbe
+	// Groessen-Kurve (gross in der Mitte, klein aussen), aber mit dem
+	// Phasenversatz, der zu seinem Startplatz gehoert. Dadurch genuegt EIN
+	// Anwerfen; es laeuft kein Bild-fuer-Bild-Rechner mit.
+	const BAND_DAUER = 18000;
+	const BAND_GROSS = 1;
+	const BAND_KLEIN = 0.5;
+	function laufbandAnlegen(band: HTMLElement): Animation[] {
+		const spur = band.querySelector<HTMLElement>("[data-spur]");
+		if (!spur) return [];
+		const zeichen = [...spur.children] as HTMLElement[];
+		if (!zeichen.length) return [];
+		const satz = zeichen.length / 3;
+		const luecke = parseFloat(getComputedStyle(spur).columnGap) || 0;
+		const breite = zeichen[0].getBoundingClientRect().width;
+		const schritt = breite + luecke;
+		const satzBreite = schritt * satz;
+		const bandKasten = band.getBoundingClientRect();
+		const mitte = bandKasten.width / 2;
+		const anims: Animation[] = [
+			spur.animate(
+				[
+					{ transform: "translateX(0px)" },
+					{ transform: "translateX(" + -satzBreite + "px)" },
+				],
+				{ duration: BAND_DAUER, iterations: Infinity, easing: "linear" },
+			),
+		];
+		zeichen.forEach((el, i) => {
+			const start = i * schritt + breite / 2;
+			// Wann laeuft dieses Zeichen durch die Mitte?
+			let t = (BAND_DAUER * (((start - mitte) % satzBreite) + satzBreite)) / satzBreite;
+			t %= BAND_DAUER;
+			const a = el.animate(
+				[
+					{ transform: "scale(" + BAND_GROSS + ")", offset: 0 },
+					{ transform: "scale(" + BAND_KLEIN + ")", offset: 0.5 },
+					{ transform: "scale(" + BAND_GROSS + ")", offset: 1 },
+				],
+				{ duration: BAND_DAUER, iterations: Infinity, easing: "linear" },
+			);
+			a.currentTime = (BAND_DAUER - t) % BAND_DAUER;
+			anims.push(a);
+		});
+		return anims;
+	}
+
 	function mount() {
 		ab?.();
 		const ziele = [
@@ -875,6 +959,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 						.map(([el]) => el),
 				);
 				zoomsAnlegen();
+				baenderAnlegen();
 				liefen.forEach((el) => anschalten(el));
 			}, 200);
 		};
@@ -909,6 +994,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			});
 		};
 		ziele.forEach(anschalten);
+
+		// Laufbaender: laufen unabhaengig von den Kachel-Animationen.
+		let baender: Animation[] = [];
+		const baenderAnlegen = () => {
+			baender.forEach((a) => a.cancel());
+			baender = [];
+			if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+			document
+				.querySelectorAll<HTMLElement>("[data-laufband]")
+				.forEach((b) => baender.push(...laufbandAnlegen(b)));
+		};
+		baenderAnlegen();
 		const io = new IntersectionObserver(
 			(eintraege) => {
 				eintraege.forEach((e) => {
