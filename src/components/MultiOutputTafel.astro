@@ -629,6 +629,54 @@ const kernaussage =
 			rafId = requestAnimationFrame(loop);
 		}
 
+		// ── MESSFENSTER ?takt (20.09. abends) ────────────────────────────
+		// Freds Befund: beim Schmalziehen des Fensters klappert die Wand
+		// langsamer, "als käme sie nicht hinterher". Am synthetischen Test
+		// liegt es NICHT — ein einzelner Klappschritt kostet bei 375px
+		// weniger als bei 1600px. Und beobachten lässt sich der laufende
+		// Ablauf von außen schlecht, weil ein verdecktes Fenster gar keine
+		// Frames bekommt. Also misst die Wand sich selbst: /?takt blendet
+		// oben rechts die Zahlen ein, auf die es ankommt.
+		//   Bilder/s — kommt der Bildschirm überhaupt hinterher?
+		//   Rückstau  — wie viele Klapp-Aufträge warten gerade in den
+		//               Kacheln? Bei gesunder Wand einstellig bis knapp
+		//               dreistellig; steigt die Zahl und bleibt oben, KANN
+		//               die Wand wirklich nicht hinterher, und die Ursache
+		//               liegt in der Klapp-Dauer, nicht in der Timeline.
+		//   Ventil    — wie oft das Überlauf-Ventil schon gegriffen hat.
+		//   T / Total — Stand in der Timeline; läuft T zu langsam, ist der
+		//               Frame-Deckel die Bremse, nicht das Klappern.
+		if (new URLSearchParams(location.search).has("takt")) {
+			const box = document.createElement("div");
+			box.style.cssText =
+				"position:fixed;top:8px;right:8px;z-index:99999;background:#000;" +
+				"color:#0f0;font:11px/1.45 ui-monospace,monospace;padding:8px 10px;" +
+				"white-space:pre;pointer-events:none;border:1px solid #0f0";
+			document.body.appendChild(box);
+			let bilder = 0;
+			const zaehle = () => {
+				bilder++;
+				requestAnimationFrame(zaehle);
+			};
+			requestAnimationFrame(zaehle);
+			window.setInterval(() => {
+				let stau = 0;
+				let maxStau = 0;
+				for (const row of tiles)
+					for (const tile of row) {
+						stau += tile.pending;
+						if (tile.pending > maxStau) maxStau = tile.pending;
+					}
+				box.textContent =
+					"Fenster   " + window.innerWidth + " px\n" +
+					"Bilder/s  " + bilder + "\n" +
+					"Rueckstau " + stau + "  (max " + maxStau + " je Kachel)\n" +
+					"T         " + Math.round(T / 100) / 10 + " / " + Math.round(total / 100) / 10 + " s\n" +
+					"Ereignis  " + gIdx + " / " + events.length;
+				bilder = 0;
+			}, 1000);
+		}
+
 		if (reduceMotion()) {
 			// Fertiger Akt-1-Endzustand statisch (BAU-ANWEISUNG Punkt 3).
 			seekInstant(akt1EndeT);
