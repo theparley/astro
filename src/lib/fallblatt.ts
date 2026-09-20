@@ -71,6 +71,10 @@ export interface FlapTile {
 	/** Warteschlange, damit Ereignisse pro Kachel strikt nacheinander
 	 *  klappen (Timeline-Boards feuern fire-and-forget). */
 	queue: Promise<void>;
+	/** Wie viele Aufträge dieser Kachel noch ausstehen. Ventil gegen
+	 *  Aufstau: eine Kachel, die schon hinterherhängt, klappt nicht
+	 *  weiter nach, sondern wird hart gesetzt (siehe queueFlap). */
+	pending: number;
 }
 
 const LAYER_HTML =
@@ -95,6 +99,7 @@ function grab(el: HTMLElement): FlapTile {
 		current: el.dataset.char || " ",
 		gen: 0,
 		queue: Promise.resolve(),
+		pending: 0,
 	};
 }
 
@@ -134,6 +139,7 @@ export function setInstant(tile: FlapTile, html: string) {
 export function resetInstant(tile: FlapTile, html: string) {
 	tile.gen++;
 	tile.queue = Promise.resolve();
+	tile.pending = 0;
 	setInstant(tile, html);
 }
 
@@ -227,10 +233,20 @@ export async function flapTo(
  *  nach einem Reset verfallen wartende Aufträge über die Generation). */
 export function enqueue(tile: FlapTile, fn: () => Promise<void> | void) {
 	const gen = tile.gen;
-	tile.queue = tile.queue.then(() => {
-		if (tile.gen !== gen) return;
-		return fn() || undefined;
-	});
+	tile.pending++;
+	tile.queue = tile.queue
+		.then(() => {
+			if (tile.gen !== gen) return;
+			return fn() || undefined;
+		})
+		.then(
+			() => {
+				if (tile.gen === gen) tile.pending = Math.max(0, tile.pending - 1);
+			},
+			() => {
+				if (tile.gen === gen) tile.pending = Math.max(0, tile.pending - 1);
+			},
+		);
 }
 
 /** Timeline-Helfer: reiht einen Klapp-Auftrag in die Kachel-Warteschlange
@@ -241,6 +257,23 @@ export function queueFlap(
 	stepMs: number = FLAP_STEP_MS,
 	onMid?: () => void,
 ) {
+	// ÜBERLAUF-VENTIL (20.09. abends, Freds Befund "je länger sie läuft,
+	// desto kaputter"): eine Klappe dauert bis zu MAX_FLAPS × stepMs, also
+	// gut eine halbe Sekunde. Stockt der Bildschirm (Telefon, Scrollen,
+	// Hintergrund-Tab), feuert die Timeline beim nächsten Frame mehrere
+	// Ereignisse auf einmal — die landen alle in derselben Kachel-Schlange
+	// und werden NACHEINANDER abgeklappert. Die Kachel hängt dann
+	// sekundenlang hinter der Timeline, zeigt längst überholte Zeichen,
+	// und weil das bei jedem Stocken erneut passiert, wächst der Rückstand
+	// mit der Laufzeit: irgendwann stimmt nichts mehr zusammen.
+	// Ab dem zweiten wartenden Auftrag wird deshalb nicht weiter
+	// aufgestaut, sondern hart gesetzt — die Kachel verliert EINE
+	// Klappbewegung und ist dafür sofort wieder synchron.
+	if (tile.pending > 1) {
+		resetInstant(tile, targetHtml);
+		if (onMid) onMid();
+		return;
+	}
 	enqueue(tile, () => flapTo(tile, targetHtml, stepMs, onMid));
 }
 

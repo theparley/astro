@@ -56,23 +56,23 @@ const { taktMs = 180, leseMs = 2500, seitePauseMs = 500, entstehen = false } = A
 
 // Wandgeometrie — identisch zum Entwurf: exakt halbierte Wand, 20 Kacheln
 // je Hälfte, EINE Trenner-Spalte auf der Bildmitte.
-const HALB = 20;
-const GESAMT_COLS = HALB + 1 + HALB; // 41
+// Probe 20.09.: drei Output-Spalten nebeneinander brauchen mehr Breite —
+// 22 + 1 + 22 = 45 statt 41. (Zwei-Akt-Fassung bleibt bei 41.)
+const HALB = 22;
+const GESAMT_COLS = HALB + 1 + HALB; // 45
 // +KOPF-Zeilen (Fred 14.09. spät: VIDEOPODCAST wandert IN die Wand) und
 // RAND (Fred 14.09. nacht: "Text klebt am Rand" — eine Leerzeile oben und
 // unten, eine Leerspalte links und rechts als Passepartout).
 // Fred 20.09.: VIDEOPODCAST-Titel und Akt-Label (CONTENT-OUTPUT/WATCHTIME)
 // sind raus — die Wand zeigt rechts selbst, was rauskommt. Kopf = Rand-
 // Zeile + eine Zeile Luft; die Wand wird dadurch zwei Zeilen kürzer.
-const KOPF = 2; // Rand-Zeile + 1 Zeile Luft
+// DREISPALTIGE PROBE (Fred 20.09.): INPUT oben über die ganze Breite,
+// darunter DREI Output-Blöcke nebeneinander (Formate | Zuschauer |
+// Zuschauerzeit). Zeilen: Rand + INPUT-Kopf + 3 Input-Zeilen + Luft +
+// OUTPUT-Kopf + 12 Listenzeilen + Rand.
+const KOPF = 2;
 const RAND_UNTEN = 1;
-// 13 = Anzahl der Output-Zeilen (ZEILEN im Skript unten) — MUSS mitziehen,
-// wenn dort eine Zeile dazukommt, sonst fehlen der Wand Kachelzeilen.
-// +5 statt +3 seit 20.09. abends: über der Liste steht jetzt auch in Akt 1
-// eine Summenzeile ("9 AUSSPIELUNGEN"), auf derselben Höhe wie "100+ STUNDEN"
-// und "1000+ ZUSCHAUER" in den Akten 2 und 3 — plus eine Leerzeile
-// zwischen Summe und Aufzählung.
-const ROWS = 13 + 5 + KOPF + RAND_UNTEN;
+const ROWS = 3 + 2 + 1 + 12 + KOPF + RAND_UNTEN;
 
 // sr-only-Kernaussage (Port-Checkliste Punkt 1): echte Lesefassung der
 // Tafel-Botschaft für Crawler/Screenreader — das Kachel-Raster selbst ist
@@ -80,7 +80,7 @@ const ROWS = 13 + 5 + KOPF + RAND_UNTEN;
 const kernaussage =
 	"Aus einem Gespräch im Monat entstehen: 1 Livestream, 1 Videopodcast, " +
 	"1 Audio-Podcast, 10 Beiträge, 10 Clips, 10 Shorts, 1 Newsletter, " +
-	"1 Transkript und 10 Zitate für KI. Eure Bibliothek wächst jeden Monat. " +
+	"1 Transkript und 10 Zitate für KI. Eure Bibliothek wächst. " +
 	"1 Stunde Aufnahme steht gegen 100+ Stunden Zuschauerzeit.";
 ---
 
@@ -129,12 +129,7 @@ const kernaussage =
 		   FlapWort.astro bleibt als Baustein im Repo. */}
 		{/* Zahlwörter fett auf 900 (Fred 14.09. nacht) — gleiche Bauform
 		   wie die Expertise-Öffner im Paragraph. */}
-		{/* Staccato bleibt, nur die Reihenfolge ist neu (Fred 20.09.):
-		   Gespräch, Stunde, Experten — die Fließtext-Fassung ("Ein Gespräch
-		   in einer Stunde mit zwei Experten.") war ein Irrweg derselben
-		   Runde. Vorfassung 14.09.: "Zwei Experten. Ein Gespräch. Eine
-		   Stunde." */}
-		<p><strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde. <strong>Zwei</strong> Experten.</p>
+		<p><strong>Zwei</strong> Experten. <strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde.</p>
 	</div>
 
 	<p class="mo-fallback">{kernaussage}</p>
@@ -212,11 +207,6 @@ const kernaussage =
 	// Output-Liste fluchtet (Einser in Spalte 1, Wörter ab Spalte 3);
 	// AUFWAND zieht unter STUNDE mit (Muster "   WÄCHST.").
 	const INPUT_ZEILE = " 1 GESPRÄCH";
-	// Die Taktung steht ganz vorn (Fred 20.09. abends: „ein Gespräch im
-	// Monat"). Einzeilig passt es nicht — " 1 GESPRÄCH IM MONAT" wären 20
-	// Kacheln, die linke Halbwand hat 20 und braucht den Rand. Also zweite
-	// Zeile, eingerückt aufs G wie "   WÄCHST." unter der Bibliothek.
-	const INPUT_ZEILE2 = "   IM MONAT";
 	const INPUT_COLS = 16;
 	// Logo-Reihenfolge je Zeile (Fred 15.09., wie im GIF-Creator): die
 	// HÄUFIGSTE Plattform sitzt außen an der gemeinsamen rechten Kante
@@ -236,13 +226,8 @@ const kernaussage =
 		// weit nach links, dass das I von KI überdeckt wird.
 		{ text: "10 ZITATE FÜR KI", logos: ["chatgpt", "claude", "gemini"] },
 		{ text: "", logos: [] },
-		// „Eure Bibliothek wächst jeden Monat." (Fred 20.09. abends) — das
-		// Gegenstück zum „1 Gespräch im Monat" der Eingangsseite. Dreizeilig,
-		// weil "   WÄCHST JEDEN MONAT." 22 Kacheln bräuchte und rechts nur
-		// 19 frei sind. Die drei Zeilen laufen in dünner Schrift.
 		{ text: " + EURE BIBLIOTHEK", logos: [] },
-		{ text: "   WÄCHST JEDEN", logos: [] },
-		{ text: "   MONAT.", logos: [] },
+		{ text: "   WÄCHST.", logos: [] },
 	];
 	const TEXT_COLS = Math.max(...ZEILEN.map((z) => z.text.length));
 	// KOPF-Zeilen + RAND (Fred 14.09. nacht): Zeile 0 bleibt LEER
@@ -253,12 +238,19 @@ const kernaussage =
 	// Zeilen geschrumpft. Wortlaut-Vorrat: FORMAT_TITEL "VIDEOPODCAST",
 	// AKT_LABELS ["CONTENT-OUTPUT","WATCHTIME"] in der Git-Historie.
 	const RAND = 1;
-	const KOPF = 1 + RAND;
-	const ROWS = ZEILEN.length + 5 + KOPF + RAND;
-	const HALB = 20;
-	const GESAMT_COLS = HALB + 1 + HALB; // 41, Trenner = Spalte 20
+	const KOPF = 1 + RAND;          // Zeile 2 = INPUT-Kopf
+	const IN_START = KOPF + 1;      // Zeile 3..5 = die drei Input-Zeilen
+	const OUT_KOPF = IN_START + 4;  // Zeile 7 = OUTPUT-Kopf
+	const OUT_START = OUT_KOPF + 1; // Zeile 8 = erste Output-Zeile
+	const ROWS = OUT_START + ZEILEN.length + RAND;
+	const HALB = 22;
+	const GESAMT_COLS = HALB + 1 + HALB; // 45, Trenner = Spalte 22
 	const MITTE_RECHTS = HALB + 1;
 	const BLOCK_BREITE = 10;
+	// Drei Spalten nebeneinander: Formate (Text) | Zuschauer | Stunden.
+	const SP1 = RAND;                        // Formate (16 Text + 4 Logos)
+	const SP2 = SP1 + 20 + 1;                // Zuschauer-Block (10 breit)
+	const SP3 = SP2 + BLOCK_BREITE + 1;      // Stunden-Block (10 breit)
 	// Spaltenköpfe ausgeschrieben (Fred 20.09.: INPUT/OUTPUT statt IN/OUT,
 	// weil der Absatz darüber von "multiplizieren" und die Sektion vom
 	// Multi-OUTPUT spricht).
@@ -294,188 +286,64 @@ const kernaussage =
 					add(tAb, r, c, { weiss: false });
 				}
 		};
-		// Nur die RECHTE Hälfte abräumen (Fred 20.09. abends): zwischen den
-		// Akten bleibt die linke Seite STEHEN — INPUT, 1 GESPRÄCH und die
-		// LIVE-Q&A-SESSION halten, nur der Output flappt raus und macht
-		// Platz für die Zuschauerzeit.
-		// Die OUTPUT-Kopfzeile bleibt dabei STEHEN (Fred 20.09. abends):
-		// beide Spaltenköpfe halten über den Aktwechsel, es flappt nur der
-		// Inhalt darunter.
-		const addClearRechts = (base: number) => {
-			for (let r = 0; r < ROWS; r++)
-				for (let c = MITTE_RECHTS; c < GESAMT_COLS; c++) {
-					if (r === KOPF) continue;
-					const tAb = base + stagWelle(r, c);
-					add(tAb, r, c, { html: "&nbsp;" });
-					add(tAb, r, c, { weiss: false });
-				}
-		};
-		const CLEAR_RECHTS_MS =
-			stagWelle(ROWS - 1, GESAMT_COLS - 1) - stagWelle(0, MITTE_RECHTS) + 6 * FLAP_STEP_MS;
 
 		let t = 200;
-		// ── Akt 1: INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
-		addText(KOPF, RAND, INPUT_COLS, KOPF_LINKS, t); t += 500;
-		addText(KOPF + 2, RAND, INPUT_COLS, INPUT_ZEILE, t);
-		addText(KOPF + 3, RAND, INPUT_COLS, INPUT_ZEILE2, t + 160);
-		// Formatname unter dem Gespräch, eingerückt auf das G von GESPRÄCH
-		// (Index 3 in " 1 GESPRÄCH"). "&" liegt auf der Trommel, kein
-		// Sonderzeichen nötig. Fred 20.09. abends: "LIVE" ist raus — ohne
-		// das Wort passt "Q&A SESSION" wieder in EINE Zeile (14 von 16
-		// Kacheln), die Zweizeiligkeit war nur der Breite geschuldet.
-		addText(KOPF + 4, RAND, INPUT_COLS, "   Q&A SESSION", t + 320);
-		// Linke Seite steht fertig geflappt → Seitenpause (Fred 20.09.)
+		// ── EIN BILD STATT DREI AKTEN (Fred 20.09., dreispaltige Probe) ──
+		// Oben der INPUT (ein Gespräch, zwei Experten, eine Stunde), darunter
+		// der OUTPUT in drei Spalten nebeneinander: Formate | Zuschauer |
+		// Zuschauerzeit. Die Wand erzählt damit nicht mehr nacheinander,
+		// sondern zeigt die ganze Rechnung auf einen Blick.
+		// Rückweg zur Zwei-Akt-Fassung: Commit b9ff492 (MultiOutputTafel.astro
+		// bleibt unverändert, diese Datei ist die Probe).
+		const PERSON = LOGOS.person;
+		addText(KOPF, SP1, 6, "INPUT", t); t += 450;
+		addText(IN_START, SP1, 12, " 1 GESPRÄCH", t);
+		addText(IN_START + 1, SP1, 12, " 2 EXPERTEN", t);
+		add(t + 320, IN_START + 1, SP1 + 12, { html: PERSON });
+		add(t + 440, IN_START + 1, SP1 + 13, { html: PERSON });
+		addText(IN_START + 2, SP1, 12, " 1 STUNDE", t);
+		add(t + 320, IN_START + 2, SP1 + 12, { weiss: true });
 		t += FERTIG + seitePause;
-		addText(KOPF, MITTE_RECHTS, TEXT_COLS, KOPF_RECHTS, t); t += 500;
-		// Anzahl der Ausspielungen über der Liste (Fred 20.09. abends): Akt 1
-		// bekommt damit dieselbe Bauform wie Akt 2 und 3 — Kopfwort, Summe,
-		// dann das Bild. Die Zahl wird aus ZEILEN GERECHNET, nicht getippt:
-		// gezählt werden die Zeilen mit einer Stückzahl davor (die leere
-		// Zeile und der Bibliotheks-Nachsatz zählen nicht).
-		// WORTWAHL (Fred 20.09. abends, nach Wortsuche): "VARIANTEN" war
-		// inhaltsgleich mit "OUTPUT" darüber und mit der Sektionsüberschrift
-		// — dreimal derselbe Gedanke. "AUSSPIELUNGEN" trägt die fehlende
-		// Information, dass diese neun Dinge RAUSGEHEN, und ist damit die
-		// Überschrift der Logo-Kolonne rechts. Deckung: steht schon
-		// kundenseitig im Angebots-Master ("Planung der Ausspielung",
-		// "Ausspielrhythmus"). 13 Zeichen = 16 Kacheln, fluchtet exakt mit
-		// "10 ZITATE FÜR KI". Ausweichwort ohne Jargon-Risiko: "STÜCKE".
-		// Verworfen: FORMATE (bezeichnet auf derselben Seite die
-		// EINGANGSseite), BEWEISSTÜCKE (Label der Produkte-Sektion),
-		// AUFTRITTE (Performance-Modus), DELIVERABLES, VERÖFFENTLICHUNGEN
-		// (18 Zeichen).
-		const AUSSPIELUNGEN = ZEILEN.filter((z) => /^\s*\d/.test(z.text)).length;
-		addText(
-			KOPF + 2,
-			MITTE_RECHTS,
-			TEXT_COLS,
-			String(AUSSPIELUNGEN).padStart(2) + " AUSSPIELUNGEN",
-			t,
-		);
-		t += 500;
+
+		addText(OUT_KOPF, SP1, 7, "OUTPUT", t); t += 400;
+
+		// Spalte 1 — die Formate (Plattform-Logos rechts daneben)
 		ZEILEN.forEach((def, i) => {
-			const r = KOPF + 4 + i;
-			addText(r, MITTE_RECHTS, TEXT_COLS, def.text, t);
-			// Logos rechtsbündig am Wandrand (Gleis-Kolonne), geflappt einzeln:
+			const r = OUT_START + i;
+			addText(r, SP1, TEXT_COLS, def.text, t);
 			def.logos.forEach((name, l) => {
-				add(t + 260 + l * 150, r, GESAMT_COLS - RAND - def.logos.length + l, { html: LOGOS[name] });
+				add(t + 260 + l * 150, r, SP1 + TEXT_COLS + l, { html: LOGOS[name] });
 			});
 			t += Math.max(takt, 60);
 		});
-		t += 500 + lese;
-		const akt1EndeT = t - 1; // Moment „Liste steht komplett" (reduced-motion-Standbild)
-		// FÜNFTE Dramaturgie-Fassung (Fred 20.09. abends): kein kompletter
-		// Abbau mehr zwischen den Akten. Die LINKE Seite hält ihren Stand,
-		// nur der OUTPUT flappt raus — dann wächst links die Aufnahme-Zeile
-		// nach, und erst wenn die fertig geflappt ist, kommt rechts die
-		// Zuschauerzeit. (Vorfassung mit vollem addClearAll + parallelen
-		// Kopfzeilen: Git-Historie.)
-		addClearRechts(t); t += CLEAR_RECHTS_MS;
 
-		// ── Akt 2: 1 Stunde Aufnahme gegen 100+ Stunden Zuschauerzeit ──
-		// Links wächst UNTER dem Gespräch nach (Zahlen-Spalte wie oben:
-		// Einser in Spalte 1, Wort ab Spalte 3).
-		addText(KOPF + 6, RAND, INPUT_COLS, " 1 STUNDE", t);
-		addText(KOPF + 7, RAND, INPUT_COLS, "   AUFNAHMEZEIT", t);
-		// Die Uhr sitzt hinter STUNDE, mit EINER Leerkachel Abstand (Fred
-		// 20.09. abends): " 1 STUNDE" endet auf Spalte 9, Spalte 10 bleibt
-		// leer, der Kreis nimmt Spalte 11.
-		add(t + 500, KOPF + 6, RAND + 10, { weiss: true });
-		// Links steht fertig geflappt → dieselbe Seitenpause wie in Akt 1
-		t += FERTIG + seitePause;
-		// Rechts erscheint die Summe UNTER dem stehengebliebenen OUTPUT —
-		// auf denselben Zeilen, auf denen eben noch die Liste anfing.
-		addText(KOPF + 2, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
-		addText(KOPF + 3, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t); t += 500;
-		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
-		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
-		// DIAGONAL-WELLE (Fred 14.09. abends): Verzögerung = (Zeile ×
-		// Versatz + Spalte) × Takt, von oben nach unten. ZEILEN-VERSATZ =
-		// Freds Regler-Achse (10 = Zeile fertig, dann nächste; 1 =
-		// steilste Diagonale). UNGELOCKT.
+		// Spalten 2 und 3 — die beiden Hunderterblöcke mit Überschrift
 		const BLOCK_TAKT = 30;
 		const BLOCK_ZEILEN_VERSATZ = 3;
-		let i = 0;
-		// Block startet eine Zeile tiefer als früher: über ihm stehen jetzt
-		// die zwei Beschriftungszeilen + eine Leerzeile (wie in Akt 1).
-		const BLOCK_START = KOPF + 5;
-		for (let r = BLOCK_START; r < ROWS && i < 100; r++)
-			for (let c = 0; c < BLOCK_BREITE && i < 100; c++) {
-				const tK = t + ((r - BLOCK_START) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT;
-				// Letzte Kachel des Quadrats trägt „…" statt Kreis (Fred
-				// 20.09. abends, wie beim Zuschauer-Block): das Quadrat hört
-				// nicht auf, es bricht ab — deshalb heißt es oben „100+".
-				// Die Form bleibt 10×10, nur die untere rechte Ecke wechselt.
-				if (i === 99) add(tK, r, MITTE_RECHTS + c, { html: LOGOS.weiter });
-				else add(tK, r, MITTE_RECHTS + c, { weiss: true });
-				i++;
+		addText(OUT_KOPF, SP2, 10, "ZUSCHAUER", t);
+		addText(OUT_KOPF, SP3, 10, "STUNDEN", t); t += 400;
+		const blockAb = OUT_START;
+		const tPersonen = t;
+		let iP = 0;
+		for (let r = blockAb; r < ROWS && iP < 100; r++)
+			for (let c = 0; c < BLOCK_BREITE && iP < 100; c++) {
+				add(tPersonen + ((r - blockAb) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, SP2 + c, { html: PERSON });
+				iP++;
 			}
 		const blockDauer = (9 * BLOCK_ZEILEN_VERSATZ + 9) * BLOCK_TAKT;
-		// Wahrnehmungs-Pause (Fred 14.09. nacht: "kommt zu schnell"):
-		// blockDauer ist nur der STARTVERSATZ der letzten Kachel — bis ihr
-		// Kreis wirklich steht, rattert sie noch bis zu 6 Klappen nach.
-		// Danach die Lesezeit auf dem fertigen Bild (die Beschriftungen
-		// stehen seit 20.09. schon oben, es kommt nichts mehr nach).
-		t += blockDauer + 6 * FLAP_STEP_MS + 300 + lese;
-
-		// ── Akt 3: 2 Experten gegen 1000+ Zuschauer ──
-		// Gleiches Prinzip wie der Übergang 1→2 (Fred 20.09. abends): die
-		// Kreise und die Zuschauerzeit flappen raus, INPUT und OUTPUT
-		// bleiben stehen, links bleibt der ganze Stand stehen. Danach
-		// wächst links die dritte Zeile nach — und auf DERSELBEN Zeile
-		// rechts die Summe, damit das Paar waagerecht zu lesen ist.
-		addClearRechts(t); t += CLEAR_RECHTS_MS;
-		addText(KOPF + 9, RAND, INPUT_COLS, " 2 EXPERTEN", t);
-		// Hinter EXPERTEN stehen ZWEI EIGENE Kacheln mit je einem großen
-		// Männchen (Fred 20.09. abends: „zwei große Menschen, nicht die
-		// Doppelkachel"). Setzung wie die Uhr hinter STUNDE: Text endet auf
-		// Spalte 11, Leerkachel 12, dann Spalte 13 und 14.
-		add(t + 500, KOPF + 9, RAND + 12, { html: LOGOS.person1 });
-		add(t + 620, KOPF + 9, RAND + 13, { html: LOGOS.person1 });
-		t += FERTIG + seitePause;
-		// Rechts oben unter OUTPUT (Fred 20.09. abends), auf derselben Zeile
-		// wie „100+ STUNDEN" in Akt 2. Der Zuschauer-Block ist NICHT mehr das
-		// 10×10-Quadrat der Zuschauerzeit, sondern füllt die rechte Halbwand
-		// bis zum Anschlag (Fred 20.09. abends): von der Trennspalte bis zur
-		// letzten Kachel vor dem Rand, und nach unten bis zur Randzeile.
-		// Jede Kachel trägt VIER Männchen (2×2, Fred 20.09. abends: "das ist mir
-		// lieber" — bei acht wurden die Figuren zur Textur).
-		addText(KOPF + 2, MITTE_RECHTS, TEXT_COLS, "1000+ ZUSCHAUER", t); t += 500;
-		const VOLL_BREITE = GESAMT_COLS - RAND - MITTE_RECHTS; // bis zum Rand rechts
-		const VOLL_START = BLOCK_START;
-		const VOLL_ZEILEN = ROWS - RAND - VOLL_START; // bis zur Randzeile unten
-		// Die LETZTE Kachel unten rechts trägt „…" statt Männchen (Fred
-		// 20.09. abends): der Block hört nicht auf, er bricht nur ab.
-		const LETZTE_R = VOLL_START + VOLL_ZEILEN - 1;
-		const LETZTE_C = VOLL_BREITE - 1;
-		for (let r = VOLL_START; r < VOLL_START + VOLL_ZEILEN; r++)
-			for (let c = 0; c < VOLL_BREITE; c++) {
-				const punkte = r === LETZTE_R && c === LETZTE_C;
-				add(
-					t + ((r - VOLL_START) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT,
-					r,
-					MITTE_RECHTS + c,
-					{ html: punkte ? LOGOS.weiter : LOGOS.personen4 },
-				);
+		const tStunden = tPersonen + blockDauer + 400;
+		let iS = 0;
+		for (let r = blockAb; r < ROWS && iS < 100; r++)
+			for (let c = 0; c < BLOCK_BREITE && iS < 100; c++) {
+				add(tStunden + ((r - blockAb) * BLOCK_ZEILEN_VERSATZ + c) * BLOCK_TAKT, r, SP3 + c, { weiss: true });
+				iS++;
 			}
-		const vollDauer =
-			((VOLL_ZEILEN - 1) * BLOCK_ZEILEN_VERSATZ + (VOLL_BREITE - 1)) * BLOCK_TAKT;
-		t += vollDauer + 6 * FLAP_STEP_MS + 300 + lese;
+		t = tStunden + blockDauer + 6 * FLAP_STEP_MS + 300 + lese;
+		const akt1EndeT = t - 1;
 
-		// Schluss-Abbau + ATEMPAUSE vor dem Loop-Neustart (Fred 14.09.: der
-		// Neustart kam, bevor die weißen Kacheln ganz weg waren). Der Abbau
-		// selbst dauert (ROWS-1)*90 + (COLS-1)*6 ≈ 1,5s — erst NACH seinem
-		// Ende plus einer knappen Sekunde Leere beginnt die Wand von vorn.
 		addClearAll(t);
-		// Abbau-Dauer REAL rechnen (Bugfix 14.09. abends): seit dem
-		// Fallblatt-Umbau rattert jede Kachel bis zu MAX_FLAPS Klappen
-		// zur Leertafel (statt einem 170ms-Kipp) — die Kaskade allein
-		// unterschätzte den Abbau, Nachzügler klapperten in den nächsten
-		// Akt hinein.
 		const abbauDauer =
 			(ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS;
-		// Stille vor dem Loop-Neustart auf 0 (Fred 20.09., vorher 900 ms) —
-		// die Wand beginnt von vorn, sobald die letzte Kachel schwarz ist.
 		t += abbauDauer + 0;
 
 		events.sort((a, b) => a.t - b.t);
@@ -600,22 +468,9 @@ const kernaussage =
 		function startLoop(vonT = 0) {
 			if (cancelled) return;
 			springeZu(vonT);
-			// FRAME-SPRUNG DECKELN (20.09. abends, zweite Hälfte des Fixes
-			// zum Ventil in lib/fallblatt.ts): stockt der Bildschirm — auf
-			// dem Telefon beim Scrollen, im Hintergrund-Tab, bei einem
-			// Nachlade-Ruck — liefert der nächste Frame eine Zeitdifferenz
-			// von mehreren hundert Millisekunden. Ungedeckelt spult die
-			// Timeline diese Strecke in EINEM Frame ab und feuert ein
-			// Bündel Ereignisse gleichzeitig los; die Choreografie (Welle,
-			// Streuung, Seitenpausen) ist damit zerstört, auch wenn die
-			// Inhalte stimmen. Mit Deckel läuft die Wand nach einem Stocken
-			// lieber ein Stück LANGSAMER weiter, statt zu springen — bei
-			// einer Endlosschleife ohne Bezug zu einer Tonspur ist das der
-			// bessere Tausch.
-			const MAX_FRAME_MS = 120;
 			const loop = (now: number) => {
 				if (cancelled || !laufend) return;
-				T += Math.min(Math.max(0, now - last), MAX_FRAME_MS);
+				T += now - last;
 				last = now;
 				if (T > total) {
 					springeZu(0);
@@ -856,38 +711,9 @@ const kernaussage =
 		gap: 1px; /* Fuge minimal, beide Achsen (Fred 14.09. abends, alle Boards) */
 	}
 
-	/* Dünne Schrift für die BESCHRIFTUNGEN (Fred 20.09. abends): was die
-	   Zahl erklärt, wiegt leichter als die Zahl selbst — die Zahlenzeilen
-	   bleiben 900. Die Forma DJR Mono ist variabel (wght 1–900), 300 ist
-	   echte Schnittstärke, kein Fake-Light.
-	   LINKS: „Q&A SESSION" (Zeilenindex 6) und „AUFNAHMEZEIT" (9).
-	   RECHTS: „EURE BIBLIOTHEK / WÄCHST JEDEN / MONAT." (16/17/18).
-	   ACHTUNG: nth-child zählt ab 1, die Indizes hängen an der Timeline —
-	   verschiebt sich dort eine Zeile, müssen diese Zahlen mit. */
-	.mo-halbwand[data-halb="links"] .mo-zeile:nth-child(7) .sf-glyph,
-	.mo-halbwand[data-halb="links"] .mo-zeile:nth-child(10) .sf-glyph,
-	.mo-halbwand[data-halb="rechts"] .mo-zeile:nth-child(17) .sf-glyph,
-	.mo-halbwand[data-halb="rechts"] .mo-zeile:nth-child(18) .sf-glyph,
-	.mo-halbwand[data-halb="rechts"] .mo-zeile:nth-child(19) .sf-glyph {
-		font-weight: 300;
-	}
-
-	/* Das PLUS bleibt fett (Fred 20.09. abends): es gehört zur Zahlenspalte,
-	   nicht zur Beschriftung — " + EURE BIBLIOTHEK" setzt auf Spalte 21 auf,
-	   das + sitzt also auf der zweiten Kachel der rechten Halbwand. */
-	.mo-halbwand[data-halb="rechts"] .mo-zeile:nth-child(17) .mo-kachel:nth-child(2) .sf-glyph {
-		font-weight: 900;
-	}
-
 	.mo-kachel {
 		width: var(--mo-k);
 		height: calc(var(--mo-k) * 1.38);
-		/* Jede Kachel ist ein eigener Layout- und Malbereich (20.09. abends,
-		   Mobil-Ruckeln): ohne das muss der Browser bei jeder Klappe prüfen,
-		   ob sich der Rest der Wand verschiebt — bei 861 Kacheln und ~8.600
-		   Knoten ist das auf dem Telefon der teure Teil. `size` bleibt
-		   bewusst draußen, die Kachelgröße kommt ja von außen. */
-		contain: layout paint style;
 		background: var(--panel);
 		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 		position: relative;
@@ -983,14 +809,6 @@ const kernaussage =
 		width: 62%;
 		height: 62%;
 		display: block;
-	}
-
-	/* Große Einzelfigur (Fred 20.09. abends): das Männchen hinter
-	   „2 EXPERTEN" soll die Kachel tragen, nicht als Logo darin sitzen.
-	   86 % statt 62 % — die Figur ist quadratisch, die Breite begrenzt. */
-	.mo-kachel svg.sf-gross {
-		width: 86%;
-		height: 86%;
 	}
 
 	.mo-logo-text {

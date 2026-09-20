@@ -1,0 +1,13 @@
+---
+// PROBESEITE (Fred 20.09.): dreispaltige Fassung der Multi-Output-Wand —
+// INPUT oben (1 Gespräch, 2 Experten, 1 Stunde), darunter der OUTPUT in
+// drei Spalten nebeneinander (Formate | Zuschauer | Zuschauerzeit).
+// Die Startseite nutzt weiter MultiOutputTafel.astro (Zwei-Akt-Fassung,
+// Live-Stand Commit b9ff492) — diese Seite ist der Vergleich daneben.
+import Layout from "../layouts/Layout.astro";
+import MultiOutputTafelDrei from "../components/MultiOutputTafelDrei.astro";
+---
+
+<Layout title="Wand dreispaltig">
+	<MultiOutputTafelDrei />
+</Layout>
