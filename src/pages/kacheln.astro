@@ -8,6 +8,7 @@
 // NICHT eingebunden — eigene Seite, damit die Startseite unberührt bleibt.
 // Konzept steht im Website-Dokument über dem Wand-Kapitel.
 import Layout from "../layouts/Layout.astro";
+import SplitFlap from "../components/SplitFlap.astro";
 import { LOGOS } from "../lib/fallblatt";
 
 // Die zehn Varianten als schlichte Liste (Fred 20.09. abends: "schreibt
@@ -42,6 +43,27 @@ const kanalBand = [
 	"chatgpt",
 	"claude",
 	"gemini",
+];
+
+// FALLBLATT-FASSUNG der Liste (Fred 20.09. abends: "ich will es noch einmal
+// sehen"). Aufrufbar unter /kacheln?board — beide Fassungen liegen im
+// Dokument, eine Zeile Skript schaltet um. So laesst sich vergleichen, ohne
+// dass eine der beiden verloren geht.
+// Zwanzig Spalten, weil "10 LINKEDIN-BEITRÄGE" genau so breit ist; die
+// Zahlenspalte folgt der Wand (Einser eingerueckt, Zehner am Rand).
+const brettZeilen = [
+	[
+		" 1 LIVESTREAM",
+		" 1 VIDEOPODCAST",
+		" 1 AUDIO-PODCAST",
+		"10 LINKEDIN-BEITRÄGE",
+		"10 CLIPS",
+		"10 SHORTS",
+		" 1 NEWSLETTER",
+		" 1 LANDINGPAGE",
+		" 1 TRANSKRIPT",
+		"10 ZITATE FÜR KI",
+	],
 ];
 
 const varianten: Array<[string, string, string[]]> = [
@@ -136,6 +158,15 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 					<p class="bezug">Ein Gespräch im Monat. Mehr als zehn Deliverys für alle Kanäle.</p>
 				</div>
 				<div class="kachel">
+				<div class="kachel-mitte kachel-mitte--brett">
+					<SplitFlap
+						lines={brettZeilen}
+						loop={false}
+						minCols={20}
+						minRows={10}
+						ausrichtung="links"
+					/>
+				</div>
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
 						{varianten.map(([zahl, wort]) => (
@@ -367,6 +398,23 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		align-content: start;
 		justify-items: center;
 		overflow: hidden;
+	}
+
+	/* Umschalter: standardmaessig die Schriftfassung, mit ?board das
+	   Fallblatt. Beide liegen im Dokument. */
+	.kachel-mitte--brett {
+		display: none;
+		align-content: start;
+		justify-items: center;
+		overflow: hidden;
+	}
+
+	:global(body.brett) .kachel-mitte--liste {
+		display: none;
+	}
+
+	:global(body.brett) .kachel-mitte--brett {
+		display: grid;
 	}
 
 	.varianten {
@@ -1110,3 +1158,26 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	}
 
 </style>
+
+<style is:global>
+	/* Kachelgroesse des Fallblatts MUSS auf .sf-grid selbst stehen:
+	   SplitFlap rechnet --sf-tile-w dort per eigener Formel und
+	   ueberschreibt jede Vorgabe am Elternelement.
+	   4,85cqw: zwanzig Spalten plus die Zarge des Bretts ergeben damit 692
+	   von 694 px Platz. Mit glatten 5cqw waren es 713 — die Zarge kommt
+	   oben drauf und war in der Rechnung vergessen. */
+	.kachel-mitte--brett .sf-grid {
+		--sf-tile-w: 4.85cqw;
+	}
+</style>
+
+<script>
+	// Umschalter ?board — bewusst simpel, es ist eine Probe.
+	function brett() {
+		document.body.classList.toggle(
+			"brett",
+			new URLSearchParams(location.search).has("board"),
+		);
+	}
+	document.addEventListener("astro:page-load", brett);
+</script>
