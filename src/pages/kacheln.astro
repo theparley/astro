@@ -480,6 +480,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		gap: 10cqw;
 		width: max-content;
 		will-change: transform;
+		/* Die Spur wird vom Skript gesetzt, nicht von CSS animiert. */
 	}
 
 	.kanal {
@@ -978,7 +979,19 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	// Groessen-Kurve (gross in der Mitte, klein aussen), aber mit dem
 	// Phasenversatz, der zu seinem Startplatz gehoert. Dadurch genuegt EIN
 	// Anwerfen; es laeuft kein Bild-fuer-Bild-Rechner mit.
-	const BAND_DAUER = 18000;
+	// ── Laufband ───────────────────────────────────────────────────────
+	// Ein Zeichen pro SCHRITT-Dauer, aber nicht gleichfoermig: die Spur wird
+	// langsamer, waehrend ein Zeichen die Mitte durchlaeuft, und wieder
+	// schneller dazwischen (Fred 20.09. abends). Kein Halt — nur ein
+	// Atmen. Umgesetzt ueber den Weg-Verlauf innerhalb eines Schritts:
+	//     f(t) = t − a·sin(2πt)/(2π),  f'(t) = 1 − a·cos(2πt)
+	// An den Schrittgrenzen (dort steht ein Zeichen genau mittig) ist die
+	// Geschwindigkeit 1−a, in der Mitte dazwischen 1+a. Mit a = 0,7 heisst
+	// das: gut ein Drittel Tempo im Scheitel, knapp doppeltes dazwischen.
+	// Die Funktion ist an den Grenzen stetig UND gleich steil, deshalb gibt
+	// es keinen Ruck beim Uebergang von Schritt zu Schritt.
+	const BAND_SCHRITT_MS = 1800;
+	const BAND_BREMSE = 0.7;
 	const BAND_GROSS = 1.5;
 	const BAND_KLEIN = 0.45;
 	function laufbandAnlegen(band: HTMLElement): { anims: Animation[]; stop: () => void } {
@@ -989,42 +1002,35 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		const satz = zeichen.length / 3;
 		const luecke = parseFloat(getComputedStyle(spur).columnGap) || 0;
 		const breite = zeichen[0].getBoundingClientRect().width;
-		const satzBreite = (breite + luecke) * satz;
-		const anims = [
-			spur.animate(
-				[
-					{ transform: "translateX(0px)" },
-					{ transform: "translateX(" + -satzBreite + "px)" },
-				],
-				{ duration: BAND_DAUER, iterations: Infinity, easing: "linear" },
-			),
-		];
-		// GROESSE AUS DER POSITION, JEDES BILD NEU (20.09. abends, Fred:
-		// "kannst du die in der Mitte groesser machen?"). Vorher bekam jedes
-		// Zeichen eine eigene Groessen-Animation mit errechnetem
-		// Phasenversatz — eine Rechnung, die man nicht ansieht und deren
-		// Fehler genau so aussieht wie gar kein Effekt. Jetzt wird die
-		// Groesse aus der TATSAECHLICHEN Lage abgeleitet: Abstand zur
-		// Bandmitte, weich abfallend. Das kann nicht aus dem Takt geraten,
-		// stimmt bei jeder Breite und ueberlebt jede Aenderung an Tempo oder
-		// Abstaenden.
-		let laeuft = true;
+		const schritt = breite + luecke;
+		const satzBreite = schritt * satz;
+		const kasten = band.getBoundingClientRect();
+		const halb = kasten.width / 2;
+		// Versatz, damit an jeder Schrittgrenze wirklich ein Zeichen mittig
+		// steht — sonst faellt die Verlangsamung neben den Scheitel.
+		const versatz = ((breite / 2 - halb) % schritt + schritt) % schritt;
 		const kurve = (d: number) => (1 + Math.cos(Math.min(1, d) * Math.PI)) / 2;
-		const takt = () => {
+		let laeuft = true;
+		let start = 0;
+		const takt = (jetzt: number) => {
 			if (!laeuft) return;
-			const kasten = band.getBoundingClientRect();
-			const mitte = kasten.left + kasten.width / 2;
-			const halb = kasten.width / 2;
-			for (const el of zeichen) {
-				const r = el.getBoundingClientRect();
-				const d = Math.abs(r.left + r.width / 2 - mitte) / halb;
-				const s = BAND_KLEIN + (BAND_GROSS - BAND_KLEIN) * kurve(d);
-				el.style.transform = "scale(" + s.toFixed(3) + ")";
+			if (!start) start = jetzt;
+			const u = (jetzt - start) / BAND_SCHRITT_MS;
+			const n = Math.floor(u);
+			const t = u - n;
+			const f = t - (BAND_BREMSE * Math.sin(2 * Math.PI * t)) / (2 * Math.PI);
+			const x = (versatz + schritt * (n + f)) % satzBreite;
+			spur.style.transform = "translateX(" + -x.toFixed(2) + "px)";
+			for (let i = 0; i < zeichen.length; i++) {
+				const mitte = i * schritt + breite / 2 - x;
+				const d = Math.abs(mitte - halb) / halb;
+				const sk = BAND_KLEIN + (BAND_GROSS - BAND_KLEIN) * kurve(d);
+				zeichen[i].style.transform = "scale(" + sk.toFixed(3) + ")";
 			}
 			requestAnimationFrame(takt);
 		};
 		requestAnimationFrame(takt);
-		return { anims, stop: () => { laeuft = false; } };
+		return { anims: [], stop: () => { laeuft = false; } };
 	}
 
 	function mount() {
