@@ -105,11 +105,12 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 		<div class="kachel-reihe">
 			{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
-			<div class="kachel">
+			<div class="feld">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">1 <span class="zu">zu</span> 10</p>
 					<p class="bezug">Ein Gespräch im Monat. Zehn Varianten für alle Kanäle.</p>
 				</div>
+				<div class="kachel">
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
 						{varianten.map(([zahl, wort, kanaele]) => (
@@ -127,6 +128,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 						))}
 					</ul>
 				</div>
+				</div>
 			</div>
 
 			{/* ── Kachel 2: Stunde → Zuschauerzeit ─────────────────────────── */}
@@ -134,11 +136,12 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			   ZEHNFACHEN Durchmesser (Fred 20.09.: "berechnen das 100 mal nach
 			   Fläche"). Hundertfacher Durchmesser wäre die zehntausendfache
 			   Fläche — das Bild behauptete dann hundertmal mehr als die Zahl. */}
-			<div class="kachel">
+			<div class="feld">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">1 <span class="zu">zu</span> 100+</p>
 					<p class="bezug">Eine Stunde Aufnahme im Monat zu mehr als hundert Stunden Zuschauerzeit.</p>
 				</div>
+				<div class="kachel">
 				<div class="kachel-mitte">
 					<div class="kreis-buehne" data-kreis>
 						{/* Die weiße Fläche wächst, der schwarze Punkt in ihrer
@@ -158,6 +161,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 						</span>
 					</div>
 				</div>
+				</div>
 			</div>
 
 			{/* ── Kachel 3: Experten → Zuschauer ───────────────────────────── */}
@@ -167,16 +171,18 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			   viele Menschen, am Ende fast Punkte. Technisch EIN Element:
 			   background-repeat macht die Menge, background-size ist der Zoom
 			   — kein einziger zusätzlicher Knoten für tausend Leute. */}
-			<div class="kachel">
+			<div class="feld">
 				<div class="kachel-kopf">
 					<p class="verhaeltnis">2 <span class="zu">zu</span> 1000+</p>
 					<p class="bezug">Zwei Experten erreichen mehr als tausend Zuschauer.</p>
 				</div>
+				<div class="kachel">
 				<div class="kachel-mitte">
 					<div class="menge" data-menge>
 						<span class="menge-lage menge-weiss" style={`--person: ${uri(personSvgWeiss)}`}></span>
 						<span class="menge-lage menge-schwarz" style={`--person: ${uri(personSvgSchwarz)}`}></span>
 					</div>
+				</div>
 				</div>
 			</div>
 		</div>
@@ -227,14 +233,27 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	}
 
 	/* Kachelform 1:1 aus der Bausteine-Reihe der Startseite. */
+	/* SCHRIFT UEBER DIE KACHEL (Fred 20.09. abends): Verhaeltnis und
+	   Bezugszeile stehen nicht mehr IN der Flaeche, sondern darueber. Die
+	   Kachel ist damit reines Bild.
+	   Der Container fuer die cqw-Einheiten bleibt auf der KACHEL — alle
+	   Masse der Animationen sind daran bemessen. Der Kopf bekommt seinen
+	   eigenen Container auf dem Feld, damit seine Schriftgroessen weiter
+	   mit der Spaltenbreite wachsen. */
+	.feld {
+		container-type: inline-size;
+		display: grid;
+		grid-template-rows: auto auto;
+		gap: clamp(10px, 1.4vw, 20px);
+	}
+
 	.kachel {
 		position: relative;
 		background: var(--panel);
 		aspect-ratio: 4 / 5;
 		padding: clamp(18px, 2.2vw, 32px);
 		display: grid;
-		grid-template-rows: auto 1fr;
-		gap: 12px;
+		grid-template-rows: 1fr;
 		container-type: inline-size;
 		overflow: hidden;
 	}
@@ -593,14 +612,20 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Kachelhoehe), im Scheitel soll der grosse Kreis mittig in der Kachel
 	   sitzen (50 %). Beides zugleich geht nicht mit einem festen Versatz —
 	   also faehrt die Buehne mit.
-	   Gerechnet gegen die Ruhelage der Buehnenmitte bei 570 px von 914:
-	   -11,44cqw bringen sie auf 491 px (Figurenhoehe), -16,3cqw auf 457 px
-	   (Kachelmitte). Die Verschiebung steht VOR der Skalierung, wird also
-	   nicht mitvergroessert. */
+	   Seit der Kopf UEBER der Kachel steht, faellt die Ruhelage der
+	   Buehnenmitte mit der Kachelmitte zusammen (457 px von 914) — im
+	   Scheitel braucht es deshalb gar keinen Versatz. Am Anfang schieben
+	   4,75cqw sie auf 490 px, die Figurenhoehe der dritten Kachel.
+	   MESS-WARNUNG: diese Werte nur an einer FRISCH GELADENEN Seite
+	   nachmessen. Nach einem scrollIntoView liefert das Browser-Fenster hier
+	   andere Kachelmasse (424 statt 457) — daran habe ich mich zweimal
+	   verrechnet.
+	   Die Verschiebung steht VOR der Skalierung, wird also nicht
+	   mitvergroessert. */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: translateY(-11.5cqw) scale(10); }
-		38%, 50% { transform: translateY(-16.26cqw) scale(2.06); }
-		88%, 100% { transform: translateY(-11.5cqw) scale(10); }
+		0%, 4% { transform: translateY(4.75cqw) scale(10); }
+		38%, 50% { transform: translateY(0cqw) scale(2.06); }
+		88%, 100% { transform: translateY(4.75cqw) scale(10); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
@@ -615,37 +640,11 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		38%, 100% { --fuell: 1turn; }
 	}
 
-	/* Der Text weicht dem Ergebnis (Fred 20.09. abends), wie in Kachel 3.
-	   Er geht, bevor der grosse Kreis voll ist, und kommt auf dem Rueckweg
-	   wieder — so steht das fertige Bild einen Moment allein.
-	   :has() statt eines eigenen Markers: der Kopf ist ein GESCHWISTER der
-	   Buehne, von [data-kreis] aus also nicht erreichbar. Ueber die Kachel
-	   als gemeinsamen Vorfahren geht es. */
-	.kachel:has([data-kreis].laeuft) .kachel-kopf {
-		animation: kopf-kreis 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	}
+	/* Das Ein- und Ausblenden der Schrift ist RAUS (Fred 20.09. abends).
+	   Es war noetig, solange der Text IN der Kachel lag und dem Bild im Weg
+	   war. Seit er darueber steht, stoert er nichts mehr — und eine Schrift,
+	   die ohne Not verschwindet, kostet nur Lesezeit. */
 
-	/* SYNCHRON MIT KACHEL 3 (Fred 20.09. abends), und zwar nach DEREN
-	   Zeiten gerichtet. Kachel 3 laeuft in zwei Haelften von je 7 Sekunden
-	   mit gespiegeltem Rueckweg; ihr Text haelt bis 45 % der Haelfte und
-	   ist bei 80 % weg. Auf die 14-Sekunden-Runde umgerechnet sind das
-	   22,5 % und 40 % — gespiegelt kommt er zwischen 60 % und 77,5 %
-	   wieder. Auch die Kurve ist von dort uebernommen. Wer an Kachel 3
-	   dreht, muss diese vier Zahlen nachrechnen. */
-	@keyframes kopf-kreis {
-		0%, 22.5% { opacity: 1; }
-		40%, 60% { opacity: 0; }
-		77.5%, 100% { opacity: 1; }
-	}
-
-	/* NACH KACHEL 3 GERICHTET (Fred 20.09. abends). Dort blendet die weisse
-	   Menge auf dem Rueckweg aus; ihre Opazitaets-Kurve laeuft im Hinweg von
-	   12 % auf 55 % der HAELFTE, gespiegelt also von 72,5 % auf 94 % der
-	   ganzen Runde. Genau dort blendet jetzt auch der weisse Kreis aus.
-	   Folge: die Kreise bleiben stehen, waehrend die Kamera schon
-	   zurueckfaehrt — erst danach verschwinden sie. Beim Rundenwechsel ist
-	   das unkritisch, weil der Fuellwinkel dann ohnehin auf null steht und
-	   nichts zu sehen waere. */
 	@keyframes bogen-aus {
 		0%, 72.5% { opacity: 1; }
 		94%, 100% { opacity: 0; }
@@ -692,15 +691,14 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		[data-kreis].laeuft,
 		[data-kreis].laeuft .uhr--klein,
 		[data-kreis].laeuft .uhr--gross,
-		[data-kreis].laeuft .bogen,
-		.kachel:has([data-kreis].laeuft) .kachel-kopf {
+		[data-kreis].laeuft .bogen {
 			animation: none;
 		}
 		.uhr {
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: translateY(-16.26cqw) scale(2.06);
+			transform: translateY(0cqw) scale(2.06);
 		}
 	}
 </style>
@@ -785,27 +783,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			direction: "alternate",
 			easing: "linear",
 		} as const;
-		// TEXT BLENDET AUS (Fred 20.09. abends, nach Sichtung: das Kippen ins
-		// Schwarze sah nicht gut aus — schwarze Schrift auf dem weißen Feld
-		// wirkte wie ein Loch, nicht wie eine Aussparung). Jetzt verschwindet
-		// der ganze Kopf, Verhältnis und Bezugszeile zusammen, während die
-		// Menge dicht wird. Am Ende steht nur noch das Bild.
-		const kopf = el.closest(".kachel")?.querySelector<HTMLElement>(".kachel-kopf");
-		const kopfAnim = kopf
-			? [
-					kopf.animate(
-						[
-							{ opacity: 1, offset: 0, easing: "linear" },
-							{ opacity: 1, offset: 0.45, easing: WEICH },
-							{ opacity: 0, offset: 0.8, easing: "linear" },
-							{ opacity: 0, offset: 1 },
-						],
-						takt,
-					),
-				]
-			: [];
 		return [
-			...kopfAnim,
 			schwarz.animate(groesse, takt),
 			// BEIDE LAGEN BEKOMMEN EXAKT DIESELBE GROESSEN-KURVE. Die
 			// Einblendung laeuft als EIGENE Animation auf demselben Element
