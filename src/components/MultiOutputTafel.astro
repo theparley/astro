@@ -690,9 +690,27 @@ const kernaussage =
 				{ threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
 			);
 			io.observe(sektion);
+			// TAB-WECHSEL (20.09. abends, Kern von Freds Befund "je länger
+			// sie läuft, desto kaputter" — beobachtet auf localhost, also
+			// am DESKTOP): ein verborgener Tab bekommt gar keine Frames
+			// mehr. Der Beobachter merkt davon nichts, die Wand gilt weiter
+			// als "läuft". Beim Zurückkommen liefert der erste Frame eine
+			// Zeitdifferenz von Sekunden bis Minuten — die Timeline spult
+			// die ganze Strecke in EINEM Frame ab und kippt tausende
+			// Ereignisse in die Kachel-Schlangen. Danach klappert die Wand
+			// minutenlang einem Stand hinterher, der längst vorbei ist. Wer
+			// zwischen Fenstern hin- und herspringt, sammelt diesen Effekt
+			// mit jedem Wechsel ein: es wird mit der Zeit immer falscher.
+			// Der Frame-Deckel fängt das schon ab; hier wird zusätzlich die
+			// Uhr sauber nachgezogen, damit gar kein Sprung entsteht.
+			const beiSichtbarkeit = () => {
+				if (document.visibilityState === "visible") last = performance.now();
+			};
+			document.addEventListener("visibilitychange", beiSichtbarkeit);
 			return () => {
 				cancelled = true;
 				io.disconnect();
+				document.removeEventListener("visibilitychange", beiSichtbarkeit);
 				cancelAnimationFrame(rafId);
 			};
 		}
