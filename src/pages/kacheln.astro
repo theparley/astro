@@ -396,9 +396,12 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 	/* Umschalter: standardmaessig die Schriftfassung, mit ?board das
 	   Fallblatt. Beide liegen im Dokument. */
+	/* Senkrecht mittig (Fred 20.09. abends): das Brett ist deutlich
+	   niedriger als der Platz zwischen Kachelkante und Laufband — oben
+	   angeschlagen hing es in der Luft. */
 	.kachel-mitte--brett {
 		display: none;
-		align-content: start;
+		align-content: center;
 		justify-items: center;
 		overflow: hidden;
 	}
@@ -409,6 +412,21 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 	:global(body.brett) .kachel-mitte--brett {
 		display: grid;
+	}
+
+	/* In der Brett-Fassung steht das Band DIREKT UNTER dem Brett, nicht am
+	   unteren Kachelrand (Fred 20.09. abends). Dafuer werden beide Zeilen
+	   inhaltshoch und als Block gemeinsam in die Kachelmitte gesetzt —
+	   sonst zieht die 1fr-Zeile das Brett nach oben und laesst das Band
+	   unten allein stehen. Gilt nur fuer diese Fassung; die Listenfassung
+	   braucht ihre volle Hoehe. */
+	:global(body.brett) .kachel:has(.laufband) {
+		grid-template-rows: auto auto;
+		align-content: center;
+	}
+
+	:global(body.brett) .laufband {
+		align-self: start;
 	}
 
 	.varianten {
