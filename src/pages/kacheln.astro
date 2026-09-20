@@ -1236,6 +1236,37 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 		--sf-font-size: calc(var(--sf-tile-w) * 1.5);
 	}
 
+	/* NUR DIE SCHRIFT (Fred 20.09. abends): Wand, Kacheln, Zarge und
+	   Scharnier werden unsichtbar, die Buchstaben bleiben — und mit ihnen
+	   die Klapp-Bewegung, denn die steckt in den Schichten, nicht in der
+	   Flaeche. Das Brett verliert damit seine Anmutung als Anzeigetafel und
+	   wird zu Schrift, die sich umblaettert.
+	   Alles hier ist Sichtbarkeit, keine Geometrie: Kachelgroessen,
+	   Zeilenraster und Schriftgroesse bleiben, wie sie sind. */
+	.kachel-mitte--brett .sf-grid,
+	.kachel-mitte--brett .sf-board {
+		background: none;
+		padding: 0;
+		box-shadow: none;
+	}
+
+	.kachel-mitte--brett .sf-tile {
+		background: transparent;
+		box-shadow: none;
+	}
+
+	.kachel-mitte--brett .sf-hinge {
+		display: none;
+	}
+
+	.kachel-mitte--brett .sf-static--top,
+	.kachel-mitte--brett .sf-static--bottom,
+	.kachel-mitte--brett .sf-flap--front,
+	.kachel-mitte--brett .sf-flap--back {
+		background: transparent;
+		box-shadow: none;
+	}
+
 	.kachel-mitte--brett .sf-row-line {
 		gap: 0;
 	}
