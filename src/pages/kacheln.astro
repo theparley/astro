@@ -93,7 +93,7 @@ const personSvgSchwarz = doppel(
 ).replace(/"/g, "'");
 const personSvgWeiss = doppel("fill='#ffffff'").replace(/"/g, "'");
 const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
+
 ---
 
 <Layout title="Kacheln (Probe)">
@@ -146,8 +146,16 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 						   das als Punkt mit weißem Rand; am Ende steht dieselbe
 						   Stunde als kleiner Punkt in einem hundertmal größeren
 						   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
-						<span class="uhr uhr--gross"></span>
-						<span class="uhr uhr--klein"><span class="uhr-kern"></span></span>
+						<span class="uhr uhr--gross">
+							<span class="bogen"></span>
+							<span class="speiche speiche--start"></span>
+							<span class="speiche speiche--lauf"></span>
+						</span>
+						<span class="uhr uhr--klein">
+							<span class="bogen"></span>
+							<span class="speiche speiche--start"></span>
+							<span class="speiche speiche--lauf"></span>
+						</span>
 					</div>
 				</div>
 			</div>
@@ -165,7 +173,10 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 					<p class="bezug">Zwei Experten erreichen mehr als tausend Zuschauer.</p>
 				</div>
 				<div class="kachel-mitte">
-					<div class="menge" data-menge style={`--person: ${personUri}`}></div>
+					<div class="menge" data-menge>
+						<span class="menge-lage menge-weiss" style={`--person: ${uri(personSvgWeiss)}`}></span>
+						<span class="menge-lage menge-schwarz" style={`--person: ${uri(personSvgSchwarz)}`}></span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -217,6 +228,7 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 
 	/* Kachelform 1:1 aus der Bausteine-Reihe der Startseite. */
 	.kachel {
+		position: relative;
 		background: var(--panel);
 		aspect-ratio: 4 / 5;
 		padding: clamp(18px, 2.2vw, 32px);
@@ -237,6 +249,15 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 	   statt "1:9" — das Verhältnis wird damit selbst schon gesprochen und
 	   nicht erst in der Zeile darunter. Kostet Größe: die längste Fassung
 	   ist jetzt "2 zu 1000+", die Schrift musste entsprechend kleiner. */
+	/* Nur der Kopf wird gestapelt. Die mittlere Zeile darf KEINE eigene
+	   Positionierung bekommen — sonst wird sie der Bezug fuer die absolut
+	   liegende Menge in Kachel 3, und die bleibt wieder im Rahmen stecken
+	   (genau der Fehler, den Fred gemeldet hat). */
+	.kachel-kopf {
+		position: relative;
+		z-index: 1;
+	}
+
 	.verhaeltnis {
 		margin: 0;
 		font-weight: 900;
@@ -265,7 +286,10 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 		display: grid;
 		place-items: center;
 		min-height: 0;
-		position: relative;
+		/* KEIN position: relative — sonst wird diese Zeile der Bezug fuer
+		   die absolut liegende Menge in Kachel 3, und die bleibt in der
+		   Rasterzeile stecken statt die ganze Kachel zu fuellen. Die
+		   Kreis-Buehne in Kachel 2 bringt ihren eigenen Bezug mit. */
 	}
 
 	/* Das Board muss in die Resthöhe der Kachel passen: zehn Zeilen mal
@@ -364,81 +388,70 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 		place-items: center;
 	}
 
+	/* NUR DER RAND WAECHST, nicht die Flaeche (Fred 20.09. abends: "ich
+	   will nicht, dass der Kuchen als Flaeche waechst, sondern dass der
+	   Rand vom Kuchen waechst"). Eine gefuellte Scheibe behauptet Masse;
+	   gesucht ist die LINIE, die das Stueck umfaehrt, waehrend es entsteht.
+	   Drei Teile, alle aus demselben Winkel --fuell gespeist:
+	     · der Bogen — ein Kreis, der NUR aus seiner Randlinie besteht, von
+	       einer Kegel-Maske bis zum aktuellen Winkel freigelegt,
+	     · die feste Speiche auf zwoelf Uhr, die Schnittkante, an der das
+	       Stueck beginnt,
+	     · die laufende Speiche, die mit dem Winkel mitdreht.
+	   Zusammen eine geschlossene Kontur um das Stueck, wie nachgezogen —
+	   innen bleibt alles schwarz.
+	   --fuell ist im globalen Block als Winkel registriert, sonst waere die
+	   Gradient-Stelle nicht animierbar und wuerde springen. */
+	/* WICHTIG: die Maske sitzt auf dem BOGEN, nicht auf der ganzen Uhr.
+	   Lag sie aussen, schnitt sie auch die Speichen mit ab — und
+	   ausgerechnet die laufende Speiche liegt genau auf der Maskenkante,
+	   wurde also halbiert oder ganz verschluckt. Genau der fehlende Strich
+	   zur Mitte (Fred 20.09. abends: "der muesste ja auch noch eine
+	   Verbindung zur Mitte haben"). */
 	.uhr {
 		position: absolute;
+	}
+
+	.bogen {
+		position: absolute;
+		inset: 0;
 		border-radius: 50%;
-	}
-
-	/* UHRENLAUF statt Wachsen (Fred 20.09. abends): nicht ein Kreis, der
-	   groesser wird, sondern zwei Kreise, die sich FUELLEN wie eine
-	   ablaufende Stunde. Erst die kleine — das ist die Stunde, die die
-	   Experten liefern —, dann die grosse drumherum. Beide beginnen als
-	   schwarze Scheibe mit weissem Saum, damit man sieht, was noch leer
-	   ist. Technik: conic-gradient mit einem registrierten Winkel
-	   (--fuell), der sich als Winkel interpolieren laesst; ohne @property
-	   waere eine Gradient-Stelle nicht animierbar. */
-	.uhr {
-		background: conic-gradient(#ffffff var(--fuell, 0turn), transparent 0);
-	}
-
-	/* Die kleine Stunde ist KEINE weiße Fläche, sondern eine schwarze mit
-	   weißem Rand — und der Rand läuft RINGSUM, auch an den beiden geraden
-	   Kanten zur Mitte hin (Fred 20.09. abends: "wie so ein Stück Kuchen
-	   gehört zum ganzen Kuchen"). Ein angeschnittenes Stück sieht damit aus
-	   wie ein Stück, nicht wie ein abgerissenes Feld.
-	   Gebaut aus zwei Lagen: außen eine weiße Scheibe, freigelegt von einer
-	   Kegel-Maske bis zum aktuellen Winkel — das ist die Umrisslinie. Darin
-	   ein schwarzer Kern, der ringsum kleiner ist (Abstand zur Rundung per
-	   inset, Abstand zu den geraden Kanten über einen Winkel-Versatz in
-	   seiner eigenen Maske). Was übrig bleibt, ist genau der Saum. */
-	.uhr--klein {
-		background: #ffffff;
+		box-sizing: border-box;
+		border: var(--strich) solid #ffffff;
 		-webkit-mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
 		mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
 	}
 
-	.uhr-kern {
+	.speiche {
 		position: absolute;
-		inset: 0.45cqw;
-		border-radius: 50%;
-		background: var(--panel);
-		--kante: 5deg;
-		--bis: max(var(--kante), calc(var(--fuell, 0turn) - var(--kante)));
-		-webkit-mask-image: conic-gradient(
-			transparent 0 var(--kante),
-			#000 var(--kante) var(--bis),
-			transparent var(--bis)
-		);
-		mask-image: conic-gradient(
-			transparent 0 var(--kante),
-			#000 var(--kante) var(--bis),
-			transparent var(--bis)
-		);
+		left: 50%;
+		bottom: 50%;
+		width: var(--strich);
+		height: 50%;
+		margin-left: calc(var(--strich) / -2);
+		background: #ffffff;
+		transform-origin: 50% 100%;
 	}
 
-	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10.
-	   KEIN Saum (Fred 20.09. abends): der grosse Kreis soll nicht schon als
-	   leere Scheibe dastehen und dann gefuellt werden, sondern ERST DURCH
-	   die Bewegung entstehen. Wer den Umriss vorher sieht, kennt das
-	   Ergebnis, bevor es da ist — die Ueberraschung ueber die Groesse waere
-	   weg. Nur die kleine Stunde behaelt ihren Saum, weil sie sonst am
-	   Anfang gar nicht sichtbar waere. */
+	.speiche--lauf {
+		transform: rotate(var(--fuell, 0turn));
+	}
+
+	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10. */
 	.uhr--gross {
 		width: 70cqw;
 		height: 70cqw;
+		--strich: 0.5cqw;
 	}
 
-	/* Auch die kleine Stunde ohne Saum (Fred 20.09. abends): die Kachel ist
-	   am Anfang leer, und der Kuchen malt die Scheibe erst. Kein Umriss
-	   verrät vorher, wie groß sie wird — gleiche Regel wie beim großen
-	   Kreis. Sichtbar ist die kleine Stunde trotzdem sofort, weil der Zoom
-	   sie am Anfang zehnfach vergrößert zeigt. */
+	/* Strichstaerke am ZOOM bemessen: die kleine Stunde wird am Anfang
+	   zehnfach vergroessert gezeigt, ihre Linie erscheint also zehnfach
+	   dick. 0,12cqw sind im Zoom rund 8 px und spaeter, in Ruhe, noch knapp
+	   ein Pixel — beides traegt. */
 	.uhr--klein {
 		width: 7cqw;
 		height: 7cqw;
-	}
-
-	.uhr--klein {
+		--strich: 0.12cqw;
 		z-index: 1;
 	}
 
@@ -481,26 +494,38 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 	/* Startgröße: EINE Figur füllt die Kachel. Endgröße: rund tausend
 	   Figuren passen hinein — bei 4:5 sind das etwa 28 × 35 Zellen, also
 	   Zellbreite = Kachelbreite / 28 ≈ 3,6 cqw. */
+	/* UEBER DIE GANZE KACHEL (Fred 20.09. abends: "ich will, dass die
+	   Person ueber die gesamte Kachel drei zu sehen ist"). Vorher lag die
+	   Menge in der mittleren Rasterzeile und hatte dadurch einen unsichtbaren
+	   Rahmen: oben die Ueberschrift, unten der Kachelrand. Jetzt liegt sie
+	   absolut ueber der ganzen Kachel und wird nur von deren Kante
+	   beschnitten; die Ueberschrift steht darueber. */
 	.menge {
-		width: 100%;
-		height: 100%;
-		background-image: var(--person);
-		/* Erste Ebene: die zwei schwarzen Start-Figuren, EINMAL, mittig.
-		   Zweite Ebene: die weiße Menge, gekachelt. */
-		background-repeat: no-repeat, repeat;
-		/* Fest mittig — das trägt jetzt, weil die Kachelung selbst zwei
-		   Figuren enthält: ihre Mitte liegt zwischen den beiden, und
-		   "center" hält diese Mitte bei jeder Größe an derselben Stelle. */
-		background-position: center;
-		background-size: 100% 100%, 100% 100%;
+		position: absolute;
+		inset: 0;
 	}
 
-	/* Der Zoom läuft NICHT über @keyframes: Container-Einheiten (cqw)
-	   lassen sich dort nicht zuverlässig interpolieren, die Animation fiel
-	   still aus (Befund 20.09. abends — Kachel 3 stand einfach still). Die
-	   Größen rechnet jetzt das Skript in echten Pixeln aus und gibt sie der
-	   Web-Animations-API; bei Größenänderung des Fensters wird neu
-	   gerechnet. */
+	/* Beide Lagen liegen deckungsgleich und werden GLEICH skaliert: die
+	   schwarze Doppelfigur einmal und mittig, die weiße Menge gekachelt.
+	   Am Anfang ist die Kachelung größer als die Fläche — die zwei Experten
+	   ragen also über den Rand hinaus und werden beschnitten (Fred 20.09.
+	   abends: "man hat das Gefühl, es ist groß"). Die weiße Menge ist dabei
+	   noch unsichtbar und blendet erst beim Rauszoomen ein. */
+	.menge-lage {
+		position: absolute;
+		inset: 0;
+		background-image: var(--person);
+		background-position: center;
+	}
+
+	.menge-weiss {
+		background-repeat: repeat;
+		opacity: 0;
+	}
+
+	.menge-schwarz {
+		background-repeat: no-repeat;
+	}
 
 	@media (prefers-reduced-motion: reduce) {
 		[data-kreis].laeuft,
@@ -530,40 +555,59 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 	// doppelt so breit wie hoch; bei Kachelbreite t passen also
 	// (B/t) × (H/(t/2)) × 2 = 4·B·H/t² Figuren in die Fläche.
 	const ZIEL_FIGUREN = 1000;
-	function zoomAnlegen(el: HTMLElement): Animation | null {
+	// Wie weit die zwei Experten am Anfang über die Kachel hinausragen.
+	// 1 = sie füllen sie genau, größer = sie werden beschnitten und wirken
+	// nah. EIN Regler, hier wird getunt.
+	const START_UEBERSTAND = 1.35;
+	function zoomAnlegen(el: HTMLElement): Animation[] {
 		const r = el.getBoundingClientRect();
-		if (!r.width) return null;
-		// Start: EINE Kachelung füllt die Fläche. Die Grafik ist 2:1 und
-		// behält ihr Verhältnis, sitzt also mittig — zwei große Figuren.
-		const startB = Math.round(r.width);
-		const startH = Math.round(r.height);
-		// Die Kachelgröße wird nicht nur geschätzt, sondern nachgezählt: die
-		// Formel liefert einen Startwert, dann wird verkleinert, bis wirklich
-		// GANZE Figuren in der geforderten Zahl im Bild stehen (Fred
-		// 20.09. abends: "in dem Grid sieht man am Ende, wie viele es sind").
-		// Mit der reinen Formel waren es 928 statt 1000 — angeschnittene
-		// Figuren am Rand zählen eben nicht mit, und die Behauptung "mehr
-		// als tausend" soll man abzählen können.
+		if (!r.width) return [];
+		const weiss = el.querySelector<HTMLElement>(".menge-weiss");
+		const schwarz = el.querySelector<HTMLElement>(".menge-schwarz");
+		if (!weiss || !schwarz) return [];
+		const startB = Math.round(r.width * START_UEBERSTAND);
+		const startH = Math.round(startB / 2);
+		// Die Kachelgröße wird nicht geschätzt, sondern nachgezählt: es
+		// sollen wirklich GANZE Figuren in der geforderten Zahl im Bild
+		// stehen — angeschnittene am Rand zählen nicht mit, und "mehr als
+		// tausend" soll man abzählen können.
 		const ganze = (t: number) =>
 			Math.floor(r.width / t) * Math.floor(r.height / Math.round(t / 2)) * 2;
 		let endeB = Math.max(8, Math.round(Math.sqrt((4 * r.width * r.height) / ZIEL_FIGUREN)));
 		while (endeB > 8 && ganze(endeB) < ZIEL_FIGUREN) endeB--;
 		const endeH = Math.round(endeB / 2);
-		// Beide Hintergrund-Ebenen bekommen dieselbe Größe, damit die
-		// schwarze Doppelfigur exakt auf den zwei mittleren der Menge liegt.
-		const zwei = (b: number, h: number) => {
-			const eine = b + "px " + h + "px";
-			return eine + ", " + eine;
-		};
-		return el.animate(
-			[
-				{ backgroundSize: zwei(startB, startH), offset: 0 },
-				{ backgroundSize: zwei(startB, startH), offset: 0.1 },
-				{ backgroundSize: zwei(endeB, endeH), offset: 0.7 },
-				{ backgroundSize: zwei(endeB, endeH), offset: 1 },
-			],
-			{ duration: 6000, iterations: Infinity, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
-		);
+		const groesse = [
+			{ backgroundSize: startB + "px " + startH + "px", offset: 0 },
+			{ backgroundSize: startB + "px " + startH + "px", offset: 0.1 },
+			{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7 },
+			{ backgroundSize: endeB + "px " + endeH + "px", offset: 1 },
+		];
+		const takt = {
+			duration: 6000,
+			iterations: Infinity,
+			easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+		} as const;
+		return [
+			schwarz.animate(groesse, takt),
+			// BEIDE LAGEN BEKOMMEN EXAKT DIESELBE GROESSEN-KURVE. Die
+			// Einblendung laeuft als EIGENE Animation auf demselben Element
+			// (Fred 20.09. abends: "du zoomst die zwei Experten
+			// unterschiedlich von den anderen"). Vorher steckte die Opazitaet
+			// in denselben Keyframes — und weil ein zusaetzlicher
+			// Zwischenschritt fuer die Einblendung noetig war, bekam die
+			// weisse Lage dadurch eine andere Groessen-Kurve als die
+			// schwarze. Getrennte Animationen koennen nicht auseinanderlaufen.
+			weiss.animate(groesse, takt),
+			weiss.animate(
+				[
+					{ opacity: 0, offset: 0 },
+					{ opacity: 0, offset: 0.1 },
+					{ opacity: 1, offset: 0.45 },
+					{ opacity: 1, offset: 1 },
+				],
+				takt,
+			),
+		];
 	}
 
 	function mount() {
@@ -576,16 +620,16 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 		// Zoom-Animationen je Mengen-Kachel, pausiert bis zur Sichtbarkeit;
 		// bei Fensteränderung mit neuen Pixelwerten neu aufgesetzt.
 		const mengen = ziele.filter((z) => z.hasAttribute("data-menge"));
-		let zooms = new Map<HTMLElement, Animation>();
+		let zooms = new Map<HTMLElement, Animation[]>();
 		const zoomsAnlegen = () => {
-			zooms.forEach((a) => a.cancel());
+			zooms.forEach((as) => as.forEach((a) => a.cancel()));
 			zooms = new Map();
 			if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 			mengen.forEach((el) => {
-				const a = zoomAnlegen(el);
-				if (a) {
-					a.pause();
-					zooms.set(el, a);
+				const as = zoomAnlegen(el);
+				if (as.length) {
+					as.forEach((a) => a.pause());
+					zooms.set(el, as);
 				}
 			});
 		};
@@ -596,11 +640,11 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 			neuTimer = window.setTimeout(() => {
 				const liefen = new Set(
 					[...zooms.entries()]
-						.filter(([el, a]) => a.playState === "running" || el.classList.contains("laeuft"))
+						.filter(([el, as]) => as[0].playState === "running" || el.classList.contains("laeuft"))
 						.map(([el]) => el),
 				);
 				zoomsAnlegen();
-				liefen.forEach((el) => zooms.get(el)?.play());
+				liefen.forEach((el) => zooms.get(el)?.forEach((a) => a.play()));
 			}, 200);
 		};
 		window.addEventListener("resize", beiResize);
@@ -616,7 +660,7 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 		// isIntersecting ist eindeutig, es braucht kein Verhältnis.
 		ziele.forEach((z) => {
 			z.classList.add("laeuft");
-			zooms.get(z)?.play();
+			zooms.get(z)?.forEach((a) => a.play());
 		});
 		const io = new IntersectionObserver(
 			(eintraege) => {
@@ -625,10 +669,7 @@ const personUri = `${uri(personSvgSchwarz)}, ${uri(personSvgWeiss)}`;
 					const an = e.isIntersecting;
 					el.classList.toggle("laeuft", an);
 					const zoom = zooms.get(el);
-					if (zoom) {
-						if (an) zoom.play();
-						else zoom.pause();
-					}
+					if (zoom) zoom.forEach((a) => (an ? a.play() : a.pause()));
 				});
 			},
 			{ threshold: 0 },
