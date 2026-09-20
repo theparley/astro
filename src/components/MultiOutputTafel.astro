@@ -37,6 +37,11 @@ interface Props {
 	taktMs?: number;
 	/** Lese-Pause am Ende jedes Akts (ms). Ebenfalls ungelockt. */
 	leseMs?: number;
+	/** Pause zwischen linker und rechter Wandhälfte (ms, Fred 20.09.):
+	 * erst steht die INPUT-Seite fertig geflappt da (Akt 1: INPUT +
+	 * 1 GESPRÄCH, Akt 2: 1 STUNDE/AUFNAHME + Kreis), dann diese Pause,
+	 * dann beginnt die OUTPUT-Seite. */
+	seitePauseMs?: number;
 	/** ENTSTEHEN-PROBE (Fred 14.09. nacht, /wand): die Kacheln selbst
 	 * klappen erst als Welle auf (Board entsteht), DANN beginnt das
 	 * Flappen der Timeline. */
@@ -47,7 +52,7 @@ interface Props {
 // langsam"): 400 → 260 → 220 → 200 → 180 ms. Regler fürs Tempo; die
 // Klappzeit je Kachel (FLAP_STEP_MS 110 im gemeinsamen Modul) sitzt schon
 // knapp über der Frame-Grenze und kann kaum schneller.
-const { taktMs = 180, leseMs = 2500, entstehen = false } = Astro.props;
+const { taktMs = 180, leseMs = 2500, seitePauseMs = 500, entstehen = false } = Astro.props;
 
 // Wandgeometrie — identisch zum Entwurf: exakt halbierte Wand, 20 Kacheln
 // je Hälfte, EINE Trenner-Spalte auf der Bildmitte.
@@ -83,6 +88,7 @@ const kernaussage =
 	data-mo-tafel
 	data-takt-ms={taktMs}
 	data-lese-ms={leseMs}
+	data-seite-pause-ms={seitePauseMs}
 	data-entstehen={entstehen ? "1" : undefined}
 >
 	<div class="mo-kopf">
@@ -245,7 +251,11 @@ const kernaussage =
 	// unten (stagWelle) — dieselben Formeln nutzt die GIF-Werkstatt.
 	const stag = stagStreu;
 
-	function buildTimeline(takt: number, lese: number) {
+	function buildTimeline(takt: number, lese: number, seitePause: number) {
+		// „Fertig geflappt" = größter Streuversatz einer Zeile (8 × 26 ms)
+		// plus die volle Trommelzeit einer Kachel (MAX_FLAPS Klappen).
+		// Danach erst läuft die Seitenpause, dann startet die andere Hälfte.
+		const FERTIG = 8 * 26 + 6 * FLAP_STEP_MS;
 		const events: Ev[] = [];
 		const add = (t: number, r: number, c: number, props: Partial<Ev>) =>
 			events.push({ t, r, c, ...props });
@@ -267,7 +277,9 @@ const kernaussage =
 		let t = 200;
 		// ── Akt 1: INPUT → 1 GESPRÄCH → OUTPUT → Liste ──
 		addText(KOPF, RAND, INPUT_COLS, KOPF_LINKS, t); t += 500;
-		addText(KOPF + 2, RAND, INPUT_COLS, INPUT_ZEILE, t); t += 600;
+		addText(KOPF + 2, RAND, INPUT_COLS, INPUT_ZEILE, t);
+		// Linke Seite steht fertig geflappt → Seitenpause (Fred 20.09.)
+		t += FERTIG + seitePause;
 		addText(KOPF, MITTE_RECHTS, TEXT_COLS, KOPF_RECHTS, t); t += 500;
 		ZEILEN.forEach((def, i) => {
 			const r = KOPF + 2 + i;
@@ -294,7 +306,9 @@ const kernaussage =
 		// (Fassung 14.09. nacht, in der Git-Historie).
 		addText(KOPF, RAND, INPUT_COLS, "1 STUNDE", t);
 		addText(KOPF + 1, RAND, INPUT_COLS, "AUFNAHME", t); t += 500;
-		add(t, KOPF + 3, RAND, { weiss: true }); t += 600;
+		add(t, KOPF + 3, RAND, { weiss: true });
+		// Kreis steht → dieselbe Seitenpause wie in Akt 1
+		t += FERTIG + seitePause;
 		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
 		addText(KOPF + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
@@ -365,9 +379,10 @@ const kernaussage =
 
 		const takt = Number(sektion.dataset.taktMs) || 400;
 		const lese = Number(sektion.dataset.leseMs) || 2500;
+		const seitePause = Number(sektion.dataset.seitePauseMs ?? 500);
 		const entstehen = sektion.dataset.entstehen === "1";
 
-		const { events, total, akt1EndeT } = buildTimeline(takt, lese);
+		const { events, total, akt1EndeT } = buildTimeline(takt, lese, seitePause);
 
 		// Entsteh-Welle: jede Kachel bekommt ihren Versatz als
 		// transition-delay (diagonal wie die Block-Welle); Gesamtdauer =
