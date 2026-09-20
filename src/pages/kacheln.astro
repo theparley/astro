@@ -483,8 +483,16 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   große entsteht, fährt die Kamera zurück. Dadurch sieht man zuerst die
 	   Stunde als etwas Großes und erlebt erst beim Rauszoomen, wie klein
 	   sie im Verhältnis ist. Genau die Umkehrung, um die es geht. */
+	/* Der Zoom laeuft LANGSAMER und beidseitig weich (Fred 20.09. abends).
+	   Zwei Stellschrauben: die Strecke (32 → 88 Prozent statt 32 → 70, also
+	   gut anderthalbmal so lang) und die Kurve. cubic-bezier(0.65, 0, 0.35,
+	   1) ist symmetrisch — gleich sanft am Anfang wie am Ende, waehrend die
+	   vorherige Kurve zum Schluss hin stark abbremste und dadurch
+	   ungleichmaessig wirkte. Die Kamera faehrt damit noch ein Stueck
+	   weiter, nachdem der grosse Kreis bei 82 Prozent fertig ist: das Bild
+	   kommt zur Ruhe, statt zu stoppen. */
 	[data-kreis].laeuft {
-		animation: kreis-zoom 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+		animation: kreis-zoom 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	/* OHNE HALT (Fred 20.09. abends: "da ist ein Stop drin"). Der grosse
@@ -494,7 +502,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Zahl; wer eine verschiebt, muss die anderen mitnehmen. */
 	@keyframes kreis-zoom {
 		0%, 32% { transform: scale(10); }
-		70%, 100% { transform: scale(1); }
+		88%, 100% { transform: scale(1); }
 	}
 
 	[data-kreis].laeuft .uhr--klein {
