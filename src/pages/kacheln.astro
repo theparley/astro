@@ -556,15 +556,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	/* WENIGER WEIT RAUS (Fred 20.09. abends: "am Ende groesser machen, nur
 	   so weit heraus, dass man gerade den Kreis erkennt"). Der grosse Kreis
 	   misst 70cqw; bei Faktor 1,3 sind das 91 von 100 Kachelbreiten, er
-	   fuellt die Kachel also fast aus.
+	   misst im Ruhezustand 70cqw.
 	   NUR das Ende ist groesser geworden, der Anfang bleibt bei Faktor 10
-	   (Fred 20.09. abends, Korrektur). Der Zoomweg betraegt damit 10 zu 1,3,
-	   also 7,7 — die kleine Stunde am Anfang ist dadurch etwas kleiner im
-	   Bild als der grosse Kreis am Ende. Das ist gewollt: gefragt war ein
-	   groesserer Schluss, nicht ein gleich grosser Anfang. */
+	   (Fred 20.09. abends). Endfaktor jetzt 1,48: der Kreis misst damit
+	   rund 720 px bei 731 px Kacheloberflaeche — er reicht bis knapp an die
+	   Aussenkante und ragt ueber den Innenrand hinaus, bleibt aber ganz im
+	   Bild. Weiter waere er angeschnitten und keine Scheibe mehr.
+	   Senkrecht geprueft: Mitte bei 53,7 % der Hoehe, oben 131 px, unten
+	   851 px von 914 — passt. Der Zoomweg betraegt 10 zu 1,48, also 6,8. */
 	@keyframes kreis-zoom {
 		0%, 4% { transform: scale(10); }
-		38%, 50% { transform: scale(1.3); }
+		38%, 50% { transform: scale(1.48); }
 		88%, 100% { transform: scale(10); }
 	}
 
