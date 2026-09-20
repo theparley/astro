@@ -44,7 +44,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">1 zu 9</p>
+					<p class="verhaeltnis">1 <span class="zu">zu</span> 9</p>
 					<p class="bezug">Ein Gespräch im Monat zu neun Ausspielungen.</p>
 				</div>
 				<div class="kachel-mitte kachel-mitte--flap">
@@ -59,7 +59,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			   Fläche — das Bild behauptete dann hundertmal mehr als die Zahl. */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">1 zu 100+</p>
+					<p class="verhaeltnis">1 <span class="zu">zu</span> 100+</p>
 					<p class="bezug">Eine Stunde Aufnahmezeit zu mehr als hundert Stunden Zuschauerzeit.</p>
 				</div>
 				<div class="kachel-mitte">
@@ -84,7 +84,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 			   — kein einziger zusätzlicher Knoten für tausend Leute. */}
 			<div class="kachel">
 				<div class="kachel-kopf">
-					<p class="verhaeltnis">2 zu 1000+</p>
+					<p class="verhaeltnis">2 <span class="zu">zu</span> 1000+</p>
 					<p class="bezug">Zwei Experten zu mehr als tausend Zuschauern.</p>
 				</div>
 				<div class="kachel-mitte">
@@ -167,6 +167,13 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		letter-spacing: -0.03em;
 		font-size: 21cqw;
 		white-space: nowrap;
+	}
+
+	/* Das Bindewort steht in der dünnen Schrift (Fred 20.09. abends): die
+	   Zahlen tragen, "zu" verbindet nur. Gleiche Bauform wie in der Wand,
+	   wo die Beschriftungen leichter wiegen als die Zahlen. */
+	.zu {
+		font-weight: 300;
 	}
 
 	.bezug {
