@@ -23,17 +23,17 @@ import { LOGOS } from "../lib/fallblatt";
 // OFFEN: TRANSKRIPT und KI-ZITATE hat Fred als "keine Ausspielungen in dem
 // Sinn" bezeichnet — sie stehen hier drin, weil die Zehn sonst nicht
 // aufgeht. Sein Entscheid steht aus.
-const varianten = [
-	"Livestream",
-	"Videopodcast",
-	"Audio-Podcast",
-	"LinkedIn",
-	"Clips",
-	"Shorts",
-	"Newsletter",
-	"Website",
-	"Transkript",
-	"Zitate für KI",
+const varianten: Array<[string, string]> = [
+	["1", "Livestream"],
+	["1", "Videopodcast"],
+	["1", "Audio-Podcast"],
+	["10", "LinkedIn-Beiträge"],
+	["10", "Clips"],
+	["10", "Shorts"],
+	["1", "Newsletter"],
+	["1", "Landingpage"],
+	["1", "Transkript"],
+	["10", "KI-lesbar"],
 ];
 
 // Männchen als Hintergrund-Kachelung (Kachel 3). Ein einziges DIV statt
@@ -53,18 +53,27 @@ const varianten = [
 // zwischen zwei Nachbarn. Die Zellenzahl ändert sich dadurch nicht, nur die
 // Figur darin wird kleiner.
 const personPfad = (LOGOS.person.match(/<path d="([^"]+)"/) || [])[1] ?? "";
-// SCHWARZE FIGUR MIT WEISSEM RAND (Fred 20.09. abends) — dieselbe Setzung
-// wie der schwarze Punkt in Kachel 2: die Figur selbst ist so dunkel wie
-// die Kachel, sichtbar macht sie der Saum. paint-order='stroke' legt den
-// weißen Strich UNTER die Füllung, sonst frisst er die Figur von innen auf.
-const personSvg = (
-	"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-	// 72/640 = 0.1125; verschoben auf (14,14), weil die Figur bei
-	// x 160..800 / y -800..-160 sitzt.
-	"<g transform='translate(-4 104) scale(0.1125)' fill='#0d0d0d' " +
+// ZWEI FIGUREN IN EINER KACHELUNG (Fred 20.09. abends, dritter Anlauf:
+// "du zoomst immer noch von der Seite"). Der Grund lag nicht am Versatz,
+// sondern an der Bauform: eine Kachelung mit EINER Figur hat in ihrer Mitte
+// entweder eine Figur (dann sieht man am Start drei) oder eine Fuge (dann
+// muss der Versatz für jede Zellgröße neu gerechnet werden — und zwischen
+// zwei Rechenpunkten wandert das Raster seitlich weg, genau der Eindruck).
+// Eine Kachelung mit ZWEI Figuren nebeneinander löst beides: ihre Mitte
+// liegt zwischen den beiden, und "background-position: center" hält diese
+// Mitte bei JEDER Größe fest. Kein Versatz, kein Wandern, symmetrisch.
+//
+// Figuren schwarz mit weißem Saum wie der Punkt in Kachel 2.
+// paint-order='stroke' legt den Strich unter die Füllung, sonst frisst er
+// die Figur von innen auf.
+const figur = (x: number) =>
+	"<g transform='translate(" + x + " 104) scale(0.1125)' fill='#0d0d0d' " +
 	"stroke='#ffffff' stroke-width='34' paint-order='stroke' " +
-	"stroke-linejoin='round'>" +
-	"<path d='" + personPfad + "'/></g>" +
+	"stroke-linejoin='round'><path d='" + personPfad + "'/></g>";
+const personSvg = (
+	"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'>" +
+	figur(-4) +
+	figur(96) +
 	"</svg>"
 ).replace(/"/g, "'");
 const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
@@ -86,8 +95,11 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 				</div>
 				<div class="kachel-mitte kachel-mitte--liste">
 					<ul class="varianten">
-						{varianten.map((v) => (
-							<li>{v}</li>
+						{varianten.map(([zahl, wort]) => (
+							<li>
+								<span class="anzahl">{zahl}</span>
+								{wort}
+							</li>
 						))}
 					</ul>
 				</div>
@@ -253,6 +265,20 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		letter-spacing: -0.01em;
 	}
 
+	/* Zahlenspalte rechtsbündig wie in der Wand: die Einser fluchten unter
+	   den Zehnern, die Wörter beginnen alle auf derselben Kante. */
+	.anzahl {
+		display: inline-block;
+		width: 2.2em;
+		margin-right: 0.45em;
+		text-align: right;
+		/* Kein Fettdruck (Fred 20.09. abends, nach Sichtung): die Zahlen
+		   sollen die Spalte halten, nicht die Zeile beherrschen. Die
+		   Überschrift der Kachel ist das Verhältnis — wenn die Liste
+		   darunter auch noch fett zählt, bekommt die Kachel zwei laute
+		   Stimmen. */
+	}
+
 	/* ── Kachel 2: Kreis ───────────────────────────────────────────────── */
 	.kreis-buehne {
 		position: relative;
@@ -313,6 +339,21 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		z-index: 1;
 	}
 
+	/* ZOOM (Fred 20.09. abends): am Anfang steht die kleine Stunde GROSS im
+	   Bild — die Bühne ist zehnfach vergrößert, die 7cqw-Scheibe füllt also
+	   dieselbe Fläche, die später der große Kreis einnimmt. Sobald der
+	   große entsteht, fährt die Kamera zurück. Dadurch sieht man zuerst die
+	   Stunde als etwas Großes und erlebt erst beim Rauszoomen, wie klein
+	   sie im Verhältnis ist. Genau die Umkehrung, um die es geht. */
+	[data-kreis].laeuft {
+		animation: kreis-zoom 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	}
+
+	@keyframes kreis-zoom {
+		0%, 42% { transform: scale(10); }
+		75%, 100% { transform: scale(1); }
+	}
+
 	[data-kreis].laeuft .uhr--klein {
 		animation: uhr-klein 7s linear infinite;
 	}
@@ -333,13 +374,13 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 
 	/* Die grosse beginnt erst, wenn die kleine steht. */
 	@keyframes uhr-gross {
-		0%, 42% { --fuell: 0turn; }
-		88%, 100% { --fuell: 1turn; }
+		0%, 44% { --fuell: 0turn; }
+		90%, 100% { --fuell: 1turn; }
 	}
 
 	@keyframes punkt-ein {
-		0%, 45% { opacity: 0; }
-		70%, 100% { opacity: 1; }
+		0%, 62% { opacity: 0; }
+		82%, 100% { opacity: 1; }
 	}
 
 	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
@@ -351,16 +392,11 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		height: 100%;
 		background-image: var(--person);
 		background-repeat: repeat;
-		/* WAAGERECHT AN DER KANTE ANSETZEN (Fred 20.09. abends): bei
-		   "center" liegt die MITTE einer Zelle auf der Mitte der Fläche —
-		   man sieht dann eine ganze Figur in der Mitte und links und rechts
-		   je eine halbe, also gefühlt drei. Mit 0 beginnt die Kachelung an
-		   der linken Kante, zwei Zellen füllen die Breite genau aus, und in
-		   der Mitte liegt die Fuge zwischen den beiden. Senkrecht bleibt es
-		   mittig, damit die Menge beim Rauszoomen aus der Mitte heraus
-		   wächst. */
-		background-position: 0 center;
-		background-size: 50% 100%;
+		/* Fest mittig — das trägt jetzt, weil die Kachelung selbst zwei
+		   Figuren enthält: ihre Mitte liegt zwischen den beiden, und
+		   "center" hält diese Mitte bei jeder Größe an derselben Stelle. */
+		background-position: center;
+		background-size: 100% 100%;
 	}
 
 	/* Der Zoom läuft NICHT über @keyframes: Container-Einheiten (cqw)
@@ -371,6 +407,7 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	   gerechnet. */
 
 	@media (prefers-reduced-motion: reduce) {
+		[data-kreis].laeuft,
 		[data-kreis].laeuft .uhr--klein,
 		[data-kreis].laeuft .uhr--gross,
 		[data-kreis].laeuft .kreis--punkt {
@@ -381,6 +418,9 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 		}
 		.kreis--punkt {
 			opacity: 1;
+		}
+		.kreis-buehne {
+			transform: scale(1);
 		}
 	}
 </style>
@@ -394,36 +434,25 @@ const personUri = `url("data:image/svg+xml,${encodeURIComponent(personSvg)}")`;
 	// Start: eine Figur füllt die Kachel. Ende: rund tausend Figuren passen
 	// hinein. Die Kachel ist 4:5, also ergibt eine Zellkante von
 	// breite / 28 etwa 28 × 35 = 980 Figuren.
-	const ZELLEN_QUER = 28;
+	// Zielmenge am Ende des Zooms. Eine Kachelung trägt ZWEI Figuren und ist
+	// doppelt so breit wie hoch; bei Kachelbreite t passen also
+	// (B/t) × (H/(t/2)) × 2 = 4·B·H/t² Figuren in die Fläche.
+	const ZIEL_FIGUREN = 1000;
 	function zoomAnlegen(el: HTMLElement): Animation | null {
 		const r = el.getBoundingClientRect();
 		if (!r.width) return null;
-		// START = GENAU ZWEI (Fred 20.09. abends): eine Zelle ist halb so
-		// breit wie die Fläche und so hoch wie sie — damit passen quer zwei
-		// und hoch eine, also zwei Figuren. Die Grafik behält ihr
-		// Seitenverhältnis und sitzt mittig in der hohen Zelle, deshalb
-		// werden sie beim Zoom nicht verzerrt, sondern die Zelle wird nur
-		// quadratisch.
-		const startB = Math.floor(r.width / 2);
+		// Start: EINE Kachelung füllt die Fläche. Die Grafik ist 2:1 und
+		// behält ihr Verhältnis, sitzt also mittig — zwei große Figuren.
+		const startB = Math.round(r.width);
 		const startH = Math.round(r.height);
-		const ende = Math.max(4, Math.round(r.width / ZELLEN_QUER));
-		// AUS DER MITTE HERAUS ZOOMEN (Fred 20.09. abends: "du zoomst von
-		// der Seite"). Eine feste Startkante hält zwar am Anfang die Fuge
-		// mittig, aber beim Verkleinern rutscht alles zur linken Kante —
-		// die beiden Personen, mit denen man angefangen hat, wandern aus
-		// dem Bild. Deshalb wird für JEDE Zellgröße der Versatz so
-		// gerechnet, dass eine Zellfuge genau auf der Mitte liegt: dann
-		// bleibt die Mitte stehen und die Menge wächst nach beiden Seiten
-		// gleichmäßig um die beiden herum.
-		const fugeMittig = (zelle: number) =>
-			r.width / 2 - zelle * Math.round(r.width / 2 / zelle);
-		const pos = (zelle: number) => fugeMittig(zelle).toFixed(2) + "px center";
+		const endeB = Math.max(8, Math.round(Math.sqrt((4 * r.width * r.height) / ZIEL_FIGUREN)));
+		const endeH = Math.round(endeB / 2);
 		return el.animate(
 			[
-				{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: pos(startB), offset: 0 },
-				{ backgroundSize: startB + "px " + startH + "px", backgroundPosition: pos(startB), offset: 0.1 },
-				{ backgroundSize: ende + "px " + ende + "px", backgroundPosition: pos(ende), offset: 0.7 },
-				{ backgroundSize: ende + "px " + ende + "px", backgroundPosition: pos(ende), offset: 1 },
+				{ backgroundSize: startB + "px " + startH + "px", offset: 0 },
+				{ backgroundSize: startB + "px " + startH + "px", offset: 0.1 },
+				{ backgroundSize: endeB + "px " + endeH + "px", offset: 0.7 },
+				{ backgroundSize: endeB + "px " + endeH + "px", offset: 1 },
 			],
 			{ duration: 6000, iterations: Infinity, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
 		);
