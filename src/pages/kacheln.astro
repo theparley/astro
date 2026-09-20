@@ -465,9 +465,17 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   Der GROSSE Kreis wird flaechig weiss (Fred 20.09. abends) — er ist das
 	   Ergebnis, nicht die Zeichnung. Also keine Kontur, kein Speichenpaar,
 	   sondern ein Kuchenstueck, das sich mit Weiss fuellt. */
+	/* Durchmesser neu bemessen (Fred 20.09. abends): am Anfang ist nur der
+	   Strich der Stunde zu sehen, und seine OBERKANTE soll auf Kopfhoehe der
+	   Figuren in Kachel 3 liegen. Der Strich ist der Radius der kleinen
+	   Stunde, zehnfach vergroessert — aus Figurenmitte (490 px) minus
+	   Kopfoberkante (313 px) folgt ein Radius von 177 px, also 2,55cqw
+	   unskaliert und 5,1cqw Durchmesser. Der grosse Kreis behaelt das
+	   Verhaeltnis 1:10, ist also 51cqw breit; damit er im Scheitel weiter an
+	   die Kachelkante stoesst, waechst der Zoomfaktor dort auf 2,06. */
 	.uhr--gross {
-		width: 70cqw;
-		height: 70cqw;
+		width: 51cqw;
+		height: 51cqw;
 		--strich: 0cqw;
 	}
 
@@ -495,9 +503,9 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   dick. 0,12cqw sind im Zoom rund 8 px und spaeter, in Ruhe, noch knapp
 	   ein Pixel — beides traegt. */
 	.uhr--klein {
-		width: 7cqw;
-		height: 7cqw;
-		--strich: 0.12cqw;
+		width: 5.1cqw;
+		height: 5.1cqw;
+		--strich: 0.16cqw;
 		z-index: 1;
 	}
 
@@ -590,9 +598,9 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 	   (Kachelmitte). Die Verschiebung steht VOR der Skalierung, wird also
 	   nicht mitvergroessert. */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: translateY(-11.44cqw) scale(10); }
-		38%, 50% { transform: translateY(-16.3cqw) scale(1.5); }
-		88%, 100% { transform: translateY(-11.44cqw) scale(10); }
+		0%, 4% { transform: translateY(-11.5cqw) scale(10); }
+		38%, 50% { transform: translateY(-16.26cqw) scale(2.06); }
+		88%, 100% { transform: translateY(-11.5cqw) scale(10); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
@@ -692,7 +700,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: translateY(-16.3cqw) scale(1.5);
+			transform: translateY(-16.26cqw) scale(2.06);
 		}
 	}
 </style>
