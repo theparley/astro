@@ -45,15 +45,18 @@ const tafelFormate = [
 // Zeilen-Aufteilung NEU (Fred 14.09.): Tafel wandert in die HALBE Spalte
 // mit der Wand-Kachelgröße — dafür lange Wörter geteilt, max. DREI Zeilen,
 // längste Zeile 11 Zeichen (TESTIMONIAL/MITARBEITER).
+// EINZEILIG (Fred 20.09.): die Formatnamen stehen jetzt in EINER Zeile
+// statt im Zweizeiler — das Board unter dem Text wird dadurch flach.
+// Breiteste Zeile: MITARBEITER INTERVIEW (21 Kacheln).
 const tafelZustaende = [
-	["VIDEO", "PODCAST"],
-	["KUNDEN", "TESTIMONIAL"],
-	["LIVE", "WEBINAR"],
-	["EXPERTEN", "TALK"],
-	["ONLINE", "EVENT"],
-	["RECRUITING", "VIDEO"],
-	["LIVE Q&A", "SESSION"],
-	["MITARBEITER", "INTERVIEW"],
+	["VIDEO PODCAST"],
+	["KUNDEN TESTIMONIAL"],
+	["LIVE WEBINAR"],
+	["EXPERTEN TALK"],
+	["ONLINE EVENT"],
+	["RECRUITING VIDEO"],
+	["LIVE Q&A SESSION"],
+	["MITARBEITER INTERVIEW"],
 ];
 
 // Kontakt-Board unter dem Augenzeugen-Turm (Fred 14.09.): startet leer und
@@ -351,7 +354,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			<p class="tafel-intro">Das Personal Branding eines Solopreneurs.<br />Die Thought Leadership eines CEOs.<br />Die Brancheninstanz eines Expertenteams.</p>
 			<p class="tafel-intro">Welches Format passt? Das entscheiden Ziel und Budget, Branche und Themen, Firmenkultur und Menschen.</p>
 			<p class="tafel-intro">Im Zentrum steht immer das echte Gespräch. Es ist der fortlaufende Beweis eurer Expertise. Welche Formate zu euch passen, finden wir gemeinsam heraus.</p>
-			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={4} rahmen />
+			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={1} rahmen />
 		</div>
 			<div class="format-rechts">
 				{/* Jedes Wort eine Zeile (Fred 14.09. abends) — Wort-Turm wie beim
