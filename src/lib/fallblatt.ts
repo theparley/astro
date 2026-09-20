@@ -266,6 +266,13 @@ export const LOGOS: Record<string, string> = {
 	web: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4.2" ry="9.5"/><path d="M2.8 12h18.4M4 7h16M4 17h16"/></svg>',
 	mail: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M3 6.5l9 7 9-7"/></svg>',
 	ki: '<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.5l1.9 6.2 6.2 1.9-6.2 1.9L12 18.7l-1.9-6.2-6.2-1.9 6.2-1.9z"/><path d="M19 15.5l.9 2.8 2.8.9-2.8.9-.9 2.8-.9-2.8-2.8-.9 2.8-.9z" opacity="0.85"/></svg>',
+	// Personen-Piktogramm (Fred 20.09., für den Zuschauer-Block der Wand):
+	// Material Symbols "person" (fill 1), Apache 2.0, keine Namensnennung
+	// nötig. Gewählt nach Piktogramm-Recherche: exakt quadratischer
+	// Zuschnitt (viewBox 160 -800 640 640), Kopf = halbe Figurenhöhe,
+	// Lücke zum Körper nur ~6 % — kein "langer Hals" wie bei Strich-Icons,
+	// kein Verschmelzen wie bei Phosphor. Trägt bis ~30 px.
+	person: '<svg viewBox="160 -800 640 640" fill="white"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>',
 	// KI-Assistenten (Fred 15.09., „Zitate für KI"-Zeile): ECHTE Marken-
 	// Piktogramme (Pfade aus der Simple-Icons-Sammlung, CC0; Markenrechte
 	// liegen bei den Anbietern — Nutzung nach deren Richtlinien).
