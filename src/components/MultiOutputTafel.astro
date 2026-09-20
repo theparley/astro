@@ -70,7 +70,7 @@ const kernaussage =
 	"Aus einem Gespräch im Monat entstehen: 1 Livestream, 1 Videopodcast, " +
 	"1 Audio-Podcast, 10 Beiträge, 10 Clips, 10 Shorts, 1 Newsletter, " +
 	"1 Transkript und 10 Zitate für KI. Eure Bibliothek wächst. " +
-	"1 Stunde Aufnahme steht gegen 100+ Stunden Watchtime.";
+	"1 Stunde Aufnahme steht gegen 100+ Stunden Zuschauerzeit.";
 ---
 
 {/* MOBIL-FORM ENTSCHIEDEN (Fred 14.09.): unterhalb eines Breakpoints
@@ -283,10 +283,10 @@ const kernaussage =
 		// Auch hier: Kaskade + echte Trommel-Klappzeit (s. Abbau unten).
 		addClearAll(t); t += (ROWS - 1) * 90 + (GESAMT_COLS - 1) * 6 + 6 * FLAP_STEP_MS + 500;
 
-		// ── Akt 2: 1 Stunde Aufnahme gegen 100+ Stunden Watchtime ──
+		// ── Akt 2: 1 Stunde Aufnahme gegen 100+ Stunden Zuschauerzeit ──
 		// VIERTE Dramaturgie-Fassung (Fred 20.09.): Akt 2 wird PARALLEL zu
 		// Akt 1 gebaut — die Beschriftungen stehen OBEN wie INPUT/OUTPUT
-		// (zweizeilig: 1 STUNDE / AUFNAHME links, 100+ STUNDEN / WATCHTIME
+		// (zweizeilig: 1 STUNDE / AUFNAHME links, 100+ STUNDEN / ZUSCHAUERZEIT
 		// rechts), darunter erscheinen die Kreise. Vorher standen beide
 		// Beschriftungen erst GANZ AM ENDE unten auf den Summen-Zeilen
 		// (Fassung 14.09. nacht, in der Git-Historie).
@@ -294,7 +294,7 @@ const kernaussage =
 		addText(KOPF + 1, RAND, INPUT_COLS, "AUFNAHME", t); t += 500;
 		add(t, KOPF + 3, RAND, { weiss: true }); t += 600;
 		addText(KOPF, MITTE_RECHTS, TEXT_COLS, "100+ STUNDEN", t);
-		addText(KOPF + 1, MITTE_RECHTS, TEXT_COLS, "WATCHTIME", t); t += 500;
+		addText(KOPF + 1, MITTE_RECHTS, TEXT_COLS, "ZUSCHAUERZEIT", t); t += 500;
 		// 10×10-Block: das Zehner-Quadrat hat exakt die Einzelkachel-Proportion
 		// 1:1,38 — „die kleine Kachel wird zur großen Kachel", 100 geht glatt auf.
 		// DIAGONAL-WELLE (Fred 14.09. abends): Verzögerung = (Zeile ×
