@@ -259,13 +259,20 @@ const uhren = uhrenGeometrie();
 const ST = STUNDE_TEXT;
 const zahlS = (UHR.r * ST.zahlGroesse) / GLYPHEN.upm;      // Schrift-Einheit → viewBox
 const einheitS = (UHR.r * ST.einheitGroesse) / GLYPHEN.upm;
-const zifferLage = (s: string) => { const b = s.split("").map((c) => GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl].adv); const w = b.reduce((a, c) => a + c, 0); let x = -w / 2; return b.map((adv) => { const hier = x; x += adv; return hier; }); };
+// TABELLENZIFFERN (Fred 21.09.: „wenn eine 1 am Anfang steht, springt es
+// nach rechts und links"): jede Ziffer bekommt dieselbe Zelle, so breit
+// wie die breiteste Ziffer, und sitzt darin mittig. Die Zahl bleibt
+// dadurch beim Zaehlen an Ort und Stelle.
+const ZELLE = Math.max(...Object.values(GLYPHEN.zahl).map((g) => g.adv));
+// Optisch zentriert: nach den Umriss-Grenzen (xMin/xMax), nicht nach dem
+// Vorschub — die 1 hat einseitig mehr Luft.
+const zifferLage = (s: string) => { const w = ZELLE * s.length; return s.split("").map((c, i) => { const g = GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl]; return -w / 2 + i * ZELLE + ZELLE / 2 - (g.xMin + g.xMax) / 2; }); };
 const startZiffern = String(ST.bis).padStart(2, "0");
 const startLage = zifferLage(startZiffern);
 const einheitBreite = ST.einheit.split("").reduce((a, c) => a + GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit].adv, 0);
 let einheitX = -einheitBreite / 2;
 const einheitPfade = ST.einheit.split("").map((c) => { const g = GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit]; const x = einheitX; einheitX += g.adv; return { d: g.d, x }; });
-const glyphenJson = JSON.stringify(GLYPHEN.zahl);
+const glyphenJson = JSON.stringify({ ...GLYPHEN.zahl, ZELLE });
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
@@ -1540,12 +1547,12 @@ const beschlagStriche = [
 		// Ziffern als Umrisse: je Slot ein <path>, bei Wechsel d und Lage setzen
 		// (zwei Ziffern mittig ueber ihre Vorschubbreiten).
 		const zaehler = buehne.querySelector<SVGGElement>(".stunde-zaehler")!;
-		const GL: Record<string, { d: string; adv: number }> = JSON.parse(zaehler.dataset.glyphen!);
+		const { ZELLE, ...GL } = JSON.parse(zaehler.dataset.glyphen!) as Record<string, { d: string; adv: number; xMin: number; xMax: number }> & { ZELLE: number };
 		const slots = Array.from(zaehler.querySelectorAll<SVGPathElement>(".ziffer"));
+		// Tabellenziffern: feste Zelle je Ziffer, Ziffer mittig darin (s. Frontmatter).
 		const setzeZahl = (s: string) => {
-			const w = s.split("").reduce((a, c) => a + GL[c].adv, 0);
-			let x = -w / 2;
-			s.split("").forEach((c, i) => { slots[i].setAttribute("d", GL[c].d); slots[i].setAttribute("transform", `translate(${x} 0)`); x += GL[c].adv; });
+			const w = ZELLE * s.length;
+			s.split("").forEach((c, i) => { slots[i].setAttribute("d", GL[c].d); slots[i].setAttribute("transform", `translate(${-w / 2 + i * ZELLE + ZELLE / 2 - (GL[c].xMin + GL[c].xMax) / 2} 0)`); });
 		};
 		const laufAnim = anims[anims.length - 1];
 		const kurveK = bezier(P.KURVE[0], P.KURVE[1], P.KURVE[2], P.KURVE[3]);
