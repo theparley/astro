@@ -282,7 +282,18 @@ const ZEIT = {
 	nachlauf: 0,        // kein Halt bis zur naechsten Runde
 };
 const KURVE = [0.65, 0, 0.35, 1];   // weich rein und raus: Stunde, Uhren, Reinzoomen
-const KURVE_RAUS = [0, 0, 0.35, 1]; // Rauszoomen: kein Anlauf, weiches Auslaufen
+// OHNE STOPP VOR DEM KRIECHEN (Fred 21.09.): endet das Rauszoomen auf
+// Tempo null und faengt das Kriechen bei null an, liegen zwei Stillstaende
+// hintereinander — das Auge liest eine Pause. Deshalb kommt das Rauszoomen
+// mit einem kleinen Resttempo an (letzter Wert 0,976 statt 1: die Kurve
+// ist am Ende nicht mehr ganz flach), und das Kriechen faehrt sofort damit
+// weiter (reines Auslaufen, kein Anlauf). Am inneren Uebergang dasselbe:
+// das Zurueckkriechen endet beschleunigend, das Reinzoomen setzt mit
+// passendem Anfangstempo an (zweiter Wert 0,012 statt 0).
+const KURVE_RAUS = [0, 0, 0.35, 0.976];     // Rauszoomen: kein Anlauf, Resttempo am Ende
+const KURVE_KRIECH_RAUS = [0, 0, 0.35, 1];  // Kriechen raus: faehrt sofort, laeuft weich aus
+const KURVE_KRIECH_REIN = [0.65, 0, 1, 1];  // Kriechen zurueck: weich an, beschleunigend
+const KURVE_REIN = [0.65, 0.012, 0.35, 1];  // Reinzoomen: setzt mit dem Kriechtempo an
 // bei ende 1,15 sind 96 Uhren ganz im Bild, 36 angeschnitten.
 // drift (Fred 21.09.: „statt einem Stopp am Ende ein ganz leichtes
 // Rauszoomen, dann wieder Reinzoomen, genauso langsam, und dann schneller"):
@@ -335,7 +346,7 @@ const BLATT = {
 };
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * 60).toFixed(3);
 const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, reinStart, RUNDE, N: uhren.length });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KAMERA, M, standEnde, reinStart, RUNDE, N: uhren.length });
 
 interface Props {
 	fassung?: "brett" | "liste";
@@ -1397,9 +1408,9 @@ const { fassung = "brett" } = Astro.props;
 
 	function stundenAnlegen(buehne: HTMLElement): Animation[] {
 		const P = JSON.parse(buehne.dataset.plan!);
-		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, reinStart, RUNDE, N } = P;
-		const K = `cubic-bezier(${KURVE.join(", ")})`;
-		const KR = `cubic-bezier(${KURVE_RAUS.join(", ")})`;
+		const { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KAMERA, M, standEnde, reinStart, RUNDE, N } = P;
+		const bz = (k: number[]) => `cubic-bezier(${k.join(", ")})`;
+		const K = bz(KURVE), KR = bz(KURVE_RAUS), KKR = bz(KURVE_KRIECH_RAUS), KKI = bz(KURVE_KRIECH_REIN), KI = bz(KURVE_REIN);
 		const S0 = `scale(${KAMERA.start})`, S1 = `scale(${KAMERA.ende})`;
 		const SD = `scale(${(KAMERA.ende * (1 - (ZEIT.stand > 0 ? KAMERA.drift : 0))).toFixed(4)})`; // Ende des Kriechens
 		const ms = RUNDE * 1000;
@@ -1416,9 +1427,9 @@ const { fassung = "brett" } = Astro.props;
 		anims.push(kamera.animate([
 			{ transform: S0, offset: 0 },
 			{ transform: S0, offset: o(M.kameraStart), easing: KR },
-			{ transform: S1, offset: o(M.kameraEnde), easing: K },
-			{ transform: SD, offset: o(standEnde), easing: K },
-			{ transform: S1, offset: o(reinStart), easing: K },
+			{ transform: S1, offset: o(M.kameraEnde), easing: KKR },
+			{ transform: SD, offset: o(standEnde), easing: KKI },
+			{ transform: S1, offset: o(reinStart), easing: KI },
 			{ transform: S0, offset: o(reinStart + ZEIT.kameraRein) },
 			{ transform: S0, offset: 1 },
 		], opt));
