@@ -247,35 +247,29 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 // Zeiten, Kurven, Kamera und Geometrie kommen aus src/lib/stunde.ts — EINE
 // BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
 // Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
-import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, ZEIGER, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
+import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 // Zeiger-Sektor: Versatz der Scheibe o laeuft 1,06 → 0, Vorderkante bei
 // L = 1,04 − o. Der Sektor [L − w, L] braucht Versatz o + w − 1,04, um eine
 // Periode (2) verschoben, damit er positiv bleibt: 2,02 + w → 0,96 + w.
-// KLEINE Scheiben: dasharray 1 2, Versatz 1,02 → 0 (lib DASH_KLEIN), also
-// Vorderkante L = 1 − o, am Ende genau 1,0 (kein Ueberhang wie bei der
-// Stunde). Zeiger: Sektor [L − w, L] mit Versatz 2 − L + w, Periode 2:
-// 2,02 + w → 1 + w; am Ende steht der Sektor [1 − w, 1] auf 12 und deckt
-// die Naht der Scheibe.
-const zw = ZEIGER.anteil;
-const ZEIGER_ZU = +(2.02 + zw).toFixed(4);   // unsichtbar (vor dem Pfadanfang)
-const ZEIGER_AUF = +(1 + zw).toFixed(4);     // Ende: Sektor [1 − w, 1] = auf 12
-const KLEIN_LEER = 1.02;
+// Kein Zeiger auf den kleinen Uhren (Fred 21.09., s. lib): die wachsende
+// weisse Flaeche ist die Information.
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
 const df = +((BLATT.fuenf.breite / (2 * Math.PI * BLATT.fuenf.r)) * 12).toFixed(4);
 const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraRein: M.kameraRein, ausblenden: M.ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, M, standEnde: M.standEnde, reinStart: M.reinStart, reinEnde: M.reinEnde, innenEnde: M.innenEnde, RUNDE: M.RUNDE, N: uhren.length, ZEIGER_ZU, ZEIGER_AUF, KLEIN_LEER });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraRein: M.kameraRein, ausblenden: M.ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, M, standEnde: M.standEnde, reinStart: M.reinStart, reinEnde: M.reinEnde, innenEnde: M.innenEnde, RUNDE: M.RUNDE, N: uhren.length });
 
 interface Props {
 	fassung?: "brett" | "liste";
-	// Stoppuhr-Probe (Fred 21.09.): Krone + zwei Druecker an Stunde und
-	// allen kleinen Uhren; bezug2 ersetzt die Bezugszeile von Kachel 2.
+	// Stoppuhr (Fred 21.09., seit abends Standard): Krone + Druecker rechts
+	// an Stunde und allen kleinen Uhren (lib STOPPUHR); false = schlichte
+	// Uhr. bezug2 ersetzt die Bezugszeile von Kachel 2.
 	stoppuhr?: boolean;
 	bezug2?: string;
 }
-const { fassung = "brett", stoppuhr = false, bezug2 } = Astro.props;
+const { fassung = "brett", stoppuhr = true, bezug2 } = Astro.props;
 // Beschlag als drei T-Pfade (Krone, Druecker links, Druecker rechts),
 // relativ zur Uhrmitte, je mit Drehung. EIN Pfad je T, nicht zwei
 // Rechtecke: an der gemeinsamen Kante zweier Rechtecke bleibt sonst eine
@@ -533,7 +527,7 @@ const beschlagStriche = [
 										{BLATT.kleineMinuten && <circle class="blatt blatt--dunkel minute" cx={u.x} cy={u.y} r={BLATT.minute.r} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />}
 										<circle class="blatt blatt--dunkel fuenf" cx={u.x} cy={u.y} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 										<circle class="blatt blatt--dunkel viertel" cx={u.x} cy={u.y} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
-										<circle class="zeiger" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
+
 										{stoppuhr && (
 											<g class="beschlag beschlag--klein" data-i={i}>
 												{beschlagStriche.map((b) => b.l.map((l) => <line pathLength="1" x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke-width={l.w} transform={`translate(${u.x} ${u.y}) rotate(${b.rot})`} />))}
@@ -1057,18 +1051,12 @@ const beschlagStriche = [
 	   DIV, und von dort erbten alle SVG-Kinder das Strichmuster, auch die
 	   Speichen (Fred 21.09., live: „der Strich, der den Zeiger anzeigt, ist
 	   jetzt gestrichelt"). */
+	.scheibe,
 	.stunde-fuellung,
 	.stunde-rand {
 		fill: none;
 		stroke-dasharray: 1.04 2;
 		stroke-dashoffset: 1.06;
-	}
-	/* Kleine Scheiben ohne Ueberhang (lib DASH_KLEIN): Vorderkante endet auf
-	   1,0, der Zeiger-Sektor deckt dort die Naht. */
-	.scheibe {
-		fill: none;
-		stroke-dasharray: 1 2;
-		stroke-dashoffset: 1.02;
 	}
 	.scheibe {
 		stroke: #ffffff;
@@ -1109,16 +1097,7 @@ const beschlagStriche = [
 		stroke-dasharray: 1 1;
 		stroke-dashoffset: 1;
 	}
-	/* Zeiger der kleinen Uhren: dunkler Sektor an der Vorderkante der
-	   Fuellung (s. lib ZEIGER + Frontmatter ZEIGER_ZU/AUF), Kuchenstueck-
-	   Mechanik wie .scheibe. Kein Transform, keine eigene Ebene. */
-	.zeiger {
-		fill: none;
-		stroke: var(--kachel);
-		stroke-width: 34;
-		stroke-dasharray: 0.012 1.988;
-		stroke-dashoffset: 2.032;
-	}
+
 
 	/* Ziffernblaetter (s. Frontmatter BLATT). Die dunklen liegen ueber den
 	   weissen Scheiben und erscheinen in dem Mass, wie das Weiss darunter
@@ -1152,9 +1131,7 @@ const beschlagStriche = [
 		.beschlag--klein {
 			stroke-dashoffset: 0;
 		}
-		.zeiger {
-			stroke-dashoffset: 1.012;
-		}
+
 		.scheibe,
 		.stunde-fuellung,
 		.stunde-rand {
@@ -1538,7 +1515,7 @@ const beschlagStriche = [
 		const starts = Array.from({ length: N }, (_, i) => startBei(i, k));
 		const dauern = starts.map((t, i) => dauerVon(i < N - 1 ? starts[i + 1] - t : t - starts[i - 1]));
 		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde
-		const zeiger = Array.from(buehne.querySelectorAll<SVGCircleElement>(".zeiger[data-i]"));
+
 		const beschlaege = Array.from(buehne.querySelectorAll<SVGGElement>(".beschlag--klein[data-i]"));
 		buehne.querySelectorAll<SVGCircleElement>(".scheibe[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
@@ -1548,24 +1525,14 @@ const beschlagStriche = [
 			const voll = Math.min(leerVorEnde, o(s + dauern[i]));
 			const ab = Math.min(voll, o(s));
 			anims.push(el.animate([
-				{ strokeDashoffset: P.KLEIN_LEER, offset: 0 },
-				{ strokeDashoffset: P.KLEIN_LEER, offset: ab, easing: K },
+				{ strokeDashoffset: 1.06, offset: 0 },
+				{ strokeDashoffset: 1.06, offset: ab, easing: K },
 				{ strokeDashoffset: 0, offset: voll },
 				{ strokeDashoffset: 0, offset: leerVorEnde },
-				{ strokeDashoffset: P.KLEIN_LEER, offset: Math.min(1, leerVorEnde + 0.0001) },
-				{ strokeDashoffset: P.KLEIN_LEER, offset: 1 },
+				{ strokeDashoffset: 1.06, offset: Math.min(1, leerVorEnde + 0.0001) },
+				{ strokeDashoffset: 1.06, offset: 1 },
 			], opt));
-			// Der dunkle Zeiger ist ein Sektor an der Vorderkante: gleiche Marken
-			// und Kurve wie die Scheibe, Versatz linear verschoben (P.ZEIGER_ZU →
-			// P.ZEIGER_AUF), dadurch exakt synchron; am Ende steht er auf 12.
-			anims.push(zeiger[i].animate([
-				{ strokeDashoffset: P.ZEIGER_ZU, offset: 0 },
-				{ strokeDashoffset: P.ZEIGER_ZU, offset: ab, easing: K },
-				{ strokeDashoffset: P.ZEIGER_AUF, offset: voll },
-				{ strokeDashoffset: P.ZEIGER_AUF, offset: leerVorEnde },
-				{ strokeDashoffset: P.ZEIGER_ZU, offset: Math.min(1, leerVorEnde + 0.0001) },
-				{ strokeDashoffset: P.ZEIGER_ZU, offset: 1 },
-			], opt));
+
 				// Stoppuhr-Probe: der Beschlag schaltet sich mit dem Start der Fuellung
 				// ein (Versatz 1 → 0, wie die Scheibe 1,06 → 0) und mit leerVorEnde aus.
 				if (beschlaege[i]) anims.push(beschlaege[i].animate([

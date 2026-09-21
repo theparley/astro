@@ -18,8 +18,8 @@ import StoppuhrZaehler from "../components/StoppuhrZaehler.astro";
 
 <Layout title="Stoppuhr-Probe">
 	<div class="fassung fassung--a">
-		<p class="marke">A · wie bisher: Uhr</p>
-		<MultiOutputKacheln />
+		<p class="marke">A · Uhr ohne Beschlag</p>
+		<MultiOutputKacheln stoppuhr={false} />
 	</div>
 	<div class="fassung fassung--b">
 		<p class="marke">B · Stoppuhr</p>
