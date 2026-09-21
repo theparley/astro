@@ -95,9 +95,14 @@ export const STOPPUHR = {
 	knoepfe: "rechts" as "rechts" | "beide",
 };
 export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)
-// Beschriftung der Stunde (Fred 21.09.: „in die Uhr reinschreiben 60 Min."):
-// unter der Mitte, erscheint, sobald die Stunde fertig gezeichnet ist.
-export const STUNDE_TEXT = { text: "60 Min.", dy: 0.5, groesse: 0.26, einblenden: 0.3 }; // dy/groesse in Anteilen von r, einblenden in s
+// Beschriftung der Stunde (Fred 21.09.: „in die Uhr reinschreiben 60 Min.",
+// dann: „mitzaehlen, hochzaehlen, so wie der Zeiger sich bewegt"): unter
+// der Mitte, zaehlt 0 → 60 mit dem Zeiger (gleiche Kurve), steht dann.
+// Fred 21.09.: „die 60 in die Mitte, die Minuten klein drunter" — Zahl
+// mittig, direkt unter dem Drehpunkt (die Speichen laufen nach oben),
+// Einheit klein darunter. Masse in Anteilen von r (Grundlinien ab Mitte).
+export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.34, zahlDy: 0.29, einheitGroesse: 0.14, einheitDy: 0.47 };
+export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
 // ── Geometrie ───────────────────────────────────────────────────────────
 export function uhren(): Array<{ x: number; y: number }> {

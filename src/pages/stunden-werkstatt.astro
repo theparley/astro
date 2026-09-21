@@ -76,7 +76,7 @@ const N = uhren().length;
 <script src="/werkzeug/gif.js" is:inline></script>
 
 <script>
-	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, STUNDE_TEXT, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
+	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, STUNDE_TEXT, stundeMinuten, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
 	const WEISS = "#ffffff";
@@ -179,15 +179,14 @@ const N = uhren().length;
 		ctx.globalAlpha = 1;
 		if (stoppuhr) beschlag(ctx, UHR.cx, UHR.cy, WEISS);
 		blatt(ctx, UHR.cx, UHR.cy, WEISS);
-		// „60 Min." ab fertiger Stunde (Einblendung ueber STUNDE_TEXT.einblenden)
-		const textA = Math.max(0, Math.min(1, (t - m.stundeEnde) / STUNDE_TEXT.einblenden));
-		if (textA > 0 && t < m.RUNDE - 0.06) {
-			ctx.globalAlpha = textA;
+		// Zaehler „0 … 60 Min." mit dem Zeiger (Zahl rechtsbuendig an fester Kante)
+		if (t >= 0.09 && t < m.RUNDE - 0.06) {
 			ctx.fillStyle = WEISS;
-			ctx.font = `700 ${UHR.r * STUNDE_TEXT.groesse}px "Forma DJR", Helvetica, Arial, sans-serif`;
-			ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-			ctx.fillText(STUNDE_TEXT.text, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.dy);
-			ctx.globalAlpha = 1;
+			ctx.textBaseline = "alphabetic"; ctx.textAlign = "center";
+			ctx.font = `900 ${UHR.r * STUNDE_TEXT.zahlGroesse}px "Forma DJR", Helvetica, Arial, sans-serif`;
+			ctx.fillText(String(stundeMinuten(z.stundeAnteil)).padStart(2, "0"), UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.zahlDy);
+			ctx.font = `700 ${UHR.r * STUNDE_TEXT.einheitGroesse}px "Forma DJR", Helvetica, Arial, sans-serif`;
+			ctx.fillText(STUNDE_TEXT.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.einheitDy);
 		}
 		ctx.strokeStyle = WEISS;
 		ctx.lineWidth = STRICH;
