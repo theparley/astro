@@ -248,7 +248,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 // BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
 // Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
 import { GLYPHEN } from "../lib/stunde-glyphen";
-import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, STUNDE_TEXT, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
+import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, STUNDE_TEXT, ZEIGER_DECKKRAFT, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 // Zeiger-Sektor: Versatz der Scheibe o laeuft 1,06 → 0, Vorderkante bei
 // L = 1,04 − o. Der Sektor [L − w, L] braucht Versatz o + w − 1,04, um eine
@@ -564,7 +564,7 @@ const beschlagStriche = [
 							{/* KEIN fester Startstrich auf 12 mehr (Fred 21.09.): waehrend der Zeiger
    laeuft, soll oben nicht noch ein zweiter Zeiger stehen. Der Rand
    zeichnet sich weiter von 12 aus mit. */}
-							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
+							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} opacity={ZEIGER_DECKKRAFT} />
 							{/* Zaehler „00 … 60" (Fred 21.09.): mittig in der unteren Haelfte, ueber
 							   dem Halbstundenstrich, zaehlt mit dem Zeiger hoch (Script liest die
 							   Zeit der Speichen-Animation), steht dann auf 60; „Min." klein darunter.

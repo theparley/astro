@@ -76,6 +76,10 @@ export const BLATT = {
 	kleineMinuten: false,
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
+// Zeiger der Stunde halbtransparent (Fred 21.09.: „mach den Zeiger mal
+// transparent"): er laeuft hinter der Zahl, mit Deckkraft < 1 bleibt die
+// Zahl auch dort lesbar, wo er durchlaeuft. 1 = deckend.
+export const ZEIGER_DECKKRAFT = 0.5;
 // KEIN Zeiger auf den kleinen Uhren (Fred 21.09.): erst 176 drehende
 // Linien (ruckelten auf dem Handy), dann ein Sektor an der Vorderkante der
 // Fuellung (zu unauffaellig) — Entscheidung: die wachsende weisse Flaeche

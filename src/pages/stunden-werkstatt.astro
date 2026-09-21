@@ -77,7 +77,7 @@ const N = uhren().length;
 
 <script>
 	import { GLYPHEN } from "../lib/stunde-glyphen";
-	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, STUNDE_TEXT, stundeMinuten, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
+	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, STUNDE_TEXT, ZEIGER_DECKKRAFT, stundeMinuten, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
 	const WEISS = "#ffffff";
@@ -199,8 +199,8 @@ const N = uhren().length;
 		ctx.lineWidth = STRICH;
 		ctx.beginPath();
 		// kein fester Startstrich auf 12 (Fred 21.09.)
-		tick(ctx, UHR.cx, UHR.cy, 0, UHR.r, z.stundeAnteil * Math.PI * 2);        // laufende Speiche
-		ctx.stroke();
+		tick(ctx, UHR.cx, UHR.cy, 0, UHR.r, z.stundeAnteil * Math.PI * 2);        // laufende Speiche (halbtransparent, s. lib)
+		ctx.globalAlpha = ZEIGER_DECKKRAFT; ctx.stroke(); ctx.globalAlpha = 1;
 		void KAMERA;
 	}
 
