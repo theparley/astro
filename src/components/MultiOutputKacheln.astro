@@ -244,123 +244,15 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 
 
 // ── KACHEL 2: DIE STUNDE UND IHRE HUNDERT ──────────────────────────────
-// Fassung C der Stunden-Probe (Fred 21.09., eingebaut am selben Tag):
-// eine schwarze Stunde in der Mitte, um sie herum Ringe aus weissen Uhren,
-// die sich eine nach der anderen im Uhrzeigersinn fuellen, waehrend die
-// Kamera zurueckfaehrt. Menge durch Wiederholung, nicht durch Flaeche
-// (Isotype) — die fruehere Fassung „ein hundertfach groesserer Kreis" ist
-// damit abgeloest (Stand im Git vor diesem Commit).
-//
-// ALLE ZEITEN in Sekunden, alles andere wird daraus gerechnet. Wer eine
-// Zahl aendert, muss sonst nichts anfassen.
-const ZEIT = {
-	halt: 0,           // Halt am Anfang (0 = die Stunde zeichnet sofort)
-	stunde: 2.16,      // die Stunde zeichnet sich (Rand, Fuellung, Zeiger)
-	// Rauszoomen von KAMERA.start auf KAMERA.ende. Eine Zahl in Sekunden
-	// oder "letzteUhr" (dann so lang, bis die letzte Uhr fertig ist).
-	// DER EINE REGLER: an der Fahrt haengt die Uhrendauer und damit die
-	// Beschleunigung (s. uhrenDauer).
-	kameraRaus: 4.32 as number | "letzteUhr",
-	kameraVorsprung: 0, // nur bei "letzteUhr": so viele Sekunden steht die Kamera frueher
-	kameraAbStunde: 0,  // wann die Kamera losfaehrt, als Anteil der Stunden-Zeichnung
-	uhrenAbStunde: 0.5, // wann die erste weisse Uhr anfaengt, als Anteil der Stunde
-	uhrenStart: "abStunde" as number | "abStunde",
-	// Von der ersten bis zum Ende der letzten Uhr. "mitKamera": die letzte
-	// Uhr ist genau fertig, wenn die Kamera steht; die Beschleunigung
-	// ergibt sich daraus (bei 4,32 s Fahrt: +657 % je Sekunde).
-	uhrenDauer: "mitKamera" as number | "mitKamera",
-	// Die Rate, mit der Uhren anfangen, waechst jede Sekunde um denselben
-	// Prozentsatz (exponentiell in der Zeit) — das ist die einzige Form,
-	// die sich ueber die ganze Strecke gleich stark beschleunigt anfuehlt.
-	ersteDauer: 2.16,   // die erste weisse Uhr so lang wie die Stunde
-	naechsteBei: 0.5,   // die naechste Uhr faengt an, wenn die laufende hier ist
-	dauerMin: 0.3,      // kuerzeste Dauer einer Uhr
-	stand: 2,           // leichtes Weiter-Rauskriechen draussen (Fred 21.09.: „zwei Sekunden, dieses ganz leichte"); 0 = echter Stopp
-	kriechenRein: 2,    // genauso langsam wieder zurueck auf ende, bevor das Reinzoomen anzieht
-	ausblenden: "wieRein" as number | "wieRein", // weisse Uhren und Zeichnung der Stunde blenden waehrend des Reinzoomens aus; Zahl in Sekunden macht es unabhaengig
-	kameraRein: "wieRaus" as number | "wieRaus", // Kamera zurueck, so lang wie das Rauszoomen (Fred 21.09.); Zahl in Sekunden macht es unabhaengig
-	// INNEN DASSELBE WIE AUSSEN (Fred 21.09.: „den Uebergang, wenn man die Uhr
-	// gross sieht, genauso wie am Ende vom Rauszoomen"): nach der Ankunft
-	// auf der Stunde kriecht die Kamera noch ein Stueck naeher (KAMERA.drift
-	// ueber start hinaus), und genauso langsam zurueck — von dort zieht die
-	// naechste Runde ohne Stopp an.
-	innenStand: 2,      // Kriechen naeher ran
-	innenZurueck: 2,    // Kriechen zurueck auf start
-	nachlauf: 0,        // kein Halt bis zur naechsten Runde
-};
-const KURVE = [0.65, 0, 0.35, 1];   // weich rein und raus: Stunde, Uhren, Reinzoomen
-// OHNE STOPP VOR DEM KRIECHEN (Fred 21.09.): endet das Rauszoomen auf
-// Tempo null und faengt das Kriechen bei null an, liegen zwei Stillstaende
-// hintereinander — das Auge liest eine Pause. Deshalb kommt das Rauszoomen
-// mit einem kleinen Resttempo an (letzter Wert 0,976 statt 1: die Kurve
-// ist am Ende nicht mehr ganz flach), und das Kriechen faehrt sofort damit
-// weiter (reines Auslaufen, kein Anlauf). Am inneren Uebergang dasselbe:
-// das Zurueckkriechen endet beschleunigend, das Reinzoomen setzt mit
-// passendem Anfangstempo an (zweiter Wert 0,012 statt 0).
-// Rauszoomen setzt mit dem Kriechtempo an (zweiter Wert 0,012 wie beim
-// Reinzoomen), seit die Kamera am Rundenanfang aus dem inneren Kriechen
-// kommt und nicht mehr steht — vorher [0, 0, 0.35, 0.976] ohne Anlauf.
-const KURVE_RAUS = [0.65, 0.012, 0.35, 0.976]; // Rauszoomen: weicher Ansatz, Resttempo am Ende
-const KURVE_KRIECH_RAUS = [0, 0, 0.35, 1];  // Kriechen raus: faehrt sofort, laeuft weich aus
-const KURVE_KRIECH_REIN = [0.65, 0, 1, 1];  // Kriechen zurueck: weich an, beschleunigend
-const KURVE_REIN = [0.65, 0.012, 0.35, 0.976]; // Reinzoomen: setzt mit dem Kriechtempo an, kommt mit Resttempo an (wie raus)
-// bei ende 1,15 sind 96 Uhren ganz im Bild, 36 angeschnitten.
-// drift (Fred 21.09.: „statt einem Stopp am Ende ein ganz leichtes
-// Rauszoomen, dann wieder Reinzoomen, genauso langsam, und dann schneller"):
-// waehrend der Standzeit (ZEIT.stand) faehrt die Kamera nicht stehend,
-// sondern kriecht um diesen Anteil weiter raus — von 1,15 auf 1,15·(1−0,03)
-// = 1,116 —, weich rein und raus; das Reinzoomen setzt dort mit weichem
-// Anlauf an. 0 = echter Stopp.
-// ende 1,2 statt 1,15 (Fred 21.09., „wie viele Kacheln man sieht"): mit dem
-// Kriechen auf 1,164 blieben bei 1,15 nicht mehr unter hundert (106 ganz im
-// Bild). Bei 1,2 sind es an beiden Enden 92 ganz im Bild, 32–36 angeschnitten.
-const KAMERA = { start: 7, ende: 1.2, drift: 0.03 };
-
-const uhrenStart = ZEIT.uhrenStart === "abStunde" ? ZEIT.halt + ZEIT.stunde * ZEIT.uhrenAbStunde : ZEIT.uhrenStart;
-const kameraStart = ZEIT.halt + ZEIT.stunde * ZEIT.kameraAbStunde;
-const uhrenDauer =
-	ZEIT.uhrenDauer !== "mitKamera" ? ZEIT.uhrenDauer
-	: ZEIT.kameraRaus === "letzteUhr" ? 9.92
-	: kameraStart + ZEIT.kameraRaus - uhrenStart;
-const uhrenEnde = uhrenStart + uhrenDauer;
-const M = {
-	halt: ZEIT.halt,
-	stundeEnde: ZEIT.halt + ZEIT.stunde,
-	kameraStart,
-	kameraEnde: ZEIT.kameraRaus === "letzteUhr" ? uhrenEnde - ZEIT.kameraVorsprung : kameraStart + ZEIT.kameraRaus,
-	uhrenStart,
-	uhrenEnde,
-};
-const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
-const reinStart = standEnde + ZEIT.kriechenRein; // hier setzt das Reinzoomen an, das Ausblenden auch
-const kameraRein = ZEIT.kameraRein === "wieRaus" ? M.kameraEnde - M.kameraStart : ZEIT.kameraRein;
-const ausblenden = ZEIT.ausblenden === "wieRein" ? kameraRein : ZEIT.ausblenden;
-const reinEnde = reinStart + kameraRein;
-const innenEnde = reinEnde + ZEIT.innenStand;     // naechster Punkt: die Kamera ist ueber start hinaus
-const RUNDE = Math.max(reinStart + ausblenden, innenEnde + ZEIT.innenZurueck) + ZEIT.nachlauf;
-
-// Geometrie: sieben Ringe um die Stunde, Abstand 90, je Ring round(2·pi·k)
-// Uhren — 176; Ring 1-5 ganz in der Kachel, 6 und 7 angeschnitten.
-// viewBox 1000 x 1250 liegt auf der GANZEN Kachel („slice"), Stunde in
-// (500, 625).
-const UHR = { r: 34, cx: 500, cy: 625, abstand: 90, ringe: 7 };
-const uhren: Array<{ x: number; y: number }> = [];
-for (let k = 1; k <= UHR.ringe; k++) {
-	const n = Math.round(2 * Math.PI * k);
-	for (let j = 0; j < n; j++) {
-		const th = -Math.PI / 2 + (j * 2 * Math.PI) / n;
-		uhren.push({ x: +(UHR.cx + UHR.abstand * k * Math.cos(th)).toFixed(2), y: +(UHR.cy + UHR.abstand * k * Math.sin(th)).toFixed(2) });
-	}
-}
-// Ziffernblatt als zwei gestrichelte Kreise je Uhr: Strichbreite = radiale
-// Laenge des Ticks, Muster = Tick-Breite und Luecke; pathLength 60 bzw. 4.
-const BLATT = {
-	minute: { r: UHR.r - 1 - 1.75, laenge: 3.5, breite: 0.9 },
-	viertel: { r: UHR.r - 1 - 3.5, laenge: 7, breite: 1.8 },
-};
+// Zeiten, Kurven, Kamera und Geometrie kommen aus src/lib/stunde.ts — EINE
+// BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
+// Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
+import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, marken, uhren as uhrenGeometrie } from "../lib/stunde";
+const uhren = uhrenGeometrie();
+const M = marken();
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * 60).toFixed(3);
 const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer, kameraRein, ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KAMERA, M, standEnde, reinStart, reinEnde, innenEnde, RUNDE, N: uhren.length });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraRein: M.kameraRein, ausblenden: M.ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, M, standEnde: M.standEnde, reinStart: M.reinStart, reinEnde: M.reinEnde, innenEnde: M.innenEnde, RUNDE: M.RUNDE, N: uhren.length });
 
 interface Props {
 	fassung?: "brett" | "liste";
@@ -1473,7 +1365,7 @@ const { fassung = "brett" } = Astro.props;
 			{ opacity: 0, offset: 0 },
 			{ opacity: 0, offset: o(SCHUTZ) },
 			{ opacity: 1, offset: o(SCHUTZ * 1.5) },
-			{ opacity: 1, offset: o(reinStart), easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+			{ opacity: 1, offset: o(reinStart), easing: bz(P.KURVE_AUSBLENDEN) },
 			{ opacity: 0, offset: o(reinStart + ZEIT.ausblenden) }, // ZEIT.ausblenden ist im Plan bereits aufgeloest
 			{ opacity: 0, offset: 1 },
 		];
