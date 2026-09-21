@@ -119,64 +119,68 @@ const kanalBand = [
 // das sieht nach Fehler aus, nicht nach Rhythmus.
 // Geprueft ueber den Rand hinweg: die letzte Zeile geht wieder in die erste
 // ueber, also zaehlt auch dieses Paar.
-// Formen und Ziele sind vollstaendig entzerrt. Die ZAHLEN nicht ganz: neun
-// der vierzehn Zeilen tragen die 1, dem stehen fuenf Trenner gegenueber —
-// vier Beruehrungen sind damit das rechnerische Minimum (9 minus 5). Genau
-// vier sind es, und zwar als vier EINZELNE Paare, nicht als Dreierblock:
-// das Muster laeuft B-A-A-B-A-A-B-A-A-B-A-A-B-A. Ein Dreierblock waere
-// schlimmer als vier Paare, weil die Zahlenspalte dann zwei Takte lang
-// stillstuende statt einen.
+// Formen und Ziele sind vollstaendig entzerrt, auch ueber den Rand. Die
+// ZAHLEN nicht ganz: acht der vierzehn Zeilen tragen die 1, dem stehen
+// sechs Trenner gegenueber — zwei Beruehrungen sind damit das rechnerische
+// Minimum (8 minus 6), und genau zwei sind es.
+// Die Reihenfolge ist nicht von Hand gelegt, sondern gesucht: der
+// Loesungsraum ist zu gross, um ihn im Kopf zu pruefen, sobald drei
+// Spalten gleichzeitig kollisionsfrei sein sollen. Wer Zeilen aendert,
+// muss die Pruefung wiederholen (drei Spalten, zyklisch, letzte gegen
+// erste) und nicht nur die geaenderte Zeile ansehen.
+// VIERTE BEDINGUNG: die zwei Zahl-Beruehrungen duerfen sich nicht
+// beruehren. Drei gleiche Zahlen hintereinander waeren schlimmer als
+// zwei getrennte Paare — die Zahlenspalte stuende dann zwei Takte still
+// statt einen. Die erste gefundene Loesung hatte genau diesen Dreierblock
+// (Zeilen 6-7-8) und wurde deshalb verworfen.
+// KI IST KEIN ZIEL MEHR (Fred 21.09.): die frueheren Zeilen „ZITATE / KI"
+// und „TRANSKRIPT / KI" behaupteten die KI als Kanal. Jetzt heisst die
+// Zeile „ZITATE FÜR KI / WEBSITE" — Kanal ist die Website, die KI ist das
+// Publikum. Damit sinkt die Zahl der Ziele von acht auf sieben, und
+// WEBSITE kommt dreimal vor.
 // PREIS DIESER SORTIERUNG: die Reihe ist damit nicht mehr nach Laenge
 // geordnet (lang → kurz). Das war vorher ein System, jetzt ist es eine
 // Mischung. Fuer ein durchlaufendes Brett ist das eher ein Gewinn — es
 // verhindert, dass jemand Bloecke als „Kategorien" liest und nachzaehlt.
 const brettZeilen = [
-	["9", "BEITRÄGE", "LINKEDIN"],
-	["1", "VIDEOPODCAST", "WEBSITE"],
-	["1", "TRANSKRIPT", "KI"],
-	["9", "SHORTS", "YOUTUBE"],
-	["1", "LIVESTREAM", "LINKEDIN"],
+	["12", "Q&A", "YOUTUBE"],
 	["1", "TRANSKRIPT", "WEBSITE"],
 	["9", "REELS", "INSTAGRAM"],
-	["1", "VIDEOPODCAST", "YOUTUBE"],
 	["1", "SHOWNOTES", "SPOTIFY"],
-	["10", "Q&A", "YOUTUBE"],
-	["1", "NEWSLETTER", "E-MAIL"],
+	["1", "LIVESTREAM", "YOUTUBE"],
+	["9", "BEITRÄGE", "LINKEDIN"],
 	["1", "PODCAST-FOLGE", "SPOTIFY"],
 	["9", "VIDEOS", "TIKTOK"],
-	["1", "LIVESTREAM", "YOUTUBE"],
+	["1", "LIVESTREAM", "LINKEDIN"],
+	["1", "VIDEOPODCAST", "YOUTUBE"],
+	["12", "ZITATE FÜR KI", "WEBSITE"],
+	["1", "NEWSLETTER", "E-MAIL"],
+	["9", "SHORTS", "YOUTUBE"],
+	["1", "VIDEOPODCAST", "WEBSITE"],
 ];
 
 // Die Listen-Fassung von Kachel 1 (ohne Brett) traegt dieselben Paare —
 // beide Fassungen duerfen nie auseinanderlaufen.
 const varianten: Array<[string, string, string[]]> = [
-	["9", "Beiträge für LinkedIn", ["linkedin"]],
-	["1", "Videopodcast-Aufzeichnung für die Website", ["web"]],
-	// KI-LESBARES TRANSKRIPT statt „10 Zitate für KI" (Fred 21.09.).
-	// Der frueheren Ablehnung von „KI-lesbar" ist damit der halbe Boden
-	// entzogen: als Adjektiv war es ungrammatisch („10 KI-lesbar"), als
-	// Substantiv-Fuegung ist es sauber. Der zweite Einwand — es benennt die
-	// Eintrittsbedingung, nicht die Leistung — bleibt bestehen und ist hier
-	// GEWOLLT: geliefert wird die Bedingung, nicht das Ergebnis. Zitiert zu
-	// werden kann niemand zusagen, ein maschinenlesbares Transkript schon.
-	// Damit faellt die Stueckzahl von zehn auf eins — ein Artefakt, keine
-	// zehn Schnipsel.
-	// BEDINGUNG: Diese Zeile haelt nur, wenn das KI-Transkript ein ANDERES
-	// Artefakt ist als das Website-Transkript — also strukturiert, in
-	// Abschnitte geschnitten, Sprecher und Aussagen ausgezeichnet. Ist es
-	// dieselbe Datei an zwei Orten, ist es EINE Delivery und die Zeile faellt.
-	["1", "KI-lesbares Transkript", ["chatgpt", "claude", "gemini"]],
-	["9", "Shorts für YouTube", ["youtube"]],
-	["1", "Livestream für LinkedIn", ["linkedin"]],
+	["12", "Q&A für YouTube", ["youtube"]],
 	["1", "Transkript für die Website", ["web"]],
 	["9", "Reels für Instagram", ["instagram"]],
-	["1", "Videopodcast für YouTube", ["youtube"]],
 	["1", "Shownotes für Spotify", ["spotify"]],
-	["10", "Q&A für YouTube", ["youtube"]],
-	["1", "Newsletter per Mail", ["mail"]],
+	["1", "Livestream für YouTube", ["youtube"]],
+	["9", "Beiträge für LinkedIn", ["linkedin"]],
 	["1", "Podcast-Folge für Spotify", ["spotify"]],
 	["9", "Videos für TikTok", ["tiktok"]],
-	["1", "Livestream für YouTube", ["youtube"]],
+	["1", "Livestream für LinkedIn", ["linkedin"]],
+	["1", "Videopodcast für YouTube", ["youtube"]],
+	// ZITATE FÜR KI statt „KI-lesbares Transkript" (Fred 21.09.), und das
+	// Ziel ist jetzt die WEBSITE statt „KI". Das loest den Einwand, dass
+	// die KI kein Kanal ist: der Kanal ist die Website, die KI das
+	// Publikum. Die Form traegt ihr „für KI" selbst — die einzige Zeile
+	// mit einer Praeposition im Formwort, und genau deshalb verstaendlich.
+	["12", "Zitate für KI auf der Website", ["chatgpt", "claude", "gemini"]],
+	["1", "Newsletter per Mail", ["mail"]],
+	["9", "Shorts für YouTube", ["youtube"]],
+	["1", "Videopodcast-Aufzeichnung für die Website", ["web"]],
 ];
 
 // Männchen als Hintergrund-Kachelung (Kachel 3). Ein einziges DIV statt
