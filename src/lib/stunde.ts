@@ -73,6 +73,12 @@ export const BLATT = {
 	kleineMinuten: true, // Fred 21.09.: „Lass die mal drin" (Website)
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
+// Zeiger der kleinen Uhren: KEIN drehendes Element (176 SVG-Transforms
+// ruckelten auf dem Handy, Fred 21.09.), sondern ein dunkler Sektor an der
+// Vorderkante der Fuellung — dieselbe Kuchenstueck-Mechanik wie die
+// Scheibe, nur um `anteil` versetzt. Breite als Anteil des Umfangs; 0,012
+// entspricht am Rand der Strichbreite 2,5 der Stunde.
+export const ZEIGER = { anteil: 0.012 };
 // Stoppuhr-Beschlag (Fred 21.09., Probe): Krone oben als T mit Hals,
 // Druecker rechts oben bei 45 Grad (knoepfe: "beide" fuer links und rechts). Masse in Anteilen des
 // Radius, abgeleitet aus Octicons / Noun 2624401 / UXWing (Recherche
@@ -87,7 +93,10 @@ export const STOPPUHR = {
 	// mehr nach Stoppuhr aus") oder "beide" (links und rechts).
 	knoepfe: "rechts" as "rechts" | "beide",
 };
-export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)
+export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick der STUNDE (Splitter/Spalt-frei)
+// Die kleinen Scheiben laufen nur bis 1,0 (kein Ueberhang): der dunkle
+// Zeiger-Sektor endet genau auf 12 und deckt dort die Naht der Scheibe.
+export const DASH_KLEIN = { muster: [1, 2], leer: 1.02 };
 
 // ── Geometrie ───────────────────────────────────────────────────────────
 export function uhren(): Array<{ x: number; y: number }> {

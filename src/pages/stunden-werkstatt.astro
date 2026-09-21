@@ -76,7 +76,7 @@ const N = uhren().length;
 <script src="/werkzeug/gif.js" is:inline></script>
 
 <script>
-	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
+	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, ZEIGER, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
 	const WEISS = "#ffffff";
@@ -163,12 +163,14 @@ const N = uhren().length;
 		for (let i = 0; i < N; i++) stueck(ctx, punkte[i].x, punkte[i].y, UHR.r, z.anteile[i]);
 		for (let i = 0; i < N; i++) if (z.anteile[i] > 0) blatt(ctx, punkte[i].x, punkte[i].y, KACHEL, BLATT.kleineMinuten);
 		if (stoppuhr) for (let i = 0; i < N; i++) if (z.anteile[i] > 0) beschlag(ctx, punkte[i].x, punkte[i].y, WEISS);
-		// Dunkler Zeiger je weisser Uhr: dreht mit der Fuellung, steht am Ende auf 12
-		ctx.strokeStyle = KACHEL;
-		ctx.lineWidth = STRICH;
-		ctx.beginPath();
-		for (let i = 0; i < N; i++) if (z.anteile[i] > 0) tick(ctx, punkte[i].x, punkte[i].y, 0, UHR.r, z.anteile[i] * Math.PI * 2);
-		ctx.stroke();
+		// Dunkler Zeiger je weisser Uhr: Sektor an der Vorderkante der Fuellung
+		// (wie die Website: lib ZEIGER), steht am Ende auf 12
+		ctx.fillStyle = KACHEL;
+		for (let i = 0; i < N; i++) if (z.anteile[i] > 0) {
+			const a = Math.min(1.04, z.anteile[i] * 1.04);
+			const von = Math.max(0, a - ZEIGER.anteil), bis = Math.min(1, a);
+			if (bis > von) { ctx.beginPath(); ctx.moveTo(punkte[i].x, punkte[i].y); ctx.arc(punkte[i].x, punkte[i].y, UHR.r, -Math.PI / 2 + von * Math.PI * 2, -Math.PI / 2 + bis * Math.PI * 2); ctx.closePath(); ctx.fill(); }
+		}
 
 		// Die Stunde: dunkle Fuellung und Rand (blenden mit aus), helles
 		// Blatt und Speichen (bleiben stehen)
