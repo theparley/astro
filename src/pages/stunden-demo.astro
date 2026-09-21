@@ -13,7 +13,26 @@ const ZEIT = {
 	kameraRaus: 6.12,  // Kamera von 7 auf 1, beginnt, wenn die Stunde steht
 	uhrenStart: 3.24,  // ab Rundenbeginn: die erste Uhr faengt an
 	uhrenDauer: 11.52, // von der ersten bis zum Ende der letzten Uhr
-	uhrDauer: 0.54,    // jede einzelne Uhr, vom leeren zum vollen Kreis
+	// RAMPE UND VERHAELTNIS (Fred 21.09.: „es fuehlt sich natuerlicher an,
+	// wenn es ein Verhaeltnis gaebe zwischen dem Ramp, wie die Uhren
+	// entstehen, und wie schnell die Uhren animiert werden"). Statt einer
+	// festen Dauer je Uhr:
+	//   rampe     wie viel schneller die Uhren am ENDE der Reihe anfangen
+	//             als am Anfang (4 = am Ende viermal so viele je Sekunde).
+	//             Nur eine Steigerung, kein Auslaufen (Fred 21.09.: „das
+	//             darf schneller werden — je mehr draussen ist, desto mehr
+	//             vervielfaeltigt sich das; beim Rauszoomen sieht man
+	//             ploetzlich viel mehr Uhren, wenn da die Animation
+	//             schneller wird, ist es besser").
+	// Die Dauer jeder Uhr haengt am Abstand zur naechsten: die ERSTE weisse
+	// Uhr braucht genau so lang wie die schwarze Stunde (Fred 21.09.: „die
+	// erste weisse Uhr genauso schnell animieren wie die erste Uhr, und
+	// dann immer schneller werden"), alle weiteren im Verhaeltnis ihrer
+	// Luecke zur ersten — am Ende also 1/rampe davon. Damit ist eine Uhr
+	// genau dort langsam, wo wenige anfangen, und schnell, wo viele
+	// anfangen. Wie viele gleichzeitig laufen, ergibt sich daraus (es steht
+	// in der Fusszeile). Kein eigener Wert mehr dafuer.
+	rampe: 4,
 	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
 	ausblenden: 3.9,   // alles blendet aus
 	kameraRein: 6.84,  // Kamera zurueck auf 7, laeuft parallel zum Ausblenden
@@ -678,14 +697,32 @@ import Layout from "../layouts/Layout.astro";
 		const K = `cubic-bezier(${KURVE.join(", ")})`;
 		const ms = RUNDE * 1000;
 		const o = (s: number) => s / RUNDE; // Sekunde -> Anteil der Runde
-		// UMKEHRUNG der Kurve fuer die Reihenfolge: gesucht ist die Startzeit
-		// der i-ten Uhr, so dass die ZAHL der gestarteten Uhren ueber die Zeit
-		// der Kurve folgt (wenig am Anfang, viele in der Mitte, wenig am Ende).
-		// Legt man die Kurve direkt auf die Nummer, kippt es um: die ersten
-		// Uhren starten fast gleichzeitig (gemessen: 66 volle Uhren nach 24 %
-		// der Strecke statt 19). Die Umkehrfunktion einer Bezier-Kurve ist
-		// dieselbe Kurve mit vertauschten Achsen: (x1,y1,x2,y2) → (y1,x1,y2,x2).
-		const startzeit = bezier(KURVE[1], KURVE[0], KURVE[3], KURVE[2]);
+		// REIHENFOLGE MIT RAMPE: die Rate, mit der Uhren anfangen, steigt
+		// ueber die Strecke von 1 auf rampe — weich anlaufend (halber
+		// erhoehter Kosinus), ohne Auslaufen am Ende. Das Verhaeltnis bleibt
+		// damit begrenzt; die Umkehrung der Kamera-Kurve waere an den Raendern
+		// unendlich flach, die erste Uhr haette fast fuenf Sekunden gebraucht.
+		// Die Startzeit der i-ten Uhr ist die Umkehrung der aufsummierten Rate.
+		const rate = (u: number) => 1 + (ZEIT.rampe - 1) * (1 - Math.cos(Math.PI * u)) / 2;
+		const STUETZEN = 2000;
+		const summe: number[] = [0];
+		for (let k = 1; k <= STUETZEN; k++) summe.push(summe[k - 1] + (rate((k - 0.5) / STUETZEN)) / STUETZEN);
+		const startlage = (anteil: number) => {
+			const ziel = anteil * summe[STUETZEN];
+			let k = 0;
+			while (k < STUETZEN && summe[k + 1] < ziel) k++;
+			const rest = (ziel - summe[k]) / (summe[k + 1] - summe[k] || 1);
+			return Math.min(1, (k + rest) / STUETZEN);
+		};
+		const lagen = Array.from({ length: N }, (_, i) => startlage(i / (N - 1)));
+		const luecken = lagen.map((l, i) => (i < N - 1 ? lagen[i + 1] - l : lagen[i] - lagen[i - 1]));
+		// Dauer je Uhr: die erste so lang wie die Stunde, die weiteren im
+		// Verhaeltnis ihrer Luecke zur ersten (haengt nicht an der Strecke).
+		const dauern = luecken.map((l) => ZEIT.stunde * (l / luecken[0]));
+		// Die Strecke so waehlen, dass die LETZTE Uhr genau bei uhrenEnde
+		// fertig ist: Ende = lage_letzte·strecke + dauer_letzte.
+		const strecke = (ZEIT.uhrenDauer - dauern[N - 1]) / lagen[N - 1];
+		const gleichzeitig = dauern[0] / (luecken[0] * strecke);
 		const opt = { duration: ms, iterations: Infinity };
 
 		const kamera = buehne.querySelector<SVGGElement>(".kamera")!;
@@ -721,25 +758,25 @@ import Layout from "../layouts/Layout.astro";
 			{ transform: "rotate(1turn)", offset: 1 },
 		], opt);
 
-		// Die Uhren: Startzeiten auf der Kurve verteilt, jede fuellt sich in
-		// uhrDauer mit derselben Kurve.
-		const spanne = ZEIT.uhrenDauer - ZEIT.uhrDauer;
+		// Die Uhren: Start aus der Rampe, Dauer aus dem Abstand (s. oben).
 		buehne.querySelectorAll<SVGCircleElement>(".feld[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
-			const s = ZEIT.uhrenStart + startzeit(i / (N - 1)) * spanne;
+			const s = ZEIT.uhrenStart + lagen[i] * strecke;
 			el.animate([
 				{ strokeDashoffset: 1.06, offset: 0 },
 				{ strokeDashoffset: 1.06, offset: o(s), easing: K },
-				{ strokeDashoffset: 0, offset: o(s + ZEIT.uhrDauer) },
+				{ strokeDashoffset: 0, offset: o(s + dauern[i]) },
 				{ strokeDashoffset: 0, offset: 1 },
 			], opt);
 		});
+		const mitte = Math.floor(N / 2);
 
 		const fuss = document.querySelector("[data-fuss]");
 		if (fuss) fuss.textContent =
 			`Runde ${RUNDE.toFixed(2)} s.\n` +
 			`Stunde ${M.halt}–${M.stundeEnde.toFixed(2)} s · Kamera raus ${M.stundeEnde.toFixed(2)}–${M.kameraEnde.toFixed(2)} s · ` +
-			`Uhren ${ZEIT.uhrenStart}–${M.uhrenEnde.toFixed(2)} s (je ${ZEIT.uhrDauer} s, Reihenfolge auf der Kurve) · ` +
+			`Uhren ${ZEIT.uhrenStart}–${M.uhrenEnde.toFixed(2)} s, Rampe ${ZEIT.rampe}, rund ${gleichzeitig.toFixed(0)} gleichzeitig — ` +
+			`Dauer je Uhr erste ${dauern[0].toFixed(2)} s, Mitte ${dauern[mitte].toFixed(2)} s, letzte ${dauern[N - 1].toFixed(2)} s · ` +
 			`steht bis ${standEnde.toFixed(2)} s · ausblenden bis ${(standEnde + ZEIT.ausblenden).toFixed(2)} s · ` +
 			`Kamera rein bis ${(standEnde + ZEIT.kameraRein).toFixed(2)} s.\n` +
 			`Schalter: ?rand ?hell ?heller ?ohneblatt`;
