@@ -1154,8 +1154,20 @@ const { fassung = "brett" } = Astro.props;
 		box-shadow: none;
 	}
 
+	/* SCHARNIER WIEDER SICHTBAR (Fred 21.09.: „den Querstrich wieder rein,
+	   ohne den Kachelhintergrund, aber dass man versteht, dass es ein
+	   Flipboard ist"). Die Kacheln bleiben transparent; die Naht ist ein
+	   Strich in der KACHELFARBE, der durch die Buchstaben schneidet — wie
+	   der Spalt zwischen Ober- und Unterklappe. Weil die Kacheln ohne
+	   Abstand stehen, fuegen sich die Naehte zu einer Linie ueber die ganze
+	   Zeile. Hoehe an der Kachelbreite bemessen (rund 2 px bei 40 px
+	   Kacheln). Gilt auch auf dem Telefon — die Basis blendet das Scharnier
+	   dort aus (Befund 20.09., dunkle Wand), hier ist es gewollt. */
 	.kachel-mitte--brett .sf-hinge {
-		display: none;
+		display: block;
+		background: var(--kachel);
+		height: max(1.5px, calc(var(--sf-tile-w) * 0.05));
+		transform: translateY(-50%);
 	}
 
 	.kachel-mitte--brett .sf-static--top,
