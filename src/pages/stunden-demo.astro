@@ -19,9 +19,9 @@ const ZEIT = {
 	kameraRaus: "letzteUhr" as number | "letzteUhr",
 	// Vorsprung der Kamera vor der letzten Uhr, in Sekunden: bei "letzteUhr"
 	// steht sie so viel frueher (Fred 21.09.: „mach das Rauszoomen eine
-	// Sekunde schneller", dann „nochmal eine Sekunde"). 0 = genau mit der
-	// letzten Uhr.
-	kameraVorsprung: 2,
+	// Sekunde schneller", dann „nochmal eine Sekunde", dann noch eine). 0 =
+	// genau mit der letzten Uhr.
+	kameraVorsprung: 3,
 	// Wann die Kamera losfaehrt, als Anteil der Stunden-Zeichnung: 0,75 =
 	// im letzten Viertel (Fred 21.09.: „starte mit dem Zoomen noch frueher,
 	// bevor die schwarze Uhr fertig animiert hat, wenn sie im letzten
@@ -85,7 +85,7 @@ const ZEIT = {
 	lueckeMin: 0.05,
 	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
 	ausblenden: 3.9,   // die weissen Uhren und die Zeichnung der Stunde blenden aus
-	kameraRein: 6.84,  // Kamera zurueck auf 7, laeuft parallel zum Ausblenden
+	kameraRein: 5.84,  // Kamera zurueck auf 7, parallel zum Ausblenden (war 6,84; Fred 21.09.: eine Sekunde schneller)
 	// KEIN SCHWARZ MEHR (Fred 21.09.: „die Pause, wenn es zurueckgeht und
 	// der Bildschirm schwarz wird, ist zu lang … da wuerde ich alles
 	// ausblenden und dann starten wie am Anfang mit der Uhr mit dem
