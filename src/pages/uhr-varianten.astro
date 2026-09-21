@@ -21,7 +21,8 @@ const einheitG = GLYPHEN.einheit as unknown as Record<string, Z>;
 type Variante = {
 	nr: number; titel: string; notiz: string;
 	zahl: { groesse: number; dy: number; lage?: "unten" | "mitte" | "geteilt"; luecke?: number; fett?: boolean };
-	zeiger: "voll" | "duenn" | "halb" | "aussen" | "ring" | "hinter" | "nadel" | "punkt" | "keiner" | "ringinnen";
+	zeiger: "voll" | "duenn" | "halb" | "aussen" | "ring" | "hinter" | "nadel" | "punkt" | "keiner" | "ringinnen" | "punktschweif" | "hinterKelle" | "sektor";
+	kontur?: boolean; // Ziffern mit Freiraum in Hintergrundfarbe (Zeiger dahinter bleibt lesbar getrennt)
 	blatt: "voll" | "rand" | "viertel" | "keins";
 	einheit: "unter" | "neben" | "keine" | "klein-oben";
 };
@@ -85,7 +86,14 @@ const zeigerSvg = (art: Variante["zeiger"], minuten: number) => {
 		case "ring": { // Fortschrittsbogen aussen auf dem Rand (Kuchenstueck-Trick)
 			const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r + 3.5}" fill="none" stroke="#fff" stroke-width="2.2" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)"/>`; }
 		case "ringinnen": { const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r - 12}" fill="none" stroke="#fff" stroke-width="2.4" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)" opacity="0.9"/>` + tick(r - 13.2, r - 10.8, 0, 1.2); }
-		case "hinter": return ""; // wird VOR den Ziffern gezeichnet (s. uhrSvg)
+		case "punktschweif": { // Richtung A „Studiouhr": Punkt innerhalb des Strichkranzes, drei nachziehende kleinere Punkte
+			let out = `<circle cx="0" cy="0" r="1.6" fill="#fff"/>`;
+			for (let k = 0; k < 4; k++) { const a = rad - k * 0.11; const s = Math.sin(a), c = Math.cos(a); const rr = r - 9.5; out += `<circle cx="${f(rr * s)}" cy="${f(-rr * c)}" r="${f(2.6 - k * 0.6)}" fill="#fff"/>`; }
+			return out; }
+		case "sektor": { // Richtung C: gefuellter Sektor vom Drehpunkt bis zum Strichkranz
+			const rr = r - 9, anteil = minuten / 60; if (anteil >= 1) return `<circle cx="0" cy="0" r="${rr}" fill="#fff"/>`;
+			const s = Math.sin(rad), c = Math.cos(rad); return `<path d="M0,0 L0,${-rr} A${rr},${rr} 0 ${anteil > 0.5 ? 1 : 0} 1 ${f(rr * s)},${f(-rr * c)} Z" fill="#fff"/>`; }
+		case "hinter": case "hinterKelle": return ""; // wird VOR den Ziffern gezeichnet (s. uhrSvg)
 	}
 };
 
@@ -111,8 +119,13 @@ function uhrSvg(v: Variante, minuten: number) {
 	if (v.einheit === "unter") einheit = einheitSvg(0.14, cx, grundZahl + 0.17 * r);
 	if (v.einheit === "neben") einheit = einheitSvg(0.13, cx + (ZELLE * 2 * (r * v.zahl.groesse) / GLYPHEN.upm) / 2 + 2, grundZahl, "links");
 	if (v.einheit === "klein-oben") einheit = einheitSvg(0.12, cx, cy - 0.42 * r);
-	const zeigerHinter = v.zeiger === "hinter" ? tick(0, r, 0, STRICH) + tick(0, r, (minuten / 60) * 2 * Math.PI, STRICH) : "";
-	const zeigerVor = v.zeiger === "hinter" ? "" : zeigerSvg(v.zeiger, minuten);
+	const radH = (minuten / 60) * 2 * Math.PI;
+	const kelle = `<circle cx="${f((r - 6) * Math.sin(radH))}" cy="${f(-(r - 6) * Math.cos(radH))}" r="2.8" fill="#fff"/>`;
+	const zeigerHinter = v.zeiger === "hinter" ? tick(0, r, 0, STRICH) + tick(0, r, radH, STRICH)
+		: v.zeiger === "hinterKelle" ? tick(0, r, 0, STRICH * 0.5) + tick(0, r - 6, radH, STRICH * 0.5) + kelle
+		: v.zeiger === "sektor" ? zeigerSvg("sektor", minuten) : "";
+	const zeigerVor = (v.zeiger === "hinter" || v.zeiger === "hinterKelle" || v.zeiger === "sektor") ? "" : zeigerSvg(v.zeiger, minuten);
+	if (v.kontur) { ziffern = ziffern.replaceAll('fill="#fff"', 'fill="#fff" stroke="#212121" stroke-width="140" paint-order="stroke" stroke-linejoin="round"'); einheit = einheit.replaceAll('fill="#fff"', 'fill="#fff" stroke="#212121" stroke-width="140" paint-order="stroke" stroke-linejoin="round"'); }
 	const pad = 16;
 	return `<svg viewBox="${-r - pad} ${-r - pad - 12} ${2 * r + 2 * pad} ${2 * r + 2 * pad + 12}" aria-hidden="true">
 		<circle cx="0" cy="0" r="${r}" fill="#212121" stroke="#fff" stroke-width="${STRICH}"/>
@@ -145,13 +158,17 @@ const varianten: Variante[] = [
 	{ nr: 18, titel: "Geteilt, Ring aussen", notiz: "Ziffern beidseits, Fortschrittsring aussen, kein Zeiger.", zahl: { groesse: 0.8, lage: "geteilt", luecke: 0.4 }, zeiger: "ring", blatt: "rand", einheit: "unter" },
 	{ nr: 19, titel: "Geteilt, Zeiger dahinter", notiz: "Ziffern beidseits, voller Zeiger hinter den Ziffern.", zahl: { groesse: 0.8, lage: "geteilt", luecke: 0.36 }, zeiger: "hinter", blatt: "voll", einheit: "unter" },
 	{ nr: 20, titel: "Zahl mit Luft, Zeiger duenn", notiz: "Ziffern mit Abstand (Zeiger passt in die Luecke), 0,66 r mittig, Zeiger duenn.", zahl: { groesse: 0.66, lage: "mitte", luecke: 0.14 }, zeiger: "duenn", blatt: "voll", einheit: "unter" },
+	// Aus der Recherche (Sub-Agent 21.09.): die drei empfohlenen Richtungen
+	{ nr: 21, titel: "A · Studiouhr", notiz: "Vorbild Broadcast-Studiouhr (Wharton): Zahl 0,6 r mittig, Strichkranz bleibt, Zeiger als Punkt innerhalb des Kranzes mit kurzem Schweif, Nabe in der Mitte.", zahl: { groesse: 0.6, lage: "mitte" }, zeiger: "punktschweif", blatt: "voll", einheit: "unter" },
+	{ nr: 22, titel: "B · Chronograph", notiz: "Vorbild iPhone-Stoppuhr/Ana-Digi: Zahl 0,4 r unten mit Freiraum (Kontur in Grundfarbe), duenner Zeiger mit Kelle laeuft HINTER der Zahl durch.", zahl: { groesse: 0.42, dy: 0.52 }, zeiger: "hinterKelle", blatt: "voll", einheit: "unter", kontur: true },
+	{ nr: 23, titel: "C · Sektor", notiz: "Vorbild Time Timer: kein Zeiger, ein weisser Sektor fuellt sich bis zum Strichkranz, Zahl 0,55 r mittig mit Kontur darueber.", zahl: { groesse: 0.55, lage: "mitte" }, zeiger: "sektor", blatt: "voll", einheit: "unter", kontur: true },
 ];
 ---
 
 <Layout title="Uhr-Varianten">
 	<section class="probe">
 		<h1>Uhr und Zeitanzeige</h1>
-		<p class="sub">20 Fassungen aus derselben Geometrie wie die Startseite. Links fertig (60, Zeiger auf 12), rechts mittendrin (27). Beurteilen: Wie gross darf die Zahl, wie geht der Zeiger mit ihr um, bleibt es eine Uhr?</p>
+		<p class="sub">23 Fassungen aus derselben Geometrie wie die Startseite. Links fertig (60, Zeiger auf 12), rechts mittendrin (27). Beurteilen: Wie gross darf die Zahl, wie geht der Zeiger mit ihr um, bleibt es eine Uhr? 21 bis 23 sind die drei Richtungen aus der Vorbild-Recherche.</p>
 		<div class="raster">
 			{varianten.map((v) => (
 				<article class="karte">
