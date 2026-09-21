@@ -247,6 +247,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 // Zeiten, Kurven, Kamera und Geometrie kommen aus src/lib/stunde.ts — EINE
 // BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
 // Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
+import { GLYPHEN } from "../lib/stunde-glyphen";
 import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, STUNDE_TEXT, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 // Zeiger-Sektor: Versatz der Scheibe o laeuft 1,06 → 0, Vorderkante bei
@@ -254,6 +255,17 @@ const uhren = uhrenGeometrie();
 // Periode (2) verschoben, damit er positiv bleibt: 2,02 + w → 0,96 + w.
 // Kein Zeiger auf den kleinen Uhren (Fred 21.09., s. lib): die wachsende
 // weisse Flaeche ist die Information.
+// Zaehler „00 … 60 Min." als Umrisse (stunde-glyphen.ts): Server-Stand = „60".
+const ST = STUNDE_TEXT;
+const zahlS = (UHR.r * ST.zahlGroesse) / GLYPHEN.upm;      // Schrift-Einheit → viewBox
+const einheitS = (UHR.r * ST.einheitGroesse) / GLYPHEN.upm;
+const zifferLage = (s: string) => { const b = s.split("").map((c) => GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl].adv); const w = b.reduce((a, c) => a + c, 0); let x = -w / 2; return b.map((adv) => { const hier = x; x += adv; return hier; }); };
+const startZiffern = String(ST.bis).padStart(2, "0");
+const startLage = zifferLage(startZiffern);
+const einheitBreite = ST.einheit.split("").reduce((a, c) => a + GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit].adv, 0);
+let einheitX = -einheitBreite / 2;
+const einheitPfade = ST.einheit.split("").map((c) => { const g = GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit]; const x = einheitX; einheitX += g.adv; return { d: g.d, x }; });
+const glyphenJson = JSON.stringify(GLYPHEN.zahl);
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
@@ -541,14 +553,20 @@ const beschlagStriche = [
 							<circle class="blatt blatt--hell fuenf" cx={UHR.cx} cy={UHR.cy} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<circle class="blatt blatt--hell viertel" cx={UHR.cx} cy={UHR.cy} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<circle class="stunde-rand" cx={UHR.cx} cy={UHR.cy} r={UHR.r} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
-							{/* Zaehler „0 … 60" (Fred 21.09.): Zahl mittig direkt unter dem Drehpunkt,
-							   zaehlt mit dem Zeiger hoch (Script liest die Zeit der Speichen-
-							   Animation), steht dann auf 60; „Min." klein darunter. Server-Stand =
-							   Endstand. */}
-							<text class="stunde-text" text-anchor="middle">
-								<tspan class="stunde-zahl" x={UHR.cx} y={UHR.cy + UHR.r * STUNDE_TEXT.zahlDy} font-size={UHR.r * STUNDE_TEXT.zahlGroesse}>{STUNDE_TEXT.bis}</tspan>
-								<tspan class="stunde-einheit" x={UHR.cx} y={UHR.cy + UHR.r * STUNDE_TEXT.einheitDy} font-size={UHR.r * STUNDE_TEXT.einheitGroesse}>{STUNDE_TEXT.einheit}</tspan>
-							</text>
+							{/* Zaehler „00 … 60" (Fred 21.09.): mittig in der unteren Haelfte, ueber
+							   dem Halbstundenstrich, zaehlt mit dem Zeiger hoch (Script liest die
+							   Zeit der Speichen-Animation), steht dann auf 60; „Min." klein darunter.
+							   Immer sichtbar. Als UMRISSE aus stunde-glyphen.ts, nicht als Text: Text
+							   zitterte unter der Kamera-Skalierung, Pfade skalieren wie die Kreise.
+							   Server-Stand = Endstand „60". */}
+							<g class="stunde-zaehler" data-glyphen={glyphenJson}>
+								<g class="stunde-zahl" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.zahlDy}) scale(${zahlS} ${-zahlS})`}>
+									{startZiffern.split("").map((c, i) => <path class="ziffer" data-slot={i} d={GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl].d} transform={`translate(${startLage[i]} 0)`} />)}
+								</g>
+								<g class="stunde-einheit" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.einheitDy}) scale(${einheitS} ${-einheitS})`}>
+									{einheitPfade.map((p) => <path d={p.d} transform={`translate(${p.x} 0)`} />)}
+								</g>
+							</g>
 							<line class="speiche speiche--start" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							{stoppuhr && (
@@ -1099,24 +1117,9 @@ const beschlagStriche = [
 	.beschlag--stunde path {
 		fill: #ffffff;
 	}
-	.stunde-text {
+	/* Zaehler: Umrisse (s. Markup), weiss wie das Blatt der Stunde. */
+	.stunde-zaehler path {
 		fill: #ffffff;
-		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
-		font-weight: 900;
-			letter-spacing: -0.02em;
-			font-variant-numeric: tabular-nums;
-			/* ZITTERN BEIM ZOOMEN (Fred 21.09.): Text unter einer laufenden
-			   Skalierung wird vom Browser je Bild neu gesetzt, und dabei rastet
-			   die Schrift-Hinting-Logik Glyphen und Zeichenabstaende auf ganze
-			   Pixel — bei jeder Zwischenskala anders, das Auge liest es als
-			   Zittern. geometricPrecision schaltet das Einrasten ab: die Glyphen
-			   werden rein geometrisch skaliert wie die Kreise daneben. */
-			text-rendering: geometricPrecision;
-			font-kerning: none;
-		}
-	.stunde-einheit {
-		font-weight: 700;
-		letter-spacing: 0;
 	}
 	.beschlag--klein {
 		fill: none;
@@ -1534,7 +1537,16 @@ const beschlagStriche = [
 		// rechnet den Anteil mit derselben Kurve — exakt synchron zum Zeiger, ohne
 		// zweite Zeitquelle. Die Schleife endet von selbst, wenn die Animation
 		// abgeraeumt wird (playState idle, z. B. nach resize).
-		const zahl = buehne.querySelector<SVGTSpanElement>(".stunde-zahl")!;
+		// Ziffern als Umrisse: je Slot ein <path>, bei Wechsel d und Lage setzen
+		// (zwei Ziffern mittig ueber ihre Vorschubbreiten).
+		const zaehler = buehne.querySelector<SVGGElement>(".stunde-zaehler")!;
+		const GL: Record<string, { d: string; adv: number }> = JSON.parse(zaehler.dataset.glyphen!);
+		const slots = Array.from(zaehler.querySelectorAll<SVGPathElement>(".ziffer"));
+		const setzeZahl = (s: string) => {
+			const w = s.split("").reduce((a, c) => a + GL[c].adv, 0);
+			let x = -w / 2;
+			s.split("").forEach((c, i) => { slots[i].setAttribute("d", GL[c].d); slots[i].setAttribute("transform", `translate(${x} 0)`); x += GL[c].adv; });
+		};
 		const laufAnim = anims[anims.length - 1];
 		const kurveK = bezier(P.KURVE[0], P.KURVE[1], P.KURVE[2], P.KURVE[3]);
 		let zuletzt = -1;
@@ -1543,7 +1555,7 @@ const beschlagStriche = [
 			const t = ((laufAnim.currentTime as number) ?? 0) / 1000 % RUNDE;
 			const u = Math.max(0, Math.min(1, (t - M.halt) / (M.stundeEnde - M.halt)));
 			const n = t >= RUNDE - SCHUTZ ? 0 : Math.min(P.STUNDE_TEXT.bis, Math.floor(kurveK(u) * P.STUNDE_TEXT.bis + 1e-6));
-			if (n !== zuletzt) { zuletzt = n; zahl.textContent = String(n).padStart(2, "0"); } // „00" … „60" (Fred 21.09.)
+			if (n !== zuletzt) { zuletzt = n; setzeZahl(String(n).padStart(2, "0")); } // „00" … „60" (Fred 21.09.)
 			requestAnimationFrame(zaehle);
 		};
 		requestAnimationFrame(zaehle);

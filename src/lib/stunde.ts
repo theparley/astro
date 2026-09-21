@@ -98,10 +98,12 @@ export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Sp
 // Beschriftung der Stunde (Fred 21.09.: „in die Uhr reinschreiben 60 Min.",
 // dann: „mitzaehlen, hochzaehlen, so wie der Zeiger sich bewegt"): unter
 // der Mitte, zaehlt 0 → 60 mit dem Zeiger (gleiche Kurve), steht dann.
-// Fred 21.09.: „die 60 in die Mitte, die Minuten klein drunter" — Zahl
-// mittig, direkt unter dem Drehpunkt (die Speichen laufen nach oben),
-// Einheit klein darunter. Masse in Anteilen von r (Grundlinien ab Mitte).
-export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.34, zahlDy: 0.29, einheitGroesse: 0.14, einheitDy: 0.47 };
+// Fred 21.09.: „die 60 in die Mitte, die Minuten klein drunter", dann
+// „nach unten an den Halbstundenbalken": Zahl mittig in der unteren
+// Haelfte, Einheit klein darunter, knapp ueber dem Viertelstrich bei 6
+// (der beginnt bei 0,76 r). Masse in Anteilen von r (Grundlinien ab Mitte).
+// Gesetzt als UMRISSE aus stunde-glyphen.ts, nicht als <text> (Zittern).
+export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.34, zahlDy: 0.55, einheitGroesse: 0.14, einheitDy: 0.72 };
 export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
 // ── Geometrie ───────────────────────────────────────────────────────────

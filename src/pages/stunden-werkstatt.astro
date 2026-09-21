@@ -76,6 +76,7 @@ const N = uhren().length;
 <script src="/werkzeug/gif.js" is:inline></script>
 
 <script>
+	import { GLYPHEN } from "../lib/stunde-glyphen";
 	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, STUNDE_TEXT, stundeMinuten, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
@@ -136,6 +137,14 @@ const N = uhren().length;
 		teil(0, S.hals.breite, S.hals.hoehe, S.kappe.breite, S.kappe.hoehe);
 		for (const w of knopfWinkel()) teil(w, S.knopf.halsBreite, S.knopf.hals, S.knopf.breite, S.knopf.hoehe);
 	}
+	// Umriss-Schrift: Zeichenkette mittig um x, Grundlinie y, k = Schrift-Einheit → viewBox
+	const pfadCache = new Map<string, Path2D>();
+	function schrift(ctx: CanvasRenderingContext2D, s: string, satz: Record<string, { d: string; adv: number }>, x: number, y: number, k: number) {
+		const w = s.split("").reduce((a, c) => a + satz[c].adv, 0);
+		ctx.save(); ctx.translate(x, y); ctx.scale(k, -k); ctx.translate(-w / 2, 0);
+		for (const c of s) { let p = pfadCache.get(satz[c].d); if (!p) { p = new Path2D(satz[c].d); pfadCache.set(satz[c].d, p); } ctx.fill(p); ctx.translate(satz[c].adv, 0); }
+		ctx.restore();
+	}
 	function stueck(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, anteil: number) {
 		if (anteil <= 0) return;
 		ctx.beginPath();
@@ -179,15 +188,11 @@ const N = uhren().length;
 		ctx.globalAlpha = 1;
 		if (stoppuhr) beschlag(ctx, UHR.cx, UHR.cy, WEISS);
 		blatt(ctx, UHR.cx, UHR.cy, WEISS);
-		// Zaehler „00 … 60 Min." mit dem Zeiger, immer sichtbar
-		{
-			ctx.fillStyle = WEISS;
-			ctx.textBaseline = "alphabetic"; ctx.textAlign = "center";
-			ctx.font = `900 ${UHR.r * STUNDE_TEXT.zahlGroesse}px "Forma DJR", Helvetica, Arial, sans-serif`;
-			ctx.fillText(String(stundeMinuten(z.stundeAnteil)).padStart(2, "0"), UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.zahlDy);
-			ctx.font = `700 ${UHR.r * STUNDE_TEXT.einheitGroesse}px "Forma DJR", Helvetica, Arial, sans-serif`;
-			ctx.fillText(STUNDE_TEXT.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.einheitDy);
-		}
+		// Zaehler „00 … 60 Min." mit dem Zeiger, immer sichtbar — als Umrisse
+		// (stunde-glyphen.ts), identisch mit der Website
+		ctx.fillStyle = WEISS;
+		schrift(ctx, String(stundeMinuten(z.stundeAnteil)).padStart(2, "0"), GLYPHEN.zahl, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.zahlDy, (UHR.r * STUNDE_TEXT.zahlGroesse) / GLYPHEN.upm);
+		schrift(ctx, STUNDE_TEXT.einheit, GLYPHEN.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.einheitDy, (UHR.r * STUNDE_TEXT.einheitGroesse) / GLYPHEN.upm);
 		ctx.strokeStyle = WEISS;
 		ctx.lineWidth = STRICH;
 		ctx.beginPath();
