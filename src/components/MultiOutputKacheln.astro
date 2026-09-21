@@ -243,6 +243,88 @@ const personSvgWeiss = doppel("fill='#ffffff'").replace(/"/g, "'");
 const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
 
+// ── KACHEL 2: DIE STUNDE UND IHRE HUNDERT ──────────────────────────────
+// Fassung C der Stunden-Probe (Fred 21.09., eingebaut am selben Tag):
+// eine schwarze Stunde in der Mitte, um sie herum Ringe aus weissen Uhren,
+// die sich eine nach der anderen im Uhrzeigersinn fuellen, waehrend die
+// Kamera zurueckfaehrt. Menge durch Wiederholung, nicht durch Flaeche
+// (Isotype) — die fruehere Fassung „ein hundertfach groesserer Kreis" ist
+// damit abgeloest (Stand im Git vor diesem Commit).
+//
+// ALLE ZEITEN in Sekunden, alles andere wird daraus gerechnet. Wer eine
+// Zahl aendert, muss sonst nichts anfassen.
+const ZEIT = {
+	halt: 0,           // Halt am Anfang (0 = die Stunde zeichnet sofort)
+	stunde: 2.16,      // die Stunde zeichnet sich (Rand, Fuellung, Zeiger)
+	// Rauszoomen von KAMERA.start auf KAMERA.ende. Eine Zahl in Sekunden
+	// oder "letzteUhr" (dann so lang, bis die letzte Uhr fertig ist).
+	// DER EINE REGLER: an der Fahrt haengt die Uhrendauer und damit die
+	// Beschleunigung (s. uhrenDauer).
+	kameraRaus: 4.32 as number | "letzteUhr",
+	kameraVorsprung: 0, // nur bei "letzteUhr": so viele Sekunden steht die Kamera frueher
+	kameraAbStunde: 0,  // wann die Kamera losfaehrt, als Anteil der Stunden-Zeichnung
+	uhrenAbStunde: 0.5, // wann die erste weisse Uhr anfaengt, als Anteil der Stunde
+	uhrenStart: "abStunde" as number | "abStunde",
+	// Von der ersten bis zum Ende der letzten Uhr. "mitKamera": die letzte
+	// Uhr ist genau fertig, wenn die Kamera steht; die Beschleunigung
+	// ergibt sich daraus (bei 4,32 s Fahrt: +657 % je Sekunde).
+	uhrenDauer: "mitKamera" as number | "mitKamera",
+	// Die Rate, mit der Uhren anfangen, waechst jede Sekunde um denselben
+	// Prozentsatz (exponentiell in der Zeit) — das ist die einzige Form,
+	// die sich ueber die ganze Strecke gleich stark beschleunigt anfuehlt.
+	ersteDauer: 2.16,   // die erste weisse Uhr so lang wie die Stunde
+	naechsteBei: 0.5,   // die naechste Uhr faengt an, wenn die laufende hier ist
+	dauerMin: 0.3,      // kuerzeste Dauer einer Uhr
+	stand: 0,           // KEIN Stopp draussen: die Kamera faehrt sofort zurueck
+	ausblenden: 2.16,   // weisse Uhren und Zeichnung der Stunde blenden aus (= kameraRein)
+	kameraRein: 2.16,   // Kamera zurueck, so lang wie die Stunde
+	nachlauf: 0,        // kein Halt bis zur naechsten Runde
+};
+const KURVE = [0.65, 0, 0.35, 1];   // weich rein und raus: Stunde, Uhren, Reinzoomen
+const KURVE_RAUS = [0, 0, 0.35, 1]; // Rauszoomen: kein Anlauf, weiches Auslaufen
+const KAMERA = { start: 7, ende: 1.15 }; // bei 1,15 sind 96 Uhren ganz im Bild, 36 angeschnitten
+
+const uhrenStart = ZEIT.uhrenStart === "abStunde" ? ZEIT.halt + ZEIT.stunde * ZEIT.uhrenAbStunde : ZEIT.uhrenStart;
+const kameraStart = ZEIT.halt + ZEIT.stunde * ZEIT.kameraAbStunde;
+const uhrenDauer =
+	ZEIT.uhrenDauer !== "mitKamera" ? ZEIT.uhrenDauer
+	: ZEIT.kameraRaus === "letzteUhr" ? 9.92
+	: kameraStart + ZEIT.kameraRaus - uhrenStart;
+const uhrenEnde = uhrenStart + uhrenDauer;
+const M = {
+	halt: ZEIT.halt,
+	stundeEnde: ZEIT.halt + ZEIT.stunde,
+	kameraStart,
+	kameraEnde: ZEIT.kameraRaus === "letzteUhr" ? uhrenEnde - ZEIT.kameraVorsprung : kameraStart + ZEIT.kameraRaus,
+	uhrenStart,
+	uhrenEnde,
+};
+const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
+const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + ZEIT.kameraRein) + ZEIT.nachlauf;
+
+// Geometrie: sieben Ringe um die Stunde, Abstand 90, je Ring round(2·pi·k)
+// Uhren — 176; Ring 1-5 ganz in der Kachel, 6 und 7 angeschnitten.
+// viewBox 1000 x 1250 liegt auf der GANZEN Kachel („slice"), Stunde in
+// (500, 625).
+const UHR = { r: 34, cx: 500, cy: 625, abstand: 90, ringe: 7 };
+const uhren: Array<{ x: number; y: number }> = [];
+for (let k = 1; k <= UHR.ringe; k++) {
+	const n = Math.round(2 * Math.PI * k);
+	for (let j = 0; j < n; j++) {
+		const th = -Math.PI / 2 + (j * 2 * Math.PI) / n;
+		uhren.push({ x: +(UHR.cx + UHR.abstand * k * Math.cos(th)).toFixed(2), y: +(UHR.cy + UHR.abstand * k * Math.sin(th)).toFixed(2) });
+	}
+}
+// Ziffernblatt als zwei gestrichelte Kreise je Uhr: Strichbreite = radiale
+// Laenge des Ticks, Muster = Tick-Breite und Luecke; pathLength 60 bzw. 4.
+const BLATT = {
+	minute: { r: UHR.r - 1 - 1.75, laenge: 3.5, breite: 0.9 },
+	viertel: { r: UHR.r - 1 - 3.5, laenge: 7, breite: 1.8 },
+};
+const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * 60).toFixed(3);
+const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N: uhren.length });
+
 interface Props {
 	fassung?: "brett" | "liste";
 }
@@ -425,47 +507,34 @@ const { fassung = "brett" } = Astro.props;
 			</div>
 			<div class="kachel">
 			<div class="kachel-mitte">
-				<div class="kreis-buehne" data-kreis>
-					{/* Die weiße Fläche wächst, der schwarze Punkt in ihrer
-					   Mitte bleibt (Fred 20.09. abends). Am Anfang liest sich
-					   das als Punkt mit weißem Rand; am Ende steht dieselbe
-					   Stunde als kleiner Punkt in einem hundertmal größeren
-					   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
-					{/* ECHTE SVG (Fred 21.09., Handy: pixelig und ruckelig — „bei SVGs
-					   entstehen normalerweise keine Pixel"). Vorher waren Kreise
-					   DIVs mit conic-gradient-Maske, die als Ebene gerastert und per
-					   transform hochskaliert wurden. Jetzt zeichnet der Browser die
-					   Vektoren in jedem Bild neu, in der Aufloesung, die gerade
-					   gebraucht wird — scharf bei jeder Kamerafahrt, und billig, weil
-					   es drei Kreise und zwei Linien sind.
-					   Koordinaten: viewBox 1000 x 1250 (die 4:5-Kachel), Mitte
-					   (500, 625). Grosser Kreis Radius 500, kleine Stunde Radius 50 —
-					   Durchmesser 1:10, Flaeche 1:100.
-					   KUCHENSTUECK-TRICK: ein Kreis mit halbem Radius und einem
-					   Strich so breit wie der Radius ist eine volle Scheibe. Mit
-					   pathLength=1 und stroke-dasharray=1 gibt stroke-dashoffset von
-					   1 nach 0 die Scheibe als wachsendes Stueck frei — die Kanten des
-					   Stuecks sind exakte Radien. rotate(-90) legt den Startpunkt auf
-					   zwoelf Uhr, von dort laeuft es im Uhrzeigersinn.
-					   Reihenfolge = Stapel: grosse Scheibe unten, dann die dunkle
-					   Fuellung der Stunde, ihre Kontur, oben die Speichen. */}
-					<svg class="stunde" viewBox="0 0 1000 1250" aria-hidden="true">
+				{/* Aufbau: siehe Frontmatter (KACHEL 2). Kuchenstueck-Trick fuer
+				   jede Uhr: Kreis mit halbem Radius, Strich so breit wie der
+				   Radius, pathLength 1, stroke-dashoffset von 1,06 auf 0 gibt die
+				   Scheibe als wachsendes Stueck frei; rotate(-90) legt den Start
+				   auf zwoelf Uhr. Strich 1,04 lang: kein Splitter am Anfang, kein
+				   Spalt am Ende. Reihenfolge = Stapel: die weissen Uhren samt
+				   dunklen Blaettern in EINER Gruppe (die blendet am Ende aus), dann
+				   die Stunde: Fuellung, helles Blatt, Rand, Speichen. */}
+				<div class="kreis-buehne" data-kreis data-plan={plan}>
+					<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
 						<g class="kamera">
-							{/* NAHT-DECKEL (Fred 21.09., „bleibt am Ende ein sichtbarer
-							   Strich in der oberen Haelfte vom Kreis"): bei vollem
-							   Kuchenstueck treffen Anfang und Ende des Strichs auf
-							   zwoelf Uhr, und der Browser laesst dort eine Haarlinie vom
-							   Mittelpunkt zum Rand stehen — in der Maskenfassung war es
-							   dieselbe Naht bei 1turn. Meine erste Deutung (die
-							   Speichen) war falsch. Diese volle Scheibe liegt UNTER dem
-							   Stueck und blendet in dem Moment ein, in dem es sich
-							   schliesst (37,5–38,5 %); danach ist die Naht zugedeckt. */}
-							<circle class="gross-voll" cx="500" cy="625" r="500" />
-							<circle class="gross" cx="500" cy="625" r="250" pathLength="1" transform="rotate(-90 500 625)" />
-							<circle class="stunde-fuellung" cx="500" cy="625" r="25" pathLength="1" transform="rotate(-90 500 625)" />
-							<circle class="stunde-rand" cx="500" cy="625" r="50" pathLength="1" transform="rotate(-90 500 625)" />
-							<line class="speiche speiche--start" x1="500" y1="625" x2="500" y2="575" />
-							<line class="speiche speiche--lauf" x1="500" y1="625" x2="500" y2="575" />
+							<g class="weisse">
+								{uhren.map((u, i) => (
+									<circle class="feld" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
+								))}
+								{uhren.map((u) => (
+									<>
+										<circle class="blatt blatt--dunkel minute" cx={u.x} cy={u.y} r={BLATT.minute.r} pathLength="60" stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
+										<circle class="blatt blatt--dunkel viertel" cx={u.x} cy={u.y} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
+									</>
+								))}
+							</g>
+							<circle class="stunde-fuellung" cx={UHR.cx} cy={UHR.cy} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							<circle class="blatt blatt--hell minute" cx={UHR.cx} cy={UHR.cy} r={BLATT.minute.r} pathLength="60" stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							<circle class="blatt blatt--hell viertel" cx={UHR.cx} cy={UHR.cy} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							<circle class="stunde-rand" cx={UHR.cx} cy={UHR.cy} r={UHR.r} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							<line class="speiche speiche--start" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
+							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 						</g>
 					</svg>
 				</div>
@@ -929,200 +998,91 @@ const { fassung = "brett" } = Astro.props;
 	   der Kreis dadurch bei jeder Zoomstufe mit — ein Versatz an den
 	   Kreisen selbst wuerde dagegen mitskaliert und am Anfang zehnfach
 	   ausschlagen. */
+	/* KEIN eigener Bezug mehr: das SVG liegt absolut auf der KACHEL (deren
+	   Polsterung ist der Rand), nicht auf der Innenflaeche — sonst blieben
+	   rundum 2,5cqw stehen und der Anschnitt der aeusseren Uhren fiele weg. */
 	.kreis-buehne {
-		position: relative;
+		position: static;
 		width: 100%;
 		height: 100%;
-		display: grid;
-		place-items: center;
 	}
 
-	/* ── Die Stunde als SVG ─────────────────────────────────────────────
-	   Aufbau und Warum stehen am Markup. Hier nur die Masse und der Takt.
-	   Was dargestellt wird (unveraendert seit 20.09.): am Anfang steht die
-	   Stunde GROSS im Bild (Kamera auf 5), ihre Kontur zeichnet sich von
-	   zwoelf Uhr aus im Uhrzeigersinn, die laufende Speiche dreht mit.
-	   Dann fuellt sich der grosse Kreis weiss, waehrend die Kamera auf 1
-	   zurueckfaehrt — die Stunde bleibt als dunkle Scheibe mit weissem Saum
-	   darin stehen, hundertfach eingeholt. Am Ende blendet alles aus, die
-	   Kamera faehrt zurueck, es geht von vorn los.
-	   Kameramarken (Prozent der Runde), unveraendert uebernommen:
-	     0–4    Halt, Kamera auf 5, nichts zu sehen (Einblendung bis 4)
-	     4–16   die Stunde zeichnet sich
-	     16–38  der grosse Kreis fuellt sich, Kamera faehrt zurueck
-	     50     Wendepunkt, Kamera auf 1
-	     72,5–94  alles blendet aus — JETZT AUCH DIE SPEICHEN (Fred 21.09.,
-	              Handy: „bleibt am Ende ein sichtbarer Strich in der oberen
-	              Haelfte vom Kreis"). Bis dahin blieb der Strich der Stunde
-	              als Startbild stehen (Entscheidung 20.09.); als Rest im
-	              Schwarz liest er sich aber als Fehler. Die Einblendung bei
-	              2–4 % holt ihn fuer den naechsten Durchlauf zurueck.
-	     88     Kamera wieder auf 5
-	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen. */
-	.stunde {
+	/* ── Die Stunde und ihre hundert ────────────────────────────────────
+	   Bewegung kommt komplett aus dem Skript (Web Animations API, Zeiten aus
+	   ZEIT im Frontmatter). Hier stehen nur Ruhezustaende und Masse. */
+	.raster {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
 		display: block;
-		width: 100%;
-		height: 100%;
-		overflow: visible;
 	}
 
-	/* Kamera = eine Gruppe, die um die Bildmitte skaliert. transform-box:
-	   view-box macht 50 % 50 % zur Mitte der viewBox, also (500, 625) —
-	   ohne das laege der Drehpunkt in der linken oberen Ecke. */
+	/* Kamera = Gruppe, die um die Bildmitte skaliert. transform-box: view-box
+	   macht 50 % 50 % zur Mitte der viewBox (500, 625). Ruhe = Rundenanfang. */
 	.kamera {
 		transform-box: view-box;
 		transform-origin: 50% 50%;
-		transform: scale(5);
-		opacity: 0;
+		transform: scale(7);
 	}
 
-	/* SPLITTER AM ANFANG (Fred 21.09., Raster-Probe: „am Anfang gleich ein
-	   weisser Strich, der konisch zulaeuft"): bei Versatz genau 1 fallen
-	   Strichanfang und Pfadende aufeinander, und der Browser laesst an der
-	   Kante einen Splitter stehen — bei 500 Einheiten Strichbreite ein Keil
-	   vom Mittelpunkt zum Rand. Deshalb Versatz ueber 1 und ein Muster mit
-	   Luecke 2: der ganze Pfad (Laenge 1) liegt am Anfang sicher in der
-	   Luecke.
-	   SPALT AM ENDE (Fred 21.09., „der erste Kreis schliesst die weisse
-	   Linie nicht ganz, da bleibt ein Mini-Spalt Schwarz"): bei Versatz 0
-	   endete der Strich (Laenge 1) rechnerisch exakt am Pfadende — und die
-	   Pfadlaenge ist im Browser nie ganz exakt 1. Der Strich ist jetzt 1,04
-	   lang und schiesst um 4 % ueber zwoelf Uhr hinaus; Startversatz 1,06,
-	   damit er anfangs trotzdem komplett in der Luecke liegt. Der Ueberschuss
-	   malt in derselben Farbe ueber den Anfang, also unsichtbar — und deckt
-	   nebenbei die Naht der Kuchenstuecke mit ab. */
-	.gross,
+	/* Kuchenstueck-Trick, anfangs leer (s. Markup). */
+	.feld,
 	.stunde-fuellung,
 	.stunde-rand {
 		fill: none;
 		stroke-dasharray: 1.04 2;
 		stroke-dashoffset: 1.06;
 	}
-
-	/* Halber Radius + Strich = Radius: die volle Scheibe (s. Markup). */
-	.gross {
+	.feld {
 		stroke: #ffffff;
-		stroke-width: 500;
+		stroke-width: 34;
 	}
-
-	/* Der Naht-Deckel (s. Markup): unsichtbar, bis das Stueck voll ist. */
-	.gross-voll {
-		fill: #ffffff;
-		opacity: 0;
-	}
-
-	/* Dunkle Fuellung der Stunde, gleicher Trick, gleicher Takt wie ihre
-	   Kontur — auf Schwarz zunaechst unsichtbar, bleibt aber stehen, sobald
-	   das Weiss des grossen Kreises darunter durchlaeuft (Fred 20.09.:
-	   „wenn es geht, bleibt der schwarze Kreis innen drin schwarz"). */
+	/* Dunkle Fuellung der Stunde: auf Schwarz unsichtbar, bleibt als dunkle
+	   Scheibe stehen, wenn die weissen Uhren um sie herum entstehen. */
 	.stunde-fuellung {
 		stroke: var(--panel);
-		stroke-width: 50;
+		stroke-width: 34;
 	}
-
-	/* Kontur und Speichen: 2,5 Einheiten. Bei Kamera 5 sind das 12,5
-	   Einheiten, rund 6 px auf einer 542er Kachel; in Ruhe knapp 1,3 px —
-	   dieselben Werte wie vorher (0,12cqw, zehnfach im Zoom). Die Linie
-	   waechst mit der Kamera, das ist gewollt: sichtbar ist am Anfang die
-	   absolute Dicke. */
+	/* Kontur und Speichen: 2,5 Einheiten — bei Kamera 7 rund 6 px auf einer
+	   542er Kachel, in Ruhe knapp ein Pixel. Die Linie waechst mit der
+	   Kamera, das ist gewollt. */
 	.stunde-rand,
 	.speiche {
 		stroke: #ffffff;
 		stroke-width: 2.5;
 	}
-
 	.speiche--lauf {
 		transform-box: view-box;
 		transform-origin: 50% 50%;
 	}
 
-	/* TAKT 18s = genau zehn Schritte des Piktogramm-Bands in Kachel 1
-	   (1,8 s je Schritt), die Kacheln bleiben phasengleich. Hintergrund der
-	   Zahl: der exakte Tempo-Abgleich mit dem Band (52,7 px/s Kante) haette
-	   45 s gebraucht — Fred am Handy: „viel zu langsam". Weitere Taktstufen:
-	   14,4 s (8 Schritte), 21,6 s (12), 25,2 s (14).
-	   Kurve cubic-bezier(0.65, 0, 0.35, 1) ist symmetrisch, gleich weich am
-	   Anfang wie am Ende; CSS legt sie auf jeden Abschnitt einzeln, die
-	   Haltezeiten sind konstante Werte und bleiben unberuehrt. */
-	[data-kreis].laeuft .kamera {
-		animation:
-			kamera 18s cubic-bezier(0.65, 0, 0.35, 1) infinite,
-			ausblenden 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	/* Ziffernblaetter (s. Frontmatter BLATT). Die dunklen liegen ueber den
+	   weissen Scheiben und erscheinen in dem Mass, wie das Weiss darunter
+	   waechst. */
+	.blatt {
+		fill: none;
+	}
+	.blatt.minute {
+		stroke-width: 3.5;
+	}
+	.blatt.viertel {
+		stroke-width: 7;
+	}
+	.blatt--hell {
+		stroke: #ffffff;
+	}
+	.blatt--dunkel {
+		stroke: var(--panel);
 	}
 
-	[data-kreis].laeuft .stunde-rand,
-	[data-kreis].laeuft .stunde-fuellung {
-		animation: stunde-zeichnen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-	}
-
-	[data-kreis].laeuft .speiche--lauf {
-		animation: stunde-drehen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-	}
-
-	[data-kreis].laeuft .gross {
-		animation: kreis-fuellen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-	}
-
-	[data-kreis].laeuft .gross-voll {
-		animation: kreis-deckel 18s linear infinite;
-	}
-
-	/* Kamera: durchgehend von 5 auf 1 und zurueck, ohne Wegpunkt — ein
-	   Zwischenhalt liesse die Fahrt mit der Abschnittskurve bis zum
-	   Stillstand bremsen. Bei 5 ist die Stunde so gross wie spaeter der
-	   ganze Kreis in Ruhe; bei 1 steht der grosse Kreis mit der Kachel-
-	   Polsterung als Luft vollstaendig im Bild. */
-	@keyframes kamera {
-		0%, 4% { transform: scale(5); }
-		50% { transform: scale(1); }
-		88%, 100% { transform: scale(5); }
-	}
-
-	@keyframes ausblenden {
-		0%, 2% { opacity: 0; }
-		4%, 72.5% { opacity: 1; }
-		94%, 100% { opacity: 0; }
-	}
-
-	@keyframes stunde-zeichnen {
-		0%, 4% { stroke-dashoffset: 1.06; }
-		16%, 100% { stroke-dashoffset: 0; }
-	}
-
-	@keyframes stunde-drehen {
-		0%, 4% { transform: rotate(0turn); }
-		16%, 100% { transform: rotate(1turn); }
-	}
-
-	@keyframes kreis-fuellen {
-		0%, 16% { stroke-dashoffset: 1.06; }
-		38%, 100% { stroke-dashoffset: 0; }
-	}
-
-	/* Deckel: kurze Ueberblendung genau um das Schliessen bei 38 %. */
-	@keyframes kreis-deckel {
-		0%, 37.5% { opacity: 0; }
-		38.5%, 100% { opacity: 1; }
-	}
-
-	/* Ohne Bewegung: das fertige Bild in Ruhe. */
+	/* Ohne Bewegung: das fertige Bild in Ruhe — Kamera draussen, alle Uhren
+	   voll. Das Skript legt in dem Fall keine Animationen an. */
 	@media (prefers-reduced-motion: reduce) {
-		[data-kreis].laeuft .kamera,
-		[data-kreis].laeuft .stunde-rand,
-		[data-kreis].laeuft .stunde-fuellung,
-		[data-kreis].laeuft .speiche--lauf,
-		[data-kreis].laeuft .gross,
-		[data-kreis].laeuft .gross-voll {
-			animation: none;
-		}
-		.gross-voll {
-			opacity: 1;
-		}
 		.kamera {
-			transform: scale(1);
-			opacity: 1;
+			transform: scale(1.15);
 		}
-		.gross,
+		.feld,
 		.stunde-fuellung,
 		.stunde-rand {
 			stroke-dashoffset: 0;
@@ -1377,6 +1337,109 @@ const { fassung = "brett" } = Astro.props;
 		return { anims: [], stop: () => { laeuft = false; } };
 	}
 
+	// KACHEL 2 — die Stunde und ihre hundert. Legt alle Animationen der
+	// Kachel PAUSIERT an und gibt sie zurueck; Start/Stopp uebernimmt der
+	// Sichtbarkeits-Beobachter unten (wie bei den frueheren Zoom-Kacheln).
+	// Alle Zeiten kommen aus data-plan (ZEIT im Frontmatter).
+	// Handy-Tauglichkeit: reine SVG-Vektoren, in jedem Bild in der noetigen
+	// Aufloesung gezeichnet — keine gerasterte Ebene, die skaliert wird.
+	// Rund 530 einfache Formen je Bild; alle Animationen haengen an EINER
+	// Zeitachse (Document Timeline), koennen also nicht auseinanderlaufen,
+	// auch nicht nach einem versteckten Tab. Ausserhalb des Bilds werden sie
+	// pausiert (Akku), bei Sichtbarkeit von vorn gestartet.
+	function bezier(x1: number, y1: number, x2: number, y2: number) {
+		const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+		const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+		const X = (t: number) => ((ax * t + bx) * t + cx) * t;
+		const Y = (t: number) => ((ay * t + by) * t + cy) * t;
+		const dX = (t: number) => (3 * ax * t + 2 * bx) * t + cx;
+		return (x: number) => {
+			let t = x;
+			for (let i = 0; i < 8; i++) { const dd = X(t) - x; if (Math.abs(dd) < 1e-6) break; t -= dd / dX(t); }
+			return Y(Math.min(1, Math.max(0, t)));
+		};
+	}
+	void bezier; // Loeser bleibt fuer kuenftige Kurven-Umkehrungen im Baukasten
+
+	function stundenAnlegen(buehne: HTMLElement): Animation[] {
+		const P = JSON.parse(buehne.dataset.plan!);
+		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N } = P;
+		const K = `cubic-bezier(${KURVE.join(", ")})`;
+		const KR = `cubic-bezier(${KURVE_RAUS.join(", ")})`;
+		const S0 = `scale(${KAMERA.start})`, S1 = `scale(${KAMERA.ende})`;
+		const ms = RUNDE * 1000;
+		const o = (s: number) => s / RUNDE;
+		const opt = { duration: ms, iterations: Infinity };
+		const anims: Animation[] = [];
+
+		// Kamera: raus (KURVE_RAUS), im selben Bild wieder rein (KURVE) —
+		// kein Halt an den Wendepunkten (Fred 21.09.).
+		const kamera = buehne.querySelector<SVGGElement>(".kamera")!;
+		anims.push(kamera.animate([
+			{ transform: S0, offset: 0 },
+			{ transform: S0, offset: o(M.kameraStart), easing: KR },
+			{ transform: S1, offset: o(M.kameraEnde) },
+			{ transform: S1, offset: o(standEnde), easing: K },
+			{ transform: S0, offset: o(standEnde + ZEIT.kameraRein) },
+			{ transform: S0, offset: 1 },
+		], opt));
+
+		// Ausblenden: nur die weissen Uhren (samt dunklen Blaettern) und die
+		// Zeichnung der Stunde; Blatt und Startstrich der Stunde bleiben
+		// stehen — die naechste Runde zeichnet direkt von dort los.
+		const ausblenden = [
+			{ opacity: 1, offset: 0 },
+			{ opacity: 1, offset: o(standEnde), easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+			{ opacity: 0, offset: o(standEnde + ZEIT.ausblenden) },
+			{ opacity: 0, offset: 1 },
+		];
+		buehne.querySelectorAll<SVGElement>(".weisse, .stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(ausblenden, opt)));
+
+		// Die Stunde zeichnet sich, der Zeiger dreht.
+		const zeichnen = [
+			{ strokeDashoffset: 1.06, offset: 0 },
+			{ strokeDashoffset: 1.06, offset: o(M.halt), easing: K },
+			{ strokeDashoffset: 0, offset: o(M.stundeEnde) },
+			{ strokeDashoffset: 0, offset: 1 },
+		];
+		buehne.querySelectorAll<SVGCircleElement>(".stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(zeichnen, opt)));
+		anims.push(buehne.querySelector<SVGLineElement>(".speiche--lauf")!.animate([
+			{ transform: "rotate(0turn)", offset: 0 },
+			{ transform: "rotate(0turn)", offset: o(M.halt), easing: K },
+			{ transform: "rotate(1turn)", offset: o(M.stundeEnde) },
+			{ transform: "rotate(1turn)", offset: 1 },
+		], opt));
+
+		// Die Uhren: Rate r(t) = r0 · e^(k·t), r0 = 1 / erster Abstand. Die
+		// i-te Uhr startet, wenn die aufsummierte Rate i erreicht:
+		// t_i = ln(1 + i·k/r0) / k. k per Bisektion, damit die letzte Uhr
+		// genau bei uhrenEnde fertig ist. Dauer je Uhr = Abstand zur
+		// naechsten geteilt durch naechsteBei, nach unten gedeckelt.
+		const r0 = 1 / (ZEIT.ersteDauer * ZEIT.naechsteBei);
+		const startBei = (i: number, k: number) => (k < 1e-9 ? i / r0 : Math.log(1 + (i * k) / r0) / k);
+		const dauerVon = (luecke: number) => Math.max(ZEIT.dauerMin, luecke / ZEIT.naechsteBei);
+		const gesamt = (k: number) => startBei(N - 1, k) + dauerVon(startBei(N - 1, k) - startBei(N - 2, k));
+		let lo = 0, hi = 5;
+		for (let s = 0; s < 80; s++) { const mid = (lo + hi) / 2; if (gesamt(mid) > ZEIT.uhrenDauer) lo = mid; else hi = mid; }
+		const k = (lo + hi) / 2;
+		const starts = Array.from({ length: N }, (_, i) => startBei(i, k));
+		const dauern = starts.map((t, i) => dauerVon(i < N - 1 ? starts[i + 1] - t : t - starts[i - 1]));
+		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde
+		buehne.querySelectorAll<SVGCircleElement>(".feld[data-i]").forEach((el) => {
+			const i = Number(el.dataset.i);
+			const s = M.uhrenStart + starts[i];
+			anims.push(el.animate([
+				{ strokeDashoffset: 1.06, offset: 0 },
+				{ strokeDashoffset: 1.06, offset: o(s), easing: K },
+				// Deckel auf den Rundenanteil, nicht auf die Sekunde — sonst laegen
+				// spaete Marken vor ihrem Start und animate() wirft (Fehler 21.09.).
+				{ strokeDashoffset: 0, offset: Math.min(1, o(s + dauern[i])) },
+				{ strokeDashoffset: 0, offset: 1 },
+			], opt));
+		});
+		return anims;
+	}
+
 	function mount() {
 		ab?.();
 		const ziele = [
@@ -1387,6 +1450,7 @@ const { fassung = "brett" } = Astro.props;
 		// Zoom-Animationen je Mengen-Kachel, pausiert bis zur Sichtbarkeit;
 		// bei Fensteränderung mit neuen Pixelwerten neu aufgesetzt.
 		const mengen = ziele.filter((z) => z.hasAttribute("data-menge"));
+		const stunden = ziele.filter((z) => z.hasAttribute("data-plan"));
 		let zooms = new Map<HTMLElement, Animation[]>();
 		const zoomsAnlegen = () => {
 			zooms.forEach((as) => as.forEach((a) => a.cancel()));
@@ -1398,6 +1462,13 @@ const { fassung = "brett" } = Astro.props;
 					as.forEach((a) => a.pause());
 					zooms.set(el, as);
 				}
+			});
+			// Kachel 2 haengt am selben Mechanismus: pausiert anlegen, der
+			// Beobachter startet und stoppt, ein resize legt neu an.
+			stunden.forEach((el) => {
+				const as = stundenAnlegen(el);
+				as.forEach((a) => a.pause());
+				zooms.set(el, as);
 			});
 		};
 		zoomsAnlegen();
