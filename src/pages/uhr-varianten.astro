@@ -1,0 +1,181 @@
+---
+// /uhr-varianten — PROBE-SEITE (Fred 21.09.): „Fuer die Uhr und die
+// Zeitanzeige zehn bis zwanzig Vorschlaege. Die 60 so gross wie moeglich:
+// Zeiger duenner oder durchsichtiger, oder die 60 so, dass der Zeiger in
+// der Mitte zwischen den Ziffern steht, oder den Zeiger nur aussen laufen
+// lassen." Jede Fassung steht zweimal: fertig (60, Zeiger auf 12) und
+// mittendrin (27, Zeiger bei 162 Grad), damit man sieht, wie Zeiger und
+// Zahl sich beruehren. Alles statisch aus derselben Geometrie wie die
+// Startseite (lib stunde.ts + stunde-glyphen.ts), Zoom-Stand „nah".
+// Nicht verlinkt. Nichts davon ist live, bis Fred waehlt.
+import Layout from "../layouts/Layout.astro";
+import { UHR, BLATT, STRICH, STOPPUHR, knopfWinkel } from "../lib/stunde";
+import { GLYPHEN } from "../lib/stunde-glyphen";
+
+const r = UHR.r, cx = 0, cy = 0; // Uhr im Ursprung, viewBox um sie herum
+const ZELLE = Math.max(...Object.values(GLYPHEN.zahl).map((g) => g.adv));
+type Z = { d: string; adv: number; xMin: number; xMax: number };
+const zahlG = GLYPHEN.zahl as unknown as Record<string, Z>;
+const einheitG = GLYPHEN.einheit as unknown as Record<string, Z>;
+
+type Variante = {
+	nr: number; titel: string; notiz: string;
+	zahl: { groesse: number; dy: number; lage?: "unten" | "mitte" | "geteilt"; luecke?: number; fett?: boolean };
+	zeiger: "voll" | "duenn" | "halb" | "aussen" | "ring" | "hinter" | "nadel" | "punkt" | "keiner" | "ringinnen";
+	blatt: "voll" | "rand" | "viertel" | "keins";
+	einheit: "unter" | "neben" | "keine" | "klein-oben";
+};
+
+// ── Bausteine (Strings, weil die Seite eine Probe ist) ─────────────────
+const f = (n: number) => +n.toFixed(2);
+const tick = (innen: number, aussen: number, winkel: number, breite: number, farbe = "#fff") => {
+	const s = Math.sin(winkel), c = Math.cos(winkel);
+	return `<line x1="${f(cx + innen * s)}" y1="${f(cy - innen * c)}" x2="${f(cx + aussen * s)}" y2="${f(cy - aussen * c)}" stroke="${farbe}" stroke-width="${breite}"/>`;
+};
+const blattSvg = (art: Variante["blatt"]) => {
+	if (art === "keins") return "";
+	let out = "";
+	const kurz = art === "rand" ? 0.55 : 1; // „rand": Striche auf gut die Haelfte gekuerzt, mehr Platz innen
+	for (let i = 0; i < 60; i++) {
+		const w = (i * Math.PI) / 30;
+		if (i % 15 === 0) out += tick(r - 1 - BLATT.viertel.laenge * kurz, r - 1, w, BLATT.viertel.breite);
+		else if (art === "viertel") continue;
+		else if (i % 5 === 0) out += tick(r - 1 - BLATT.fuenf.laenge * kurz, r - 1, w, BLATT.fuenf.breite);
+		else out += tick(r - 1 - BLATT.minute.laenge * kurz, r - 1, w, BLATT.minute.breite);
+	}
+	return out;
+};
+const tPfad = (halsB: number, halsH: number, kappeB: number, kappeH: number) => {
+	const kb = kappeB * r / 2, hb = halsB * r / 2, yK = -r - halsH * r - kappeH * r, yH = -r - halsH * r, yU = -r + 1;
+	return `M${-kb},${yK}H${kb}V${yH}H${hb}V${yU}H${-hb}V${yH}H${-kb}Z`;
+};
+const beschlagSvg = () => {
+	const SP = STOPPUHR;
+	const teile = [{ d: tPfad(SP.hals.breite, SP.hals.hoehe, SP.kappe.breite, SP.kappe.hoehe), rot: 0 }, ...knopfWinkel().map((w) => ({ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: w }))];
+	return teile.map((t) => `<path d="${t.d}" fill="#fff" transform="rotate(${t.rot})"/>`).join("");
+};
+const ziffernSvg = (text: string, groesse: number, x: number, grundlinie: number, luecke = 0, fett = true) => {
+	const k = (r * groesse) / GLYPHEN.upm;
+	const n = text.length, w = ZELLE * n + luecke * (n - 1) / k;
+	return text.split("").map((c, i) => {
+		const g = zahlG[c];
+		const tx = -w / 2 + i * (ZELLE + luecke / k) + ZELLE / 2 - (g.xMin + g.xMax) / 2;
+		return `<path d="${g.d}" fill="#fff" transform="translate(${f(x)} ${f(grundlinie)}) scale(${k} ${-k}) translate(${f(tx)} 0)"/>`;
+	}).join("");
+};
+const einheitSvg = (groesse: number, x: number, grundlinie: number, anker: "mitte" | "links" = "mitte") => {
+	const k = (r * groesse) / GLYPHEN.upm;
+	const text = "Min.";
+	const w = text.split("").reduce((a, c) => a + einheitG[c].adv, 0);
+	let ex = anker === "mitte" ? -w / 2 : 0;
+	return text.split("").map((c) => { const g = einheitG[c]; const s = `<path d="${g.d}" fill="#fff" transform="translate(${f(x)} ${f(grundlinie)}) scale(${k} ${-k}) translate(${f(ex)} 0)"/>`; ex += g.adv; return s; }).join("");
+};
+const zeigerSvg = (art: Variante["zeiger"], minuten: number) => {
+	const w = (minuten / 60) * 360;
+	const rad = (w * Math.PI) / 180;
+	switch (art) {
+		case "keiner": return "";
+		case "voll": return tick(0, r, 0, STRICH) + tick(0, r, rad, STRICH);
+		case "duenn": return tick(0, r, 0, STRICH * 0.5) + tick(0, r, rad, STRICH * 0.5);
+		case "halb": return tick(0, r, 0, STRICH) + tick(0, r, rad, STRICH).replace('stroke="#fff"', 'stroke="#fff" opacity="0.45"');
+		case "nadel": { const s = Math.sin(rad), c = Math.cos(rad); const bx = 1.6; // spitz zum Rand, breit am Drehpunkt
+			return tick(0, r, 0, STRICH * 0.5) + `<polygon points="${f(-bx * c)},${f(-bx * s)} ${f(bx * c)},${f(bx * s)} ${f(r * s)},${f(-r * c)}" fill="#fff"/>`; }
+		case "aussen": return tick(r * 0.74, r, 0, STRICH) + tick(r * 0.74, r, rad, STRICH);
+		case "punkt": { const s = Math.sin(rad), c = Math.cos(rad); return `<circle cx="${f((r - 5) * s)}" cy="${f(-(r - 5) * c)}" r="2.6" fill="#fff"/>` + tick(r - 8, r - 1, 0, STRICH * 0.7); }
+		case "ring": { // Fortschrittsbogen aussen auf dem Rand (Kuchenstueck-Trick)
+			const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r + 3.5}" fill="none" stroke="#fff" stroke-width="2.2" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)"/>`; }
+		case "ringinnen": { const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r - 12}" fill="none" stroke="#fff" stroke-width="2.4" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)" opacity="0.9"/>` + tick(r - 13.2, r - 10.8, 0, 1.2); }
+		case "hinter": return ""; // wird VOR den Ziffern gezeichnet (s. uhrSvg)
+	}
+};
+
+function uhrSvg(v: Variante, minuten: number) {
+	const zahl = String(minuten).padStart(2, "0");
+	const lage = v.zahl.lage ?? "unten";
+	let ziffern = "", einheit = "";
+	if (lage === "geteilt") {
+		// je eine Ziffer links und rechts vom Drehpunkt, Zeiger laeuft dazwischen
+		const k = (r * v.zahl.groesse) / GLYPHEN.upm;
+		const cap = 1450 * k; // Versalhoehe der Forma-Ziffern ~1450 Einheiten
+		const grund = cy + cap / 2 + (v.zahl.dy || 0) * r;
+		const abstand = (v.zahl.luecke ?? 0.4) * r;
+		ziffern = ziffernSvg(zahl[0], v.zahl.groesse, cx - abstand, grund) + ziffernSvg(zahl[1], v.zahl.groesse, cx + abstand, grund);
+	} else if (lage === "mitte") {
+		const k = (r * v.zahl.groesse) / GLYPHEN.upm;
+		const cap = 1450 * k;
+		ziffern = ziffernSvg(zahl, v.zahl.groesse, cx, cy + cap / 2 + (v.zahl.dy || 0) * r, (v.zahl.luecke ?? 0) * r);
+	} else {
+		ziffern = ziffernSvg(zahl, v.zahl.groesse, cx, cy + v.zahl.dy * r, (v.zahl.luecke ?? 0) * r);
+	}
+	const grundZahl = lage === "unten" ? cy + v.zahl.dy * r : cy + (1450 * (r * v.zahl.groesse) / GLYPHEN.upm) / 2 + (v.zahl.dy || 0) * r;
+	if (v.einheit === "unter") einheit = einheitSvg(0.14, cx, grundZahl + 0.17 * r);
+	if (v.einheit === "neben") einheit = einheitSvg(0.13, cx + (ZELLE * 2 * (r * v.zahl.groesse) / GLYPHEN.upm) / 2 + 2, grundZahl, "links");
+	if (v.einheit === "klein-oben") einheit = einheitSvg(0.12, cx, cy - 0.42 * r);
+	const zeigerHinter = v.zeiger === "hinter" ? tick(0, r, 0, STRICH) + tick(0, r, (minuten / 60) * 2 * Math.PI, STRICH) : "";
+	const zeigerVor = v.zeiger === "hinter" ? "" : zeigerSvg(v.zeiger, minuten);
+	const pad = 16;
+	return `<svg viewBox="${-r - pad} ${-r - pad - 12} ${2 * r + 2 * pad} ${2 * r + 2 * pad + 12}" aria-hidden="true">
+		<circle cx="0" cy="0" r="${r}" fill="#212121" stroke="#fff" stroke-width="${STRICH}"/>
+		${blattSvg(v.blatt)}
+		${zeigerHinter}
+		${ziffern}${einheit}
+		${zeigerVor}
+		${beschlagSvg()}
+	</svg>`;
+}
+
+const varianten: Variante[] = [
+	{ nr: 1, titel: "Stand heute", notiz: "Zahl 0,34 r in der unteren Haelfte, Zeiger voll bis zur Mitte.", zahl: { groesse: 0.34, dy: 0.4 }, zeiger: "voll", blatt: "voll", einheit: "unter" },
+	{ nr: 2, titel: "Groesser unten", notiz: "Zahl 0,5 r, Zeiger voll. Der Zeiger kreuzt die Zahl in der unteren Haelfte.", zahl: { groesse: 0.5, dy: 0.5 }, zeiger: "voll", blatt: "voll", einheit: "unter" },
+	{ nr: 3, titel: "Mitte, Zeiger duenn", notiz: "Zahl 0,7 r mittig, Zeiger halb so breit darueber.", zahl: { groesse: 0.7, lage: "mitte" }, zeiger: "duenn", blatt: "voll", einheit: "unter" },
+	{ nr: 4, titel: "Mitte, Zeiger halbtransparent", notiz: "Zahl 0,7 r mittig, Zeiger mit 45 % Deckkraft darueber.", zahl: { groesse: 0.7, lage: "mitte" }, zeiger: "halb", blatt: "voll", einheit: "unter" },
+	{ nr: 5, titel: "Mitte, Zeiger dahinter", notiz: "Zahl 0,7 r mittig, Zeiger laeuft HINTER der Zahl (Zahl deckt ihn).", zahl: { groesse: 0.7, lage: "mitte" }, zeiger: "hinter", blatt: "voll", einheit: "unter" },
+	{ nr: 6, titel: "Geteilt, Zeiger dazwischen", notiz: "6 links, 0 rechts vom Drehpunkt, Zeiger voll dazwischen. Zahl 0,7 r.", zahl: { groesse: 0.7, lage: "geteilt", luecke: 0.42 }, zeiger: "voll", blatt: "voll", einheit: "unter" },
+	{ nr: 7, titel: "Geteilt, Zeiger duenn", notiz: "Wie 6, Zeiger halb so breit; Ziffern enger an der Mitte.", zahl: { groesse: 0.72, lage: "geteilt", luecke: 0.38 }, zeiger: "duenn", blatt: "rand", einheit: "unter" },
+	{ nr: 8, titel: "Geteilt, Zeiger nur aussen", notiz: "Ziffern beidseits der Mitte, Zeiger als Randstueck (0,74 r bis r).", zahl: { groesse: 0.8, lage: "geteilt", luecke: 0.42 }, zeiger: "aussen", blatt: "rand", einheit: "unter" },
+	{ nr: 9, titel: "Zeiger nur aussen, Zahl mittig", notiz: "Zahl 0,8 r mittig, Zeiger als kurzes Randstueck. Kein Zeiger in der Mitte.", zahl: { groesse: 0.8, lage: "mitte" }, zeiger: "aussen", blatt: "rand", einheit: "unter" },
+	{ nr: 10, titel: "Fortschrittsring aussen", notiz: "Kein Zeiger. Bogen um den Rand herum waechst mit, Zahl 0,85 r mittig.", zahl: { groesse: 0.85, lage: "mitte" }, zeiger: "ring", blatt: "rand", einheit: "unter" },
+	{ nr: 11, titel: "Ring innen, Blatt aussen", notiz: "Bogen innerhalb des Blatts, Zahl 0,7 r mittig.", zahl: { groesse: 0.7, lage: "mitte" }, zeiger: "ringinnen", blatt: "rand", einheit: "unter" },
+	{ nr: 12, titel: "Punkt am Rand", notiz: "Zeiger als Punkt, der am Rand entlanglaeuft, Zahl 0,85 r mittig.", zahl: { groesse: 0.85, lage: "mitte" }, zeiger: "punkt", blatt: "rand", einheit: "unter" },
+	{ nr: 13, titel: "Nadel", notiz: "Zeiger als Nadel: breit am Drehpunkt, spitz am Rand; Zahl 0,7 r mittig.", zahl: { groesse: 0.7, lage: "mitte" }, zeiger: "nadel", blatt: "voll", einheit: "unter" },
+	{ nr: 14, titel: "Nur Viertel, Zahl maximal", notiz: "Blatt nur mit Viertelstrichen, Zahl 0,95 r mittig, Ring aussen.", zahl: { groesse: 0.95, lage: "mitte" }, zeiger: "ring", blatt: "viertel", einheit: "keine" },
+	{ nr: 15, titel: "Einheit daneben", notiz: "Zahl 0,6 r mittig, Min. rechts neben der Zahl auf der Grundlinie, Zeiger duenn.", zahl: { groesse: 0.6, lage: "mitte", dy: 0 }, zeiger: "duenn", blatt: "voll", einheit: "neben" },
+	{ nr: 16, titel: "Einheit oben, Zahl unten", notiz: "Min. klein unter der 12, Zahl 0,6 r in der unteren Haelfte, Zeiger voll.", zahl: { groesse: 0.6, dy: 0.62 }, zeiger: "voll", blatt: "voll", einheit: "klein-oben" },
+	{ nr: 17, titel: "Ohne Blatt", notiz: "Nur Rand, Zahl 0,9 r mittig, Zeiger halbtransparent.", zahl: { groesse: 0.9, lage: "mitte" }, zeiger: "halb", blatt: "keins", einheit: "unter" },
+	{ nr: 18, titel: "Geteilt, Ring aussen", notiz: "Ziffern beidseits, Fortschrittsring aussen, kein Zeiger.", zahl: { groesse: 0.8, lage: "geteilt", luecke: 0.4 }, zeiger: "ring", blatt: "rand", einheit: "unter" },
+	{ nr: 19, titel: "Geteilt, Zeiger dahinter", notiz: "Ziffern beidseits, voller Zeiger hinter den Ziffern.", zahl: { groesse: 0.8, lage: "geteilt", luecke: 0.36 }, zeiger: "hinter", blatt: "voll", einheit: "unter" },
+	{ nr: 20, titel: "Zahl mit Luft, Zeiger duenn", notiz: "Ziffern mit Abstand (Zeiger passt in die Luecke), 0,66 r mittig, Zeiger duenn.", zahl: { groesse: 0.66, lage: "mitte", luecke: 0.14 }, zeiger: "duenn", blatt: "voll", einheit: "unter" },
+];
+---
+
+<Layout title="Uhr-Varianten">
+	<section class="probe">
+		<h1>Uhr und Zeitanzeige</h1>
+		<p class="sub">20 Fassungen aus derselben Geometrie wie die Startseite. Links fertig (60, Zeiger auf 12), rechts mittendrin (27). Beurteilen: Wie gross darf die Zahl, wie geht der Zeiger mit ihr um, bleibt es eine Uhr?</p>
+		<div class="raster">
+			{varianten.map((v) => (
+				<article class="karte">
+					<h2><span class="nr">{v.nr}</span> {v.titel}</h2>
+					<div class="paar">
+						<div class="kachel" set:html={uhrSvg(v, 60)} />
+						<div class="kachel" set:html={uhrSvg(v, 27)} />
+					</div>
+					<p class="notiz">{v.notiz}</p>
+				</article>
+			))}
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.probe { max-width: 1400px; margin: 0 auto; padding: clamp(40px, 6vw, 100px) 24px 160px; }
+	h1 { font-weight: 900; text-transform: uppercase; line-height: 0.9; letter-spacing: -0.01em; font-size: clamp(2.5rem, 1rem + 6vw, 6rem); margin: 0 0 12px; }
+	.sub { color: var(--gray); max-width: 60rem; margin: 0 0 40px; }
+	.raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 28px; }
+	.karte h2 { font-size: 1rem; font-weight: 700; margin: 0 0 10px; }
+	.nr { display: inline-block; min-width: 1.8em; color: var(--gray); }
+	.paar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+	.kachel { background: var(--kachel); aspect-ratio: 1; padding: 6%; }
+	.kachel :global(svg) { width: 100%; height: 100%; display: block; }
+	.notiz { color: var(--gray); font-size: 0.85rem; margin: 10px 0 0; }
+</style>
