@@ -560,10 +560,15 @@ const beschlagStriche = [
 							<circle class="blatt blatt--hell fuenf" cx={UHR.cx} cy={UHR.cy} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<circle class="blatt blatt--hell viertel" cx={UHR.cx} cy={UHR.cy} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<circle class="stunde-rand" cx={UHR.cx} cy={UHR.cy} r={UHR.r} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							{/* KEIN fester Startstrich auf 12 mehr (Fred 21.09.): waehrend der Zeiger
+   laeuft, soll oben nicht noch ein zweiter Zeiger stehen. Der Rand
+   zeichnet sich weiter von 12 aus mit. */}
+							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							{/* Zaehler „00 … 60" (Fred 21.09.): mittig in der unteren Haelfte, ueber
 							   dem Halbstundenstrich, zaehlt mit dem Zeiger hoch (Script liest die
 							   Zeit der Speichen-Animation), steht dann auf 60; „Min." klein darunter.
-							   Immer sichtbar. Als UMRISSE aus stunde-glyphen.ts, nicht als Text: Text
+							   Liegt im Stapel NACH dem Zeiger: der Zeiger laeuft hinter der Zahl
+   (Variante 5). Immer sichtbar. Als UMRISSE aus stunde-glyphen.ts, nicht als Text: Text
 							   zitterte unter der Kamera-Skalierung, Pfade skalieren wie die Kreise.
 							   Server-Stand = Endstand „60". */}
 							<g class="stunde-zaehler" data-glyphen={glyphenJson}>
@@ -574,10 +579,6 @@ const beschlagStriche = [
 									{einheitPfade.map((p) => <path d={p.d} transform={`translate(${p.x} 0)`} />)}
 								</g>
 							</g>
-							{/* KEIN fester Startstrich auf 12 mehr (Fred 21.09.): waehrend der Zeiger
-   laeuft, soll oben nicht noch ein zweiter Zeiger stehen. Der Rand
-   zeichnet sich weiter von 12 aus mit. */}
-							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							{stoppuhr && (
 								<g class="beschlag beschlag--stunde">
 									{beschlag.map((b) => <path d={b.d} transform={`translate(${UHR.cx} ${UHR.cy}) rotate(${b.rot})`} />)}

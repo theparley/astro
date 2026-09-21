@@ -106,7 +106,11 @@ export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Sp
 // Fred 21.09. (3): nicht an den Halbstundenstrich („sonst koennte man
 // meinen, die halbe Stunde sind 60 Minuten"), sondern mittig zwischen
 // Drehpunkt und unterem Rand: Block von ~0,2 r bis 0,62 r, Luft zum Strich.
-export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.34, zahlDy: 0.4, einheitGroesse: 0.14, einheitDy: 0.57 }; // Fred 21.09.: „noch ein Stueckchen hoeher"
+// VARIANTE 5 von /uhr-varianten (Fred 21.09.: „Setz mal die Variante 5
+// um"): Zahl 0,7 r, senkrecht um den Drehpunkt zentriert (Versalhoehe der
+// Forma-Ziffern ~1450/2000 em → Grundlinie bei +0,254 r), Zeiger laeuft
+// HINTER der Zahl, „Min." klein darunter.
+export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.7, zahlDy: 0.254, einheitGroesse: 0.14, einheitDy: 0.424 };
 export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
 // ── Geometrie ───────────────────────────────────────────────────────────
