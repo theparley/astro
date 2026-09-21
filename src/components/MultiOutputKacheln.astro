@@ -574,7 +574,9 @@ const beschlagStriche = [
 									{einheitPfade.map((p) => <path d={p.d} transform={`translate(${p.x} 0)`} />)}
 								</g>
 							</g>
-							<line class="speiche speiche--start" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
+							{/* KEIN fester Startstrich auf 12 mehr (Fred 21.09.): waehrend der Zeiger
+   laeuft, soll oben nicht noch ein zweiter Zeiger stehen. Der Rand
+   zeichnet sich weiter von 12 aus mit. */}
 							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							{stoppuhr && (
 								<g class="beschlag beschlag--stunde">

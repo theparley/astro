@@ -54,7 +54,6 @@ const layer = (ch: string) => ch === " " ? " " : ch;
 				<circle class="blatt minute" cx={u.cx} cy={u.cy} r={BLATT.minute.r * K} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.cx} ${u.cy})`} />
 				<circle class="blatt fuenf" cx={u.cx} cy={u.cy} r={BLATT.fuenf.r * K} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.cx} ${u.cy})`} />
 				<circle class="blatt viertel" cx={u.cx} cy={u.cy} r={BLATT.viertel.r * K} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.cx} ${u.cy})`} />
-				<line class="speiche speiche--start" x1={u.cx} y1={u.cy} x2={u.cx} y2={u.cy - r} />
 				<line class="speiche speiche--lauf" data-hand x1={u.cx} y1={u.cy} x2={u.cx} y2={u.cy - r} style={`transform-origin: ${u.cx}px ${u.cy}px`} />
 				<g class="beschlag">
 					{beschlag.map((b) => <path d={b.d} transform={`translate(${u.cx} ${u.cy}) rotate(${b.rot})`} />)}

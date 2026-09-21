@@ -76,16 +76,16 @@ const zeigerSvg = (art: Variante["zeiger"], minuten: number) => {
 	const rad = (w * Math.PI) / 180;
 	switch (art) {
 		case "keiner": return "";
-		case "voll": return tick(0, r, 0, STRICH) + tick(0, r, rad, STRICH);
-		case "duenn": return tick(0, r, 0, STRICH * 0.5) + tick(0, r, rad, STRICH * 0.5);
-		case "halb": return tick(0, r, 0, STRICH) + tick(0, r, rad, STRICH).replace('stroke="#fff"', 'stroke="#fff" opacity="0.45"');
+		case "voll": return tick(0, r, rad, STRICH);
+		case "duenn": return tick(0, r, rad, STRICH * 0.5);
+		case "halb": return tick(0, r, rad, STRICH).replace('stroke="#fff"', 'stroke="#fff" opacity="0.45"');
 		case "nadel": { const s = Math.sin(rad), c = Math.cos(rad); const bx = 1.6; // spitz zum Rand, breit am Drehpunkt
-			return tick(0, r, 0, STRICH * 0.5) + `<polygon points="${f(-bx * c)},${f(-bx * s)} ${f(bx * c)},${f(bx * s)} ${f(r * s)},${f(-r * c)}" fill="#fff"/>`; }
-		case "aussen": return tick(r * 0.74, r, 0, STRICH) + tick(r * 0.74, r, rad, STRICH);
-		case "punkt": { const s = Math.sin(rad), c = Math.cos(rad); return `<circle cx="${f((r - 5) * s)}" cy="${f(-(r - 5) * c)}" r="2.6" fill="#fff"/>` + tick(r - 8, r - 1, 0, STRICH * 0.7); }
+			return `<polygon points="${f(-bx * c)},${f(-bx * s)} ${f(bx * c)},${f(bx * s)} ${f(r * s)},${f(-r * c)}" fill="#fff"/>`; }
+		case "aussen": return tick(r * 0.74, r, rad, STRICH);
+		case "punkt": { const s = Math.sin(rad), c = Math.cos(rad); return `<circle cx="${f((r - 5) * s)}" cy="${f(-(r - 5) * c)}" r="2.6" fill="#fff"/>`; }
 		case "ring": { // Fortschrittsbogen aussen auf dem Rand (Kuchenstueck-Trick)
 			const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r + 3.5}" fill="none" stroke="#fff" stroke-width="2.2" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)"/>`; }
-		case "ringinnen": { const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r - 12}" fill="none" stroke="#fff" stroke-width="2.4" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)" opacity="0.9"/>` + tick(r - 13.2, r - 10.8, 0, 1.2); }
+		case "ringinnen": { const anteil = minuten / 60; return `<circle cx="0" cy="0" r="${r - 12}" fill="none" stroke="#fff" stroke-width="2.4" pathLength="1" stroke-dasharray="${f(anteil)} 2" transform="rotate(-90)" opacity="0.9"/>`; }
 		case "punktschweif": { // Richtung A „Studiouhr": Punkt innerhalb des Strichkranzes, drei nachziehende kleinere Punkte
 			let out = `<circle cx="0" cy="0" r="1.6" fill="#fff"/>`;
 			for (let k = 0; k < 4; k++) { const a = rad - k * 0.11; const s = Math.sin(a), c = Math.cos(a); const rr = r - 9.5; out += `<circle cx="${f(rr * s)}" cy="${f(-rr * c)}" r="${f(2.6 - k * 0.6)}" fill="#fff"/>`; }
@@ -121,8 +121,8 @@ function uhrSvg(v: Variante, minuten: number) {
 	if (v.einheit === "klein-oben") einheit = einheitSvg(0.12, cx, cy - 0.42 * r);
 	const radH = (minuten / 60) * 2 * Math.PI;
 	const kelle = `<circle cx="${f((r - 6) * Math.sin(radH))}" cy="${f(-(r - 6) * Math.cos(radH))}" r="2.8" fill="#fff"/>`;
-	const zeigerHinter = v.zeiger === "hinter" ? tick(0, r, 0, STRICH) + tick(0, r, radH, STRICH)
-		: v.zeiger === "hinterKelle" ? tick(0, r, 0, STRICH * 0.5) + tick(0, r - 6, radH, STRICH * 0.5) + kelle
+	const zeigerHinter = v.zeiger === "hinter" ? tick(0, r, radH, STRICH)
+		: v.zeiger === "hinterKelle" ? tick(0, r - 6, radH, STRICH * 0.5) + kelle
 		: v.zeiger === "sektor" ? zeigerSvg("sektor", minuten) : "";
 	const zeigerVor = (v.zeiger === "hinter" || v.zeiger === "hinterKelle" || v.zeiger === "sektor") ? "" : zeigerSvg(v.zeiger, minuten);
 	if (v.kontur) { ziffern = ziffern.replaceAll('fill="#fff"', 'fill="#fff" stroke="#212121" stroke-width="140" paint-order="stroke" stroke-linejoin="round"'); einheit = einheit.replaceAll('fill="#fff"', 'fill="#fff" stroke="#212121" stroke-width="140" paint-order="stroke" stroke-linejoin="round"'); }

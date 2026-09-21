@@ -198,7 +198,7 @@ const N = uhren().length;
 		ctx.strokeStyle = WEISS;
 		ctx.lineWidth = STRICH;
 		ctx.beginPath();
-		tick(ctx, UHR.cx, UHR.cy, 0, UHR.r, 0);                                   // Startstrich
+		// kein fester Startstrich auf 12 (Fred 21.09.)
 		tick(ctx, UHR.cx, UHR.cy, 0, UHR.r, z.stundeAnteil * Math.PI * 2);        // laufende Speiche
 		ctx.stroke();
 		void KAMERA;
