@@ -10,7 +10,13 @@
 const ZEIT = {
 	halt: 0.72,        // dunkler Halt am Anfang, die Einblendung endet hier
 	stunde: 2.16,      // die Stunde zeichnet sich (Rand, Fuellung, Zeiger)
-	kameraRaus: 6.12,  // Kamera von 7 auf 1, beginnt, wenn die Stunde steht
+	// Kamera von 7 auf 1,15, beginnt, wenn die Stunde steht. "letzteUhr"
+	// heisst: sie faehrt genau so lang, bis die letzte Uhr fertig ist (Fred
+	// 21.09.: „mach die Zeit vom Rauszoomen so lang, dass es passt mit der
+	// letzten Uhr, die fertig animiert wird … vielleicht ist es ja gar
+	// nicht zu lang"). Eine Zahl in Sekunden macht es wieder unabhaengig;
+	// vorher standen hier 6,12.
+	kameraRaus: "letzteUhr" as number | "letzteUhr",
 	uhrenStart: 3.24,  // ab Rundenbeginn: die erste Uhr faengt an
 	uhrenDauer: 14.4,  // von der ersten bis zum Ende der letzten Uhr
 	                   // (war 11,52 — mit „eine nach der anderen" am Anfang
@@ -76,13 +82,14 @@ const KURVE = [0.65, 0, 0.35, 1];
 const KAMERA = { start: 7, ende: 1.15 };
 
 // Abgeleitete Marken (Sekunden ab Rundenbeginn)
+const uhrenEnde = ZEIT.uhrenStart + ZEIT.uhrenDauer;
 const M = {
 	halt: ZEIT.halt,
 	stundeEnde: ZEIT.halt + ZEIT.stunde,
-	kameraEnde: ZEIT.halt + ZEIT.stunde + ZEIT.kameraRaus,
-	uhrenEnde: ZEIT.uhrenStart + ZEIT.uhrenDauer,
+	kameraEnde: ZEIT.kameraRaus === "letzteUhr" ? uhrenEnde : ZEIT.halt + ZEIT.stunde + ZEIT.kameraRaus,
+	uhrenEnde,
 };
-const standEnde = M.uhrenEnde + ZEIT.stand;
+const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
 const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + ZEIT.kameraRein) + ZEIT.nachlauf;
 const plan = JSON.stringify({ ZEIT, KURVE, KAMERA, M, standEnde, RUNDE, N: 176 });
 
