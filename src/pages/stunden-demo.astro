@@ -17,7 +17,12 @@ const ZEIT = {
 	// nicht zu lang"). Eine Zahl in Sekunden macht es wieder unabhaengig;
 	// vorher standen hier 6,12.
 	kameraRaus: "letzteUhr" as number | "letzteUhr",
-	uhrenStart: 3.24,  // ab Rundenbeginn: die erste Uhr faengt an
+	// Die erste weisse Uhr faengt an, sobald die Stunde fertig gezeichnet
+	// ist — "nachStunde" koppelt das an halt + stunde (Fred 21.09.: „wenn die
+	// schwarze Uhr fertig gedreht hat, ist die Pause bis die erste weisse
+	// entsteht zu gross"; vorher 3,24 s, also 0,36 s Pause). Eine Zahl in
+	// Sekunden setzt einen festen Zeitpunkt.
+	uhrenStart: "nachStunde" as number | "nachStunde",
 	uhrenDauer: 14.4,  // von der ersten bis zum Ende der letzten Uhr
 	                   // (war 11,52 — mit „eine nach der anderen" am Anfang
 	                   // reichte das nur fuer eine einzige langsame Uhr, dann
@@ -82,11 +87,13 @@ const KURVE = [0.65, 0, 0.35, 1];
 const KAMERA = { start: 7, ende: 1.15 };
 
 // Abgeleitete Marken (Sekunden ab Rundenbeginn)
-const uhrenEnde = ZEIT.uhrenStart + ZEIT.uhrenDauer;
+const uhrenStart = ZEIT.uhrenStart === "nachStunde" ? ZEIT.halt + ZEIT.stunde : ZEIT.uhrenStart;
+const uhrenEnde = uhrenStart + ZEIT.uhrenDauer;
 const M = {
 	halt: ZEIT.halt,
 	stundeEnde: ZEIT.halt + ZEIT.stunde,
 	kameraEnde: ZEIT.kameraRaus === "letzteUhr" ? uhrenEnde : ZEIT.halt + ZEIT.stunde + ZEIT.kameraRaus,
+	uhrenStart,
 	uhrenEnde,
 };
 const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
@@ -781,7 +788,7 @@ import Layout from "../layouts/Layout.astro";
 		// Die Uhren: Start und Dauer aus der Beschleunigung (s. oben).
 		buehne.querySelectorAll<SVGCircleElement>(".feld[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
-			const s = ZEIT.uhrenStart + starts[i];
+			const s = M.uhrenStart + starts[i];
 			el.animate([
 				{ strokeDashoffset: 1.06, offset: 0 },
 				{ strokeDashoffset: 1.06, offset: o(s), easing: K },
@@ -795,7 +802,7 @@ import Layout from "../layouts/Layout.astro";
 		if (fuss) fuss.textContent =
 			`Runde ${RUNDE.toFixed(2)} s.\n` +
 			`Stunde ${M.halt}–${M.stundeEnde.toFixed(2)} s · Kamera raus ${M.stundeEnde.toFixed(2)}–${M.kameraEnde.toFixed(2)} s · ` +
-			`Uhren ${ZEIT.uhrenStart}–${M.uhrenEnde.toFixed(2)} s, Schrumpffaktor ${q.toFixed(3)} je Uhr — ` +
+			`Uhren ${M.uhrenStart.toFixed(2)}–${M.uhrenEnde.toFixed(2)} s, Schrumpffaktor ${q.toFixed(3)} je Uhr — ` +
 			`Dauer erste ${dauern[0].toFixed(2)} s, zehnte ${dauern[9].toFixed(2)} s, Mitte ${dauern[mitte].toFixed(2)} s, letzte ${dauern[N - 1].toFixed(2)} s; ` +
 			`10 Uhren gestartet nach ${wann(10)} s, 50 nach ${wann(50)} s, 100 nach ${wann(100)} s · ` +
 			`steht bis ${standEnde.toFixed(2)} s · ausblenden bis ${(standEnde + ZEIT.ausblenden).toFixed(2)} s · ` +
