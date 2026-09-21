@@ -7,8 +7,8 @@
 // C (Fred 21.09.): kein Rauszoomen — zwei Stoppuhren nebeneinander,
 // schwarz und weiss, darunter Fallblatt-Zaehler: links laeuft einmal → 1,
 // rechts hundertmal → 100 (StoppuhrZaehler.astro ueber Slot kachel2).
-// D (Fred 21.09.): Ausdehnen — jede kleine Uhr beginnt 0,4 r naeher am
-// Zentrum und schiebt sich waehrend ihrer Fuellung nach aussen (Prop
+// D (Fred 21.09.): Ausdehnen — jede kleine Uhr beginnt 0,6 r naeher am
+// Zentrum (Fred: 0,6) und schiebt sich waehrend ihrer Fuellung nach aussen (Prop
 // `ausdehnen`). ?a ?b ?c ?d zeigen je eine Fassung allein. — so laeuft nur EINE Sektion
 // (beide zugleich im Bild verdoppeln die Animationslast, das verfaelscht
 // den Ruckel-Eindruck; die Startseite hat immer nur eine).
@@ -29,7 +29,7 @@ import StoppuhrZaehler from "../components/StoppuhrZaehler.astro";
 	</div>
 	<div class="fassung fassung--d">
 		<p class="marke">D · Ausdehnen: jede Uhr schiebt sich von innen auf ihren Platz</p>
-		<MultiOutputKacheln ausdehnen={0.4} />
+		<MultiOutputKacheln ausdehnen={0.6} />
 	</div>
 	<div class="fassung fassung--c">
 		<p class="marke">C · Zwei Stoppuhren mit Zähler</p>
