@@ -264,30 +264,25 @@ const { fassung = "brett" } = Astro.props;
 		   Sektionstitel der Seite gleich, „Eine Frage des Formats." hatte
 		   ihn seit jeher. Ein Satzpunkt macht aus der Ueberschrift eine
 		   Aussage statt einer Beschriftung. */}
-		<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs.</h2>
-		{/* Vierte Fassung (Fred 14.09., Diktat): „am Beispiel des Formats
-		   einer Live-Q&A-Session" — löst das Dreifach-Kompositum
-		   „Live-Q&A-Session-Formats" auf und macht ehrlich, dass die Tafel
-		   EIN Beispiel zeigt (nicht jedes Format liefert exakt diese
-		   Stückzahlen — entlastet still die Zahlen-Flagge). */}
-		{/* PROBE Inline-Fallblatt (Fred 14.09. abends, zweite Runde: "nur
-		   Zahlen"): die ZIFFERN als einzelne Kacheln im Fließtext — 2
-		   Experten, 1 Gespräch, 1 Stunde. Passt zur Zahlenkolonne der
-		   Wand; die Wort-Fassung (ZWEI/EIN/EINE) war die erste Probe. */}
-		{/* Beispiel-Satz ERSATZLOS raus (Fred 14.09. spät); VIDEOPODCAST
-		   steht in der Wand selbst (Kopf-Zeile der Timeline). Die
-		   Ziffern-Kacheln (FlapWort 2/1/1) sind nach Sichtung wieder
-		   VERWORFEN (Fred: "als Wörter hinschreiben") — es gilt der
-		   gelockte Zahlen-Staccato-Wortlaut. Die Inline-Kachel-Komponente
-		   FlapWort.astro bleibt als Baustein im Repo. */}
-		{/* Zahlwörter fett auf 900 (Fred 14.09. nacht) — gleiche Bauform
-		   wie die Expertise-Öffner im Paragraph. */}
-		{/* Staccato bleibt, nur die Reihenfolge ist neu (Fred 20.09.):
-		   Gespräch, Stunde, Experten — die Fließtext-Fassung ("Ein Gespräch
-		   in einer Stunde mit zwei Experten.") war ein Irrweg derselben
-		   Runde. Vorfassung 14.09.: "Zwei Experten. Ein Gespräch. Eine
-		   Stunde." */}
-		<p><strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde. <strong>Zwei</strong> Experten.</p>
+		{/* AUGENZEUGEN-MUSTER (Fred 21.09., Fassung C aus /kopf-demo):
+		   Ueberschrift und Unterzeile stehen in EINEM Block, der so breit ist
+		   wie die Ueberschrift (width: max-content, mittig gestellt). Die
+		   Unterzeile darin ist rechtsbuendig und endet damit exakt unter dem
+		   Punkt von GESPRÄCHS. Dasselbe Muster wie der Augenzeugen-Turm oben
+		   auf der Seite, wo „Noch vor dem ersten Kontakt." unter dem Punkt
+		   von ZEUGEN endet. Vorher schwebte die Zeile mittig unter der
+		   Ueberschrift und gehoerte optisch zu nichts.
+		   OHNE FETTUNG (Fassung C gegen B): die Zahlwoerter standen auf 900.
+		   Mittig gesetzt hatten sie einen Job — sie markierten die drei
+		   Zahlen als gezaehlte Fakten. An der rechten Kante eines fetten
+		   Blocks liest das Auge sie als Fortsetzung der Ueberschrift, die
+		   Ecke wird unruhig. Und das Vorbild oben ist ebenfalls ungefettet —
+		   die kleine Zeile ist dort bewusst leise, das ist der Reiz der
+		   Anheftung. Die Position uebernimmt jetzt die Betonung. */}
+		<div class="turm-block">
+			<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs.</h2>
+			<p>Ein Gespräch. Eine Stunde. Zwei Experten.</p>
+		</div>
 	</div>
 
 	<div class:list={["kachel-reihe", fassung === "brett" && "kacheln--brett"]}>
@@ -508,8 +503,45 @@ const { fassung = "brett" } = Astro.props;
 	}
 
 
+	/* Block so breit wie die Ueberschrift, mittig gestellt; die Unterzeile
+	   darin rechtsbuendig (Augenzeugen-Muster, s. Kommentar am Markup).
+	   max-width: 100% als Schutz auf schmalen Schirmen. */
+	.mo-kopf .turm-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		width: max-content;
+		max-width: 100%;
+		margin: 0 auto;
+		text-align: left;
+	}
+
+	.mo-kopf .turm-block p {
+		text-align: right;
+		max-width: none;
+		margin: 0;
+	}
+
+	/* ABSTAND = TURM-RHYTHMUS, dieselbe Rechnung wie in index.astro: bei
+	   Zeilenabstand 0.9 und Versal-Kappe 0.7 liegen zwei Turmzeilen
+	   0.2 Turm-Em auseinander; mit text-box-trim bleiben davon +0.05
+	   Turm-Em als Rand. Ohne text-box-Unterstuetzung ein fester Wert,
+	   damit sich nie etwas ueberschneidet. */
+	@supports (text-box: trim-both cap alphabetic) {
+		.mo-kopf .turm-block p {
+			text-box: trim-both cap alphabetic;
+			margin-top: calc(clamp(2.5rem, 1rem + 7vw, 8rem) * 0.05);
+		}
+	}
+
+	@supports not (text-box: trim-both cap alphabetic) {
+		.mo-kopf .turm-block p {
+			margin-top: 12px;
+		}
+	}
+
 	.mo-kopf h2 {
-		margin: 0 0 40px;
+		margin: 0;
 		font-weight: 900;
 		text-transform: uppercase;
 		/* 0.9 — seit Fred 14.09. nacht der EINHEITLICHE Zeilenabstand
@@ -527,10 +559,6 @@ const { fassung = "brett" } = Astro.props;
 		color: var(--white);
 		margin: 0 auto;
 		max-width: 46rem;
-	}
-
-	.mo-kopf p strong {
-		font-weight: 900;
 	}
 
 	/* Breite wie der uebrige Seiteninhalt (--max-width, 1100px). Die WAND
