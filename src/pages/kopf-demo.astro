@@ -9,6 +9,13 @@
 // endet sie exakt unter dem letzten Buchstaben der Überschrift, statt
 // unter deren Mitte zu schweben.
 //
+// EINZELANSICHTEN (Fred 21.09., „damit ich sie in Chrome öffnen kann"):
+//   /kopf-demo     alle drei untereinander, mit Beschriftung
+//   /kopf-demo?b   nur B, ohne Beschriftung, im Abstand der echten Sektion
+//   /kopf-demo?c   nur C, ebenso
+// Der Umschalter setzt eine Klasse auf <body> und blendet den Rest aus —
+// so sieht man jede Fassung ohne Nachbarn und ohne Vergleichsrahmen.
+//
 // Nicht verlinkt. Die Startseite bleibt unverändert, bis Fred wählt.
 import Layout from "../layouts/Layout.astro";
 ---
@@ -141,4 +148,42 @@ import Layout from "../layouts/Layout.astro";
 			margin-top: 12px;
 		}
 	}
+
+	/* ── Einzelansichten ?b und ?c ────────────────────────────────────── */
+	/* Beschriftungen weg, nur die gewaehlte Fassung, und der Abstand der
+	   echten Sektion drumherum (--abstand-xl oben wie .mo-sektion). */
+	:global(body.nur-b) .hinweis,
+	:global(body.nur-b) .fuss,
+	:global(body.nur-c) .hinweis,
+	:global(body.nur-c) .fuss {
+		display: none;
+	}
+
+	:global(body.nur-b) .kopf--a,
+	:global(body.nur-b) .kopf--c,
+	:global(body.nur-c) .kopf--a,
+	:global(body.nur-c) .kopf--b {
+		display: none;
+	}
+
+	:global(body.nur-b) .probe,
+	:global(body.nur-c) .probe {
+		padding: var(--abstand-xl) clamp(16px, 3vw, 56px) var(--abstand-xl);
+		max-width: none;
+	}
+
+	:global(body.nur-b) .kopf,
+	:global(body.nur-c) .kopf {
+		margin-bottom: 0;
+	}
 </style>
+
+<script>
+	// Umschalter — bewusst simpel, es ist eine Probe.
+	function fassung() {
+		const p = new URLSearchParams(location.search);
+		document.body.classList.toggle("nur-b", p.has("b"));
+		document.body.classList.toggle("nur-c", p.has("c"));
+	}
+	document.addEventListener("astro:page-load", fassung);
+</script>
