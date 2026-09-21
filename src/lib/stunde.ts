@@ -137,7 +137,7 @@ export const DASH_STUNDE = { muster: [1.04, 2], leer: 1.04, voll: 0.04 };
 // Ende. stundeX: waagrechter Versatz der Zahl in r (Fred: „die 1 ist
 // gefuehlt zu weit rechts" — die Box-Mitte der 1 liegt links vom Stamm,
 // das Auge nimmt den Stamm als Masse; −0,045 r rueckt ihn zur Mitte).
-export const STUNDE_TEXT = { modus: "stunde1" as "stunde1" | "zaehler", stundeZahl: "1", stundeEinheit: "Std.", stundeGroesse: 0.9, stundeDy: 0.326, stundeEinheitDy: 0.496, stundeImmer: true, stundeX: -0.045,
+export const STUNDE_TEXT = { modus: "stunde1" as "stunde1" | "zaehler", stundeZahl: "1", stundeEinheit: "Std.", stundeGroesse: 1.0, stundeDy: 0.25, stundeEinheitDy: 0.42, stundeImmer: true, stundeX: -0.045,
 	einheit: "Min.", bis: 60, zahlGroesse: 0.95, zahlDy: 0.344, einheitGroesse: 0.14, einheitDy: 0.514, luecke: 0.06, nullVor: 0.4 }; // luecke in em, zahlDy = Versalhoehe/2
 export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
