@@ -70,7 +70,10 @@ export const BLATT = {
 	// Die kleinen Uhren tragen nur die vier Viertelstriche (Fred 21.09.:
 	// „lassen wir die Minutenstriche weg"). Die Stunde behaelt ihr volles
 	// Blatt. Spart im GIF die groesste Menge Kantenpixel.
-	kleineMinuten: true, // Fred 21.09.: „Lass die mal drin" (Website)
+	// Fred 21.09. abends: Minutenstriche der kleinen Uhren raus (Fuenf-
+	// Minuten und Viertel bleiben), zum Anschauen auf der Startseite —
+	// weniger Malaufwand je Bild, die Stunde behaelt ihr volles Blatt.
+	kleineMinuten: false,
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
 // KEIN Zeiger auf den kleinen Uhren (Fred 21.09.): erst 176 drehende
