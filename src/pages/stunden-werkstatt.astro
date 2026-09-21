@@ -193,8 +193,8 @@ const N = uhren().length;
 		// Zeitanzeige: Modus stunde1 (1 + Einheit ab fertigem Kreis bis nullVor vor Ende Reinzoomen) oder Zaehler 00 … 60
 		ctx.fillStyle = WEISS;
 		if (STUNDE_TEXT.modus === "stunde1") {
-			if (t >= m.stundeEnde && t < m.reinEnde - (STUNDE_TEXT.nullVor ?? 0)) {
-				schrift(ctx, STUNDE_TEXT.stundeZahl, GLYPHEN.zahl, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.stundeDy, (UHR.r * STUNDE_TEXT.stundeGroesse) / GLYPHEN.upm, ZELLE, 0);
+			if (STUNDE_TEXT.stundeImmer || (t >= m.stundeEnde && t < m.reinEnde - (STUNDE_TEXT.nullVor ?? 0))) {
+				schrift(ctx, STUNDE_TEXT.stundeZahl, GLYPHEN.zahl, UHR.cx + UHR.r * (STUNDE_TEXT.stundeX ?? 0), UHR.cy + UHR.r * STUNDE_TEXT.stundeDy, (UHR.r * STUNDE_TEXT.stundeGroesse) / GLYPHEN.upm, ZELLE, 0);
 				schrift(ctx, STUNDE_TEXT.stundeEinheit, GLYPHEN.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.stundeEinheitDy, (UHR.r * STUNDE_TEXT.einheitGroesse) / GLYPHEN.upm);
 			}
 		} else {

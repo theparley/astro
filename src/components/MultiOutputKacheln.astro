@@ -277,7 +277,7 @@ const startLage = zifferLage(startZiffern);
 const einheitBreite = einheitText.split("").reduce((a, c) => a + GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit].adv, 0);
 let einheitX = -einheitBreite / 2;
 const einheitPfade = einheitText.split("").map((c) => { const g = GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit]; const x = einheitX; einheitX += g.adv; return { d: g.d, x }; });
-const glyphenJson = JSON.stringify({ ...GLYPHEN.zahl, ZELLE, LUECKE, STUNDE1: STUNDE1 ? 1 : 0 });
+const glyphenJson = JSON.stringify({ ...GLYPHEN.zahl, ZELLE, LUECKE, STUNDE1: STUNDE1 ? 1 : 0, STUNDE_IMMER: ST.stundeImmer ? 1 : 0 });
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
@@ -598,8 +598,8 @@ const beschlagStriche = [
    (Variante 5). Immer sichtbar. Als UMRISSE aus stunde-glyphen.ts, nicht als Text: Text
 							   zitterte unter der Kamera-Skalierung, Pfade skalieren wie die Kreise.
 							   Server-Stand = Endstand „60". */}
-							<g class="stunde-zaehler" data-glyphen={glyphenJson} data-stunde1={STUNDE1 || undefined}>
-								<g class="stunde-zahl" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * zahlDy}) scale(${zahlS} ${-zahlS})`}>
+							<g class="stunde-zaehler" data-glyphen={glyphenJson} data-stunde1={(STUNDE1 && !ST.stundeImmer) || undefined}>
+								<g class="stunde-zahl" transform={`translate(${UHR.cx + (STUNDE1 ? UHR.r * (ST.stundeX ?? 0) : 0)} ${UHR.cy + UHR.r * zahlDy}) scale(${zahlS} ${-zahlS})`}>
 									{startZiffern.split("").map((c, i) => <path class="ziffer" data-slot={i} d={GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl].d} transform={`translate(${startLage[i]} 0)`} />)}
 								</g>
 								{einheitText && (
@@ -1599,7 +1599,7 @@ const beschlagStriche = [
 		// Ziffern als Umrisse: je Slot ein <path>, bei Wechsel d und Lage setzen
 		// (zwei Ziffern mittig ueber ihre Vorschubbreiten).
 		const zaehler = buehne.querySelector<SVGGElement>(".stunde-zaehler")!;
-		const { ZELLE, LUECKE, STUNDE1, ...GL } = JSON.parse(zaehler.dataset.glyphen!) as Record<string, { d: string; adv: number; xMin: number; xMax: number }> & { ZELLE: number; LUECKE: number; STUNDE1: number };
+		const { ZELLE, LUECKE, STUNDE1, STUNDE_IMMER, ...GL } = JSON.parse(zaehler.dataset.glyphen!) as Record<string, { d: string; adv: number; xMin: number; xMax: number }> & { ZELLE: number; LUECKE: number; STUNDE1: number; STUNDE_IMMER: number };
 		const slots = Array.from(zaehler.querySelectorAll<SVGPathElement>(".ziffer"));
 		// Tabellenziffern: feste Zelle je Ziffer, Ziffer mittig darin (s. Frontmatter).
 		const setzeZahl = (s: string) => {
@@ -1610,7 +1610,7 @@ const beschlagStriche = [
 		// Einheit schaltet sich ein, sobald der Kreis fertig ist, und nullVor
 		// Sekunden vor dem Ende des Reinzoomens wieder aus (ein Element, eine
 		// Deckkraft-Animation mit Stufen).
-		if (STUNDE1) {
+		if (STUNDE1 && !STUNDE_IMMER) { // stundeImmer: die 1 steht von Anfang an, keine Schaltung
 			const ausBei = o(M.reinEnde - (P.STUNDE_TEXT.nullVor ?? 0));
 			anims.push(zaehler.animate([
 				{ opacity: 0, offset: 0, easing: "step-end" },
