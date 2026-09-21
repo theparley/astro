@@ -4,12 +4,16 @@
 // Druecker an Stunde und allen kleinen Uhren) mit der neuen Bezugszeile
 // „... messbarer Zuschauerzeit". Beide Fassungen kommen aus derselben
 // Komponente (Prop `stoppuhr`), damit nichts auseinanderlaufen kann.
-// ?a zeigt nur die Uhr, ?b nur die Stoppuhr — so laeuft nur EINE Sektion
+// C (Fred 21.09.): kein Rauszoomen — zwei Stoppuhren nebeneinander,
+// schwarz und weiss, darunter Fallblatt-Zaehler: links laeuft einmal → 1,
+// rechts hundertmal → 100 (StoppuhrZaehler.astro ueber Slot kachel2).
+// ?a zeigt nur die Uhr, ?b nur die Stoppuhr, ?c nur den Zaehler — so laeuft nur EINE Sektion
 // (beide zugleich im Bild verdoppeln die Animationslast, das verfaelscht
 // den Ruckel-Eindruck; die Startseite hat immer nur eine).
 // Nicht verlinkt. Die Startseite bleibt unveraendert, bis Fred waehlt.
 import Layout from "../layouts/Layout.astro";
 import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
+import StoppuhrZaehler from "../components/StoppuhrZaehler.astro";
 ---
 
 <Layout title="Stoppuhr-Probe">
@@ -21,6 +25,12 @@ import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 		<p class="marke">B · Stoppuhr</p>
 		<MultiOutputKacheln stoppuhr bezug2="Eine Stunde Aufnahme wird so zu mehr als 100 Stunden messbarer Zuschauerzeit." />
 	</div>
+	<div class="fassung fassung--c">
+		<p class="marke">C · Zwei Stoppuhren mit Zähler</p>
+		<MultiOutputKacheln bezug2="Eine Stunde Aufnahme wird so zu mehr als 100 Stunden messbarer Zuschauerzeit.">
+			<StoppuhrZaehler slot="kachel2" />
+		</MultiOutputKacheln>
+	</div>
 </Layout>
 
 <style>
@@ -30,10 +40,12 @@ import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 		margin: 0;
 		padding: 40px clamp(16px, 3vw, 56px) 0;
 	}
-	:global(body.nur-a) .fassung--b,
-	:global(body.nur-b) .fassung--a,
+	:global(body.nur-a) .fassung--b, :global(body.nur-a) .fassung--c,
+	:global(body.nur-b) .fassung--a, :global(body.nur-b) .fassung--c,
+	:global(body.nur-c) .fassung--a, :global(body.nur-c) .fassung--b,
 	:global(body.nur-a) .marke,
-	:global(body.nur-b) .marke {
+	:global(body.nur-b) .marke,
+	:global(body.nur-c) .marke {
 		display: none;
 	}
 </style>
@@ -43,6 +55,7 @@ import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 		const p = new URLSearchParams(location.search);
 		document.body.classList.toggle("nur-a", p.has("a"));
 		document.body.classList.toggle("nur-b", p.has("b"));
+		document.body.classList.toggle("nur-c", p.has("c"));
 	}
 	fassung();
 	document.addEventListener("astro:page-load", fassung);

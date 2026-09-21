@@ -1,0 +1,228 @@
+---
+// StoppuhrZaehler.astro — Kachel-2-Fassung C (Fred 21.09., Probe):
+// KEIN Rauszoomen. Zwei Stoppuhren nebeneinander, links schwarz, rechts
+// weiss, darunter je ein Fallblatt-Zaehler aus der Mechanik von Kachel 1
+// (src/lib/fallblatt.ts). Die linke laeuft einmal, der Zaehler klappt auf
+// 1. Die rechte dreht hundertmal, der Zaehler klappt auf 100. Dann kurz
+// stehen, beide zurueck auf 0, von vorn.
+// Geometrie (Radius, Blatt, Beschlag, Strich) kommt aus src/lib/stunde.ts,
+// fuenffach vergroessert (UHR.r 34 → 170 im 1000er-Raster) — dieselbe Uhr
+// wie in Fassung A/B, nur ohne Kamera. Wird per Slot „kachel2" in
+// MultiOutputKacheln eingesetzt, Kopf und Bezugszeile bleiben dort.
+import { ZEIT, UHR, BLATT, STRICH, STOPPUHR, knopfWinkel } from "../lib/stunde";
+
+const K = 6;                       // Vergroesserung gegenueber der Kachel-Uhr
+const r = UHR.r * K;               // 204
+const strich = STRICH * K;         // 12.5
+const uhren = [
+	{ cx: 250, cy: 330, fassung: "dunkel" },
+	{ cx: 750, cy: 330, fassung: "hell" },
+];
+const striche = 60 / BLATT.minute.schritt;
+const dash = (breite: number, rad: number, n: number) => +((breite * K) / (2 * Math.PI * rad * K) * n).toFixed(4);
+const dm = dash(BLATT.minute.breite, BLATT.minute.r, striche);
+const df = dash(BLATT.fuenf.breite, BLATT.fuenf.r, 12);
+const dq = dash(BLATT.viertel.breite, BLATT.viertel.r, 4);
+const SP = STOPPUHR;
+const tPfad = (halsB: number, halsH: number, kappeB: number, kappeH: number) => {
+	const kb = kappeB * r / 2, hb = halsB * r / 2, yK = -r - halsH * r - kappeH * r, yH = -r - halsH * r, yU = -r + K;
+	return `M${-kb},${yK}H${kb}V${yH}H${hb}V${yU}H${-hb}V${yH}H${-kb}Z`;
+};
+const beschlag = [
+	{ d: tPfad(SP.hals.breite, SP.hals.hoehe, SP.kappe.breite, SP.kappe.hoehe), rot: 0 },
+	...knopfWinkel().map((w) => ({ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: w })),
+];
+
+// Zeiten (Sekunden). Die linke laeuft so lang wie die Stunde in A/B.
+const T = { links: ZEIT.stunde, pause: 0.4, rechts: 8, stand: 2.5 };
+const RUNDE = T.links + T.pause + T.rechts + T.stand;
+const plan = JSON.stringify({ ...T, RUNDE });
+
+// Zaehler: drei Kacheln je Uhr, rechtsbuendig („  0" → „  1" / „100").
+const zaehler = [
+	{ start: "  0", ende: "  1", flip: 110 },
+	{ start: "  0", ende: "100", flip: 60 },
+];
+const layer = (ch: string) => ch === " " ? " " : ch;
+---
+
+<div class="zaehler" data-zaehler data-plan={plan}>
+	<svg class="uhren" viewBox="0 40 1000 500" aria-hidden="true">
+		{uhren.map((u) => (
+			<g class={`uhr uhr--${u.fassung}`}>
+				<circle class="korpus" cx={u.cx} cy={u.cy} r={r} />
+				<circle class="blatt minute" cx={u.cx} cy={u.cy} r={BLATT.minute.r * K} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.cx} ${u.cy})`} />
+				<circle class="blatt fuenf" cx={u.cx} cy={u.cy} r={BLATT.fuenf.r * K} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.cx} ${u.cy})`} />
+				<circle class="blatt viertel" cx={u.cx} cy={u.cy} r={BLATT.viertel.r * K} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.cx} ${u.cy})`} />
+				<line class="speiche speiche--start" x1={u.cx} y1={u.cy} x2={u.cx} y2={u.cy - r} />
+				<line class="speiche speiche--lauf" data-hand x1={u.cx} y1={u.cy} x2={u.cx} y2={u.cy - r} style={`transform-origin: ${u.cx}px ${u.cy}px`} />
+				<g class="beschlag">
+					{beschlag.map((b) => <path d={b.d} transform={`translate(${u.cx} ${u.cy}) rotate(${b.rot})`} />)}
+				</g>
+			</g>
+		))}
+	</svg>
+	<div class="zaehler-reihe">
+		{zaehler.map((z, i) => (
+			<div class="sf-grid zaehler-board" data-board={i} data-start={z.start} data-ende={z.ende} data-flip={z.flip} aria-hidden="true">
+				<div class="sf-row-line">
+					{[...z.start].map((ch, c) => (
+						<span class="sf-tile" data-c={c} data-char={ch}>
+							<span class="sf-static sf-static--top"><span class="sf-glyph" data-layer="top-static">{layer(ch)}</span></span>
+							<span class="sf-static sf-static--bottom"><span class="sf-glyph" data-layer="bottom-static">{layer(ch)}</span></span>
+							<span class="sf-flap sf-flap--front" data-layer="front-flap"><span class="sf-glyph">{layer(ch)}</span></span>
+							<span class="sf-flap sf-flap--back" data-layer="back-flap"><span class="sf-glyph">{layer(ch)}</span></span>
+							<span class="sf-hinge"></span>
+						</span>
+					))}
+				</div>
+			</div>
+		))}
+	</div>
+	<p class="sr">Eine Stunde. Hundert Stunden.</p>
+</div>
+
+<style>
+	.zaehler {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 5cqw;
+		padding: 5cqw;
+	}
+	.uhren {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+	.korpus {
+		stroke-width: 15;
+	}
+	.uhr--dunkel .korpus { fill: var(--kachel); stroke: #ffffff; }
+	.uhr--hell .korpus { fill: #ffffff; stroke: #ffffff; }
+	.blatt { fill: none; }
+	.uhr--dunkel .blatt, .uhr--dunkel .speiche { stroke: #ffffff; }
+	.uhr--hell .blatt, .uhr--hell .speiche { stroke: var(--kachel); }
+	.blatt.minute { stroke-width: 21; }   /* BLATT.minute.laenge × K */
+	.blatt.fuenf { stroke-width: 30; }
+	.blatt.viertel { stroke-width: 42; }
+	.speiche { stroke-width: 15; stroke-linecap: butt; }
+	.speiche--lauf { transform-box: view-box; }
+	.beschlag path { fill: #ffffff; }
+	/* Zaehler: dieselbe Kachel-Mechanik wie Kachel 1, Groesse hier eigen. */
+	.zaehler-reihe {
+		display: flex;
+		justify-content: space-around;
+		width: 100%;
+	}
+	.zaehler-board {
+		--sf-tile-w: 12cqw;
+		--sf-font-size: calc(var(--sf-tile-w) * 1.5);
+	}
+	.sr {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		margin: -1px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.speiche--lauf { transform: rotate(0turn); }
+	}
+</style>
+
+<script>
+	import { KURVE } from "../lib/stunde";
+	import { wireTileLayers, setInstant, flapTo, reduceMotion, type FlapTile } from "../lib/fallblatt";
+
+	type Board = { tiles: FlapTile[]; start: string; ende: string; flip: number; ziel: string; laeuft: boolean; gen: number };
+
+	function anlegen(wurzel: HTMLElement) {
+		const P = JSON.parse(wurzel.dataset.plan!);
+		const RUNDE: number = P.RUNDE;
+		const o = (s: number) => Math.min(1, s / RUNDE);
+		const bz = `cubic-bezier(${KURVE.join(", ")})`;
+		const opt: KeyframeAnimationOptions = { duration: RUNDE * 1000, iterations: Infinity, fill: "both" };
+		const haende = wurzel.querySelectorAll<SVGLineElement>("[data-hand]");
+		const boards: Board[] = Array.from(wurzel.querySelectorAll<HTMLElement>("[data-board]")).map((b) => ({
+			tiles: Array.from(b.querySelectorAll<HTMLElement>(".sf-tile")).map(wireTileLayers),
+			start: b.dataset.start!, ende: b.dataset.ende!, flip: Number(b.dataset.flip) || 110,
+			ziel: b.dataset.start!, laeuft: false, gen: 0,
+		}));
+		const setze = (b: Board, s: string) => { b.gen++; b.ziel = s; b.tiles.forEach((t, i) => setInstant(t, s[i])); };
+
+		if (reduceMotion()) {
+			boards.forEach((b) => setze(b, b.ende));
+			return () => {};
+		}
+
+		// Zeiger: links eine Drehung in T.links (Kurve wie die Stunde), rechts
+		// hundert Drehungen linear von T.links+pause bis +rechts.
+		const anims: Animation[] = [];
+		anims.push(haende[0].animate([
+			{ transform: "rotate(0turn)", offset: 0, easing: bz },
+			{ transform: "rotate(1turn)", offset: o(P.links) },
+			{ transform: "rotate(1turn)", offset: 1 },
+		], opt));
+		anims.push(haende[1].animate([
+			{ transform: "rotate(0turn)", offset: 0 },
+			{ transform: "rotate(0turn)", offset: o(P.links + P.pause), easing: "linear" },
+			{ transform: "rotate(100turn)", offset: o(P.links + P.pause + P.rechts) },
+			{ transform: "rotate(100turn)", offset: 1 },
+		], opt));
+
+		// Zaehler folgen der Zeit der Zeiger-Animation. Wenn das Ziel schneller
+		// wechselt, als die Kacheln klappen, holt die Schleife mit dem
+		// jeweils neuesten Ziel auf (Zahlen werden uebersprungen, nie gestaut).
+		const klappe = async (b: Board) => {
+			if (b.laeuft) return;
+			b.laeuft = true;
+			const gen = b.gen;
+			let z = "";
+			while (z !== b.ziel && gen === b.gen) {
+				z = b.ziel;
+				await Promise.all(b.tiles.map((t, i) => flapTo(t, z[i], b.flip)));
+			}
+			b.laeuft = false;
+		};
+		const zielFuer = (b: Board, wert: number) => String(wert).padStart(3, " ");
+		let raf = 0;
+		const tick = () => {
+			const t = ((anims[0].currentTime as number) % (RUNDE * 1000)) / 1000;
+			const links = t >= P.links ? 1 : 0;
+			const r0 = P.links + P.pause;
+			const rechts = t < r0 ? 0 : Math.min(100, Math.floor(((t - r0) / P.rechts) * 100));
+			[links, rechts].forEach((w, i) => {
+				const b = boards[i];
+				const z = zielFuer(b, w);
+				if (z !== b.ziel) { b.ziel = z; klappe(b); }
+			});
+			raf = requestAnimationFrame(tick);
+		};
+
+		const start = () => {
+			anims.forEach((a) => { a.currentTime = 0; a.play(); });
+			boards.forEach((b) => setze(b, b.start));
+			cancelAnimationFrame(raf);
+			raf = requestAnimationFrame(tick);
+		};
+		const stopp = () => { anims.forEach((a) => a.pause()); cancelAnimationFrame(raf); };
+		anims.forEach((a) => a.pause());
+		const io = new IntersectionObserver((es) => es.forEach((e) => (e.isIntersecting ? start() : stopp())), { threshold: 0.2 });
+		io.observe(wurzel);
+		return () => { io.disconnect(); stopp(); anims.forEach((a) => a.cancel()); };
+	}
+
+	let aufraeumen: Array<() => void> = [];
+	function mount() {
+		aufraeumen.forEach((f) => f());
+		aufraeumen = Array.from(document.querySelectorAll<HTMLElement>("[data-zaehler]")).map(anlegen);
+	}
+	mount();
+	document.addEventListener("astro:page-load", mount);
+	document.addEventListener("astro:before-swap", () => { aufraeumen.forEach((f) => f()); aufraeumen = []; });
+</script>

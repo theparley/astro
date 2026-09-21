@@ -247,7 +247,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 // Zeiten, Kurven, Kamera und Geometrie kommen aus src/lib/stunde.ts — EINE
 // BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
 // Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
-import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, marken, uhren as uhrenGeometrie } from "../lib/stunde";
+import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
@@ -277,8 +277,25 @@ const tPfad = (halsB: number, halsH: number, kappeB: number, kappeH: number) => 
 };
 const beschlag = [
 	{ d: tPfad(SP.hals.breite, SP.hals.hoehe, SP.kappe.breite, SP.kappe.hoehe), rot: 0 },
-	{ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: -SP.knopf.winkel },
-	{ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: SP.knopf.winkel },
+	...knopfWinkel().map((w) => ({ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: w })),
+];
+// Die kleinen Uhren bekommen den Beschlag als STRICHE (zwei Linien je T:
+// Hals und Kappe, Breite = Strichbreite), nicht als Flaeche. Grund: so
+// laesst er sich mit derselben Mechanik wie die Scheiben ein- und
+// ausschalten — stroke-dashoffset auf der Gruppe, pathLength 1, Versatz
+// 1 → 0 — auf dem Haupt-Thread, ohne Compositor-Ebene und ohne Deckkraft
+// oder Visibility (beides flackerte am Rundenwechsel, Fred 21.09.). Der
+// Hals reicht bis in die Kappenmitte, damit keine Naht entsteht.
+const tStriche = (halsB: number, halsH: number, kappeB: number, kappeH: number) => {
+	const yKm = -rr - halsH * rr - kappeH * rr / 2;
+	return [
+		{ x1: 0, y1: -rr + 1, x2: 0, y2: yKm, w: halsB * rr },
+		{ x1: -kappeB * rr / 2, y1: yKm, x2: kappeB * rr / 2, y2: yKm, w: kappeH * rr },
+	];
+};
+const beschlagStriche = [
+	{ l: tStriche(SP.hals.breite, SP.hals.hoehe, SP.kappe.breite, SP.kappe.hoehe), rot: 0 },
+	...knopfWinkel().map((w) => ({ l: tStriche(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: w })),
 ];
 ---
 
@@ -484,6 +501,9 @@ const beschlag = [
 				   Spalt am Ende. Reihenfolge = Stapel: die weissen Uhren samt
 				   dunklen Blaettern in EINER Gruppe (die blendet am Ende aus), dann
 				   die Stunde: Fuellung, helles Blatt, Rand, Speichen. */}
+				{/* Slot „kachel2" (Probe 21.09.): eine andere Buehne fuer Kachel 2
+				   (z. B. StoppuhrZaehler). Ohne Slot steht die Stunden-Buehne. */}
+				<slot name="kachel2">
 				<div class="kreis-buehne" data-kreis data-plan={plan}>
 					<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
 						<g class="kamera">
@@ -499,7 +519,7 @@ const beschlag = [
 										<line class="zeiger" data-i={i} x1={u.x} y1={u.y} x2={u.x} y2={u.y - UHR.r} style={`transform-origin: ${u.x}px ${u.y}px`} />
 										{stoppuhr && (
 											<g class="beschlag beschlag--klein" data-i={i}>
-												{beschlag.map((b) => <path d={b.d} transform={`translate(${u.x} ${u.y}) rotate(${b.rot})`} />)}
+												{beschlagStriche.map((b) => b.l.map((l) => <line pathLength="1" x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke-width={l.w} transform={`translate(${u.x} ${u.y}) rotate(${b.rot})`} />))}
 											</g>
 										)}
 									</>
@@ -520,6 +540,7 @@ const beschlag = [
 						</g>
 					</svg>
 				</div>
+				</slot>
 			</div>
 			</div>
 		</div>
@@ -1051,16 +1072,19 @@ const beschlag = [
 	/* Dunkler Zeiger je weisser Uhr (Fred 21.09.): laeuft mit der Fuellung
 	   einmal herum und bleibt auf 12 stehen, wie der weisse der Stunde.
 	   Drehpunkt = Uhrmitte (inline transform-origin, view-box-Einheiten). */
-	/* Stoppuhr-Beschlag (Probe): Krone + Druecker als T-Pfade, weiss. Bei
-	   den kleinen Uhren erscheint er mit der Fuellung (Script) — ueber
-	   VISIBILITY, nicht Opacity: 176 Opacity-Animationen legen 176
-	   Compositor-Ebenen an, das ruckelte und blitzte (Fred 21.09.).
-	   Visibility schaltet nur zweimal je Runde auf dem Haupt-Thread um. */
-	.beschlag path {
+	/* Stoppuhr-Beschlag (Probe). Stunde: T-Pfade als Flaeche, weiss, statisch.
+	   Kleine Uhren: Striche (s. Frontmatter), ein- und ausgeschaltet ueber
+	   stroke-dashoffset auf der GRUPPE (vererbt sich auf die Linien) — exakt
+	   die Mechanik der Scheiben, kein Opacity, kein Visibility (beides
+	   flackerte am Rundenwechsel, Fred 21.09.). Versatz 1 = unsichtbar. */
+	.beschlag--stunde path {
 		fill: #ffffff;
 	}
 	.beschlag--klein {
-		visibility: hidden;
+		fill: none;
+		stroke: #ffffff;
+		stroke-dasharray: 1 1;
+		stroke-dashoffset: 1;
 	}
 	.zeiger {
 		stroke: var(--kachel);
@@ -1098,7 +1122,7 @@ const beschlag = [
 			transform: scale(1.15);
 		}
 		.beschlag--klein {
-			visibility: visible;
+			stroke-dashoffset: 0;
 		}
 		.scheibe,
 		.stunde-fuellung,
@@ -1509,15 +1533,14 @@ const beschlag = [
 				{ transform: "rotate(1turn)", offset: 1 },
 				], opt));
 				// Stoppuhr-Probe: der Beschlag schaltet sich mit dem Start der Fuellung
-				// ein und mit dem Rundenende (leerVorEnde) aus. Visibility ist diskret;
-				// „step-end" haelt den Startwert bis zum naechsten Keyframe, sonst
-				// gaelte das Intervall hidden→visible als sichtbar.
+				// ein (Versatz 1 → 0, wie die Scheibe 1,06 → 0) und mit leerVorEnde aus.
 				if (beschlaege[i]) anims.push(beschlaege[i].animate([
-					{ visibility: "hidden", offset: 0, easing: "step-end" },
-					{ visibility: "visible", offset: ab, easing: "step-end" },
-					{ visibility: "visible", offset: leerVorEnde, easing: "step-end" },
-					{ visibility: "hidden", offset: Math.min(1, leerVorEnde + 0.0001) },
-					{ visibility: "hidden", offset: 1 },
+					{ strokeDashoffset: 1, offset: 0 },
+					{ strokeDashoffset: 1, offset: ab },
+					{ strokeDashoffset: 0, offset: Math.min(leerVorEnde, ab + 0.0001) },
+					{ strokeDashoffset: 0, offset: leerVorEnde },
+					{ strokeDashoffset: 1, offset: Math.min(1, leerVorEnde + 0.0001) },
+					{ strokeDashoffset: 1, offset: 1 },
 				], opt));
 		});
 		return anims;

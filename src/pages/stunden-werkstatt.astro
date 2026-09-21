@@ -76,7 +76,7 @@ const N = uhren().length;
 <script src="/werkzeug/gif.js" is:inline></script>
 
 <script>
-	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
+	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, knopfWinkel, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
 	const WEISS = "#ffffff";
@@ -134,8 +134,7 @@ const N = uhren().length;
 			ctx.restore();
 		};
 		teil(0, S.hals.breite, S.hals.hoehe, S.kappe.breite, S.kappe.hoehe);
-		teil(-S.knopf.winkel, S.knopf.halsBreite, S.knopf.hals, S.knopf.breite, S.knopf.hoehe);
-		teil(S.knopf.winkel, S.knopf.halsBreite, S.knopf.hals, S.knopf.breite, S.knopf.hoehe);
+		for (const w of knopfWinkel()) teil(w, S.knopf.halsBreite, S.knopf.hals, S.knopf.breite, S.knopf.hoehe);
 	}
 	function stueck(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, anteil: number) {
 		if (anteil <= 0) return;
