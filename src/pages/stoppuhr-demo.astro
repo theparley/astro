@@ -7,7 +7,9 @@
 // C (Fred 21.09.): kein Rauszoomen — zwei Stoppuhren nebeneinander,
 // schwarz und weiss, darunter Fallblatt-Zaehler: links laeuft einmal → 1,
 // rechts hundertmal → 100 (StoppuhrZaehler.astro ueber Slot kachel2).
-// ?a zeigt nur die Uhr, ?b nur die Stoppuhr, ?c nur den Zaehler — so laeuft nur EINE Sektion
+// D (Fred 21.09.): Ausdehnen — jede kleine Uhr beginnt 0,4 r naeher am
+// Zentrum und schiebt sich waehrend ihrer Fuellung nach aussen (Prop
+// `ausdehnen`). ?a ?b ?c ?d zeigen je eine Fassung allein. — so laeuft nur EINE Sektion
 // (beide zugleich im Bild verdoppeln die Animationslast, das verfaelscht
 // den Ruckel-Eindruck; die Startseite hat immer nur eine).
 // Nicht verlinkt. Die Startseite bleibt unveraendert, bis Fred waehlt.
@@ -25,6 +27,10 @@ import StoppuhrZaehler from "../components/StoppuhrZaehler.astro";
 		<p class="marke">B · Stoppuhr</p>
 		<MultiOutputKacheln stoppuhr bezug2="Eine Stunde Aufnahme wird so zu mehr als 100 Stunden messbarer Zuschauerzeit." />
 	</div>
+	<div class="fassung fassung--d">
+		<p class="marke">D · Ausdehnen: jede Uhr schiebt sich von innen auf ihren Platz</p>
+		<MultiOutputKacheln ausdehnen={0.4} />
+	</div>
 	<div class="fassung fassung--c">
 		<p class="marke">C · Zwei Stoppuhren mit Zähler</p>
 		<MultiOutputKacheln bezug2="Eine Stunde Aufnahme wird so zu mehr als 100 Stunden messbarer Zuschauerzeit.">
@@ -40,9 +46,11 @@ import StoppuhrZaehler from "../components/StoppuhrZaehler.astro";
 		margin: 0;
 		padding: 40px clamp(16px, 3vw, 56px) 0;
 	}
-	:global(body.nur-a) .fassung--b, :global(body.nur-a) .fassung--c,
-	:global(body.nur-b) .fassung--a, :global(body.nur-b) .fassung--c,
-	:global(body.nur-c) .fassung--a, :global(body.nur-c) .fassung--b,
+	:global(body.nur-a) .fassung--b, :global(body.nur-a) .fassung--c, :global(body.nur-a) .fassung--d,
+	:global(body.nur-b) .fassung--a, :global(body.nur-b) .fassung--c, :global(body.nur-b) .fassung--d,
+	:global(body.nur-c) .fassung--a, :global(body.nur-c) .fassung--b, :global(body.nur-c) .fassung--d,
+	:global(body.nur-d) .fassung--a, :global(body.nur-d) .fassung--b, :global(body.nur-d) .fassung--c,
+	:global(body.nur-d) .marke,
 	:global(body.nur-a) .marke,
 	:global(body.nur-b) .marke,
 	:global(body.nur-c) .marke {
@@ -56,6 +64,7 @@ import StoppuhrZaehler from "../components/StoppuhrZaehler.astro";
 		document.body.classList.toggle("nur-a", p.has("a"));
 		document.body.classList.toggle("nur-b", p.has("b"));
 		document.body.classList.toggle("nur-c", p.has("c"));
+		document.body.classList.toggle("nur-d", p.has("d"));
 	}
 	fassung();
 	document.addEventListener("astro:page-load", fassung);

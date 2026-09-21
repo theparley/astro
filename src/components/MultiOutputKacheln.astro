@@ -286,10 +286,14 @@ interface Props {
 	// Stoppuhr (Fred 21.09., seit abends Standard): Krone + Druecker rechts
 	// an Stunde und allen kleinen Uhren (lib STOPPUHR); false = schlichte
 	// Uhr. bezug2 ersetzt die Bezugszeile von Kachel 2.
-	stoppuhr?: boolean;
-	bezug2?: string;
-}
-const { fassung = "brett", stoppuhr = true, bezug2 } = Astro.props;
+		stoppuhr?: boolean;
+		bezug2?: string;
+		// AUSDEHNEN (Fred 21.09., Demo): jede kleine Uhr beginnt um diesen Anteil
+		// von r naeher am Zentrum und schiebt sich waehrend ihrer Fuellung nach
+		// aussen auf ihren Platz. 0 = aus (Startseite).
+		ausdehnen?: number;
+	}
+const { fassung = "brett", stoppuhr = true, bezug2, ausdehnen = 0 } = Astro.props;
 // Beschlag als drei T-Pfade (Krone, Druecker links, Druecker rechts),
 // relativ zur Uhrmitte, je mit Drehung. EIN Pfad je T, nicht zwei
 // Rechtecke: an der gemeinsamen Kante zweier Rechtecke bleibt sonst eine
@@ -552,15 +556,16 @@ const beschlagStriche = [
 				{/* Slot „kachel2" (Probe 21.09.): eine andere Buehne fuer Kachel 2
 				   (z. B. StoppuhrZaehler). Ohne Slot steht die Stunden-Buehne. */}
 				<slot name="kachel2">
-				<div class="kreis-buehne" data-kreis data-plan={plan}>
+				<div class="kreis-buehne" data-kreis data-plan={plan} data-ausdehnen={ausdehnen || undefined}>
 					<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
 						<g class="kamera">
 							<g class="weisse">
+								{/* Je Uhr EINE Gruppe (Scheibe, Blatt, Beschlag): so laesst sich die
+								   ganze Uhr bewegen (Ausdehnen-Demo). Die Scheiben ueberlappen sich
+								   nicht (Abstand 90 > 2 r), die Stapelung je Uhr aendert nichts. */}
 								{uhren.map((u, i) => (
-									<circle class="scheibe" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
-								))}
-								{uhren.map((u, i) => (
-									<>
+									<g class="uhr" data-i={i} data-ux={((u.x - UHR.cx) / (Math.hypot(u.x - UHR.cx, u.y - UHR.cy) || 1)).toFixed(4)} data-uy={((u.y - UHR.cy) / (Math.hypot(u.x - UHR.cx, u.y - UHR.cy) || 1)).toFixed(4)}>
+										<circle class="scheibe" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
 										{BLATT.kleineMinuten && <circle class="blatt blatt--dunkel minute" cx={u.x} cy={u.y} r={BLATT.minute.r} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />}
 										<circle class="blatt blatt--dunkel fuenf" cx={u.x} cy={u.y} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 										<circle class="blatt blatt--dunkel viertel" cx={u.x} cy={u.y} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
@@ -568,10 +573,10 @@ const beschlagStriche = [
 										{stoppuhr && (
 											<g class="beschlag beschlag--klein" data-i={i}>
 												{beschlagStriche.map((b) => b.l.map((l) => <line pathLength="1" x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke-width={l.w} transform={`translate(${u.x} ${u.y}) rotate(${b.rot})`} />))}
-											</g>
-										)}
-									</>
-								))}
+															</g>
+														)}
+												</g>
+											))}
 							</g>
 							<circle class="stunde-fuellung" cx={UHR.cx} cy={UHR.cy} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							{BLATT.stundeMinuten && <circle class="blatt blatt--hell minute" cx={UHR.cx} cy={UHR.cy} r={BLATT.minute.r} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />}
@@ -1622,6 +1627,10 @@ const beschlagStriche = [
 		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde
 
 		const beschlaege = Array.from(buehne.querySelectorAll<SVGGElement>(".beschlag--klein[data-i]"));
+		// Ausdehnen-Demo: Gruppe je Uhr von innen (um `ausdehnen` r naeher am
+		// Zentrum) auf ihren Platz schieben, mit der Zeit und Kurve der Fuellung.
+		const ausdehnen = Number(buehne.dataset.ausdehnen) || 0;
+		const gruppen = ausdehnen ? Array.from(buehne.querySelectorAll<SVGGElement>(".uhr[data-i]")) : [];
 		buehne.querySelectorAll<SVGCircleElement>(".scheibe[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
 			const s = M.uhrenStart + starts[i];
@@ -1638,6 +1647,17 @@ const beschlagStriche = [
 				{ strokeDashoffset: 1.06, offset: 1 },
 			], opt));
 
+				if (ausdehnen && gruppen[i]) {
+					const dx = -Number(gruppen[i].dataset.ux) * ausdehnen * 34, dy = -Number(gruppen[i].dataset.uy) * ausdehnen * 34;
+					anims.push(gruppen[i].animate([
+						{ transform: `translate(${dx}px, ${dy}px)`, offset: 0 },
+						{ transform: `translate(${dx}px, ${dy}px)`, offset: ab, easing: K },
+						{ transform: "translate(0px, 0px)", offset: voll },
+						{ transform: "translate(0px, 0px)", offset: leerVorEnde },
+						{ transform: `translate(${dx}px, ${dy}px)`, offset: Math.min(1, leerVorEnde + 0.0001) },
+						{ transform: `translate(${dx}px, ${dy}px)`, offset: 1 },
+					], opt));
+				}
 				// Stoppuhr-Probe: der Beschlag schaltet sich mit dem Start der Fuellung
 				// ein (Versatz 1 → 0, wie die Scheibe 1,06 → 0) und mit leerVorEnde aus.
 				if (beschlaege[i]) anims.push(beschlaege[i].animate([
