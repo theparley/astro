@@ -257,7 +257,7 @@ const uhren = uhrenGeometrie();
 // weisse Flaeche ist die Information.
 // Zaehler „00 … 60 Min." als Umrisse (stunde-glyphen.ts): Server-Stand = „60".
 const ST = STUNDE_TEXT;
-const zahlS = (UHR.r * ST.zahlGroesse) / GLYPHEN.upm;      // Schrift-Einheit → viewBox
+const zahlS = (UHR.r * (ST.modus === "stunde1" ? ST.stundeGroesse : ST.zahlGroesse)) / GLYPHEN.upm;      // Schrift-Einheit → viewBox
 const einheitS = (UHR.r * ST.einheitGroesse) / GLYPHEN.upm;
 // TABELLENZIFFERN (Fred 21.09.: „wenn eine 1 am Anfang steht, springt es
 // nach rechts und links"): jede Ziffer bekommt dieselbe Zelle, so breit
@@ -268,12 +268,16 @@ const LUECKE = (STUNDE_TEXT.luecke ?? 0) * GLYPHEN.upm; // Luft zwischen den Zel
 // Optisch zentriert: nach den Umriss-Grenzen (xMin/xMax), nicht nach dem
 // Vorschub — die 1 hat einseitig mehr Luft.
 const zifferLage = (s: string) => { const w = ZELLE * s.length + LUECKE * (s.length - 1); return s.split("").map((c, i) => { const g = GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl]; return -w / 2 + i * (ZELLE + LUECKE) + ZELLE / 2 - (g.xMin + g.xMax) / 2; }); };
-const startZiffern = String(ST.bis).padStart(2, "0");
+const STUNDE1 = ST.modus === "stunde1";
+const startZiffern = STUNDE1 ? ST.stundeZahl : String(ST.bis).padStart(2, "0");
+const einheitText = STUNDE1 ? ST.stundeEinheit : ST.einheit;
+const zahlDy = STUNDE1 ? ST.stundeDy : ST.zahlDy;
+const einheitDy = STUNDE1 ? ST.stundeEinheitDy : ST.einheitDy;
 const startLage = zifferLage(startZiffern);
-const einheitBreite = ST.einheit.split("").reduce((a, c) => a + GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit].adv, 0);
+const einheitBreite = einheitText.split("").reduce((a, c) => a + GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit].adv, 0);
 let einheitX = -einheitBreite / 2;
-const einheitPfade = ST.einheit.split("").map((c) => { const g = GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit]; const x = einheitX; einheitX += g.adv; return { d: g.d, x }; });
-const glyphenJson = JSON.stringify({ ...GLYPHEN.zahl, ZELLE, LUECKE });
+const einheitPfade = einheitText.split("").map((c) => { const g = GLYPHEN.einheit[c as keyof typeof GLYPHEN.einheit]; const x = einheitX; einheitX += g.adv; return { d: g.d, x }; });
+const glyphenJson = JSON.stringify({ ...GLYPHEN.zahl, ZELLE, LUECKE, STUNDE1: STUNDE1 ? 1 : 0 });
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
@@ -594,12 +598,12 @@ const beschlagStriche = [
    (Variante 5). Immer sichtbar. Als UMRISSE aus stunde-glyphen.ts, nicht als Text: Text
 							   zitterte unter der Kamera-Skalierung, Pfade skalieren wie die Kreise.
 							   Server-Stand = Endstand „60". */}
-							<g class="stunde-zaehler" data-glyphen={glyphenJson}>
-								<g class="stunde-zahl" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.zahlDy}) scale(${zahlS} ${-zahlS})`}>
+							<g class="stunde-zaehler" data-glyphen={glyphenJson} data-stunde1={STUNDE1 || undefined}>
+								<g class="stunde-zahl" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * zahlDy}) scale(${zahlS} ${-zahlS})`}>
 									{startZiffern.split("").map((c, i) => <path class="ziffer" data-slot={i} d={GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl].d} transform={`translate(${startLage[i]} 0)`} />)}
 								</g>
-								{ST.einheit && (
-									<g class="stunde-einheit" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.einheitDy}) scale(${einheitS} ${-einheitS})`}>
+								{einheitText && (
+									<g class="stunde-einheit" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * einheitDy}) scale(${einheitS} ${-einheitS})`}>
 										{einheitPfade.map((p) => <path d={p.d} transform={`translate(${p.x} 0)`} />)}
 									</g>
 								)}
@@ -1157,9 +1161,13 @@ const beschlagStriche = [
 	.beschlag--stunde path {
 		fill: #ffffff;
 	}
-	/* Zaehler: Umrisse (s. Markup), weiss wie das Blatt der Stunde. */
+	/* Zaehler: Umrisse (s. Markup), weiss wie das Blatt der Stunde. Im Modus
+	   stunde1 unsichtbar, bis der Kreis fertig ist (Script). */
 	.stunde-zaehler path {
 		fill: #ffffff;
+	}
+	.stunde-zaehler[data-stunde1] {
+		opacity: 0;
 	}
 	.beschlag--klein {
 		fill: none;
@@ -1209,6 +1217,9 @@ const beschlagStriche = [
 		.stunde-fuellung,
 		.stunde-rand {
 			stroke-dashoffset: 0.04;
+		}
+		.stunde-zaehler[data-stunde1] {
+			opacity: 1;
 		}
 	}
 </style>
@@ -1588,13 +1599,27 @@ const beschlagStriche = [
 		// Ziffern als Umrisse: je Slot ein <path>, bei Wechsel d und Lage setzen
 		// (zwei Ziffern mittig ueber ihre Vorschubbreiten).
 		const zaehler = buehne.querySelector<SVGGElement>(".stunde-zaehler")!;
-		const { ZELLE, LUECKE, ...GL } = JSON.parse(zaehler.dataset.glyphen!) as Record<string, { d: string; adv: number; xMin: number; xMax: number }> & { ZELLE: number; LUECKE: number };
+		const { ZELLE, LUECKE, STUNDE1, ...GL } = JSON.parse(zaehler.dataset.glyphen!) as Record<string, { d: string; adv: number; xMin: number; xMax: number }> & { ZELLE: number; LUECKE: number; STUNDE1: number };
 		const slots = Array.from(zaehler.querySelectorAll<SVGPathElement>(".ziffer"));
 		// Tabellenziffern: feste Zelle je Ziffer, Ziffer mittig darin (s. Frontmatter).
 		const setzeZahl = (s: string) => {
 			const w = ZELLE * s.length + LUECKE * (s.length - 1);
 			s.split("").forEach((c, i) => { slots[i].setAttribute("d", GL[c].d); slots[i].setAttribute("transform", `translate(${-w / 2 + i * (ZELLE + LUECKE) + ZELLE / 2 - (GL[c].xMin + GL[c].xMax) / 2} 0)`); });
 		};
+		// Modus „stunde1" (Fred 21.09., Variante 25): keine Zaehlung; die 1 mit
+		// Einheit schaltet sich ein, sobald der Kreis fertig ist, und nullVor
+		// Sekunden vor dem Ende des Reinzoomens wieder aus (ein Element, eine
+		// Deckkraft-Animation mit Stufen).
+		if (STUNDE1) {
+			const ausBei = o(M.reinEnde - (P.STUNDE_TEXT.nullVor ?? 0));
+			anims.push(zaehler.animate([
+				{ opacity: 0, offset: 0, easing: "step-end" },
+				{ opacity: 1, offset: o(M.stundeEnde), easing: "step-end" },
+				{ opacity: 1, offset: ausBei, easing: "step-end" },
+				{ opacity: 0, offset: Math.min(1, ausBei + 0.0001) },
+				{ opacity: 0, offset: 1 },
+			], opt));
+		}
 		const laufAnim = anims[anims.length - 1];
 		const kurveK = bezier(P.KURVE[0], P.KURVE[1], P.KURVE[2], P.KURVE[3]);
 		let zuletzt = -1;
@@ -1606,9 +1631,9 @@ const beschlagStriche = [
 // STUNDE_TEXT.nullVor, Fred 21.09.), nicht erst am Rundenende.
 			const n = t >= M.reinEnde - (P.STUNDE_TEXT.nullVor ?? 0) ? 0 : Math.min(P.STUNDE_TEXT.bis, Math.floor(kurveK(u) * P.STUNDE_TEXT.bis + 1e-6));
 			if (n !== zuletzt) { zuletzt = n; setzeZahl(String(n).padStart(2, "0")); } // „00" … „60" (Fred 21.09.)
-			requestAnimationFrame(zaehle);
+			if (!STUNDE1) requestAnimationFrame(zaehle);
 		};
-		requestAnimationFrame(zaehle);
+		if (!STUNDE1) requestAnimationFrame(zaehle);
 
 		// Die Uhren: Rate r(t) = r0 · e^(k·t), r0 = 1 / erster Abstand. Die
 		// i-te Uhr startet, wenn die aufsummierte Rate i erreicht:
