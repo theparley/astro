@@ -275,14 +275,25 @@ const ZEIT = {
 	ersteDauer: 2.16,   // die erste weisse Uhr so lang wie die Stunde
 	naechsteBei: 0.5,   // die naechste Uhr faengt an, wenn die laufende hier ist
 	dauerMin: 0.3,      // kuerzeste Dauer einer Uhr
-	stand: 2,           // das volle Feld steht (Fred 21.09.: „sonst wird es zu hektisch … lass das mal zwei Sekunden stehen"); 0 = sofort zurueck
+	stand: 2,           // leichtes Weiter-Rauskriechen draussen (Fred 21.09.: „zwei Sekunden, dieses ganz leichte"); 0 = echter Stopp
+	kriechenRein: 2,    // genauso langsam wieder zurueck auf ende, bevor das Reinzoomen anzieht
 	ausblenden: 2.16,   // weisse Uhren und Zeichnung der Stunde blenden aus (= kameraRein)
 	kameraRein: 2.16,   // Kamera zurueck, so lang wie die Stunde
 	nachlauf: 0,        // kein Halt bis zur naechsten Runde
 };
 const KURVE = [0.65, 0, 0.35, 1];   // weich rein und raus: Stunde, Uhren, Reinzoomen
 const KURVE_RAUS = [0, 0, 0.35, 1]; // Rauszoomen: kein Anlauf, weiches Auslaufen
-const KAMERA = { start: 7, ende: 1.15 }; // bei 1,15 sind 96 Uhren ganz im Bild, 36 angeschnitten
+// bei ende 1,15 sind 96 Uhren ganz im Bild, 36 angeschnitten.
+// drift (Fred 21.09.: „statt einem Stopp am Ende ein ganz leichtes
+// Rauszoomen, dann wieder Reinzoomen, genauso langsam, und dann schneller"):
+// waehrend der Standzeit (ZEIT.stand) faehrt die Kamera nicht stehend,
+// sondern kriecht um diesen Anteil weiter raus — von 1,15 auf 1,15·(1−0,03)
+// = 1,116 —, weich rein und raus; das Reinzoomen setzt dort mit weichem
+// Anlauf an. 0 = echter Stopp.
+// ende 1,2 statt 1,15 (Fred 21.09., „wie viele Kacheln man sieht"): mit dem
+// Kriechen auf 1,164 blieben bei 1,15 nicht mehr unter hundert (106 ganz im
+// Bild). Bei 1,2 sind es an beiden Enden 92 ganz im Bild, 32–36 angeschnitten.
+const KAMERA = { start: 7, ende: 1.2, drift: 0.03 };
 
 const uhrenStart = ZEIT.uhrenStart === "abStunde" ? ZEIT.halt + ZEIT.stunde * ZEIT.uhrenAbStunde : ZEIT.uhrenStart;
 const kameraStart = ZEIT.halt + ZEIT.stunde * ZEIT.kameraAbStunde;
@@ -300,7 +311,8 @@ const M = {
 	uhrenEnde,
 };
 const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
-const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + ZEIT.kameraRein) + ZEIT.nachlauf;
+const reinStart = standEnde + ZEIT.kriechenRein; // hier setzt das Reinzoomen an, das Ausblenden auch
+const RUNDE = Math.max(reinStart + ZEIT.ausblenden, reinStart + ZEIT.kameraRein) + ZEIT.nachlauf;
 
 // Geometrie: sieben Ringe um die Stunde, Abstand 90, je Ring round(2·pi·k)
 // Uhren — 176; Ring 1-5 ganz in der Kachel, 6 und 7 angeschnitten.
@@ -323,7 +335,7 @@ const BLATT = {
 };
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * 60).toFixed(3);
 const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N: uhren.length });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, reinStart, RUNDE, N: uhren.length });
 
 interface Props {
 	fassung?: "brett" | "liste";
@@ -1385,10 +1397,11 @@ const { fassung = "brett" } = Astro.props;
 
 	function stundenAnlegen(buehne: HTMLElement): Animation[] {
 		const P = JSON.parse(buehne.dataset.plan!);
-		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N } = P;
+		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, reinStart, RUNDE, N } = P;
 		const K = `cubic-bezier(${KURVE.join(", ")})`;
 		const KR = `cubic-bezier(${KURVE_RAUS.join(", ")})`;
 		const S0 = `scale(${KAMERA.start})`, S1 = `scale(${KAMERA.ende})`;
+		const SD = `scale(${(KAMERA.ende * (1 - (ZEIT.stand > 0 ? KAMERA.drift : 0))).toFixed(4)})`; // Ende des Kriechens
 		const ms = RUNDE * 1000;
 		const o = (s: number) => s / RUNDE;
 		const opt = { duration: ms, iterations: Infinity };
@@ -1397,12 +1410,16 @@ const { fassung = "brett" } = Astro.props;
 		// Kamera: raus (KURVE_RAUS), im selben Bild wieder rein (KURVE) —
 		// kein Halt an den Wendepunkten (Fred 21.09.).
 		const kamera = buehne.querySelector<SVGGElement>(".kamera")!;
+		// Draussen kein Stopp, sondern ein Kriechen (KAMERA.drift): von S1 in
+		// ZEIT.stand weich weiter nach SD, in ZEIT.kriechenRein genauso weich
+		// zurueck nach S1, und erst dann zieht das Reinzoomen nach S0 an.
 		anims.push(kamera.animate([
 			{ transform: S0, offset: 0 },
 			{ transform: S0, offset: o(M.kameraStart), easing: KR },
-			{ transform: S1, offset: o(M.kameraEnde) },
-			{ transform: S1, offset: o(standEnde), easing: K },
-			{ transform: S0, offset: o(standEnde + ZEIT.kameraRein) },
+			{ transform: S1, offset: o(M.kameraEnde), easing: K },
+			{ transform: SD, offset: o(standEnde), easing: K },
+			{ transform: S1, offset: o(reinStart), easing: K },
+			{ transform: S0, offset: o(reinStart + ZEIT.kameraRein) },
 			{ transform: S0, offset: 1 },
 		], opt));
 
@@ -1423,8 +1440,8 @@ const { fassung = "brett" } = Astro.props;
 			{ opacity: 0, offset: 0 },
 			{ opacity: 0, offset: o(SCHUTZ) },
 			{ opacity: 1, offset: o(SCHUTZ * 1.5) },
-			{ opacity: 1, offset: o(standEnde), easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
-			{ opacity: 0, offset: o(standEnde + ZEIT.ausblenden) },
+			{ opacity: 1, offset: o(reinStart), easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+			{ opacity: 0, offset: o(reinStart + ZEIT.ausblenden) },
 			{ opacity: 0, offset: 1 },
 		];
 		const leerVorEnde = o(RUNDE - SCHUTZ);
