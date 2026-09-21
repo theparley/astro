@@ -101,7 +101,15 @@ const KURVE = [0.65, 0, 0.35, 1];
 // ersten drei Sekunden kaum (7 → 6,7). Diese Kurve faehrt vom ersten Bild
 // an und laeuft nur am Ende weich aus. [0.65, 0, 0.35, 1] macht den
 // weichen Anlauf wieder rein.
-const KURVE_RAUS = [0, 0, 0.35, 1];
+// UEBERSCHWINGEN (Fred 21.09.: „gib dem Uebergang zwischen Rein- und
+// Rauszoomen so einen kleinen Overshoot"): ein y-Wert ueber 1 laesst die
+// Kurve kurz ueber das Ziel hinausschiessen und zuruecksetzen — wie ein
+// Objektiv, das einrastet. Gemessen am letzten Wert:
+//   1,2 → 2,2 %   1,3 → 4,5 %   1,45 → 8,7 %   (jeweils bei ~80 % der Fahrt)
+// Beim Rauszoomen faehrt die Kamera also kurz UNTER 1,15 und zurueck, beim
+// Reinzoomen kurz UEBER 7 und zurueck.
+const KURVE_RAUS = [0, 0, 0.3, 1.3];     // kein Anlauf, Ueberschwingen 4,5 %
+const KURVE_REIN = [0.35, 0, 0.3, 1.3];  // weicher Anlauf, Ueberschwingen 4,5 %
 // Kamera: Anfang und Ende als Massstab. NICHT GANZ RAUS (Fred 21.09.: „wir
 // wollen ja bloss ca. 100 Uhren sehen und die anderen angeschnitten — und
 // im Zweifel weniger als 100"). Bei 1,0 waren 132 Uhren ganz im Bild, bei
@@ -127,7 +135,7 @@ const M = {
 };
 const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
 const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + ZEIT.kameraRein) + ZEIT.nachlauf;
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N: 176 });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KURVE_REIN, KAMERA, M, standEnde, RUNDE, N: 176 });
 
 // Geometrie: sieben Ringe um die Stunde, Abstand 90, je Ring round(2·pi·k)
 // Uhren — 176 insgesamt; beim Ende-Massstab 1,15 sind 96 ganz im Bild.
@@ -759,8 +767,9 @@ import Layout from "../layouts/Layout.astro";
 
 	function anlegen(buehne: HTMLElement) {
 		const P = JSON.parse(buehne.dataset.plan!);
-		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N } = P;
+		const { ZEIT, KURVE, KURVE_RAUS, KURVE_REIN, KAMERA, M, standEnde, RUNDE, N } = P;
 		const KR = `cubic-bezier(${KURVE_RAUS.join(", ")})`;
+		const KI = `cubic-bezier(${KURVE_REIN.join(", ")})`;
 		const S0 = `scale(${KAMERA.start})`, S1 = `scale(${KAMERA.ende})`;
 		const K = `cubic-bezier(${KURVE.join(", ")})`;
 		const ms = RUNDE * 1000;
@@ -789,7 +798,7 @@ import Layout from "../layouts/Layout.astro";
 			{ transform: S0, offset: 0 },
 			{ transform: S0, offset: o(M.kameraStart), easing: KR },
 			{ transform: S1, offset: o(M.kameraEnde) },
-			{ transform: S1, offset: o(standEnde), easing: K },
+			{ transform: S1, offset: o(standEnde), easing: KI },
 			{ transform: S0, offset: o(standEnde + ZEIT.kameraRein) },
 			{ transform: S0, offset: 1 },
 		], opt);
