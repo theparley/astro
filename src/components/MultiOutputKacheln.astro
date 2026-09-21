@@ -250,7 +250,9 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 const M = marken();
-const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * 60).toFixed(3);
+const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
+const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
+const df = +((BLATT.fuenf.breite / (2 * Math.PI * BLATT.fuenf.r)) * 12).toFixed(4);
 const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
 const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraRein: M.kameraRein, ausblenden: M.ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, M, standEnde: M.standEnde, reinStart: M.reinStart, reinEnde: M.reinEnde, innenEnde: M.innenEnde, RUNDE: M.RUNDE, N: uhren.length });
 
@@ -453,13 +455,15 @@ const { fassung = "brett" } = Astro.props;
 								))}
 								{uhren.map((u) => (
 									<>
-										{BLATT.kleineMinuten && <circle class="blatt blatt--dunkel minute" cx={u.x} cy={u.y} r={BLATT.minute.r} pathLength="60" stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />}
+										{BLATT.kleineMinuten && <circle class="blatt blatt--dunkel minute" cx={u.x} cy={u.y} r={BLATT.minute.r} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />}
+										<circle class="blatt blatt--dunkel fuenf" cx={u.x} cy={u.y} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 										<circle class="blatt blatt--dunkel viertel" cx={u.x} cy={u.y} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 									</>
 								))}
 							</g>
 							<circle class="stunde-fuellung" cx={UHR.cx} cy={UHR.cy} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
-							<circle class="blatt blatt--hell minute" cx={UHR.cx} cy={UHR.cy} r={BLATT.minute.r} pathLength="60" stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							<circle class="blatt blatt--hell minute" cx={UHR.cx} cy={UHR.cy} r={BLATT.minute.r} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
+							<circle class="blatt blatt--hell fuenf" cx={UHR.cx} cy={UHR.cy} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<circle class="blatt blatt--hell viertel" cx={UHR.cx} cy={UHR.cy} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<circle class="stunde-rand" cx={UHR.cx} cy={UHR.cy} r={UHR.r} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<line class="speiche speiche--start" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
@@ -1005,6 +1009,10 @@ const { fassung = "brett" } = Astro.props;
 	.blatt.minute {
 		stroke-width: 3.5;
 	}
+	.blatt.fuenf {
+		stroke-width: 5;
+	}
+
 	.blatt.viertel {
 		stroke-width: 7;
 	}

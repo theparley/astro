@@ -38,6 +38,16 @@ const N = uhren().length;
 					<option value="kachel" selected>Kachel (#212121)</option>
 					<option value="schwarz">Schwarz</option>
 				</select></label>
+			<label class="wk-feld"><span>Verschwinden der weißen Uhren</span>
+				<select data-schnitt>
+					<option value="weich" selected>Weich ausblenden (wie Website)</option>
+					<option value="hart">Auf einen Schlag (Probe)</option>
+				</select></label>
+			<label class="wk-feld"><span>Minutenstriche der Stunde</span>
+				<select data-striche>
+					<option value="1" selected>60 (jede Minute, wie Website)</option>
+					<option value="5">12 (alle fünf Minuten, Probe)</option>
+				</select></label>
 			<label class="wk-feld"><span>Graustufen an den Kanten</span>
 				<select data-stufen>
 					<option value="6" selected>6 (weich, Standard)</option>
@@ -53,14 +63,18 @@ const N = uhren().length;
 <script src="/werkzeug/gif.js" is:inline></script>
 
 <script>
-	import { KAMERA, UHR, BLATT, STRICH, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
+	import { ZEIT, KAMERA, UHR, BLATT, STRICH, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
 	const WEISS = "#ffffff";
-	const m = marken();
 	const punkte = uhren();
 	const N = punkte.length;
-	const plan = uhrenPlan(N, m);
+	// Marken und Plan haengen an ZEIT; die Probe-Regler unten schreiben ZEIT/
+	// BLATT zur Laufzeit um (nur diese Seite, die Website liest zur Bauzeit)
+	// und rechnen dann neu.
+	let m = marken();
+	let plan = uhrenPlan(N, m);
+	function neuRechnen() { m = marken(); plan = uhrenPlan(N, m); }
 
 	// ── Der Painter: malt den Zustand zur Zeit t auf einen Kontext ──────
 	// Alles in viewBox-Einheiten (1000 x 1250), der Kontext wird davor auf
@@ -78,7 +92,14 @@ const N = uhren().length;
 		if (minuten) {
 			ctx.lineWidth = BLATT.minute.breite;
 			ctx.beginPath();
-			for (let i = 0; i < 60; i++) if (i % 15) tick(ctx, cx, cy, r - 1 - BLATT.minute.laenge, r - 1, (i * Math.PI) / 30);
+			for (let i = 0; i < 60; i += BLATT.minute.schritt) if (i % 15) tick(ctx, cx, cy, r - 1 - BLATT.minute.laenge, r - 1, (i * Math.PI) / 30);
+			ctx.stroke();
+		}
+		// Fuenf Minuten
+		if (minuten) {
+			ctx.lineWidth = BLATT.fuenf.breite;
+			ctx.beginPath();
+			for (let i = 0; i < 60; i += 5) if (i % 15) tick(ctx, cx, cy, r - 1 - BLATT.fuenf.laenge, r - 1, (i * Math.PI) / 30);
 			ctx.stroke();
 		}
 		// Viertel
@@ -144,12 +165,17 @@ const N = uhren().length;
 		fps: document.querySelector<HTMLInputElement>("[data-fps]")!,
 		grund: document.querySelector<HTMLSelectElement>("[data-grund]")!,
 		stufen: document.querySelector<HTMLSelectElement>("[data-stufen]")!,
+		striche: document.querySelector<HTMLSelectElement>("[data-striche]")!,
+		schnitt: document.querySelector<HTMLSelectElement>("[data-schnitt]")!,
 		status: document.querySelector<HTMLElement>("[data-status]")!,
 		knopf: document.querySelector<HTMLButtonElement>("[data-export]")!,
 	};
 	const grundFarbe = () => (eingaben.grund.value === "schwarz" ? "#000000" : KACHEL);
 	let start = performance.now();
 	let laeuft = true;
+	eingaben.striche.value = String(BLATT.minute.schritt);
+	eingaben.striche.addEventListener("change", () => { BLATT.minute.schritt = Number(eingaben.striche.value) || 1; });
+	eingaben.schnitt.addEventListener("change", () => { ZEIT.ausblenden = eingaben.schnitt.value === "hart" ? 0 : "wieRein"; neuRechnen(); });
 	function bild(jetzt: number) {
 		if (!laeuft) return;
 		const t = ((jetzt - start) / 1000) % m.RUNDE;
@@ -221,7 +247,7 @@ const N = uhren().length;
 				gif.on("finished", (blob: Blob) => {
 					const url = URL.createObjectURL(blob);
 					const a = document.createElement("a");
-					a.href = url; a.download = `parley-stunde-${W}px-${fps}fps-${stufenWahl}stufen.gif`; a.click();
+					a.href = url; a.download = `parley-stunde-${W}px-${fps}fps-${stufenWahl}stufen-${60 / BLATT.minute.schritt}striche-${eingaben.schnitt.value}-${Date.now()}.gif`; a.click();
 					eingaben.status.textContent = `Fertig: ${(blob.size / 1024 / 1024).toFixed(1)} MB, ${gemalt} Bilder (${frames - gemalt} Standbilder zusammengelegt), ${m.RUNDE.toFixed(2)} s Schleife.`;
 					eingaben.status.dataset.fertig = String(blob.size);
 					eingaben.knopf.disabled = false;

@@ -33,7 +33,12 @@ export const ZEIT = {
 	dauerMin: 0.3,      // kuerzeste Dauer einer Uhr
 	stand: 2,           // draussen: leichtes Weiter-Rauskriechen (KAMERA.drift); 0 = echter Stopp
 	kriechenRein: 2,    // genauso langsam zurueck auf ende, bevor das Reinzoomen anzieht
-	ausblenden: "wieRein" as number | "wieRein", // weisse Uhren + Zeichnung der Stunde blenden waehrend des Reinzoomens aus
+	// Weisse Uhren + Zeichnung der Stunde blenden waehrend des Reinzoomens
+	// aus (Deckkraft). "wieRein" = so lang wie das Reinzoomen, Sekunden =
+	// eigene Dauer, 0 = auf einen Schlag. Die Website bleibt weich (Fred
+	// 21.09.: „Die Webseite sollst du nicht veraendern"); den harten Schnitt
+	// probiert nur die GIF-Werkstatt, die den Wert zur Laufzeit ueberschreibt.
+	ausblenden: "wieRein" as number | "wieRein",
 	kameraRein: "wieRaus" as number | "wieRaus", // Kamera zurueck, so lang wie das Rauszoomen
 	innenStand: 2,      // innen: Kriechen naeher ran (KAMERA.drift ueber start hinaus)
 	innenZurueck: 2,    // Kriechen zurueck auf start; die naechste Runde faehrt ohne Stopp weiter
@@ -54,12 +59,18 @@ export const KAMERA = { start: 7, ende: 1.2, drift: 0.03 };
 export const UHR = { r: 34, cx: 500, cy: 625, abstand: 90, ringe: 7 };
 export const VIEWBOX = { w: 1000, h: 1250 };
 export const BLATT = {
-	minute: { r: UHR.r - 1 - 1.75, laenge: 3.5, breite: 0.9 },
+	// schritt: Minuten je Strich. 1 = 60 Striche (56 + Viertel), 5 = zwoelf
+	// Striche (8 + Viertel). Website: 1. Die GIF-Werkstatt probiert 5 zur
+	// Laufzeit (Fred 21.09.: „reicht das, damit man die Uhr erkennt?").
+	minute: { r: UHR.r - 1 - 1.75, laenge: 3.5, breite: 0.9, schritt: 1 },
+	// Fuenf-Minuten-Striche als dritte Stufe zwischen Minute und Viertel
+	// (Fred 21.09.: „zusaetzlich die 5-Minuten-Striche rein", Website).
+	fuenf: { r: UHR.r - 1 - 2.5, laenge: 5, breite: 1.3 },
 	viertel: { r: UHR.r - 1 - 3.5, laenge: 7, breite: 1.8 },
 	// Die kleinen Uhren tragen nur die vier Viertelstriche (Fred 21.09.:
 	// „lassen wir die Minutenstriche weg"). Die Stunde behaelt ihr volles
 	// Blatt. Spart im GIF die groesste Menge Kantenpixel.
-	kleineMinuten: false,
+	kleineMinuten: true, // Fred 21.09.: „Lass die mal drin" (Website)
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
 export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)
