@@ -76,8 +76,8 @@ const ZEIT = {
 	ersteDauer: 2.16,
 	naechsteBei: 0.5,
 	dauerMin: 0.3,
-	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
-	ausblenden: 3.9,   // die weissen Uhren und die Zeichnung der Stunde blenden aus
+	stand: 0,          // KEIN STOPP draussen (Fred 21.09.: „das Stoppen machen wir weg, sofort wieder zurueck"); war 2,04
+	ausblenden: 2.16,  // die weissen Uhren und die Zeichnung der Stunde blenden aus — so lang wie das Reinzoomen, sonst wartet die Kamera innen auf das Ausblenden (war 3,9)
 	kameraRein: 2.16,  // Kamera zurueck auf 7, parallel zum Ausblenden — so lang wie die Stunde (Fred 21.09.; war 5)
 	// KEIN SCHWARZ MEHR (Fred 21.09.: „die Pause, wenn es zurueckgeht und
 	// der Bildschirm schwarz wird, ist zu lang … da wuerde ich alles
@@ -102,16 +102,6 @@ const KURVE = [0.65, 0, 0.35, 1];
 // an und laeuft nur am Ende weich aus. [0.65, 0, 0.35, 1] macht den
 // weichen Anlauf wieder rein.
 const KURVE_RAUS = [0, 0, 0.35, 1];
-// POP AN DEN UEBERGAENGEN (Fred 21.09., zweiter Anlauf — der erste hatte die
-// Fahrt selbst veraendert, das war falsch): die Zoomfahrten bleiben, wie sie
-// sind. Stattdessen hüpft das Bild an den Uebergaengen kurz — wie eine
-// Grafik, die aufpoppt: einen Moment groesser, dann zurueck.
-//   pop       wie viel groesser, als Anteil (0,05 = 5 %)
-//   popDauer  wie lang der Huepfer dauert, in Sekunden
-// Er sitzt an drei Stellen: wenn die Kamera draussen ankommt (alle Uhren
-// im Bild), bevor sie wieder reinfaehrt, und wenn sie am Rundenanfang auf
-// der Stunde ankommt. 0 schaltet ihn ab.
-const POP = { groesse: 0.0075, dauer: 0.9 }; // Fred 21.09.: Dauer doppelt, Prozentsatz halb (vorher 0,015 / 0,45; 5 % war viel zu stark)
 // Kamera: Anfang und Ende als Massstab. NICHT GANZ RAUS (Fred 21.09.: „wir
 // wollen ja bloss ca. 100 Uhren sehen und die anderen angeschnitten — und
 // im Zweifel weniger als 100"). Bei 1,0 waren 132 Uhren ganz im Bild, bei
@@ -136,8 +126,8 @@ const M = {
 	uhrenEnde,
 };
 const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
-const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + POP.dauer + ZEIT.kameraRein) + ZEIT.nachlauf;
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, POP, M, standEnde, RUNDE, N: 176 });
+const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + ZEIT.kameraRein) + ZEIT.nachlauf;
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N: 176 });
 
 // Geometrie: sieben Ringe um die Stunde, Abstand 90, je Ring round(2·pi·k)
 // Uhren — 176 insgesamt; beim Ende-Massstab 1,15 sind 96 ganz im Bild.
@@ -769,11 +759,8 @@ import Layout from "../layouts/Layout.astro";
 
 	function anlegen(buehne: HTMLElement) {
 		const P = JSON.parse(buehne.dataset.plan!);
-		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, POP, M, standEnde, RUNDE, N } = P;
+		const { ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N } = P;
 		const KR = `cubic-bezier(${KURVE_RAUS.join(", ")})`;
-		const SP = `scale(${(KAMERA.ende * (1 + POP.groesse)).toFixed(4)})`; // Pop draussen
-		const SQ = `scale(${(KAMERA.start * (1 + POP.groesse)).toFixed(4)})`; // Pop auf der Stunde
-		const pd = POP.dauer, EO = "cubic-bezier(0.2, 0, 0.4, 1)";
 		const S0 = `scale(${KAMERA.start})`, S1 = `scale(${KAMERA.ende})`;
 		const K = `cubic-bezier(${KURVE.join(", ")})`;
 		const ms = RUNDE * 1000;
@@ -798,21 +785,17 @@ import Layout from "../layouts/Layout.astro";
 		const opt = { duration: ms, iterations: Infinity };
 
 		const kamera = buehne.querySelector<SVGGElement>(".kamera")!;
-		// Pop = zwei kurze Marken: hoch auf (1 + groesse), zurueck. Nach der
-		// Ankunft draussen, vor der Abfahrt, und nach der Ankunft auf der Stunde
-		// (Rundenanfang). Die Fahrten selbst sind unveraendert.
+		// OHNE STOPP AN DEN WENDEPUNKTEN (Fred 21.09.): die Kamera faehrt raus
+		// und im selben Bild wieder rein, und am Rundenanfang sofort wieder
+		// raus. Die weichen Kurven bleiben — die Umkehr ist dadurch rund, kein
+		// Halt. Voraussetzung: stand = 0 und ausblenden <= kameraRein, sonst
+		// wartet die Kamera innen auf das Ende des Ausblendens.
 		kamera.animate([
-			{ transform: S0, offset: 0, easing: EO },
-			{ transform: SQ, offset: o(pd / 2), easing: EO },
-			{ transform: S0, offset: o(pd) },
-			{ transform: S0, offset: o(Math.max(pd, M.kameraStart)), easing: KR },
-			{ transform: S1, offset: o(M.kameraEnde), easing: EO },
-			{ transform: SP, offset: o(M.kameraEnde + pd / 2), easing: EO },
-			{ transform: S1, offset: o(M.kameraEnde + pd) },
-			{ transform: S1, offset: o(standEnde), easing: EO },
-			{ transform: SP, offset: o(standEnde + pd / 2), easing: EO },
-			{ transform: S1, offset: o(standEnde + pd), easing: K },
-			{ transform: S0, offset: o(standEnde + pd + ZEIT.kameraRein) },
+			{ transform: S0, offset: 0 },
+			{ transform: S0, offset: o(M.kameraStart), easing: KR },
+			{ transform: S1, offset: o(M.kameraEnde) },
+			{ transform: S1, offset: o(standEnde), easing: K },
+			{ transform: S0, offset: o(standEnde + ZEIT.kameraRein) },
 			{ transform: S0, offset: 1 },
 		], opt);
 		// Ausblenden trifft nur die weissen Uhren (samt dunklen Blaettern) und
@@ -863,7 +846,7 @@ import Layout from "../layouts/Layout.astro";
 			`Dauer erste ${dauern[0].toFixed(2)} s, zehnte ${dauern[9].toFixed(2)} s, Mitte ${dauern[mitte].toFixed(2)} s, letzte ${dauern[N - 1].toFixed(2)} s; ` +
 			`10 Uhren gestartet nach ${wann(10)} s, 50 nach ${wann(50)} s, 100 nach ${wann(100)} s · ` +
 			`steht bis ${standEnde.toFixed(2)} s · ausblenden bis ${(standEnde + ZEIT.ausblenden).toFixed(2)} s · ` +
-			`Kamera rein bis ${(standEnde + POP.dauer + ZEIT.kameraRein).toFixed(2)} s (Pop ${(POP.groesse * 100).toFixed(0)} %, ${POP.dauer} s).\n` +
+			`Kamera rein bis ${(standEnde + ZEIT.kameraRein).toFixed(2)} s.\n` +
 			`Schalter: ?rand ?hell ?heller ?ohneblatt`;
 	}
 
