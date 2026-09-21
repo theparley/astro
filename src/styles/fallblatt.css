@@ -36,6 +36,14 @@
 	width: 100%;
 	height: 50%;
 	overflow: hidden;
+	/* KANTENGLATT BESCHNEIDEN (Fred 21.09., Handy: „zwischendurch sieht das
+	   auch immer wieder pixelig aus"). Jede Klappe ist eine eigene
+	   GPU-Ebene (will-change) und wird in 3D gedreht. overflow: hidden wird
+	   auf solchen Ebenen ohne Kantenglaettung angewendet — die halbe Glyphe
+	   bekommt an der Schnittkante Treppen, und zwar genau waehrend der
+	   Drehung, wenn die Kante schraeg im Raum liegt. clip-path wird als
+	   Maske gerechnet und ist geglaettet; overflow bleibt als Rueckfall. */
+	clip-path: inset(0);
 	background: var(--panel, #141414);
 	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
