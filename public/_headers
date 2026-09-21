@@ -1,0 +1,7 @@
+# Gehashte Build-Dateien duerfen lange gecacht werden: ihr Name aendert
+# sich mit dem Inhalt (Astro/Vite). Vorher galt Cloudflares Standard
+# (max-age 14400, must-revalidate), was zusammen mit dem 200er-HTML-
+# Fallback fuer fehlende Dateien (s. src/pages/404.astro) einen vier
+# Stunden lang kaputten Cache erzeugen konnte.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

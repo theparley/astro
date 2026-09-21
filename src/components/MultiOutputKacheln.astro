@@ -1665,4 +1665,7 @@ const beschlagStriche = [
 	}
 
 	document.addEventListener("astro:page-load", mount);
+	// Fallnetz: laedt das Modul erst NACH astro:page-load (z. B. spaet aus
+	// dem Cache), wuerde mount nie laufen — dann sofort anlegen.
+	if (document.readyState === "complete") mount();
 </script>

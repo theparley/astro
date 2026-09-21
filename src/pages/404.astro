@@ -1,0 +1,45 @@
+---
+// 404 — MUSS ES GEBEN (Befund 21.09.): ohne eigene 404.html liefert
+// Cloudflare Pages fuer JEDE unbekannte Adresse die Startseite mit Status
+// 200 — auch fuer ein Skript unter /_astro/, das waehrend eines Deploys
+// gerade nicht da ist. Freds Chrome bekam so HTML statt JavaScript,
+// cachte es vier Stunden als Modul, und die Animationen der Startseite
+// standen still (kein Fehler in der Konsole, das Modul lief einfach nie).
+// Mit dieser Seite antwortet Pages mit echten 404ern, die kein Browser
+// als Modul cacht.
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Nicht gefunden" description="Diese Seite gibt es nicht.">
+	<main class="nf">
+		<h1>Nicht gefunden.</h1>
+		<p class="sub">Diese Adresse gibt es bei The Parley nicht. <a href="/">Zur Startseite</a></p>
+	</main>
+</Layout>
+
+<style>
+	.nf {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: clamp(60px, 10vw, 140px) 24px 160px;
+	}
+	.nf h1 {
+		font-weight: 900;
+		text-transform: uppercase;
+		line-height: 0.9;
+		letter-spacing: -0.01em;
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+		margin: 0 0 24px;
+	}
+	.sub {
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+		line-height: 1.3;
+		color: var(--white);
+		margin: 0;
+	}
+	.sub a {
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
+	}
+</style>
