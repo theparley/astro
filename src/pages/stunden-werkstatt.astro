@@ -127,9 +127,10 @@ const N = uhren().length;
 		const r = UHR.r, S = STOPPUHR;
 		ctx.fillStyle = farbe;
 		const teil = (winkel: number, halsB: number, halsH: number, kappeB: number, kappeH: number) => {
+			// ein T-Pfad statt zwei Rechtecke, sonst bleibt an der Kante eine Naht
+			const kb = kappeB * r / 2, hb = halsB * r / 2, yK = -r - halsH * r - kappeH * r, yH = -r - halsH * r, yU = -r + 1;
 			ctx.save(); ctx.translate(cx, cy); ctx.rotate((winkel * Math.PI) / 180);
-			ctx.fillRect(-halsB * r / 2, -r - halsH * r, halsB * r, halsH * r + 1);
-			ctx.fillRect(-kappeB * r / 2, -r - halsH * r - kappeH * r, kappeB * r, kappeH * r);
+			ctx.beginPath(); ctx.moveTo(-kb, yK); ctx.lineTo(kb, yK); ctx.lineTo(kb, yH); ctx.lineTo(hb, yH); ctx.lineTo(hb, yU); ctx.lineTo(-hb, yU); ctx.lineTo(-hb, yH); ctx.lineTo(-kb, yH); ctx.closePath(); ctx.fill();
 			ctx.restore();
 		};
 		teil(0, S.hals.breite, S.hals.hoehe, S.kappe.breite, S.kappe.hoehe);

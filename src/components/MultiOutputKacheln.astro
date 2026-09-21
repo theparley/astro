@@ -264,16 +264,21 @@ interface Props {
 	bezug2?: string;
 }
 const { fassung = "brett", stoppuhr = false, bezug2 } = Astro.props;
-// Beschlag-Rechtecke in viewBox-Einheiten, relativ zur Uhrmitte (x, y, w, h, drehung)
+// Beschlag als drei T-Pfade (Krone, Druecker links, Druecker rechts),
+// relativ zur Uhrmitte, je mit Drehung. EIN Pfad je T, nicht zwei
+// Rechtecke: an der gemeinsamen Kante zweier Rechtecke bleibt sonst eine
+// sichtbare Naht aus der Kantenglaettung (Fred 21.09.: „ich sehe die
+// Linie dazwischen"). Der Hals reicht 1 Einheit in den Kreis hinein.
 const SP = STOPPUHR;
 const rr = UHR.r;
+const tPfad = (halsB: number, halsH: number, kappeB: number, kappeH: number) => {
+	const kb = kappeB * rr / 2, hb = halsB * rr / 2, yK = -rr - halsH * rr - kappeH * rr, yH = -rr - halsH * rr, yU = -rr + 1;
+	return `M${-kb},${yK}H${kb}V${yH}H${hb}V${yU}H${-hb}V${yH}H${-kb}Z`;
+};
 const beschlag = [
-	{ x: -SP.hals.breite * rr / 2, y: -rr - SP.hals.hoehe * rr, w: SP.hals.breite * rr, h: SP.hals.hoehe * rr + 1, rot: 0 },
-	{ x: -SP.kappe.breite * rr / 2, y: -rr - SP.hals.hoehe * rr - SP.kappe.hoehe * rr, w: SP.kappe.breite * rr, h: SP.kappe.hoehe * rr, rot: 0 },
-	...[-SP.knopf.winkel, SP.knopf.winkel].flatMap((w) => [
-		{ x: -SP.knopf.halsBreite * rr / 2, y: -rr - SP.knopf.hals * rr, w: SP.knopf.halsBreite * rr, h: SP.knopf.hals * rr + 1, rot: w },
-		{ x: -SP.knopf.breite * rr / 2, y: -rr - SP.knopf.hals * rr - SP.knopf.hoehe * rr, w: SP.knopf.breite * rr, h: SP.knopf.hoehe * rr, rot: w },
-	]),
+	{ d: tPfad(SP.hals.breite, SP.hals.hoehe, SP.kappe.breite, SP.kappe.hoehe), rot: 0 },
+	{ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: -SP.knopf.winkel },
+	{ d: tPfad(SP.knopf.halsBreite, SP.knopf.hals, SP.knopf.breite, SP.knopf.hoehe), rot: SP.knopf.winkel },
 ];
 ---
 
@@ -494,7 +499,7 @@ const beschlag = [
 										<line class="zeiger" data-i={i} x1={u.x} y1={u.y} x2={u.x} y2={u.y - UHR.r} style={`transform-origin: ${u.x}px ${u.y}px`} />
 										{stoppuhr && (
 											<g class="beschlag beschlag--klein" data-i={i}>
-												{beschlag.map((b) => <rect x={u.x + b.x} y={u.y + b.y} width={b.w} height={b.h} transform={`rotate(${b.rot} ${u.x} ${u.y})`} />)}
+												{beschlag.map((b) => <path d={b.d} transform={`translate(${u.x} ${u.y}) rotate(${b.rot})`} />)}
 											</g>
 										)}
 									</>
@@ -509,7 +514,7 @@ const beschlag = [
 							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							{stoppuhr && (
 								<g class="beschlag beschlag--stunde">
-									{beschlag.map((b) => <rect x={UHR.cx + b.x} y={UHR.cy + b.y} width={b.w} height={b.h} transform={`rotate(${b.rot} ${UHR.cx} ${UHR.cy})`} />)}
+									{beschlag.map((b) => <path d={b.d} transform={`translate(${UHR.cx} ${UHR.cy}) rotate(${b.rot})`} />)}
 								</g>
 							)}
 						</g>
@@ -1048,7 +1053,7 @@ const beschlag = [
 	   Drehpunkt = Uhrmitte (inline transform-origin, view-box-Einheiten). */
 	/* Stoppuhr-Beschlag (Probe): Krone + Druecker als Rechtecke, weiss.
 	   Bei den kleinen Uhren erscheint er mit der Fuellung (Script). */
-	.beschlag rect {
+	.beschlag path {
 		fill: #ffffff;
 	}
 	.beschlag--klein {
