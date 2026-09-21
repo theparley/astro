@@ -1205,7 +1205,11 @@ const { fassung = "brett" } = Astro.props;
 	.kachel-mitte--brett .sf-hinge {
 		display: block;
 		background: var(--kachel);
-		height: max(1.5px, calc(var(--sf-tile-w) * 0.05));
+		/* GANZ DUENN (Fred 21.09., zweite Runde: „wieder raus oder ganz
+		   duenn"): 1 px, das duennste, was ueberall sicher gezeichnet wird —
+		   auf Retina-Handys sind das 2–3 Geraetepixel, ein Haarstrich.
+		   Vorher rund 2 px bei 1280 (5 % der Kachelbreite). */
+		height: 1px;
 		transform: translateY(-50%);
 	}
 
