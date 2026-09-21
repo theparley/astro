@@ -1,25 +1,32 @@
 ---
 // PROBE-SEITE (Fred 21.09.): zwei Fassungen der Stunden-Kachel nebeneinander.
 //   A  der Live-Stand: eine Stunde, dann der hundertfach groessere Kreis
-//      (Flaeche 1:100). Markup und CSS sind 1:1 aus MultiOutputKacheln.astro
-//      gezogen — beim Bauen der Seite, nicht von Hand kopiert.
-//   B  Freds Idee: dieselbe Stunde zeichnet sich, dann faehrt die Kamera
-//      zurueck und gibt ein RASTER aus 100 Stunden frei — 10 x 10, die
-//      eine bleibt schwarz, die 99 anderen fuellen sich weiss, in fuenf
-//      Wellen von innen nach aussen, waehrend die Kamera faehrt. Menge
-//      durch Wiederholung statt durch Flaeche (Isotype, Neurath), die
-//      Kombination aus dem Zoom der gestrichenen Figuren-Kachel und der
-//      Stunden-Zeichnung.
-//      Geometrie: Zelle 90 Einheiten, Kreisradius 34, schwarze Stunde in
-//      Zelle (4,4) = exakt die Bildmitte (500, 625), damit die Kamera um
-//      sie herum fahren kann. Das Raster spannt 95..995 in der Breite und
-//      220..1120 in der Hoehe der 1000 x 1250 viewBox.
-//      Wellen = Chebyshev-Abstand zur Mitte (1..5); jede Welle hat eigene
-//      Keyframes statt animation-delay — ein Delay wuerde den Neustart der
-//      Runde je Kreis verschieben, und am Rundenanfang staenden dann volle
-//      Scheiben, die spaeter leer springen.
-//   Beide Fassungen starten gleichzeitig (18 s, zehn Bandschritte) und
-//   laufen synchron. Nicht verlinkt, nur auf dev.
+//      (Flaeche 1:100). Markup und CSS werden beim Bauen der Seite aus
+//      MultiOutputKacheln.astro gezogen, nicht von Hand kopiert.
+//   B  Freds Idee, dritter Stand: dieselbe Stunde zeichnet sich, dann faehrt
+//      die Kamera zurueck und gibt ein RASTER aus Stunden frei — die eine
+//      bleibt schwarz, die anderen fuellen sich weiss, in Wellen von innen
+//      nach aussen, waehrend die Kamera faehrt. Menge durch Wiederholung
+//      statt durch Flaeche (Isotype, Neurath).
+//
+//      RASTER 11 x 13, STUNDE EXAKT MITTIG, RAND ANGESCHNITTEN (Fred 21.09.:
+//      „Es heisst ja auch 100+ … zoome so weit raus, dass die anderen
+//      Kacheln angeschnitten sind … ein bisschen weniger als 100 sehen wir
+//      jetzt und das andere koennte noch dazukommen"). Ungerade Zahl Spalten
+//      und Zeilen, damit die Stunde eine echte Mittelzelle hat — die Kamera
+//      braucht dann keine Fahrt mehr, sie skaliert um die Bildmitte.
+//      Abstaende: 100 in der Breite (10 Abstaende auf 1000), 104.167 in der
+//      Hoehe (12 Abstaende auf 1250) — 4 % Unterschied, unsichtbar, aber so
+//      liegen die aeussersten Mitten GENAU auf den Kachelkanten: links und
+//      rechts wie oben und unten stehen Halbkreise. Voll sichtbar 9 x 11 =
+//      99, dazu 44 angeschnittene. Das Plus in „100+" ist damit gezeigt,
+//      nicht behauptet.
+//      Wellen = Chebyshev-Abstand zur Mitte (1..6), je Ring eigene
+//      Keyframes statt animation-delay (ein Delay verschoebe den Rundenstart
+//      je Kreis, und am Rundenanfang staenden volle Scheiben).
+//   Beide Fassungen starten gleichzeitig (18 s, zehn Bandschritte).
+//   Kontrast-Schalter per Adresse: ?rand ?hell ?heller (kombinierbar).
+//   Nicht verlinkt.
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -53,213 +60,361 @@ import Layout from "../layouts/Layout.astro";
 				</div>
 			</div>
 			<div>
-				<p class="hinweis">B — Raster: 1 von 100</p>
+				<p class="hinweis">B — Raster 11 × 13: 99 voll, Rand angeschnitten</p>
 				<div class="kachel">
 					<div class="buehne variante-b" data-probe>
-						<svg class="raster" viewBox="0 0 1000 1250" aria-hidden="true">
+						<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
 							<g class="kamera-b">
-								<circle class="feld-voll ring-4" cx="95" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="185" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="275" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="365" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="455" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="545" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="635" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="725" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="220" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="220" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="275" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="365" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="455" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="545" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="635" cy="310" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="310" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="310" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="310" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="400" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="400" r="34" />
-								<circle class="feld-voll ring-2" cx="275" cy="400" r="34" />
-								<circle class="feld-voll ring-2" cx="365" cy="400" r="34" />
-								<circle class="feld-voll ring-2" cx="455" cy="400" r="34" />
-								<circle class="feld-voll ring-2" cx="545" cy="400" r="34" />
-								<circle class="feld-voll ring-2" cx="635" cy="400" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="400" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="400" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="400" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="490" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="490" r="34" />
-								<circle class="feld-voll ring-2" cx="275" cy="490" r="34" />
-								<circle class="feld-voll ring-1" cx="365" cy="490" r="34" />
-								<circle class="feld-voll ring-1" cx="455" cy="490" r="34" />
-								<circle class="feld-voll ring-1" cx="545" cy="490" r="34" />
-								<circle class="feld-voll ring-2" cx="635" cy="490" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="490" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="490" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="490" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="580" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="580" r="34" />
-								<circle class="feld-voll ring-2" cx="275" cy="580" r="34" />
-								<circle class="feld-voll ring-1" cx="365" cy="580" r="34" />
-								<circle class="feld-voll ring-1" cx="545" cy="580" r="34" />
-								<circle class="feld-voll ring-2" cx="635" cy="580" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="580" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="580" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="580" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="670" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="670" r="34" />
-								<circle class="feld-voll ring-2" cx="275" cy="670" r="34" />
-								<circle class="feld-voll ring-1" cx="365" cy="670" r="34" />
-								<circle class="feld-voll ring-1" cx="455" cy="670" r="34" />
-								<circle class="feld-voll ring-1" cx="545" cy="670" r="34" />
-								<circle class="feld-voll ring-2" cx="635" cy="670" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="670" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="670" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="670" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="760" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="760" r="34" />
-								<circle class="feld-voll ring-2" cx="275" cy="760" r="34" />
-								<circle class="feld-voll ring-2" cx="365" cy="760" r="34" />
-								<circle class="feld-voll ring-2" cx="455" cy="760" r="34" />
-								<circle class="feld-voll ring-2" cx="545" cy="760" r="34" />
-								<circle class="feld-voll ring-2" cx="635" cy="760" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="760" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="760" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="760" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="185" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="275" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="365" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="455" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="545" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="635" cy="850" r="34" />
-								<circle class="feld-voll ring-3" cx="725" cy="850" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="850" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="850" r="34" />
-								<circle class="feld-voll ring-4" cx="95" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="185" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="275" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="365" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="455" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="545" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="635" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="725" cy="940" r="34" />
-								<circle class="feld-voll ring-4" cx="815" cy="940" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="940" r="34" />
-								<circle class="feld-voll ring-5" cx="95" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="185" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="275" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="365" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="455" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="545" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="635" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="725" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="815" cy="1030" r="34" />
-								<circle class="feld-voll ring-5" cx="905" cy="1030" r="34" />
-								<circle class="feld ring-4" cx="95" cy="220" r="17" pathLength="1" transform="rotate(-90 95 220)" />
-								<circle class="feld ring-4" cx="185" cy="220" r="17" pathLength="1" transform="rotate(-90 185 220)" />
-								<circle class="feld ring-4" cx="275" cy="220" r="17" pathLength="1" transform="rotate(-90 275 220)" />
-								<circle class="feld ring-4" cx="365" cy="220" r="17" pathLength="1" transform="rotate(-90 365 220)" />
-								<circle class="feld ring-4" cx="455" cy="220" r="17" pathLength="1" transform="rotate(-90 455 220)" />
-								<circle class="feld ring-4" cx="545" cy="220" r="17" pathLength="1" transform="rotate(-90 545 220)" />
-								<circle class="feld ring-4" cx="635" cy="220" r="17" pathLength="1" transform="rotate(-90 635 220)" />
-								<circle class="feld ring-4" cx="725" cy="220" r="17" pathLength="1" transform="rotate(-90 725 220)" />
-								<circle class="feld ring-4" cx="815" cy="220" r="17" pathLength="1" transform="rotate(-90 815 220)" />
-								<circle class="feld ring-5" cx="905" cy="220" r="17" pathLength="1" transform="rotate(-90 905 220)" />
-								<circle class="feld ring-4" cx="95" cy="310" r="17" pathLength="1" transform="rotate(-90 95 310)" />
-								<circle class="feld ring-3" cx="185" cy="310" r="17" pathLength="1" transform="rotate(-90 185 310)" />
-								<circle class="feld ring-3" cx="275" cy="310" r="17" pathLength="1" transform="rotate(-90 275 310)" />
-								<circle class="feld ring-3" cx="365" cy="310" r="17" pathLength="1" transform="rotate(-90 365 310)" />
-								<circle class="feld ring-3" cx="455" cy="310" r="17" pathLength="1" transform="rotate(-90 455 310)" />
-								<circle class="feld ring-3" cx="545" cy="310" r="17" pathLength="1" transform="rotate(-90 545 310)" />
-								<circle class="feld ring-3" cx="635" cy="310" r="17" pathLength="1" transform="rotate(-90 635 310)" />
-								<circle class="feld ring-3" cx="725" cy="310" r="17" pathLength="1" transform="rotate(-90 725 310)" />
-								<circle class="feld ring-4" cx="815" cy="310" r="17" pathLength="1" transform="rotate(-90 815 310)" />
-								<circle class="feld ring-5" cx="905" cy="310" r="17" pathLength="1" transform="rotate(-90 905 310)" />
-								<circle class="feld ring-4" cx="95" cy="400" r="17" pathLength="1" transform="rotate(-90 95 400)" />
-								<circle class="feld ring-3" cx="185" cy="400" r="17" pathLength="1" transform="rotate(-90 185 400)" />
-								<circle class="feld ring-2" cx="275" cy="400" r="17" pathLength="1" transform="rotate(-90 275 400)" />
-								<circle class="feld ring-2" cx="365" cy="400" r="17" pathLength="1" transform="rotate(-90 365 400)" />
-								<circle class="feld ring-2" cx="455" cy="400" r="17" pathLength="1" transform="rotate(-90 455 400)" />
-								<circle class="feld ring-2" cx="545" cy="400" r="17" pathLength="1" transform="rotate(-90 545 400)" />
-								<circle class="feld ring-2" cx="635" cy="400" r="17" pathLength="1" transform="rotate(-90 635 400)" />
-								<circle class="feld ring-3" cx="725" cy="400" r="17" pathLength="1" transform="rotate(-90 725 400)" />
-								<circle class="feld ring-4" cx="815" cy="400" r="17" pathLength="1" transform="rotate(-90 815 400)" />
-								<circle class="feld ring-5" cx="905" cy="400" r="17" pathLength="1" transform="rotate(-90 905 400)" />
-								<circle class="feld ring-4" cx="95" cy="490" r="17" pathLength="1" transform="rotate(-90 95 490)" />
-								<circle class="feld ring-3" cx="185" cy="490" r="17" pathLength="1" transform="rotate(-90 185 490)" />
-								<circle class="feld ring-2" cx="275" cy="490" r="17" pathLength="1" transform="rotate(-90 275 490)" />
-								<circle class="feld ring-1" cx="365" cy="490" r="17" pathLength="1" transform="rotate(-90 365 490)" />
-								<circle class="feld ring-1" cx="455" cy="490" r="17" pathLength="1" transform="rotate(-90 455 490)" />
-								<circle class="feld ring-1" cx="545" cy="490" r="17" pathLength="1" transform="rotate(-90 545 490)" />
-								<circle class="feld ring-2" cx="635" cy="490" r="17" pathLength="1" transform="rotate(-90 635 490)" />
-								<circle class="feld ring-3" cx="725" cy="490" r="17" pathLength="1" transform="rotate(-90 725 490)" />
-								<circle class="feld ring-4" cx="815" cy="490" r="17" pathLength="1" transform="rotate(-90 815 490)" />
-								<circle class="feld ring-5" cx="905" cy="490" r="17" pathLength="1" transform="rotate(-90 905 490)" />
-								<circle class="feld ring-4" cx="95" cy="580" r="17" pathLength="1" transform="rotate(-90 95 580)" />
-								<circle class="feld ring-3" cx="185" cy="580" r="17" pathLength="1" transform="rotate(-90 185 580)" />
-								<circle class="feld ring-2" cx="275" cy="580" r="17" pathLength="1" transform="rotate(-90 275 580)" />
-								<circle class="feld ring-1" cx="365" cy="580" r="17" pathLength="1" transform="rotate(-90 365 580)" />
-								<circle class="feld ring-1" cx="545" cy="580" r="17" pathLength="1" transform="rotate(-90 545 580)" />
-								<circle class="feld ring-2" cx="635" cy="580" r="17" pathLength="1" transform="rotate(-90 635 580)" />
-								<circle class="feld ring-3" cx="725" cy="580" r="17" pathLength="1" transform="rotate(-90 725 580)" />
-								<circle class="feld ring-4" cx="815" cy="580" r="17" pathLength="1" transform="rotate(-90 815 580)" />
-								<circle class="feld ring-5" cx="905" cy="580" r="17" pathLength="1" transform="rotate(-90 905 580)" />
-								<circle class="feld ring-4" cx="95" cy="670" r="17" pathLength="1" transform="rotate(-90 95 670)" />
-								<circle class="feld ring-3" cx="185" cy="670" r="17" pathLength="1" transform="rotate(-90 185 670)" />
-								<circle class="feld ring-2" cx="275" cy="670" r="17" pathLength="1" transform="rotate(-90 275 670)" />
-								<circle class="feld ring-1" cx="365" cy="670" r="17" pathLength="1" transform="rotate(-90 365 670)" />
-								<circle class="feld ring-1" cx="455" cy="670" r="17" pathLength="1" transform="rotate(-90 455 670)" />
-								<circle class="feld ring-1" cx="545" cy="670" r="17" pathLength="1" transform="rotate(-90 545 670)" />
-								<circle class="feld ring-2" cx="635" cy="670" r="17" pathLength="1" transform="rotate(-90 635 670)" />
-								<circle class="feld ring-3" cx="725" cy="670" r="17" pathLength="1" transform="rotate(-90 725 670)" />
-								<circle class="feld ring-4" cx="815" cy="670" r="17" pathLength="1" transform="rotate(-90 815 670)" />
-								<circle class="feld ring-5" cx="905" cy="670" r="17" pathLength="1" transform="rotate(-90 905 670)" />
-								<circle class="feld ring-4" cx="95" cy="760" r="17" pathLength="1" transform="rotate(-90 95 760)" />
-								<circle class="feld ring-3" cx="185" cy="760" r="17" pathLength="1" transform="rotate(-90 185 760)" />
-								<circle class="feld ring-2" cx="275" cy="760" r="17" pathLength="1" transform="rotate(-90 275 760)" />
-								<circle class="feld ring-2" cx="365" cy="760" r="17" pathLength="1" transform="rotate(-90 365 760)" />
-								<circle class="feld ring-2" cx="455" cy="760" r="17" pathLength="1" transform="rotate(-90 455 760)" />
-								<circle class="feld ring-2" cx="545" cy="760" r="17" pathLength="1" transform="rotate(-90 545 760)" />
-								<circle class="feld ring-2" cx="635" cy="760" r="17" pathLength="1" transform="rotate(-90 635 760)" />
-								<circle class="feld ring-3" cx="725" cy="760" r="17" pathLength="1" transform="rotate(-90 725 760)" />
-								<circle class="feld ring-4" cx="815" cy="760" r="17" pathLength="1" transform="rotate(-90 815 760)" />
-								<circle class="feld ring-5" cx="905" cy="760" r="17" pathLength="1" transform="rotate(-90 905 760)" />
-								<circle class="feld ring-4" cx="95" cy="850" r="17" pathLength="1" transform="rotate(-90 95 850)" />
-								<circle class="feld ring-3" cx="185" cy="850" r="17" pathLength="1" transform="rotate(-90 185 850)" />
-								<circle class="feld ring-3" cx="275" cy="850" r="17" pathLength="1" transform="rotate(-90 275 850)" />
-								<circle class="feld ring-3" cx="365" cy="850" r="17" pathLength="1" transform="rotate(-90 365 850)" />
-								<circle class="feld ring-3" cx="455" cy="850" r="17" pathLength="1" transform="rotate(-90 455 850)" />
-								<circle class="feld ring-3" cx="545" cy="850" r="17" pathLength="1" transform="rotate(-90 545 850)" />
-								<circle class="feld ring-3" cx="635" cy="850" r="17" pathLength="1" transform="rotate(-90 635 850)" />
-								<circle class="feld ring-3" cx="725" cy="850" r="17" pathLength="1" transform="rotate(-90 725 850)" />
-								<circle class="feld ring-4" cx="815" cy="850" r="17" pathLength="1" transform="rotate(-90 815 850)" />
-								<circle class="feld ring-5" cx="905" cy="850" r="17" pathLength="1" transform="rotate(-90 905 850)" />
-								<circle class="feld ring-4" cx="95" cy="940" r="17" pathLength="1" transform="rotate(-90 95 940)" />
-								<circle class="feld ring-4" cx="185" cy="940" r="17" pathLength="1" transform="rotate(-90 185 940)" />
-								<circle class="feld ring-4" cx="275" cy="940" r="17" pathLength="1" transform="rotate(-90 275 940)" />
-								<circle class="feld ring-4" cx="365" cy="940" r="17" pathLength="1" transform="rotate(-90 365 940)" />
-								<circle class="feld ring-4" cx="455" cy="940" r="17" pathLength="1" transform="rotate(-90 455 940)" />
-								<circle class="feld ring-4" cx="545" cy="940" r="17" pathLength="1" transform="rotate(-90 545 940)" />
-								<circle class="feld ring-4" cx="635" cy="940" r="17" pathLength="1" transform="rotate(-90 635 940)" />
-								<circle class="feld ring-4" cx="725" cy="940" r="17" pathLength="1" transform="rotate(-90 725 940)" />
-								<circle class="feld ring-4" cx="815" cy="940" r="17" pathLength="1" transform="rotate(-90 815 940)" />
-								<circle class="feld ring-5" cx="905" cy="940" r="17" pathLength="1" transform="rotate(-90 905 940)" />
-								<circle class="feld ring-5" cx="95" cy="1030" r="17" pathLength="1" transform="rotate(-90 95 1030)" />
-								<circle class="feld ring-5" cx="185" cy="1030" r="17" pathLength="1" transform="rotate(-90 185 1030)" />
-								<circle class="feld ring-5" cx="275" cy="1030" r="17" pathLength="1" transform="rotate(-90 275 1030)" />
-								<circle class="feld ring-5" cx="365" cy="1030" r="17" pathLength="1" transform="rotate(-90 365 1030)" />
-								<circle class="feld ring-5" cx="455" cy="1030" r="17" pathLength="1" transform="rotate(-90 455 1030)" />
-								<circle class="feld ring-5" cx="545" cy="1030" r="17" pathLength="1" transform="rotate(-90 545 1030)" />
-								<circle class="feld ring-5" cx="635" cy="1030" r="17" pathLength="1" transform="rotate(-90 635 1030)" />
-								<circle class="feld ring-5" cx="725" cy="1030" r="17" pathLength="1" transform="rotate(-90 725 1030)" />
-								<circle class="feld ring-5" cx="815" cy="1030" r="17" pathLength="1" transform="rotate(-90 815 1030)" />
-								<circle class="feld ring-5" cx="905" cy="1030" r="17" pathLength="1" transform="rotate(-90 905 1030)" />
-								<circle class="stunde-fuellung" cx="455" cy="580" r="17" pathLength="1" transform="rotate(-90 455 580)" />
-								<circle class="stunde-rand" cx="455" cy="580" r="34" pathLength="1" transform="rotate(-90 455 580)" />
-								<line class="speiche speiche--start" x1="455" y1="580" x2="455" y2="546" />
-								<line class="speiche speiche--lauf" x1="455" y1="580" x2="455" y2="546" />
+								<circle class="feld-voll ring-6" cx="0" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="100" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="200" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="300" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="400" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="500" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="600" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="700" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="800" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="900" cy="0" r="34" />
+								<circle class="feld-voll ring-6" cx="1000" cy="0" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="100" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="200" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="300" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="400" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="500" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="600" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="700" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="800" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="900" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="104.167" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="200" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="300" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="400" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="500" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="600" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="700" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="800" cy="208.333" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="208.333" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="208.333" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="312.5" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="300" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="400" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="500" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="600" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="700" cy="312.5" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="312.5" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="312.5" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="312.5" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="416.667" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="416.667" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="416.667" r="34" />
+								<circle class="feld-voll ring-2" cx="300" cy="416.667" r="34" />
+								<circle class="feld-voll ring-2" cx="400" cy="416.667" r="34" />
+								<circle class="feld-voll ring-2" cx="500" cy="416.667" r="34" />
+								<circle class="feld-voll ring-2" cx="600" cy="416.667" r="34" />
+								<circle class="feld-voll ring-2" cx="700" cy="416.667" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="416.667" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="416.667" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="416.667" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="520.833" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="520.833" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="520.833" r="34" />
+								<circle class="feld-voll ring-2" cx="300" cy="520.833" r="34" />
+								<circle class="feld-voll ring-1" cx="400" cy="520.833" r="34" />
+								<circle class="feld-voll ring-1" cx="500" cy="520.833" r="34" />
+								<circle class="feld-voll ring-1" cx="600" cy="520.833" r="34" />
+								<circle class="feld-voll ring-2" cx="700" cy="520.833" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="520.833" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="520.833" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="520.833" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="625" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="625" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="625" r="34" />
+								<circle class="feld-voll ring-2" cx="300" cy="625" r="34" />
+								<circle class="feld-voll ring-1" cx="400" cy="625" r="34" />
+								<circle class="feld-voll ring-1" cx="600" cy="625" r="34" />
+								<circle class="feld-voll ring-2" cx="700" cy="625" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="625" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="625" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="625" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="729.167" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="729.167" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="729.167" r="34" />
+								<circle class="feld-voll ring-2" cx="300" cy="729.167" r="34" />
+								<circle class="feld-voll ring-1" cx="400" cy="729.167" r="34" />
+								<circle class="feld-voll ring-1" cx="500" cy="729.167" r="34" />
+								<circle class="feld-voll ring-1" cx="600" cy="729.167" r="34" />
+								<circle class="feld-voll ring-2" cx="700" cy="729.167" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="729.167" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="729.167" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="729.167" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="833.333" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="833.333" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="833.333" r="34" />
+								<circle class="feld-voll ring-2" cx="300" cy="833.333" r="34" />
+								<circle class="feld-voll ring-2" cx="400" cy="833.333" r="34" />
+								<circle class="feld-voll ring-2" cx="500" cy="833.333" r="34" />
+								<circle class="feld-voll ring-2" cx="600" cy="833.333" r="34" />
+								<circle class="feld-voll ring-2" cx="700" cy="833.333" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="833.333" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="833.333" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="833.333" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="937.5" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="200" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="300" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="400" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="500" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="600" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="700" cy="937.5" r="34" />
+								<circle class="feld-voll ring-3" cx="800" cy="937.5" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="937.5" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="937.5" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="100" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="200" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="300" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="400" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="500" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="600" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="700" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="800" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-4" cx="900" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="1041.67" r="34" />
+								<circle class="feld-voll ring-5" cx="0" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="100" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="200" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="300" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="400" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="500" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="600" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="700" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="800" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="900" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-5" cx="1000" cy="1145.83" r="34" />
+								<circle class="feld-voll ring-6" cx="0" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="100" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="200" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="300" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="400" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="500" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="600" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="700" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="800" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="900" cy="1250" r="34" />
+								<circle class="feld-voll ring-6" cx="1000" cy="1250" r="34" />
+								<circle class="feld ring-6" cx="0" cy="0" r="17" pathLength="1" transform="rotate(-90 0 0)" />
+								<circle class="feld ring-6" cx="100" cy="0" r="17" pathLength="1" transform="rotate(-90 100 0)" />
+								<circle class="feld ring-6" cx="200" cy="0" r="17" pathLength="1" transform="rotate(-90 200 0)" />
+								<circle class="feld ring-6" cx="300" cy="0" r="17" pathLength="1" transform="rotate(-90 300 0)" />
+								<circle class="feld ring-6" cx="400" cy="0" r="17" pathLength="1" transform="rotate(-90 400 0)" />
+								<circle class="feld ring-6" cx="500" cy="0" r="17" pathLength="1" transform="rotate(-90 500 0)" />
+								<circle class="feld ring-6" cx="600" cy="0" r="17" pathLength="1" transform="rotate(-90 600 0)" />
+								<circle class="feld ring-6" cx="700" cy="0" r="17" pathLength="1" transform="rotate(-90 700 0)" />
+								<circle class="feld ring-6" cx="800" cy="0" r="17" pathLength="1" transform="rotate(-90 800 0)" />
+								<circle class="feld ring-6" cx="900" cy="0" r="17" pathLength="1" transform="rotate(-90 900 0)" />
+								<circle class="feld ring-6" cx="1000" cy="0" r="17" pathLength="1" transform="rotate(-90 1000 0)" />
+								<circle class="feld ring-5" cx="0" cy="104.167" r="17" pathLength="1" transform="rotate(-90 0 104.167)" />
+								<circle class="feld ring-5" cx="100" cy="104.167" r="17" pathLength="1" transform="rotate(-90 100 104.167)" />
+								<circle class="feld ring-5" cx="200" cy="104.167" r="17" pathLength="1" transform="rotate(-90 200 104.167)" />
+								<circle class="feld ring-5" cx="300" cy="104.167" r="17" pathLength="1" transform="rotate(-90 300 104.167)" />
+								<circle class="feld ring-5" cx="400" cy="104.167" r="17" pathLength="1" transform="rotate(-90 400 104.167)" />
+								<circle class="feld ring-5" cx="500" cy="104.167" r="17" pathLength="1" transform="rotate(-90 500 104.167)" />
+								<circle class="feld ring-5" cx="600" cy="104.167" r="17" pathLength="1" transform="rotate(-90 600 104.167)" />
+								<circle class="feld ring-5" cx="700" cy="104.167" r="17" pathLength="1" transform="rotate(-90 700 104.167)" />
+								<circle class="feld ring-5" cx="800" cy="104.167" r="17" pathLength="1" transform="rotate(-90 800 104.167)" />
+								<circle class="feld ring-5" cx="900" cy="104.167" r="17" pathLength="1" transform="rotate(-90 900 104.167)" />
+								<circle class="feld ring-5" cx="1000" cy="104.167" r="17" pathLength="1" transform="rotate(-90 1000 104.167)" />
+								<circle class="feld ring-5" cx="0" cy="208.333" r="17" pathLength="1" transform="rotate(-90 0 208.333)" />
+								<circle class="feld ring-4" cx="100" cy="208.333" r="17" pathLength="1" transform="rotate(-90 100 208.333)" />
+								<circle class="feld ring-4" cx="200" cy="208.333" r="17" pathLength="1" transform="rotate(-90 200 208.333)" />
+								<circle class="feld ring-4" cx="300" cy="208.333" r="17" pathLength="1" transform="rotate(-90 300 208.333)" />
+								<circle class="feld ring-4" cx="400" cy="208.333" r="17" pathLength="1" transform="rotate(-90 400 208.333)" />
+								<circle class="feld ring-4" cx="500" cy="208.333" r="17" pathLength="1" transform="rotate(-90 500 208.333)" />
+								<circle class="feld ring-4" cx="600" cy="208.333" r="17" pathLength="1" transform="rotate(-90 600 208.333)" />
+								<circle class="feld ring-4" cx="700" cy="208.333" r="17" pathLength="1" transform="rotate(-90 700 208.333)" />
+								<circle class="feld ring-4" cx="800" cy="208.333" r="17" pathLength="1" transform="rotate(-90 800 208.333)" />
+								<circle class="feld ring-4" cx="900" cy="208.333" r="17" pathLength="1" transform="rotate(-90 900 208.333)" />
+								<circle class="feld ring-5" cx="1000" cy="208.333" r="17" pathLength="1" transform="rotate(-90 1000 208.333)" />
+								<circle class="feld ring-5" cx="0" cy="312.5" r="17" pathLength="1" transform="rotate(-90 0 312.5)" />
+								<circle class="feld ring-4" cx="100" cy="312.5" r="17" pathLength="1" transform="rotate(-90 100 312.5)" />
+								<circle class="feld ring-3" cx="200" cy="312.5" r="17" pathLength="1" transform="rotate(-90 200 312.5)" />
+								<circle class="feld ring-3" cx="300" cy="312.5" r="17" pathLength="1" transform="rotate(-90 300 312.5)" />
+								<circle class="feld ring-3" cx="400" cy="312.5" r="17" pathLength="1" transform="rotate(-90 400 312.5)" />
+								<circle class="feld ring-3" cx="500" cy="312.5" r="17" pathLength="1" transform="rotate(-90 500 312.5)" />
+								<circle class="feld ring-3" cx="600" cy="312.5" r="17" pathLength="1" transform="rotate(-90 600 312.5)" />
+								<circle class="feld ring-3" cx="700" cy="312.5" r="17" pathLength="1" transform="rotate(-90 700 312.5)" />
+								<circle class="feld ring-3" cx="800" cy="312.5" r="17" pathLength="1" transform="rotate(-90 800 312.5)" />
+								<circle class="feld ring-4" cx="900" cy="312.5" r="17" pathLength="1" transform="rotate(-90 900 312.5)" />
+								<circle class="feld ring-5" cx="1000" cy="312.5" r="17" pathLength="1" transform="rotate(-90 1000 312.5)" />
+								<circle class="feld ring-5" cx="0" cy="416.667" r="17" pathLength="1" transform="rotate(-90 0 416.667)" />
+								<circle class="feld ring-4" cx="100" cy="416.667" r="17" pathLength="1" transform="rotate(-90 100 416.667)" />
+								<circle class="feld ring-3" cx="200" cy="416.667" r="17" pathLength="1" transform="rotate(-90 200 416.667)" />
+								<circle class="feld ring-2" cx="300" cy="416.667" r="17" pathLength="1" transform="rotate(-90 300 416.667)" />
+								<circle class="feld ring-2" cx="400" cy="416.667" r="17" pathLength="1" transform="rotate(-90 400 416.667)" />
+								<circle class="feld ring-2" cx="500" cy="416.667" r="17" pathLength="1" transform="rotate(-90 500 416.667)" />
+								<circle class="feld ring-2" cx="600" cy="416.667" r="17" pathLength="1" transform="rotate(-90 600 416.667)" />
+								<circle class="feld ring-2" cx="700" cy="416.667" r="17" pathLength="1" transform="rotate(-90 700 416.667)" />
+								<circle class="feld ring-3" cx="800" cy="416.667" r="17" pathLength="1" transform="rotate(-90 800 416.667)" />
+								<circle class="feld ring-4" cx="900" cy="416.667" r="17" pathLength="1" transform="rotate(-90 900 416.667)" />
+								<circle class="feld ring-5" cx="1000" cy="416.667" r="17" pathLength="1" transform="rotate(-90 1000 416.667)" />
+								<circle class="feld ring-5" cx="0" cy="520.833" r="17" pathLength="1" transform="rotate(-90 0 520.833)" />
+								<circle class="feld ring-4" cx="100" cy="520.833" r="17" pathLength="1" transform="rotate(-90 100 520.833)" />
+								<circle class="feld ring-3" cx="200" cy="520.833" r="17" pathLength="1" transform="rotate(-90 200 520.833)" />
+								<circle class="feld ring-2" cx="300" cy="520.833" r="17" pathLength="1" transform="rotate(-90 300 520.833)" />
+								<circle class="feld ring-1" cx="400" cy="520.833" r="17" pathLength="1" transform="rotate(-90 400 520.833)" />
+								<circle class="feld ring-1" cx="500" cy="520.833" r="17" pathLength="1" transform="rotate(-90 500 520.833)" />
+								<circle class="feld ring-1" cx="600" cy="520.833" r="17" pathLength="1" transform="rotate(-90 600 520.833)" />
+								<circle class="feld ring-2" cx="700" cy="520.833" r="17" pathLength="1" transform="rotate(-90 700 520.833)" />
+								<circle class="feld ring-3" cx="800" cy="520.833" r="17" pathLength="1" transform="rotate(-90 800 520.833)" />
+								<circle class="feld ring-4" cx="900" cy="520.833" r="17" pathLength="1" transform="rotate(-90 900 520.833)" />
+								<circle class="feld ring-5" cx="1000" cy="520.833" r="17" pathLength="1" transform="rotate(-90 1000 520.833)" />
+								<circle class="feld ring-5" cx="0" cy="625" r="17" pathLength="1" transform="rotate(-90 0 625)" />
+								<circle class="feld ring-4" cx="100" cy="625" r="17" pathLength="1" transform="rotate(-90 100 625)" />
+								<circle class="feld ring-3" cx="200" cy="625" r="17" pathLength="1" transform="rotate(-90 200 625)" />
+								<circle class="feld ring-2" cx="300" cy="625" r="17" pathLength="1" transform="rotate(-90 300 625)" />
+								<circle class="feld ring-1" cx="400" cy="625" r="17" pathLength="1" transform="rotate(-90 400 625)" />
+								<circle class="feld ring-1" cx="600" cy="625" r="17" pathLength="1" transform="rotate(-90 600 625)" />
+								<circle class="feld ring-2" cx="700" cy="625" r="17" pathLength="1" transform="rotate(-90 700 625)" />
+								<circle class="feld ring-3" cx="800" cy="625" r="17" pathLength="1" transform="rotate(-90 800 625)" />
+								<circle class="feld ring-4" cx="900" cy="625" r="17" pathLength="1" transform="rotate(-90 900 625)" />
+								<circle class="feld ring-5" cx="1000" cy="625" r="17" pathLength="1" transform="rotate(-90 1000 625)" />
+								<circle class="feld ring-5" cx="0" cy="729.167" r="17" pathLength="1" transform="rotate(-90 0 729.167)" />
+								<circle class="feld ring-4" cx="100" cy="729.167" r="17" pathLength="1" transform="rotate(-90 100 729.167)" />
+								<circle class="feld ring-3" cx="200" cy="729.167" r="17" pathLength="1" transform="rotate(-90 200 729.167)" />
+								<circle class="feld ring-2" cx="300" cy="729.167" r="17" pathLength="1" transform="rotate(-90 300 729.167)" />
+								<circle class="feld ring-1" cx="400" cy="729.167" r="17" pathLength="1" transform="rotate(-90 400 729.167)" />
+								<circle class="feld ring-1" cx="500" cy="729.167" r="17" pathLength="1" transform="rotate(-90 500 729.167)" />
+								<circle class="feld ring-1" cx="600" cy="729.167" r="17" pathLength="1" transform="rotate(-90 600 729.167)" />
+								<circle class="feld ring-2" cx="700" cy="729.167" r="17" pathLength="1" transform="rotate(-90 700 729.167)" />
+								<circle class="feld ring-3" cx="800" cy="729.167" r="17" pathLength="1" transform="rotate(-90 800 729.167)" />
+								<circle class="feld ring-4" cx="900" cy="729.167" r="17" pathLength="1" transform="rotate(-90 900 729.167)" />
+								<circle class="feld ring-5" cx="1000" cy="729.167" r="17" pathLength="1" transform="rotate(-90 1000 729.167)" />
+								<circle class="feld ring-5" cx="0" cy="833.333" r="17" pathLength="1" transform="rotate(-90 0 833.333)" />
+								<circle class="feld ring-4" cx="100" cy="833.333" r="17" pathLength="1" transform="rotate(-90 100 833.333)" />
+								<circle class="feld ring-3" cx="200" cy="833.333" r="17" pathLength="1" transform="rotate(-90 200 833.333)" />
+								<circle class="feld ring-2" cx="300" cy="833.333" r="17" pathLength="1" transform="rotate(-90 300 833.333)" />
+								<circle class="feld ring-2" cx="400" cy="833.333" r="17" pathLength="1" transform="rotate(-90 400 833.333)" />
+								<circle class="feld ring-2" cx="500" cy="833.333" r="17" pathLength="1" transform="rotate(-90 500 833.333)" />
+								<circle class="feld ring-2" cx="600" cy="833.333" r="17" pathLength="1" transform="rotate(-90 600 833.333)" />
+								<circle class="feld ring-2" cx="700" cy="833.333" r="17" pathLength="1" transform="rotate(-90 700 833.333)" />
+								<circle class="feld ring-3" cx="800" cy="833.333" r="17" pathLength="1" transform="rotate(-90 800 833.333)" />
+								<circle class="feld ring-4" cx="900" cy="833.333" r="17" pathLength="1" transform="rotate(-90 900 833.333)" />
+								<circle class="feld ring-5" cx="1000" cy="833.333" r="17" pathLength="1" transform="rotate(-90 1000 833.333)" />
+								<circle class="feld ring-5" cx="0" cy="937.5" r="17" pathLength="1" transform="rotate(-90 0 937.5)" />
+								<circle class="feld ring-4" cx="100" cy="937.5" r="17" pathLength="1" transform="rotate(-90 100 937.5)" />
+								<circle class="feld ring-3" cx="200" cy="937.5" r="17" pathLength="1" transform="rotate(-90 200 937.5)" />
+								<circle class="feld ring-3" cx="300" cy="937.5" r="17" pathLength="1" transform="rotate(-90 300 937.5)" />
+								<circle class="feld ring-3" cx="400" cy="937.5" r="17" pathLength="1" transform="rotate(-90 400 937.5)" />
+								<circle class="feld ring-3" cx="500" cy="937.5" r="17" pathLength="1" transform="rotate(-90 500 937.5)" />
+								<circle class="feld ring-3" cx="600" cy="937.5" r="17" pathLength="1" transform="rotate(-90 600 937.5)" />
+								<circle class="feld ring-3" cx="700" cy="937.5" r="17" pathLength="1" transform="rotate(-90 700 937.5)" />
+								<circle class="feld ring-3" cx="800" cy="937.5" r="17" pathLength="1" transform="rotate(-90 800 937.5)" />
+								<circle class="feld ring-4" cx="900" cy="937.5" r="17" pathLength="1" transform="rotate(-90 900 937.5)" />
+								<circle class="feld ring-5" cx="1000" cy="937.5" r="17" pathLength="1" transform="rotate(-90 1000 937.5)" />
+								<circle class="feld ring-5" cx="0" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 0 1041.67)" />
+								<circle class="feld ring-4" cx="100" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 100 1041.67)" />
+								<circle class="feld ring-4" cx="200" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 200 1041.67)" />
+								<circle class="feld ring-4" cx="300" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 300 1041.67)" />
+								<circle class="feld ring-4" cx="400" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 400 1041.67)" />
+								<circle class="feld ring-4" cx="500" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 500 1041.67)" />
+								<circle class="feld ring-4" cx="600" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 600 1041.67)" />
+								<circle class="feld ring-4" cx="700" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 700 1041.67)" />
+								<circle class="feld ring-4" cx="800" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 800 1041.67)" />
+								<circle class="feld ring-4" cx="900" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 900 1041.67)" />
+								<circle class="feld ring-5" cx="1000" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 1000 1041.67)" />
+								<circle class="feld ring-5" cx="0" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 0 1145.83)" />
+								<circle class="feld ring-5" cx="100" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 100 1145.83)" />
+								<circle class="feld ring-5" cx="200" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 200 1145.83)" />
+								<circle class="feld ring-5" cx="300" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 300 1145.83)" />
+								<circle class="feld ring-5" cx="400" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 400 1145.83)" />
+								<circle class="feld ring-5" cx="500" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 500 1145.83)" />
+								<circle class="feld ring-5" cx="600" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 600 1145.83)" />
+								<circle class="feld ring-5" cx="700" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 700 1145.83)" />
+								<circle class="feld ring-5" cx="800" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 800 1145.83)" />
+								<circle class="feld ring-5" cx="900" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 900 1145.83)" />
+								<circle class="feld ring-5" cx="1000" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 1000 1145.83)" />
+								<circle class="feld ring-6" cx="0" cy="1250" r="17" pathLength="1" transform="rotate(-90 0 1250)" />
+								<circle class="feld ring-6" cx="100" cy="1250" r="17" pathLength="1" transform="rotate(-90 100 1250)" />
+								<circle class="feld ring-6" cx="200" cy="1250" r="17" pathLength="1" transform="rotate(-90 200 1250)" />
+								<circle class="feld ring-6" cx="300" cy="1250" r="17" pathLength="1" transform="rotate(-90 300 1250)" />
+								<circle class="feld ring-6" cx="400" cy="1250" r="17" pathLength="1" transform="rotate(-90 400 1250)" />
+								<circle class="feld ring-6" cx="500" cy="1250" r="17" pathLength="1" transform="rotate(-90 500 1250)" />
+								<circle class="feld ring-6" cx="600" cy="1250" r="17" pathLength="1" transform="rotate(-90 600 1250)" />
+								<circle class="feld ring-6" cx="700" cy="1250" r="17" pathLength="1" transform="rotate(-90 700 1250)" />
+								<circle class="feld ring-6" cx="800" cy="1250" r="17" pathLength="1" transform="rotate(-90 800 1250)" />
+								<circle class="feld ring-6" cx="900" cy="1250" r="17" pathLength="1" transform="rotate(-90 900 1250)" />
+								<circle class="feld ring-6" cx="1000" cy="1250" r="17" pathLength="1" transform="rotate(-90 1000 1250)" />
+								<circle class="stunde-fuellung" cx="500" cy="625" r="17" pathLength="1" transform="rotate(-90 500 625)" />
+								<g class="ziffernblatt">
+									<line class="viertel" x1="500" y1="592" x2="500" y2="599" transform="rotate(0 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(6 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(12 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(18 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(24 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(30 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(36 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(42 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(48 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(54 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(60 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(66 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(72 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(78 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(84 500 625)" />
+									<line class="viertel" x1="500" y1="592" x2="500" y2="599" transform="rotate(90 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(96 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(102 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(108 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(114 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(120 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(126 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(132 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(138 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(144 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(150 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(156 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(162 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(168 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(174 500 625)" />
+									<line class="viertel" x1="500" y1="592" x2="500" y2="599" transform="rotate(180 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(186 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(192 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(198 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(204 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(210 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(216 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(222 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(228 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(234 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(240 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(246 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(252 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(258 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(264 500 625)" />
+									<line class="viertel" x1="500" y1="592" x2="500" y2="599" transform="rotate(270 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(276 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(282 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(288 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(294 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(300 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(306 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(312 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(318 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(324 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(330 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(336 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(342 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(348 500 625)" />
+									<line class="minute" x1="500" y1="592" x2="500" y2="595.5" transform="rotate(354 500 625)" />
+								</g>
+								<circle class="stunde-rand" cx="500" cy="625" r="34" pathLength="1" transform="rotate(-90 500 625)" />
+								<line class="speiche speiche--start" x1="500" y1="625" x2="500" y2="591" />
+								<line class="speiche speiche--lauf" x1="500" y1="625" x2="500" y2="591" />
 							</g>
 						</svg>
 					</div>
@@ -268,9 +423,9 @@ import Layout from "../layouts/Layout.astro";
 		</div>
 		<p class="fuss">
 			Beide laufen synchron in 18 Sekunden. B: Stunde zeichnet sich 4–16 %,
-			Kamera faehrt 16–50 % zurueck, die fuenf Ringe fuellen sich 26–47 %,
-			Ausblenden 72,5–94 %. Beim Rauszoomen verkleinert sich die Stunde von
-			Zellenbreite auf ein Hundertstel des Rasters.
+			Kamera faehrt 16–50 % zurueck, die 6 Ringe fuellen sich 24–47 %,
+			Ausblenden 72,5–94 %. In Ruhe 99 volle Kreise, an allen vier Kanten
+			Halbkreise. Schalter: ?rand ?hell ?heller ?ohneblatt.
 		</p>
 	</section>
 </Layout>
@@ -288,6 +443,7 @@ import Layout from "../layouts/Layout.astro";
 
 	/* Kachelform wie auf der Startseite: 4:5, Panel-Grund, 2,5cqw Polster. */
 	.kachel {
+		position: relative;
 		container-type: inline-size;
 		aspect-ratio: 4 / 5;
 		background: var(--panel);
@@ -303,9 +459,9 @@ import Layout from "../layouts/Layout.astro";
 	     ?rand    1 px Linie in 14 % Weiss
 	     ?hell    Kachelgrund #161616 (statt #0d0d0d)
 	     ?heller  Kachelgrund #1f1f1f
-	   Der Rand aendert nichts an der Flaeche, die Aufhellung aendert den
-	   Token --panel fuer die ganze Seite mit — das waere dann auch die
-	   Farbe der dunklen Stunde und der Fallblatt-Kacheln. */
+	   Der Rand aendert nichts an der Flaeche; die Aufhellung wuerde auf der
+	   Startseite den Token --panel und damit auch die dunkle Stunde und die
+	   Fallblatt-Kacheln mitziehen. */
 	:global(body.rand) .kachel { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
 	:global(body.hell) .kachel { background: #161616; }
 	:global(body.heller) .kachel { background: #1f1f1f; }
@@ -449,28 +605,29 @@ import Layout from "../layouts/Layout.astro";
 		38.5%, 100% { opacity: 1; }
 	}
 
-	/* ── B: das Raster ─────────────────────────────────────────────── */
-	.raster { display: block; width: 100%; height: 100%; overflow: visible; }
 
-	/* Kamera wie in A, nur die Startweite ist anders: bei 7 misst die
-	   Stunde 476 Einheiten, knapp die halbe Breite — wie die Stunde in A
-	   bei 5 (500). Die Nachbarn liegen bei 7 mit ihren Mitten 630 Einheiten
-	   von der Mitte, also ausserhalb des Bilds; sie sind ohnehin unsichtbar,
-	   bis ihre Welle sie fuellt. */
-	/* RASTER MITTIG, KAMERA FAEHRT MIT (Fred 21.09., „dass unser Kreis
-	   nachher in der Mitte ist"). 100 hat keine Mittelzelle — jedes Rechteck
-	   mit 100 Zellen hat eine gerade Seite. Also: das Raster liegt mittig in
-	   der Kachel, die schwarze Stunde in Zelle (4,4), einer der vier
-	   mittleren, bei (455, 580) — 45 Einheiten links und ueber der
-	   Bildmitte. Damit sie am ANFANG trotzdem exakt mittig steht, faehrt die
-	   Kamera mit: translate(315, 315) bei Faktor 7 bildet die
-	   Stunde genau auf (500, 625) ab, bei Faktor 1 ist die Verschiebung 0
-	   und das Raster steht mittig. Rechnung: O + s·(H − O) + t = O
-	   ⇒ t = −s·(H − O). */
+	/* ── B: das Raster ─────────────────────────────────────────────── */
+	/* AUF DER GANZEN KACHEL, nicht in der Innenflaeche (Fred 21.09.: „du
+	   faehrst mir zu weit raus … bei den Experten und Zuschauern war die
+	   ganze Kachel ausgefuellt"). Sass das SVG in der Innenflaeche, blieb
+	   rundum die Polsterung als Rand (gemessen 17 px) und der Anschnitt an
+	   den Kanten fiel weg. Absolut auf die Kachel gelegt und mit „slice"
+	   liegt x = 0 exakt auf der linken Kachelkante — die aeussersten Mitten
+	   sitzen auf den Kanten, an allen vier Seiten stehen Halbkreise. */
+	.raster {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	/* Kamera um die Bildmitte = die Stunde. Bei 7 misst die Stunde
+	   476 Einheiten, knapp die halbe Breite — wie in A bei 5. */
 	.kamera-b {
 		transform-box: view-box;
 		transform-origin: 50% 50%;
-		transform: translate(315px, 315px) scale(7);
+		transform: scale(7);
 		opacity: 0;
 	}
 
@@ -478,12 +635,13 @@ import Layout from "../layouts/Layout.astro";
 	   voll ist, und deckt die Haarlinie auf zwoelf Uhr zu. */
 	.variante-b .feld-voll { fill: #ffffff; opacity: 0; }
 
-	/* Die 99: weisse Scheiben per Kuchenstueck-Trick, anfangs leer. */
+	/* Die weissen Scheiben per Kuchenstueck-Trick, anfangs leer. Versatz
+	   1,02 und Muster „1 2" gegen den Splitter am Anfang (s. Komponente). */
 	.variante-b .feld {
 		fill: none;
 		stroke: #ffffff;
 		stroke-width: 34;
-		stroke-dasharray: 1 2;   /* Splitter-Fix, s. Komponente */
+		stroke-dasharray: 1 2;
 		stroke-dashoffset: 1.02;
 	}
 
@@ -497,7 +655,21 @@ import Layout from "../layouts/Layout.astro";
 	.variante-b .stunde-fuellung { stroke: var(--panel); stroke-width: 34; }
 	.variante-b .stunde-rand,
 	.variante-b .speiche { stroke: #ffffff; stroke-width: 2.5; }
-	.variante-b .speiche--lauf { transform-box: view-box; transform-origin: 455px 580px; }
+
+	/* ZIFFERNBLATT (Fred 21.09.: „die Striche, die innerhalb einer Uhr sind,
+	   die die Minuten und Viertelstunden anzeigen"). 60 Striche innen am
+	   Rand, alle 6 Grad; die vier Viertel doppelt so lang und doppelt so
+	   kraeftig. Masse in Einheiten der ungezoomten Stunde: Minute 3,5 lang
+	   und 0,9 breit, Viertel 7 und 1,8 — bei Kamera 7 also rund 12 und 24 px
+	   auf einer 518er Kachel, in Ruhe unter einem Pixel, dann nur noch
+	   Textur wie bei einer echten Uhr aus der Ferne. Sichtbar ab der
+	   Einblendung, also BEVOR sich der Rand zeichnet — das Blatt steht,
+	   der Zeiger laeuft darauf. Abschalten: ?ohneblatt */
+	.variante-b .ziffernblatt line { stroke: #ffffff; }
+	.variante-b .ziffernblatt .minute { stroke-width: 0.9; }
+	.variante-b .ziffernblatt .viertel { stroke-width: 1.8; }
+	:global(body.ohneblatt) .ziffernblatt { display: none; }
+	.variante-b .speiche--lauf { transform-box: view-box; transform-origin: 50% 50%; }
 
 	.variante-b.laeuft .kamera-b {
 		animation:
@@ -517,11 +689,13 @@ import Layout from "../layouts/Layout.astro";
 	.variante-b.laeuft .feld-voll.ring-4 { animation: deckel-4 18s linear infinite; }
 	.variante-b.laeuft .feld.ring-5 { animation: welle-5 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
 	.variante-b.laeuft .feld-voll.ring-5 { animation: deckel-5 18s linear infinite; }
+	.variante-b.laeuft .feld.ring-6 { animation: welle-6 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	.variante-b.laeuft .feld-voll.ring-6 { animation: deckel-6 18s linear infinite; }
 
 	@keyframes kamera-b {
-		0%, 4% { transform: translate(315px, 315px) scale(7); }
-		50% { transform: translate(0px, 0px) scale(1); }
-		88%, 100% { transform: translate(315px, 315px) scale(7); }
+		0%, 4% { transform: scale(7); }
+		50% { transform: scale(1); }
+		88%, 100% { transform: scale(7); }
 	}
 	@keyframes ausblenden-b {
 		0%, 2% { opacity: 0; }
@@ -537,42 +711,50 @@ import Layout from "../layouts/Layout.astro";
 		16%, 100% { transform: rotate(1turn); }
 	}
 	@keyframes welle-1 {
-		0%, 26% { stroke-dashoffset: 1.02; }
-		31%, 100% { stroke-dashoffset: 0; }
+		0%, 24.0% { stroke-dashoffset: 1.02; }
+		29.0%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-1 {
-		0%, 30.5% { opacity: 0; }
-		31.5%, 100% { opacity: 1; }
+		0%, 28.5% { opacity: 0; }
+		29.5%, 100% { opacity: 1; }
 	}
 	@keyframes welle-2 {
-		0%, 30% { stroke-dashoffset: 1.02; }
-		35%, 100% { stroke-dashoffset: 0; }
+		0%, 27.6% { stroke-dashoffset: 1.02; }
+		32.6%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-2 {
-		0%, 34.5% { opacity: 0; }
-		35.5%, 100% { opacity: 1; }
+		0%, 32.1% { opacity: 0; }
+		33.1%, 100% { opacity: 1; }
 	}
 	@keyframes welle-3 {
-		0%, 34% { stroke-dashoffset: 1.02; }
-		39%, 100% { stroke-dashoffset: 0; }
+		0%, 31.2% { stroke-dashoffset: 1.02; }
+		36.2%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-3 {
-		0%, 38.5% { opacity: 0; }
-		39.5%, 100% { opacity: 1; }
+		0%, 35.7% { opacity: 0; }
+		36.7%, 100% { opacity: 1; }
 	}
 	@keyframes welle-4 {
-		0%, 38% { stroke-dashoffset: 1.02; }
-		43%, 100% { stroke-dashoffset: 0; }
+		0%, 34.8% { stroke-dashoffset: 1.02; }
+		39.8%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-4 {
-		0%, 42.5% { opacity: 0; }
-		43.5%, 100% { opacity: 1; }
+		0%, 39.3% { opacity: 0; }
+		40.3%, 100% { opacity: 1; }
 	}
 	@keyframes welle-5 {
-		0%, 42% { stroke-dashoffset: 1.02; }
-		47%, 100% { stroke-dashoffset: 0; }
+		0%, 38.4% { stroke-dashoffset: 1.02; }
+		43.4%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-5 {
+		0%, 42.9% { opacity: 0; }
+		43.9%, 100% { opacity: 1; }
+	}
+	@keyframes welle-6 {
+		0%, 42.0% { stroke-dashoffset: 1.02; }
+		47.0%, 100% { stroke-dashoffset: 0; }
+	}
+	@keyframes deckel-6 {
 		0%, 46.5% { opacity: 0; }
 		47.5%, 100% { opacity: 1; }
 	}
@@ -580,11 +762,10 @@ import Layout from "../layouts/Layout.astro";
 
 <script>
 	// Beide Fassungen im selben Augenblick starten, damit sie synchron
-	// laufen — auf der Startseite uebernimmt das der Sichtbarkeits-Beobachter
-	// der Komponente, hier reicht der Seitenstart.
+	// laufen; dazu die Kontrast-Schalter aus der Adresse.
 	document.addEventListener("astro:page-load", () => {
 		document.querySelectorAll("[data-probe]").forEach((el) => el.classList.add("laeuft"));
 		const p = new URLSearchParams(location.search);
-		for (const k of ["rand", "hell", "heller"]) document.body.classList.toggle(k, p.has(k));
+		for (const k of ["rand", "hell", "heller", "ohneblatt"]) document.body.classList.toggle(k, p.has(k));
 	});
 </script>
