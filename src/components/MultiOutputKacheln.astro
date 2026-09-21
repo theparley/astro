@@ -453,11 +453,12 @@ const { fassung = "brett" } = Astro.props;
 								{uhren.map((u, i) => (
 									<circle class="scheibe" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
 								))}
-								{uhren.map((u) => (
+								{uhren.map((u, i) => (
 									<>
 										{BLATT.kleineMinuten && <circle class="blatt blatt--dunkel minute" cx={u.x} cy={u.y} r={BLATT.minute.r} pathLength={striche} stroke-dasharray={`${dm} ${1 - dm}`} stroke-dashoffset={dm / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />}
 										<circle class="blatt blatt--dunkel fuenf" cx={u.x} cy={u.y} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 										<circle class="blatt blatt--dunkel viertel" cx={u.x} cy={u.y} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
+										<line class="zeiger" data-i={i} x1={u.x} y1={u.y} x2={u.x} y2={u.y - UHR.r} style={`transform-origin: ${u.x}px ${u.y}px`} />
 									</>
 								))}
 							</g>
@@ -999,6 +1000,14 @@ const { fassung = "brett" } = Astro.props;
 		transform-box: view-box;
 		transform-origin: 50% 50%;
 	}
+	/* Dunkler Zeiger je weisser Uhr (Fred 21.09.): laeuft mit der Fuellung
+	   einmal herum und bleibt auf 12 stehen, wie der weisse der Stunde.
+	   Drehpunkt = Uhrmitte (inline transform-origin, view-box-Einheiten). */
+	.zeiger {
+		stroke: var(--kachel);
+		stroke-width: 2.5;
+		transform-box: view-box;
+	}
 
 	/* Ziffernblaetter (s. Frontmatter BLATT). Die dunklen liegen ueber den
 	   weissen Scheiben und erscheinen in dem Mass, wie das Weiss darunter
@@ -1412,19 +1421,29 @@ const { fassung = "brett" } = Astro.props;
 		const starts = Array.from({ length: N }, (_, i) => startBei(i, k));
 		const dauern = starts.map((t, i) => dauerVon(i < N - 1 ? starts[i + 1] - t : t - starts[i - 1]));
 		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde
+		const zeiger = Array.from(buehne.querySelectorAll<SVGLineElement>(".zeiger[data-i]"));
 		buehne.querySelectorAll<SVGCircleElement>(".scheibe[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
 			const s = M.uhrenStart + starts[i];
 			// Deckel auf den Rundenanteil, nicht auf die Sekunde — sonst laegen
 			// spaete Marken vor ihrem Start und animate() wirft (Fehler 21.09.).
 			const voll = Math.min(leerVorEnde, o(s + dauern[i]));
+			const ab = Math.min(voll, o(s));
 			anims.push(el.animate([
 				{ strokeDashoffset: 1.06, offset: 0 },
-				{ strokeDashoffset: 1.06, offset: Math.min(voll, o(s)), easing: K },
+				{ strokeDashoffset: 1.06, offset: ab, easing: K },
 				{ strokeDashoffset: 0, offset: voll },
 				{ strokeDashoffset: 0, offset: leerVorEnde },
 				{ strokeDashoffset: 1.06, offset: Math.min(1, leerVorEnde + 0.0001) },
 				{ strokeDashoffset: 1.06, offset: 1 },
+			], opt));
+			// Der dunkle Zeiger dreht mit derselben Zeit und Kurve wie die
+			// Fuellung; eine volle Drehung endet auf 12, ein Reset ist unsichtbar.
+			anims.push(zeiger[i].animate([
+				{ transform: "rotate(0turn)", offset: 0 },
+				{ transform: "rotate(0turn)", offset: ab, easing: K },
+				{ transform: "rotate(1turn)", offset: voll },
+				{ transform: "rotate(1turn)", offset: 1 },
 			], opt));
 		});
 		return anims;
