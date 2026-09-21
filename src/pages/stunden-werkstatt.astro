@@ -140,10 +140,10 @@ const N = uhren().length;
 	// Umriss-Schrift: Zeichenkette mittig um x, Grundlinie y, k = Schrift-Einheit → viewBox
 	const pfadCache = new Map<string, Path2D>();
 	// zelle > 0: Tabellenziffern (feste Zelle je Zeichen, mittig darin), sonst Vorschub
-	function schrift(ctx: CanvasRenderingContext2D, s: string, satz: Record<string, { d: string; adv: number; xMin: number; xMax: number }>, x: number, y: number, k: number, zelle = 0) {
-		const w = zelle ? zelle * s.length : s.split("").reduce((a, c) => a + satz[c].adv, 0);
+	function schrift(ctx: CanvasRenderingContext2D, s: string, satz: Record<string, { d: string; adv: number; xMin: number; xMax: number }>, x: number, y: number, k: number, zelle = 0, luecke = 0) {
+		const w = zelle ? zelle * s.length + luecke * (s.length - 1) : s.split("").reduce((a, c) => a + satz[c].adv, 0);
 		ctx.save(); ctx.translate(x, y); ctx.scale(k, -k); ctx.translate(-w / 2, 0);
-		for (const c of s) { let p = pfadCache.get(satz[c].d); if (!p) { p = new Path2D(satz[c].d); pfadCache.set(satz[c].d, p); } ctx.save(); if (zelle) ctx.translate(zelle / 2 - (satz[c].xMin + satz[c].xMax) / 2, 0); ctx.fill(p); ctx.restore(); ctx.translate(zelle || satz[c].adv, 0); }
+		for (const c of s) { let p = pfadCache.get(satz[c].d); if (!p) { p = new Path2D(satz[c].d); pfadCache.set(satz[c].d, p); } ctx.save(); if (zelle) ctx.translate(zelle / 2 - (satz[c].xMin + satz[c].xMax) / 2, 0); ctx.fill(p); ctx.restore(); ctx.translate(zelle ? zelle + luecke : satz[c].adv, 0); }
 		ctx.restore();
 	}
 	const ZELLE = Math.max(...Object.values(GLYPHEN.zahl).map((g) => g.adv));
@@ -193,7 +193,7 @@ const N = uhren().length;
 		// Zaehler „00 … 60 Min." mit dem Zeiger, immer sichtbar — als Umrisse
 		// (stunde-glyphen.ts), identisch mit der Website
 		ctx.fillStyle = WEISS;
-		schrift(ctx, String(stundeMinuten(z.stundeAnteil)).padStart(2, "0"), GLYPHEN.zahl, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.zahlDy, (UHR.r * STUNDE_TEXT.zahlGroesse) / GLYPHEN.upm, ZELLE);
+		schrift(ctx, String(stundeMinuten(z.stundeAnteil)).padStart(2, "0"), GLYPHEN.zahl, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.zahlDy, (UHR.r * STUNDE_TEXT.zahlGroesse) / GLYPHEN.upm, ZELLE, (STUNDE_TEXT.luecke ?? 0) * GLYPHEN.upm);
 		schrift(ctx, STUNDE_TEXT.einheit, GLYPHEN.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.einheitDy, (UHR.r * STUNDE_TEXT.einheitGroesse) / GLYPHEN.upm);
 		ctx.strokeStyle = WEISS;
 		ctx.lineWidth = STRICH;
