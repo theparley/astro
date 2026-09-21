@@ -1104,9 +1104,8 @@ const beschlagStriche = [
 		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
 		font-weight: 900;
 		letter-spacing: -0.02em;
-		font-variant-numeric: tabular-nums;
-		opacity: 0;
-	}
+			font-variant-numeric: tabular-nums;
+		}
 	.stunde-einheit {
 		font-weight: 700;
 		letter-spacing: 0;
@@ -1151,9 +1150,7 @@ const beschlagStriche = [
 		.beschlag--klein {
 			stroke-dashoffset: 0;
 		}
-		.stunde-text {
-			opacity: 1;
-		}
+
 
 		.scheibe,
 		.stunde-fuellung,
@@ -1507,15 +1504,8 @@ const beschlagStriche = [
 		buehne.querySelectorAll<SVGElement>(".weisse, .stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(ausblenden, opt)));
 
 		// Die Stunde zeichnet sich, der Zeiger dreht.
-		// Zaehler: sichtbar ab Rundenbeginn (nach SCHUTZ), weg vor dem Wechsel.
-		anims.push(buehne.querySelector<SVGTextElement>(".stunde-text")!.animate([
-			{ opacity: 0, offset: 0 },
-			{ opacity: 0, offset: o(SCHUTZ) },
-			{ opacity: 1, offset: o(SCHUTZ * 1.5) },
-			{ opacity: 1, offset: o(RUNDE - SCHUTZ) },
-			{ opacity: 0, offset: Math.min(1, o(RUNDE - SCHUTZ) + 0.0001) },
-			{ opacity: 0, offset: 1 },
-		], opt));
+		// Zaehler: immer da, kein Ein-/Ausblenden (Fred 21.09.); am Rundenwechsel
+		// springt er hart von 60 auf 00, wie eine Stoppuhr beim Nullstellen.
 		const zeichnen = [
 			{ strokeDashoffset: 1.06, offset: 0 },
 			{ strokeDashoffset: 1.06, offset: o(M.halt), easing: K },

@@ -179,8 +179,8 @@ const N = uhren().length;
 		ctx.globalAlpha = 1;
 		if (stoppuhr) beschlag(ctx, UHR.cx, UHR.cy, WEISS);
 		blatt(ctx, UHR.cx, UHR.cy, WEISS);
-		// Zaehler „0 … 60 Min." mit dem Zeiger (Zahl rechtsbuendig an fester Kante)
-		if (t >= 0.09 && t < m.RUNDE - 0.06) {
+		// Zaehler „00 … 60 Min." mit dem Zeiger, immer sichtbar
+		{
 			ctx.fillStyle = WEISS;
 			ctx.textBaseline = "alphabetic"; ctx.textAlign = "center";
 			ctx.font = `900 ${UHR.r * STUNDE_TEXT.zahlGroesse}px "Forma DJR", Helvetica, Arial, sans-serif`;
