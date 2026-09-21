@@ -56,6 +56,10 @@ export const VIEWBOX = { w: 1000, h: 1250 };
 export const BLATT = {
 	minute: { r: UHR.r - 1 - 1.75, laenge: 3.5, breite: 0.9 },
 	viertel: { r: UHR.r - 1 - 3.5, laenge: 7, breite: 1.8 },
+	// Die kleinen Uhren tragen nur die vier Viertelstriche (Fred 21.09.:
+	// „lassen wir die Minutenstriche weg"). Die Stunde behaelt ihr volles
+	// Blatt. Spart im GIF die groesste Menge Kantenpixel.
+	kleineMinuten: false,
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
 export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)

@@ -38,6 +38,12 @@ const N = uhren().length;
 					<option value="kachel" selected>Kachel (#212121)</option>
 					<option value="schwarz">Schwarz</option>
 				</select></label>
+			<label class="wk-feld"><span>Graustufen an den Kanten</span>
+				<select data-stufen>
+					<option value="6" selected>6 (weich, Standard)</option>
+					<option value="4">4 (etwas härter)</option>
+					<option value="2">2 (keine, hart)</option>
+				</select></label>
 			<button class="wk-cta" data-export type="button">GIF bauen</button>
 			<p class="wk-status" data-status>Bereit. Eine Runde = {m.RUNDE.toFixed(2)} s; bei 25 Bildern/s sind das {Math.ceil(m.RUNDE * 25)} Bilder.</p>
 		</div>
@@ -64,15 +70,17 @@ const N = uhren().length;
 		ctx.moveTo(cx + innen * s, cy - innen * c);
 		ctx.lineTo(cx + aussen * s, cy - aussen * c);
 	}
-	function blatt(ctx: CanvasRenderingContext2D, cx: number, cy: number, farbe: string) {
+	function blatt(ctx: CanvasRenderingContext2D, cx: number, cy: number, farbe: string, minuten = true) {
 		const r = UHR.r;
 		ctx.strokeStyle = farbe;
 		ctx.lineCap = "butt";
-		// Minuten
-		ctx.lineWidth = BLATT.minute.breite;
-		ctx.beginPath();
-		for (let i = 0; i < 60; i++) if (i % 15) tick(ctx, cx, cy, r - 1 - BLATT.minute.laenge, r - 1, (i * Math.PI) / 30);
-		ctx.stroke();
+		// Minuten (die kleinen Uhren nur, wenn BLATT.kleineMinuten)
+		if (minuten) {
+			ctx.lineWidth = BLATT.minute.breite;
+			ctx.beginPath();
+			for (let i = 0; i < 60; i++) if (i % 15) tick(ctx, cx, cy, r - 1 - BLATT.minute.laenge, r - 1, (i * Math.PI) / 30);
+			ctx.stroke();
+		}
 		// Viertel
 		ctx.lineWidth = BLATT.viertel.breite;
 		ctx.beginPath();
@@ -104,7 +112,7 @@ const N = uhren().length;
 		ctx.globalAlpha = z.deckkraft;
 		ctx.fillStyle = WEISS;
 		for (let i = 0; i < N; i++) stueck(ctx, punkte[i].x, punkte[i].y, UHR.r, z.anteile[i]);
-		for (let i = 0; i < N; i++) if (z.anteile[i] > 0) blatt(ctx, punkte[i].x, punkte[i].y, KACHEL);
+		for (let i = 0; i < N; i++) if (z.anteile[i] > 0) blatt(ctx, punkte[i].x, punkte[i].y, KACHEL, BLATT.kleineMinuten);
 
 		// Die Stunde: dunkle Fuellung und Rand (blenden mit aus), helles
 		// Blatt und Speichen (bleiben stehen)
@@ -135,6 +143,7 @@ const N = uhren().length;
 		breite: document.querySelector<HTMLInputElement>("[data-breite]")!,
 		fps: document.querySelector<HTMLInputElement>("[data-fps]")!,
 		grund: document.querySelector<HTMLSelectElement>("[data-grund]")!,
+		stufen: document.querySelector<HTMLSelectElement>("[data-stufen]")!,
 		status: document.querySelector<HTMLElement>("[data-status]")!,
 		knopf: document.querySelector<HTMLButtonElement>("[data-export]")!,
 	};
@@ -156,8 +165,13 @@ const N = uhren().length;
 	//    Bild an den Encoder geht (weniger verschiedene Pixel, gleicher Look).
 	// 2. Bilder, in denen sich nichts bewegt (Standzeit), nicht wiederholen,
 	//    sondern dem vorigen Bild die Wartezeit dazugeben.
-	const STUFEN = 6;
-	function stufen(bild: ImageData, grund: number) {
+	// Graustufen = die Zwischentoene an den KANTEN (Kantenglaettung), nicht
+	// das Ausblenden. 2 = nur Grund und Weiss (Kanten hart, wie ohne
+	// Glaettung), 4 = zwei Zwischentoene, 6 = fuenf (Standard). Das Ausblenden
+	// selbst laeuft weiter ueber alle Werte, weil es Deckkraft vor dem
+	// Runden ist: bei 2 Stufen kippt es allerdings hart, deshalb wird die
+	// Deckkraft-Phase immer mit 6 Stufen gerundet.
+	function stufen(bild: ImageData, grund: number, STUFEN: number) {
 		const d = bild.data, span = 255 - grund, schritt = span / (STUFEN - 1);
 		for (let i = 0; i < d.length; i += 4) {
 			const v = grund + Math.round((d[i] - grund) / schritt) * schritt;
@@ -185,6 +199,7 @@ const N = uhren().length;
 		eingaben.status.textContent = `Male ${frames} Bilder à ${W} × ${H} …`;
 		const grund = grundFarbe();
 		const grundWert = parseInt(grund.slice(1, 3), 16);
+		const stufenWahl = Number(eingaben.stufen.value) || 6;
 		let f = 0, letzte = "", gemalt = 0;
 		const schritt = () => {
 			const ende = Math.min(frames, f + 10);
@@ -194,7 +209,9 @@ const N = uhren().length;
 				if (sig === letzte && gif.frames.length) { gif.frames[gif.frames.length - 1].delay += delay; continue; }
 				letzte = sig;
 				male(ctx, t, W, H, grund);
-				gif.addFrame(stufen(ctx.getImageData(0, 0, W, H), grundWert), { delay });
+				const z = zustand(t, m, plan, N);
+				const st = z.deckkraft > 0 && z.deckkraft < 1 ? Math.max(6, stufenWahl) : stufenWahl;
+				gif.addFrame(stufen(ctx.getImageData(0, 0, W, H), grundWert, st), { delay });
 				gemalt++;
 			}
 			if (f < frames) { eingaben.status.textContent = `Male Bild ${f} von ${frames} …`; setTimeout(schritt, 0); }
@@ -204,7 +221,7 @@ const N = uhren().length;
 				gif.on("finished", (blob: Blob) => {
 					const url = URL.createObjectURL(blob);
 					const a = document.createElement("a");
-					a.href = url; a.download = `parley-stunde-${W}px-${fps}fps.gif`; a.click();
+					a.href = url; a.download = `parley-stunde-${W}px-${fps}fps-${stufenWahl}stufen.gif`; a.click();
 					eingaben.status.textContent = `Fertig: ${(blob.size / 1024 / 1024).toFixed(1)} MB, ${gemalt} Bilder (${frames - gemalt} Standbilder zusammengelegt), ${m.RUNDE.toFixed(2)} s Schleife.`;
 					eingaben.status.dataset.fertig = String(blob.size);
 					eingaben.knopf.disabled = false;
