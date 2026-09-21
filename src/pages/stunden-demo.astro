@@ -50,39 +50,27 @@ const ZEIT = {
 	//             vervielfaeltigt sich das; beim Rauszoomen sieht man
 	//             ploetzlich viel mehr Uhren, wenn da die Animation
 	//             schneller wird, ist es besser").
-	// EINE NACH DER ANDEREN, DANN IMMER SCHNELLER (Fred 21.09., drei Stufen:
-	// „Verhaeltnis zwischen Ramp und Uhrdauer" → „Rampe am Ende raus, das
-	// darf schneller werden" → „am Anfang entstehen fuenf gleichzeitig, den
-	// Anfang haette ich gern langsamer, eine Uhr nach der anderen").
-	// Die Abstaende zwischen den Starts schrumpfen von Uhr zu Uhr um denselben
-	// Faktor (geometrisch = gleichmaessige Beschleunigung), und jede Uhr
-	// dauert genau so lang wie ihr Abstand zur naechsten — die naechste
-	// faengt also an, wenn die vorige fertig ist. Nur nach unten gedeckelt,
-	// damit spaete Uhren noch sichtbar zeichnen.
-	//   ersteDauer   Dauer der ersten weissen Uhr — so lang wie die Stunde,
-	//                damit sie „genauso schnell wie die erste Uhr" ist
-	//   naechsteBei  wann die naechste Uhr anfaengt, als Anteil der laufenden:
-	//                1 = wenn sie fertig ist, 0,5 = bei Halbzeit (Fred 21.09.:
-	//                „dass die naechste startet, wenn die Uhr zur Haelfte
-	//                fertig ist"). Der Abstand ist also Dauer mal naechsteBei,
-	//                die Dauer bleibt, die Starts ruecken zusammen.
+	// EINE NACH DER ANDEREN, DANN IMMER SCHNELLER — BIS ZUM SCHLUSS (Fred
+	// 21.09., zuletzt: „die wird zum Ende hin nicht so viel schneller …
+	// langsam anfangen und immer schneller").
+	// Die Rate, mit der Uhren anfangen, waechst JEDE SEKUNDE um denselben
+	// Prozentsatz (exponentiell in der Zeit). Das ist die einzige Form, die
+	// sich ueber die ganze Strecke gleich stark beschleunigt anfuehlt:
+	// vorher schrumpfte der Abstand je UHR um einen Faktor und lief nach 17
+	// Uhren gegen einen Boden (lueckeMin) — danach war das Tempo konstant,
+	// ein Plateau ueber 160 Uhren. Jetzt gibt es keinen Boden mehr; der
+	// Prozentsatz ergibt sich daraus, dass die letzte Uhr genau bei
+	// uhrenEnde fertig ist, und steht in der Fusszeile.
+	//   ersteDauer   Dauer der ersten weissen Uhr — so lang wie die Stunde
+	//   naechsteBei  wann die naechste Uhr anfaengt, als Anteil der laufenden
+	//                (0,5 = bei Halbzeit); der erste Abstand ist also
+	//                ersteDauer mal naechsteBei, jede Dauer ist Abstand
+	//                geteilt durch naechsteBei
 	//   dauerMin     kuerzeste Dauer einer Uhr; unterhalb laufen sie ueber-
 	//                lappend, weil die Abstaende weiter schrumpfen
-	//   lueckeMin    kleinster Abstand zwischen zwei Starts. OHNE diesen
-	//                Boden schrumpfen die Abstaende geometrisch gegen null
-	//                und das Ende wird ein Blitz (gemessen: 13 Uhren nach
-	//                14 s, dann 158 auf einmal in der letzten halben
-	//                Sekunde). Mit Boden wird das Ende ein schneller,
-	//                gleichmaessiger Regen: dauerMin / lueckeMin Uhren laufen
-	//                dann gleichzeitig.
-	// Der Schrumpffaktor ergibt sich aus uhrenDauer: 176 Uhren in 11,52 s bei
-	// 2,16 s Anfang heisst, nach den ersten paar Sekunden geht es sehr
-	// schnell — das ist Arithmetik, kein Regler. Wer das Finale weicher
-	// will, verlaengert uhrenDauer.
 	ersteDauer: 2.16,
 	naechsteBei: 0.5,
 	dauerMin: 0.3,
-	lueckeMin: 0.05,
 	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
 	ausblenden: 3.9,   // die weissen Uhren und die Zeichnung der Stunde blenden aus
 	kameraRein: 5,     // Kamera zurueck auf 7, parallel zum Ausblenden (Fred 21.09.: „auf fuenf Sekunden")
@@ -768,22 +756,21 @@ import Layout from "../layouts/Layout.astro";
 		const K = `cubic-bezier(${KURVE.join(", ")})`;
 		const ms = RUNDE * 1000;
 		const o = (s: number) => s / RUNDE; // Sekunde -> Anteil der Runde
-		// GEOMETRISCHE BESCHLEUNIGUNG: Luecke_i = ersteLuecke · q^i. Der
-		// Faktor q wird so gesucht (Bisektion), dass die letzte Uhr genau bei
-		// uhrenEnde fertig ist: Summe der Luecken + Dauer der letzten = uhrenDauer.
+		// BESCHLEUNIGUNG JE SEKUNDE: Rate r(t) = r0 · e^(k·t), r0 = 1 / erster
+		// Abstand. Die i-te Uhr startet, wenn die aufsummierte Rate i erreicht:
+		// t_i = ln(1 + i·k/r0) / k. k wird so gesucht (Bisektion), dass die
+		// letzte Uhr genau bei uhrenEnde fertig ist.
+		const r0 = 1 / (ZEIT.ersteDauer * ZEIT.naechsteBei);
+		const startBei = (i: number, k: number) => (k < 1e-9 ? i / r0 : Math.log(1 + (i * k) / r0) / k);
 		const dauerVon = (luecke: number) => Math.max(ZEIT.dauerMin, luecke / ZEIT.naechsteBei);
-		const lueckeVon = (roh: number) => Math.max(ZEIT.lueckeMin, roh);
-		const ersteLuecke = ZEIT.ersteDauer * ZEIT.naechsteBei;
-		const gesamt = (q: number) => {
-			let t = 0, g = ersteLuecke;
-			for (let i = 0; i < N - 1; i++) { t += lueckeVon(g); g *= q; }
-			return t + dauerVon(lueckeVon(g));
-		};
-		let lo = 0.5, hi = 1;
-		for (let k = 0; k < 60; k++) { const mid = (lo + hi) / 2; if (gesamt(mid) > ZEIT.uhrenDauer) hi = mid; else lo = mid; }
-		const q = (lo + hi) / 2;
-		const starts: number[] = [], dauern: number[] = [];
-		for (let i = 0, t = 0, g = ersteLuecke; i < N; i++, t += lueckeVon(g), g *= q) { starts.push(t); dauern.push(dauerVon(lueckeVon(g))); }
+		const gesamt = (k: number) => startBei(N - 1, k) + dauerVon(startBei(N - 1, k) - startBei(N - 2, k));
+		let lo = 0, hi = 5;
+		for (let s = 0; s < 80; s++) { const mid = (lo + hi) / 2; if (gesamt(mid) > ZEIT.uhrenDauer) lo = mid; else hi = mid; }
+		const k = (lo + hi) / 2;
+		const starts = Array.from({ length: N }, (_, i) => startBei(i, k));
+		const dauern = starts.map((t, i) => dauerVon(i < N - 1 ? starts[i + 1] - t : t - starts[i - 1]));
+		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde, unabhaengig von der Rundung der Rate
+		const proSekunde = Math.exp(k); // Faktor, um den die Rate je Sekunde waechst
 		// Nur fuer die Fusszeile: wann sind 10, 50, 100 Uhren gestartet?
 		const wann = (n: number) => starts[Math.min(N - 1, n - 1)].toFixed(1);
 		const opt = { duration: ms, iterations: Infinity };
@@ -841,7 +828,7 @@ import Layout from "../layouts/Layout.astro";
 		if (fuss) fuss.textContent =
 			`Runde ${RUNDE.toFixed(2)} s.\n` +
 			`Stunde ${M.halt}–${M.stundeEnde.toFixed(2)} s · Kamera raus ${M.kameraStart.toFixed(2)}–${M.kameraEnde.toFixed(2)} s · ` +
-			`Uhren ${M.uhrenStart.toFixed(2)}–${M.uhrenEnde.toFixed(2)} s, Schrumpffaktor ${q.toFixed(3)} je Uhr — ` +
+			`Uhren ${M.uhrenStart.toFixed(2)}–${M.uhrenEnde.toFixed(2)} s, Rate waechst um ${((proSekunde - 1) * 100).toFixed(0)} % je Sekunde (Anfang ${r0.toFixed(2)}/s, Ende ${(r0 * Math.exp(k * starts[N - 1])).toFixed(1)}/s) — ` +
 			`Dauer erste ${dauern[0].toFixed(2)} s, zehnte ${dauern[9].toFixed(2)} s, Mitte ${dauern[mitte].toFixed(2)} s, letzte ${dauern[N - 1].toFixed(2)} s; ` +
 			`10 Uhren gestartet nach ${wann(10)} s, 50 nach ${wann(50)} s, 100 nach ${wann(100)} s · ` +
 			`steht bis ${standEnde.toFixed(2)} s · ausblenden bis ${(standEnde + ZEIT.ausblenden).toFixed(2)} s · ` +
