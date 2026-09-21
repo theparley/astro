@@ -112,7 +112,10 @@ export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Sp
 // HINTER der Zahl, „Min." klein darunter.
 // Fred 21.09. (2): „Zahlen noch ein bisschen groesser, Abstand zwischen den
 // Zahlen nur minimal breiter": 0,78 r, Luecke 0,03 em zwischen den Zellen.
-export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.95, zahlDy: 0.344, einheitGroesse: 0.14, einheitDy: 0.514, luecke: 0.06 }; // Fred 21.09.: 0,95 / 0,06; luecke in em, zahlDy = Versalhoehe/2
+// nullVor: so viele Sekunden VOR dem Ende des Reinzoomens springt der
+// Zaehler auf 00 (Fred 21.09.: „kurz bevor das Reinzoomen fertig ist,
+// gib mir einen Wert zum Einstellen"). 0 = genau am Ende.
+export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.95, zahlDy: 0.344, einheitGroesse: 0.14, einheitDy: 0.514, luecke: 0.06, nullVor: 0.4 }; // Fred 21.09.: 0,95 / 0,06; luecke in em, zahlDy = Versalhoehe/2
 export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
 // ── Geometrie ───────────────────────────────────────────────────────────
