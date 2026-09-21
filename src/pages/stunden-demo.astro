@@ -8,7 +8,7 @@
 // und Reinzoomen"). Wer eine Zahl aendert, muss sonst nichts anfassen —
 // die Runde wird am Ende zusammengerechnet.
 const ZEIT = {
-	halt: 0.72,        // dunkler Halt am Anfang, die Einblendung endet hier
+	halt: 0.72,        // Halt am Anfang: die Stunde steht mit Blatt und Strich, noch ungezeichnet
 	stunde: 2.16,      // die Stunde zeichnet sich (Rand, Fuellung, Zeiger)
 	// Kamera von 7 auf 1,15, beginnt, wenn die Stunde steht. "letzteUhr"
 	// heisst: sie faehrt genau so lang, bis die letzte Uhr fertig ist (Fred
@@ -17,6 +17,11 @@ const ZEIT = {
 	// nicht zu lang"). Eine Zahl in Sekunden macht es wieder unabhaengig;
 	// vorher standen hier 6,12.
 	kameraRaus: "letzteUhr" as number | "letzteUhr",
+	// Wann die Kamera losfaehrt, als Anteil der Stunden-Zeichnung: 0,75 =
+	// im letzten Viertel (Fred 21.09.: „starte mit dem Zoomen noch frueher,
+	// bevor die schwarze Uhr fertig animiert hat, wenn sie im letzten
+	// Viertel ist"). 1 = erst, wenn sie fertig ist.
+	kameraAbStunde: 0.75,
 	// Die erste weisse Uhr faengt an, sobald die Stunde fertig gezeichnet
 	// ist — "nachStunde" koppelt das an halt + stunde (Fred 21.09.: „wenn die
 	// schwarze Uhr fertig gedreht hat, ist die Pause bis die erste weisse
@@ -67,9 +72,15 @@ const ZEIT = {
 	dauerMin: 0.3,
 	lueckeMin: 0.05,
 	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
-	ausblenden: 3.9,   // alles blendet aus
+	ausblenden: 3.9,   // die weissen Uhren und die Zeichnung der Stunde blenden aus
 	kameraRein: 6.84,  // Kamera zurueck auf 7, laeuft parallel zum Ausblenden
-	nachlauf: 1.56,    // dunkel bis zur naechsten Runde
+	// KEIN SCHWARZ MEHR (Fred 21.09.: „die Pause, wenn es zurueckgeht und
+	// der Bildschirm schwarz wird, ist zu lang … da wuerde ich alles
+	// ausblenden und dann starten wie am Anfang mit der Uhr mit dem
+	// Strich"). Ziffernblatt und Startstrich der Stunde bleiben immer
+	// stehen; die Kamera faehrt auf sie zurueck, und die naechste Runde
+	// beginnt direkt mit dem Zeichnen. nachlauf ist nur noch ein Atemzug.
+	nachlauf: 0.3,
 };
 // Eine Kurve fuer alles: symmetrisch, weich am Anfang wie am Ende. Gilt
 // fuer die Kamera, die Stunde, jede einzelne Uhr — und seit 21.09. auch
@@ -96,10 +107,12 @@ const KAMERA = { start: 7, ende: 1.15 };
 // Abgeleitete Marken (Sekunden ab Rundenbeginn)
 const uhrenStart = ZEIT.uhrenStart === "nachStunde" ? ZEIT.halt + ZEIT.stunde : ZEIT.uhrenStart;
 const uhrenEnde = uhrenStart + ZEIT.uhrenDauer;
+const kameraStart = ZEIT.halt + ZEIT.stunde * ZEIT.kameraAbStunde;
 const M = {
 	halt: ZEIT.halt,
 	stundeEnde: ZEIT.halt + ZEIT.stunde,
-	kameraEnde: ZEIT.kameraRaus === "letzteUhr" ? uhrenEnde : ZEIT.halt + ZEIT.stunde + ZEIT.kameraRaus,
+	kameraStart,
+	kameraEnde: ZEIT.kameraRaus === "letzteUhr" ? uhrenEnde : kameraStart + ZEIT.kameraRaus,
 	uhrenStart,
 	uhrenEnde,
 };
@@ -120,7 +133,8 @@ import Layout from "../layouts/Layout.astro";
 			<div class="buehne" data-probe data-plan={plan}>
 				<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
 					<g class="kamera">
-							<circle class="feld" data-i="0" cx="500" cy="535" r="17" pathLength="1" transform="rotate(-90 500 535)" />
+							<g class="weisse">
+						<circle class="feld" data-i="0" cx="500" cy="535" r="17" pathLength="1" transform="rotate(-90 500 535)" />
 							<circle class="feld" data-i="1" cx="577.942" cy="580" r="17" pathLength="1" transform="rotate(-90 577.942 580)" />
 							<circle class="feld" data-i="2" cx="577.942" cy="670" r="17" pathLength="1" transform="rotate(-90 577.942 670)" />
 							<circle class="feld" data-i="3" cx="500" cy="715" r="17" pathLength="1" transform="rotate(-90 500 715)" />
@@ -648,6 +662,7 @@ import Layout from "../layouts/Layout.astro";
 							<circle class="blatt blatt--dunkel viertel" cx="322.508" cy="20.5194" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 322.508 20.5194)" />
 							<circle class="blatt blatt--dunkel minute" cx="410.342" cy="1.41249" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 410.342 1.41249)" />
 							<circle class="blatt blatt--dunkel viertel" cx="410.342" cy="1.41249" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 410.342 1.41249)" />
+						</g>
 							<circle class="stunde-fuellung" cx="500" cy="625" r="17" pathLength="1" transform="rotate(-90 500 625)" />
 							<circle class="blatt blatt--hell minute" cx="500" cy="625" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 625)" />
 							<circle class="blatt blatt--hell viertel" cx="500" cy="625" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 625)" />
@@ -693,7 +708,7 @@ import Layout from "../layouts/Layout.astro";
 
 	/* Kamera um die Bildmitte. Ruhezustaende hier; die Bewegung kommt aus
 	   dem Skript (Web Animations API), damit alle Zeiten aus ZEIT stammen. */
-	.kamera { transform-box: view-box; transform-origin: 50% 50%; transform: scale(7); opacity: 0; }
+	.kamera { transform-box: view-box; transform-origin: 50% 50%; transform: scale(7); }
 
 	/* Kuchenstueck-Trick, Strich 1,04 lang gegen Splitter und Spalt. */
 	.feld,
@@ -763,20 +778,23 @@ import Layout from "../layouts/Layout.astro";
 		const kamera = buehne.querySelector<SVGGElement>(".kamera")!;
 		kamera.animate([
 			{ transform: S0, offset: 0 },
-			{ transform: S0, offset: o(M.stundeEnde), easing: KR },
+			{ transform: S0, offset: o(M.kameraStart), easing: KR },
 			{ transform: S1, offset: o(M.kameraEnde) },
 			{ transform: S1, offset: o(standEnde), easing: K },
 			{ transform: S0, offset: o(standEnde + ZEIT.kameraRein) },
 			{ transform: S0, offset: 1 },
 		], opt);
-		kamera.animate([
-			{ opacity: 0, offset: 0 },
-			{ opacity: 0, offset: o(M.halt / 2) },
-			{ opacity: 1, offset: o(M.halt) },
+		// Ausblenden trifft nur die weissen Uhren (samt dunklen Blaettern) und
+		// die Zeichnung der Stunde (Rand, Fuellung). Blatt und Strich der
+		// Stunde bleiben stehen. Am Rundenanfang springt die Deckkraft auf 1
+		// zurueck — unsichtbar, weil alles dann ohnehin leer ist.
+		const ausblenden = [
+			{ opacity: 1, offset: 0 },
 			{ opacity: 1, offset: o(standEnde), easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
 			{ opacity: 0, offset: o(standEnde + ZEIT.ausblenden) },
 			{ opacity: 0, offset: 1 },
-		], opt);
+		];
+		buehne.querySelectorAll<SVGElement>(".weisse, .stunde-rand, .stunde-fuellung").forEach((el) => el.animate(ausblenden, opt));
 
 		// Die Stunde: Rand und dunkle Fuellung zeichnen sich, der Zeiger dreht.
 		const zeichnen = [
@@ -809,7 +827,7 @@ import Layout from "../layouts/Layout.astro";
 		const fuss = document.querySelector("[data-fuss]");
 		if (fuss) fuss.textContent =
 			`Runde ${RUNDE.toFixed(2)} s.\n` +
-			`Stunde ${M.halt}–${M.stundeEnde.toFixed(2)} s · Kamera raus ${M.stundeEnde.toFixed(2)}–${M.kameraEnde.toFixed(2)} s · ` +
+			`Stunde ${M.halt}–${M.stundeEnde.toFixed(2)} s · Kamera raus ${M.kameraStart.toFixed(2)}–${M.kameraEnde.toFixed(2)} s · ` +
 			`Uhren ${M.uhrenStart.toFixed(2)}–${M.uhrenEnde.toFixed(2)} s, Schrumpffaktor ${q.toFixed(3)} je Uhr — ` +
 			`Dauer erste ${dauern[0].toFixed(2)} s, zehnte ${dauern[9].toFixed(2)} s, Mitte ${dauern[mitte].toFixed(2)} s, letzte ${dauern[N - 1].toFixed(2)} s; ` +
 			`10 Uhren gestartet nach ${wann(10)} s, 50 nach ${wann(50)} s, 100 nach ${wann(100)} s · ` +
