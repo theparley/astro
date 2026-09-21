@@ -1565,7 +1565,9 @@ const beschlagStriche = [
 			if (laufAnim.playState === "idle") return;
 			const t = ((laufAnim.currentTime as number) ?? 0) / 1000 % RUNDE;
 			const u = Math.max(0, Math.min(1, (t - M.halt) / (M.stundeEnde - M.halt)));
-			const n = t >= RUNDE - SCHUTZ ? 0 : Math.min(P.STUNDE_TEXT.bis, Math.floor(kurveK(u) * P.STUNDE_TEXT.bis + 1e-6));
+			// Nullstellen, sobald das Reinzoomen fertig ist (M.reinEnde; Fred 21.09.),
+// nicht erst am Rundenende — die Uhr steht dann schon wieder gross da.
+const n = t >= M.reinEnde ? 0 : Math.min(P.STUNDE_TEXT.bis, Math.floor(kurveK(u) * P.STUNDE_TEXT.bis + 1e-6));
 			if (n !== zuletzt) { zuletzt = n; setzeZahl(String(n).padStart(2, "0")); } // „00" … „60" (Fred 21.09.)
 			requestAnimationFrame(zaehle);
 		};
