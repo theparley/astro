@@ -1051,13 +1051,16 @@ const beschlag = [
 	/* Dunkler Zeiger je weisser Uhr (Fred 21.09.): laeuft mit der Fuellung
 	   einmal herum und bleibt auf 12 stehen, wie der weisse der Stunde.
 	   Drehpunkt = Uhrmitte (inline transform-origin, view-box-Einheiten). */
-	/* Stoppuhr-Beschlag (Probe): Krone + Druecker als Rechtecke, weiss.
-	   Bei den kleinen Uhren erscheint er mit der Fuellung (Script). */
+	/* Stoppuhr-Beschlag (Probe): Krone + Druecker als T-Pfade, weiss. Bei
+	   den kleinen Uhren erscheint er mit der Fuellung (Script) — ueber
+	   VISIBILITY, nicht Opacity: 176 Opacity-Animationen legen 176
+	   Compositor-Ebenen an, das ruckelte und blitzte (Fred 21.09.).
+	   Visibility schaltet nur zweimal je Runde auf dem Haupt-Thread um. */
 	.beschlag path {
 		fill: #ffffff;
 	}
 	.beschlag--klein {
-		opacity: 0;
+		visibility: hidden;
 	}
 	.zeiger {
 		stroke: var(--kachel);
@@ -1093,6 +1096,9 @@ const beschlag = [
 	@media (prefers-reduced-motion: reduce) {
 		.kamera {
 			transform: scale(1.15);
+		}
+		.beschlag--klein {
+			visibility: visible;
 		}
 		.scheibe,
 		.stunde-fuellung,
@@ -1502,15 +1508,16 @@ const beschlag = [
 				{ transform: "rotate(1turn)", offset: voll },
 				{ transform: "rotate(1turn)", offset: 1 },
 				], opt));
-				// Stoppuhr-Probe: der Beschlag erscheint im ersten Zehntel der
-				// Fuellung und verschwindet mit dem Rundenende (leerVorEnde).
+				// Stoppuhr-Probe: der Beschlag schaltet sich mit dem Start der Fuellung
+				// ein und mit dem Rundenende (leerVorEnde) aus. Visibility ist diskret;
+				// „step-end" haelt den Startwert bis zum naechsten Keyframe, sonst
+				// gaelte das Intervall hidden→visible als sichtbar.
 				if (beschlaege[i]) anims.push(beschlaege[i].animate([
-					{ opacity: 0, offset: 0 },
-					{ opacity: 0, offset: ab },
-					{ opacity: 1, offset: ab + (voll - ab) * 0.1 },
-					{ opacity: 1, offset: leerVorEnde },
-					{ opacity: 0, offset: Math.min(1, leerVorEnde + 0.0001) },
-					{ opacity: 0, offset: 1 },
+					{ visibility: "hidden", offset: 0, easing: "step-end" },
+					{ visibility: "visible", offset: ab, easing: "step-end" },
+					{ visibility: "visible", offset: leerVorEnde, easing: "step-end" },
+					{ visibility: "hidden", offset: Math.min(1, leerVorEnde + 0.0001) },
+					{ visibility: "hidden", offset: 1 },
 				], opt));
 		});
 		return anims;
