@@ -790,10 +790,29 @@ const beschlagStriche = [
 	   eigenen Container auf dem Feld, damit seine Schriftgroessen weiter
 	   mit der Spaltenbreite wachsen. */
 	.feld {
-		container-type: inline-size;
+		/* KEIN container-type mehr auf dem Feld (21.09.): Chrome verweigert
+		   einem Container mit inline-size-Containment das Subgrid (computed
+		   „none"), die Kacheln blieben versetzt. Der Container fuer die cqw-
+		   Einheiten des Kopfs sitzt jetzt auf .kachel-kopf (gleiche Breite). */
 		display: grid;
 		grid-template-rows: auto auto;
 		gap: clamp(10px, 1.4vw, 20px);
+	}
+	/* KACHELN AUF EINER HOEHE (Fred 21.09.): die Bezugszeilen sind verschieden
+	   lang, die Kacheln standen deshalb versetzt. Die Felder haengen ihre
+	   zwei Zeilen (Kopf, Kachel) jetzt als Subgrid in die Reihe: Zeile 1 ist
+	   so hoch wie der hoehere Kopf, beide Kacheln beginnen in Zeile 2 auf
+	   derselben Linie; der kuerzere Kopf bekommt die Luft nach unten. */
+	@supports (grid-template-rows: subgrid) {
+		.kachel-reihe {
+			grid-template-rows: auto auto;
+			row-gap: clamp(10px, 1.4vw, 20px);
+			column-gap: 16px;
+		}
+		.feld {
+			grid-template-rows: subgrid;
+			grid-row: span 2;
+		}
 	}
 
 	.kachel {
@@ -831,6 +850,7 @@ const beschlagStriche = [
 	.kachel-kopf {
 		position: relative;
 		z-index: 1;
+		container-type: inline-size; /* cqw-Bezug des Kopfs (vorher auf .feld) */
 	}
 
 	.verhaeltnis {
