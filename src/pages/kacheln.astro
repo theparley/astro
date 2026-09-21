@@ -8,6 +8,15 @@
 // bei der GIF-Werkstatt: EINE Basis, zwei Ansichten).
 //
 // ?liste zeigt statt des Fallblatts die statische Aufzaehlung.
+// DIAGNOSE-SCHALTER (Fred 21.09., „mittendrin laeuft das Rauszoomen nicht
+// smooth"): auf dem Handy laesst sich nicht messen, nur vergleichen. Die
+// Schalter nehmen je einen Malaufwand aus Kachel 2 heraus (display:none,
+// nichts wird gemalt), damit Fred sieht, welcher es ist:
+//   ?ohne-zeiger    die 176 dunklen Zeiger der kleinen Uhren
+//   ?ohne-minuten   die 60er-Minutenkraenze der kleinen Uhren
+//   ?ohne-fuenf     die Fuenf-Minuten-Kraenze der kleinen Uhren
+//   ?nur-viertel    beides (nur die vier Viertelstriche bleiben)
+// Kombinierbar: ?ohne-zeiger&nur-viertel
 import Layout from "../layouts/Layout.astro";
 import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 ---
@@ -32,6 +41,12 @@ import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 </Layout>
 
 <style>
+	/* Diagnose-Schalter, s. Kopf der Datei. */
+	:global(body.ohne-zeiger .zeiger),
+	:global(body.ohne-minuten .blatt--dunkel.minute),
+	:global(body.ohne-fuenf .blatt--dunkel.fuenf) {
+		display: none;
+	}
 	.probe {
 		max-width: var(--max-width);
 		margin: 0 auto;
@@ -68,6 +83,9 @@ import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
 		if (!reihe) return;
 		const p = new URLSearchParams(location.search);
 		reihe.classList.toggle("kacheln--brett", !p.has("liste"));
+		document.body.classList.toggle("ohne-zeiger", p.has("ohne-zeiger"));
+		document.body.classList.toggle("ohne-minuten", p.has("ohne-minuten") || p.has("nur-viertel"));
+		document.body.classList.toggle("ohne-fuenf", p.has("ohne-fuenf") || p.has("nur-viertel"));
 	}
 	document.addEventListener("astro:page-load", fassung);
 </script>
