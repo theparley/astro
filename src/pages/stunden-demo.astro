@@ -30,8 +30,9 @@ const ZEIT = {
 	// Wann die erste weisse Uhr anfaengt, als Anteil der Stunden-Zeichnung:
 	// 1 = wenn die Stunde fertig ist (das war „nachStunde"), 0,85 = kurz
 	// davor (Fred 21.09.: „starte die erste weisse Uhr ein bisschen
-	// frueher"). Eine Zahl in Sekunden setzt einen festen Zeitpunkt.
-	uhrenAbStunde: 0.85,
+	// frueher"), dann 0,5 (Fred: „wenn die schwarze Uhr Halbzeit hat"). Eine
+	// Zahl in Sekunden setzt einen festen Zeitpunkt.
+	uhrenAbStunde: 0.5,
 	uhrenStart: "abStunde" as number | "abStunde",
 	uhrenDauer: 14.4,  // von der ersten bis zum Ende der letzten Uhr
 	                   // (war 11,52 — mit „eine nach der anderen" am Anfang
