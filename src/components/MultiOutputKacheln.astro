@@ -976,9 +976,19 @@ const { fassung = "brett" } = Astro.props;
 	   steht er mit 11 px Luft je Seite vollstaendig im Bild.
 	   Zur Orientierung: 2,06 beruehrt die Seitenkanten genau, 2,58 fuellt
 	   die Hoehe und schneidet 92 px je Seite ab. */
+	/* ZEHNFACH IM LAYOUT, HERUNTERSKALIERT IM ZOOM (Fred 21.09., Handy:
+	   „sieht nicht aus wie eine SVG-Grafik, sondern komplett pixelig").
+	   Vorher stand die Buehne auf Layoutgroesse und wurde per transform bis
+	   auf Faktor 10 VERGROESSERT. Mobile Browser rastern eine Ebene in
+	   ihrer Layoutgroesse und skalieren dann das Bitmap — bei Faktor 10
+	   wird aus der 19-px-Stunde mit 0,45-px-Strich ein Brei. Jetzt ist
+	   alles zehnmal so gross angelegt und der Zoom faehrt von 1 auf 0,2
+	   HERUNTER. Verkleinern bleibt immer scharf, weil das Raster in voller
+	   Groesse entsteht. Sichtbare Masse sind exakt dieselben:
+	   (s/10) × (10·b) = s × b. Alle Zahlen in cqw, also mitgewachsen. */
 	.uhr--gross {
-		width: 51cqw;
-		height: 51cqw;
+		width: 510cqw;
+		height: 510cqw;
 		--strich: 0cqw;
 	}
 
@@ -1012,9 +1022,9 @@ const { fassung = "brett" } = Astro.props;
 	   aber nicht das Verhaeltnis, sondern die absolute Dicke — und die ist
 	   damit um ein Drittel gewachsen. Ungefragt, deshalb zurueck. */
 	.uhr--klein {
-		width: 5.1cqw;
-		height: 5.1cqw;
-		--strich: 0.12cqw;
+		width: 51cqw;
+		height: 51cqw;
+		--strich: 1.2cqw; /* = 0,12cqw × 10, sichtbar unveraendert */
 		z-index: 1;
 	}
 
@@ -1058,15 +1068,21 @@ const { fassung = "brett" } = Astro.props;
 	           Diesen Weg legt die Kante in der Zoomphase zurueck (4 %
 	           bis 50 % der Runde).
 	   1106px bei 52,7 px/s brauchen 21,0s Zoomphase, das sind 45,6s Runde.
-	   Gesetzt sind 45s: Kantentempo 53,4 px/s (1 % ueber dem Band) — und
-	   45s sind GENAU 25 Bandschritte, die beiden Kacheln liegen damit auch
-	   im selben Takt und laufen nie auseinander.
+	   45s WAREN GESETZT und sind wieder raus (Fred 21.09., Handy: „laufen
+	   viel zu langsam"). Der exakte Tempo-Abgleich ist mit dieser
+	   Zoomstrecke nur um den Preis einer Dreiviertelminute zu haben — auf
+	   dem Handy sieht dann niemand eine ganze Runde. Deshalb bleibt vom
+	   Abgleich nur der TAKT: 18s sind genau zehn Bandschritte (18 / 1,8),
+	   die beiden Kacheln bleiben phasengleich. Kantentempo dabei 134 px/s,
+	   2,5-faches Bandtempo, aber 29 % ruhiger als die urspruenglichen 14s.
+	   Weitere Taktstufen, falls nachgeregelt wird: 14,4s (8 Schritte),
+	   21,6s (12), 25,2s (14), 27s (15).
 	   Wer das Band-Tempo aendert (BAND_SCHRITT_MS im Skript) oder die
 	   Kreisgroesse (--uhr--gross, kreis-zoom), muss hier nachrechnen.
 	   Die frueheren 14s stammten aus dem Gleichtakt mit Kachel 3, die es
 	   seit dem 20.09. nicht mehr gibt. */
 	[data-kreis].laeuft {
-		animation: kreis-zoom 45s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: kreis-zoom 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	/* Die Zeiger laufen nicht mehr gleichfoermig an und ab (Fred 20.09.
@@ -1076,17 +1092,17 @@ const { fassung = "brett" } = Astro.props;
 	   Haltezeiten davor und danach sind konstante Werte und bleiben davon
 	   unberuehrt, gedehnt wird also nur das Zeichnen selbst. */
 	[data-kreis].laeuft .uhr--klein {
-		animation: uhr-klein 45s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: uhr-klein 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	[data-kreis].laeuft .uhr--gross {
-		animation: uhr-gross 45s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: uhr-gross 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	/* Das Ausblenden trifft nur die KREISE, nicht die Speichen — der Strich
 	   der Stunde bleibt stehen. */
 	[data-kreis].laeuft .bogen {
-		animation: bogen-aus 45s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+		animation: bogen-aus 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 
 	/* WENIGER WEIT RAUS (Fred 20.09. abends: "am Ende groesser machen, nur
@@ -1143,10 +1159,12 @@ const { fassung = "brett" } = Astro.props;
 	   grosse, beschnittene Bild von selbst, waehrend der Kreis gezeichnet
 	   wird. Am Scheitel steht er dann mit 11 px Luft je Seite
 	   vollstaendig im Bild. */
+	/* Faktoren durch zehn geteilt (s. Kommentar an .uhr--gross): 10 → 1,
+	   2 → 0,2. Die Kamera faehrt jetzt HERUNTER statt hinauf. */
 	@keyframes kreis-zoom {
-		0%, 4% { transform: scale(10); }
-		50% { transform: scale(2); }
-		88%, 100% { transform: scale(10); }
+		0%, 4% { transform: scale(1); }
+		50% { transform: scale(0.2); }
+		88%, 100% { transform: scale(1); }
 	}
 
 	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
@@ -1230,7 +1248,7 @@ const { fassung = "brett" } = Astro.props;
 			--fuell: 1turn;
 		}
 		.kreis-buehne {
-			transform: scale(2);
+			transform: scale(0.2); /* Ruhelage, entspricht dem frueheren 2 */
 		}
 	}
 </style>
