@@ -976,12 +976,19 @@ const { fassung = "brett" } = Astro.props;
 		opacity: 0;
 	}
 
+	/* SPLITTER AM ANFANG (Fred 21.09., Raster-Probe: „am Anfang gleich ein
+	   weisser Strich, der konisch zulaeuft"): bei Versatz genau 1 fallen
+	   Strichanfang und Pfadende aufeinander, und der Browser laesst an der
+	   Kante einen Splitter stehen — bei 500 Einheiten Strichbreite ein Keil
+	   vom Mittelpunkt zum Rand. Deshalb Versatz 1,02 und ein Muster mit
+	   Luecke 2: der ganze Pfad (Laenge 1) liegt am Anfang sicher in der
+	   Luecke, bei Versatz 0 deckt der Strich ihn ganz. */
 	.gross,
 	.stunde-fuellung,
 	.stunde-rand {
 		fill: none;
-		stroke-dasharray: 1;
-		stroke-dashoffset: 1;
+		stroke-dasharray: 1 2;
+		stroke-dashoffset: 1.02;
 	}
 
 	/* Halber Radius + Strich = Radius: die volle Scheibe (s. Markup). */
@@ -1070,7 +1077,7 @@ const { fassung = "brett" } = Astro.props;
 	}
 
 	@keyframes stunde-zeichnen {
-		0%, 4% { stroke-dashoffset: 1; }
+		0%, 4% { stroke-dashoffset: 1.02; }
 		16%, 100% { stroke-dashoffset: 0; }
 	}
 
@@ -1080,7 +1087,7 @@ const { fassung = "brett" } = Astro.props;
 	}
 
 	@keyframes kreis-fuellen {
-		0%, 16% { stroke-dashoffset: 1; }
+		0%, 16% { stroke-dashoffset: 1.02; }
 		38%, 100% { stroke-dashoffset: 0; }
 	}
 
