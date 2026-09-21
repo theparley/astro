@@ -719,8 +719,8 @@ import Layout from "../layouts/Layout.astro";
 	.variante-a .stunde-fuellung,
 	.variante-a .stunde-rand {
 		fill: none;
-		stroke-dasharray: 1 2;
-		stroke-dashoffset: 1.02;
+		stroke-dasharray: 1.04 2;
+		stroke-dashoffset: 1.06;
 	}
 
 	/* Halber Radius + Strich = Radius: die volle Scheibe (s. Markup). */
@@ -809,7 +809,7 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	@keyframes stunde-zeichnen {
-		0%, 4% { stroke-dashoffset: 1.02; }
+		0%, 4% { stroke-dashoffset: 1.06; }
 		16%, 100% { stroke-dashoffset: 0; }
 	}
 
@@ -819,7 +819,7 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 	@keyframes kreis-fuellen {
-		0%, 16% { stroke-dashoffset: 1.02; }
+		0%, 16% { stroke-dashoffset: 1.06; }
 		38%, 100% { stroke-dashoffset: 0; }
 	}
 
@@ -865,16 +865,16 @@ import Layout from "../layouts/Layout.astro";
 		fill: none;
 		stroke: #ffffff;
 		stroke-width: 34;
-		stroke-dasharray: 1 2;
-		stroke-dashoffset: 1.02;
+		stroke-dasharray: 1.04 2;
+		stroke-dashoffset: 1.06;
 	}
 
 	/* Die eine: dunkle Fuellung, weisse Kontur, Speichen — wie in A. */
 	.variante-b .stunde-fuellung,
 	.variante-b .stunde-rand {
 		fill: none;
-		stroke-dasharray: 1 2;
-		stroke-dashoffset: 1.02;
+		stroke-dasharray: 1.04 2;
+		stroke-dashoffset: 1.06;
 	}
 	.variante-b .stunde-fuellung { stroke: var(--panel); stroke-width: 34; }
 	.variante-b .stunde-rand,
@@ -935,7 +935,7 @@ import Layout from "../layouts/Layout.astro";
 		94%, 100% { opacity: 0; }
 	}
 	@keyframes zeichnen-b {
-		0%, 4% { stroke-dashoffset: 1.02; }
+		0%, 4% { stroke-dashoffset: 1.06; }
 		16%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes drehen-b {
@@ -943,7 +943,7 @@ import Layout from "../layouts/Layout.astro";
 		16%, 100% { transform: rotate(1turn); }
 	}
 	@keyframes welle-1 {
-		0%, 24.0% { stroke-dashoffset: 1.02; }
+		0%, 24.0% { stroke-dashoffset: 1.06; }
 		29.0%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-1 {
@@ -951,7 +951,7 @@ import Layout from "../layouts/Layout.astro";
 		29.5%, 100% { opacity: 1; }
 	}
 	@keyframes welle-2 {
-		0%, 27.6% { stroke-dashoffset: 1.02; }
+		0%, 27.6% { stroke-dashoffset: 1.06; }
 		32.6%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-2 {
@@ -959,7 +959,7 @@ import Layout from "../layouts/Layout.astro";
 		33.1%, 100% { opacity: 1; }
 	}
 	@keyframes welle-3 {
-		0%, 31.2% { stroke-dashoffset: 1.02; }
+		0%, 31.2% { stroke-dashoffset: 1.06; }
 		36.2%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-3 {
@@ -967,7 +967,7 @@ import Layout from "../layouts/Layout.astro";
 		36.7%, 100% { opacity: 1; }
 	}
 	@keyframes welle-4 {
-		0%, 34.8% { stroke-dashoffset: 1.02; }
+		0%, 34.8% { stroke-dashoffset: 1.06; }
 		39.8%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-4 {
@@ -975,7 +975,7 @@ import Layout from "../layouts/Layout.astro";
 		40.3%, 100% { opacity: 1; }
 	}
 	@keyframes welle-5 {
-		0%, 38.4% { stroke-dashoffset: 1.02; }
+		0%, 38.4% { stroke-dashoffset: 1.06; }
 		43.4%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-5 {
@@ -983,7 +983,7 @@ import Layout from "../layouts/Layout.astro";
 		43.9%, 100% { opacity: 1; }
 	}
 	@keyframes welle-6 {
-		0%, 42.0% { stroke-dashoffset: 1.02; }
+		0%, 42.0% { stroke-dashoffset: 1.06; }
 		47.0%, 100% { stroke-dashoffset: 0; }
 	}
 	@keyframes deckel-6 {

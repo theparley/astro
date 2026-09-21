@@ -980,15 +980,23 @@ const { fassung = "brett" } = Astro.props;
 	   weisser Strich, der konisch zulaeuft"): bei Versatz genau 1 fallen
 	   Strichanfang und Pfadende aufeinander, und der Browser laesst an der
 	   Kante einen Splitter stehen — bei 500 Einheiten Strichbreite ein Keil
-	   vom Mittelpunkt zum Rand. Deshalb Versatz 1,02 und ein Muster mit
+	   vom Mittelpunkt zum Rand. Deshalb Versatz ueber 1 und ein Muster mit
 	   Luecke 2: der ganze Pfad (Laenge 1) liegt am Anfang sicher in der
-	   Luecke, bei Versatz 0 deckt der Strich ihn ganz. */
+	   Luecke.
+	   SPALT AM ENDE (Fred 21.09., „der erste Kreis schliesst die weisse
+	   Linie nicht ganz, da bleibt ein Mini-Spalt Schwarz"): bei Versatz 0
+	   endete der Strich (Laenge 1) rechnerisch exakt am Pfadende — und die
+	   Pfadlaenge ist im Browser nie ganz exakt 1. Der Strich ist jetzt 1,04
+	   lang und schiesst um 4 % ueber zwoelf Uhr hinaus; Startversatz 1,06,
+	   damit er anfangs trotzdem komplett in der Luecke liegt. Der Ueberschuss
+	   malt in derselben Farbe ueber den Anfang, also unsichtbar — und deckt
+	   nebenbei die Naht der Kuchenstuecke mit ab. */
 	.gross,
 	.stunde-fuellung,
 	.stunde-rand {
 		fill: none;
-		stroke-dasharray: 1 2;
-		stroke-dashoffset: 1.02;
+		stroke-dasharray: 1.04 2;
+		stroke-dashoffset: 1.06;
 	}
 
 	/* Halber Radius + Strich = Radius: die volle Scheibe (s. Markup). */
@@ -1077,7 +1085,7 @@ const { fassung = "brett" } = Astro.props;
 	}
 
 	@keyframes stunde-zeichnen {
-		0%, 4% { stroke-dashoffset: 1.02; }
+		0%, 4% { stroke-dashoffset: 1.06; }
 		16%, 100% { stroke-dashoffset: 0; }
 	}
 
@@ -1087,7 +1095,7 @@ const { fassung = "brett" } = Astro.props;
 	}
 
 	@keyframes kreis-fuellen {
-		0%, 16% { stroke-dashoffset: 1.02; }
+		0%, 16% { stroke-dashoffset: 1.06; }
 		38%, 100% { stroke-dashoffset: 0; }
 	}
 
