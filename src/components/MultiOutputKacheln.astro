@@ -431,16 +431,33 @@ const { fassung = "brett" } = Astro.props;
 					   das als Punkt mit weißem Rand; am Ende steht dieselbe
 					   Stunde als kleiner Punkt in einem hundertmal größeren
 					   Feld. Die 1 verschwindet nicht, sie wird eingeholt. */}
-					<span class="uhr uhr--gross">
-						<span class="bogen"></span>
-						<span class="speiche speiche--start"></span>
-						<span class="speiche speiche--lauf"></span>
-					</span>
-					<span class="uhr uhr--klein">
-						<span class="bogen"></span>
-						<span class="speiche speiche--start"></span>
-						<span class="speiche speiche--lauf"></span>
-					</span>
+					{/* ECHTE SVG (Fred 21.09., Handy: pixelig und ruckelig — „bei SVGs
+					   entstehen normalerweise keine Pixel"). Vorher waren Kreise
+					   DIVs mit conic-gradient-Maske, die als Ebene gerastert und per
+					   transform hochskaliert wurden. Jetzt zeichnet der Browser die
+					   Vektoren in jedem Bild neu, in der Aufloesung, die gerade
+					   gebraucht wird — scharf bei jeder Kamerafahrt, und billig, weil
+					   es drei Kreise und zwei Linien sind.
+					   Koordinaten: viewBox 1000 x 1250 (die 4:5-Kachel), Mitte
+					   (500, 625). Grosser Kreis Radius 500, kleine Stunde Radius 50 —
+					   Durchmesser 1:10, Flaeche 1:100.
+					   KUCHENSTUECK-TRICK: ein Kreis mit halbem Radius und einem
+					   Strich so breit wie der Radius ist eine volle Scheibe. Mit
+					   pathLength=1 und stroke-dasharray=1 gibt stroke-dashoffset von
+					   1 nach 0 die Scheibe als wachsendes Stueck frei — die Kanten des
+					   Stuecks sind exakte Radien. rotate(-90) legt den Startpunkt auf
+					   zwoelf Uhr, von dort laeuft es im Uhrzeigersinn.
+					   Reihenfolge = Stapel: grosse Scheibe unten, dann die dunkle
+					   Fuellung der Stunde, ihre Kontur, oben die Speichen. */}
+					<svg class="stunde" viewBox="0 0 1000 1250" aria-hidden="true">
+						<g class="kamera">
+							<circle class="gross" cx="500" cy="625" r="250" pathLength="1" transform="rotate(-90 500 625)" />
+							<circle class="stunde-fuellung" cx="500" cy="625" r="25" pathLength="1" transform="rotate(-90 500 625)" />
+							<circle class="stunde-rand" cx="500" cy="625" r="50" pathLength="1" transform="rotate(-90 500 625)" />
+							<line class="speiche speiche--start" x1="500" y1="625" x2="500" y2="575" />
+							<line class="speiche speiche--lauf" x1="500" y1="625" x2="500" y2="575" />
+						</g>
+					</svg>
 				</div>
 			</div>
 			</div>
@@ -910,367 +927,162 @@ const { fassung = "brett" } = Astro.props;
 		place-items: center;
 	}
 
-	/* NUR DER RAND WAECHST, nicht die Flaeche (Fred 20.09. abends: "ich
-	   will nicht, dass der Kuchen als Flaeche waechst, sondern dass der
-	   Rand vom Kuchen waechst"). Eine gefuellte Scheibe behauptet Masse;
-	   gesucht ist die LINIE, die das Stueck umfaehrt, waehrend es entsteht.
-	   Drei Teile, alle aus demselben Winkel --fuell gespeist:
-	     · der Bogen — ein Kreis, der NUR aus seiner Randlinie besteht, von
-	       einer Kegel-Maske bis zum aktuellen Winkel freigelegt,
-	     · die feste Speiche auf zwoelf Uhr, die Schnittkante, an der das
-	       Stueck beginnt,
-	     · die laufende Speiche, die mit dem Winkel mitdreht.
-	   Zusammen eine geschlossene Kontur um das Stueck, wie nachgezogen —
-	   innen bleibt alles schwarz.
-	   --fuell ist im globalen Block als Winkel registriert, sonst waere die
-	   Gradient-Stelle nicht animierbar und wuerde springen. */
-	/* WICHTIG: die Maske sitzt auf dem BOGEN, nicht auf der ganzen Uhr.
-	   Lag sie aussen, schnitt sie auch die Speichen mit ab — und
-	   ausgerechnet die laufende Speiche liegt genau auf der Maskenkante,
-	   wurde also halbiert oder ganz verschluckt. Genau der fehlende Strich
-	   zur Mitte (Fred 20.09. abends: "der muesste ja auch noch eine
-	   Verbindung zur Mitte haben"). */
-	.uhr {
-		position: absolute;
+	/* ── Die Stunde als SVG ─────────────────────────────────────────────
+	   Aufbau und Warum stehen am Markup. Hier nur die Masse und der Takt.
+	   Was dargestellt wird (unveraendert seit 20.09.): am Anfang steht die
+	   Stunde GROSS im Bild (Kamera auf 5), ihre Kontur zeichnet sich von
+	   zwoelf Uhr aus im Uhrzeigersinn, die laufende Speiche dreht mit.
+	   Dann fuellt sich der grosse Kreis weiss, waehrend die Kamera auf 1
+	   zurueckfaehrt — die Stunde bleibt als dunkle Scheibe mit weissem Saum
+	   darin stehen, hundertfach eingeholt. Am Ende blendet alles aus, die
+	   Kamera faehrt zurueck, es geht von vorn los.
+	   Kameramarken (Prozent der Runde), unveraendert uebernommen:
+	     0–4    Halt, Kamera auf 5, nichts zu sehen (Einblendung bis 4)
+	     4–16   die Stunde zeichnet sich
+	     16–38  der grosse Kreis fuellt sich, Kamera faehrt zurueck
+	     50     Wendepunkt, Kamera auf 1
+	     72,5–94  alles blendet aus — JETZT AUCH DIE SPEICHEN (Fred 21.09.,
+	              Handy: „bleibt am Ende ein sichtbarer Strich in der oberen
+	              Haelfte vom Kreis"). Bis dahin blieb der Strich der Stunde
+	              als Startbild stehen (Entscheidung 20.09.); als Rest im
+	              Schwarz liest er sich aber als Fehler. Die Einblendung bei
+	              2–4 % holt ihn fuer den naechsten Durchlauf zurueck.
+	     88     Kamera wieder auf 5
+	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen. */
+	.stunde {
+		display: block;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
 	}
 
-	.bogen {
-		position: absolute;
-		inset: 0;
-		border-radius: 50%;
-		box-sizing: border-box;
-		border: var(--strich) solid #ffffff;
-		-webkit-mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
-		mask-image: conic-gradient(#000 var(--fuell, 0turn), transparent 0);
+	/* Kamera = eine Gruppe, die um die Bildmitte skaliert. transform-box:
+	   view-box macht 50 % 50 % zur Mitte der viewBox, also (500, 625) —
+	   ohne das laege der Drehpunkt in der linken oberen Ecke. */
+	.kamera {
+		transform-box: view-box;
+		transform-origin: 50% 50%;
+		transform: scale(5);
+		opacity: 0;
 	}
 
+	.gross,
+	.stunde-fuellung,
+	.stunde-rand {
+		fill: none;
+		stroke-dasharray: 1;
+		stroke-dashoffset: 1;
+	}
+
+	/* Halber Radius + Strich = Radius: die volle Scheibe (s. Markup). */
+	.gross {
+		stroke: #ffffff;
+		stroke-width: 500;
+	}
+
+	/* Dunkle Fuellung der Stunde, gleicher Trick, gleicher Takt wie ihre
+	   Kontur — auf Schwarz zunaechst unsichtbar, bleibt aber stehen, sobald
+	   das Weiss des grossen Kreises darunter durchlaeuft (Fred 20.09.:
+	   „wenn es geht, bleibt der schwarze Kreis innen drin schwarz"). */
+	.stunde-fuellung {
+		stroke: var(--panel);
+		stroke-width: 50;
+	}
+
+	/* Kontur und Speichen: 2,5 Einheiten. Bei Kamera 5 sind das 12,5
+	   Einheiten, rund 6 px auf einer 542er Kachel; in Ruhe knapp 1,3 px —
+	   dieselben Werte wie vorher (0,12cqw, zehnfach im Zoom). Die Linie
+	   waechst mit der Kamera, das ist gewollt: sichtbar ist am Anfang die
+	   absolute Dicke. */
+	.stunde-rand,
 	.speiche {
-		position: absolute;
-		left: 50%;
-		bottom: 50%;
-		width: var(--strich);
-		height: 50%;
-		margin-left: calc(var(--strich) / -2);
-		background: #ffffff;
-		transform-origin: 50% 100%;
+		stroke: #ffffff;
+		stroke-width: 2.5;
 	}
 
 	.speiche--lauf {
-		transform: rotate(var(--fuell, 0turn));
+		transform-box: view-box;
+		transform-origin: 50% 50%;
 	}
 
-	/* Flaechenverhaeltnis 1:100 = Durchmesser 1:10.
-	   Der GROSSE Kreis wird flaechig weiss (Fred 20.09. abends) — er ist das
-	   Ergebnis, nicht die Zeichnung. Also keine Kontur, kein Speichenpaar,
-	   sondern ein Kuchenstueck, das sich mit Weiss fuellt. */
-	/* Durchmesser neu bemessen (Fred 20.09. abends): am Anfang ist nur der
-	   Strich der Stunde zu sehen, und seine OBERKANTE soll auf Kopfhoehe der
-	   Figuren in Kachel 3 liegen. Der Strich ist der Radius der kleinen
-	   Stunde, zehnfach vergroessert — aus Figurenmitte (490 px) minus
-	   Kopfoberkante (313 px) folgt ein Radius von 177 px, also 2,55cqw
-	   unskaliert und 5,1cqw Durchmesser. Der grosse Kreis behaelt das
-	   Verhaeltnis 1:10, ist also 51cqw breit.
-	   ZOOM ZWEISTUFIG: beim Entstehen steht der Kreis auf Faktor 2,3 und ist
-	   links und rechts um je 42 px beschnitten — das laesst ihn gross
-	   wirken. Fertig gezeichnet faehrt die Kamera auf 2,0 zurueck, dann
-	   steht er mit 11 px Luft je Seite vollstaendig im Bild.
-	   Zur Orientierung: 2,06 beruehrt die Seitenkanten genau, 2,58 fuellt
-	   die Hoehe und schneidet 92 px je Seite ab. */
-	/* ZEHNFACH IM LAYOUT, HERUNTERSKALIERT IM ZOOM (Fred 21.09., Handy:
-	   „sieht nicht aus wie eine SVG-Grafik, sondern komplett pixelig").
-	   Vorher stand die Buehne auf Layoutgroesse und wurde per transform bis
-	   auf Faktor 10 VERGROESSERT. Mobile Browser rastern eine Ebene in
-	   ihrer Layoutgroesse und skalieren dann das Bitmap — bei Faktor 10
-	   wird aus der 19-px-Stunde mit 0,45-px-Strich ein Brei. Jetzt ist
-	   alles zehnmal so gross angelegt und der Zoom faehrt von 1 auf 0,2
-	   HERUNTER. Verkleinern bleibt immer scharf, weil das Raster in voller
-	   Groesse entsteht. Sichtbare Masse sind exakt dieselben:
-	   (s/10) × (10·b) = s × b. Alle Zahlen in cqw, also mitgewachsen. */
-	.uhr--gross {
-		width: 510cqw;
-		height: 510cqw;
-		--strich: 0cqw;
+	/* TAKT 18s = genau zehn Schritte des Piktogramm-Bands in Kachel 1
+	   (1,8 s je Schritt), die Kacheln bleiben phasengleich. Hintergrund der
+	   Zahl: der exakte Tempo-Abgleich mit dem Band (52,7 px/s Kante) haette
+	   45 s gebraucht — Fred am Handy: „viel zu langsam". Weitere Taktstufen:
+	   14,4 s (8 Schritte), 21,6 s (12), 25,2 s (14).
+	   Kurve cubic-bezier(0.65, 0, 0.35, 1) ist symmetrisch, gleich weich am
+	   Anfang wie am Ende; CSS legt sie auf jeden Abschnitt einzeln, die
+	   Haltezeiten sind konstante Werte und bleiben unberuehrt. */
+	[data-kreis].laeuft .kamera {
+		animation:
+			kamera 18s cubic-bezier(0.65, 0, 0.35, 1) infinite,
+			ausblenden 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 
-	.uhr--gross .bogen {
-		border: none;
-		background: #ffffff;
+	[data-kreis].laeuft .stunde-rand,
+	[data-kreis].laeuft .stunde-fuellung {
+		animation: stunde-zeichnen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
-	.uhr--gross .speiche {
-		display: none;
+	[data-kreis].laeuft .speiche--lauf {
+		animation: stunde-drehen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
-	/* Die kleine Stunde bekommt eine schwarze Fuellung. Auf der schwarzen
-	   Kachel sieht man davon zunaechst nichts — sobald aber das weisse Feld
-	   des grossen Kreises darunter durchlaeuft, bleibt sie als schwarze
-	   Scheibe mit weissem Saum stehen (Fred: "wenn es geht, bleibt der
-	   schwarze Kreis innen drin schwarz"). Dieselbe Maske wie die Kontur,
-	   also erscheint die Fuellung im selben Takt wie der Rand. */
-	.uhr--klein .bogen {
-		background: var(--panel);
+	[data-kreis].laeuft .gross {
+		animation: kreis-fuellen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
-	/* Strichstaerke am ZOOM bemessen: die kleine Stunde wird am Anfang
-	   zehnfach vergroessert gezeigt, ihre Linie erscheint also zehnfach
-	   dick. 0,12cqw sind im Zoom rund 8 px und spaeter, in Ruhe, noch knapp
-	   ein Pixel — beides traegt.
-	   ZURUECK auf 0,12 (Fred 20.09. abends: "der Startstrich ist dicker
-	   geworden, warum?"). Er war es: beim Verkleinern des Kreises von 7 auf
-	   5,1cqw hatte ich die Linie auf 0,16 mitgezogen, damit sie im
-	   Verhaeltnis zum kleineren Kreis gleich bleibt. Sichtbar ist am Anfang
-	   aber nicht das Verhaeltnis, sondern die absolute Dicke — und die ist
-	   damit um ein Drittel gewachsen. Ungefragt, deshalb zurueck. */
-	.uhr--klein {
-		width: 51cqw;
-		height: 51cqw;
-		--strich: 1.2cqw; /* = 0,12cqw × 10, sichtbar unveraendert */
-		z-index: 1;
+	/* Kamera: durchgehend von 5 auf 1 und zurueck, ohne Wegpunkt — ein
+	   Zwischenhalt liesse die Fahrt mit der Abschnittskurve bis zum
+	   Stillstand bremsen. Bei 5 ist die Stunde so gross wie spaeter der
+	   ganze Kreis in Ruhe; bei 1 steht der grosse Kreis mit der Kachel-
+	   Polsterung als Luft vollstaendig im Bild. */
+	@keyframes kamera {
+		0%, 4% { transform: scale(5); }
+		50% { transform: scale(1); }
+		88%, 100% { transform: scale(5); }
 	}
 
-	/* ZOOM (Fred 20.09. abends): am Anfang steht die kleine Stunde GROSS im
-	   Bild — die Bühne ist zehnfach vergrößert, die 7cqw-Scheibe füllt also
-	   dieselbe Fläche, die später der große Kreis einnimmt. Sobald der
-	   große entsteht, fährt die Kamera zurück. Dadurch sieht man zuerst die
-	   Stunde als etwas Großes und erlebt erst beim Rauszoomen, wie klein
-	   sie im Verhältnis ist. Genau die Umkehrung, um die es geht. */
-	/* Der Zoom laeuft LANGSAMER und beidseitig weich (Fred 20.09. abends).
-	   Zwei Stellschrauben: die Strecke (32 → 88 Prozent statt 32 → 70, also
-	   gut anderthalbmal so lang) und die Kurve. cubic-bezier(0.65, 0, 0.35,
-	   1) ist symmetrisch — gleich sanft am Anfang wie am Ende, waehrend die
-	   vorherige Kurve zum Schluss hin stark abbremste und dadurch
-	   ungleichmaessig wirkte. Die Kamera faehrt damit noch ein Stueck
-	   weiter, nachdem der grosse Kreis bei 82 Prozent fertig ist: das Bild
-	   kommt zur Ruhe, statt zu stoppen. */
-	/* HIN UND ZURUECK, ABER NICHT SPIEGELBILDLICH (Fred 20.09. abends).
-	   Der Rueckweg soll anders aussehen als der Hinweg: es zoomt wieder
-	   heran, dabei blenden BEIDE Kreise aus — sie laufen nicht rueckwaerts
-	   leer. Stehen bleibt allein der senkrechte Strich der Stunde, und der
-	   ist der Wendepunkt, an dem die Runde neu beginnt.
-	   Deshalb KEIN "alternate": das spielt exakt rueckwaerts und kann keinen
-	   eigenen Rueckweg. Stattdessen beschreibt eine einzige, vorwaerts
-	   laufende Runde von 14 Sekunden beides. Die Marken:
-	     4 %  die Stunde beginnt zu zeichnen
-	    16 %  sie steht, der grosse Kreis setzt an, die Kamera faehrt zurueck
-	    38 %  der grosse Kreis ist voll
-	    50 %  WENDEPUNKT — der Rueckweg beginnt
-	    72,5–94 %  die Kreise blenden aus (synchron mit Kachel 3)
-	    88 %  die Kamera ist wieder ganz herangefahren
-	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen.
-	   TEMPO = BANDTEMPO (Fred 21.09.: „die Geschwindigkeit, wie es rein-
-	   und rauszoomt, waere die gleiche Geschwindigkeit, wie die Piktogramme
-	   in Kachel 1 durchlaufen"). Ausgerechnet statt geschaetzt, bei 542px
-	   Kachelbreite (1280er Viewport):
-	     Band  ein Zeichen plus Abstand = 17,5cqw = 94,8px, alle 1,8s
-	           -> 52,7 px/s, gleichfoermig.
-	     Zoom  der grosse Kreis misst 51cqw, sein Radius faellt von
-	           Massstab 10 auf 2, also von 1382px auf 276px = 1106px Weg.
-	           Diesen Weg legt die Kante in der Zoomphase zurueck (4 %
-	           bis 50 % der Runde).
-	   1106px bei 52,7 px/s brauchen 21,0s Zoomphase, das sind 45,6s Runde.
-	   45s WAREN GESETZT und sind wieder raus (Fred 21.09., Handy: „laufen
-	   viel zu langsam"). Der exakte Tempo-Abgleich ist mit dieser
-	   Zoomstrecke nur um den Preis einer Dreiviertelminute zu haben — auf
-	   dem Handy sieht dann niemand eine ganze Runde. Deshalb bleibt vom
-	   Abgleich nur der TAKT: 18s sind genau zehn Bandschritte (18 / 1,8),
-	   die beiden Kacheln bleiben phasengleich. Kantentempo dabei 134 px/s,
-	   2,5-faches Bandtempo, aber 29 % ruhiger als die urspruenglichen 14s.
-	   Weitere Taktstufen, falls nachgeregelt wird: 14,4s (8 Schritte),
-	   21,6s (12), 25,2s (14), 27s (15).
-	   Wer das Band-Tempo aendert (BAND_SCHRITT_MS im Skript) oder die
-	   Kreisgroesse (--uhr--gross, kreis-zoom), muss hier nachrechnen.
-	   Die frueheren 14s stammten aus dem Gleichtakt mit Kachel 3, die es
-	   seit dem 20.09. nicht mehr gibt. */
-	[data-kreis].laeuft {
-		animation: kreis-zoom 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-	}
-
-	/* Die Zeiger laufen nicht mehr gleichfoermig an und ab (Fred 20.09.
-	   abends), sondern weich in beide Richtungen — dieselbe symmetrische
-	   Kurve wie der Zoom, damit Kamera und Zeichnung denselben Charakter
-	   haben. CSS legt die Kurve auf JEDEN Abschnitt einzeln; die
-	   Haltezeiten davor und danach sind konstante Werte und bleiben davon
-	   unberuehrt, gedehnt wird also nur das Zeichnen selbst. */
-	[data-kreis].laeuft .uhr--klein {
-		animation: uhr-klein 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-	}
-
-	[data-kreis].laeuft .uhr--gross {
-		animation: uhr-gross 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-	}
-
-	/* Das Ausblenden trifft nur die KREISE, nicht die Speichen — der Strich
-	   der Stunde bleibt stehen. */
-	[data-kreis].laeuft .bogen {
-		animation: bogen-aus 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	}
-
-	/* WENIGER WEIT RAUS (Fred 20.09. abends: "am Ende groesser machen, nur
-	   so weit heraus, dass man gerade den Kreis erkennt"). Der grosse Kreis
-	   misst 70cqw; bei Faktor 1,3 sind das 91 von 100 Kachelbreiten, er
-	   misst im Ruhezustand 70cqw.
-	   NUR das Ende ist groesser geworden, der Anfang bleibt bei Faktor 10
-	   (Fred 20.09. abends). Endfaktor 1,5: der Kreis misst damit 730 px bei
-	   731 px Kacheloberflaeche — er STOESST links und rechts an die Kante,
-	   ohne angeschnitten zu werden. Mehr geht nicht, ohne dass er seine
-	   Rundung verliert; der Wert ist damit keine Geschmacksfrage mehr,
-	   sondern die Obergrenze.
-	   Senkrecht geprueft: Mitte bei 53,7 % der Hoehe, oben 126 px, unten
-	   856 px von 914 — passt. Der Zoomweg betraegt 10 zu 1,5, also 6,7. */
-	/* ── BESTIMMUNGSPUNKTE DER BEIDEN KACHELN (Fred 20.09. abends) ──────
-	   Damit spaetere Aenderungen nicht raten muessen, woran ausgerichtet
-	   wird, sind die Ankerpunkte hier festgehalten:
-	     Kachel 2 → der MITTELPUNKT DES KREISES.
-	     Kachel 3 → der MITTELPUNKT ZWISCHEN DEN BEIDEN PERSONEN,
-	                waagerecht wie senkrecht.
-	   Beide muessen an zwei Momenten uebereinstimmen: am ANFANG und in der
-	   MITTE der Animation (dem Wendepunkt bei 50 %). Nachgemessen bei einer
-	   Kachel von 731 × 914 px:
-	     Anfang  Kachel 2 (366 | 491)   Kachel 3 (366 | 490)
-	     Mitte   Kachel 2 (366 | 457)   Kachel 3 (366 | 457)
-	   Waagerecht ergibt sich die Deckung von selbst: beide Bilder sitzen
-	   mittig, und weil die Kachelung der dritten Kachel ZWEI Figuren
-	   enthaelt, liegt ihre Mitte zwischen den beiden. Senkrecht muss die
-	   Buehne der zweiten Kachel dafuer mitfahren — siehe unten. ────────── */
-
-	/* KEIN VERSATZ MEHR (Fred 20.09. abends, neue Regel): das Zentrum der
-	   Kreise — es ist fuer beide dasselbe — sitzt zu JEDEM Zeitpunkt in der
-	   Mitte der Kachel, waagerecht wie senkrecht. Am Anfang, im Scheitel und
-	   am Ende.
-	   Seit der Kopf ueber der Kachel steht, faellt die Ruhelage der Buehne
-	   ohnehin mit der Kachelmitte zusammen — es genuegt also, gar nicht zu
-	   verschieben und nur zu skalieren.
-	   DAMIT ENTFAELLT die vorherige Regel, die Strichoberkante am Anfang auf
-	   Kopfhoehe der Figuren in Kachel 3 zu legen: der Strich beginnt jetzt
-	   bei 280 px, die Koepfe liegen bei 313. Die Kreisgroessen (5,1 und
-	   51cqw) stammen noch aus jener Rechnung und koennen bleiben oder neu
-	   bemessen werden.
-	   MESS-WARNUNG: Werte nur an einer FRISCH GELADENEN Seite nachmessen.
-	   Nach einem scrollIntoView liefert das Browser-Fenster hier andere
-	   Kachelmasse (424 statt 457 Mitte). */
-	/* EINE Bewegung, kein Zwischenhalt (Fred 20.09. abends). Vorher stand
-	   bei 38 % ein Wegpunkt auf Faktor 2,3, damit der Kreis beim Entstehen
-	   angeschnitten wirkt. Das war unnoetig und sichtbar: CSS legt die
-	   Beschleunigungskurve auf JEDEN Abschnitt einzeln, die Kamera bremste
-	   also auf dem Wegpunkt bis zum Stillstand und fuhr danach neu an.
-	   Der Wegpunkt ist raus. Die Kamera faehrt durchgehend von Faktor 10
-	   auf 2,0 — und weil sie dabei ohnehin durch den angeschnittenen
-	   Bereich kommt (ab 2,06 stoesst der Kreis an die Kante), entsteht das
-	   grosse, beschnittene Bild von selbst, waehrend der Kreis gezeichnet
-	   wird. Am Scheitel steht er dann mit 11 px Luft je Seite
-	   vollstaendig im Bild. */
-	/* Faktoren durch zehn geteilt (s. Kommentar an .uhr--gross): 10 → 1,
-	   2 → 0,2. Die Kamera faehrt jetzt HERUNTER statt hinauf. */
-	@keyframes kreis-zoom {
-		0%, 4% { transform: scale(1); }
-		50% { transform: scale(0.2); }
-		88%, 100% { transform: scale(1); }
-	}
-
-	/* Die Stunde zeichnet sich und bleibt dann voll — zurueck geht sie
-	   nicht, sie blendet aus (siehe bogen-aus). */
-	@keyframes uhr-klein {
-		0%, 4% { --fuell: 0turn; }
-		16%, 100% { --fuell: 1turn; }
-	}
-
-	@keyframes uhr-gross {
-		0%, 16% { --fuell: 0turn; }
-		38%, 100% { --fuell: 1turn; }
-	}
-
-	/* Das Ein- und Ausblenden der Schrift ist RAUS (Fred 20.09. abends).
-	   Es war noetig, solange der Text IN der Kachel lag und dem Bild im Weg
-	   war. Seit er darueber steht, stoert er nichts mehr — und eine Schrift,
-	   die ohne Not verschwindet, kostet nur Lesezeit. */
-
-	/* Der Bogen bleibt in den ersten Prozent der Runde noch unsichtbar
-	   (Fred 20.09. abends: "ein Blitz, kurz bevor die Animation losgeht").
-	   Am Rundenwechsel springen zwei Dinge gleichzeitig zurueck: die
-	   Sichtbarkeit des Bogens von 0 auf 1 und der Fuellwinkel von voll auf
-	   leer. Der Winkel wird aber VERERBT — er wird auf der Uhr animiert und
-	   erst im Bogen als Maske wirksam. Kommt er ein einziges Bild spaeter an
-	   als die Sichtbarkeit, steht der fertige Kreis fuer einen Frame voll im
-	   Bild: genau der Blitz. Mit dem Halt bei 0 bis 2 Prozent ist das
-	   Zeitfenster zu; sichtbar wird der Bogen erst ab 4 Prozent, also genau
-	   dann, wenn die Stunde zu zeichnen beginnt. */
-	@keyframes bogen-aus {
+	@keyframes ausblenden {
 		0%, 2% { opacity: 0; }
 		4%, 72.5% { opacity: 1; }
 		94%, 100% { opacity: 0; }
 	}
 
-	/* ── Kachel 3: Rauszoomen ──────────────────────────────────────────── */
-	/* Startgröße: EINE Figur füllt die Kachel. Endgröße: rund tausend
-	   Figuren passen hinein — bei 4:5 sind das etwa 28 × 35 Zellen, also
-	   Zellbreite = Kachelbreite / 28 ≈ 3,6 cqw. */
-	/* UEBER DIE GANZE KACHEL (Fred 20.09. abends: "ich will, dass die
-	   Person ueber die gesamte Kachel drei zu sehen ist"). Vorher lag die
-	   Menge in der mittleren Rasterzeile und hatte dadurch einen unsichtbaren
-	   Rahmen: oben die Ueberschrift, unten der Kachelrand. Jetzt liegt sie
-	   absolut ueber der ganzen Kachel und wird nur von deren Kante
-	   beschnitten; die Ueberschrift steht darueber. */
-	.menge {
-		position: absolute;
-		inset: 0;
+	@keyframes stunde-zeichnen {
+		0%, 4% { stroke-dashoffset: 1; }
+		16%, 100% { stroke-dashoffset: 0; }
 	}
 
-	/* Beide Lagen liegen deckungsgleich und werden GLEICH skaliert: die
-	   schwarze Doppelfigur einmal und mittig, die weiße Menge gekachelt.
-	   Am Anfang ist die Kachelung größer als die Fläche — die zwei Experten
-	   ragen also über den Rand hinaus und werden beschnitten (Fred 20.09.
-	   abends: "man hat das Gefühl, es ist groß"). Die weiße Menge ist dabei
-	   noch unsichtbar und blendet erst beim Rauszoomen ein. */
-	.menge-lage {
-		position: absolute;
-		inset: 0;
-		background-image: var(--person);
-		background-position: center;
+	@keyframes stunde-drehen {
+		0%, 4% { transform: rotate(0turn); }
+		16%, 100% { transform: rotate(1turn); }
 	}
 
-	.menge-weiss {
-		background-repeat: repeat;
-		opacity: 0;
+	@keyframes kreis-fuellen {
+		0%, 16% { stroke-dashoffset: 1; }
+		38%, 100% { stroke-dashoffset: 0; }
 	}
 
-	.menge-schwarz {
-		background-repeat: no-repeat;
-	}
-
+	/* Ohne Bewegung: das fertige Bild in Ruhe. */
 	@media (prefers-reduced-motion: reduce) {
-		[data-kreis].laeuft,
-		[data-kreis].laeuft .uhr--klein,
-		[data-kreis].laeuft .uhr--gross,
-		[data-kreis].laeuft .bogen {
+		[data-kreis].laeuft .kamera,
+		[data-kreis].laeuft .stunde-rand,
+		[data-kreis].laeuft .stunde-fuellung,
+		[data-kreis].laeuft .speiche--lauf,
+		[data-kreis].laeuft .gross {
 			animation: none;
 		}
-		.uhr {
-			--fuell: 1turn;
+		.kamera {
+			transform: scale(1);
+			opacity: 1;
 		}
-		.kreis-buehne {
-			transform: scale(0.2); /* Ruhelage, entspricht dem frueheren 2 */
+		.gross,
+		.stunde-fuellung,
+		.stunde-rand {
+			stroke-dashoffset: 0;
 		}
 	}
-</style>
-
-<style is:global>
-	/* Registrierter Winkel: nur so laesst sich eine Farbstelle im
-	   conic-gradient animieren — eine gewoehnliche Variable waere fuer den
-	   Browser bloss ein Text und wuerde springen statt zu laufen.
-	   @property gehoert auf Dokumentebene, deshalb hier im globalen Block. */
-	/* MUSS vererben (Fehler 20.09. abends, Fred: "ich sehe nur noch einen
-	   Strich"): der Winkel wird auf der Uhr animiert, gebraucht wird er
-	   aber in ihren KINDERN — im Bogen als Maske und in der laufenden
-	   Speiche als Drehung. Mit inherits:false bekamen die Kinder ihren
-	   eigenen Anfangswert 0turn: die Maske gab nichts frei (Bogen
-	   unsichtbar) und die Speiche drehte nie. Uebrig blieben genau die zwei
-	   senkrechten Striche, die er gesehen hat. */
-	@property --fuell {
-		syntax: "<angle>";
-		inherits: true;
-		initial-value: 0turn;
-	}
-
 </style>
 
 <style is:global>
