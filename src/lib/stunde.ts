@@ -112,7 +112,7 @@ export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Sp
 // HINTER der Zahl, „Min." klein darunter.
 // Fred 21.09. (2): „Zahlen noch ein bisschen groesser, Abstand zwischen den
 // Zahlen nur minimal breiter": 0,78 r, Luecke 0,03 em zwischen den Zellen.
-export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.78, zahlDy: 0.283, einheitGroesse: 0.14, einheitDy: 0.45, luecke: 0.03 }; // luecke in em
+export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.85, zahlDy: 0.308, einheitGroesse: 0.14, einheitDy: 0.478, luecke: 0.04 }; // Fred 21.09.: 0,85 / 0,04; luecke in em, zahlDy = Versalhoehe/2
 export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
 // ── Geometrie ───────────────────────────────────────────────────────────
