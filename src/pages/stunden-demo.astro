@@ -20,14 +20,15 @@ const ZEIT = {
 	// Wann die Kamera losfaehrt, als Anteil der Stunden-Zeichnung: 0,75 =
 	// im letzten Viertel (Fred 21.09.: „starte mit dem Zoomen noch frueher,
 	// bevor die schwarze Uhr fertig animiert hat, wenn sie im letzten
-	// Viertel ist"). 1 = erst, wenn sie fertig ist.
-	kameraAbStunde: 0.75,
-	// Die erste weisse Uhr faengt an, sobald die Stunde fertig gezeichnet
-	// ist — "nachStunde" koppelt das an halt + stunde (Fred 21.09.: „wenn die
-	// schwarze Uhr fertig gedreht hat, ist die Pause bis die erste weisse
-	// entsteht zu gross"; vorher 3,24 s, also 0,36 s Pause). Eine Zahl in
-	// Sekunden setzt einen festen Zeitpunkt.
-	uhrenStart: "nachStunde" as number | "nachStunde",
+	// Viertel ist"), dann 0 (Fred: „fangen wir mit der Zoom-Animation an,
+	// wenn die Uhr anfaengt zu laufen"). 1 = erst, wenn sie fertig ist.
+	kameraAbStunde: 0,
+	// Wann die erste weisse Uhr anfaengt, als Anteil der Stunden-Zeichnung:
+	// 1 = wenn die Stunde fertig ist (das war „nachStunde"), 0,85 = kurz
+	// davor (Fred 21.09.: „starte die erste weisse Uhr ein bisschen
+	// frueher"). Eine Zahl in Sekunden setzt einen festen Zeitpunkt.
+	uhrenAbStunde: 0.85,
+	uhrenStart: "abStunde" as number | "abStunde",
 	uhrenDauer: 14.4,  // von der ersten bis zum Ende der letzten Uhr
 	                   // (war 11,52 — mit „eine nach der anderen" am Anfang
 	                   // reichte das nur fuer eine einzige langsame Uhr, dann
@@ -105,7 +106,7 @@ const KURVE_RAUS = [0, 0, 0.35, 1];
 const KAMERA = { start: 7, ende: 1.15 };
 
 // Abgeleitete Marken (Sekunden ab Rundenbeginn)
-const uhrenStart = ZEIT.uhrenStart === "nachStunde" ? ZEIT.halt + ZEIT.stunde : ZEIT.uhrenStart;
+const uhrenStart = ZEIT.uhrenStart === "abStunde" ? ZEIT.halt + ZEIT.stunde * ZEIT.uhrenAbStunde : ZEIT.uhrenStart;
 const uhrenEnde = uhrenStart + ZEIT.uhrenDauer;
 const kameraStart = ZEIT.halt + ZEIT.stunde * ZEIT.kameraAbStunde;
 const M = {
