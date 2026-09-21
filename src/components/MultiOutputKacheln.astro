@@ -451,6 +451,16 @@ const { fassung = "brett" } = Astro.props;
 					   Fuellung der Stunde, ihre Kontur, oben die Speichen. */}
 					<svg class="stunde" viewBox="0 0 1000 1250" aria-hidden="true">
 						<g class="kamera">
+							{/* NAHT-DECKEL (Fred 21.09., „bleibt am Ende ein sichtbarer
+							   Strich in der oberen Haelfte vom Kreis"): bei vollem
+							   Kuchenstueck treffen Anfang und Ende des Strichs auf
+							   zwoelf Uhr, und der Browser laesst dort eine Haarlinie vom
+							   Mittelpunkt zum Rand stehen — in der Maskenfassung war es
+							   dieselbe Naht bei 1turn. Meine erste Deutung (die
+							   Speichen) war falsch. Diese volle Scheibe liegt UNTER dem
+							   Stueck und blendet in dem Moment ein, in dem es sich
+							   schliesst (37,5–38,5 %); danach ist die Naht zugedeckt. */}
+							<circle class="gross-voll" cx="500" cy="625" r="500" />
 							<circle class="gross" cx="500" cy="625" r="250" pathLength="1" transform="rotate(-90 500 625)" />
 							<circle class="stunde-fuellung" cx="500" cy="625" r="25" pathLength="1" transform="rotate(-90 500 625)" />
 							<circle class="stunde-rand" cx="500" cy="625" r="50" pathLength="1" transform="rotate(-90 500 625)" />
@@ -980,6 +990,12 @@ const { fassung = "brett" } = Astro.props;
 		stroke-width: 500;
 	}
 
+	/* Der Naht-Deckel (s. Markup): unsichtbar, bis das Stueck voll ist. */
+	.gross-voll {
+		fill: #ffffff;
+		opacity: 0;
+	}
+
 	/* Dunkle Fuellung der Stunde, gleicher Trick, gleicher Takt wie ihre
 	   Kontur — auf Schwarz zunaechst unsichtbar, bleibt aber stehen, sobald
 	   das Weiss des grossen Kreises darunter durchlaeuft (Fred 20.09.:
@@ -1032,6 +1048,10 @@ const { fassung = "brett" } = Astro.props;
 		animation: kreis-fuellen 18s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
+	[data-kreis].laeuft .gross-voll {
+		animation: kreis-deckel 18s linear infinite;
+	}
+
 	/* Kamera: durchgehend von 5 auf 1 und zurueck, ohne Wegpunkt — ein
 	   Zwischenhalt liesse die Fahrt mit der Abschnittskurve bis zum
 	   Stillstand bremsen. Bei 5 ist die Stunde so gross wie spaeter der
@@ -1064,14 +1084,24 @@ const { fassung = "brett" } = Astro.props;
 		38%, 100% { stroke-dashoffset: 0; }
 	}
 
+	/* Deckel: kurze Ueberblendung genau um das Schliessen bei 38 %. */
+	@keyframes kreis-deckel {
+		0%, 37.5% { opacity: 0; }
+		38.5%, 100% { opacity: 1; }
+	}
+
 	/* Ohne Bewegung: das fertige Bild in Ruhe. */
 	@media (prefers-reduced-motion: reduce) {
 		[data-kreis].laeuft .kamera,
 		[data-kreis].laeuft .stunde-rand,
 		[data-kreis].laeuft .stunde-fuellung,
 		[data-kreis].laeuft .speiche--lauf,
-		[data-kreis].laeuft .gross {
+		[data-kreis].laeuft .gross,
+		[data-kreis].laeuft .gross-voll {
 			animation: none;
+		}
+		.gross-voll {
+			opacity: 1;
 		}
 		.kamera {
 			transform: scale(1);
@@ -1289,11 +1319,22 @@ const { fassung = "brett" } = Astro.props;
 		if (!zeichen.length) return { anims: [], stop: () => {} };
 		const satz = zeichen.length / 3;
 		const luecke = parseFloat(getComputedStyle(spur).columnGap) || 0;
-		const breite = zeichen[0].getBoundingClientRect().width;
+		// LAYOUT-MASSE, KEINE GEZEICHNETEN (Fred 21.09., Handy: „als ob sie
+		// nicht in der Mitte groesser werden, sondern am rechten Rand").
+		// getBoundingClientRect liefert die Breite MIT Transformation — beim
+		// ersten Anlegen steht jedes Zeichen auf Faktor 1, beim NEU-Anlegen
+		// nach einem resize aber auf 0,45 bis 1,5. Dann stimmen Schritt,
+		// Satzbreite und Versatz nicht mehr, die errechneten Positionen
+		// laufen den echten davon, und der Scheitel wandert nach rechts.
+		// Auf dem Handy feuert resize bei jedem Ein- und Ausfahren der
+		// Adressleiste, also praktisch beim ersten Scrollen. offsetWidth und
+		// clientWidth sind Layoutwerte und ignorieren Transformationen.
+		// Reproduziert im Browser: Scheitel bei 252 px (Bandmitte 257), nach
+		// einem resize-Ereignis bei 308.
+		const breite = zeichen[0].offsetWidth;
 		const schritt = breite + luecke;
 		const satzBreite = schritt * satz;
-		const kasten = band.getBoundingClientRect();
-		const halb = kasten.width / 2;
+		const halb = band.clientWidth / 2;
 		// Versatz, damit an jeder Schrittgrenze wirklich ein Zeichen mittig
 		// steht — sonst faellt die Verlangsamung neben den Scheitel.
 		const versatz = ((breite / 2 - halb) % schritt + schritt) % schritt;
