@@ -58,9 +58,13 @@ const ZEIT = {
 	// dauert genau so lang wie ihr Abstand zur naechsten — die naechste
 	// faengt also an, wenn die vorige fertig ist. Nur nach unten gedeckelt,
 	// damit spaete Uhren noch sichtbar zeichnen.
-	//   ersteLuecke  Abstand und Dauer der ersten weissen Uhr — so lang wie
-	//                die Stunde, damit sie „genauso schnell wie die erste
-	//                Uhr" ist
+	//   ersteDauer   Dauer der ersten weissen Uhr — so lang wie die Stunde,
+	//                damit sie „genauso schnell wie die erste Uhr" ist
+	//   naechsteBei  wann die naechste Uhr anfaengt, als Anteil der laufenden:
+	//                1 = wenn sie fertig ist, 0,5 = bei Halbzeit (Fred 21.09.:
+	//                „dass die naechste startet, wenn die Uhr zur Haelfte
+	//                fertig ist"). Der Abstand ist also Dauer mal naechsteBei,
+	//                die Dauer bleibt, die Starts ruecken zusammen.
 	//   dauerMin     kuerzeste Dauer einer Uhr; unterhalb laufen sie ueber-
 	//                lappend, weil die Abstaende weiter schrumpfen
 	//   lueckeMin    kleinster Abstand zwischen zwei Starts. OHNE diesen
@@ -74,7 +78,8 @@ const ZEIT = {
 	// 2,16 s Anfang heisst, nach den ersten paar Sekunden geht es sehr
 	// schnell — das ist Arithmetik, kein Regler. Wer das Finale weicher
 	// will, verlaengert uhrenDauer.
-	ersteLuecke: 2.16,
+	ersteDauer: 2.16,
+	naechsteBei: 0.5,
 	dauerMin: 0.3,
 	lueckeMin: 0.05,
 	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
@@ -765,10 +770,11 @@ import Layout from "../layouts/Layout.astro";
 		// GEOMETRISCHE BESCHLEUNIGUNG: Luecke_i = ersteLuecke · q^i. Der
 		// Faktor q wird so gesucht (Bisektion), dass die letzte Uhr genau bei
 		// uhrenEnde fertig ist: Summe der Luecken + Dauer der letzten = uhrenDauer.
-		const dauerVon = (luecke: number) => Math.max(ZEIT.dauerMin, luecke);
+		const dauerVon = (luecke: number) => Math.max(ZEIT.dauerMin, luecke / ZEIT.naechsteBei);
 		const lueckeVon = (roh: number) => Math.max(ZEIT.lueckeMin, roh);
+		const ersteLuecke = ZEIT.ersteDauer * ZEIT.naechsteBei;
 		const gesamt = (q: number) => {
-			let t = 0, g = ZEIT.ersteLuecke;
+			let t = 0, g = ersteLuecke;
 			for (let i = 0; i < N - 1; i++) { t += lueckeVon(g); g *= q; }
 			return t + dauerVon(lueckeVon(g));
 		};
@@ -776,7 +782,7 @@ import Layout from "../layouts/Layout.astro";
 		for (let k = 0; k < 60; k++) { const mid = (lo + hi) / 2; if (gesamt(mid) > ZEIT.uhrenDauer) hi = mid; else lo = mid; }
 		const q = (lo + hi) / 2;
 		const starts: number[] = [], dauern: number[] = [];
-		for (let i = 0, t = 0, g = ZEIT.ersteLuecke; i < N; i++, t += lueckeVon(g), g *= q) { starts.push(t); dauern.push(dauerVon(lueckeVon(g))); }
+		for (let i = 0, t = 0, g = ersteLuecke; i < N; i++, t += lueckeVon(g), g *= q) { starts.push(t); dauern.push(dauerVon(lueckeVon(g))); }
 		// Nur fuer die Fusszeile: wann sind 10, 50, 100 Uhren gestartet?
 		const wann = (n: number) => starts[Math.min(N - 1, n - 1)].toFixed(1);
 		const opt = { duration: ms, iterations: Infinity };
