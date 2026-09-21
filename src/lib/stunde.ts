@@ -73,6 +73,16 @@ export const BLATT = {
 	kleineMinuten: true, // Fred 21.09.: „Lass die mal drin" (Website)
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
+// Stoppuhr-Beschlag (Fred 21.09., Probe): Krone oben als T mit Hals,
+// je ein Druecker links und rechts bei 45 Grad. Masse in Anteilen des
+// Radius, abgeleitet aus Octicons / Noun 2624401 / UXWing (Recherche
+// 21.09.): Kappe 0,35 bis 0,6 r breit, Hals 0,15 bis 0,3 r, Knoepfe 0,15
+// bis 0,3 r ueber den Rand, Balken quer zur Radialrichtung.
+export const STOPPUHR = {
+	kappe: { breite: 0.42, hoehe: 0.16 },  // Deckel der Krone
+	hals: { breite: 0.2, hoehe: 0.14 },    // Steg zwischen Rand und Kappe
+	knopf: { breite: 0.28, hoehe: 0.13, hals: 0.1, halsBreite: 0.16, winkel: 45 }, // Druecker: Hals + Kappe, bei ±winkel
+};
 export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)
 
 // ── Geometrie ───────────────────────────────────────────────────────────

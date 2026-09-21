@@ -39,6 +39,11 @@ const N = uhren().length;
 					<option value="kachel" selected>Kachel (#212121)</option>
 					<option value="schwarz">Schwarz</option>
 				</select></label>
+			<label class="wk-feld"><span>Uhr</span>
+				<select data-uhr>
+					<option value="uhr" selected>Uhr (wie Website)</option>
+					<option value="stoppuhr">Stoppuhr (Probe)</option>
+				</select></label>
 			<label class="wk-feld"><span>Verlauf</span>
 				<select data-modus>
 					<option value="runde" selected>Ganze Runde (raus, rein, wie Website)</option>
@@ -71,7 +76,7 @@ const N = uhren().length;
 <script src="/werkzeug/gif.js" is:inline></script>
 
 <script>
-	import { ZEIT, KAMERA, UHR, BLATT, STRICH, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
+	import { ZEIT, KAMERA, UHR, BLATT, STRICH, STOPPUHR, VIEWBOX, marken, uhren, uhrenPlan, zustand } from "../lib/stunde";
 
 	const KACHEL = "#212121";
 	const WEISS = "#ffffff";
@@ -116,6 +121,21 @@ const N = uhren().length;
 		for (let i = 0; i < 4; i++) tick(ctx, cx, cy, r - 1 - BLATT.viertel.laenge, r - 1, (i * Math.PI) / 2);
 		ctx.stroke();
 	}
+	// Stoppuhr-Beschlag (Probe): Krone (Hals + Kappe) oben, Druecker bei ±45°
+	let stoppuhr = false;
+	function beschlag(ctx: CanvasRenderingContext2D, cx: number, cy: number, farbe: string) {
+		const r = UHR.r, S = STOPPUHR;
+		ctx.fillStyle = farbe;
+		const teil = (winkel: number, halsB: number, halsH: number, kappeB: number, kappeH: number) => {
+			ctx.save(); ctx.translate(cx, cy); ctx.rotate((winkel * Math.PI) / 180);
+			ctx.fillRect(-halsB * r / 2, -r - halsH * r, halsB * r, halsH * r + 1);
+			ctx.fillRect(-kappeB * r / 2, -r - halsH * r - kappeH * r, kappeB * r, kappeH * r);
+			ctx.restore();
+		};
+		teil(0, S.hals.breite, S.hals.hoehe, S.kappe.breite, S.kappe.hoehe);
+		teil(-S.knopf.winkel, S.knopf.halsBreite, S.knopf.hals, S.knopf.breite, S.knopf.hoehe);
+		teil(S.knopf.winkel, S.knopf.halsBreite, S.knopf.hals, S.knopf.breite, S.knopf.hoehe);
+	}
 	function stueck(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, anteil: number) {
 		if (anteil <= 0) return;
 		ctx.beginPath();
@@ -142,6 +162,7 @@ const N = uhren().length;
 		ctx.fillStyle = WEISS;
 		for (let i = 0; i < N; i++) stueck(ctx, punkte[i].x, punkte[i].y, UHR.r, z.anteile[i]);
 		for (let i = 0; i < N; i++) if (z.anteile[i] > 0) blatt(ctx, punkte[i].x, punkte[i].y, KACHEL, BLATT.kleineMinuten);
+		if (stoppuhr) for (let i = 0; i < N; i++) if (z.anteile[i] > 0) beschlag(ctx, punkte[i].x, punkte[i].y, WEISS);
 		// Dunkler Zeiger je weisser Uhr: dreht mit der Fuellung, steht am Ende auf 12
 		ctx.strokeStyle = KACHEL;
 		ctx.lineWidth = STRICH;
@@ -161,6 +182,7 @@ const N = uhren().length;
 			ctx.stroke();
 		}
 		ctx.globalAlpha = 1;
+		if (stoppuhr) beschlag(ctx, UHR.cx, UHR.cy, WEISS);
 		blatt(ctx, UHR.cx, UHR.cy, WEISS);
 		ctx.strokeStyle = WEISS;
 		ctx.lineWidth = STRICH;
@@ -182,6 +204,7 @@ const N = uhren().length;
 		striche: document.querySelector<HTMLSelectElement>("[data-striche]")!,
 		schnitt: document.querySelector<HTMLSelectElement>("[data-schnitt]")!,
 		modus: document.querySelector<HTMLSelectElement>("[data-modus]")!,
+		uhr: document.querySelector<HTMLSelectElement>("[data-uhr]")!,
 		schwarz: document.querySelector<HTMLInputElement>("[data-schwarz]")!,
 		status: document.querySelector<HTMLElement>("[data-status]")!,
 		knopf: document.querySelector<HTMLButtonElement>("[data-export]")!,
@@ -192,6 +215,7 @@ const N = uhren().length;
 	eingaben.striche.value = String(BLATT.minute.schritt);
 	eingaben.striche.addEventListener("change", () => { BLATT.minute.schritt = Number(eingaben.striche.value) || 1; });
 	eingaben.schnitt.addEventListener("change", () => { ZEIT.ausblenden = eingaben.schnitt.value === "hart" ? 0 : "wieRein"; neuRechnen(); });
+	eingaben.uhr.addEventListener("change", () => { stoppuhr = eingaben.uhr.value === "stoppuhr"; });
 	// Verlauf „schnitt" (Fred 21.09.): Rauszoomen, bis alle Uhren stehen
 	// (standEnde), dann alles auf einen Schlag weg, kurz Schwarz, von vorn.
 	const schnittModus = () => eingaben.modus.value === "schnitt";
@@ -273,7 +297,7 @@ const N = uhren().length;
 				gif.on("finished", (blob: Blob) => {
 					const url = URL.createObjectURL(blob);
 					const a = document.createElement("a");
-					a.href = url; a.download = `parley-stunde-${W}px-${fps}fps-${stufenWahl}stufen-${60 / BLATT.minute.schritt}striche-${eingaben.schnitt.value}-${eingaben.modus.value}-${Date.now()}.gif`; a.click();
+					a.href = url; a.download = `parley-stunde-${W}px-${fps}fps-${stufenWahl}stufen-${60 / BLATT.minute.schritt}striche-${eingaben.schnitt.value}-${eingaben.modus.value}-${eingaben.uhr.value}-${Date.now()}.gif`; a.click();
 					eingaben.status.textContent = `Fertig: ${(blob.size / 1024 / 1024).toFixed(1)} MB, ${gemalt} Bilder (${frames - gemalt} Standbilder zusammengelegt), ${laenge.toFixed(2)} s Schleife.`;
 					eingaben.status.dataset.fertig = String(blob.size);
 					eingaben.knopf.disabled = false;

@@ -247,7 +247,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 // Zeiten, Kurven, Kamera und Geometrie kommen aus src/lib/stunde.ts — EINE
 // BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
 // Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
-import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, marken, uhren as uhrenGeometrie } from "../lib/stunde";
+import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 const M = marken();
 const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 12)
@@ -258,8 +258,23 @@ const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraR
 
 interface Props {
 	fassung?: "brett" | "liste";
+	// Stoppuhr-Probe (Fred 21.09.): Krone + zwei Druecker an Stunde und
+	// allen kleinen Uhren; bezug2 ersetzt die Bezugszeile von Kachel 2.
+	stoppuhr?: boolean;
+	bezug2?: string;
 }
-const { fassung = "brett" } = Astro.props;
+const { fassung = "brett", stoppuhr = false, bezug2 } = Astro.props;
+// Beschlag-Rechtecke in viewBox-Einheiten, relativ zur Uhrmitte (x, y, w, h, drehung)
+const SP = STOPPUHR;
+const rr = UHR.r;
+const beschlag = [
+	{ x: -SP.hals.breite * rr / 2, y: -rr - SP.hals.hoehe * rr, w: SP.hals.breite * rr, h: SP.hals.hoehe * rr + 1, rot: 0 },
+	{ x: -SP.kappe.breite * rr / 2, y: -rr - SP.hals.hoehe * rr - SP.kappe.hoehe * rr, w: SP.kappe.breite * rr, h: SP.kappe.hoehe * rr, rot: 0 },
+	...[-SP.knopf.winkel, SP.knopf.winkel].flatMap((w) => [
+		{ x: -SP.knopf.halsBreite * rr / 2, y: -rr - SP.knopf.hals * rr, w: SP.knopf.halsBreite * rr, h: SP.knopf.hals * rr + 1, rot: w },
+		{ x: -SP.knopf.breite * rr / 2, y: -rr - SP.knopf.hals * rr - SP.knopf.hoehe * rr, w: SP.knopf.breite * rr, h: SP.knopf.hoehe * rr, rot: w },
+	]),
+];
 ---
 
 <section class="mo-sektion">
@@ -381,8 +396,14 @@ const { fassung = "brett" } = Astro.props;
 					   „Vertrauensaufbau auf allen Kanälen." Der erste Satz sagt nur
 					   noch, was uebergeben wird (Menge, Zustand), der zweite, wozu:
 					   das Vertrauens-Wort aus der Vertrauensthese kommt damit in die
-					   Kachel, und die Kanaele haengen am Zweck, nicht an der Zahl. */}
-					<p class="bezug">Ein Gespräch im Monat liefert mehr als 10 sendefertige Deliveries. Vertrauensaufbau auf allen Kanälen.</p>
+					   Kachel, und die Kanaele haengen am Zweck, nicht an der Zahl.
+					   SENDEFERTIG ALS ZWEITER SATZ (Fred 21.09., dritte Fassung des
+					   Tages, getippt): „Vertrauensaufbau" wieder raus, „sendefertig"
+					   wandert aus dem Beiwort in den Nachsatz — „Sendefertig für alle
+					   Kanäle." Der erste Satz ist damit nur noch Menge und Wort, der
+					   zweite der Zustand plus Reichweite. Fred tippte „für alle
+					   Kanälen"; gesetzt ist der Akkusativ „für alle Kanäle". */}
+					<p class="bezug">Ein Gespräch im Monat liefert mehr als 10 Deliveries. Sendefertig für alle Kanäle.</p>
 			</div>
 			<div class="kachel">
 			<div class="kachel-mitte kachel-mitte--brett">
@@ -440,7 +461,7 @@ const { fassung = "brett" } = Astro.props;
 				   100+" ist dann keine Behauptung mehr, sondern die Kurzform des
 				   Satzes darunter. Vorher musste der Leser raten, worauf sich die
 				   Eins bezieht. */}
-				<p class="bezug">Eine Stunde Aufnahme wird so zu mehr als 100 Stunden Zuschauerzeit.</p>
+				<p class="bezug">{bezug2 ?? "Eine Stunde Aufnahme wird so zu mehr als 100 Stunden Zuschauerzeit."}</p>
 			</div>
 			<div class="kachel">
 			<div class="kachel-mitte">
@@ -465,6 +486,11 @@ const { fassung = "brett" } = Astro.props;
 										<circle class="blatt blatt--dunkel fuenf" cx={u.x} cy={u.y} r={BLATT.fuenf.r} pathLength="12" stroke-dasharray={`${df} ${1 - df}`} stroke-dashoffset={df / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 										<circle class="blatt blatt--dunkel viertel" cx={u.x} cy={u.y} r={BLATT.viertel.r} pathLength="4" stroke-dasharray={`${dq} ${1 - dq}`} stroke-dashoffset={dq / 2} transform={`rotate(-90 ${u.x} ${u.y})`} />
 										<line class="zeiger" data-i={i} x1={u.x} y1={u.y} x2={u.x} y2={u.y - UHR.r} style={`transform-origin: ${u.x}px ${u.y}px`} />
+										{stoppuhr && (
+											<g class="beschlag beschlag--klein" data-i={i}>
+												{beschlag.map((b) => <rect x={u.x + b.x} y={u.y + b.y} width={b.w} height={b.h} transform={`rotate(${b.rot} ${u.x} ${u.y})`} />)}
+											</g>
+										)}
 									</>
 								))}
 							</g>
@@ -475,6 +501,11 @@ const { fassung = "brett" } = Astro.props;
 							<circle class="stunde-rand" cx={UHR.cx} cy={UHR.cy} r={UHR.r} pathLength="1" transform={`rotate(-90 ${UHR.cx} ${UHR.cy})`} />
 							<line class="speiche speiche--start" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
 							<line class="speiche speiche--lauf" x1={UHR.cx} y1={UHR.cy} x2={UHR.cx} y2={UHR.cy - UHR.r} />
+							{stoppuhr && (
+								<g class="beschlag beschlag--stunde">
+									{beschlag.map((b) => <rect x={UHR.cx + b.x} y={UHR.cy + b.y} width={b.w} height={b.h} transform={`rotate(${b.rot} ${UHR.cx} ${UHR.cy})`} />)}
+								</g>
+							)}
 						</g>
 					</svg>
 				</div>
@@ -1009,6 +1040,14 @@ const { fassung = "brett" } = Astro.props;
 	/* Dunkler Zeiger je weisser Uhr (Fred 21.09.): laeuft mit der Fuellung
 	   einmal herum und bleibt auf 12 stehen, wie der weisse der Stunde.
 	   Drehpunkt = Uhrmitte (inline transform-origin, view-box-Einheiten). */
+	/* Stoppuhr-Beschlag (Probe): Krone + Druecker als Rechtecke, weiss.
+	   Bei den kleinen Uhren erscheint er mit der Fuellung (Script). */
+	.beschlag rect {
+		fill: #ffffff;
+	}
+	.beschlag--klein {
+		opacity: 0;
+	}
 	.zeiger {
 		stroke: var(--kachel);
 		stroke-width: 2.5;
@@ -1428,6 +1467,7 @@ const { fassung = "brett" } = Astro.props;
 		const dauern = starts.map((t, i) => dauerVon(i < N - 1 ? starts[i + 1] - t : t - starts[i - 1]));
 		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde
 		const zeiger = Array.from(buehne.querySelectorAll<SVGLineElement>(".zeiger[data-i]"));
+		const beschlaege = Array.from(buehne.querySelectorAll<SVGGElement>(".beschlag--klein[data-i]"));
 		buehne.querySelectorAll<SVGCircleElement>(".scheibe[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
 			const s = M.uhrenStart + starts[i];
@@ -1450,7 +1490,17 @@ const { fassung = "brett" } = Astro.props;
 				{ transform: "rotate(0turn)", offset: ab, easing: K },
 				{ transform: "rotate(1turn)", offset: voll },
 				{ transform: "rotate(1turn)", offset: 1 },
-			], opt));
+				], opt));
+				// Stoppuhr-Probe: der Beschlag erscheint im ersten Zehntel der
+				// Fuellung und verschwindet mit dem Rundenende (leerVorEnde).
+				if (beschlaege[i]) anims.push(beschlaege[i].animate([
+					{ opacity: 0, offset: 0 },
+					{ opacity: 0, offset: ab },
+					{ opacity: 1, offset: ab + (voll - ab) * 0.1 },
+					{ opacity: 1, offset: leerVorEnde },
+					{ opacity: 0, offset: Math.min(1, leerVorEnde + 0.0001) },
+					{ opacity: 0, offset: 1 },
+				], opt));
 		});
 		return anims;
 	}

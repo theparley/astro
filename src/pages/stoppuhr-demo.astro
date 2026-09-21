@@ -1,0 +1,26 @@
+---
+// PROBE-SEITE (Fred 21.09.): die beiden Kacheln zweimal untereinander,
+// oben wie bisher (normale Uhr), unten als STOPPUHR (Krone + zwei
+// Druecker an Stunde und allen kleinen Uhren) mit der neuen Bezugszeile
+// „... messbarer Zuschauerzeit". Beide Fassungen kommen aus derselben
+// Komponente (Prop `stoppuhr`), damit nichts auseinanderlaufen kann.
+// Nicht verlinkt. Die Startseite bleibt unveraendert, bis Fred waehlt.
+import Layout from "../layouts/Layout.astro";
+import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
+---
+
+<Layout title="Stoppuhr-Probe">
+	<p class="marke">A · wie bisher: Uhr</p>
+	<MultiOutputKacheln />
+	<p class="marke">B · Stoppuhr</p>
+	<MultiOutputKacheln stoppuhr bezug2="Eine Stunde Aufnahme wird so zu mehr als 100 Stunden messbarer Zuschauerzeit." />
+</Layout>
+
+<style>
+	.marke {
+		color: var(--gray);
+		font-size: 0.95rem;
+		margin: 0;
+		padding: 40px clamp(16px, 3vw, 56px) 0;
+	}
+</style>
