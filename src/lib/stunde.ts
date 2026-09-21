@@ -122,7 +122,8 @@ export const DASH_STUNDE = { muster: [1.04, 2], leer: 1.04, voll: 0.04 };
 // nullVor: so viele Sekunden VOR dem Ende des Reinzoomens springt der
 // Zaehler auf 00 (Fred 21.09.: „kurz bevor das Reinzoomen fertig ist,
 // gib mir einen Wert zum Einstellen"). 0 = genau am Ende.
-export const STUNDE_TEXT = { einheit: "Min.", bis: 60, zahlGroesse: 0.95, zahlDy: 0.344, einheitGroesse: 0.14, einheitDy: 0.514, luecke: 0.06, nullVor: 0.4 }; // Fred 21.09.: 0,95 / 0,06; luecke in em, zahlDy = Versalhoehe/2
+// einheit "" = keine Einheit unter der Zahl (Fred 21.09.: „Minutenanzeige raus").
+export const STUNDE_TEXT = { einheit: "", bis: 60, zahlGroesse: 0.95, zahlDy: 0.344, einheitGroesse: 0.14, einheitDy: 0.514, luecke: 0.06, nullVor: 0.4 }; // Fred 21.09.: 0,95 / 0,06; luecke in em, zahlDy = Versalhoehe/2
 export function stundeMinuten(stundeAnteil: number) { return Math.min(STUNDE_TEXT.bis, Math.floor(stundeAnteil * STUNDE_TEXT.bis + 1e-6)); }
 
 // ── Geometrie ───────────────────────────────────────────────────────────

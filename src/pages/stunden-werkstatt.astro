@@ -194,7 +194,7 @@ const N = uhren().length;
 		// (stunde-glyphen.ts), identisch mit der Website
 		ctx.fillStyle = WEISS;
 		schrift(ctx, String(t >= m.reinEnde - (STUNDE_TEXT.nullVor ?? 0) ? 0 : stundeMinuten(z.stundeAnteil)).padStart(2, "0"), GLYPHEN.zahl, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.zahlDy, (UHR.r * STUNDE_TEXT.zahlGroesse) / GLYPHEN.upm, ZELLE, (STUNDE_TEXT.luecke ?? 0) * GLYPHEN.upm);
-		schrift(ctx, STUNDE_TEXT.einheit, GLYPHEN.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.einheitDy, (UHR.r * STUNDE_TEXT.einheitGroesse) / GLYPHEN.upm);
+		if (STUNDE_TEXT.einheit) schrift(ctx, STUNDE_TEXT.einheit, GLYPHEN.einheit, UHR.cx, UHR.cy + UHR.r * STUNDE_TEXT.einheitDy, (UHR.r * STUNDE_TEXT.einheitGroesse) / GLYPHEN.upm);
 		ctx.strokeStyle = WEISS;
 		ctx.lineWidth = STRICH;
 		ctx.beginPath();

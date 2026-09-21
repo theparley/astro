@@ -584,9 +584,11 @@ const beschlagStriche = [
 								<g class="stunde-zahl" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.zahlDy}) scale(${zahlS} ${-zahlS})`}>
 									{startZiffern.split("").map((c, i) => <path class="ziffer" data-slot={i} d={GLYPHEN.zahl[c as keyof typeof GLYPHEN.zahl].d} transform={`translate(${startLage[i]} 0)`} />)}
 								</g>
-								<g class="stunde-einheit" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.einheitDy}) scale(${einheitS} ${-einheitS})`}>
-									{einheitPfade.map((p) => <path d={p.d} transform={`translate(${p.x} 0)`} />)}
-								</g>
+								{ST.einheit && (
+									<g class="stunde-einheit" transform={`translate(${UHR.cx} ${UHR.cy + UHR.r * ST.einheitDy}) scale(${einheitS} ${-einheitS})`}>
+										{einheitPfade.map((p) => <path d={p.d} transform={`translate(${p.x} 0)`} />)}
+									</g>
+								)}
 							</g>
 							{stoppuhr && (
 								<g class="beschlag beschlag--stunde">
