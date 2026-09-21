@@ -35,9 +35,15 @@ const ZEIT = {
 	// Zahl in Sekunden setzt einen festen Zeitpunkt.
 	uhrenAbStunde: 0.5,
 	uhrenStart: "abStunde" as number | "abStunde",
-	uhrenDauer: 9.92,  // von der ersten bis zum Ende der letzten Uhr — 9,92 heisst: die
-	                   // letzte Uhr ist genau fertig, wenn die Kamera bei 11 s steht
-	                   // (Fred 21.09.); Beschleunigung +59 % je Sekunde. Kuerzer = steiler.
+	// Von der ersten bis zum Ende der letzten Uhr. "mitKamera" koppelt es an
+	// die Zoomfahrt: die letzte Uhr ist genau fertig, wenn die Kamera steht
+	// (Fred 21.09.: „wenn ich die Zoom-Zeit veraendere, soll sich die
+	// Uhrendauer automatisch anpassen"). Bei kameraRaus 11 sind das 9,92 s
+	// und +59 % je Sekunde; kuerzere Fahrt = steilere Beschleunigung. Eine
+	// Zahl in Sekunden macht es wieder unabhaengig. Achtung: kameraRaus muss
+	// dann eine Zahl sein — "letzteUhr" und "mitKamera" zugleich waere ein
+	// Kreis; in dem Fall gilt 9,92 als Rueckfall.
+	uhrenDauer: "mitKamera" as number | "mitKamera",
 	// RAMPE UND VERHAELTNIS (Fred 21.09.: „es fuehlt sich natuerlicher an,
 	// wenn es ein Verhaeltnis gaebe zwischen dem Ramp, wie die Uhren
 	// entstehen, und wie schnell die Uhren animiert werden"). Statt einer
@@ -105,8 +111,12 @@ const KAMERA = { start: 7, ende: 1.15 };
 
 // Abgeleitete Marken (Sekunden ab Rundenbeginn)
 const uhrenStart = ZEIT.uhrenStart === "abStunde" ? ZEIT.halt + ZEIT.stunde * ZEIT.uhrenAbStunde : ZEIT.uhrenStart;
-const uhrenEnde = uhrenStart + ZEIT.uhrenDauer;
 const kameraStart = ZEIT.halt + ZEIT.stunde * ZEIT.kameraAbStunde;
+const uhrenDauer =
+	ZEIT.uhrenDauer !== "mitKamera" ? ZEIT.uhrenDauer
+	: ZEIT.kameraRaus === "letzteUhr" ? 9.92
+	: kameraStart + ZEIT.kameraRaus - uhrenStart; // kameraVorsprung gilt nur fuer die Kopplung "letzteUhr"
+const uhrenEnde = uhrenStart + uhrenDauer;
 const M = {
 	halt: ZEIT.halt,
 	stundeEnde: ZEIT.halt + ZEIT.stunde,
@@ -117,7 +127,7 @@ const M = {
 };
 const standEnde = Math.max(M.uhrenEnde, M.kameraEnde) + ZEIT.stand;
 const RUNDE = Math.max(standEnde + ZEIT.ausblenden, standEnde + ZEIT.kameraRein) + ZEIT.nachlauf;
-const plan = JSON.stringify({ ZEIT, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N: 176 });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer }, KURVE, KURVE_RAUS, KAMERA, M, standEnde, RUNDE, N: 176 });
 
 // Geometrie: sieben Ringe um die Stunde, Abstand 90, je Ring round(2·pi·k)
 // Uhren — 176 insgesamt; beim Ende-Massstab 1,15 sind 96 ganz im Bild.
