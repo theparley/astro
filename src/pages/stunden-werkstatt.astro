@@ -189,7 +189,7 @@ const N = uhren().length;
 		}
 		ctx.globalAlpha = 1;
 		if (stoppuhr) beschlag(ctx, UHR.cx, UHR.cy, WEISS);
-		blatt(ctx, UHR.cx, UHR.cy, WEISS);
+		blatt(ctx, UHR.cx, UHR.cy, WEISS, BLATT.stundeMinuten);
 		// Zaehler „00 … 60 Min." mit dem Zeiger, immer sichtbar — als Umrisse
 		// (stunde-glyphen.ts), identisch mit der Website
 		ctx.fillStyle = WEISS;

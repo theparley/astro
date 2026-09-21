@@ -74,6 +74,9 @@ export const BLATT = {
 	// Minuten und Viertel bleiben), zum Anschauen auf der Startseite —
 	// weniger Malaufwand je Bild, die Stunde behaelt ihr volles Blatt.
 	kleineMinuten: false,
+	// Auch die Stunde ohne Minutenstriche (Fred 21.09.: „die kleinen Striche
+	// im Ziffernblatt raus"); Fuenf-Minuten und Viertel bleiben.
+	stundeMinuten: false,
 };
 export const STRICH = 2.5;   // Kontur der Stunde und Speichen
 // Zeiger der Stunde halbtransparent (Fred 21.09.: „mach den Zeiger mal
