@@ -1088,12 +1088,17 @@ const beschlagStriche = [
 	   DIV, und von dort erbten alle SVG-Kinder das Strichmuster, auch die
 	   Speichen (Fred 21.09., live: „der Strich, der den Zeiger anzeigt, ist
 	   jetzt gestrichelt"). */
-	.scheibe,
+	.scheibe {
+		fill: none;
+		stroke-dasharray: 1.04 2;
+		stroke-dashoffset: 1.06;
+	}
+	/* Stunde: 1,04 → 0,04, exakt synchron zum Zeiger (s. Script zeichnen). */
 	.stunde-fuellung,
 	.stunde-rand {
 		fill: none;
 		stroke-dasharray: 1.04 2;
-		stroke-dashoffset: 1.06;
+		stroke-dashoffset: 1.04;
 	}
 	.scheibe {
 		stroke: #ffffff;
@@ -1174,10 +1179,12 @@ const beschlagStriche = [
 		}
 
 
-		.scheibe,
+		.scheibe {
+			stroke-dashoffset: 0;
+		}
 		.stunde-fuellung,
 		.stunde-rand {
-			stroke-dashoffset: 0;
+			stroke-dashoffset: 0.04;
 		}
 	}
 </style>
@@ -1528,13 +1535,19 @@ const beschlagStriche = [
 		// Die Stunde zeichnet sich, der Zeiger dreht.
 		// Zaehler: immer da, kein Ein-/Ausblenden (Fred 21.09.); am Rundenwechsel
 		// springt er hart von 60 auf 00, wie eine Stoppuhr beim Nullstellen.
+		// SYNCHRON MIT DEM ZEIGER (Fred 21.09.: „der Kreis aussenrum laeuft
+		// linear?"): beide hatten dieselbe Kurve, aber der Rand lief 1,06 → 0
+		// bei Strichlaenge 1,04, also ueber 106 % des Umfangs, waehrend der
+		// Zeiger 100 % dreht — der Rand eilte bis zu 14 Grad voraus. Jetzt
+		// 1,04 → 0,04: Vorderkante exakt beim Zeiger (0 → 360 Grad). Die Naht
+		// bei 12 (Start und Schluss) liegt unter dem Zeiger, der dort steht.
 		const zeichnen = [
-			{ strokeDashoffset: 1.06, offset: 0 },
-			{ strokeDashoffset: 1.06, offset: o(M.halt), easing: K },
-			{ strokeDashoffset: 0, offset: o(M.stundeEnde) },
-			{ strokeDashoffset: 0, offset: leerVorEnde },
-			{ strokeDashoffset: 1.06, offset: Math.min(1, leerVorEnde + 0.0001) },
-			{ strokeDashoffset: 1.06, offset: 1 },
+			{ strokeDashoffset: 1.04, offset: 0 },
+			{ strokeDashoffset: 1.04, offset: o(M.halt), easing: K },
+			{ strokeDashoffset: 0.04, offset: o(M.stundeEnde) },
+			{ strokeDashoffset: 0.04, offset: leerVorEnde },
+			{ strokeDashoffset: 1.04, offset: Math.min(1, leerVorEnde + 0.0001) },
+			{ strokeDashoffset: 1.04, offset: 1 },
 		];
 		buehne.querySelectorAll<SVGCircleElement>(".stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(zeichnen, opt)));
 		const speiche = buehne.querySelector<SVGLineElement>(".speiche--lauf")!;
@@ -1567,7 +1580,7 @@ const beschlagStriche = [
 			const u = Math.max(0, Math.min(1, (t - M.halt) / (M.stundeEnde - M.halt)));
 			// Nullstellen kurz BEVOR das Reinzoomen fertig ist (M.reinEnde minus
 // STUNDE_TEXT.nullVor, Fred 21.09.), nicht erst am Rundenende.
-const n = t >= M.reinEnde - (P.STUNDE_TEXT.nullVor ?? 0) ? 0 : Math.min(P.STUNDE_TEXT.bis, Math.floor(kurveK(u) * P.STUNDE_TEXT.bis + 1e-6));
+			const n = t >= M.reinEnde - (P.STUNDE_TEXT.nullVor ?? 0) ? 0 : Math.min(P.STUNDE_TEXT.bis, Math.floor(kurveK(u) * P.STUNDE_TEXT.bis + 1e-6));
 			if (n !== zuletzt) { zuletzt = n; setzeZahl(String(n).padStart(2, "0")); } // „00" … „60" (Fred 21.09.)
 			requestAnimationFrame(zaehle);
 		};

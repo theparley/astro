@@ -94,7 +94,10 @@ export const STOPPUHR = {
 	// mehr nach Stoppuhr aus") oder "beide" (links und rechts).
 	knoepfe: "rechts" as "rechts" | "beide",
 };
-export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)
+export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick der kleinen Scheiben (Splitter/Spalt-frei)
+// Stunde: 1,04 → 0,04, damit die Vorderkante exakt mit dem Zeiger laeuft
+// (beide Naehte bei 12 liegen unter dem Zeiger). Fred 21.09.
+export const DASH_STUNDE = { muster: [1.04, 2], leer: 1.04, voll: 0.04 };
 // Beschriftung der Stunde (Fred 21.09.: „in die Uhr reinschreiben 60 Min.",
 // dann: „mitzaehlen, hochzaehlen, so wie der Zeiger sich bewegt"): unter
 // der Mitte, zaehlt 0 → 60 mit dem Zeiger (gleiche Kurve), steht dann.
