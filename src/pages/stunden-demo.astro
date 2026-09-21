@@ -1,32 +1,41 @@
 ---
-// PROBE-SEITE (Fred 21.09.): zwei Fassungen der Stunden-Kachel nebeneinander.
+// PROBE-SEITE (Fred 21.09.): drei Fassungen der Stunden-Kachel nebeneinander.
 //   A  der Live-Stand: eine Stunde, dann der hundertfach groessere Kreis
-//      (Flaeche 1:100). Markup und CSS werden beim Bauen der Seite aus
+//      (Flaeche 1:100). Markup und CSS werden beim Bauen aus
 //      MultiOutputKacheln.astro gezogen, nicht von Hand kopiert.
-//   B  Freds Idee, dritter Stand: dieselbe Stunde zeichnet sich, dann faehrt
-//      die Kamera zurueck und gibt ein RASTER aus Stunden frei — die eine
-//      bleibt schwarz, die anderen fuellen sich weiss, in Wellen von innen
-//      nach aussen, waehrend die Kamera faehrt. Menge durch Wiederholung
-//      statt durch Flaeche (Isotype, Neurath).
-//
-//      RASTER 11 x 13, STUNDE EXAKT MITTIG, RAND ANGESCHNITTEN (Fred 21.09.:
-//      „Es heisst ja auch 100+ … zoome so weit raus, dass die anderen
-//      Kacheln angeschnitten sind … ein bisschen weniger als 100 sehen wir
-//      jetzt und das andere koennte noch dazukommen"). Ungerade Zahl Spalten
-//      und Zeilen, damit die Stunde eine echte Mittelzelle hat — die Kamera
-//      braucht dann keine Fahrt mehr, sie skaliert um die Bildmitte.
-//      Abstaende: 100 in der Breite (10 Abstaende auf 1000), 104.167 in der
-//      Hoehe (12 Abstaende auf 1250) — 4 % Unterschied, unsichtbar, aber so
-//      liegen die aeussersten Mitten GENAU auf den Kachelkanten: links und
-//      rechts wie oben und unten stehen Halbkreise. Voll sichtbar 9 x 11 =
-//      99, dazu 44 angeschnittene. Das Plus in „100+" ist damit gezeigt,
-//      nicht behauptet.
-//      Wellen = Chebyshev-Abstand zur Mitte (1..6), je Ring eigene
-//      Keyframes statt animation-delay (ein Delay verschoebe den Rundenstart
-//      je Kreis, und am Rundenanfang staenden volle Scheiben).
-//   Beide Fassungen starten gleichzeitig (18 s, zehn Bandschritte).
-//   Kontrast-Schalter per Adresse: ?rand ?hell ?heller (kombinierbar).
-//   Nicht verlinkt.
+//   B  Raster 11 x 13, Stunde exakt mittig, Kanten angeschnitten. Voll
+//      sichtbar 9 x 11 = 99, dazu 44 angeschnittene. Freds Wahl vom 21.09.
+//      („die Variante mit den vielen kleinen Uhren: staerkere Aussage").
+//      Fuellung jetzt wie in C EINE NACH DER ANDEREN: die Zellen sind nach
+//      Ring (Chebyshev-Abstand 1..6) und darin nach Winkel ab zwoelf Uhr
+//      im Uhrzeigersinn sortiert — eine Spirale nach aussen, die um jedes
+//      Quadrat einmal herumlaeuft. Fenster je Ring 5,5 %, versetzt um
+//      5,3 %, je Uhr 1,5 %; Ring 1 ab 18 %, Ring 6 bis 50 %.
+//      Die Wellen-Fassung (sechs Ringe auf einmal, mit Naht-Deckeln)
+//      bleibt per ?wellen abrufbar — so lassen sich beide Rhythmen
+//      vergleichen.
+//   C  RUND STATT RASTER, EINE NACH DER ANDEREN (Fred 21.09.: „ob wir die
+//      Uhren eine nach der anderen animieren koennen … vielleicht ein
+//      rundes Design, kein Raster, und im Kreis die Uhr animieren").
+//      Sieben konzentrische Ringe um die Stunde, Abstand 90, je Ring
+//      round(2·pi·k) Uhren gleichmaessig verteilt — Nachbarabstand also
+//      ueberall rund 90. Ring 1..5 liegen ganz in der Kachel (94 Uhren),
+//      Ring 6 wird links und rechts angeschnitten, Ring 7 rundum. Das
+//      Plus in „100+" ist damit wieder gezeigt.
+//      Die Uhren fuellen sich EINZELN, im Uhrzeigersinn ab zwoelf Uhr,
+//      Ring fuer Ring von innen nach aussen — wie ein Zeiger, der ueber
+//      jeden Ring einmal herumgeht. Zeitfenster je Ring 5 % der Runde,
+//      versetzt um 4,5 %, jede Uhr braucht 1,5 %. Ring 1 startet bei 18 %,
+//      Ring 7 endet bei 50 % — genau, wenn die Kamera in Ruhe ist.
+//      176 Uhren, 176 eigene Zeitfenster: das geht nicht mehr
+//      mit CSS-Keyframes je Uhr, sondern ueber die Web Animations API —
+//      jede Uhr bekommt EINE 18-s-Animation mit vier Marken (0, Start,
+//      Ende, 1), alle im selben Bild gestartet wie die CSS-Animationen der
+//      Kamera. Kein animation-delay, sonst verschoebe sich der Rundenstart
+//      je Uhr.
+//      Kein Naht-Deckel noetig: der Strich schiesst 4 % ueber zwoelf Uhr
+//      hinaus und deckt die Naht selbst.
+//   Alle starten gleichzeitig (18 s). Schalter: ?rand ?hell ?heller ?ohneblatt.
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -60,7 +69,7 @@ import Layout from "../layouts/Layout.astro";
 				</div>
 			</div>
 			<div>
-				<p class="hinweis">B — Raster 11 × 13: 99 voll, Rand angeschnitten</p>
+				<p class="hinweis">B — Rechteck 11 × 13, eine nach der anderen als Spirale</p>
 				<div class="kachel">
 					<div class="buehne variante-b" data-probe>
 						<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -207,148 +216,148 @@ import Layout from "../layouts/Layout.astro";
 								<circle class="feld-voll ring-6" cx="800" cy="1250" r="34" />
 								<circle class="feld-voll ring-6" cx="900" cy="1250" r="34" />
 								<circle class="feld-voll ring-6" cx="1000" cy="1250" r="34" />
-								<circle class="feld ring-6" cx="0" cy="0" r="17" pathLength="1" transform="rotate(-90 0 0)" />
-								<circle class="feld ring-6" cx="100" cy="0" r="17" pathLength="1" transform="rotate(-90 100 0)" />
-								<circle class="feld ring-6" cx="200" cy="0" r="17" pathLength="1" transform="rotate(-90 200 0)" />
-								<circle class="feld ring-6" cx="300" cy="0" r="17" pathLength="1" transform="rotate(-90 300 0)" />
-								<circle class="feld ring-6" cx="400" cy="0" r="17" pathLength="1" transform="rotate(-90 400 0)" />
-								<circle class="feld ring-6" cx="500" cy="0" r="17" pathLength="1" transform="rotate(-90 500 0)" />
-								<circle class="feld ring-6" cx="600" cy="0" r="17" pathLength="1" transform="rotate(-90 600 0)" />
-								<circle class="feld ring-6" cx="700" cy="0" r="17" pathLength="1" transform="rotate(-90 700 0)" />
-								<circle class="feld ring-6" cx="800" cy="0" r="17" pathLength="1" transform="rotate(-90 800 0)" />
-								<circle class="feld ring-6" cx="900" cy="0" r="17" pathLength="1" transform="rotate(-90 900 0)" />
-								<circle class="feld ring-6" cx="1000" cy="0" r="17" pathLength="1" transform="rotate(-90 1000 0)" />
-								<circle class="feld ring-5" cx="0" cy="104.167" r="17" pathLength="1" transform="rotate(-90 0 104.167)" />
-								<circle class="feld ring-5" cx="100" cy="104.167" r="17" pathLength="1" transform="rotate(-90 100 104.167)" />
-								<circle class="feld ring-5" cx="200" cy="104.167" r="17" pathLength="1" transform="rotate(-90 200 104.167)" />
-								<circle class="feld ring-5" cx="300" cy="104.167" r="17" pathLength="1" transform="rotate(-90 300 104.167)" />
-								<circle class="feld ring-5" cx="400" cy="104.167" r="17" pathLength="1" transform="rotate(-90 400 104.167)" />
-								<circle class="feld ring-5" cx="500" cy="104.167" r="17" pathLength="1" transform="rotate(-90 500 104.167)" />
-								<circle class="feld ring-5" cx="600" cy="104.167" r="17" pathLength="1" transform="rotate(-90 600 104.167)" />
-								<circle class="feld ring-5" cx="700" cy="104.167" r="17" pathLength="1" transform="rotate(-90 700 104.167)" />
-								<circle class="feld ring-5" cx="800" cy="104.167" r="17" pathLength="1" transform="rotate(-90 800 104.167)" />
-								<circle class="feld ring-5" cx="900" cy="104.167" r="17" pathLength="1" transform="rotate(-90 900 104.167)" />
-								<circle class="feld ring-5" cx="1000" cy="104.167" r="17" pathLength="1" transform="rotate(-90 1000 104.167)" />
-								<circle class="feld ring-5" cx="0" cy="208.333" r="17" pathLength="1" transform="rotate(-90 0 208.333)" />
-								<circle class="feld ring-4" cx="100" cy="208.333" r="17" pathLength="1" transform="rotate(-90 100 208.333)" />
-								<circle class="feld ring-4" cx="200" cy="208.333" r="17" pathLength="1" transform="rotate(-90 200 208.333)" />
-								<circle class="feld ring-4" cx="300" cy="208.333" r="17" pathLength="1" transform="rotate(-90 300 208.333)" />
-								<circle class="feld ring-4" cx="400" cy="208.333" r="17" pathLength="1" transform="rotate(-90 400 208.333)" />
-								<circle class="feld ring-4" cx="500" cy="208.333" r="17" pathLength="1" transform="rotate(-90 500 208.333)" />
-								<circle class="feld ring-4" cx="600" cy="208.333" r="17" pathLength="1" transform="rotate(-90 600 208.333)" />
-								<circle class="feld ring-4" cx="700" cy="208.333" r="17" pathLength="1" transform="rotate(-90 700 208.333)" />
-								<circle class="feld ring-4" cx="800" cy="208.333" r="17" pathLength="1" transform="rotate(-90 800 208.333)" />
-								<circle class="feld ring-4" cx="900" cy="208.333" r="17" pathLength="1" transform="rotate(-90 900 208.333)" />
-								<circle class="feld ring-5" cx="1000" cy="208.333" r="17" pathLength="1" transform="rotate(-90 1000 208.333)" />
-								<circle class="feld ring-5" cx="0" cy="312.5" r="17" pathLength="1" transform="rotate(-90 0 312.5)" />
-								<circle class="feld ring-4" cx="100" cy="312.5" r="17" pathLength="1" transform="rotate(-90 100 312.5)" />
-								<circle class="feld ring-3" cx="200" cy="312.5" r="17" pathLength="1" transform="rotate(-90 200 312.5)" />
-								<circle class="feld ring-3" cx="300" cy="312.5" r="17" pathLength="1" transform="rotate(-90 300 312.5)" />
-								<circle class="feld ring-3" cx="400" cy="312.5" r="17" pathLength="1" transform="rotate(-90 400 312.5)" />
-								<circle class="feld ring-3" cx="500" cy="312.5" r="17" pathLength="1" transform="rotate(-90 500 312.5)" />
-								<circle class="feld ring-3" cx="600" cy="312.5" r="17" pathLength="1" transform="rotate(-90 600 312.5)" />
-								<circle class="feld ring-3" cx="700" cy="312.5" r="17" pathLength="1" transform="rotate(-90 700 312.5)" />
-								<circle class="feld ring-3" cx="800" cy="312.5" r="17" pathLength="1" transform="rotate(-90 800 312.5)" />
-								<circle class="feld ring-4" cx="900" cy="312.5" r="17" pathLength="1" transform="rotate(-90 900 312.5)" />
-								<circle class="feld ring-5" cx="1000" cy="312.5" r="17" pathLength="1" transform="rotate(-90 1000 312.5)" />
-								<circle class="feld ring-5" cx="0" cy="416.667" r="17" pathLength="1" transform="rotate(-90 0 416.667)" />
-								<circle class="feld ring-4" cx="100" cy="416.667" r="17" pathLength="1" transform="rotate(-90 100 416.667)" />
-								<circle class="feld ring-3" cx="200" cy="416.667" r="17" pathLength="1" transform="rotate(-90 200 416.667)" />
-								<circle class="feld ring-2" cx="300" cy="416.667" r="17" pathLength="1" transform="rotate(-90 300 416.667)" />
-								<circle class="feld ring-2" cx="400" cy="416.667" r="17" pathLength="1" transform="rotate(-90 400 416.667)" />
-								<circle class="feld ring-2" cx="500" cy="416.667" r="17" pathLength="1" transform="rotate(-90 500 416.667)" />
-								<circle class="feld ring-2" cx="600" cy="416.667" r="17" pathLength="1" transform="rotate(-90 600 416.667)" />
-								<circle class="feld ring-2" cx="700" cy="416.667" r="17" pathLength="1" transform="rotate(-90 700 416.667)" />
-								<circle class="feld ring-3" cx="800" cy="416.667" r="17" pathLength="1" transform="rotate(-90 800 416.667)" />
-								<circle class="feld ring-4" cx="900" cy="416.667" r="17" pathLength="1" transform="rotate(-90 900 416.667)" />
-								<circle class="feld ring-5" cx="1000" cy="416.667" r="17" pathLength="1" transform="rotate(-90 1000 416.667)" />
-								<circle class="feld ring-5" cx="0" cy="520.833" r="17" pathLength="1" transform="rotate(-90 0 520.833)" />
-								<circle class="feld ring-4" cx="100" cy="520.833" r="17" pathLength="1" transform="rotate(-90 100 520.833)" />
-								<circle class="feld ring-3" cx="200" cy="520.833" r="17" pathLength="1" transform="rotate(-90 200 520.833)" />
-								<circle class="feld ring-2" cx="300" cy="520.833" r="17" pathLength="1" transform="rotate(-90 300 520.833)" />
-								<circle class="feld ring-1" cx="400" cy="520.833" r="17" pathLength="1" transform="rotate(-90 400 520.833)" />
-								<circle class="feld ring-1" cx="500" cy="520.833" r="17" pathLength="1" transform="rotate(-90 500 520.833)" />
-								<circle class="feld ring-1" cx="600" cy="520.833" r="17" pathLength="1" transform="rotate(-90 600 520.833)" />
-								<circle class="feld ring-2" cx="700" cy="520.833" r="17" pathLength="1" transform="rotate(-90 700 520.833)" />
-								<circle class="feld ring-3" cx="800" cy="520.833" r="17" pathLength="1" transform="rotate(-90 800 520.833)" />
-								<circle class="feld ring-4" cx="900" cy="520.833" r="17" pathLength="1" transform="rotate(-90 900 520.833)" />
-								<circle class="feld ring-5" cx="1000" cy="520.833" r="17" pathLength="1" transform="rotate(-90 1000 520.833)" />
-								<circle class="feld ring-5" cx="0" cy="625" r="17" pathLength="1" transform="rotate(-90 0 625)" />
-								<circle class="feld ring-4" cx="100" cy="625" r="17" pathLength="1" transform="rotate(-90 100 625)" />
-								<circle class="feld ring-3" cx="200" cy="625" r="17" pathLength="1" transform="rotate(-90 200 625)" />
-								<circle class="feld ring-2" cx="300" cy="625" r="17" pathLength="1" transform="rotate(-90 300 625)" />
-								<circle class="feld ring-1" cx="400" cy="625" r="17" pathLength="1" transform="rotate(-90 400 625)" />
-								<circle class="feld ring-1" cx="600" cy="625" r="17" pathLength="1" transform="rotate(-90 600 625)" />
-								<circle class="feld ring-2" cx="700" cy="625" r="17" pathLength="1" transform="rotate(-90 700 625)" />
-								<circle class="feld ring-3" cx="800" cy="625" r="17" pathLength="1" transform="rotate(-90 800 625)" />
-								<circle class="feld ring-4" cx="900" cy="625" r="17" pathLength="1" transform="rotate(-90 900 625)" />
-								<circle class="feld ring-5" cx="1000" cy="625" r="17" pathLength="1" transform="rotate(-90 1000 625)" />
-								<circle class="feld ring-5" cx="0" cy="729.167" r="17" pathLength="1" transform="rotate(-90 0 729.167)" />
-								<circle class="feld ring-4" cx="100" cy="729.167" r="17" pathLength="1" transform="rotate(-90 100 729.167)" />
-								<circle class="feld ring-3" cx="200" cy="729.167" r="17" pathLength="1" transform="rotate(-90 200 729.167)" />
-								<circle class="feld ring-2" cx="300" cy="729.167" r="17" pathLength="1" transform="rotate(-90 300 729.167)" />
-								<circle class="feld ring-1" cx="400" cy="729.167" r="17" pathLength="1" transform="rotate(-90 400 729.167)" />
-								<circle class="feld ring-1" cx="500" cy="729.167" r="17" pathLength="1" transform="rotate(-90 500 729.167)" />
-								<circle class="feld ring-1" cx="600" cy="729.167" r="17" pathLength="1" transform="rotate(-90 600 729.167)" />
-								<circle class="feld ring-2" cx="700" cy="729.167" r="17" pathLength="1" transform="rotate(-90 700 729.167)" />
-								<circle class="feld ring-3" cx="800" cy="729.167" r="17" pathLength="1" transform="rotate(-90 800 729.167)" />
-								<circle class="feld ring-4" cx="900" cy="729.167" r="17" pathLength="1" transform="rotate(-90 900 729.167)" />
-								<circle class="feld ring-5" cx="1000" cy="729.167" r="17" pathLength="1" transform="rotate(-90 1000 729.167)" />
-								<circle class="feld ring-5" cx="0" cy="833.333" r="17" pathLength="1" transform="rotate(-90 0 833.333)" />
-								<circle class="feld ring-4" cx="100" cy="833.333" r="17" pathLength="1" transform="rotate(-90 100 833.333)" />
-								<circle class="feld ring-3" cx="200" cy="833.333" r="17" pathLength="1" transform="rotate(-90 200 833.333)" />
-								<circle class="feld ring-2" cx="300" cy="833.333" r="17" pathLength="1" transform="rotate(-90 300 833.333)" />
-								<circle class="feld ring-2" cx="400" cy="833.333" r="17" pathLength="1" transform="rotate(-90 400 833.333)" />
-								<circle class="feld ring-2" cx="500" cy="833.333" r="17" pathLength="1" transform="rotate(-90 500 833.333)" />
-								<circle class="feld ring-2" cx="600" cy="833.333" r="17" pathLength="1" transform="rotate(-90 600 833.333)" />
-								<circle class="feld ring-2" cx="700" cy="833.333" r="17" pathLength="1" transform="rotate(-90 700 833.333)" />
-								<circle class="feld ring-3" cx="800" cy="833.333" r="17" pathLength="1" transform="rotate(-90 800 833.333)" />
-								<circle class="feld ring-4" cx="900" cy="833.333" r="17" pathLength="1" transform="rotate(-90 900 833.333)" />
-								<circle class="feld ring-5" cx="1000" cy="833.333" r="17" pathLength="1" transform="rotate(-90 1000 833.333)" />
-								<circle class="feld ring-5" cx="0" cy="937.5" r="17" pathLength="1" transform="rotate(-90 0 937.5)" />
-								<circle class="feld ring-4" cx="100" cy="937.5" r="17" pathLength="1" transform="rotate(-90 100 937.5)" />
-								<circle class="feld ring-3" cx="200" cy="937.5" r="17" pathLength="1" transform="rotate(-90 200 937.5)" />
-								<circle class="feld ring-3" cx="300" cy="937.5" r="17" pathLength="1" transform="rotate(-90 300 937.5)" />
-								<circle class="feld ring-3" cx="400" cy="937.5" r="17" pathLength="1" transform="rotate(-90 400 937.5)" />
-								<circle class="feld ring-3" cx="500" cy="937.5" r="17" pathLength="1" transform="rotate(-90 500 937.5)" />
-								<circle class="feld ring-3" cx="600" cy="937.5" r="17" pathLength="1" transform="rotate(-90 600 937.5)" />
-								<circle class="feld ring-3" cx="700" cy="937.5" r="17" pathLength="1" transform="rotate(-90 700 937.5)" />
-								<circle class="feld ring-3" cx="800" cy="937.5" r="17" pathLength="1" transform="rotate(-90 800 937.5)" />
-								<circle class="feld ring-4" cx="900" cy="937.5" r="17" pathLength="1" transform="rotate(-90 900 937.5)" />
-								<circle class="feld ring-5" cx="1000" cy="937.5" r="17" pathLength="1" transform="rotate(-90 1000 937.5)" />
-								<circle class="feld ring-5" cx="0" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 0 1041.67)" />
-								<circle class="feld ring-4" cx="100" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 100 1041.67)" />
-								<circle class="feld ring-4" cx="200" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 200 1041.67)" />
-								<circle class="feld ring-4" cx="300" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 300 1041.67)" />
-								<circle class="feld ring-4" cx="400" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 400 1041.67)" />
-								<circle class="feld ring-4" cx="500" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 500 1041.67)" />
-								<circle class="feld ring-4" cx="600" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 600 1041.67)" />
-								<circle class="feld ring-4" cx="700" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 700 1041.67)" />
-								<circle class="feld ring-4" cx="800" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 800 1041.67)" />
-								<circle class="feld ring-4" cx="900" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 900 1041.67)" />
-								<circle class="feld ring-5" cx="1000" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 1000 1041.67)" />
-								<circle class="feld ring-5" cx="0" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 0 1145.83)" />
-								<circle class="feld ring-5" cx="100" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 100 1145.83)" />
-								<circle class="feld ring-5" cx="200" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 200 1145.83)" />
-								<circle class="feld ring-5" cx="300" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 300 1145.83)" />
-								<circle class="feld ring-5" cx="400" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 400 1145.83)" />
-								<circle class="feld ring-5" cx="500" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 500 1145.83)" />
-								<circle class="feld ring-5" cx="600" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 600 1145.83)" />
-								<circle class="feld ring-5" cx="700" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 700 1145.83)" />
-								<circle class="feld ring-5" cx="800" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 800 1145.83)" />
-								<circle class="feld ring-5" cx="900" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 900 1145.83)" />
-								<circle class="feld ring-5" cx="1000" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 1000 1145.83)" />
-								<circle class="feld ring-6" cx="0" cy="1250" r="17" pathLength="1" transform="rotate(-90 0 1250)" />
-								<circle class="feld ring-6" cx="100" cy="1250" r="17" pathLength="1" transform="rotate(-90 100 1250)" />
-								<circle class="feld ring-6" cx="200" cy="1250" r="17" pathLength="1" transform="rotate(-90 200 1250)" />
-								<circle class="feld ring-6" cx="300" cy="1250" r="17" pathLength="1" transform="rotate(-90 300 1250)" />
-								<circle class="feld ring-6" cx="400" cy="1250" r="17" pathLength="1" transform="rotate(-90 400 1250)" />
-								<circle class="feld ring-6" cx="500" cy="1250" r="17" pathLength="1" transform="rotate(-90 500 1250)" />
-								<circle class="feld ring-6" cx="600" cy="1250" r="17" pathLength="1" transform="rotate(-90 600 1250)" />
-								<circle class="feld ring-6" cx="700" cy="1250" r="17" pathLength="1" transform="rotate(-90 700 1250)" />
-								<circle class="feld ring-6" cx="800" cy="1250" r="17" pathLength="1" transform="rotate(-90 800 1250)" />
-								<circle class="feld ring-6" cx="900" cy="1250" r="17" pathLength="1" transform="rotate(-90 900 1250)" />
-								<circle class="feld ring-6" cx="1000" cy="1250" r="17" pathLength="1" transform="rotate(-90 1000 1250)" />
+								<circle class="feld ring-1" data-s="0.1800" data-e="0.1950" cx="500" cy="520.833" r="17" pathLength="1" transform="rotate(-90 500 520.833)" />
+								<circle class="feld ring-1" data-s="0.1850" data-e="0.2000" cx="600" cy="520.833" r="17" pathLength="1" transform="rotate(-90 600 520.833)" />
+								<circle class="feld ring-1" data-s="0.1900" data-e="0.2050" cx="600" cy="625" r="17" pathLength="1" transform="rotate(-90 600 625)" />
+								<circle class="feld ring-1" data-s="0.1950" data-e="0.2100" cx="600" cy="729.167" r="17" pathLength="1" transform="rotate(-90 600 729.167)" />
+								<circle class="feld ring-1" data-s="0.2000" data-e="0.2150" cx="500" cy="729.167" r="17" pathLength="1" transform="rotate(-90 500 729.167)" />
+								<circle class="feld ring-1" data-s="0.2050" data-e="0.2200" cx="400" cy="729.167" r="17" pathLength="1" transform="rotate(-90 400 729.167)" />
+								<circle class="feld ring-1" data-s="0.2100" data-e="0.2250" cx="400" cy="625" r="17" pathLength="1" transform="rotate(-90 400 625)" />
+								<circle class="feld ring-1" data-s="0.2150" data-e="0.2300" cx="400" cy="520.833" r="17" pathLength="1" transform="rotate(-90 400 520.833)" />
+								<circle class="feld ring-2" data-s="0.2330" data-e="0.2480" cx="500" cy="416.667" r="17" pathLength="1" transform="rotate(-90 500 416.667)" />
+								<circle class="feld ring-2" data-s="0.2355" data-e="0.2505" cx="600" cy="416.667" r="17" pathLength="1" transform="rotate(-90 600 416.667)" />
+								<circle class="feld ring-2" data-s="0.2380" data-e="0.2530" cx="700" cy="416.667" r="17" pathLength="1" transform="rotate(-90 700 416.667)" />
+								<circle class="feld ring-2" data-s="0.2405" data-e="0.2555" cx="700" cy="520.833" r="17" pathLength="1" transform="rotate(-90 700 520.833)" />
+								<circle class="feld ring-2" data-s="0.2430" data-e="0.2580" cx="700" cy="625" r="17" pathLength="1" transform="rotate(-90 700 625)" />
+								<circle class="feld ring-2" data-s="0.2455" data-e="0.2605" cx="700" cy="729.167" r="17" pathLength="1" transform="rotate(-90 700 729.167)" />
+								<circle class="feld ring-2" data-s="0.2480" data-e="0.2630" cx="700" cy="833.333" r="17" pathLength="1" transform="rotate(-90 700 833.333)" />
+								<circle class="feld ring-2" data-s="0.2505" data-e="0.2655" cx="600" cy="833.333" r="17" pathLength="1" transform="rotate(-90 600 833.333)" />
+								<circle class="feld ring-2" data-s="0.2530" data-e="0.2680" cx="500" cy="833.333" r="17" pathLength="1" transform="rotate(-90 500 833.333)" />
+								<circle class="feld ring-2" data-s="0.2555" data-e="0.2705" cx="400" cy="833.333" r="17" pathLength="1" transform="rotate(-90 400 833.333)" />
+								<circle class="feld ring-2" data-s="0.2580" data-e="0.2730" cx="300" cy="833.333" r="17" pathLength="1" transform="rotate(-90 300 833.333)" />
+								<circle class="feld ring-2" data-s="0.2605" data-e="0.2755" cx="300" cy="729.167" r="17" pathLength="1" transform="rotate(-90 300 729.167)" />
+								<circle class="feld ring-2" data-s="0.2630" data-e="0.2780" cx="300" cy="625" r="17" pathLength="1" transform="rotate(-90 300 625)" />
+								<circle class="feld ring-2" data-s="0.2655" data-e="0.2805" cx="300" cy="520.833" r="17" pathLength="1" transform="rotate(-90 300 520.833)" />
+								<circle class="feld ring-2" data-s="0.2680" data-e="0.2830" cx="300" cy="416.667" r="17" pathLength="1" transform="rotate(-90 300 416.667)" />
+								<circle class="feld ring-2" data-s="0.2705" data-e="0.2855" cx="400" cy="416.667" r="17" pathLength="1" transform="rotate(-90 400 416.667)" />
+								<circle class="feld ring-3" data-s="0.2860" data-e="0.3010" cx="500" cy="312.5" r="17" pathLength="1" transform="rotate(-90 500 312.5)" />
+								<circle class="feld ring-3" data-s="0.2877" data-e="0.3027" cx="600" cy="312.5" r="17" pathLength="1" transform="rotate(-90 600 312.5)" />
+								<circle class="feld ring-3" data-s="0.2893" data-e="0.3043" cx="700" cy="312.5" r="17" pathLength="1" transform="rotate(-90 700 312.5)" />
+								<circle class="feld ring-3" data-s="0.2910" data-e="0.3060" cx="800" cy="312.5" r="17" pathLength="1" transform="rotate(-90 800 312.5)" />
+								<circle class="feld ring-3" data-s="0.2927" data-e="0.3077" cx="800" cy="416.667" r="17" pathLength="1" transform="rotate(-90 800 416.667)" />
+								<circle class="feld ring-3" data-s="0.2943" data-e="0.3093" cx="800" cy="520.833" r="17" pathLength="1" transform="rotate(-90 800 520.833)" />
+								<circle class="feld ring-3" data-s="0.2960" data-e="0.3110" cx="800" cy="625" r="17" pathLength="1" transform="rotate(-90 800 625)" />
+								<circle class="feld ring-3" data-s="0.2977" data-e="0.3127" cx="800" cy="729.167" r="17" pathLength="1" transform="rotate(-90 800 729.167)" />
+								<circle class="feld ring-3" data-s="0.2993" data-e="0.3143" cx="800" cy="833.333" r="17" pathLength="1" transform="rotate(-90 800 833.333)" />
+								<circle class="feld ring-3" data-s="0.3010" data-e="0.3160" cx="800" cy="937.5" r="17" pathLength="1" transform="rotate(-90 800 937.5)" />
+								<circle class="feld ring-3" data-s="0.3027" data-e="0.3177" cx="700" cy="937.5" r="17" pathLength="1" transform="rotate(-90 700 937.5)" />
+								<circle class="feld ring-3" data-s="0.3043" data-e="0.3193" cx="600" cy="937.5" r="17" pathLength="1" transform="rotate(-90 600 937.5)" />
+								<circle class="feld ring-3" data-s="0.3060" data-e="0.3210" cx="500" cy="937.5" r="17" pathLength="1" transform="rotate(-90 500 937.5)" />
+								<circle class="feld ring-3" data-s="0.3077" data-e="0.3227" cx="400" cy="937.5" r="17" pathLength="1" transform="rotate(-90 400 937.5)" />
+								<circle class="feld ring-3" data-s="0.3093" data-e="0.3243" cx="300" cy="937.5" r="17" pathLength="1" transform="rotate(-90 300 937.5)" />
+								<circle class="feld ring-3" data-s="0.3110" data-e="0.3260" cx="200" cy="937.5" r="17" pathLength="1" transform="rotate(-90 200 937.5)" />
+								<circle class="feld ring-3" data-s="0.3127" data-e="0.3277" cx="200" cy="833.333" r="17" pathLength="1" transform="rotate(-90 200 833.333)" />
+								<circle class="feld ring-3" data-s="0.3143" data-e="0.3293" cx="200" cy="729.167" r="17" pathLength="1" transform="rotate(-90 200 729.167)" />
+								<circle class="feld ring-3" data-s="0.3160" data-e="0.3310" cx="200" cy="625" r="17" pathLength="1" transform="rotate(-90 200 625)" />
+								<circle class="feld ring-3" data-s="0.3177" data-e="0.3327" cx="200" cy="520.833" r="17" pathLength="1" transform="rotate(-90 200 520.833)" />
+								<circle class="feld ring-3" data-s="0.3193" data-e="0.3343" cx="200" cy="416.667" r="17" pathLength="1" transform="rotate(-90 200 416.667)" />
+								<circle class="feld ring-3" data-s="0.3210" data-e="0.3360" cx="200" cy="312.5" r="17" pathLength="1" transform="rotate(-90 200 312.5)" />
+								<circle class="feld ring-3" data-s="0.3227" data-e="0.3377" cx="300" cy="312.5" r="17" pathLength="1" transform="rotate(-90 300 312.5)" />
+								<circle class="feld ring-3" data-s="0.3243" data-e="0.3393" cx="400" cy="312.5" r="17" pathLength="1" transform="rotate(-90 400 312.5)" />
+								<circle class="feld ring-4" data-s="0.3390" data-e="0.3540" cx="500" cy="208.333" r="17" pathLength="1" transform="rotate(-90 500 208.333)" />
+								<circle class="feld ring-4" data-s="0.3402" data-e="0.3553" cx="600" cy="208.333" r="17" pathLength="1" transform="rotate(-90 600 208.333)" />
+								<circle class="feld ring-4" data-s="0.3415" data-e="0.3565" cx="700" cy="208.333" r="17" pathLength="1" transform="rotate(-90 700 208.333)" />
+								<circle class="feld ring-4" data-s="0.3427" data-e="0.3578" cx="800" cy="208.333" r="17" pathLength="1" transform="rotate(-90 800 208.333)" />
+								<circle class="feld ring-4" data-s="0.3440" data-e="0.3590" cx="900" cy="208.333" r="17" pathLength="1" transform="rotate(-90 900 208.333)" />
+								<circle class="feld ring-4" data-s="0.3453" data-e="0.3602" cx="900" cy="312.5" r="17" pathLength="1" transform="rotate(-90 900 312.5)" />
+								<circle class="feld ring-4" data-s="0.3465" data-e="0.3615" cx="900" cy="416.667" r="17" pathLength="1" transform="rotate(-90 900 416.667)" />
+								<circle class="feld ring-4" data-s="0.3478" data-e="0.3627" cx="900" cy="520.833" r="17" pathLength="1" transform="rotate(-90 900 520.833)" />
+								<circle class="feld ring-4" data-s="0.3490" data-e="0.3640" cx="900" cy="625" r="17" pathLength="1" transform="rotate(-90 900 625)" />
+								<circle class="feld ring-4" data-s="0.3503" data-e="0.3652" cx="900" cy="729.167" r="17" pathLength="1" transform="rotate(-90 900 729.167)" />
+								<circle class="feld ring-4" data-s="0.3515" data-e="0.3665" cx="900" cy="833.333" r="17" pathLength="1" transform="rotate(-90 900 833.333)" />
+								<circle class="feld ring-4" data-s="0.3528" data-e="0.3677" cx="900" cy="937.5" r="17" pathLength="1" transform="rotate(-90 900 937.5)" />
+								<circle class="feld ring-4" data-s="0.3540" data-e="0.3690" cx="900" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 900 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3553" data-e="0.3702" cx="800" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 800 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3565" data-e="0.3715" cx="700" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 700 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3578" data-e="0.3727" cx="600" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 600 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3590" data-e="0.3740" cx="500" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 500 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3602" data-e="0.3752" cx="400" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 400 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3615" data-e="0.3765" cx="300" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 300 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3627" data-e="0.3777" cx="200" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 200 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3640" data-e="0.3790" cx="100" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 100 1041.67)" />
+								<circle class="feld ring-4" data-s="0.3652" data-e="0.3802" cx="100" cy="937.5" r="17" pathLength="1" transform="rotate(-90 100 937.5)" />
+								<circle class="feld ring-4" data-s="0.3665" data-e="0.3815" cx="100" cy="833.333" r="17" pathLength="1" transform="rotate(-90 100 833.333)" />
+								<circle class="feld ring-4" data-s="0.3677" data-e="0.3827" cx="100" cy="729.167" r="17" pathLength="1" transform="rotate(-90 100 729.167)" />
+								<circle class="feld ring-4" data-s="0.3690" data-e="0.3840" cx="100" cy="625" r="17" pathLength="1" transform="rotate(-90 100 625)" />
+								<circle class="feld ring-4" data-s="0.3702" data-e="0.3852" cx="100" cy="520.833" r="17" pathLength="1" transform="rotate(-90 100 520.833)" />
+								<circle class="feld ring-4" data-s="0.3715" data-e="0.3865" cx="100" cy="416.667" r="17" pathLength="1" transform="rotate(-90 100 416.667)" />
+								<circle class="feld ring-4" data-s="0.3727" data-e="0.3877" cx="100" cy="312.5" r="17" pathLength="1" transform="rotate(-90 100 312.5)" />
+								<circle class="feld ring-4" data-s="0.3740" data-e="0.3890" cx="100" cy="208.333" r="17" pathLength="1" transform="rotate(-90 100 208.333)" />
+								<circle class="feld ring-4" data-s="0.3752" data-e="0.3902" cx="200" cy="208.333" r="17" pathLength="1" transform="rotate(-90 200 208.333)" />
+								<circle class="feld ring-4" data-s="0.3765" data-e="0.3915" cx="300" cy="208.333" r="17" pathLength="1" transform="rotate(-90 300 208.333)" />
+								<circle class="feld ring-4" data-s="0.3777" data-e="0.3927" cx="400" cy="208.333" r="17" pathLength="1" transform="rotate(-90 400 208.333)" />
+								<circle class="feld ring-5" data-s="0.3920" data-e="0.4070" cx="500" cy="104.167" r="17" pathLength="1" transform="rotate(-90 500 104.167)" />
+								<circle class="feld ring-5" data-s="0.3930" data-e="0.4080" cx="600" cy="104.167" r="17" pathLength="1" transform="rotate(-90 600 104.167)" />
+								<circle class="feld ring-5" data-s="0.3940" data-e="0.4090" cx="700" cy="104.167" r="17" pathLength="1" transform="rotate(-90 700 104.167)" />
+								<circle class="feld ring-5" data-s="0.3950" data-e="0.4100" cx="800" cy="104.167" r="17" pathLength="1" transform="rotate(-90 800 104.167)" />
+								<circle class="feld ring-5" data-s="0.3960" data-e="0.4110" cx="900" cy="104.167" r="17" pathLength="1" transform="rotate(-90 900 104.167)" />
+								<circle class="feld ring-5" data-s="0.3970" data-e="0.4120" cx="1000" cy="104.167" r="17" pathLength="1" transform="rotate(-90 1000 104.167)" />
+								<circle class="feld ring-5" data-s="0.3980" data-e="0.4130" cx="1000" cy="208.333" r="17" pathLength="1" transform="rotate(-90 1000 208.333)" />
+								<circle class="feld ring-5" data-s="0.3990" data-e="0.4140" cx="1000" cy="312.5" r="17" pathLength="1" transform="rotate(-90 1000 312.5)" />
+								<circle class="feld ring-5" data-s="0.4000" data-e="0.4150" cx="1000" cy="416.667" r="17" pathLength="1" transform="rotate(-90 1000 416.667)" />
+								<circle class="feld ring-5" data-s="0.4010" data-e="0.4160" cx="1000" cy="520.833" r="17" pathLength="1" transform="rotate(-90 1000 520.833)" />
+								<circle class="feld ring-5" data-s="0.4020" data-e="0.4170" cx="1000" cy="625" r="17" pathLength="1" transform="rotate(-90 1000 625)" />
+								<circle class="feld ring-5" data-s="0.4030" data-e="0.4180" cx="1000" cy="729.167" r="17" pathLength="1" transform="rotate(-90 1000 729.167)" />
+								<circle class="feld ring-5" data-s="0.4040" data-e="0.4190" cx="1000" cy="833.333" r="17" pathLength="1" transform="rotate(-90 1000 833.333)" />
+								<circle class="feld ring-5" data-s="0.4050" data-e="0.4200" cx="1000" cy="937.5" r="17" pathLength="1" transform="rotate(-90 1000 937.5)" />
+								<circle class="feld ring-5" data-s="0.4060" data-e="0.4210" cx="1000" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 1000 1041.67)" />
+								<circle class="feld ring-5" data-s="0.4070" data-e="0.4220" cx="1000" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 1000 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4080" data-e="0.4230" cx="900" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 900 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4090" data-e="0.4240" cx="800" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 800 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4100" data-e="0.4250" cx="700" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 700 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4110" data-e="0.4260" cx="600" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 600 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4120" data-e="0.4270" cx="500" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 500 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4130" data-e="0.4280" cx="400" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 400 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4140" data-e="0.4290" cx="300" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 300 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4150" data-e="0.4300" cx="200" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 200 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4160" data-e="0.4310" cx="100" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 100 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4170" data-e="0.4320" cx="0" cy="1145.83" r="17" pathLength="1" transform="rotate(-90 0 1145.83)" />
+								<circle class="feld ring-5" data-s="0.4180" data-e="0.4330" cx="0" cy="1041.67" r="17" pathLength="1" transform="rotate(-90 0 1041.67)" />
+								<circle class="feld ring-5" data-s="0.4190" data-e="0.4340" cx="0" cy="937.5" r="17" pathLength="1" transform="rotate(-90 0 937.5)" />
+								<circle class="feld ring-5" data-s="0.4200" data-e="0.4350" cx="0" cy="833.333" r="17" pathLength="1" transform="rotate(-90 0 833.333)" />
+								<circle class="feld ring-5" data-s="0.4210" data-e="0.4360" cx="0" cy="729.167" r="17" pathLength="1" transform="rotate(-90 0 729.167)" />
+								<circle class="feld ring-5" data-s="0.4220" data-e="0.4370" cx="0" cy="625" r="17" pathLength="1" transform="rotate(-90 0 625)" />
+								<circle class="feld ring-5" data-s="0.4230" data-e="0.4380" cx="0" cy="520.833" r="17" pathLength="1" transform="rotate(-90 0 520.833)" />
+								<circle class="feld ring-5" data-s="0.4240" data-e="0.4390" cx="0" cy="416.667" r="17" pathLength="1" transform="rotate(-90 0 416.667)" />
+								<circle class="feld ring-5" data-s="0.4250" data-e="0.4400" cx="0" cy="312.5" r="17" pathLength="1" transform="rotate(-90 0 312.5)" />
+								<circle class="feld ring-5" data-s="0.4260" data-e="0.4410" cx="0" cy="208.333" r="17" pathLength="1" transform="rotate(-90 0 208.333)" />
+								<circle class="feld ring-5" data-s="0.4270" data-e="0.4420" cx="0" cy="104.167" r="17" pathLength="1" transform="rotate(-90 0 104.167)" />
+								<circle class="feld ring-5" data-s="0.4280" data-e="0.4430" cx="100" cy="104.167" r="17" pathLength="1" transform="rotate(-90 100 104.167)" />
+								<circle class="feld ring-5" data-s="0.4290" data-e="0.4440" cx="200" cy="104.167" r="17" pathLength="1" transform="rotate(-90 200 104.167)" />
+								<circle class="feld ring-5" data-s="0.4300" data-e="0.4450" cx="300" cy="104.167" r="17" pathLength="1" transform="rotate(-90 300 104.167)" />
+								<circle class="feld ring-5" data-s="0.4310" data-e="0.4460" cx="400" cy="104.167" r="17" pathLength="1" transform="rotate(-90 400 104.167)" />
+								<circle class="feld ring-6" data-s="0.4450" data-e="0.4600" cx="500" cy="0" r="17" pathLength="1" transform="rotate(-90 500 0)" />
+								<circle class="feld ring-6" data-s="0.4468" data-e="0.4618" cx="600" cy="0" r="17" pathLength="1" transform="rotate(-90 600 0)" />
+								<circle class="feld ring-6" data-s="0.4486" data-e="0.4636" cx="700" cy="0" r="17" pathLength="1" transform="rotate(-90 700 0)" />
+								<circle class="feld ring-6" data-s="0.4505" data-e="0.4655" cx="800" cy="0" r="17" pathLength="1" transform="rotate(-90 800 0)" />
+								<circle class="feld ring-6" data-s="0.4523" data-e="0.4673" cx="900" cy="0" r="17" pathLength="1" transform="rotate(-90 900 0)" />
+								<circle class="feld ring-6" data-s="0.4541" data-e="0.4691" cx="1000" cy="0" r="17" pathLength="1" transform="rotate(-90 1000 0)" />
+								<circle class="feld ring-6" data-s="0.4559" data-e="0.4709" cx="1000" cy="1250" r="17" pathLength="1" transform="rotate(-90 1000 1250)" />
+								<circle class="feld ring-6" data-s="0.4577" data-e="0.4727" cx="900" cy="1250" r="17" pathLength="1" transform="rotate(-90 900 1250)" />
+								<circle class="feld ring-6" data-s="0.4595" data-e="0.4745" cx="800" cy="1250" r="17" pathLength="1" transform="rotate(-90 800 1250)" />
+								<circle class="feld ring-6" data-s="0.4614" data-e="0.4764" cx="700" cy="1250" r="17" pathLength="1" transform="rotate(-90 700 1250)" />
+								<circle class="feld ring-6" data-s="0.4632" data-e="0.4782" cx="600" cy="1250" r="17" pathLength="1" transform="rotate(-90 600 1250)" />
+								<circle class="feld ring-6" data-s="0.4650" data-e="0.4800" cx="500" cy="1250" r="17" pathLength="1" transform="rotate(-90 500 1250)" />
+								<circle class="feld ring-6" data-s="0.4668" data-e="0.4818" cx="400" cy="1250" r="17" pathLength="1" transform="rotate(-90 400 1250)" />
+								<circle class="feld ring-6" data-s="0.4686" data-e="0.4836" cx="300" cy="1250" r="17" pathLength="1" transform="rotate(-90 300 1250)" />
+								<circle class="feld ring-6" data-s="0.4705" data-e="0.4855" cx="200" cy="1250" r="17" pathLength="1" transform="rotate(-90 200 1250)" />
+								<circle class="feld ring-6" data-s="0.4723" data-e="0.4873" cx="100" cy="1250" r="17" pathLength="1" transform="rotate(-90 100 1250)" />
+								<circle class="feld ring-6" data-s="0.4741" data-e="0.4891" cx="0" cy="1250" r="17" pathLength="1" transform="rotate(-90 0 1250)" />
+								<circle class="feld ring-6" data-s="0.4759" data-e="0.4909" cx="0" cy="0" r="17" pathLength="1" transform="rotate(-90 0 0)" />
+								<circle class="feld ring-6" data-s="0.4777" data-e="0.4927" cx="100" cy="0" r="17" pathLength="1" transform="rotate(-90 100 0)" />
+								<circle class="feld ring-6" data-s="0.4795" data-e="0.4945" cx="200" cy="0" r="17" pathLength="1" transform="rotate(-90 200 0)" />
+								<circle class="feld ring-6" data-s="0.4814" data-e="0.4964" cx="300" cy="0" r="17" pathLength="1" transform="rotate(-90 300 0)" />
+								<circle class="feld ring-6" data-s="0.4832" data-e="0.4982" cx="400" cy="0" r="17" pathLength="1" transform="rotate(-90 400 0)" />
 								<circle class="blatt blatt--dunkel minute" cx="0" cy="0" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 0 0)" />
 								<circle class="blatt blatt--dunkel viertel" cx="0" cy="0" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 0 0)" />
 								<circle class="blatt blatt--dunkel minute" cx="100" cy="0" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 100 0)" />
@@ -644,12 +653,558 @@ import Layout from "../layouts/Layout.astro";
 					</div>
 				</div>
 			</div>
+			<div>
+				<p class="hinweis">C — Ringe, eine nach der anderen im Uhrzeigersinn</p>
+				<div class="kachel">
+					<div class="buehne variante-c" data-probe>
+						<svg class="raster" viewBox="0 0 1000 1250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+							<g class="kamera-c">
+								<circle class="feld" data-s="0.18" data-e="0.195" cx="500" cy="535" r="17" pathLength="1" transform="rotate(-90 500 535)" />
+								<circle class="feld" data-s="0.1858" data-e="0.2008" cx="577.942" cy="580" r="17" pathLength="1" transform="rotate(-90 577.942 580)" />
+								<circle class="feld" data-s="0.1917" data-e="0.2067" cx="577.942" cy="670" r="17" pathLength="1" transform="rotate(-90 577.942 670)" />
+								<circle class="feld" data-s="0.1975" data-e="0.2125" cx="500" cy="715" r="17" pathLength="1" transform="rotate(-90 500 715)" />
+								<circle class="feld" data-s="0.2033" data-e="0.2183" cx="422.058" cy="670" r="17" pathLength="1" transform="rotate(-90 422.058 670)" />
+								<circle class="feld" data-s="0.2092" data-e="0.2242" cx="422.058" cy="580" r="17" pathLength="1" transform="rotate(-90 422.058 580)" />
+								<circle class="feld" data-s="0.225" data-e="0.24" cx="500" cy="445" r="17" pathLength="1" transform="rotate(-90 500 445)" />
+								<circle class="feld" data-s="0.2277" data-e="0.2427" cx="583.65" cy="465.618" r="17" pathLength="1" transform="rotate(-90 583.65 465.618)" />
+								<circle class="feld" data-s="0.2304" data-e="0.2454" cx="648.137" cy="522.748" r="17" pathLength="1" transform="rotate(-90 648.137 522.748)" />
+								<circle class="feld" data-s="0.2331" data-e="0.2481" cx="678.688" cy="603.303" r="17" pathLength="1" transform="rotate(-90 678.688 603.303)" />
+								<circle class="feld" data-s="0.2358" data-e="0.2508" cx="668.303" cy="688.829" r="17" pathLength="1" transform="rotate(-90 668.303 688.829)" />
+								<circle class="feld" data-s="0.2385" data-e="0.2535" cx="619.362" cy="759.732" r="17" pathLength="1" transform="rotate(-90 619.362 759.732)" />
+								<circle class="feld" data-s="0.2412" data-e="0.2562" cx="543.077" cy="799.77" r="17" pathLength="1" transform="rotate(-90 543.077 799.77)" />
+								<circle class="feld" data-s="0.2438" data-e="0.2588" cx="456.923" cy="799.77" r="17" pathLength="1" transform="rotate(-90 456.923 799.77)" />
+								<circle class="feld" data-s="0.2465" data-e="0.2615" cx="380.638" cy="759.732" r="17" pathLength="1" transform="rotate(-90 380.638 759.732)" />
+								<circle class="feld" data-s="0.2492" data-e="0.2642" cx="331.697" cy="688.829" r="17" pathLength="1" transform="rotate(-90 331.697 688.829)" />
+								<circle class="feld" data-s="0.2519" data-e="0.2669" cx="321.312" cy="603.303" r="17" pathLength="1" transform="rotate(-90 321.312 603.303)" />
+								<circle class="feld" data-s="0.2546" data-e="0.2696" cx="351.863" cy="522.748" r="17" pathLength="1" transform="rotate(-90 351.863 522.748)" />
+								<circle class="feld" data-s="0.2573" data-e="0.2723" cx="416.35" cy="465.618" r="17" pathLength="1" transform="rotate(-90 416.35 465.618)" />
+								<circle class="feld" data-s="0.27" data-e="0.285" cx="500" cy="355" r="17" pathLength="1" transform="rotate(-90 500 355)" />
+								<circle class="feld" data-s="0.2718" data-e="0.2868" cx="587.669" cy="369.629" r="17" pathLength="1" transform="rotate(-90 587.669 369.629)" />
+								<circle class="feld" data-s="0.2737" data-e="0.2887" cx="665.837" cy="411.932" r="17" pathLength="1" transform="rotate(-90 665.837 411.932)" />
+								<circle class="feld" data-s="0.2755" data-e="0.2905" cx="726.035" cy="477.324" r="17" pathLength="1" transform="rotate(-90 726.035 477.324)" />
+								<circle class="feld" data-s="0.2774" data-e="0.2924" cx="761.738" cy="558.719" r="17" pathLength="1" transform="rotate(-90 761.738 558.719)" />
+								<circle class="feld" data-s="0.2792" data-e="0.2942" cx="769.078" cy="647.296" r="17" pathLength="1" transform="rotate(-90 769.078 647.296)" />
+								<circle class="feld" data-s="0.2811" data-e="0.2961" cx="747.259" cy="733.458" r="17" pathLength="1" transform="rotate(-90 747.259 733.458)" />
+								<circle class="feld" data-s="0.2829" data-e="0.2979" cx="698.645" cy="807.866" r="17" pathLength="1" transform="rotate(-90 698.645 807.866)" />
+								<circle class="feld" data-s="0.2847" data-e="0.2997" cx="628.506" cy="862.458" r="17" pathLength="1" transform="rotate(-90 628.506 862.458)" />
+								<circle class="feld" data-s="0.2866" data-e="0.3016" cx="544.441" cy="891.318" r="17" pathLength="1" transform="rotate(-90 544.441 891.318)" />
+								<circle class="feld" data-s="0.2884" data-e="0.3034" cx="455.559" cy="891.318" r="17" pathLength="1" transform="rotate(-90 455.559 891.318)" />
+								<circle class="feld" data-s="0.2903" data-e="0.3053" cx="371.494" cy="862.458" r="17" pathLength="1" transform="rotate(-90 371.494 862.458)" />
+								<circle class="feld" data-s="0.2921" data-e="0.3071" cx="301.355" cy="807.866" r="17" pathLength="1" transform="rotate(-90 301.355 807.866)" />
+								<circle class="feld" data-s="0.2939" data-e="0.3089" cx="252.741" cy="733.458" r="17" pathLength="1" transform="rotate(-90 252.741 733.458)" />
+								<circle class="feld" data-s="0.2958" data-e="0.3108" cx="230.922" cy="647.296" r="17" pathLength="1" transform="rotate(-90 230.922 647.296)" />
+								<circle class="feld" data-s="0.2976" data-e="0.3126" cx="238.262" cy="558.719" r="17" pathLength="1" transform="rotate(-90 238.262 558.719)" />
+								<circle class="feld" data-s="0.2995" data-e="0.3145" cx="273.965" cy="477.324" r="17" pathLength="1" transform="rotate(-90 273.965 477.324)" />
+								<circle class="feld" data-s="0.3013" data-e="0.3163" cx="334.163" cy="411.932" r="17" pathLength="1" transform="rotate(-90 334.163 411.932)" />
+								<circle class="feld" data-s="0.3032" data-e="0.3182" cx="412.331" cy="369.629" r="17" pathLength="1" transform="rotate(-90 412.331 369.629)" />
+								<circle class="feld" data-s="0.315" data-e="0.33" cx="500" cy="265" r="17" pathLength="1" transform="rotate(-90 500 265)" />
+								<circle class="feld" data-s="0.3164" data-e="0.3314" cx="589.528" cy="276.31" r="17" pathLength="1" transform="rotate(-90 589.528 276.31)" />
+								<circle class="feld" data-s="0.3178" data-e="0.3328" cx="673.431" cy="309.53" r="17" pathLength="1" transform="rotate(-90 673.431 309.53)" />
+								<circle class="feld" data-s="0.3192" data-e="0.3342" cx="746.437" cy="362.571" r="17" pathLength="1" transform="rotate(-90 746.437 362.571)" />
+								<circle class="feld" data-s="0.3206" data-e="0.3356" cx="803.958" cy="432.102" r="17" pathLength="1" transform="rotate(-90 803.958 432.102)" />
+								<circle class="feld" data-s="0.322" data-e="0.337" cx="842.38" cy="513.754" r="17" pathLength="1" transform="rotate(-90 842.38 513.754)" />
+								<circle class="feld" data-s="0.3234" data-e="0.3384" cx="859.29" cy="602.395" r="17" pathLength="1" transform="rotate(-90 859.29 602.395)" />
+								<circle class="feld" data-s="0.3248" data-e="0.3398" cx="853.623" cy="692.457" r="17" pathLength="1" transform="rotate(-90 853.623 692.457)" />
+								<circle class="feld" data-s="0.3262" data-e="0.3412" cx="825.738" cy="778.281" r="17" pathLength="1" transform="rotate(-90 825.738 778.281)" />
+								<circle class="feld" data-s="0.3276" data-e="0.3426" cx="777.385" cy="854.473" r="17" pathLength="1" transform="rotate(-90 777.385 854.473)" />
+								<circle class="feld" data-s="0.329" data-e="0.344" cx="711.603" cy="916.246" r="17" pathLength="1" transform="rotate(-90 711.603 916.246)" />
+								<circle class="feld" data-s="0.3304" data-e="0.3454" cx="632.525" cy="959.72" r="17" pathLength="1" transform="rotate(-90 632.525 959.72)" />
+								<circle class="feld" data-s="0.3318" data-e="0.3468" cx="545.12" cy="982.161" r="17" pathLength="1" transform="rotate(-90 545.12 982.161)" />
+								<circle class="feld" data-s="0.3332" data-e="0.3482" cx="454.88" cy="982.161" r="17" pathLength="1" transform="rotate(-90 454.88 982.161)" />
+								<circle class="feld" data-s="0.3346" data-e="0.3496" cx="367.475" cy="959.72" r="17" pathLength="1" transform="rotate(-90 367.475 959.72)" />
+								<circle class="feld" data-s="0.336" data-e="0.351" cx="288.397" cy="916.246" r="17" pathLength="1" transform="rotate(-90 288.397 916.246)" />
+								<circle class="feld" data-s="0.3374" data-e="0.3524" cx="222.615" cy="854.473" r="17" pathLength="1" transform="rotate(-90 222.615 854.473)" />
+								<circle class="feld" data-s="0.3388" data-e="0.3538" cx="174.262" cy="778.281" r="17" pathLength="1" transform="rotate(-90 174.262 778.281)" />
+								<circle class="feld" data-s="0.3402" data-e="0.3552" cx="146.377" cy="692.457" r="17" pathLength="1" transform="rotate(-90 146.377 692.457)" />
+								<circle class="feld" data-s="0.3416" data-e="0.3566" cx="140.71" cy="602.395" r="17" pathLength="1" transform="rotate(-90 140.71 602.395)" />
+								<circle class="feld" data-s="0.343" data-e="0.358" cx="157.62" cy="513.754" r="17" pathLength="1" transform="rotate(-90 157.62 513.754)" />
+								<circle class="feld" data-s="0.3444" data-e="0.3594" cx="196.042" cy="432.102" r="17" pathLength="1" transform="rotate(-90 196.042 432.102)" />
+								<circle class="feld" data-s="0.3458" data-e="0.3608" cx="253.563" cy="362.571" r="17" pathLength="1" transform="rotate(-90 253.563 362.571)" />
+								<circle class="feld" data-s="0.3472" data-e="0.3622" cx="326.569" cy="309.53" r="17" pathLength="1" transform="rotate(-90 326.569 309.53)" />
+								<circle class="feld" data-s="0.3486" data-e="0.3636" cx="410.472" cy="276.31" r="17" pathLength="1" transform="rotate(-90 410.472 276.31)" />
+								<circle class="feld" data-s="0.36" data-e="0.375" cx="500" cy="175" r="17" pathLength="1" transform="rotate(-90 500 175)" />
+								<circle class="feld" data-s="0.3611" data-e="0.3761" cx="590.584" cy="184.212" r="17" pathLength="1" transform="rotate(-90 590.584 184.212)" />
+								<circle class="feld" data-s="0.3623" data-e="0.3773" cx="677.46" cy="211.469" r="17" pathLength="1" transform="rotate(-90 677.46 211.469)" />
+								<circle class="feld" data-s="0.3634" data-e="0.3784" cx="757.071" cy="255.656" r="17" pathLength="1" transform="rotate(-90 757.071 255.656)" />
+								<circle class="feld" data-s="0.3645" data-e="0.3795" cx="826.157" cy="314.965" r="17" pathLength="1" transform="rotate(-90 826.157 314.965)" />
+								<circle class="feld" data-s="0.3656" data-e="0.3806" cx="881.89" cy="386.966" r="17" pathLength="1" transform="rotate(-90 881.89 386.966)" />
+								<circle class="feld" data-s="0.3668" data-e="0.3818" cx="921.988" cy="468.713" r="17" pathLength="1" transform="rotate(-90 921.988 468.713)" />
+								<circle class="feld" data-s="0.3679" data-e="0.3829" cx="944.811" cy="556.858" r="17" pathLength="1" transform="rotate(-90 944.811 556.858)" />
+								<circle class="feld" data-s="0.369" data-e="0.384" cx="949.422" cy="647.792" r="17" pathLength="1" transform="rotate(-90 949.422 647.792)" />
+								<circle class="feld" data-s="0.3702" data-e="0.3852" cx="935.635" cy="737.794" r="17" pathLength="1" transform="rotate(-90 935.635 737.794)" />
+								<circle class="feld" data-s="0.3713" data-e="0.3863" cx="904.012" cy="823.177" r="17" pathLength="1" transform="rotate(-90 904.012 823.177)" />
+								<circle class="feld" data-s="0.3724" data-e="0.3874" cx="855.849" cy="900.448" r="17" pathLength="1" transform="rotate(-90 855.849 900.448)" />
+								<circle class="feld" data-s="0.3735" data-e="0.3885" cx="793.118" cy="966.441" r="17" pathLength="1" transform="rotate(-90 793.118 966.441)" />
+								<circle class="feld" data-s="0.3747" data-e="0.3897" cx="718.386" cy="1018.46" r="17" pathLength="1" transform="rotate(-90 718.386 1018.46)" />
+								<circle class="feld" data-s="0.3758" data-e="0.3908" cx="634.713" cy="1054.36" r="17" pathLength="1" transform="rotate(-90 634.713 1054.36)" />
+								<circle class="feld" data-s="0.3769" data-e="0.3919" cx="545.526" cy="1072.69" r="17" pathLength="1" transform="rotate(-90 545.526 1072.69)" />
+								<circle class="feld" data-s="0.3781" data-e="0.3931" cx="454.474" cy="1072.69" r="17" pathLength="1" transform="rotate(-90 454.474 1072.69)" />
+								<circle class="feld" data-s="0.3792" data-e="0.3942" cx="365.287" cy="1054.36" r="17" pathLength="1" transform="rotate(-90 365.287 1054.36)" />
+								<circle class="feld" data-s="0.3803" data-e="0.3953" cx="281.614" cy="1018.46" r="17" pathLength="1" transform="rotate(-90 281.614 1018.46)" />
+								<circle class="feld" data-s="0.3815" data-e="0.3965" cx="206.882" cy="966.441" r="17" pathLength="1" transform="rotate(-90 206.882 966.441)" />
+								<circle class="feld" data-s="0.3826" data-e="0.3976" cx="144.151" cy="900.448" r="17" pathLength="1" transform="rotate(-90 144.151 900.448)" />
+								<circle class="feld" data-s="0.3837" data-e="0.3987" cx="95.988" cy="823.177" r="17" pathLength="1" transform="rotate(-90 95.988 823.177)" />
+								<circle class="feld" data-s="0.3848" data-e="0.3998" cx="64.3653" cy="737.794" r="17" pathLength="1" transform="rotate(-90 64.3653 737.794)" />
+								<circle class="feld" data-s="0.386" data-e="0.401" cx="50.5776" cy="647.792" r="17" pathLength="1" transform="rotate(-90 50.5776 647.792)" />
+								<circle class="feld" data-s="0.3871" data-e="0.4021" cx="55.1893" cy="556.858" r="17" pathLength="1" transform="rotate(-90 55.1893 556.858)" />
+								<circle class="feld" data-s="0.3882" data-e="0.4032" cx="78.0115" cy="468.713" r="17" pathLength="1" transform="rotate(-90 78.0115 468.713)" />
+								<circle class="feld" data-s="0.3894" data-e="0.4044" cx="118.11" cy="386.966" r="17" pathLength="1" transform="rotate(-90 118.11 386.966)" />
+								<circle class="feld" data-s="0.3905" data-e="0.4055" cx="173.843" cy="314.965" r="17" pathLength="1" transform="rotate(-90 173.843 314.965)" />
+								<circle class="feld" data-s="0.3916" data-e="0.4066" cx="242.929" cy="255.656" r="17" pathLength="1" transform="rotate(-90 242.929 255.656)" />
+								<circle class="feld" data-s="0.3927" data-e="0.4077" cx="322.54" cy="211.469" r="17" pathLength="1" transform="rotate(-90 322.54 211.469)" />
+								<circle class="feld" data-s="0.3939" data-e="0.4089" cx="409.416" cy="184.212" r="17" pathLength="1" transform="rotate(-90 409.416 184.212)" />
+								<circle class="feld" data-s="0.405" data-e="0.42" cx="500" cy="85" r="17" pathLength="1" transform="rotate(-90 500 85)" />
+								<circle class="feld" data-s="0.4059" data-e="0.4209" cx="588.881" cy="92.3649" r="17" pathLength="1" transform="rotate(-90 588.881 92.3649)" />
+								<circle class="feld" data-s="0.4068" data-e="0.4218" cx="675.338" cy="114.259" r="17" pathLength="1" transform="rotate(-90 675.338 114.259)" />
+								<circle class="feld" data-s="0.4078" data-e="0.4228" cx="757.012" cy="150.084" r="17" pathLength="1" transform="rotate(-90 757.012 150.084)" />
+								<circle class="feld" data-s="0.4087" data-e="0.4237" cx="831.675" cy="198.864" r="17" pathLength="1" transform="rotate(-90 831.675 198.864)" />
+								<circle class="feld" data-s="0.4096" data-e="0.4246" cx="897.291" cy="259.268" r="17" pathLength="1" transform="rotate(-90 897.291 259.268)" />
+								<circle class="feld" data-s="0.4105" data-e="0.4255" cx="952.07" cy="329.648" r="17" pathLength="1" transform="rotate(-90 952.07 329.648)" />
+								<circle class="feld" data-s="0.4114" data-e="0.4264" cx="994.518" cy="408.084" r="17" pathLength="1" transform="rotate(-90 994.518 408.084)" />
+								<circle class="feld" data-s="0.4124" data-e="0.4274" cx="1023.48" cy="492.438" r="17" pathLength="1" transform="rotate(-90 1023.48 492.438)" />
+								<circle class="feld" data-s="0.4133" data-e="0.4283" cx="1038.16" cy="580.407" r="17" pathLength="1" transform="rotate(-90 1038.16 580.407)" />
+								<circle class="feld" data-s="0.4142" data-e="0.4292" cx="1038.16" cy="669.593" r="17" pathLength="1" transform="rotate(-90 1038.16 669.593)" />
+								<circle class="feld" data-s="0.4151" data-e="0.4301" cx="1023.48" cy="757.562" r="17" pathLength="1" transform="rotate(-90 1023.48 757.562)" />
+								<circle class="feld" data-s="0.4161" data-e="0.4311" cx="994.518" cy="841.916" r="17" pathLength="1" transform="rotate(-90 994.518 841.916)" />
+								<circle class="feld" data-s="0.417" data-e="0.432" cx="952.07" cy="920.352" r="17" pathLength="1" transform="rotate(-90 952.07 920.352)" />
+								<circle class="feld" data-s="0.4179" data-e="0.4329" cx="897.291" cy="990.732" r="17" pathLength="1" transform="rotate(-90 897.291 990.732)" />
+								<circle class="feld" data-s="0.4188" data-e="0.4338" cx="831.675" cy="1051.14" r="17" pathLength="1" transform="rotate(-90 831.675 1051.14)" />
+								<circle class="feld" data-s="0.4197" data-e="0.4347" cx="757.012" cy="1099.92" r="17" pathLength="1" transform="rotate(-90 757.012 1099.92)" />
+								<circle class="feld" data-s="0.4207" data-e="0.4357" cx="675.338" cy="1135.74" r="17" pathLength="1" transform="rotate(-90 675.338 1135.74)" />
+								<circle class="feld" data-s="0.4216" data-e="0.4366" cx="588.881" cy="1157.64" r="17" pathLength="1" transform="rotate(-90 588.881 1157.64)" />
+								<circle class="feld" data-s="0.4225" data-e="0.4375" cx="500" cy="1165" r="17" pathLength="1" transform="rotate(-90 500 1165)" />
+								<circle class="feld" data-s="0.4234" data-e="0.4384" cx="411.119" cy="1157.64" r="17" pathLength="1" transform="rotate(-90 411.119 1157.64)" />
+								<circle class="feld" data-s="0.4243" data-e="0.4393" cx="324.662" cy="1135.74" r="17" pathLength="1" transform="rotate(-90 324.662 1135.74)" />
+								<circle class="feld" data-s="0.4253" data-e="0.4403" cx="242.988" cy="1099.92" r="17" pathLength="1" transform="rotate(-90 242.988 1099.92)" />
+								<circle class="feld" data-s="0.4262" data-e="0.4412" cx="168.325" cy="1051.14" r="17" pathLength="1" transform="rotate(-90 168.325 1051.14)" />
+								<circle class="feld" data-s="0.4271" data-e="0.4421" cx="102.709" cy="990.732" r="17" pathLength="1" transform="rotate(-90 102.709 990.732)" />
+								<circle class="feld" data-s="0.428" data-e="0.443" cx="47.9301" cy="920.352" r="17" pathLength="1" transform="rotate(-90 47.9301 920.352)" />
+								<circle class="feld" data-s="0.4289" data-e="0.4439" cx="5.4824" cy="841.916" r="17" pathLength="1" transform="rotate(-90 5.4824 841.916)" />
+								<circle class="feld" data-s="0.4299" data-e="0.4449" cx="-23.4761" cy="757.562" r="17" pathLength="1" transform="rotate(-90 -23.4761 757.562)" />
+								<circle class="feld" data-s="0.4308" data-e="0.4458" cx="-38.1556" cy="669.593" r="17" pathLength="1" transform="rotate(-90 -38.1556 669.593)" />
+								<circle class="feld" data-s="0.4317" data-e="0.4467" cx="-38.1556" cy="580.407" r="17" pathLength="1" transform="rotate(-90 -38.1556 580.407)" />
+								<circle class="feld" data-s="0.4326" data-e="0.4476" cx="-23.4761" cy="492.438" r="17" pathLength="1" transform="rotate(-90 -23.4761 492.438)" />
+								<circle class="feld" data-s="0.4336" data-e="0.4486" cx="5.4824" cy="408.084" r="17" pathLength="1" transform="rotate(-90 5.4824 408.084)" />
+								<circle class="feld" data-s="0.4345" data-e="0.4495" cx="47.9301" cy="329.648" r="17" pathLength="1" transform="rotate(-90 47.9301 329.648)" />
+								<circle class="feld" data-s="0.4354" data-e="0.4504" cx="102.709" cy="259.268" r="17" pathLength="1" transform="rotate(-90 102.709 259.268)" />
+								<circle class="feld" data-s="0.4363" data-e="0.4513" cx="168.325" cy="198.864" r="17" pathLength="1" transform="rotate(-90 168.325 198.864)" />
+								<circle class="feld" data-s="0.4372" data-e="0.4522" cx="242.988" cy="150.084" r="17" pathLength="1" transform="rotate(-90 242.988 150.084)" />
+								<circle class="feld" data-s="0.4382" data-e="0.4532" cx="324.662" cy="114.259" r="17" pathLength="1" transform="rotate(-90 324.662 114.259)" />
+								<circle class="feld" data-s="0.4391" data-e="0.4541" cx="411.119" cy="92.3649" r="17" pathLength="1" transform="rotate(-90 411.119 92.3649)" />
+								<circle class="feld" data-s="0.45" data-e="0.465" cx="500" cy="-5" r="17" pathLength="1" transform="rotate(-90 500 -5)" />
+								<circle class="feld" data-s="0.4508" data-e="0.4658" cx="589.658" cy="1.41249" r="17" pathLength="1" transform="rotate(-90 589.658 1.41249)" />
+								<circle class="feld" data-s="0.4516" data-e="0.4666" cx="677.492" cy="20.5194" r="17" pathLength="1" transform="rotate(-90 677.492 20.5194)" />
+								<circle class="feld" data-s="0.4524" data-e="0.4674" cx="761.711" cy="51.9318" r="17" pathLength="1" transform="rotate(-90 761.711 51.9318)" />
+								<circle class="feld" data-s="0.4532" data-e="0.4682" cx="840.604" cy="95.0103" r="17" pathLength="1" transform="rotate(-90 840.604 95.0103)" />
+								<circle class="feld" data-s="0.454" data-e="0.469" cx="912.562" cy="148.878" r="17" pathLength="1" transform="rotate(-90 912.562 148.878)" />
+								<circle class="feld" data-s="0.4548" data-e="0.4698" cx="976.122" cy="212.438" r="17" pathLength="1" transform="rotate(-90 976.122 212.438)" />
+								<circle class="feld" data-s="0.4556" data-e="0.4706" cx="1029.99" cy="284.396" r="17" pathLength="1" transform="rotate(-90 1029.99 284.396)" />
+								<circle class="feld" data-s="0.4564" data-e="0.4714" cx="1073.07" cy="363.289" r="17" pathLength="1" transform="rotate(-90 1073.07 363.289)" />
+								<circle class="feld" data-s="0.4572" data-e="0.4722" cx="1104.48" cy="447.508" r="17" pathLength="1" transform="rotate(-90 1104.48 447.508)" />
+								<circle class="feld" data-s="0.458" data-e="0.473" cx="1123.59" cy="535.342" r="17" pathLength="1" transform="rotate(-90 1123.59 535.342)" />
+								<circle class="feld" data-s="0.4587" data-e="0.4738" cx="1130" cy="625" r="17" pathLength="1" transform="rotate(-90 1130 625)" />
+								<circle class="feld" data-s="0.4595" data-e="0.4745" cx="1123.59" cy="714.658" r="17" pathLength="1" transform="rotate(-90 1123.59 714.658)" />
+								<circle class="feld" data-s="0.4603" data-e="0.4753" cx="1104.48" cy="802.492" r="17" pathLength="1" transform="rotate(-90 1104.48 802.492)" />
+								<circle class="feld" data-s="0.4611" data-e="0.4761" cx="1073.07" cy="886.711" r="17" pathLength="1" transform="rotate(-90 1073.07 886.711)" />
+								<circle class="feld" data-s="0.4619" data-e="0.4769" cx="1029.99" cy="965.604" r="17" pathLength="1" transform="rotate(-90 1029.99 965.604)" />
+								<circle class="feld" data-s="0.4627" data-e="0.4777" cx="976.122" cy="1037.56" r="17" pathLength="1" transform="rotate(-90 976.122 1037.56)" />
+								<circle class="feld" data-s="0.4635" data-e="0.4785" cx="912.562" cy="1101.12" r="17" pathLength="1" transform="rotate(-90 912.562 1101.12)" />
+								<circle class="feld" data-s="0.4643" data-e="0.4793" cx="840.604" cy="1154.99" r="17" pathLength="1" transform="rotate(-90 840.604 1154.99)" />
+								<circle class="feld" data-s="0.4651" data-e="0.4801" cx="761.711" cy="1198.07" r="17" pathLength="1" transform="rotate(-90 761.711 1198.07)" />
+								<circle class="feld" data-s="0.4659" data-e="0.4809" cx="677.492" cy="1229.48" r="17" pathLength="1" transform="rotate(-90 677.492 1229.48)" />
+								<circle class="feld" data-s="0.4667" data-e="0.4817" cx="589.658" cy="1248.59" r="17" pathLength="1" transform="rotate(-90 589.658 1248.59)" />
+								<circle class="feld" data-s="0.4675" data-e="0.4825" cx="500" cy="1255" r="17" pathLength="1" transform="rotate(-90 500 1255)" />
+								<circle class="feld" data-s="0.4683" data-e="0.4833" cx="410.342" cy="1248.59" r="17" pathLength="1" transform="rotate(-90 410.342 1248.59)" />
+								<circle class="feld" data-s="0.4691" data-e="0.4841" cx="322.508" cy="1229.48" r="17" pathLength="1" transform="rotate(-90 322.508 1229.48)" />
+								<circle class="feld" data-s="0.4699" data-e="0.4849" cx="238.289" cy="1198.07" r="17" pathLength="1" transform="rotate(-90 238.289 1198.07)" />
+								<circle class="feld" data-s="0.4707" data-e="0.4857" cx="159.396" cy="1154.99" r="17" pathLength="1" transform="rotate(-90 159.396 1154.99)" />
+								<circle class="feld" data-s="0.4715" data-e="0.4865" cx="87.4377" cy="1101.12" r="17" pathLength="1" transform="rotate(-90 87.4377 1101.12)" />
+								<circle class="feld" data-s="0.4723" data-e="0.4873" cx="23.8778" cy="1037.56" r="17" pathLength="1" transform="rotate(-90 23.8778 1037.56)" />
+								<circle class="feld" data-s="0.4731" data-e="0.4881" cx="-29.9897" cy="965.604" r="17" pathLength="1" transform="rotate(-90 -29.9897 965.604)" />
+								<circle class="feld" data-s="0.4739" data-e="0.4889" cx="-73.0682" cy="886.711" r="17" pathLength="1" transform="rotate(-90 -73.0682 886.711)" />
+								<circle class="feld" data-s="0.4747" data-e="0.4897" cx="-104.481" cy="802.492" r="17" pathLength="1" transform="rotate(-90 -104.481 802.492)" />
+								<circle class="feld" data-s="0.4755" data-e="0.4905" cx="-123.588" cy="714.658" r="17" pathLength="1" transform="rotate(-90 -123.588 714.658)" />
+								<circle class="feld" data-s="0.4763" data-e="0.4913" cx="-130" cy="625" r="17" pathLength="1" transform="rotate(-90 -130 625)" />
+								<circle class="feld" data-s="0.477" data-e="0.492" cx="-123.588" cy="535.342" r="17" pathLength="1" transform="rotate(-90 -123.588 535.342)" />
+								<circle class="feld" data-s="0.4778" data-e="0.4928" cx="-104.481" cy="447.508" r="17" pathLength="1" transform="rotate(-90 -104.481 447.508)" />
+								<circle class="feld" data-s="0.4786" data-e="0.4936" cx="-73.0682" cy="363.289" r="17" pathLength="1" transform="rotate(-90 -73.0682 363.289)" />
+								<circle class="feld" data-s="0.4794" data-e="0.4944" cx="-29.9897" cy="284.396" r="17" pathLength="1" transform="rotate(-90 -29.9897 284.396)" />
+								<circle class="feld" data-s="0.4802" data-e="0.4952" cx="23.8778" cy="212.438" r="17" pathLength="1" transform="rotate(-90 23.8778 212.438)" />
+								<circle class="feld" data-s="0.481" data-e="0.496" cx="87.4377" cy="148.878" r="17" pathLength="1" transform="rotate(-90 87.4377 148.878)" />
+								<circle class="feld" data-s="0.4818" data-e="0.4968" cx="159.396" cy="95.0103" r="17" pathLength="1" transform="rotate(-90 159.396 95.0103)" />
+								<circle class="feld" data-s="0.4826" data-e="0.4976" cx="238.289" cy="51.9318" r="17" pathLength="1" transform="rotate(-90 238.289 51.9318)" />
+								<circle class="feld" data-s="0.4834" data-e="0.4984" cx="322.508" cy="20.5194" r="17" pathLength="1" transform="rotate(-90 322.508 20.5194)" />
+								<circle class="feld" data-s="0.4842" data-e="0.4992" cx="410.342" cy="1.41249" r="17" pathLength="1" transform="rotate(-90 410.342 1.41249)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="535" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 535)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="535" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 535)" />
+								<circle class="blatt blatt--dunkel minute" cx="577.942" cy="580" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 577.942 580)" />
+								<circle class="blatt blatt--dunkel viertel" cx="577.942" cy="580" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 577.942 580)" />
+								<circle class="blatt blatt--dunkel minute" cx="577.942" cy="670" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 577.942 670)" />
+								<circle class="blatt blatt--dunkel viertel" cx="577.942" cy="670" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 577.942 670)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="715" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 715)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="715" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 715)" />
+								<circle class="blatt blatt--dunkel minute" cx="422.058" cy="670" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 422.058 670)" />
+								<circle class="blatt blatt--dunkel viertel" cx="422.058" cy="670" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 422.058 670)" />
+								<circle class="blatt blatt--dunkel minute" cx="422.058" cy="580" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 422.058 580)" />
+								<circle class="blatt blatt--dunkel viertel" cx="422.058" cy="580" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 422.058 580)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="445" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 445)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="445" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 445)" />
+								<circle class="blatt blatt--dunkel minute" cx="583.65" cy="465.618" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 583.65 465.618)" />
+								<circle class="blatt blatt--dunkel viertel" cx="583.65" cy="465.618" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 583.65 465.618)" />
+								<circle class="blatt blatt--dunkel minute" cx="648.137" cy="522.748" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 648.137 522.748)" />
+								<circle class="blatt blatt--dunkel viertel" cx="648.137" cy="522.748" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 648.137 522.748)" />
+								<circle class="blatt blatt--dunkel minute" cx="678.688" cy="603.303" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 678.688 603.303)" />
+								<circle class="blatt blatt--dunkel viertel" cx="678.688" cy="603.303" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 678.688 603.303)" />
+								<circle class="blatt blatt--dunkel minute" cx="668.303" cy="688.829" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 668.303 688.829)" />
+								<circle class="blatt blatt--dunkel viertel" cx="668.303" cy="688.829" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 668.303 688.829)" />
+								<circle class="blatt blatt--dunkel minute" cx="619.362" cy="759.732" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 619.362 759.732)" />
+								<circle class="blatt blatt--dunkel viertel" cx="619.362" cy="759.732" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 619.362 759.732)" />
+								<circle class="blatt blatt--dunkel minute" cx="543.077" cy="799.77" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 543.077 799.77)" />
+								<circle class="blatt blatt--dunkel viertel" cx="543.077" cy="799.77" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 543.077 799.77)" />
+								<circle class="blatt blatt--dunkel minute" cx="456.923" cy="799.77" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 456.923 799.77)" />
+								<circle class="blatt blatt--dunkel viertel" cx="456.923" cy="799.77" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 456.923 799.77)" />
+								<circle class="blatt blatt--dunkel minute" cx="380.638" cy="759.732" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 380.638 759.732)" />
+								<circle class="blatt blatt--dunkel viertel" cx="380.638" cy="759.732" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 380.638 759.732)" />
+								<circle class="blatt blatt--dunkel minute" cx="331.697" cy="688.829" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 331.697 688.829)" />
+								<circle class="blatt blatt--dunkel viertel" cx="331.697" cy="688.829" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 331.697 688.829)" />
+								<circle class="blatt blatt--dunkel minute" cx="321.312" cy="603.303" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 321.312 603.303)" />
+								<circle class="blatt blatt--dunkel viertel" cx="321.312" cy="603.303" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 321.312 603.303)" />
+								<circle class="blatt blatt--dunkel minute" cx="351.863" cy="522.748" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 351.863 522.748)" />
+								<circle class="blatt blatt--dunkel viertel" cx="351.863" cy="522.748" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 351.863 522.748)" />
+								<circle class="blatt blatt--dunkel minute" cx="416.35" cy="465.618" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 416.35 465.618)" />
+								<circle class="blatt blatt--dunkel viertel" cx="416.35" cy="465.618" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 416.35 465.618)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="355" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 355)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="355" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 355)" />
+								<circle class="blatt blatt--dunkel minute" cx="587.669" cy="369.629" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 587.669 369.629)" />
+								<circle class="blatt blatt--dunkel viertel" cx="587.669" cy="369.629" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 587.669 369.629)" />
+								<circle class="blatt blatt--dunkel minute" cx="665.837" cy="411.932" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 665.837 411.932)" />
+								<circle class="blatt blatt--dunkel viertel" cx="665.837" cy="411.932" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 665.837 411.932)" />
+								<circle class="blatt blatt--dunkel minute" cx="726.035" cy="477.324" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 726.035 477.324)" />
+								<circle class="blatt blatt--dunkel viertel" cx="726.035" cy="477.324" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 726.035 477.324)" />
+								<circle class="blatt blatt--dunkel minute" cx="761.738" cy="558.719" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 761.738 558.719)" />
+								<circle class="blatt blatt--dunkel viertel" cx="761.738" cy="558.719" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 761.738 558.719)" />
+								<circle class="blatt blatt--dunkel minute" cx="769.078" cy="647.296" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 769.078 647.296)" />
+								<circle class="blatt blatt--dunkel viertel" cx="769.078" cy="647.296" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 769.078 647.296)" />
+								<circle class="blatt blatt--dunkel minute" cx="747.259" cy="733.458" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 747.259 733.458)" />
+								<circle class="blatt blatt--dunkel viertel" cx="747.259" cy="733.458" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 747.259 733.458)" />
+								<circle class="blatt blatt--dunkel minute" cx="698.645" cy="807.866" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 698.645 807.866)" />
+								<circle class="blatt blatt--dunkel viertel" cx="698.645" cy="807.866" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 698.645 807.866)" />
+								<circle class="blatt blatt--dunkel minute" cx="628.506" cy="862.458" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 628.506 862.458)" />
+								<circle class="blatt blatt--dunkel viertel" cx="628.506" cy="862.458" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 628.506 862.458)" />
+								<circle class="blatt blatt--dunkel minute" cx="544.441" cy="891.318" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 544.441 891.318)" />
+								<circle class="blatt blatt--dunkel viertel" cx="544.441" cy="891.318" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 544.441 891.318)" />
+								<circle class="blatt blatt--dunkel minute" cx="455.559" cy="891.318" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 455.559 891.318)" />
+								<circle class="blatt blatt--dunkel viertel" cx="455.559" cy="891.318" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 455.559 891.318)" />
+								<circle class="blatt blatt--dunkel minute" cx="371.494" cy="862.458" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 371.494 862.458)" />
+								<circle class="blatt blatt--dunkel viertel" cx="371.494" cy="862.458" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 371.494 862.458)" />
+								<circle class="blatt blatt--dunkel minute" cx="301.355" cy="807.866" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 301.355 807.866)" />
+								<circle class="blatt blatt--dunkel viertel" cx="301.355" cy="807.866" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 301.355 807.866)" />
+								<circle class="blatt blatt--dunkel minute" cx="252.741" cy="733.458" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 252.741 733.458)" />
+								<circle class="blatt blatt--dunkel viertel" cx="252.741" cy="733.458" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 252.741 733.458)" />
+								<circle class="blatt blatt--dunkel minute" cx="230.922" cy="647.296" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 230.922 647.296)" />
+								<circle class="blatt blatt--dunkel viertel" cx="230.922" cy="647.296" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 230.922 647.296)" />
+								<circle class="blatt blatt--dunkel minute" cx="238.262" cy="558.719" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 238.262 558.719)" />
+								<circle class="blatt blatt--dunkel viertel" cx="238.262" cy="558.719" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 238.262 558.719)" />
+								<circle class="blatt blatt--dunkel minute" cx="273.965" cy="477.324" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 273.965 477.324)" />
+								<circle class="blatt blatt--dunkel viertel" cx="273.965" cy="477.324" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 273.965 477.324)" />
+								<circle class="blatt blatt--dunkel minute" cx="334.163" cy="411.932" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 334.163 411.932)" />
+								<circle class="blatt blatt--dunkel viertel" cx="334.163" cy="411.932" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 334.163 411.932)" />
+								<circle class="blatt blatt--dunkel minute" cx="412.331" cy="369.629" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 412.331 369.629)" />
+								<circle class="blatt blatt--dunkel viertel" cx="412.331" cy="369.629" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 412.331 369.629)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="265" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 265)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="265" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 265)" />
+								<circle class="blatt blatt--dunkel minute" cx="589.528" cy="276.31" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 589.528 276.31)" />
+								<circle class="blatt blatt--dunkel viertel" cx="589.528" cy="276.31" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 589.528 276.31)" />
+								<circle class="blatt blatt--dunkel minute" cx="673.431" cy="309.53" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 673.431 309.53)" />
+								<circle class="blatt blatt--dunkel viertel" cx="673.431" cy="309.53" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 673.431 309.53)" />
+								<circle class="blatt blatt--dunkel minute" cx="746.437" cy="362.571" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 746.437 362.571)" />
+								<circle class="blatt blatt--dunkel viertel" cx="746.437" cy="362.571" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 746.437 362.571)" />
+								<circle class="blatt blatt--dunkel minute" cx="803.958" cy="432.102" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 803.958 432.102)" />
+								<circle class="blatt blatt--dunkel viertel" cx="803.958" cy="432.102" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 803.958 432.102)" />
+								<circle class="blatt blatt--dunkel minute" cx="842.38" cy="513.754" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 842.38 513.754)" />
+								<circle class="blatt blatt--dunkel viertel" cx="842.38" cy="513.754" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 842.38 513.754)" />
+								<circle class="blatt blatt--dunkel minute" cx="859.29" cy="602.395" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 859.29 602.395)" />
+								<circle class="blatt blatt--dunkel viertel" cx="859.29" cy="602.395" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 859.29 602.395)" />
+								<circle class="blatt blatt--dunkel minute" cx="853.623" cy="692.457" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 853.623 692.457)" />
+								<circle class="blatt blatt--dunkel viertel" cx="853.623" cy="692.457" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 853.623 692.457)" />
+								<circle class="blatt blatt--dunkel minute" cx="825.738" cy="778.281" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 825.738 778.281)" />
+								<circle class="blatt blatt--dunkel viertel" cx="825.738" cy="778.281" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 825.738 778.281)" />
+								<circle class="blatt blatt--dunkel minute" cx="777.385" cy="854.473" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 777.385 854.473)" />
+								<circle class="blatt blatt--dunkel viertel" cx="777.385" cy="854.473" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 777.385 854.473)" />
+								<circle class="blatt blatt--dunkel minute" cx="711.603" cy="916.246" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 711.603 916.246)" />
+								<circle class="blatt blatt--dunkel viertel" cx="711.603" cy="916.246" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 711.603 916.246)" />
+								<circle class="blatt blatt--dunkel minute" cx="632.525" cy="959.72" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 632.525 959.72)" />
+								<circle class="blatt blatt--dunkel viertel" cx="632.525" cy="959.72" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 632.525 959.72)" />
+								<circle class="blatt blatt--dunkel minute" cx="545.12" cy="982.161" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 545.12 982.161)" />
+								<circle class="blatt blatt--dunkel viertel" cx="545.12" cy="982.161" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 545.12 982.161)" />
+								<circle class="blatt blatt--dunkel minute" cx="454.88" cy="982.161" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 454.88 982.161)" />
+								<circle class="blatt blatt--dunkel viertel" cx="454.88" cy="982.161" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 454.88 982.161)" />
+								<circle class="blatt blatt--dunkel minute" cx="367.475" cy="959.72" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 367.475 959.72)" />
+								<circle class="blatt blatt--dunkel viertel" cx="367.475" cy="959.72" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 367.475 959.72)" />
+								<circle class="blatt blatt--dunkel minute" cx="288.397" cy="916.246" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 288.397 916.246)" />
+								<circle class="blatt blatt--dunkel viertel" cx="288.397" cy="916.246" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 288.397 916.246)" />
+								<circle class="blatt blatt--dunkel minute" cx="222.615" cy="854.473" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 222.615 854.473)" />
+								<circle class="blatt blatt--dunkel viertel" cx="222.615" cy="854.473" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 222.615 854.473)" />
+								<circle class="blatt blatt--dunkel minute" cx="174.262" cy="778.281" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 174.262 778.281)" />
+								<circle class="blatt blatt--dunkel viertel" cx="174.262" cy="778.281" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 174.262 778.281)" />
+								<circle class="blatt blatt--dunkel minute" cx="146.377" cy="692.457" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 146.377 692.457)" />
+								<circle class="blatt blatt--dunkel viertel" cx="146.377" cy="692.457" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 146.377 692.457)" />
+								<circle class="blatt blatt--dunkel minute" cx="140.71" cy="602.395" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 140.71 602.395)" />
+								<circle class="blatt blatt--dunkel viertel" cx="140.71" cy="602.395" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 140.71 602.395)" />
+								<circle class="blatt blatt--dunkel minute" cx="157.62" cy="513.754" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 157.62 513.754)" />
+								<circle class="blatt blatt--dunkel viertel" cx="157.62" cy="513.754" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 157.62 513.754)" />
+								<circle class="blatt blatt--dunkel minute" cx="196.042" cy="432.102" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 196.042 432.102)" />
+								<circle class="blatt blatt--dunkel viertel" cx="196.042" cy="432.102" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 196.042 432.102)" />
+								<circle class="blatt blatt--dunkel minute" cx="253.563" cy="362.571" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 253.563 362.571)" />
+								<circle class="blatt blatt--dunkel viertel" cx="253.563" cy="362.571" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 253.563 362.571)" />
+								<circle class="blatt blatt--dunkel minute" cx="326.569" cy="309.53" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 326.569 309.53)" />
+								<circle class="blatt blatt--dunkel viertel" cx="326.569" cy="309.53" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 326.569 309.53)" />
+								<circle class="blatt blatt--dunkel minute" cx="410.472" cy="276.31" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 410.472 276.31)" />
+								<circle class="blatt blatt--dunkel viertel" cx="410.472" cy="276.31" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 410.472 276.31)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="175" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 175)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="175" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 175)" />
+								<circle class="blatt blatt--dunkel minute" cx="590.584" cy="184.212" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 590.584 184.212)" />
+								<circle class="blatt blatt--dunkel viertel" cx="590.584" cy="184.212" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 590.584 184.212)" />
+								<circle class="blatt blatt--dunkel minute" cx="677.46" cy="211.469" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 677.46 211.469)" />
+								<circle class="blatt blatt--dunkel viertel" cx="677.46" cy="211.469" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 677.46 211.469)" />
+								<circle class="blatt blatt--dunkel minute" cx="757.071" cy="255.656" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 757.071 255.656)" />
+								<circle class="blatt blatt--dunkel viertel" cx="757.071" cy="255.656" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 757.071 255.656)" />
+								<circle class="blatt blatt--dunkel minute" cx="826.157" cy="314.965" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 826.157 314.965)" />
+								<circle class="blatt blatt--dunkel viertel" cx="826.157" cy="314.965" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 826.157 314.965)" />
+								<circle class="blatt blatt--dunkel minute" cx="881.89" cy="386.966" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 881.89 386.966)" />
+								<circle class="blatt blatt--dunkel viertel" cx="881.89" cy="386.966" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 881.89 386.966)" />
+								<circle class="blatt blatt--dunkel minute" cx="921.988" cy="468.713" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 921.988 468.713)" />
+								<circle class="blatt blatt--dunkel viertel" cx="921.988" cy="468.713" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 921.988 468.713)" />
+								<circle class="blatt blatt--dunkel minute" cx="944.811" cy="556.858" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 944.811 556.858)" />
+								<circle class="blatt blatt--dunkel viertel" cx="944.811" cy="556.858" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 944.811 556.858)" />
+								<circle class="blatt blatt--dunkel minute" cx="949.422" cy="647.792" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 949.422 647.792)" />
+								<circle class="blatt blatt--dunkel viertel" cx="949.422" cy="647.792" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 949.422 647.792)" />
+								<circle class="blatt blatt--dunkel minute" cx="935.635" cy="737.794" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 935.635 737.794)" />
+								<circle class="blatt blatt--dunkel viertel" cx="935.635" cy="737.794" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 935.635 737.794)" />
+								<circle class="blatt blatt--dunkel minute" cx="904.012" cy="823.177" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 904.012 823.177)" />
+								<circle class="blatt blatt--dunkel viertel" cx="904.012" cy="823.177" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 904.012 823.177)" />
+								<circle class="blatt blatt--dunkel minute" cx="855.849" cy="900.448" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 855.849 900.448)" />
+								<circle class="blatt blatt--dunkel viertel" cx="855.849" cy="900.448" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 855.849 900.448)" />
+								<circle class="blatt blatt--dunkel minute" cx="793.118" cy="966.441" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 793.118 966.441)" />
+								<circle class="blatt blatt--dunkel viertel" cx="793.118" cy="966.441" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 793.118 966.441)" />
+								<circle class="blatt blatt--dunkel minute" cx="718.386" cy="1018.46" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 718.386 1018.46)" />
+								<circle class="blatt blatt--dunkel viertel" cx="718.386" cy="1018.46" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 718.386 1018.46)" />
+								<circle class="blatt blatt--dunkel minute" cx="634.713" cy="1054.36" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 634.713 1054.36)" />
+								<circle class="blatt blatt--dunkel viertel" cx="634.713" cy="1054.36" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 634.713 1054.36)" />
+								<circle class="blatt blatt--dunkel minute" cx="545.526" cy="1072.69" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 545.526 1072.69)" />
+								<circle class="blatt blatt--dunkel viertel" cx="545.526" cy="1072.69" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 545.526 1072.69)" />
+								<circle class="blatt blatt--dunkel minute" cx="454.474" cy="1072.69" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 454.474 1072.69)" />
+								<circle class="blatt blatt--dunkel viertel" cx="454.474" cy="1072.69" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 454.474 1072.69)" />
+								<circle class="blatt blatt--dunkel minute" cx="365.287" cy="1054.36" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 365.287 1054.36)" />
+								<circle class="blatt blatt--dunkel viertel" cx="365.287" cy="1054.36" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 365.287 1054.36)" />
+								<circle class="blatt blatt--dunkel minute" cx="281.614" cy="1018.46" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 281.614 1018.46)" />
+								<circle class="blatt blatt--dunkel viertel" cx="281.614" cy="1018.46" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 281.614 1018.46)" />
+								<circle class="blatt blatt--dunkel minute" cx="206.882" cy="966.441" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 206.882 966.441)" />
+								<circle class="blatt blatt--dunkel viertel" cx="206.882" cy="966.441" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 206.882 966.441)" />
+								<circle class="blatt blatt--dunkel minute" cx="144.151" cy="900.448" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 144.151 900.448)" />
+								<circle class="blatt blatt--dunkel viertel" cx="144.151" cy="900.448" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 144.151 900.448)" />
+								<circle class="blatt blatt--dunkel minute" cx="95.988" cy="823.177" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 95.988 823.177)" />
+								<circle class="blatt blatt--dunkel viertel" cx="95.988" cy="823.177" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 95.988 823.177)" />
+								<circle class="blatt blatt--dunkel minute" cx="64.3653" cy="737.794" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 64.3653 737.794)" />
+								<circle class="blatt blatt--dunkel viertel" cx="64.3653" cy="737.794" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 64.3653 737.794)" />
+								<circle class="blatt blatt--dunkel minute" cx="50.5776" cy="647.792" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 50.5776 647.792)" />
+								<circle class="blatt blatt--dunkel viertel" cx="50.5776" cy="647.792" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 50.5776 647.792)" />
+								<circle class="blatt blatt--dunkel minute" cx="55.1893" cy="556.858" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 55.1893 556.858)" />
+								<circle class="blatt blatt--dunkel viertel" cx="55.1893" cy="556.858" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 55.1893 556.858)" />
+								<circle class="blatt blatt--dunkel minute" cx="78.0115" cy="468.713" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 78.0115 468.713)" />
+								<circle class="blatt blatt--dunkel viertel" cx="78.0115" cy="468.713" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 78.0115 468.713)" />
+								<circle class="blatt blatt--dunkel minute" cx="118.11" cy="386.966" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 118.11 386.966)" />
+								<circle class="blatt blatt--dunkel viertel" cx="118.11" cy="386.966" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 118.11 386.966)" />
+								<circle class="blatt blatt--dunkel minute" cx="173.843" cy="314.965" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 173.843 314.965)" />
+								<circle class="blatt blatt--dunkel viertel" cx="173.843" cy="314.965" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 173.843 314.965)" />
+								<circle class="blatt blatt--dunkel minute" cx="242.929" cy="255.656" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 242.929 255.656)" />
+								<circle class="blatt blatt--dunkel viertel" cx="242.929" cy="255.656" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 242.929 255.656)" />
+								<circle class="blatt blatt--dunkel minute" cx="322.54" cy="211.469" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 322.54 211.469)" />
+								<circle class="blatt blatt--dunkel viertel" cx="322.54" cy="211.469" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 322.54 211.469)" />
+								<circle class="blatt blatt--dunkel minute" cx="409.416" cy="184.212" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 409.416 184.212)" />
+								<circle class="blatt blatt--dunkel viertel" cx="409.416" cy="184.212" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 409.416 184.212)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="85" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 85)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="85" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 85)" />
+								<circle class="blatt blatt--dunkel minute" cx="588.881" cy="92.3649" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 588.881 92.3649)" />
+								<circle class="blatt blatt--dunkel viertel" cx="588.881" cy="92.3649" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 588.881 92.3649)" />
+								<circle class="blatt blatt--dunkel minute" cx="675.338" cy="114.259" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 675.338 114.259)" />
+								<circle class="blatt blatt--dunkel viertel" cx="675.338" cy="114.259" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 675.338 114.259)" />
+								<circle class="blatt blatt--dunkel minute" cx="757.012" cy="150.084" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 757.012 150.084)" />
+								<circle class="blatt blatt--dunkel viertel" cx="757.012" cy="150.084" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 757.012 150.084)" />
+								<circle class="blatt blatt--dunkel minute" cx="831.675" cy="198.864" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 831.675 198.864)" />
+								<circle class="blatt blatt--dunkel viertel" cx="831.675" cy="198.864" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 831.675 198.864)" />
+								<circle class="blatt blatt--dunkel minute" cx="897.291" cy="259.268" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 897.291 259.268)" />
+								<circle class="blatt blatt--dunkel viertel" cx="897.291" cy="259.268" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 897.291 259.268)" />
+								<circle class="blatt blatt--dunkel minute" cx="952.07" cy="329.648" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 952.07 329.648)" />
+								<circle class="blatt blatt--dunkel viertel" cx="952.07" cy="329.648" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 952.07 329.648)" />
+								<circle class="blatt blatt--dunkel minute" cx="994.518" cy="408.084" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 994.518 408.084)" />
+								<circle class="blatt blatt--dunkel viertel" cx="994.518" cy="408.084" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 994.518 408.084)" />
+								<circle class="blatt blatt--dunkel minute" cx="1023.48" cy="492.438" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1023.48 492.438)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1023.48" cy="492.438" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1023.48 492.438)" />
+								<circle class="blatt blatt--dunkel minute" cx="1038.16" cy="580.407" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1038.16 580.407)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1038.16" cy="580.407" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1038.16 580.407)" />
+								<circle class="blatt blatt--dunkel minute" cx="1038.16" cy="669.593" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1038.16 669.593)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1038.16" cy="669.593" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1038.16 669.593)" />
+								<circle class="blatt blatt--dunkel minute" cx="1023.48" cy="757.562" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1023.48 757.562)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1023.48" cy="757.562" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1023.48 757.562)" />
+								<circle class="blatt blatt--dunkel minute" cx="994.518" cy="841.916" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 994.518 841.916)" />
+								<circle class="blatt blatt--dunkel viertel" cx="994.518" cy="841.916" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 994.518 841.916)" />
+								<circle class="blatt blatt--dunkel minute" cx="952.07" cy="920.352" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 952.07 920.352)" />
+								<circle class="blatt blatt--dunkel viertel" cx="952.07" cy="920.352" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 952.07 920.352)" />
+								<circle class="blatt blatt--dunkel minute" cx="897.291" cy="990.732" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 897.291 990.732)" />
+								<circle class="blatt blatt--dunkel viertel" cx="897.291" cy="990.732" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 897.291 990.732)" />
+								<circle class="blatt blatt--dunkel minute" cx="831.675" cy="1051.14" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 831.675 1051.14)" />
+								<circle class="blatt blatt--dunkel viertel" cx="831.675" cy="1051.14" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 831.675 1051.14)" />
+								<circle class="blatt blatt--dunkel minute" cx="757.012" cy="1099.92" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 757.012 1099.92)" />
+								<circle class="blatt blatt--dunkel viertel" cx="757.012" cy="1099.92" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 757.012 1099.92)" />
+								<circle class="blatt blatt--dunkel minute" cx="675.338" cy="1135.74" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 675.338 1135.74)" />
+								<circle class="blatt blatt--dunkel viertel" cx="675.338" cy="1135.74" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 675.338 1135.74)" />
+								<circle class="blatt blatt--dunkel minute" cx="588.881" cy="1157.64" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 588.881 1157.64)" />
+								<circle class="blatt blatt--dunkel viertel" cx="588.881" cy="1157.64" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 588.881 1157.64)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="1165" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 1165)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="1165" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 1165)" />
+								<circle class="blatt blatt--dunkel minute" cx="411.119" cy="1157.64" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 411.119 1157.64)" />
+								<circle class="blatt blatt--dunkel viertel" cx="411.119" cy="1157.64" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 411.119 1157.64)" />
+								<circle class="blatt blatt--dunkel minute" cx="324.662" cy="1135.74" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 324.662 1135.74)" />
+								<circle class="blatt blatt--dunkel viertel" cx="324.662" cy="1135.74" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 324.662 1135.74)" />
+								<circle class="blatt blatt--dunkel minute" cx="242.988" cy="1099.92" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 242.988 1099.92)" />
+								<circle class="blatt blatt--dunkel viertel" cx="242.988" cy="1099.92" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 242.988 1099.92)" />
+								<circle class="blatt blatt--dunkel minute" cx="168.325" cy="1051.14" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 168.325 1051.14)" />
+								<circle class="blatt blatt--dunkel viertel" cx="168.325" cy="1051.14" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 168.325 1051.14)" />
+								<circle class="blatt blatt--dunkel minute" cx="102.709" cy="990.732" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 102.709 990.732)" />
+								<circle class="blatt blatt--dunkel viertel" cx="102.709" cy="990.732" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 102.709 990.732)" />
+								<circle class="blatt blatt--dunkel minute" cx="47.9301" cy="920.352" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 47.9301 920.352)" />
+								<circle class="blatt blatt--dunkel viertel" cx="47.9301" cy="920.352" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 47.9301 920.352)" />
+								<circle class="blatt blatt--dunkel minute" cx="5.4824" cy="841.916" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 5.4824 841.916)" />
+								<circle class="blatt blatt--dunkel viertel" cx="5.4824" cy="841.916" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 5.4824 841.916)" />
+								<circle class="blatt blatt--dunkel minute" cx="-23.4761" cy="757.562" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -23.4761 757.562)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-23.4761" cy="757.562" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -23.4761 757.562)" />
+								<circle class="blatt blatt--dunkel minute" cx="-38.1556" cy="669.593" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -38.1556 669.593)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-38.1556" cy="669.593" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -38.1556 669.593)" />
+								<circle class="blatt blatt--dunkel minute" cx="-38.1556" cy="580.407" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -38.1556 580.407)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-38.1556" cy="580.407" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -38.1556 580.407)" />
+								<circle class="blatt blatt--dunkel minute" cx="-23.4761" cy="492.438" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -23.4761 492.438)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-23.4761" cy="492.438" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -23.4761 492.438)" />
+								<circle class="blatt blatt--dunkel minute" cx="5.4824" cy="408.084" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 5.4824 408.084)" />
+								<circle class="blatt blatt--dunkel viertel" cx="5.4824" cy="408.084" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 5.4824 408.084)" />
+								<circle class="blatt blatt--dunkel minute" cx="47.9301" cy="329.648" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 47.9301 329.648)" />
+								<circle class="blatt blatt--dunkel viertel" cx="47.9301" cy="329.648" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 47.9301 329.648)" />
+								<circle class="blatt blatt--dunkel minute" cx="102.709" cy="259.268" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 102.709 259.268)" />
+								<circle class="blatt blatt--dunkel viertel" cx="102.709" cy="259.268" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 102.709 259.268)" />
+								<circle class="blatt blatt--dunkel minute" cx="168.325" cy="198.864" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 168.325 198.864)" />
+								<circle class="blatt blatt--dunkel viertel" cx="168.325" cy="198.864" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 168.325 198.864)" />
+								<circle class="blatt blatt--dunkel minute" cx="242.988" cy="150.084" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 242.988 150.084)" />
+								<circle class="blatt blatt--dunkel viertel" cx="242.988" cy="150.084" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 242.988 150.084)" />
+								<circle class="blatt blatt--dunkel minute" cx="324.662" cy="114.259" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 324.662 114.259)" />
+								<circle class="blatt blatt--dunkel viertel" cx="324.662" cy="114.259" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 324.662 114.259)" />
+								<circle class="blatt blatt--dunkel minute" cx="411.119" cy="92.3649" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 411.119 92.3649)" />
+								<circle class="blatt blatt--dunkel viertel" cx="411.119" cy="92.3649" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 411.119 92.3649)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="-5" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 -5)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="-5" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 -5)" />
+								<circle class="blatt blatt--dunkel minute" cx="589.658" cy="1.41249" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 589.658 1.41249)" />
+								<circle class="blatt blatt--dunkel viertel" cx="589.658" cy="1.41249" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 589.658 1.41249)" />
+								<circle class="blatt blatt--dunkel minute" cx="677.492" cy="20.5194" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 677.492 20.5194)" />
+								<circle class="blatt blatt--dunkel viertel" cx="677.492" cy="20.5194" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 677.492 20.5194)" />
+								<circle class="blatt blatt--dunkel minute" cx="761.711" cy="51.9318" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 761.711 51.9318)" />
+								<circle class="blatt blatt--dunkel viertel" cx="761.711" cy="51.9318" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 761.711 51.9318)" />
+								<circle class="blatt blatt--dunkel minute" cx="840.604" cy="95.0103" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 840.604 95.0103)" />
+								<circle class="blatt blatt--dunkel viertel" cx="840.604" cy="95.0103" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 840.604 95.0103)" />
+								<circle class="blatt blatt--dunkel minute" cx="912.562" cy="148.878" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 912.562 148.878)" />
+								<circle class="blatt blatt--dunkel viertel" cx="912.562" cy="148.878" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 912.562 148.878)" />
+								<circle class="blatt blatt--dunkel minute" cx="976.122" cy="212.438" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 976.122 212.438)" />
+								<circle class="blatt blatt--dunkel viertel" cx="976.122" cy="212.438" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 976.122 212.438)" />
+								<circle class="blatt blatt--dunkel minute" cx="1029.99" cy="284.396" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1029.99 284.396)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1029.99" cy="284.396" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1029.99 284.396)" />
+								<circle class="blatt blatt--dunkel minute" cx="1073.07" cy="363.289" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1073.07 363.289)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1073.07" cy="363.289" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1073.07 363.289)" />
+								<circle class="blatt blatt--dunkel minute" cx="1104.48" cy="447.508" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1104.48 447.508)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1104.48" cy="447.508" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1104.48 447.508)" />
+								<circle class="blatt blatt--dunkel minute" cx="1123.59" cy="535.342" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1123.59 535.342)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1123.59" cy="535.342" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1123.59 535.342)" />
+								<circle class="blatt blatt--dunkel minute" cx="1130" cy="625" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1130 625)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1130" cy="625" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1130 625)" />
+								<circle class="blatt blatt--dunkel minute" cx="1123.59" cy="714.658" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1123.59 714.658)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1123.59" cy="714.658" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1123.59 714.658)" />
+								<circle class="blatt blatt--dunkel minute" cx="1104.48" cy="802.492" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1104.48 802.492)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1104.48" cy="802.492" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1104.48 802.492)" />
+								<circle class="blatt blatt--dunkel minute" cx="1073.07" cy="886.711" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1073.07 886.711)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1073.07" cy="886.711" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1073.07 886.711)" />
+								<circle class="blatt blatt--dunkel minute" cx="1029.99" cy="965.604" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 1029.99 965.604)" />
+								<circle class="blatt blatt--dunkel viertel" cx="1029.99" cy="965.604" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 1029.99 965.604)" />
+								<circle class="blatt blatt--dunkel minute" cx="976.122" cy="1037.56" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 976.122 1037.56)" />
+								<circle class="blatt blatt--dunkel viertel" cx="976.122" cy="1037.56" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 976.122 1037.56)" />
+								<circle class="blatt blatt--dunkel minute" cx="912.562" cy="1101.12" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 912.562 1101.12)" />
+								<circle class="blatt blatt--dunkel viertel" cx="912.562" cy="1101.12" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 912.562 1101.12)" />
+								<circle class="blatt blatt--dunkel minute" cx="840.604" cy="1154.99" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 840.604 1154.99)" />
+								<circle class="blatt blatt--dunkel viertel" cx="840.604" cy="1154.99" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 840.604 1154.99)" />
+								<circle class="blatt blatt--dunkel minute" cx="761.711" cy="1198.07" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 761.711 1198.07)" />
+								<circle class="blatt blatt--dunkel viertel" cx="761.711" cy="1198.07" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 761.711 1198.07)" />
+								<circle class="blatt blatt--dunkel minute" cx="677.492" cy="1229.48" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 677.492 1229.48)" />
+								<circle class="blatt blatt--dunkel viertel" cx="677.492" cy="1229.48" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 677.492 1229.48)" />
+								<circle class="blatt blatt--dunkel minute" cx="589.658" cy="1248.59" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 589.658 1248.59)" />
+								<circle class="blatt blatt--dunkel viertel" cx="589.658" cy="1248.59" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 589.658 1248.59)" />
+								<circle class="blatt blatt--dunkel minute" cx="500" cy="1255" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 1255)" />
+								<circle class="blatt blatt--dunkel viertel" cx="500" cy="1255" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 1255)" />
+								<circle class="blatt blatt--dunkel minute" cx="410.342" cy="1248.59" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 410.342 1248.59)" />
+								<circle class="blatt blatt--dunkel viertel" cx="410.342" cy="1248.59" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 410.342 1248.59)" />
+								<circle class="blatt blatt--dunkel minute" cx="322.508" cy="1229.48" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 322.508 1229.48)" />
+								<circle class="blatt blatt--dunkel viertel" cx="322.508" cy="1229.48" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 322.508 1229.48)" />
+								<circle class="blatt blatt--dunkel minute" cx="238.289" cy="1198.07" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 238.289 1198.07)" />
+								<circle class="blatt blatt--dunkel viertel" cx="238.289" cy="1198.07" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 238.289 1198.07)" />
+								<circle class="blatt blatt--dunkel minute" cx="159.396" cy="1154.99" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 159.396 1154.99)" />
+								<circle class="blatt blatt--dunkel viertel" cx="159.396" cy="1154.99" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 159.396 1154.99)" />
+								<circle class="blatt blatt--dunkel minute" cx="87.4377" cy="1101.12" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 87.4377 1101.12)" />
+								<circle class="blatt blatt--dunkel viertel" cx="87.4377" cy="1101.12" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 87.4377 1101.12)" />
+								<circle class="blatt blatt--dunkel minute" cx="23.8778" cy="1037.56" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 23.8778 1037.56)" />
+								<circle class="blatt blatt--dunkel viertel" cx="23.8778" cy="1037.56" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 23.8778 1037.56)" />
+								<circle class="blatt blatt--dunkel minute" cx="-29.9897" cy="965.604" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -29.9897 965.604)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-29.9897" cy="965.604" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -29.9897 965.604)" />
+								<circle class="blatt blatt--dunkel minute" cx="-73.0682" cy="886.711" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -73.0682 886.711)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-73.0682" cy="886.711" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -73.0682 886.711)" />
+								<circle class="blatt blatt--dunkel minute" cx="-104.481" cy="802.492" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -104.481 802.492)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-104.481" cy="802.492" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -104.481 802.492)" />
+								<circle class="blatt blatt--dunkel minute" cx="-123.588" cy="714.658" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -123.588 714.658)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-123.588" cy="714.658" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -123.588 714.658)" />
+								<circle class="blatt blatt--dunkel minute" cx="-130" cy="625" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -130 625)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-130" cy="625" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -130 625)" />
+								<circle class="blatt blatt--dunkel minute" cx="-123.588" cy="535.342" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -123.588 535.342)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-123.588" cy="535.342" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -123.588 535.342)" />
+								<circle class="blatt blatt--dunkel minute" cx="-104.481" cy="447.508" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -104.481 447.508)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-104.481" cy="447.508" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -104.481 447.508)" />
+								<circle class="blatt blatt--dunkel minute" cx="-73.0682" cy="363.289" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -73.0682 363.289)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-73.0682" cy="363.289" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -73.0682 363.289)" />
+								<circle class="blatt blatt--dunkel minute" cx="-29.9897" cy="284.396" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 -29.9897 284.396)" />
+								<circle class="blatt blatt--dunkel viertel" cx="-29.9897" cy="284.396" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 -29.9897 284.396)" />
+								<circle class="blatt blatt--dunkel minute" cx="23.8778" cy="212.438" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 23.8778 212.438)" />
+								<circle class="blatt blatt--dunkel viertel" cx="23.8778" cy="212.438" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 23.8778 212.438)" />
+								<circle class="blatt blatt--dunkel minute" cx="87.4377" cy="148.878" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 87.4377 148.878)" />
+								<circle class="blatt blatt--dunkel viertel" cx="87.4377" cy="148.878" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 87.4377 148.878)" />
+								<circle class="blatt blatt--dunkel minute" cx="159.396" cy="95.0103" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 159.396 95.0103)" />
+								<circle class="blatt blatt--dunkel viertel" cx="159.396" cy="95.0103" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 159.396 95.0103)" />
+								<circle class="blatt blatt--dunkel minute" cx="238.289" cy="51.9318" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 238.289 51.9318)" />
+								<circle class="blatt blatt--dunkel viertel" cx="238.289" cy="51.9318" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 238.289 51.9318)" />
+								<circle class="blatt blatt--dunkel minute" cx="322.508" cy="20.5194" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 322.508 20.5194)" />
+								<circle class="blatt blatt--dunkel viertel" cx="322.508" cy="20.5194" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 322.508 20.5194)" />
+								<circle class="blatt blatt--dunkel minute" cx="410.342" cy="1.41249" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 410.342 1.41249)" />
+								<circle class="blatt blatt--dunkel viertel" cx="410.342" cy="1.41249" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 410.342 1.41249)" />
+								<circle class="stunde-fuellung" cx="500" cy="625" r="17" pathLength="1" transform="rotate(-90 500 625)" />
+								<circle class="blatt blatt--hell minute" cx="500" cy="625" r="31.25" pathLength="60" stroke-dasharray="0.275 0.725" stroke-dashoffset="0.138" transform="rotate(-90 500 625)" />
+								<circle class="blatt blatt--hell viertel" cx="500" cy="625" r="29.5" pathLength="4" stroke-dasharray="0.0388 0.9612" stroke-dashoffset="0.0194" transform="rotate(-90 500 625)" />
+								<circle class="stunde-rand" cx="500" cy="625" r="34" pathLength="1" transform="rotate(-90 500 625)" />
+								<line class="speiche speiche--start" x1="500" y1="625" x2="500" y2="591" />
+								<line class="speiche speiche--lauf" x1="500" y1="625" x2="500" y2="591" />
+							</g>
+						</svg>
+					</div>
+				</div>
+			</div>
 		</div>
 		<p class="fuss">
-			Beide laufen synchron in 18 Sekunden. B: Stunde zeichnet sich 4–16 %,
-			Kamera faehrt 16–50 % zurueck, die 6 Ringe fuellen sich 24–47 %,
-			Ausblenden 72,5–94 %. In Ruhe 99 volle Kreise, an allen vier Kanten
-			Halbkreise. Schalter: ?rand ?hell ?heller ?ohneblatt.
+			Alle drei laufen synchron in 18 Sekunden. B: Stunde 4–16 %, Kamera
+			16–50 %, dann 142 Uhren einzeln als Spirale ums Quadrat (?wellen fuer
+			die Ringwellen). C: dieselbe Stunde und Kamera, dann
+			176 Uhren einzeln, im Uhrzeigersinn ab zwoelf, Ring fuer Ring von
+			innen nach aussen, 18–50 %. Schalter: ?rand ?hell ?heller ?ohneblatt.
 		</p>
 	</section>
 </Layout>
@@ -661,7 +1216,7 @@ import Layout from "../layouts/Layout.astro";
 		padding: clamp(60px, 10vw, 140px) 24px 160px;
 	}
 	.reihe { display: grid; gap: 16px; }
-	@media (min-width: 800px) { .reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+	@media (min-width: 800px) { .reihe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 	.hinweis { color: var(--gray); font-size: 0.95rem; margin: 0 0 12px; }
 	.fuss { color: var(--gray); font-size: 0.95rem; margin: 40px 0 0; max-width: 46rem; }
 
@@ -676,16 +1231,10 @@ import Layout from "../layouts/Layout.astro";
 	}
 	.buehne { width: 100%; height: 100%; display: grid; place-items: center; }
 
-	/* KONTRAST-PROBEN (Fred 21.09., Handy: „kann die beiden Flaechen nicht
-	   voneinander unterscheiden"). Kachel #0d0d0d auf Seite #000 ist ein
-	   Helligkeitsabstand von 5 % — auf OLED-Handys mit dunkler Gammakurve
-	   verschwindet er. Drei Wege, per Adresse zuschaltbar, kombinierbar:
-	     ?rand    1 px Linie in 14 % Weiss
-	     ?hell    Kachelgrund #161616 (statt #0d0d0d)
-	     ?heller  Kachelgrund #1f1f1f
-	   Der Rand aendert nichts an der Flaeche; die Aufhellung wuerde auf der
-	   Startseite den Token --panel und damit auch die dunkle Stunde und die
-	   Fallblatt-Kacheln mitziehen. */
+	/* KONTRAST-PROBEN (Fred 21.09., Handy: Kachel und Seite fallen farblich
+	   zusammen). ?rand 1 px Linie in 14 % Weiss · ?hell #161616 · ?heller
+	   #1f1f1f. Der Rand aendert nur die Kante; die Aufhellung wuerde auf der
+	   Startseite den Token --panel mitziehen. */
 	:global(body.rand) .kachel { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
 	:global(body.hell) .kachel { background: #161616; }
 	:global(body.heller) .kachel { background: #1f1f1f; }
@@ -712,9 +1261,17 @@ import Layout from "../layouts/Layout.astro";
 	   weisser Strich, der konisch zulaeuft"): bei Versatz genau 1 fallen
 	   Strichanfang und Pfadende aufeinander, und der Browser laesst an der
 	   Kante einen Splitter stehen — bei 500 Einheiten Strichbreite ein Keil
-	   vom Mittelpunkt zum Rand. Deshalb Versatz 1,02 und ein Muster mit
+	   vom Mittelpunkt zum Rand. Deshalb Versatz ueber 1 und ein Muster mit
 	   Luecke 2: der ganze Pfad (Laenge 1) liegt am Anfang sicher in der
-	   Luecke, bei Versatz 0 deckt der Strich ihn ganz. */
+	   Luecke.
+	   SPALT AM ENDE (Fred 21.09., „der erste Kreis schliesst die weisse
+	   Linie nicht ganz, da bleibt ein Mini-Spalt Schwarz"): bei Versatz 0
+	   endete der Strich (Laenge 1) rechnerisch exakt am Pfadende — und die
+	   Pfadlaenge ist im Browser nie ganz exakt 1. Der Strich ist jetzt 1,04
+	   lang und schiesst um 4 % ueber zwoelf Uhr hinaus; Startversatz 1,06,
+	   damit er anfangs trotzdem komplett in der Luecke liegt. Der Ueberschuss
+	   malt in derselben Farbe ueber den Anfang, also unsichtbar — und deckt
+	   nebenbei die Naht der Kuchenstuecke mit ab. */
 	.variante-a .gross,
 	.variante-a .stunde-fuellung,
 	.variante-a .stunde-rand {
@@ -830,14 +1387,10 @@ import Layout from "../layouts/Layout.astro";
 	}
 
 
-	/* ── B: das Raster ─────────────────────────────────────────────── */
-	/* AUF DER GANZEN KACHEL, nicht in der Innenflaeche (Fred 21.09.: „du
-	   faehrst mir zu weit raus … bei den Experten und Zuschauern war die
-	   ganze Kachel ausgefuellt"). Sass das SVG in der Innenflaeche, blieb
-	   rundum die Polsterung als Rand (gemessen 17 px) und der Anschnitt an
-	   den Kanten fiel weg. Absolut auf die Kachel gelegt und mit „slice"
-	   liegt x = 0 exakt auf der linken Kachelkante — die aeussersten Mitten
-	   sitzen auf den Kanten, an allen vier Seiten stehen Halbkreise. */
+	/* ── B und C: gemeinsames Material ─────────────────────────────── */
+	/* SVG auf der GANZEN Kachel (nicht in der Innenflaeche, sonst bleibt die
+	   Polsterung als Rand und der Anschnitt faellt weg), „slice" legt x = 0
+	   exakt auf die linke Kachelkante. */
 	.raster {
 		position: absolute;
 		inset: 0;
@@ -846,99 +1399,96 @@ import Layout from "../layouts/Layout.astro";
 		display: block;
 	}
 
-	/* Kamera um die Bildmitte = die Stunde. Bei 7 misst die Stunde
-	   476 Einheiten, knapp die halbe Breite — wie in A bei 5. */
-	.kamera-b {
+	.kamera-b,
+	.kamera-c {
 		transform-box: view-box;
 		transform-origin: 50% 50%;
 		transform: scale(7);
 		opacity: 0;
 	}
 
-	/* Naht-Deckel je Scheibe (s. Komponente): blendet ein, sobald der Ring
-	   voll ist, und deckt die Haarlinie auf zwoelf Uhr zu. */
-	.variante-b .feld-voll { fill: #ffffff; opacity: 0; }
-
-	/* Die weissen Scheiben per Kuchenstueck-Trick, anfangs leer. Versatz
-	   1,02 und Muster „1 2" gegen den Splitter am Anfang (s. Komponente). */
-	.variante-b .feld {
+	/* Kuchenstueck-Trick, anfangs leer; Strich 1,04 lang gegen Splitter am
+	   Anfang und Spalt am Ende (s. Komponente). */
+	.variante-b .feld,
+	.variante-c .feld {
 		fill: none;
 		stroke: #ffffff;
 		stroke-width: 34;
 		stroke-dasharray: 1.04 2;
 		stroke-dashoffset: 1.06;
 	}
+	.variante-b .feld-voll { fill: #ffffff; opacity: 0; }
 
-	/* Die eine: dunkle Fuellung, weisse Kontur, Speichen — wie in A. */
 	.variante-b .stunde-fuellung,
-	.variante-b .stunde-rand {
+	.variante-b .stunde-rand,
+	.variante-c .stunde-fuellung,
+	.variante-c .stunde-rand {
 		fill: none;
 		stroke-dasharray: 1.04 2;
 		stroke-dashoffset: 1.06;
 	}
-	.variante-b .stunde-fuellung { stroke: var(--panel); stroke-width: 34; }
+	.variante-b .stunde-fuellung,
+	.variante-c .stunde-fuellung { stroke: var(--panel); stroke-width: 34; }
 	.variante-b .stunde-rand,
-	.variante-b .speiche { stroke: #ffffff; stroke-width: 2.5; }
+	.variante-b .speiche,
+	.variante-c .stunde-rand,
+	.variante-c .speiche { stroke: #ffffff; stroke-width: 2.5; }
+	.variante-b .speiche--lauf,
+	.variante-c .speiche--lauf { transform-box: view-box; transform-origin: 50% 50%; }
 
-	/* ZIFFERNBLATT (Fred 21.09.: „die Striche, die die Minuten und
-	   Viertelstunden anzeigen" — und dann: „den weissen Kreisen ein
-	   schwarzes Ziffernblatt"). Nicht 60 Linien je Uhr (bei 143 Uhren
-	   waeren das 8.580 Elemente, die in jedem Bild neu gezeichnet wuerden),
-	   sondern je Uhr ZWEI GESTRICHELTE KREISE: die Strichbreite ist die
-	   radiale Laenge des Ticks, das Strichmuster seine Breite und Luecke.
-	   pathLength 60 bzw. 4 macht das Muster zu „ein Tick je Minute" und
-	   „ein Tick je Viertel", rotate(-90) plus halber Tick-Versatz setzt den
-	   ersten Tick mittig auf zwoelf Uhr. Minute 3.5 lang / 0.9 breit,
-	   Viertel 7.0 / 1.8 (Einheiten der ungezoomten Stunde).
-	   Die Blaetter der weissen Uhren sind dunkel (Kachelgrund) und liegen
-	   ueber der Scheibe: auf Schwarz unsichtbar, sie erscheinen in dem Mass,
-	   wie das Weiss darunter waechst. Abschalten: ?ohneblatt */
-	.variante-b .blatt { fill: none; }
-	.variante-b .blatt.minute { stroke-width: 3.5; }
-	.variante-b .blatt.viertel { stroke-width: 7.0; }
-	.variante-b .blatt--hell { stroke: #ffffff; }
-	.variante-b .blatt--dunkel { stroke: var(--panel); }
-	:global(body.hell) .variante-b .blatt--dunkel { stroke: #161616; }
-	:global(body.heller) .variante-b .blatt--dunkel { stroke: #1f1f1f; }
+	/* ZIFFERNBLATT als zwei gestrichelte Kreise je Uhr (Strichbreite =
+	   radiale Laenge des Ticks, Muster = Tick-Breite und Luecke; pathLength
+	   60 bzw. 4). Dunkle Blaetter liegen ueber den weissen Scheiben und
+	   erscheinen in dem Mass, wie das Weiss darunter waechst. */
+	.blatt { fill: none; }
+	.blatt.minute { stroke-width: 3.5; }
+	.blatt.viertel { stroke-width: 7.0; }
+	.blatt--hell { stroke: #ffffff; }
+	.blatt--dunkel { stroke: var(--panel); }
+	:global(body.hell) .blatt--dunkel { stroke: #161616; }
+	:global(body.heller) .blatt--dunkel { stroke: #1f1f1f; }
 	:global(body.ohneblatt) .blatt { display: none; }
-	.variante-b .speiche--lauf { transform-box: view-box; transform-origin: 50% 50%; }
 
-	.variante-b.laeuft .kamera-b {
+	.variante-b.laeuft .kamera-b,
+	.variante-c.laeuft .kamera-c {
 		animation:
-			kamera-b 18s cubic-bezier(0.65, 0, 0.35, 1) infinite,
-			ausblenden-b 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+			kamera-bc 18s cubic-bezier(0.65, 0, 0.35, 1) infinite,
+			ausblenden-bc 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 	.variante-b.laeuft .stunde-rand,
-	.variante-b.laeuft .stunde-fuellung { animation: zeichnen-b 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .speiche--lauf { animation: drehen-b 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld.ring-1 { animation: welle-1 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld-voll.ring-1 { animation: deckel-1 18s linear infinite; }
-	.variante-b.laeuft .feld.ring-2 { animation: welle-2 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld-voll.ring-2 { animation: deckel-2 18s linear infinite; }
-	.variante-b.laeuft .feld.ring-3 { animation: welle-3 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld-voll.ring-3 { animation: deckel-3 18s linear infinite; }
-	.variante-b.laeuft .feld.ring-4 { animation: welle-4 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld-voll.ring-4 { animation: deckel-4 18s linear infinite; }
-	.variante-b.laeuft .feld.ring-5 { animation: welle-5 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld-voll.ring-5 { animation: deckel-5 18s linear infinite; }
-	.variante-b.laeuft .feld.ring-6 { animation: welle-6 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-	.variante-b.laeuft .feld-voll.ring-6 { animation: deckel-6 18s linear infinite; }
+	.variante-b.laeuft .stunde-fuellung,
+	.variante-c.laeuft .stunde-rand,
+	.variante-c.laeuft .stunde-fuellung { animation: zeichnen-bc 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	.variante-b.laeuft .speiche--lauf,
+	.variante-c.laeuft .speiche--lauf { animation: drehen-bc 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld.ring-1 { animation: welle-1 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld-voll.ring-1 { animation: deckel-1 18s linear infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld.ring-2 { animation: welle-2 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld-voll.ring-2 { animation: deckel-2 18s linear infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld.ring-3 { animation: welle-3 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld-voll.ring-3 { animation: deckel-3 18s linear infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld.ring-4 { animation: welle-4 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld-voll.ring-4 { animation: deckel-4 18s linear infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld.ring-5 { animation: welle-5 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld-voll.ring-5 { animation: deckel-5 18s linear infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld.ring-6 { animation: welle-6 18s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+	:global(body.wellen) .variante-b.laeuft .feld-voll.ring-6 { animation: deckel-6 18s linear infinite; }
 
-	@keyframes kamera-b {
+	@keyframes kamera-bc {
 		0%, 4% { transform: scale(7); }
 		50% { transform: scale(1); }
 		88%, 100% { transform: scale(7); }
 	}
-	@keyframes ausblenden-b {
+	@keyframes ausblenden-bc {
 		0%, 2% { opacity: 0; }
 		4%, 72.5% { opacity: 1; }
 		94%, 100% { opacity: 0; }
 	}
-	@keyframes zeichnen-b {
+	@keyframes zeichnen-bc {
 		0%, 4% { stroke-dashoffset: 1.06; }
 		16%, 100% { stroke-dashoffset: 0; }
 	}
-	@keyframes drehen-b {
+	@keyframes drehen-bc {
 		0%, 4% { transform: rotate(0turn); }
 		16%, 100% { transform: rotate(1turn); }
 	}
@@ -993,11 +1543,32 @@ import Layout from "../layouts/Layout.astro";
 </style>
 
 <script>
-	// Beide Fassungen im selben Augenblick starten, damit sie synchron
-	// laufen; dazu die Kontrast-Schalter aus der Adresse.
+	// C: jede Uhr bekommt ihre eigene 18-s-Animation mit vier Marken — leer
+	// bis zu ihrem Start, dann 1,5 % lang fuellen, dann voll bis zum Ende der
+	// Runde. Erst diese anlegen, dann im selben Durchlauf die Klasse setzen,
+	// damit CSS- und WAAPI-Animationen im selben Bild beginnen.
+	const RUNDE = 18000;
+	function uhrenAnlegen() {
+		const wellen = new URLSearchParams(location.search).has("wellen");
+		const ziel = wellen ? ".variante-c .feld[data-s]" : ".feld[data-s]";
+		document.querySelectorAll<SVGCircleElement>(ziel).forEach((el) => {
+			const s = Number(el.dataset.s);
+			const e = Number(el.dataset.e);
+			el.animate(
+				[
+					{ strokeDashoffset: 1.06, offset: 0 },
+					{ strokeDashoffset: 1.06, offset: s, easing: "cubic-bezier(0.65, 0, 0.35, 1)" },
+					{ strokeDashoffset: 0, offset: e },
+					{ strokeDashoffset: 0, offset: 1 },
+				],
+				{ duration: RUNDE, iterations: Infinity },
+			);
+		});
+	}
 	document.addEventListener("astro:page-load", () => {
+		uhrenAnlegen();
 		document.querySelectorAll("[data-probe]").forEach((el) => el.classList.add("laeuft"));
 		const p = new URLSearchParams(location.search);
-		for (const k of ["rand", "hell", "heller", "ohneblatt"]) document.body.classList.toggle(k, p.has(k));
+		for (const k of ["rand", "hell", "heller", "ohneblatt", "wellen"]) document.body.classList.toggle(k, p.has(k));
 	});
 </script>
