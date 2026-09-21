@@ -95,6 +95,9 @@ export const STOPPUHR = {
 	knoepfe: "rechts" as "rechts" | "beide",
 };
 export const DASH = { muster: [1.04, 2], leer: 1.06 }; // Kuchenstueck-Trick (Splitter/Spalt-frei)
+// Beschriftung der Stunde (Fred 21.09.: „in die Uhr reinschreiben 60 Min."):
+// unter der Mitte, erscheint, sobald die Stunde fertig gezeichnet ist.
+export const STUNDE_TEXT = { text: "60 Min.", dy: 0.5, groesse: 0.26, einblenden: 0.3 }; // dy/groesse in Anteilen von r, einblenden in s
 
 // ── Geometrie ───────────────────────────────────────────────────────────
 export function uhren(): Array<{ x: number; y: number }> {
