@@ -83,6 +83,9 @@ export const STRICH = 2.5;   // Kontur der Stunde und Speichen
 // transparent"): er laeuft hinter der Zahl, mit Deckkraft < 1 bleibt die
 // Zahl auch dort lesbar, wo er durchlaeuft. 1 = deckend.
 export const ZEIGER_DECKKRAFT = 0.5;
+// Am Ende der Stunde, wenn der Zeiger auf 12 steht, faded er aus (Fred
+// 21.09.); Dauer in Sekunden ab stundeEnde. Zum Rundenstart ist er wieder da.
+export const ZEIGER_AUSFADEN = 0.6;
 // KEIN Zeiger auf den kleinen Uhren (Fred 21.09.): erst 176 drehende
 // Linien (ruckelten auf dem Handy), dann ein Sektor an der Vorderkante der
 // Fuellung (zu unauffaellig) — Entscheidung: die wachsende weisse Flaeche

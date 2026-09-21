@@ -248,7 +248,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
 // BASIS fuer Website und GIF-Werkstatt (/stunden-werkstatt), wie bei den
 // Fallblatt-Tafeln. Wer eine Zahl aendern will, aendert sie dort.
 import { GLYPHEN } from "../lib/stunde-glyphen";
-import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, STUNDE_TEXT, ZEIGER_DECKKRAFT, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
+import { ZEIT, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, UHR, BLATT, STOPPUHR, STUNDE_TEXT, ZEIGER_DECKKRAFT, ZEIGER_AUSFADEN, knopfWinkel, marken, uhren as uhrenGeometrie } from "../lib/stunde";
 const uhren = uhrenGeometrie();
 // Zeiger-Sektor: Versatz der Scheibe o laeuft 1,06 → 0, Vorderkante bei
 // L = 1,04 − o. Der Sektor [L − w, L] braucht Versatz o + w − 1,04, um eine
@@ -283,7 +283,7 @@ const striche = 60 / BLATT.minute.schritt; // Minutenstriche je Umlauf (60 oder 
 const dm = +((BLATT.minute.breite / (2 * Math.PI * BLATT.minute.r)) * striche).toFixed(4);
 const df = +((BLATT.fuenf.breite / (2 * Math.PI * BLATT.fuenf.r)) * 12).toFixed(4);
 const dq = +((BLATT.viertel.breite / (2 * Math.PI * BLATT.viertel.r)) * 4).toFixed(4);
-const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraRein: M.kameraRein, ausblenden: M.ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, M, standEnde: M.standEnde, reinStart: M.reinStart, reinEnde: M.reinEnde, innenEnde: M.innenEnde, RUNDE: M.RUNDE, N: uhren.length, STUNDE_TEXT });
+const plan = JSON.stringify({ ZEIT: { ...ZEIT, uhrenDauer: M.uhrenDauer, kameraRein: M.kameraRein, ausblenden: M.ausblenden }, KURVE, KURVE_RAUS, KURVE_KRIECH_RAUS, KURVE_KRIECH_REIN, KURVE_REIN, KURVE_AUSBLENDEN, KAMERA, M, standEnde: M.standEnde, reinStart: M.reinStart, reinEnde: M.reinEnde, innenEnde: M.innenEnde, RUNDE: M.RUNDE, N: uhren.length, STUNDE_TEXT, ZEIGER_DECKKRAFT, ZEIGER_AUSFADEN });
 
 interface Props {
 	fassung?: "brett" | "liste";
@@ -1586,6 +1586,14 @@ const beschlagStriche = [
 		];
 		buehne.querySelectorAll<SVGCircleElement>(".stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(zeichnen, opt)));
 		const speiche = buehne.querySelector<SVGLineElement>(".speiche--lauf")!;
+		// Zeiger faded aus, sobald er am Ende auf 12 steht (Fred 21.09.); zum
+		// Rundenstart steht er wieder mit seiner Deckkraft da.
+		anims.push(speiche.animate([
+			{ opacity: P.ZEIGER_DECKKRAFT, offset: 0 },
+			{ opacity: P.ZEIGER_DECKKRAFT, offset: o(M.stundeEnde), easing: bz(P.KURVE_AUSBLENDEN) },
+			{ opacity: 0, offset: Math.min(1, o(M.stundeEnde + P.ZEIGER_AUSFADEN)) },
+			{ opacity: 0, offset: 1 },
+		], opt));
 		anims.push(speiche.animate([
 			{ transform: "rotate(0turn)", offset: 0 },
 			{ transform: "rotate(0turn)", offset: o(M.halt), easing: K },
