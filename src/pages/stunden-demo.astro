@@ -8,7 +8,7 @@
 // und Reinzoomen"). Wer eine Zahl aendert, muss sonst nichts anfassen —
 // die Runde wird am Ende zusammengerechnet.
 const ZEIT = {
-	halt: 0.72,        // Halt am Anfang: die Stunde steht mit Blatt und Strich, noch ungezeichnet
+	halt: 0,           // Halt am Anfang (war 0,72; Fred 21.09.: „fang, wenn es fertig reingezoomt ist, gleich wieder an")
 	stunde: 2.16,      // die Stunde zeichnet sich (Rand, Fuellung, Zeiger)
 	// Kamera von 7 auf 1,15, beginnt, wenn die Stunde steht. "letzteUhr"
 	// heisst: sie faehrt genau so lang, bis die letzte Uhr fertig ist (Fred
@@ -16,7 +16,7 @@ const ZEIT = {
 	// letzten Uhr, die fertig animiert wird … vielleicht ist es ja gar
 	// nicht zu lang"). Eine Zahl in Sekunden macht es wieder unabhaengig;
 	// vorher standen hier 6,12.
-	kameraRaus: "letzteUhr" as number | "letzteUhr",
+	kameraRaus: 11 as number | "letzteUhr", // Fred 21.09.: „das Rauszoomen auf 11 Sekunden" — feste Zahl, nicht mehr an die letzte Uhr gekoppelt
 	// Vorsprung der Kamera vor der letzten Uhr, in Sekunden: bei "letzteUhr"
 	// steht sie so viel frueher (Fred 21.09.: „mach das Rauszoomen eine
 	// Sekunde schneller", dann „nochmal eine Sekunde", dann noch eine). 0 =
@@ -85,14 +85,14 @@ const ZEIT = {
 	lueckeMin: 0.05,
 	stand: 2.04,       // das fertige Bild steht, gerechnet ab der letzten Uhr
 	ausblenden: 3.9,   // die weissen Uhren und die Zeichnung der Stunde blenden aus
-	kameraRein: 5.84,  // Kamera zurueck auf 7, parallel zum Ausblenden (war 6,84; Fred 21.09.: eine Sekunde schneller)
+	kameraRein: 5,     // Kamera zurueck auf 7, parallel zum Ausblenden (Fred 21.09.: „auf fuenf Sekunden")
 	// KEIN SCHWARZ MEHR (Fred 21.09.: „die Pause, wenn es zurueckgeht und
 	// der Bildschirm schwarz wird, ist zu lang … da wuerde ich alles
 	// ausblenden und dann starten wie am Anfang mit der Uhr mit dem
 	// Strich"). Ziffernblatt und Startstrich der Stunde bleiben immer
 	// stehen; die Kamera faehrt auf sie zurueck, und die naechste Runde
 	// beginnt direkt mit dem Zeichnen. nachlauf ist nur noch ein Atemzug.
-	nachlauf: 0.3,
+	nachlauf: 0,       // (war 0,3) — keine Standzeit nach dem Reinzoomen
 };
 // Eine Kurve fuer alles: symmetrisch, weich am Anfang wie am Ende. Gilt
 // fuer die Kamera, die Stunde, jede einzelne Uhr — und seit 21.09. auch
