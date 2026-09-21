@@ -35,10 +35,9 @@ const ZEIT = {
 	// Zahl in Sekunden setzt einen festen Zeitpunkt.
 	uhrenAbStunde: 0.5,
 	uhrenStart: "abStunde" as number | "abStunde",
-	uhrenDauer: 14.4,  // von der ersten bis zum Ende der letzten Uhr
-	                   // (war 11,52 — mit „eine nach der anderen" am Anfang
-	                   // reichte das nur fuer eine einzige langsame Uhr, dann
-	                   // muessten 175 in acht Sekunden; 14,4 = 8 Bandschritte)
+	uhrenDauer: 9.92,  // von der ersten bis zum Ende der letzten Uhr — 9,92 heisst: die
+	                   // letzte Uhr ist genau fertig, wenn die Kamera bei 11 s steht
+	                   // (Fred 21.09.); Beschleunigung +59 % je Sekunde. Kuerzer = steiler.
 	// RAMPE UND VERHAELTNIS (Fred 21.09.: „es fuehlt sich natuerlicher an,
 	// wenn es ein Verhaeltnis gaebe zwischen dem Ramp, wie die Uhren
 	// entstehen, und wie schnell die Uhren animiert werden"). Statt einer
