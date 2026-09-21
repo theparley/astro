@@ -1,0 +1,144 @@
+---
+// PROBE-SEITE (Fred 21.09.): Der Kopf der Multi-Output-Sektion in drei
+// Fassungen untereinander. Frage war, ob das Muster vom Augenzeugen-Turm
+// („Noch vor dem ersten Kontakt." rechtsbündig unter dem Turm) auch hier
+// trägt — und wie es mit und ohne die fett gesetzten Zahlwörter aussieht.
+//
+// Das Muster aus index.astro: .turm-block ist `width: max-content` und
+// mittig gestellt, die kleine Zeile darin `text-align: right`. Dadurch
+// endet sie exakt unter dem letzten Buchstaben der Überschrift, statt
+// unter deren Mitte zu schweben.
+//
+// Nicht verlinkt. Die Startseite bleibt unverändert, bis Fred wählt.
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Kopf-Probe">
+	<section class="probe">
+		<p class="hinweis">A — jetziger Stand: Zeile mittig unter der Überschrift.</p>
+		<div class="kopf kopf--a">
+			<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs.</h2>
+			<p class="unterzeile"><strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde. <strong>Zwei</strong> Experten.</p>
+		</div>
+
+		<p class="hinweis">B — Augenzeugen-Muster: Zeile rechts angeheftet, Zahlwörter fett.</p>
+		<div class="kopf kopf--b">
+			<div class="turm-block">
+				<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs.</h2>
+				<p class="unterzeile"><strong>Ein</strong> Gespräch. <strong>Eine</strong> Stunde. <strong>Zwei</strong> Experten.</p>
+			</div>
+		</div>
+
+		<p class="hinweis">C — dasselbe ohne die fetten Zahlwörter.</p>
+		<div class="kopf kopf--c">
+			<div class="turm-block">
+				<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs.</h2>
+				<p class="unterzeile">Ein Gespräch. Eine Stunde. Zwei Experten.</p>
+			</div>
+		</div>
+
+		<p class="fuss">
+			Zum Vergleich der Augenzeugen-Turm auf der Startseite: dort ist der Block
+			so breit wie der Turm, die kleine Zeile darin rechtsbündig — sie endet
+			unter dem Punkt von ZEUGEN.
+		</p>
+	</section>
+</Layout>
+
+<style>
+	.probe {
+		max-width: var(--max-width);
+		margin: 0 auto;
+		padding: clamp(60px, 10vw, 140px) 24px 160px;
+	}
+
+	.hinweis {
+		color: var(--gray);
+		font-size: 0.95rem;
+		margin: 0 0 16px;
+		padding-top: 72px;
+		border-top: 1px solid var(--line);
+	}
+
+	.probe > .hinweis:first-child {
+		padding-top: 0;
+		border-top: 0;
+	}
+
+	.fuss {
+		color: var(--gray);
+		font-size: 0.95rem;
+		margin: 96px 0 0;
+	}
+
+	/* ── Kopf-Bausteine, 1:1 aus MultiOutputKacheln.astro ─────────────── */
+	.kopf {
+		text-align: center;
+		margin-bottom: 24px;
+	}
+
+	.kopf h2 {
+		margin: 0;
+		font-weight: 900;
+		text-transform: uppercase;
+		line-height: 0.9;
+		letter-spacing: -0.01em;
+		font-size: clamp(2.5rem, 1rem + 7vw, 8rem);
+		text-wrap: balance;
+	}
+
+	.unterzeile {
+		font-size: clamp(1.125rem, 0.9094rem + 0.9583vw, 1.9444rem);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
+		color: var(--white);
+		margin: 0;
+		max-width: 46rem;
+	}
+
+	.unterzeile strong {
+		font-weight: 900;
+	}
+
+	/* A: der jetzige Stand — 40px Luft, Zeile mittig. */
+	.kopf--a h2 {
+		margin-bottom: 40px;
+	}
+
+	.kopf--a .unterzeile {
+		margin-inline: auto;
+	}
+
+	/* B und C: das Augenzeugen-Muster. Block so breit wie die Überschrift
+	   (max-content), mittig gestellt, die Zeile darin rechtsbündig. */
+	.turm-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		width: max-content;
+		max-width: 100%;
+		margin: 0 auto;
+		text-align: left;
+	}
+
+	.turm-block .unterzeile {
+		text-align: right;
+		max-width: none;
+	}
+
+	/* Abstand nach der Turm-Rechnung von index.astro: bei Zeilenabstand 0.9
+	   und Versal-Kappe 0.7 sind zwei Turm-Zeilen 0.2 Turm-Em auseinander;
+	   mit text-box-trim bleibt davon +0.05 Turm-Em als Rand. */
+	@supports (text-box: trim-both cap alphabetic) {
+		.turm-block .unterzeile {
+			text-box: trim-both cap alphabetic;
+			margin-top: calc(clamp(2.5rem, 1rem + 7vw, 8rem) * 0.05);
+		}
+	}
+
+	@supports not (text-box: trim-both cap alphabetic) {
+		.turm-block .unterzeile {
+			margin-top: 12px;
+		}
+	}
+</style>
