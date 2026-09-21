@@ -1043,12 +1043,26 @@ const { fassung = "brett" } = Astro.props;
 	    72,5–94 %  die Kreise blenden aus (synchron mit Kachel 3)
 	    88 %  die Kamera ist wieder ganz herangefahren
 	   Wer eine Marke verschiebt, muss die benachbarten mitnehmen.
-	   GLEICHTAKT MIT KACHEL 3 (Fred 20.09. abends): beide Kacheln laufen in
-	   14 Sekunden und wenden bei 50 %. Kachel 3 erreicht das ueber zwei
-	   Haelften von je 7 Sekunden mit "alternate", diese hier ueber eine
-	   durchlaufende Runde — die Zahlen muessen zusammen geaendert werden. */
+	   TEMPO = BANDTEMPO (Fred 21.09.: „die Geschwindigkeit, wie es rein-
+	   und rauszoomt, waere die gleiche Geschwindigkeit, wie die Piktogramme
+	   in Kachel 1 durchlaufen"). Ausgerechnet statt geschaetzt, bei 542px
+	   Kachelbreite (1280er Viewport):
+	     Band  ein Zeichen plus Abstand = 17,5cqw = 94,8px, alle 1,8s
+	           -> 52,7 px/s, gleichfoermig.
+	     Zoom  der grosse Kreis misst 51cqw, sein Radius faellt von
+	           Massstab 10 auf 2, also von 1382px auf 276px = 1106px Weg.
+	           Diesen Weg legt die Kante in der Zoomphase zurueck (4 %
+	           bis 50 % der Runde).
+	   1106px bei 52,7 px/s brauchen 21,0s Zoomphase, das sind 45,6s Runde.
+	   Gesetzt sind 45s: Kantentempo 53,4 px/s (1 % ueber dem Band) — und
+	   45s sind GENAU 25 Bandschritte, die beiden Kacheln liegen damit auch
+	   im selben Takt und laufen nie auseinander.
+	   Wer das Band-Tempo aendert (BAND_SCHRITT_MS im Skript) oder die
+	   Kreisgroesse (--uhr--gross, kreis-zoom), muss hier nachrechnen.
+	   Die frueheren 14s stammten aus dem Gleichtakt mit Kachel 3, die es
+	   seit dem 20.09. nicht mehr gibt. */
 	[data-kreis].laeuft {
-		animation: kreis-zoom 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: kreis-zoom 45s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	/* Die Zeiger laufen nicht mehr gleichfoermig an und ab (Fred 20.09.
@@ -1058,17 +1072,17 @@ const { fassung = "brett" } = Astro.props;
 	   Haltezeiten davor und danach sind konstante Werte und bleiben davon
 	   unberuehrt, gedehnt wird also nur das Zeichnen selbst. */
 	[data-kreis].laeuft .uhr--klein {
-		animation: uhr-klein 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: uhr-klein 45s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	[data-kreis].laeuft .uhr--gross {
-		animation: uhr-gross 14s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		animation: uhr-gross 45s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 	}
 
 	/* Das Ausblenden trifft nur die KREISE, nicht die Speichen — der Strich
 	   der Stunde bleibt stehen. */
 	[data-kreis].laeuft .bogen {
-		animation: bogen-aus 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+		animation: bogen-aus 45s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 	}
 
 	/* WENIGER WEIT RAUS (Fred 20.09. abends: "am Ende groesser machen, nur
