@@ -713,7 +713,10 @@ const { fassung = "brett" } = Astro.props;
 
 	.kachel {
 		position: relative;
-		background: var(--panel);
+		/* --kachel statt --panel (Fred 21.09., s. Layout.astro): heller als
+		   die Panel-Stufe, damit sich die Kacheln auf dem Handy vom Grund
+		   abheben. */
+		background: var(--kachel);
 		aspect-ratio: 4 / 5;
 		/* Rand in cqw statt in Pixeln (20.09. abends): nur so bleibt das
 		   Verhaeltnis zwischen Feldbreite und Kachel-Innenbreite ueber alle
@@ -1046,7 +1049,7 @@ const { fassung = "brett" } = Astro.props;
 	/* Dunkle Fuellung der Stunde: auf Schwarz unsichtbar, bleibt als dunkle
 	   Scheibe stehen, wenn die weissen Uhren um sie herum entstehen. */
 	.stunde-fuellung {
-		stroke: var(--panel);
+		stroke: var(--kachel);
 		stroke-width: 34;
 	}
 	/* Kontur und Speichen: 2,5 Einheiten — bei Kamera 7 rund 6 px auf einer
@@ -1078,7 +1081,7 @@ const { fassung = "brett" } = Astro.props;
 		stroke: #ffffff;
 	}
 	.blatt--dunkel {
-		stroke: var(--panel);
+		stroke: var(--kachel);
 	}
 
 	/* Ohne Bewegung: das fertige Bild in Ruhe — Kamera draussen, alle Uhren
