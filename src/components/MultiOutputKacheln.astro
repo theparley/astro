@@ -275,7 +275,7 @@ const ZEIT = {
 	ersteDauer: 2.16,   // die erste weisse Uhr so lang wie die Stunde
 	naechsteBei: 0.5,   // die naechste Uhr faengt an, wenn die laufende hier ist
 	dauerMin: 0.3,      // kuerzeste Dauer einer Uhr
-	stand: 0,           // KEIN Stopp draussen: die Kamera faehrt sofort zurueck
+	stand: 2,           // das volle Feld steht (Fred 21.09.: „sonst wird es zu hektisch … lass das mal zwei Sekunden stehen"); 0 = sofort zurueck
 	ausblenden: 2.16,   // weisse Uhren und Zeichnung der Stunde blenden aus (= kameraRein)
 	kameraRein: 2.16,   // Kamera zurueck, so lang wie die Stunde
 	nachlauf: 0,        // kein Halt bis zur naechsten Runde
@@ -520,7 +520,7 @@ const { fassung = "brett" } = Astro.props;
 						<g class="kamera">
 							<g class="weisse">
 								{uhren.map((u, i) => (
-									<circle class="feld" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
+									<circle class="scheibe" data-i={i} cx={u.x} cy={u.y} r={UHR.r / 2} pathLength="1" transform={`rotate(-90 ${u.x} ${u.y})`} />
 								))}
 								{uhren.map((u) => (
 									<>
@@ -1027,14 +1027,19 @@ const { fassung = "brett" } = Astro.props;
 	}
 
 	/* Kuchenstueck-Trick, anfangs leer (s. Markup). */
-	.feld,
+	/* „scheibe", nicht „feld": das Layout-DIV um die Kachel heisst schon
+	   .feld, und stroke-dasharray VERERBT sich in SVG — die Regel traf das
+	   DIV, und von dort erbten alle SVG-Kinder das Strichmuster, auch die
+	   Speichen (Fred 21.09., live: „der Strich, der den Zeiger anzeigt, ist
+	   jetzt gestrichelt"). */
+	.scheibe,
 	.stunde-fuellung,
 	.stunde-rand {
 		fill: none;
 		stroke-dasharray: 1.04 2;
 		stroke-dashoffset: 1.06;
 	}
-	.feld {
+	.scheibe {
 		stroke: #ffffff;
 		stroke-width: 34;
 	}
@@ -1082,7 +1087,7 @@ const { fassung = "brett" } = Astro.props;
 		.kamera {
 			transform: scale(1.15);
 		}
-		.feld,
+		.scheibe,
 		.stunde-fuellung,
 		.stunde-rand {
 			stroke-dashoffset: 0;
@@ -1387,12 +1392,25 @@ const { fassung = "brett" } = Astro.props;
 		// Ausblenden: nur die weissen Uhren (samt dunklen Blaettern) und die
 		// Zeichnung der Stunde; Blatt und Startstrich der Stunde bleiben
 		// stehen — die naechste Runde zeichnet direkt von dort los.
+		// SICHERUNG GEGEN DEN BLITZER AM RUNDENWECHSEL (Fred 21.09., live:
+		// „ein kurzer Blitzer, kurz bevor die Animation startet"): Deckkraft
+		// laeuft im Browser auf dem Compositor-Thread, stroke-dashoffset auf
+		// dem Haupt-Thread. Am Rundenwechsel koennen die beiden ein Bild
+		// auseinanderliegen — ein Bild lang volle weisse Scheiben bei Deckkraft
+		// 1, in der Nahaufnahme ein weisser Blitz. Deshalb: die Scheiben
+		// leeren sich schon SCHUTZ Sekunden vor dem Rundenende (unsichtbar,
+		// weil ausgeblendet), und die Deckkraft bleibt die ersten SCHUTZ
+		// Sekunden der neuen Runde auf null (da ist ohnehin alles leer).
+		const SCHUTZ = 0.06;
 		const ausblenden = [
-			{ opacity: 1, offset: 0 },
+			{ opacity: 0, offset: 0 },
+			{ opacity: 0, offset: o(SCHUTZ) },
+			{ opacity: 1, offset: o(SCHUTZ * 1.5) },
 			{ opacity: 1, offset: o(standEnde), easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
 			{ opacity: 0, offset: o(standEnde + ZEIT.ausblenden) },
 			{ opacity: 0, offset: 1 },
 		];
+		const leerVorEnde = o(RUNDE - SCHUTZ);
 		buehne.querySelectorAll<SVGElement>(".weisse, .stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(ausblenden, opt)));
 
 		// Die Stunde zeichnet sich, der Zeiger dreht.
@@ -1400,7 +1418,9 @@ const { fassung = "brett" } = Astro.props;
 			{ strokeDashoffset: 1.06, offset: 0 },
 			{ strokeDashoffset: 1.06, offset: o(M.halt), easing: K },
 			{ strokeDashoffset: 0, offset: o(M.stundeEnde) },
-			{ strokeDashoffset: 0, offset: 1 },
+			{ strokeDashoffset: 0, offset: leerVorEnde },
+			{ strokeDashoffset: 1.06, offset: Math.min(1, leerVorEnde + 0.0001) },
+			{ strokeDashoffset: 1.06, offset: 1 },
 		];
 		buehne.querySelectorAll<SVGCircleElement>(".stunde-rand, .stunde-fuellung").forEach((el) => anims.push(el.animate(zeichnen, opt)));
 		anims.push(buehne.querySelector<SVGLineElement>(".speiche--lauf")!.animate([
@@ -1425,16 +1445,19 @@ const { fassung = "brett" } = Astro.props;
 		const starts = Array.from({ length: N }, (_, i) => startBei(i, k));
 		const dauern = starts.map((t, i) => dauerVon(i < N - 1 ? starts[i + 1] - t : t - starts[i - 1]));
 		dauern[0] = ZEIT.ersteDauer; // die erste exakt so lang wie die Stunde
-		buehne.querySelectorAll<SVGCircleElement>(".feld[data-i]").forEach((el) => {
+		buehne.querySelectorAll<SVGCircleElement>(".scheibe[data-i]").forEach((el) => {
 			const i = Number(el.dataset.i);
 			const s = M.uhrenStart + starts[i];
+			// Deckel auf den Rundenanteil, nicht auf die Sekunde — sonst laegen
+			// spaete Marken vor ihrem Start und animate() wirft (Fehler 21.09.).
+			const voll = Math.min(leerVorEnde, o(s + dauern[i]));
 			anims.push(el.animate([
 				{ strokeDashoffset: 1.06, offset: 0 },
-				{ strokeDashoffset: 1.06, offset: o(s), easing: K },
-				// Deckel auf den Rundenanteil, nicht auf die Sekunde — sonst laegen
-				// spaete Marken vor ihrem Start und animate() wirft (Fehler 21.09.).
-				{ strokeDashoffset: 0, offset: Math.min(1, o(s + dauern[i])) },
-				{ strokeDashoffset: 0, offset: 1 },
+				{ strokeDashoffset: 1.06, offset: Math.min(voll, o(s)), easing: K },
+				{ strokeDashoffset: 0, offset: voll },
+				{ strokeDashoffset: 0, offset: leerVorEnde },
+				{ strokeDashoffset: 1.06, offset: Math.min(1, leerVorEnde + 0.0001) },
+				{ strokeDashoffset: 1.06, offset: 1 },
 			], opt));
 		});
 		return anims;
