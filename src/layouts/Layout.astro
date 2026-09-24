@@ -91,7 +91,7 @@ const {
 		   /buchen-Kapitel). Ersetzt die vorherigen Ad-hoc-Werte (--white war
 		   #fafafa, --gray war #888) durch die entschiedenen Spec-Werte. */
 		--black: #000000;
-		--panel: #0d0d0d;
+		--panel: #1a1a1a; /* BBH-Wert (vorher #0d0d0d): weniger dunkle Stufen dicht beieinander (Fred 23.09.) */
 		/* Kachelgrund der Multi-Output-Kacheln (Fred 21.09., Handy: „kann die
 		   beiden Flaechen nicht vom Hintergrund unterscheiden"). #0d0d0d auf
 		   #000 sind 5 % Helligkeitsabstand, auf OLED-Handys mit dunkler
@@ -102,15 +102,38 @@ const {
 		   dem Kachelgrund unsichtbar bleiben. */
 		--kachel: #212121;
 		--tile: #404040;
-		--tile-text: #c8c8c8;
+		--tile-text: #cccccc; /* BBH #ccc (vorher #c8c8c8) */
 		--surface: #ededed;
 		/* Knopf-/Kachel-Fläche (Menü-Knopf, Menü-Zeilen, Formatberatung-CTA):
 		   EIN Token, damit die Flächen nie auseinanderlaufen (Fred-Sichtung
 		   2026-09-13: "wirkt weißer" — war Simultankontrast, Werte identisch). */
 		--tile-surface: rgba(237, 237, 237, 0.95);
 		--white: #ffffff;
+		/* BBH-Farben im Petto (Fred 23.09.): Signal und Weiss-Stufen, damit
+		   Zustaende ohne neue Grautoene auskommen. */
+		--white-80: rgba(255, 255, 255, 0.8);
+		--white-20: rgba(255, 255, 255, 0.2);
+		--signal-rot: #e74c3c;
+		--signal-gruen: #2ecc71;
+		--fehler: #ff0000;
+		/* SCHRIFTSKALA = BBH (Fred 23.09.: „uebernehmen wir die Schriftgroessen
+		   von BBH, bis auf unseren Hero, der bei uns einfach groesser ist").
+		   Aus deren CSS gerechnet: Grund 16 px bei 360 px Fenster, 22 px bei
+		   1728 px, Stufenfaktor 1,125 (klein) → 1,414 (gross), dazwischen
+		   linear in vw. Stufen wie bei BBH benannt. Der Hero bleibt cqw-
+		   kalibriert (index.astro), die Kachel-Zahlen bleiben Kachel-gebunden.
+		   Zeilenhoehen bei BBH: base 1,2 · md/lg 1,08 · xl 0,85 · 2xl 1 ·
+		   huge 0,85 · mega 0,82. */
+		--text-sm: clamp(13.6px, 12.26px + 0.3728vw, 18.7px);
+		--text-base: clamp(16px, 14.42px + 0.4386vw, 22px);
+		--text-md: clamp(18px, 14.55px + 0.9576vw, 31.11px);
+		--text-lg: clamp(20.25px, 14px + 1.7347vw, 43.98px);
+		--text-xl: clamp(22.78px, 12.41px + 2.881vw, 62.19px);
+		--text-2xl: clamp(25.63px, 9.24px + 4.554vw, 87.93px);
+		--text-huge: clamp(28.83px, 3.7px + 6.982vw, 124.34px);
+		--text-mega: clamp(32.44px, -5.29px + 10.48vw, 175.8px);
 		--gray: #999894;
-		--line: #2a2a2a;
+		--line: rgba(255, 255, 255, 0.2); /* BBH-Muster: Linien als Weiss 20 % (#fff3), keine eigene Graustufe (vorher #2a2a2a) */
 		/* Falltafel-Material (Fred 14.09. nacht): Zarge = Einfassung außen,
 		   Wand = Grundfläche hinter den Kacheln (Fugen). ABGELEITET aus der
 		   Kachelfarbe (Fred: "den Farbwert von der Kachel, dann die

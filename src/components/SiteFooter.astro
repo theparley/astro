@@ -101,7 +101,11 @@
 		flex-direction: column;
 		align-items: flex-end;
 		gap: 6px;
-		font-size: clamp(0.7rem, 1.1vw, 1rem);
+		/* Fred 23.09.: „ein bisschen duenn und klein" — auf BBHs Fussmass:
+		   text-sm (17 px bei 1400) und Gewicht 400 statt der Body-300. Vorher
+		   clamp(0.7rem, 1.1vw, 1rem) = 15 px, Gewicht 300. */
+		font-size: var(--text-sm);
+		font-weight: 400;
 		color: var(--gray);
 	}
 
