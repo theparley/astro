@@ -44,6 +44,7 @@ const tafelFormate = [
 	"RECRUITING-VIDEO",
 	"LIVE Q&A-SESSION",
 	"MITARBEITERINTERVIEW",
+	"ONLINE-KURS", // Fred 28.09.: „nehmen nochmal hinzu: Online-Kurse"
 ];
 // Zeilen-Aufteilung NEU (Fred 14.09.): Tafel wandert in die HALBE Spalte
 // mit der Wand-Kachelgröße — dafür lange Wörter geteilt, max. DREI Zeilen,
@@ -60,6 +61,7 @@ const tafelZustaende = [
 	["RECRUITING VIDEO"],
 	["LIVE Q&A SESSION"],
 	["MITARBEITER INTERVIEW"],
+	["ONLINE KURS"],
 ];
 
 // Kontakt-Board unter dem Augenzeugen-Turm (Fred 14.09.): startet leer und
@@ -104,8 +106,28 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		{/* PROBE LOKAL (Fred 23.09., nicht pushen): Hero und Turm getauscht —
 		   „Kunden werden zu Augenzeugen." mit „Noch vor dem ersten Kontakt."
 		   hier oben, „Kein Business ohne Witness." unten im Turm. */}
-		<h1><span><span class="hero-wort">Kunden</span> <span class="hero-wort">werden</span></span><span><span class="hero-wort">Augenzeugen.</span></span></h1>
-		<p class="hero-kontakt">Noch vor dem ersten Kontakt.</p>
+		{/* PROBE LOKAL (Fred 28.09.): Hero „Eure Expertise ist Programm.", Wort je
+		   Zeile; „Kunden werden Augenzeugen." wandert zurueck in den Turm der
+		   zweiten Sektion, die kleine Zeile geht mit. */}
+		{/* P KLAPPT UM (Fred 29.09.): das P steht zuerst als normales Forma-P
+		   (Umriss aus FormaDJRVariable.woff2, wght 900 / opsz 72, per fontTools
+		   in den Favicon-Koordinatenraum gesetzt: 395 × 461 gegen 393 × 461 des
+		   Favicons, derselbe Schnitt) und klappt nach dem Wisch wie eine
+		   Fallblatt-Kachel auf das Parley-P mit dem Playbutton: obere Haelfte
+		   faellt (zeigt ALT), untere schwingt hoch (zeigt NEU). Vier Schichten
+		   wie in fallblatt.css, hier rein in CSS mit Verzoegerung. */}
+		{/* DAS P VON PROGRAMM = das Parley-P (Fred 28.09.): dieselbe Form wie
+		   das Favicon (Forma DJR Display Black P, Punze = Playbutton, s.
+		   PARLEY_ZEICHEN.md), als Inline-SVG auf Versalhoehe (0,725 em) und
+		   Grundlinie gesetzt; der Buchstabe steht fuer Vorleser unsichtbar
+		   daneben. Pfad aus public/favicon.svg, Box 393 × 461 Einheiten. */}
+		<h1><span><span class="hero-wort">Eure</span> <span class="hero-wort">Expertise</span></span><span><span class="hero-wort">ist</span> <span class="hero-wort"><span class="hero-p" aria-hidden="true"><span class="hp-halb hp-halb--oben"><svg class="hp-neu" viewBox="1255.32 1445.08 395.2 461"><path fill-rule="evenodd" fill="currentColor" d="M1261.54 1906.08C1257.61 1906.08 1255.32 1904.1 1255.32 1899.82L1258.59 1681.51L1255.32 1451.01C1255.32 1447.06 1257.61 1445.08 1261.54 1445.08H1456.56C1582.22 1445.08 1648.32 1497.77 1648.32 1601.82C1648.32 1699.29 1579.6 1763.83 1454.6 1763.83H1401.59L1402.57 1899.82C1402.57 1904.1 1400.28 1906.08 1396.68 1906.08H1261.54ZM1401.63 1529.4L1400.18 1602.16L1401.63 1674.92L1465.14 1639.8L1527.2 1602.16L1465.14 1564.52L1401.63 1529.4Z" /></svg></span><span class="hp-halb hp-halb--unten"><svg class="hp-alt" viewBox="1255.32 1445.08 395.2 461"><path fill-rule="evenodd" fill="currentColor" d="M1260.59,1906.08Q1255.32,1906.08 1255.32,1900.81L1257.95,1681.51L1255.32,1450.35Q1255.32,1445.08 1260.59,1445.08L1457.5,1445.08Q1520.72,1445.08 1563.7,1462.53Q1606.67,1479.98 1628.57,1514.89Q1650.46,1549.79 1650.46,1601.82Q1650.46,1650.55 1627.91,1686.94Q1605.35,1723.33 1561.88,1743.58Q1518.42,1763.83 1455.53,1763.83L1402.18,1763.83L1402.84,1900.81Q1402.84,1906.08 1397.57,1906.08ZM1401.52,1663.07L1446.31,1663.07Q1474.95,1663.07 1492.57,1649.57Q1510.19,1636.07 1510.19,1604.45Q1510.19,1584.04 1502.28,1570.87Q1494.38,1557.7 1479.4,1551.44Q1464.42,1545.18 1443.67,1545.18L1402.18,1545.18Z" /></svg></span><span class="hp-halb hp-halb--oben hp-klappe hp-klappe--vorn"><svg class="hp-alt" viewBox="1255.32 1445.08 395.2 461"><path fill-rule="evenodd" fill="currentColor" d="M1260.59,1906.08Q1255.32,1906.08 1255.32,1900.81L1257.95,1681.51L1255.32,1450.35Q1255.32,1445.08 1260.59,1445.08L1457.5,1445.08Q1520.72,1445.08 1563.7,1462.53Q1606.67,1479.98 1628.57,1514.89Q1650.46,1549.79 1650.46,1601.82Q1650.46,1650.55 1627.91,1686.94Q1605.35,1723.33 1561.88,1743.58Q1518.42,1763.83 1455.53,1763.83L1402.18,1763.83L1402.84,1900.81Q1402.84,1906.08 1397.57,1906.08ZM1401.52,1663.07L1446.31,1663.07Q1474.95,1663.07 1492.57,1649.57Q1510.19,1636.07 1510.19,1604.45Q1510.19,1584.04 1502.28,1570.87Q1494.38,1557.7 1479.4,1551.44Q1464.42,1545.18 1443.67,1545.18L1402.18,1545.18Z" /></svg></span><span class="hp-halb hp-halb--unten hp-klappe hp-klappe--hinten"><svg class="hp-neu" viewBox="1255.32 1445.08 395.2 461"><path fill-rule="evenodd" fill="currentColor" d="M1261.54 1906.08C1257.61 1906.08 1255.32 1904.1 1255.32 1899.82L1258.59 1681.51L1255.32 1451.01C1255.32 1447.06 1257.61 1445.08 1261.54 1445.08H1456.56C1582.22 1445.08 1648.32 1497.77 1648.32 1601.82C1648.32 1699.29 1579.6 1763.83 1454.6 1763.83H1401.59L1402.57 1899.82C1402.57 1904.1 1400.28 1906.08 1396.68 1906.08H1261.54ZM1401.63 1529.4L1400.18 1602.16L1401.63 1674.92L1465.14 1639.8L1527.2 1602.16L1465.14 1564.52L1401.63 1529.4Z" /></svg></span><span class="hp-ganz hp-ganz--alt"><svg class="hp-alt" viewBox="1255.32 1445.08 395.2 461"><path fill-rule="evenodd" fill="currentColor" d="M1260.59,1906.08Q1255.32,1906.08 1255.32,1900.81L1257.95,1681.51L1255.32,1450.35Q1255.32,1445.08 1260.59,1445.08L1457.5,1445.08Q1520.72,1445.08 1563.7,1462.53Q1606.67,1479.98 1628.57,1514.89Q1650.46,1549.79 1650.46,1601.82Q1650.46,1650.55 1627.91,1686.94Q1605.35,1723.33 1561.88,1743.58Q1518.42,1763.83 1455.53,1763.83L1402.18,1763.83L1402.84,1900.81Q1402.84,1906.08 1397.57,1906.08ZM1401.52,1663.07L1446.31,1663.07Q1474.95,1663.07 1492.57,1649.57Q1510.19,1636.07 1510.19,1604.45Q1510.19,1584.04 1502.28,1570.87Q1494.38,1557.7 1479.4,1551.44Q1464.42,1545.18 1443.67,1545.18L1402.18,1545.18Z" /></svg></span><span class="hp-ganz hp-ganz--neu"><svg class="hp-neu" viewBox="1255.32 1445.08 395.2 461"><path fill-rule="evenodd" fill="currentColor" d="M1261.54 1906.08C1257.61 1906.08 1255.32 1904.1 1255.32 1899.82L1258.59 1681.51L1255.32 1451.01C1255.32 1447.06 1257.61 1445.08 1261.54 1445.08H1456.56C1582.22 1445.08 1648.32 1497.77 1648.32 1601.82C1648.32 1699.29 1579.6 1763.83 1454.6 1763.83H1401.59L1402.57 1899.82C1402.57 1904.1 1400.28 1906.08 1396.68 1906.08H1261.54ZM1401.63 1529.4L1400.18 1602.16L1401.63 1674.92L1465.14 1639.8L1527.2 1602.16L1465.14 1564.52L1401.63 1529.4Z" /></svg></span></span><span class="hero-p-text">P</span>rogramm.</span></span></h1>
+		{/* Vorrat (28.09., wieder raus auf Freds Wunsch): Erklaerungs-Zeile unterm
+		   Hero in md-Groesse, zuletzt "Aus echten Gespraechen entwickeln wir
+		   passende Formate, die das Vertrauen in eure Kompetenz greifbar
+		   machen." Alternative Heros desselben Tages: "Das Gespraech ist
+		   Programm.", "Euer Gespraech ist Programm." (Umlaut-Zeile brauchte
+		   0,07 em Luft nach oben). */}
 		</div>
 		{/* Logo bleibt Markenpräsenz OHNE Menü-Funktion (Website-Brief
 		   "Entscheidung 29.08."), ist aber wieder fixiert unten Mitte und
@@ -147,7 +169,8 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   die Zeile darin rechtsbündig — sie endet unter dem Punkt von
 			   ZEUGEN. Fred prüft noch, ob die Zeile überhaupt bleibt. */}
 			<div class="turm-block">
-			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kein</span><span class="statement-zeile">Business</span><span class="statement-zeile">ohne</span><span class="statement-zeile">Witness.</span></span></h2>
+			<h2 class="paragraph-statement"><span class="statement-satz"><span class="statement-zeile">Kunden</span><span class="statement-zeile">werden</span><span class="statement-zeile">Augen</span><span class="statement-zeile">zeugen.</span></span></h2>
+			<p class="kontakt-zeile">Noch vor dem ersten Kontakt.</p>
 			</div>
 		</div>
 		<div class="paragraph-text">
@@ -162,7 +185,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Satz (Expertise auf Knopfdruck) und war mit den Anfuehrungszeichen eine
 	   Spitze gegen andere — die Seite argumentiert sonst nie gegen jemanden.
 	   Der Absatz endet jetzt auf dem Befund „wirken nicht mehr." */}
-	<p class="plaedoyer-text"><strong>Generierte Expertise</strong> gibt es auf Knopfdruck.<br />Jeder Text, jedes Bild, jedes Video steht unter Generalverdacht. Inhalte, die vor kurzem noch ein Indiz für Kompetenz waren, wirken nicht mehr.</p>
+	<p class="plaedoyer-text"><strong>Generierte Expertise</strong> gibt es auf Knopfdruck.<br />Jeder Text, jedes Bild, jedes Video steht damit unter Generalverdacht.</p>
 		{/* „Beweis" statt „Vertrauensbeweis" (Fred 13.09. nacht): das Kompositum
 	   war ihm im Kopf zu schwer/feierlich — und seit „ohne Nachweis" im
 	   Absatz darüber steht, trägt die Treppe rein: INDIZ → NACHWEIS → BEWEIS,
@@ -294,7 +317,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Ordnung, „nimm die Aenderung zurueck") und bekommt den fetten
 		   Auftakt wie „Generierte Expertise" und „Gelebte Expertise": drei
 		   Absaetze, drei fette Eroeffnungen. */}
-		<p class="plaedoyer-text"><strong>Die Momentaufnahme</strong> davon wird zum fälschungssicheren Beweis. Genau solche Gesprächsmomente fangen wir mit Video filmreif ein und multiplizieren ihre Wirkung auf allen Kanälen.</p>
+		<p class="plaedoyer-text"><strong>Die Momentaufnahme</strong> davon liefert den Beweis. Wir fangen sie filmreif ein und multiplizieren ihre Wirkung.</p>
 		</div>
 	</section>
 
@@ -431,7 +454,17 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   — die Frage verbindet beide Woerter: Formate sind die Teile,
 			   Programm die Summe; „passend" nimmt das alte „passen zu wem" auf. */}
 			<p class="tafel-intro">Welche Formate ergeben das passende Programm? Das entscheiden Ziel und Budget, Branche und Themen, Firmenkultur und Menschen.</p>
-			<SplitFlap lines={tafelZustaende} holdMs={2400} minCols={26} minRows={1} rahmen ausrichtung="links" />
+			{/* PROBE LOKAL (Fred 28.09.): „die Wand und den Rahmen vom Flapperboard
+			   entfernen, dass bloss der Text schlappert" — Zarge (rahmen) weg,
+			   und ueber die Huelle .sf-bare der Komponente werden Kachelflaechen,
+			   Schatten und Scharnier unsichtbar; die Klapp-Bewegung bleibt. */}
+			<div class="sf-bare tafel-nackt">
+				{/* WERTE AUS DER PROBE (Fred 29.09., in public/fallblatt-direkt.html
+				   eingestellt und uebernommen): direkt (eine Klappe je Kachel),
+				   Reihenfolge Alphabet, schwarz zuerst, Pause 0, Halbklappe 55 ms
+				   (= Standard 110 je Klappe), Standzeit 1800 statt 2400. */}
+				<SplitFlap lines={tafelZustaende} holdMs={1800} minCols={26} minRows={1} ausrichtung="links" direkt folge="alphabet" schwarzZuerst pauseMs={0} />
+			</div>
 			{/* SCHLUSSSATZ GESTRICHEN (Fred 21.09., dritte Runde): der Absatz
 			   endet jetzt auf „Beweis eurer Expertise."
 			   Vorgeschichte an dieser Stelle, damit sie nicht noch einmal
@@ -493,7 +526,9 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 				   als Ueberschrift — „Eure Expertise ist Programm." Der Schlusssatz
 				   der Sektion sagt dasselbe noch einmal mit „Denn"; steht vorerst,
 				   Fred entscheidet, ob der Refrain bleibt. */}
-				<h2 class="format-titel">Eure<br />Expertise<br />ist<br />Programm.</h2>
+				{/* (Fred 28.09.): die Behauptung wandert in den Hero, hier wieder die
+				   Frage zum Format als Sektionsueberschrift. */}
+				<h2 class="format-titel">Eine<br />Frage<br />des<br />Formats.</h2>
 
 			</div>
 		</div>
@@ -720,35 +755,114 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Dreizeiler galten 9.6cqw). Zeilenhöhe bleibt 0.92 statt BBHs 0.82:
 		   deren Statements sind VERSAL (keine Unterlängen), unsere
 		   Mischschrift würde bei 0.82 kollidieren. */
-		font-size: 13.1cqw; /* PROBE: VERSAL, DREIZEILIG auch am Desktop (Fred 23.09.): laengste Zeile „AUGENZEUGEN." auf ~97 % der Zeilenbreite (1336 px bei 1400 px Fenster); vorher 15.6cqw fuer „Kein Business" gemischt, zweizeilig */
+		/* VIERZEILIG AUF ALLEN BREITEN (Fred 28.09.: „von Anfang an vierzeilig,
+		   aber genuegend Abstand unten zur Fahne"). Zwei Deckel: Breite
+		   (laengstes Wort PROGRAMM. auf ~97 % der Zeile = 15,7cqw) und HOEHE:
+		   vier Zeilen à 0,88 em sind 3,52 em; der Block sitzt mittig im
+		   Vollbild-Hero, die Fahne (BrandLogo, 84 px) haengt fixiert unten.
+		   Reserve 380 px (Fahne 84 px + Luft oben und unten) → em ≤ (100vh −
+		   380px) / 3,52 = 28,4vh − 108px. Bei 1632×937 (Freds Fenster): 158 px
+		   Schrift, Block 556 px, Unterkante ~107 px ueber der Fahne. */
+		font-size: min(15.7cqw, calc(28.4vh - 108px));
 		font-weight: 900;
 		text-transform: uppercase; /* PROBE (Fred 23.09.): alles in Grossbuchstaben, wie die Turm-Statements */
 		line-height: 0.88; /* Versalien ohne Unterlaengen: enger als 0.92 der Mischschrift, lockerer als BBHs 0.82 */
 		letter-spacing: -0.01em;
 	}
-	/* PROBE: kleine Zeile unter dem Hero, rechtsbuendig unter dem Punkt
-	   (Augenzeugen-Muster aus dem Turm). */
-	.hero-kontakt {
-		margin: 0.35em 0 0;
-		text-align: right;
-		/* MITTELGROESSE (Fred 23.09.: „Noch vor dem ersten Kontakt" ist zu
-		   klein — „da muessten wir eine dritte Schriftgroesse einfuehren"):
-		   die Lead-Groesse (max. 1,94 rem) steht unter dem 175-px-Hero wie
-		   eine Fussnote. BBH faehrt dreistufig: Riesen-Statement, Mittelstufe
-		   um 36 bis 44 px fuer Unterzeilen, Fliesstext. Diese Mittelstufe als
-		   EIN Token, damit sie spaeter auch Kachel-Unterzeilen und
-		   Sektionsfragen tragen kann. PROBE, noch lokal. */
-		/* = BBHs Stufe „lg" (aus ihrem CSS gerechnet: Grund 16→22 px von 360
-		   bis 1728 px, Stufenfaktor 1,125→1,414; lg = Stufe 2): 20 px bei
-		   360, 38 px bei 1400, 44 px bei 1728. Unsere Standardschrift ist
-		   BBHs „md" (28 px bei 1400), lg ist die naechste Stufe (×1,37). */
-		font-size: var(--text-lg); /* = BBH lg */
-		line-height: 1.2;
-		letter-spacing: -0.01em;
-	}
 
 	.hero h1 .hero-wort {
-		display: block; /* PROBE: Wort je Zeile auf allen Breiten (Fred 23.09.: „ich mach das mal dreizeilig") */
+		display: block; /* Wort je Zeile, auf allen Breiten (Fred 28.09.) */
+	}
+	/* Parley-P im Wort PROGRAMM: Versalhoehe der Forma-Versalien ist 0,725 em,
+	   der Kasten sitzt auf der Grundlinie (inline-block ohne Text = Unterkante
+	   auf Grundlinie). Rechts ein Hauch Luft wie die Nachbreite eines P. */
+	.hero-p {
+		display: inline-block;
+		position: relative;
+		height: 0.725em;
+		width: calc(0.725em * 395.2 / 461); /* Seitenverhaeltnis der viewBox */
+		vertical-align: baseline;
+		margin-right: 0.015em;
+		perspective: calc(0.725em * 3.2);
+	}
+	/* KEINE NAHT (Fred 29.09.: „den horizontalen Mittelstrich komplett weg"):
+	   die beiden Haelften ueberlappen sich um 1 px, damit an der Teilung
+	   kein Haarriss durch das Weiss laeuft. */
+	.hp-halb {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: calc(50% + 0.5px);
+		overflow: hidden;
+		clip-path: inset(0);
+	}
+	.hp-halb--oben { top: 0; }
+	.hp-halb--unten { bottom: 0; }
+	.hp-halb svg {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: 0.725em; /* = volle P-Hoehe, unabhaengig von der Haelfte */
+		display: block;
+	}
+	.hp-halb--oben svg { top: 0; }
+	.hp-halb--unten svg { bottom: 0; }
+	/* KEIN DURCHSCHEINEN (Fred 29.09.: „Loch vom P und Loch vom Dreieck
+	   ueberlappen, ein Loch mit Ecken"): die Glyphen sind ausserhalb der
+	   Tinte durchsichtig, durch das runde Loch der Oberklappe war das
+	   Parley-P darunter zu sehen. Loesung wie bei einer echten Kachel: jede
+	   Schicht ist DECKEND, mit dem Seitenschwarz als Grund. Eine Klappe
+	   verdeckt dann, was unter ihr liegt, ohne Sichtbarkeits-Tricks
+	   (eine Fassung mit visibility-Keyframes lief im Livebetrieb nicht
+	   zuverlaessig, s. Git-Historie). */
+	.hp-halb { background: #000; }
+	/* KEINE NAHT IM STAND (Fred 29.09.): solange nicht geklappt wird, liegt
+	   ein GANZES P ueber den Haelften — vor der Klappe das alte, danach das
+	   neue. Die Teilungslinie ist nur waehrend der 360 ms Klappe sichtbar,
+	   wie bei einer echten Kachel. */
+	.hp-ganz {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+	}
+	.hp-ganz svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+	.hp-ganz--alt { animation: hp-weg 1ms linear 1100ms both; }
+	.hp-ganz--neu { animation: hp-da 1ms linear 1460ms both; }
+	@keyframes hp-weg { from { opacity: 1; } to { opacity: 0; } }
+	@keyframes hp-da { from { opacity: 0; } to { opacity: 1; } }
+	.hp-klappe {
+		backface-visibility: hidden;
+		will-change: transform;
+		z-index: 2;
+	}
+	/* Takt (Fred 29.09.: „erst das P klappen, dann das Logo"): Wisch endet
+	   bei 900 ms (100 + 800), P klappt 1100–1460 ms, danach faehrt das Logo
+	   unten hoch (BrandLogo.astro: Stab ab 1600 ms, Fahne/Schrift ab 1820).
+	   Die Halbklappen sind mit 180 ms bewusst langsamer als die 55 ms der
+	   kleinen Kacheln, weil das P hier viele Zentimeter gross ist. */
+	.hp-klappe--vorn {
+		transform-origin: bottom center;
+		animation: hp-vorn 180ms ease-in 1100ms both;
+	}
+	.hp-klappe--hinten {
+		transform-origin: top center;
+		animation: hp-hinten 180ms ease-out 1280ms both;
+	}
+	@keyframes hp-vorn {
+		from { transform: rotateX(0deg); }
+		to { transform: rotateX(-90deg); }
+	}
+	@keyframes hp-hinten {
+		from { transform: rotateX(90deg); }
+		to { transform: rotateX(0deg); }
+	}
+	.hero-p-text {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
 	}
 	.hero h1 > span {
 		/* Beide Zeilen WISCHEN gemeinsam herein wie der Seitenübergang
@@ -767,7 +881,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   (8 Zeichen statt 13), die Schrift darf entsprechend wachsen. */
 	@media (max-width: 640px) {
 		.hero h1 {
-			font-size: 12.9cqw; /* PROBE: am Handy DREI Zeilen (Wort je Zeile, ohne „zu"), VERSAL „AUGENZEUGEN." auf ~97 % der Zeilenbreite (343 px bei 375 px Fenster); vorher 24cqw fuer „Business" gemischt */
+			font-size: 15.4cqw; /* PROBE (Fred 28.09.): am Handy VIER Zeilen (Wort je Zeile), laengstes Wort „PROGRAMM." auf ~97 % von 343 px; vorher 12,9cqw fuer AUGENZEUGEN. */
 		}
 
 		.hero h1 .hero-wort {
@@ -795,6 +909,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		.hero h1 > span {
 			animation: none;
 		}
+		.hp-klappe--vorn { display: none; } /* Endzustand sofort: Parley-P */
+		.hp-klappe--hinten { animation: none; transform: rotateX(0deg); }
+		.hp-ganz--alt { display: none; }
+		.hp-ganz--neu { animation: none; opacity: 1; }
 	}
 
 	/* "Der Paragraph" (Fred 2026-06-14, zweite Runde: "Container breiter,
@@ -823,7 +941,11 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 			   BBH-Bauweise (s. Kommentar an .format-split). */
 			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 			gap: 0;
-			align-items: start;
+			/* Beide Haelften auf EINER Mittelachse (Fred 28.09.): seit die drei
+			   Absaetze kuerzer sind als der Turm, klebte der Text oben (start),
+			   waehrend der Turm die Zeile fuellte. Jetzt zentriert sich die
+			   kuerzere Haelfte an der laengeren, egal welche das ist. */
+			align-items: center;
 		}
 
 	}

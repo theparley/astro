@@ -59,10 +59,24 @@ interface Props {
 	 * bisher) oder "links" — dann beginnt jede Zeile an der ersten Kachel,
 	 * bündig mit dem Fließtext daneben. */
 	ausrichtung?: "mitte" | "links";
+	/** KLAPP-ART (Fred 29.09., aus der Probe public/fallblatt-direkt.html):
+	 * true = jede Kachel faellt mit EINER Klappe direkt auf den Zielbuchstaben,
+	 * statt durch die Trommel zu rattern (bis 6 Klappen). */
+	direkt?: boolean;
+	/** REIHENFOLGE bei einem Wechsel: "zufall" (Standard: alle Kacheln
+	 * gleichzeitig, gestreut bis 350 ms) oder "alphabet" (Leerkacheln als
+	 * eigener Schlag, die Buchstaben einzeln nacheinander: erst alle A, dann
+	 * B …, bei gleichem Buchstaben von links nach rechts). */
+	folge?: "zufall" | "alphabet";
+	/** Bei folge="alphabet": Leerkacheln VOR den Buchstaben (true, Standard)
+	 * oder danach. */
+	schwarzZuerst?: boolean;
+	/** Bei folge="alphabet": Pause zwischen Leer-Schlag und Buchstaben, ms. */
+	pauseMs?: number;
 }
 
 // Default = der eine Tempo-Regler des Fallblatt-Moduls.
-const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true, minCols = 1, minRows = 1, rahmen = false, ausrichtung = "mitte" } = Astro.props;
+const { lines, flipMs = FLAP_STEP_MS, holdMs = 2600, holdsMs, loop = true, minCols = 1, minRows = 1, rahmen = false, ausrichtung = "mitte", direkt = false, folge = "zufall", schwarzZuerst = true, pauseMs = 0 } = Astro.props;
 
 // Zeichentrommel — Build-Zeit-Kopie der Modul-Konstante (das Frontmatter
 // läuft in Node, src/lib/fallblatt.ts wird ins Browser-Bundle importiert;
@@ -127,6 +141,10 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 	data-hold-ms={holdMs}
 	data-holds-ms={holdsMs ? JSON.stringify(holdsMs) : undefined}
 	data-loop={loop ? "1" : "0"}
+	data-direkt={direkt ? "1" : "0"}
+	data-folge={folge}
+	data-schwarz-zuerst={schwarzZuerst ? "1" : "0"}
+	data-pause-ms={pauseMs}
 	style={`--sf-cols:${cols};--sf-rows:${rows};`}
 >
 	{/* sr-only: der finale Zustand als echter Lesetext, für Screenreader und
@@ -183,6 +201,8 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		wireTileLayers,
 		resetInstant,
 		flapTo,
+		flapOnce,
+		DRUM,
 		wait,
 		reduceMotion,
 		FLAP_STEP_MS,
@@ -214,6 +234,13 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 		const flipMs = Number(boardEl.dataset.flipMs) || FLAP_STEP_MS;
 		const holdMs = Number(boardEl.dataset.holdMs) || 2600;
 		const loop = boardEl.dataset.loop === "1";
+		// Klapp-Art und Reihenfolge (Fred 29.09.), s. Props oben.
+		const direkt = boardEl.dataset.direkt === "1";
+		const folge = boardEl.dataset.folge || "zufall";
+		const schwarzZuerst = boardEl.dataset.schwarzZuerst !== "0";
+		const pauseMs = Number(boardEl.dataset.pauseMs) || 0;
+		const klapp = (tile: FlapTile, ch: string) =>
+			direkt ? flapOnce(tile, ch, Math.max(8, flipMs / 2)) : flapTo(tile, ch, flipMs);
 		// Standzeit je Zustand (optional, Index = Zustands-Index); fehlt der
 		// Eintrag, gilt die globale holdMs.
 		let holds: number[] | null = null;
@@ -237,14 +264,41 @@ const statesJson = JSON.stringify(gridStates).replace(/</g, "\\u003c");
 
 		async function goToState(stateIndex: number, animate: boolean) {
 			const grid = states[stateIndex];
-			const jobs = tiles.map(({ tile, r, c }) => {
-				const targetChar = (grid[r] && grid[r][c]) || " ";
+			const ziel = ({ r, c }: BoardTile) => (grid[r] && grid[r][c]) || " ";
+			if (animate && folge === "alphabet") {
+				// NACH DEM ALPHABET (Fred 29.09., Werte aus der Probe uebernommen):
+				// Leerkacheln als EIN Schlag (alle gleichzeitig), die Buchstaben
+				// einzeln nacheinander in Trommel-Reihenfolge (A–Z, Umlaute,
+				// Zeichen, Ziffern), bei gleichem Buchstaben von links nach
+				// rechts. Kacheln ohne Aenderung bleiben unberuehrt.
+				const gen = tiles[0]?.tile.gen ?? 0;
+				const rang = (ch: string) => (ch === " " ? -1 : DRUM.indexOf(ch) === -1 ? 998 : DRUM.indexOf(ch));
+				const aenderungen = tiles
+					.map((bt) => ({ tile: bt.tile, c: bt.c, r: bt.r, ch: ziel(bt) }))
+					.filter((x) => x.tile.current !== x.ch)
+					.sort((a, b) => rang(a.ch) - rang(b.ch) || a.r - b.r || a.c - b.c);
+				const leer = aenderungen.filter((x) => x.ch === " ");
+				const buchstaben = aenderungen.filter((x) => x.ch !== " ");
+				const schwarz = () => Promise.all(leer.map((x) => klapp(x.tile, x.ch)));
+				const buchst = async () => {
+					for (const x of buchstaben) {
+						if (cancelled || x.tile.gen !== gen) return;
+						await klapp(x.tile, x.ch);
+					}
+				};
+				const pause = () => (leer.length && buchstaben.length ? wait(pauseMs) : Promise.resolve());
+				if (schwarzZuerst) { await schwarz(); await pause(); await buchst(); }
+				else { await buchst(); await pause(); await schwarz(); }
+				return;
+			}
+			const jobs = tiles.map((bt) => {
+				const targetChar = ziel(bt);
 				if (!animate) {
-					resetInstant(tile, targetChar);
+					resetInstant(bt.tile, targetChar);
 					return Promise.resolve();
 				}
 				const delay = Math.random() * STAGGER_MAX_MS;
-				return wait(delay).then(() => flapTo(tile, targetChar, flipMs));
+				return wait(delay).then(() => klapp(bt.tile, targetChar));
 			});
 			await Promise.all(jobs);
 		}

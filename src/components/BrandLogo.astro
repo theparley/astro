@@ -70,7 +70,10 @@
 		   dem Boden (scaleY, 220ms), dann fahren Fahne und Schriftzug
 		   GLEICHZEITIG aus der Stange heraus (300ms Gleiten, BBH-Kurve).
 		   Start weiterhin an die Hero-Sequenz gekoppelt (beide Zeilen
-		   wischen 100+800ms = 900ms; Logo ab 1000ms). Die Keyframes unten
+		   wischen 100+800ms = 900ms; Logo ab 1000ms). SEIT 29.09. (Fred:
+		   „erst das P klappen, dann das Logo"): das P in PROGRAMM klappt
+		   1100–1460 ms (index.astro, .hp-klappe), das Logo startet danach —
+		   Stab ab 1600 ms, Fahne/Schrift ab 1820 ms. Die Keyframes unten
 		   nutzen fill-mode BACKWARDS, nicht both: nach dem Ende muss die
 		   normale var(--dock-*)-Transform-Regel wieder greifen, sonst
 		   friert die Animation das Scroll-Andocken ein. */
@@ -78,7 +81,7 @@
 
 	.brand-logo__pole {
 		transform-origin: bottom;
-		animation: brand-logo-stab 220ms cubic-bezier(0.77, 0, 0.18, 1) 1000ms backwards;
+		animation: brand-logo-stab 220ms cubic-bezier(0.77, 0, 0.18, 1) 1600ms backwards;
 	}
 
 	@keyframes brand-logo-stab {
@@ -91,7 +94,7 @@
 	}
 
 	.brand-logo__banner {
-		animation: brand-logo-fahne-rein 300ms cubic-bezier(0.77, 0, 0.18, 1) 1220ms backwards;
+		animation: brand-logo-fahne-rein 300ms cubic-bezier(0.77, 0, 0.18, 1) 1820ms backwards;
 	}
 
 	@keyframes brand-logo-fahne-rein {
@@ -104,7 +107,7 @@
 	}
 
 	.brand-logo__text {
-		animation: brand-logo-text-rein 300ms cubic-bezier(0.77, 0, 0.18, 1) 1220ms backwards;
+		animation: brand-logo-text-rein 300ms cubic-bezier(0.77, 0, 0.18, 1) 1820ms backwards;
 	}
 
 	@keyframes brand-logo-text-rein {

@@ -368,7 +368,13 @@ const beschlagStriche = [
 		   die kleine Zeile ist dort bewusst leise, das ist der Reiz der
 		   Anheftung. Die Position uebernimmt jetzt die Betonung. */}
 		<div class="turm-block">
-			<h2>Der Multi&#8209;Output<br />eines&nbsp;Gesprächs.</h2>
+			{/* PROBE LOKAL (Fred 28.09.): „Die Multiplikation eines Gesprächs." statt
+			   „Der Multi-Output eines Gesprächs."; die Kachel-Koepfe rechnen mit
+			   Malzeichen („1 × 10") statt Verhaeltnis („1 zu 10+"); das Plus ist
+			   raus, weil „mal zehn plus" keine Rechnung mehr ist, das „ueber"
+			   steht in der Bezugszeile darunter. Nimmt das
+			   Verb „multiplizieren" vom Ende des Plaedoyers auf. */}
+			<h2>Die Multiplikation<br />eines&nbsp;Gesprächs.</h2>
 			<p>Ein Gespräch. Eine Stunde. Zwei Experten.</p>
 		</div>
 	</div>
@@ -377,7 +383,7 @@ const beschlagStriche = [
 		{/* ── Kachel 1: Gespräch → Ausspielungen ───────────────────────── */}
 		<div class="feld">
 			<div class="kachel-kopf">
-				<p class="verhaeltnis">1 <span class="zu">zu</span> 10+</p>
+				<p class="verhaeltnis">1 <span class="zu">×</span> 10</p>
 				{/* „Mehr als zehn" statt „Zehn" (20.09. abends): die Ueberschrift
 				   traegt seit Freds Aenderung ein Plus, und eine Zeile
 				   darunter, die auf genau zehn festlegt, wuerde ihr
@@ -488,7 +494,10 @@ const beschlagStriche = [
 			</div>
 			<div class="kachel">
 			<div class="kachel-mitte kachel-mitte--brett">
-				<SplitFlap lines={brettZeilen} holdMs={1800} minCols={13} minRows={3} />
+				{/* Klapp-Werte wie das Format-Board unten (Fred 29.09., aus der Probe
+				   public/fallblatt-direkt.html): direkt, Alphabet, schwarz zuerst,
+				   Pause 0; Standzeit war hier schon 1800. */}
+				<SplitFlap lines={brettZeilen} holdMs={1800} minCols={13} minRows={3} direkt folge="alphabet" schwarzZuerst pauseMs={0} />
 			</div>
 			<div class="kachel-mitte kachel-mitte--liste">
 				<ul class="varianten">
@@ -520,7 +529,7 @@ const beschlagStriche = [
 		   Fläche — das Bild behauptete dann hundertmal mehr als die Zahl. */}
 		<div class="feld">
 			<div class="kachel-kopf">
-				<p class="verhaeltnis">1 <span class="zu">zu</span> 100+</p>
+				<p class="verhaeltnis">1 <span class="zu">×</span> 100</p>
 				{/* „WIRD SO ZU" (Fred 21.09.): das Verb kommt zurueck, aber mit
 				   Bedingung. Das kleine „so" zeigt auf die linke Kachel — Fred:
 				   „das so heisst, wenn man die 10 Deliveries bespielt". Damit ist
@@ -963,6 +972,7 @@ const beschlagStriche = [
 		align-self: start;
 	}
 
+
 	.varianten {
 		width: max-content;
 		max-width: 100%;
@@ -1316,7 +1326,7 @@ const beschlagStriche = [
 	   Kacheln). Gilt auch auf dem Telefon — die Basis blendet das Scharnier
 	   dort aus (Befund 20.09., dunkle Wand), hier ist es gewollt. */
 	.kachel-mitte--brett .sf-hinge {
-		display: block;
+		display: none; /* PROBE LOKAL 28.09. (Fred: „Wand und Rahmen weg, bloss der Text schlappert"): Scharnier-Strich aus, vorher block, 1 px. Der graue Kachelgrund bleibt wie bei Kachel 2. */
 		background: var(--kachel);
 		/* GANZ DUENN (Fred 21.09., zweite Runde: „wieder raus oder ganz
 		   duenn"): 1 px, das duennste, was ueberall sicher gezeichnet wird —
