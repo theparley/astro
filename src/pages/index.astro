@@ -1280,6 +1280,16 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   Multi-Output-Wand (--mo-k-Formel) statt der viewport-füllenden
 	   SplitFlap-Automatik. is:global nötig: .sf-grid trägt kein Scope-Attribut
 	   dieser Seite. */
+	/* SCHARNIER AUCH AUF DEM NACKTEN FORMAT-BOARD (Fred 29.09.): 1 px in
+	   Seitenschwarz durch die Buchstaben, wie der duenne Strich in Kachel 1.
+	   Die .sf-bare-Huelle blendet das Scharnier sonst aus. */
+	.tafel-nackt .sf-hinge {
+		display: block;
+		height: 1px;
+		background: #000;
+		transform: translateY(-50%);
+	}
+
 	.paragraph .sf-grid,
 	.ziel-format-tafel .sf-grid {
 		--sf-tile-w: clamp(11px, 1.75vw, 30px);
