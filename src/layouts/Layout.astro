@@ -12,7 +12,8 @@ import PageWipe from "../components/PageWipe.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 
 interface Props {
-	title: string;
+	// Ohne title = Startseite (eigener Tab-Titel, s. unten).
+	title?: string;
 	description?: string;
 	// true nur auf der Startseite: der Menü-Knopf bleibt verdeckt, bis das
 	// Hero-Logo (BrandLogo.astro) eingefahren ist und ihn aus der Stange
@@ -25,6 +26,24 @@ const {
 	description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.",
 	gateMenuBehindHero = false,
 } = Astro.props;
+
+// NAME IM TAB (Fred 26.10.2026, Namensregel in PARLEY_WORDING.md: Parley Film
+// ist der Name nach außen, The Parley wird das Studio). Unterseiten
+// „Studio · Parley Film“, die Startseite trägt Name und Satz aus der
+// Claim-Architektur (Nachtrag 25.10.: „Parley Film. Echte Gespräche.
+// Filmreif.“). Vorher „{title} · The Parley“.
+const SITE_NAME = "Parley Film";
+const pageTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME} · Echte Gespräche. Filmreif.`;
+// Websitename für Google (strukturierte Daten WebSite, nur auf der
+// Startseite, wie Google es verlangt). Bei der Umstellung auf parleyfilm.com
+// hier die Adresse tauschen (intern/Rebranding/Uebergabe_Umstellung_parleyfilm_2026-10.md).
+const SITE_URL = "https://theparley.de/";
+const websiteJsonLd = JSON.stringify({
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	name: SITE_NAME,
+	url: SITE_URL,
+});
 ---
 
 <!doctype html>
@@ -52,7 +71,8 @@ const {
 		   Datei längst im Cache liegt. 107 KB, kommt vor dem 485-KB-Textschnitt
 		   an. */}
 		<link rel="preload" href="/fonts/FormaDJRMonoVariable.woff2" as="font" type="font/woff2" crossorigin />
-		<title>{title} · The Parley</title>
+		<title>{pageTitle}</title>
+		{!title && <script type="application/ld+json" set:html={websiteJsonLd} />}
 		<ClientRouter />
 	</head>
 	<body>

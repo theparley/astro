@@ -137,25 +137,39 @@ const { gateBehindHero = false } = Astro.props;
 	   BrandLogo.astro's Stange steht) — Geburt per transition, bidirektional.
 	   Doppelklasse für Spezifität (siehe CtaTile-Historie: die transition-
 	   Shorthand-Falle). */
+	/* SCHNELL UND OHNE BLITZEN (Fred 10.10.: „das Menue erscheint viel zu
+	   spaet, orientier dich an zwetschke.de", davor dreimal „es blitzt"):
+	   die Geburt aus der Mitte (clip-path 400 ms + 150 ms Schliess-
+	   Verzoegerung) ist raus, seit unten kein Logo-Strich mehr liegt, aus dem
+	   sie entstehen koennte. Stattdessen kurzes Einblenden mit leichtem
+	   Heben (220 ms), symmetrisch in beide Richtungen und ohne Verzoegerung.
+	   Ein schneller Flick ueber die Schwelle erzeugt so hoechstens einen
+	   weichen Hauch, keinen aufspringenden Knopf. Schwelle und Ruhe-Abwarten
+	   steuert BrandLogo.astro (50 px, Totband bis 40 px).
+	   opacity bleibt in der Liste, weil .is-open den Knopf ausblendet. */
 	.menu-tile.menu-tile--gated {
 		animation: none;
-		clip-path: inset(0 50% 0 50%);
-		/* opacity mit in der Liste: transition ist ein Shorthand — eine reine
-		   clip-path-Transition hier würde das Knopf-Ausblenden beim Öffnen
-		   (Zwetschke-Verhalten, .is-open-Regel unten) hart springen lassen
-		   (dieselbe Falle wie in der CtaTile-Historie dokumentiert). */
+		clip-path: inset(0 0 0 0);
+		opacity: 0;
+		transform: translate(-50%, 10px);
+		pointer-events: none;
 		transition:
-			clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1) 150ms,
-			opacity 150ms ease,
+			opacity 220ms ease,
+			transform 220ms cubic-bezier(0.77, 0, 0.18, 1),
 			background-size 250ms ease-in-out,
 			width 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
 	}
 
 	.menu-tile--gated.menu-tile--revealed {
-		clip-path: inset(0 0 0 0);
+		opacity: 1;
+		transform: translate(-50%, 0);
+		pointer-events: auto;
+		/* EINBLENDEN SCHNELLER ALS AUSBLENDEN (Fred 10.10.: „das Menue kommt
+		   ein bisschen spaet", dann „noch schneller"): rein 70 ms, raus bleiben
+		   die 220 ms der Grundregel oben. */
 		transition:
-			clip-path 400ms cubic-bezier(0.77, 0, 0.18, 1),
-			opacity 150ms ease,
+			opacity 70ms ease-out,
+			transform 70ms cubic-bezier(0.22, 0.61, 0.36, 1),
 			background-size 250ms ease-in-out,
 			width 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
 	}
@@ -175,7 +189,7 @@ const { gateBehindHero = false } = Astro.props;
 
 		.menu-tile--gated.menu-tile--revealed .menu-tile__burger,
 		.menu-tile--gated.menu-tile--revealed .menu-tile__word {
-			transition: opacity 200ms ease 400ms;
+			transition: opacity 70ms ease-out; /* mit der Kachel, nicht 400 ms danach (10.10.) */
 		}
 	}
 
