@@ -1,6 +1,7 @@
 # the-parley-astro
 
-Marketing-Website von The Parley (theparley.de). Statisches Astro-Frontend +
+Marketing-Website von Parley Film (parleyfilm.com, bis 26.10.2026 theparley.de,
+das per 301 auf parleyfilm.com weiterleitet). Statisches Astro-Frontend +
 zwei Cloudflare Pages Functions als serverseitiger Proxy vor der
 meetergo-Buchungsstrecke (`/buchen`).
 

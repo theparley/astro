@@ -35,9 +35,14 @@ const {
 const SITE_NAME = "Parley Film";
 const pageTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME} · Echte Gespräche. Filmreif.`;
 // Websitename für Google (strukturierte Daten WebSite, nur auf der
-// Startseite, wie Google es verlangt). Bei der Umstellung auf parleyfilm.com
-// hier die Adresse tauschen (intern/Rebranding/Uebergabe_Umstellung_parleyfilm_2026-10.md).
-const SITE_URL = "https://theparley.de/";
+// Startseite, wie Google es verlangt). Die Adresse kommt aus `site` in
+// astro.config.mjs (seit 26.10.2026 parleyfilm.com, vorher theparley.de).
+const SITE_URL = new URL("/", Astro.site).href;
+// Canonical und Open Graph: immer die parleyfilm.com-Adresse der Seite, auch
+// wenn sie über die pages.dev-Vorschau oder die alte Domain aufgerufen wird.
+// Mit Schrägstrich am Ende, wie Astro baut: Cloudflare Pages leitet /kontakt
+// per 308 auf /kontakt/ um.
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 const websiteJsonLd = JSON.stringify({
 	"@context": "https://schema.org",
 	"@type": "WebSite",
@@ -72,6 +77,13 @@ const websiteJsonLd = JSON.stringify({
 		   an. */}
 		<link rel="preload" href="/fonts/FormaDJRMonoVariable.woff2" as="font" type="font/woff2" crossorigin />
 		<title>{pageTitle}</title>
+		<link rel="canonical" href={canonicalUrl} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={SITE_NAME} />
+		<meta property="og:locale" content="de_DE" />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl} />
 		{!title && <script type="application/ld+json" set:html={websiteJsonLd} />}
 		<ClientRouter />
 	</head>

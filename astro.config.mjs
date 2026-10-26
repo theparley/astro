@@ -3,6 +3,9 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
+	// Adresse der Website (Umzug theparley.de → parleyfilm.com, 26.10.2026).
+	// Grundlage für Canonical, Open Graph, Sitemap und robots.txt.
+	site: 'https://parleyfilm.com',
 	devToolbar: {
 		enabled: false,
 	},
