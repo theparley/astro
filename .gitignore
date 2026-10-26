@@ -27,3 +27,10 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Werkstatt-Seiten der Branding-Arbeit (Rasul 26.10.2026): liegen im
+# Marketing-Ordner unter branding/werkstatt-seiten/ (dort versioniert und
+# stündlich gesichert). public/lab ist nur ein lokaler Verweis darauf, damit
+# der Dev-Server sie unter localhost:4321/lab/<name>.html ausliefert. Nie
+# committen: alles in public/ geht sonst öffentlich auf die Website.
+/public/lab
