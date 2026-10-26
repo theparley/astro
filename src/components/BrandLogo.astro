@@ -1,239 +1,151 @@
-{/* Marken-Logo im Hero — FIXIERT unten Mitte, fährt beim Scrollen in die
-   Stange ein. Die Stange WIRD dann die CtaTile.astro-Kachel (horizontale
-   Geburt aus der Mitte) statt dass die Kachel separat von unten hereinwischt.
-
-   Vierte Nachbesserung (Fred, "die Verwandlungs-Kette wird vollständig"):
-   bisher fuhren Text und Fahne zwar korrekt in die Stange ein, aber die
-   CTA-Kachel erschien als eigenständiges Element mit eigener Wisch-Animation
-   (von unten) — kein sichtbarer Zusammenhang zur Stange. Gefordert: die
-   Kachel ENTSTEHT aus der Stange (horizontale Expansion aus der Mitte,
-   clip-path inset(0 50% 0 50%) -> inset(0 0 0 0), BBH-Kurve). Dafür nötig:
-   1) Farbe: Stange jetzt #ededed/95% (--surface, exakt der TileMenu-Chip-Ton
-      aus dbdbecc/e5e3724) statt Weiß — kein Farbsprung beim Übergang.
-   2) Positionen exakt fluchtend: TileMenu.astro's Geometrie übernommen
-      (Nullbreiter Anker + absolute Positionierung von Stange/Fahne/Text
-      relativ dazu) statt Flexbox, die die GESAMTE Kombo zentriert hätte
-      (Stange wäre dadurch NICHT exakt auf der Viewport-Mitte gelandet,
-      sondern leicht links davon, weil die Textbreite > Fahnenbreite ist) —
-      jetzt sitzt die Stange selbst exakt auf demselben Anker (left:50% des
-      Containers, Stange bei calc(-1 * pole-w/2)), auf dem auch
-      CtaTile.astro seine Kachel zentriert (dort ebenfalls left:50% +
-      translateX(-50%)) — pixelgenau dieselbe X-Mitte.
-   3) Die eigentliche Öffnungs-Animation (clip-path-Werte, BBH-Kurve) lebt in
-      CtaTile.astro (dort steht die Kachel, dort auch ihre "Geburt"). Diese
-      Datei liefert nur die Stange in der richtigen Farbe/Position als
-      Ausgangspunkt.
-   4) Rückwärts (dock < 1) kehrt sich alles automatisch um: CtaTile.astro
-      nutzt jetzt eine CSS-transition (statt einer einmaligen Animation) für
-      ihren clip-path — dadurch schließt sich die Kachel bei Klassenentzug
-      von selbst wieder zur Stangen-Form, exakt spiegelbildlich zum Öffnen.
-      Fahne/Text fahren ohnehin automatisch zurück (reine Funktionen des
-      kontinuierlichen dock-Werts, siehe Script unten). */}
-
-<div class="brand-logo" aria-hidden="true">
-	<div class="brand-logo__pole" aria-hidden="true"></div>
-	<div class="brand-logo__banner-wrap" aria-hidden="true">
-		<img src="/parley/parley-flag-banner.svg" alt="" class="brand-logo__banner" />
-	</div>
-	<div class="brand-logo__text-wrap">
-		<img src="/parley/parley-text.svg" alt="The Parley" class="brand-logo__text" />
-	</div>
-</div>
+---
+---
+{/* PROBE LOKAL (Fred 10.10.2026, Markenbasis ‚parley‛): statt Fahne + Stange
+   + Schriftzug „The Parley" steht unten die BILDMARKE, die zwei Zeichen
+   nebeneinander auf einer Hoehe. Dritte Fassung des Tages (Fred: „wir lassen
+   nicht parley erscheinen, wir lassen einfach das Menue erscheinen; wenn das
+   Menue fertig aufgebaut ist, verschwinden die beiden Apostrophe"):
+   RUHE: die beiden Zeichen VERSETZT wie deutsche Anfuehrungszeichen (links
+   unten, rechts oben, eng zusammen; sechste Fassung 10.10.), blenden nach
+   dem Hero-Wisch ein (1100 ms).
+   SCROLLEN: die Bildmarke bleibt stehen, keine Klammer, kein Schreiben. Bei
+   dock = 1 entsteht wie bisher der Menueknopf aus der Mitte (CtaTile,
+   400 ms); WAEHRENDDESSEN gleiten die beiden Zeichen auseinander bis neben
+   den Knopf (vierte Fassung, Fred 10.10.), ist er fertig, blenden sie aus.
+   Rueckweg: Knopf schliesst sich, danach kommen die Zeichen wieder.
+   Die Wortmarke (Wort + Klammer-Stellung) bleibt im Markup, ist aber
+   stillgelegt: das Wort ist weggeschnitten, die Zeichen stehen dauerhaft in
+   der Bildmarken-Stellung (--g: 1). Die Schreib-Choreografie (Zeichen
+   gleiten auseinander, Wort schreibt sich) liegt in der Git-Historie des
+   Tages, falls sie zurueckkommt. */}
+{/* KLAMMER UNTEN RAUS (Fred 10.10., siebte Fassung: „die doppelte Klammer
+   hier weg, das Menue erscheint einfach, sobald man scrollt, und geht ohne
+   Blitzen wieder weg"). Die Anfuehrungszeichen-Animation soll stattdessen in
+   den Hero-Text wandern (offen, naechster Schritt). Dieses Element bleibt
+   als leerer Anker: das Script darunter steuert weiterhin, WANN der
+   Menueknopf (CtaTile) erscheint — Schwelle, Totband, Ruhe-Abwarten. Die
+   Marken-Choreografien des Tages (Gegenueber, Klammer, Schreiben) liegen in
+   der Git-Historie. */}
+<div class="brand-logo" aria-hidden="true"></div>
 
 <style>
+	/* :global() auf den wortmarke__-Teilen: sie kommen aus Wortmarke.astro
+	   und tragen dessen Scope-Attribut, nicht das dieser Datei. */
 	.brand-logo {
-		/* 50% größer als der frühere Header-Maßstab, nur hier im Hero — 1:1
-		   der Wert von vor dem Menü-Bau. */
-		--logo-h: calc(clamp(32px, 4.4vw, 56px) * 1.5);
-		--pole-w: calc(var(--logo-h) * 52.36 / 2018.08);
-		/* Nullbreiter Anker (TileMenu.astro-Geometrie, siehe Kommentar oben) —
-		   Fahne/Stange/Text positionieren sich per absolute Positionierung
-		   relativ zu DIESEM Punkt, der selbst exakt auf left:50% des
-		   Viewports sitzt (kein Flex-Zentrieren einer Kombo mehr, das die
-		   Stange von der echten Mitte weggeschoben hätte). */
+		/* GROESSE (Fred 10.10., zweite Runde: „am Ende soll ‚parley‛ MIT
+		   Anfuehrungs- und Endzeichen so hoch sein wie der Menueknopf", nicht
+		   ein einzelnes Zeichen): Tintenhoehe der fertigen Wortmarke = von der
+		   Oberkante des schliessenden Zeichens (Oberlaenge 0,70 em) bis zur
+		   Unterlaenge von p/y (0,17 em) = 0,87 em = 88 px (CtaTile
+		   --tile-size) → 101 px Schrift. Die Zeichen sind dann 33 px hoch, die
+		   geschriebene Wortmarke ~3,6 em = 362 px breit. Deckel 25vw fuer
+		   schmale Fenster. */
+		--logo-fs: min(calc(88px / 0.87), 25vw);
 		position: fixed;
 		left: 50%;
 		bottom: 0;
 		z-index: 90;
 		width: 0;
-		height: var(--logo-h);
+		height: var(--logo-fs);
 		pointer-events: none;
-		/* Ladeanimation beim allerersten Aufruf (Seite frisch geladen) — von
-		   unten hoch, wie schon vor dem Menü-Bau. ACHTUNG: NICHT per clip-path
-		   auf diesem Element — der Anker ist width:0, clip-path schneidet auf
-		   die eigene (nullbreite!) Box zu und stanzt damit ALLE absolut
-		   positionierten Kinder weg (der "Logo komplett unsichtbar"-Bug vom
-		   29.08. nachts). Stattdessen translateY auf dem Anker selbst: bewegt
-		   alle Kinder mit, clippt nichts. */
-		/* Lade-Choreografie seit 15.09. = die GIF-Creator-Fassung (Fred:
-		   „das finde ich eigentlich ganz schön"): erst wächst der STAB aus
-		   dem Boden (scaleY, 220ms), dann fahren Fahne und Schriftzug
-		   GLEICHZEITIG aus der Stange heraus (300ms Gleiten, BBH-Kurve).
-		   Start weiterhin an die Hero-Sequenz gekoppelt (beide Zeilen
-		   wischen 100+800ms = 900ms; Logo ab 1000ms). SEIT 29.09. (Fred:
-		   „erst das P klappen, dann das Logo"): das P in PROGRAMM klappt
-		   1100–1460 ms (index.astro, .hp-klappe), das Logo startet danach —
-		   Stab ab 1600 ms, Fahne/Schrift ab 1820 ms. Die Keyframes unten
-		   nutzen fill-mode BACKWARDS, nicht both: nach dem Ende muss die
-		   normale var(--dock-*)-Transform-Regel wieder greifen, sonst
-		   friert die Animation das Scroll-Andocken ein. */
 	}
 
-	.brand-logo__pole {
-		transform-origin: bottom;
-		animation: brand-logo-stab 220ms cubic-bezier(0.77, 0, 0.18, 1) 1600ms backwards;
+	.brand-logo__marke {
+		position: absolute;
+		left: 0;
+		/* Grundlinie 0,2 em ueber der Unterkante (Unterlaengen p/y = 0,17 em
+		   bleiben sichtbar); die Zeilenbox endet 0,2 em unter der Grundlinie,
+		   also sitzt die Box auf 0. */
+		bottom: 0;
+		transform: translateX(-50%);
+		font-size: var(--logo-fs);
+		/* Logo-Farbe = Flaechen-Ton #ededed statt Reinweiss (BBH-Regel, wie
+		   bisher bei Fahne und Schriftzug). */
+		color: #ededed;
+		line-height: 1;
+		animation: brand-logo-rein 300ms ease-out 1100ms backwards; /* nach dem Hero-Wisch (900 ms); die P-Klappe davor ist seit 10.10. raus */
+	}
+	@keyframes brand-logo-rein {
+		from { opacity: 0; }
+		to { opacity: 1; }
 	}
 
-	@keyframes brand-logo-stab {
-		from {
-			transform: scaleY(0);
+	/* Wort stillgelegt (nur Bildmarke, s. oben). */
+	.brand-logo :global(.wortmarke__wort) {
+		clip-path: inset(0 100% 0 0);
+	}
+
+	/* Zeichen dauerhaft in der Bildmarken-Stellung (--g 1 = beide
+	   nebeneinander; 0 waere die Klammer-Stellung der Wortmarke). */
+	.brand-logo :global(.wortmarke__zeichen) {
+		--g: 1;
+	}
+	/* AUSEINANDERGEHEN BEIM MENUE (Fred 10.10.: „die beiden Apostrophe gehen
+	   auseinander, und dabei erscheint das Menue"): mit der Kachel-Geburt
+	   (400 ms, gleiche BBH-Kurve wie CtaTile) gleiten die Zeichen nach aussen
+	   bis NEBEN den fertigen Knopf, je 8 px Luft zur Knopfkante, der Knopf
+	   steht damit kurz in Anfuehrungszeichen; danach blenden sie aus
+	   (s. Uebergabe unten). --sx-l/--sx-r misst das Script aus Knopfbreite
+	   und Zeichenlage. */
+	/* VERSETZT (Fred 10.10., fuenfte Fassung: „fuer den Menueaufbau die
+	   versetzte Variante"): die Zeichen gleiten nicht nur nach aussen,
+	   sondern wie deutsche Anfuehrungszeichen auseinander, das linke nach
+	   unten (Unterkante = Knopf-Unterkante), das rechte nach oben (Oberkante
+	   = Knopf-Oberkante). Der Knopf steht dann in ‚…‛. --sy-l/--sy-r aus dem
+	   Script. */
+	.brand-logo.brand-logo--handedover :global(.wortmarke__zeichen--auf) { /* doppelte Klasse: schlaegt die Ruhe-Regel unten bei gleicher Spezifitaet */
+		transform: translate(calc(var(--dx-l, 0px) + var(--sx-l, 0px)), calc(var(--dy-l, 0px) + var(--sy-l, 0px)));
+	}
+	.brand-logo.brand-logo--handedover :global(.wortmarke__zeichen--zu) {
+		transform: translate(calc(var(--dx-r, 0px) + var(--sx-r, 0px)), calc(var(--dy-r, 0px) + var(--sy-r, 0px)));
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		/* Nur auf dem Hinweg animiert: beim Laden stehen die Zeichen sofort
+		   zusammen (das Script setzt --dx erst nach dem Layout, eine
+		   Dauer-Transition wuerde sie aus der Klammer-Stellung hereingleiten
+		   lassen), und auf dem Rueckweg springen sie unsichtbar zurueck. */
+		.brand-logo.brand-logo--handedover :global(.wortmarke__zeichen) {
+			transition: transform 400ms cubic-bezier(0.77, 0, 0.18, 1);
 		}
-		to {
-			transform: scaleY(1);
-		}
+	}
+	.brand-logo :global(.wortmarke__zeichen--auf) {
+		transform: translate(calc(var(--dx-l, 0px) * var(--g)), calc(var(--dy-l, 0px) * var(--g)));
+	}
+	.brand-logo :global(.wortmarke__zeichen--zu) {
+		transform: translate(calc(var(--dx-r, 0px) * var(--g)), calc(var(--dy-r, 0px) * var(--g)));
 	}
 
-	.brand-logo__banner {
-		animation: brand-logo-fahne-rein 300ms cubic-bezier(0.77, 0, 0.18, 1) 1820ms backwards;
+	/* Uebergabe-Moment: die Kachel liegt ueber der Marke, diese blendet
+	   aus (wie frueher die Stange). Rueckwaerts kommt sie wieder. */
+	.brand-logo--handedover .brand-logo__marke {
+		opacity: 0;
 	}
-
-	@keyframes brand-logo-fahne-rein {
-		from {
-			transform: translateX(110%);
+	@media (prefers-reduced-motion: no-preference) {
+		/* UEBERGABE (Fred 10.10.): Hinweg = die Zeichen bleiben, bis der
+		   Menueknopf fertig aufgebaut ist (400 ms Kachel-Geburt, CtaTile),
+		   dann blenden sie in 150 ms aus. Rueckweg = Zeichen erst wieder da,
+		   wenn der Knopf zu ist (550 ms = Schrift aus + Kachel schliessen,
+		   s. CLOSE_MS im Script). So liegt nie ein Blitzer zwischen beiden. */
+		.brand-logo__marke {
+			transition: opacity 150ms ease 550ms;
 		}
-		to {
-			transform: translateX(0);
+		.brand-logo--handedover .brand-logo__marke {
+			transition: opacity 150ms ease 400ms;
 		}
-	}
-
-	.brand-logo__text {
-		animation: brand-logo-text-rein 300ms cubic-bezier(0.77, 0, 0.18, 1) 1820ms backwards;
-	}
-
-	@keyframes brand-logo-text-rein {
-		from {
-			transform: translateX(-110%);
+		/* Spiegel-Rueckweg (Script setzt --gliding fuer 300 ms): Wort
+		   loescht sich, Zeichen gleiten zusammen, statt zu springen. */
+		.brand-logo--gliding :global(.wortmarke__zeichen) {
+			transition: transform 300ms cubic-bezier(0.77, 0, 0.18, 1);
 		}
-		to {
-			transform: translateX(0);
+		.brand-logo--gliding :global(.wortmarke__wort) {
+			transition: clip-path 300ms cubic-bezier(0.77, 0, 0.18, 1);
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.brand-logo__pole,
-		.brand-logo__banner,
-		.brand-logo__text {
+		.brand-logo__marke {
 			animation: none;
 		}
-	}
-
-	/* Stange: der feste Ankerpunkt, exakt auf der Viewport-Mitte zentriert
-	   (left:calc(-1 * pole-w/2) relativ zum Nullbreiten-Anker oben) — DAS ist
-	   der Punkt, an dem CtaTile.astro's Kachel später "geboren" wird, deshalb
-	   muss diese X-Mitte pixelgenau mit der Kachel-Mitte übereinstimmen
-	   (dort ebenfalls left:50%+translateX(-50%) auf denselben Viewport-
-	   Mittelpunkt). Farbe #ededed/95% (--surface) statt Weiß — derselbe Ton
-	   wie die spätere Kachel (TileMenu.astro .hero-logo__chip, dbdbecc), für
-	   den nahtlosen Farbübergang beim "Geburts"-Moment (Öffnungs-Animation
-	   sitzt in CtaTile.astro). */
-	.brand-logo__pole {
-		position: absolute;
-		left: calc(var(--pole-w) / -2);
-		bottom: 0;
-		width: var(--pole-w);
-		height: var(--logo-h);
-		background: rgba(237, 237, 237, 0.95);
-	}
-
-	/* Fahne-Wrap: overflow:hidden macht daraus das "Fenster", aus dem die
-	   Fahne (Kind-Element, siehe .brand-logo__banner) beim Einfahren
-	   herausgleitet — exakt die Header.astro-Technik, hier auf die Fahne
-	   gespiegelt (Fahne sitzt LINKS von der Stange, muss also nach RECHTS,
-	   zur Stange hin, verschwinden). Position absolut relativ zum
-	   Null-Anker, rechte Kante 4px links von der Stange — 1:1 TileMenu.astro
-	   .hero-logo__banner-wrap-Geometrie. */
-	.brand-logo__banner-wrap {
-		position: absolute;
-		right: calc(var(--pole-w) / 2 + 4px);
-		top: calc(var(--logo-h) * 40.9736 / 2018.08);
-		width: calc(var(--logo-h) * 1072.97 / 2018.08);
-		height: calc(var(--logo-h) * 459.85 / 2018.08);
-		overflow: hidden;
-	}
-
-	/* Fährt NACH dem Text ein (Phase Fahne = dock 0.5→1, siehe Script) —
-	   translateX(+110%) schiebt die Fahne nach rechts aus ihrem eigenen
-	   Fenster hinaus, also zur Stange hin/dahinter. Kein CSS-transition:
-	   der Wert kommt pro Scroll-Frame direkt vom Script (1:1 scroll-gekoppelt,
-	   wie die alte --collapse-Mechanik). */
-	.brand-logo__banner {
-		display: block;
-		width: 100%;
-		height: 100%;
-		transform: translateX(calc(var(--dock-flag, 0) * 110%));
-	}
-
-	/* Logo-Farbe = Flächen-Ton #ededed statt Reinweiß (Fred 29.08. nachts,
-	   BBH-Regel: Schrift ist reinweiß, FLÄCHEN sind #ededed — das Logo ist
-	   Fläche). Die SVGs sind weiß gefüllt; brightness(0.9294) ergibt exakt
-	   237/255 = #ededed, ohne die Dateien anzufassen. */
-	.brand-logo__banner,
-	.brand-logo__text {
-		filter: brightness(0.9294);
-	}
-
-	/* Übergabe-Moment: Sobald die CTA-Kachel offen ist (dock>=1, Script setzt
-	   die Klasse), verschwindet die Stange — sie IST jetzt der Button; die
-	   Kachel liegt mit 95% Deckkraft darüber, und ohne dieses Ausblenden
-	   schien die Stange durch (Freds Befund). Rückwärts kommt sie wieder. */
-	.brand-logo--handedover .brand-logo__pole {
-		opacity: 0;
-	}
-
-	@media (prefers-reduced-motion: no-preference) {
-		.brand-logo__pole {
-			transition: opacity 150ms ease;
-		}
-	}
-
-	/* Spiegel-Rückweg (Fred 30.08.): Beim Verlassen des Button-Zustands
-	   bleiben Text+Fahne kurz EINGEFROREN (Script hält die Phasen auf 1),
-	   bis die Kachel sich zur Stange geschlossen hat (400ms, siehe
-	   CtaTile). Dann setzt das Script diese Klasse und gibt die Phasen auf
-	   ihre Scroll-Werte frei — die Transition lässt Fahne und Text
-	   HERAUSGLEITEN statt springen. Danach wird die Klasse entfernt und die
-	   normale, transitionslose Scroll-Kopplung übernimmt wieder. Ergebnis:
-	   Button schließt sich zur Stange → Fahne fährt heraus → Text fährt
-	   heraus — das exakte Spiegelbild des Hinwegs. */
-	@media (prefers-reduced-motion: no-preference) {
-		.brand-logo--gliding .brand-logo__banner,
-		.brand-logo--gliding .brand-logo__text {
-			transition: transform 300ms cubic-bezier(0.77, 0, 0.18, 1);
-		}
-	}
-
-	/* Text-Wrap: identische Technik wie Header.astro
-	   (.parley-nav__logo-text-wrap: overflow:hidden, fester Ausschnitt).
-	   Position absolut relativ zum Null-Anker, linke Kante 4px rechts von
-	   der Stange — 1:1 TileMenu.astro .hero-logo__text-wrap-Geometrie. */
-	.brand-logo__text-wrap {
-		position: absolute;
-		left: calc(var(--pole-w) / 2 + 4px);
-		bottom: 0;
-		width: calc(var(--logo-h) * 1986.93 / 2018.08);
-		height: calc(var(--logo-h) * 1057.41 / 2018.08);
-		overflow: hidden;
-	}
-
-	/* Fährt ZUERST ein (Phase Text = dock 0→0.5) — translateX(-110%), 1:1 die
-	   Formel aus Header.astro (dort: calc(var(--collapse,0) * -110%)), nur
-	   jetzt an die neue Phase-Variable gekoppelt statt an --collapse. Text
-	   sitzt RECHTS von der Stange, muss also nach LINKS wegfahren. */
-	.brand-logo__text {
-		display: block;
-		height: 100%;
-		width: auto;
-		transform: translateX(calc(var(--dock-text, 0) * -110%));
 	}
 </style>
 
@@ -252,8 +164,11 @@
 	// 280px (DISTANCE 200) — Referenzwerte aus dem alten Header.astro-Script
 	// (dort COLLAPSE_START 120 / DISTANCE 160), hier auf Freds explizite
 	// Vorgabe 80/280 angepasst.
-	const DOCK_START = 80;
-	const DOCK_DISTANCE = 200;
+	// „sobald man scrollt, wie zwetschke.de" (Fred 10.10., zweite Runde):
+	// Knopf ab 50 px Scrollweg (vorher 280, dann 120), zu wieder unter 40 px
+	// (Totband 0,8), Ruhe-Abwarten auf 0 ms (naechster Takt; Flicks faengt die weiche Ueberblendung ab).
+	const DOCK_START = 0;
+	const DOCK_DISTANCE = 50;
 
 	let cleanup: (() => void) | null = null;
 
@@ -271,17 +186,68 @@
 		const cta = document.querySelector<HTMLElement>(".menu-tile--gated");
 		const logo = document.querySelector<HTMLElement>(".brand-logo");
 
+		// RUHEPOSITIONEN DER ZEICHEN (Bildmarke): beide nebeneinander auf einer
+		// Hoehe, Luecke 10 % der Versalhoehe (Markenbasis), mittig auf dem
+		// Anker; als Versatz zur Klammer-Stellung (Layout-Position) berechnet.
+		// Gemessen ueber offset* (ignoriert laufende Transforms), relativ zur
+		// Marke; Hoehe = Mittelwert der beiden Zeichen-Mitten.
+		const measureMarke = () => {
+			if (!logo) return;
+			const marke = logo.querySelector<HTMLElement>(".brand-logo__marke");
+			const auf = logo.querySelector<HTMLElement>(".wortmarke__zeichen--auf");
+			const zu = logo.querySelector<HTMLElement>(".wortmarke__zeichen--zu");
+			const wort = logo.querySelector<HTMLElement>(".wortmarke__wort");
+			if (!marke || !auf || !zu || !wort) return;
+			const cap = parseFloat(getComputedStyle(wort).fontSize) * 0.7;
+			const gap = cap * 0.1;
+			const cx = marke.offsetWidth / 2;
+			const aufC = { x: auf.offsetLeft + auf.offsetWidth / 2, y: auf.offsetTop + auf.offsetHeight / 2 };
+			const zuC = { x: zu.offsetLeft + zu.offsetWidth / 2, y: zu.offsetTop + zu.offsetHeight / 2 };
+			// RUHE = VERSETZT (Fred 10.10., sechste Fassung: „vom Start ab die
+			// Variante, wo die schon versetzt sind"): die Zeichen behalten ihre
+			// Hoehe aus der Wortmarke (links Kopf auf der Grundlinie, rechts
+			// Oberkante auf der Oberlaenge) und ruecken nur waagerecht zusammen,
+			// Luecke 10 % der Versalhoehe. Ergibt ein kompaktes ‚‛, 0,85 em hoch,
+			// fast genau die Knopfhoehe. Das Gegenueber auf einer Hoehe (--dy auf
+			// die gemeinsame Mitte) war die fuenfte Fassung.
+			logo.style.setProperty("--dx-l", `${cx - gap / 2 - auf.offsetWidth / 2 - aufC.x}px`);
+			logo.style.setProperty("--dy-l", `0px`);
+			logo.style.setProperty("--dx-r", `${cx + gap / 2 + zu.offsetWidth / 2 - zuC.x}px`);
+			logo.style.setProperty("--dy-r", `0px`);
+			// Spread-Ziel (Menue-Uebergabe): Zeichen-Mitte je 8 px + halbe
+			// Zeichenbreite ausserhalb der Knopfkante; Knopfbreite aus CtaTile
+			// (2 × 88 + Fuge), Rueckfall 234 px.
+			const knopf = document.querySelector<HTMLElement>(".menu-tile--gated");
+			const halb = (knopf?.offsetWidth || 234) / 2;
+			const restL = cx - gap / 2 - auf.offsetWidth / 2; // Zeichen-Mitte in Ruhe
+			const restR = cx + gap / 2 + zu.offsetWidth / 2;
+			logo.style.setProperty("--sx-l", `${cx - halb - 8 - auf.offsetWidth / 2 - restL}px`);
+			logo.style.setProperty("--sx-r", `${cx + halb + 8 + zu.offsetWidth / 2 - restR}px`);
+			// Versetzt (deutsche Anfuehrungszeichen): links unten buendig mit der
+			// Knopf-Unterkante, rechts oben buendig mit der Knopf-Oberkante. Die
+			// Marke endet an der Viewport-Unterkante wie der Knopf (beide bottom 0).
+			const knopfH = knopf?.offsetHeight || 88;
+			const unten = marke.offsetHeight; // Knopf-Unterkante in Marken-Koordinaten
+			logo.style.setProperty("--sy-l", `${unten - auf.offsetHeight / 2 - aufC.y}px`);
+			logo.style.setProperty("--sy-r", `${unten - knopfH + zu.offsetHeight / 2 - zuC.y}px`);
+		};
+		measureMarke();
+		if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureMarke);
+		window.addEventListener("resize", measureMarke, { passive: true });
+
 		let rafId = 0;
 		// Spiegel-Rückweg-Zustand (siehe CSS-Kommentar .brand-logo--gliding):
 		// beim Verlassen von dock>=1 werden die Phasen eingefroren, bis die
 		// Kachel zu ist (CLOSE_MS = CtaTile-Transition), dann Freigabe mit
 		// 300ms-Gleit-Transition, danach wieder normale Scroll-Kopplung.
-		const CLOSE_MS = 550; // 150ms Schrift-Ausblenden + 400ms Kachel-Schließen (CtaTile)
+		const CLOSE_MS = 220; // Kachel blendet in 220 ms aus (CtaTile, seit 10.10. Fade statt Geburt)
 		const GLIDE_MS = 300;
 		let prevRevealed = false;
 		let frozen = false;
 		let releaseTimer = 0;
 		let glideTimer = 0;
+		let armTimer = 0;
+		let armed = false;
 		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 		const computePhases = () => {
@@ -289,10 +255,11 @@
 			const dock = Math.max(0, Math.min(1, raw));
 			return {
 				dock,
-				// Phase Text: erste Hälfte von dock — Text fährt zuerst ein.
-				phaseText: Math.max(0, Math.min(1, dock * 2)),
-				// Phase Fahne: zweite Hälfte — Fahne folgt nach dem Text.
-				phaseFlag: Math.max(0, Math.min(1, dock * 2 - 1)),
+				// Markenbasis-Choreografie (10.10.): --dock-flag = Zeichen gleiten
+				// auseinander (dock 0 → 0,4), --dock-text = Wort schreibt sich
+				// (0,4 → 0,8); 0,8 → 1 steht die Wortmarke, bei 1 kommt die Kachel.
+				phaseText: Math.max(0, Math.min(1, (dock - 0.4) / 0.4)),
+				phaseFlag: Math.max(0, Math.min(1, dock / 0.4)),
 			};
 		};
 
@@ -303,7 +270,39 @@
 
 		const update = () => {
 			const { dock, phaseText, phaseFlag } = computePhases();
-			const revealed = dock >= 1;
+			// HYSTERESE GEGEN BLITZEN (Fred 10.10.: „wenn ich schnell hoch- oder
+			// runterscrolle, blitzt der Menueknopf"): Oeffnen bei dock >= 1
+			// (280 px), Schliessen erst wieder unter dock 0,8 (240 px). Ohne das
+			// Totband kippte die Klasse bei jedem Scroll-Zittern um die Schwelle
+			// hin und her, und Kachel plus Zeichen starteten ihre Transitions
+			// immer neu.
+			const wantRevealed = prevRevealed ? dock > 0.8 : dock >= 1;
+			// ANLAUFZEIT (Fred 10.10., zweiter Befund: „neu laden, zweimal schnell
+			// hoch und runter, der Knopf blitzt auf"): ein Flick ueber die
+			// Schwelle und sofort zurueck liess die Kachel fuer ein paar Frames
+			// aufgehen und wieder zu. Jetzt muss die Position 150 ms jenseits der
+			// Schwelle BLEIBEN, bevor der Knopf aufgeht; wer vorher zurueck ist,
+			// loest nichts aus. Zu geht er weiterhin sofort.
+			if (wantRevealed && !prevRevealed) {
+				// RUHE ABWARTEN (dritter Befund 10.10., „immer noch"): nicht 150 ms
+				// nach dem Ueberschreiten, sondern 150 ms nach dem LETZTEN
+				// Scroll-Ereignis jenseits der Schwelle. Wer in Bewegung ist,
+				// bekommt keinen Knopf; er kommt, sobald die Seite steht. Jedes
+				// Scroll-Ereignis setzt die Uhr neu.
+				clearTimeout(armTimer);
+				armTimer = window.setTimeout(() => {
+					armTimer = 0;
+					if (computePhases().dock >= 1) {
+						armed = true;
+						update();
+					}
+				}, 0);
+			} else if (!wantRevealed) {
+				clearTimeout(armTimer);
+				armTimer = 0;
+				armed = false;
+			}
+			const revealed = wantRevealed && (prevRevealed || armed);
 
 			root.style.setProperty("--hero-dock", String(dock));
 
@@ -369,7 +368,9 @@
 		cleanup = () => {
 			window.removeEventListener("scroll", onScroll);
 			window.removeEventListener("resize", onScroll);
+			window.removeEventListener("resize", measureMarke);
 			if (rafId) cancelAnimationFrame(rafId);
+			clearTimeout(armTimer);
 			clearTimeout(releaseTimer);
 			clearTimeout(glideTimer);
 			root.style.removeProperty("--hero-dock");

@@ -1,0 +1,424 @@
+---
+// HeroKlammer.astro, zweite Bauform (Fred 11.10.2026: „die Uebergaenge
+// stimmen nicht; Saetze nicht fertig, nicht mittig, Reste alter Saetze.
+// Sauber neu bauen, langfristig Saetze eingeben koennen, und es soll wie
+// frueher aus der Mitte entstehen: Anfuehrungszeichen am Anfang und Ende,
+// der Satz waechst dazwischen heraus. Erst mal nur EIN Satz.")
+//
+// Bauform: jede Zeile ist eine zentrierte Flex-Reihe [Zeichen][Rahmen][Zeichen].
+// Der Rahmen hat overflow:hidden, sein Text steht fest in seiner Mitte
+// (left 50 %, translateX −50 %), und seine BREITE waechst von 0 auf die
+// Textbreite. So entsteht der Text aus der Mitte nach beiden Seiten, und die
+// Zeichen, die als Flex-Nachbarn am Rahmen haengen, wandern dabei nach
+// aussen. Das oeffnende Zeichen sitzt vor Zeile 1, das schliessende hinter
+// der letzten Zeile. Zu Beginn (Rahmen 0) stehen beide Zeichen in der Mitte.
+// Takt 530 ms (Cursor-Rhythmus): 1 Takt Zeichen erscheinen, dann je Zeile
+// 1 Takt wachsen, Standzeit, bei mehreren Saetzen 1 Takt ausblenden, dann
+// der naechste Satz. Breiten werden nach dem Laden der Schrift gemessen;
+// bei Groessenaenderung wird der Endzustand neu gesetzt. Ein Laufzaehler
+// sorgt dafuer, dass ein Neustart (ClientRouter) alte Schleifen stoppt.
+//
+// Zeichen-Masse wie Wortmarke.astro: Hoehe 0,322 em, Breite 0,2385 em,
+// Abstand 0,049 em. Der Rahmen ist 1,05 em hoch (Zeile), seine Flex-
+// Grundlinie liegt auf der Unterkante, 0,225 em unter der Text-Grundlinie
+// (Forma 0,9/0,3), deshalb die Korrektur in den Transforms:
+// oeffnend Kopf auf der Grundlinie: 0,1485 − 0,225 = −0,0765 em;
+// schliessend Oberkante auf der Oberlaenge: −0,378 − 0,225 = −0,603 em.
+//
+// SAETZE: eine Liste, jeder Eintrag ein Satz als Liste seiner Zeilen
+// (Umbrueche fest gesetzt, damit die Schrift gross bleibt). Mit einem
+// Eintrag kein Wechsel; mit mehreren laufen sie nacheinander, endlos.
+// Gaeste-Saetze (Fred 10.10., getippt), Vorrat fuer spaeter:
+//   ["Ich habe noch nie so entspannt", "einen Vortrag gehalten."]
+//   ["Ich sehe aus wie im Fernsehen."]
+//   ["Echt jetzt, wir reden", "schon eine Stunde?"]
+// ZU UND AUF (Fred 11.10.: „jetzt klappt es auch wieder zusammen, die
+// beiden fahren zusammen, und dann haben wir einen sauberen Uebergang"):
+// zwischen zwei Saetzen schrumpft der Rahmen zurueck auf 0, die Zeichen
+// treffen sich in der Mitte, dann waechst der naechste Satz heraus.
+const FOLGE: string[][] = [
+	["Und wo ist hier die Kamera?"],
+	["Ich sehe aus wie im Fernsehen."],
+	["Ich habe noch nie so entspannt", "einen Vortrag gehalten."],
+	["Echt jetzt, wir reden", "schon eine Stunde?"],
+];
+const erster = FOLGE[0];
+---
+
+<h1 class="hk" data-hk data-folge={JSON.stringify(FOLGE)}>
+	<span class="hk-zeile" data-hk-zeile>
+		<span class="hk-zeichen hk-zeichen--auf" aria-hidden="true"><svg viewBox="0 0 76.44 46.2"><path fill="currentColor" d="M5.71 24.90 L5.71 24.93 L0.05 44.67 L0.02 44.78 L0.00 44.90 L0.00 45.02 L0.01 45.13 L0.03 45.25 L0.06 45.36 L0.10 45.47 L0.15 45.58 L0.21 45.67 L0.28 45.77 L0.36 45.85 L0.44 45.93 L0.54 46.00 L0.64 46.06 L0.74 46.11 L0.85 46.15 L0.97 46.18 L1.08 46.19 L1.20 46.20 L16.39 46.20 L16.51 46.19 L16.63 46.18 L16.75 46.15 L16.86 46.11 L16.96 46.06 L17.07 45.99 L17.16 45.92 L17.25 45.84 L17.33 45.76 L33.95 25.23 L34.02 25.14 L34.08 25.04 L34.13 24.93 L34.16 24.82 L34.19 24.71 L34.21 24.59 L34.22 24.48 L34.22 1.20 L34.21 1.08 L34.19 0.97 L34.16 0.85 L34.12 0.74 L34.07 0.63 L34.01 0.53 L33.94 0.44 L33.86 0.35 L33.78 0.27 L33.68 0.20 L33.58 0.14 L33.47 0.09 L33.36 0.05 L33.25 0.02 L33.13 0.01 L33.02 0.00 L6.92 0.00 L6.80 0.01 L6.68 0.02 L6.57 0.05 L6.46 0.09 L6.35 0.14 L6.25 0.20 L6.15 0.27 L6.07 0.35 L5.99 0.44 L5.92 0.53 L5.86 0.63 L5.81 0.74 L5.77 0.85 L5.74 0.97 L5.72 1.08 L5.72 1.20 L5.72 24.87 Z" /><path fill="currentColor" transform="translate(42.22 0) matrix(-1 0 0 1 34.22 0)" d="M5.71 24.90 L5.71 24.93 L0.05 44.67 L0.02 44.78 L0.00 44.90 L0.00 45.02 L0.01 45.13 L0.03 45.25 L0.06 45.36 L0.10 45.47 L0.15 45.58 L0.21 45.67 L0.28 45.77 L0.36 45.85 L0.44 45.93 L0.54 46.00 L0.64 46.06 L0.74 46.11 L0.85 46.15 L0.97 46.18 L1.08 46.19 L1.20 46.20 L16.39 46.20 L16.51 46.19 L16.63 46.18 L16.75 46.15 L16.86 46.11 L16.96 46.06 L17.07 45.99 L17.16 45.92 L17.25 45.84 L17.33 45.76 L33.95 25.23 L34.02 25.14 L34.08 25.04 L34.13 24.93 L34.16 24.82 L34.19 24.71 L34.21 24.59 L34.22 24.48 L34.22 1.20 L34.21 1.08 L34.19 0.97 L34.16 0.85 L34.12 0.74 L34.07 0.63 L34.01 0.53 L33.94 0.44 L33.86 0.35 L33.78 0.27 L33.68 0.20 L33.58 0.14 L33.47 0.09 L33.36 0.05 L33.25 0.02 L33.13 0.01 L33.02 0.00 L6.92 0.00 L6.80 0.01 L6.68 0.02 L6.57 0.05 L6.46 0.09 L6.35 0.14 L6.25 0.20 L6.15 0.27 L6.07 0.35 L5.99 0.44 L5.92 0.53 L5.86 0.63 L5.81 0.74 L5.77 0.85 L5.74 0.97 L5.72 1.08 L5.72 1.20 L5.72 24.87 Z" /></svg></span>
+		<span class="hk-rahmen" data-hk-rahmen><span class="hk-text" data-hk-text>{erster.join(" ")}<span class="hk-zeichen hk-zeichen--zu" aria-hidden="true"><svg viewBox="0 0 76.44 46.2"><path fill="currentColor" d="M5.71 24.90 L5.71 24.93 L0.05 44.67 L0.02 44.78 L0.00 44.90 L0.00 45.02 L0.01 45.13 L0.03 45.25 L0.06 45.36 L0.10 45.47 L0.15 45.58 L0.21 45.67 L0.28 45.77 L0.36 45.85 L0.44 45.93 L0.54 46.00 L0.64 46.06 L0.74 46.11 L0.85 46.15 L0.97 46.18 L1.08 46.19 L1.20 46.20 L16.39 46.20 L16.51 46.19 L16.63 46.18 L16.75 46.15 L16.86 46.11 L16.96 46.06 L17.07 45.99 L17.16 45.92 L17.25 45.84 L17.33 45.76 L33.95 25.23 L34.02 25.14 L34.08 25.04 L34.13 24.93 L34.16 24.82 L34.19 24.71 L34.21 24.59 L34.22 24.48 L34.22 1.20 L34.21 1.08 L34.19 0.97 L34.16 0.85 L34.12 0.74 L34.07 0.63 L34.01 0.53 L33.94 0.44 L33.86 0.35 L33.78 0.27 L33.68 0.20 L33.58 0.14 L33.47 0.09 L33.36 0.05 L33.25 0.02 L33.13 0.01 L33.02 0.00 L6.92 0.00 L6.80 0.01 L6.68 0.02 L6.57 0.05 L6.46 0.09 L6.35 0.14 L6.25 0.20 L6.15 0.27 L6.07 0.35 L5.99 0.44 L5.92 0.53 L5.86 0.63 L5.81 0.74 L5.77 0.85 L5.74 0.97 L5.72 1.08 L5.72 1.20 L5.72 24.87 Z" /><path fill="currentColor" transform="translate(42.22 0) matrix(-1 0 0 1 34.22 0)" d="M5.71 24.90 L5.71 24.93 L0.05 44.67 L0.02 44.78 L0.00 44.90 L0.00 45.02 L0.01 45.13 L0.03 45.25 L0.06 45.36 L0.10 45.47 L0.15 45.58 L0.21 45.67 L0.28 45.77 L0.36 45.85 L0.44 45.93 L0.54 46.00 L0.64 46.06 L0.74 46.11 L0.85 46.15 L0.97 46.18 L1.08 46.19 L1.20 46.20 L16.39 46.20 L16.51 46.19 L16.63 46.18 L16.75 46.15 L16.86 46.11 L16.96 46.06 L17.07 45.99 L17.16 45.92 L17.25 45.84 L17.33 45.76 L33.95 25.23 L34.02 25.14 L34.08 25.04 L34.13 24.93 L34.16 24.82 L34.19 24.71 L34.21 24.59 L34.22 24.48 L34.22 1.20 L34.21 1.08 L34.19 0.97 L34.16 0.85 L34.12 0.74 L34.07 0.63 L34.01 0.53 L33.94 0.44 L33.86 0.35 L33.78 0.27 L33.68 0.20 L33.58 0.14 L33.47 0.09 L33.36 0.05 L33.25 0.02 L33.13 0.01 L33.02 0.00 L6.92 0.00 L6.80 0.01 L6.68 0.02 L6.57 0.05 L6.46 0.09 L6.35 0.14 L6.25 0.20 L6.15 0.27 L6.07 0.35 L5.99 0.44 L5.92 0.53 L5.86 0.63 L5.81 0.74 L5.77 0.85 L5.74 0.97 L5.72 1.08 L5.72 1.20 L5.72 24.87 Z" /></svg></span></span></span>
+	</span>
+</h1>
+{/* Unser Satz unter der Klammer (Fred 10.10.), blendet ein, wenn der erste
+   Gaeste-Satz steht. */}
+<p class="hk-unterzeile" data-hk-unterzeile>Wir fangen echte Gespräche ein.<br />Mit einem neuen Blickwinkel für filmreife Aufnahmen ohne Kamerastress.</p>
+
+<style is:global>
+	/* is:global mit hk-Praefix (Astro-Falle, s. SplitFlap.astro): die Zeilen
+	   werden vom Script neu gebaut und tragen dann kein Scope-Attribut; mit
+	   scoped CSS waeren sie unstyled (genau das war das „nicht mittig, Reste
+	   alter Saetze" vom 11.10.). */
+	.hk {
+		--hk-fs: clamp(28px, 6vw, 124px);
+		--hk-zeilen: 2;
+		/* FESTE HOEHE (Fred 11.10.: „der kleine Text unten soll fix bleiben;
+		   der Text oben baut sich aus einer Zeile auf und wird laenger, dann
+		   lieber hoeher ansetzen als mittig"): der Block ist immer zwei
+		   Zeilen hoch, Zeile 1 sitzt oben, Zeile 2 kommt darunter, nichts
+		   darunter bewegt sich. */
+		height: calc(var(--hk-zeilen) * 1.05em);
+		overflow: visible;
+		position: relative; /* Bezug fuer offsetLeft der Zeilen-Kinder (Zoom-Messung) */
+		display: block;
+		margin: 0;
+		padding: 0;
+		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
+		font-weight: 900;
+		font-optical-sizing: none;
+		font-variation-settings: "opsz" 72;
+		font-size: var(--hk-fs);
+		line-height: 1.05;
+		letter-spacing: -0.01em;
+		text-transform: none;
+		color: #fff;
+	}
+	.hk-zeile {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		white-space: nowrap;
+	}
+	.hk-rahmen {
+		position: relative;
+		display: block;
+		overflow: hidden;
+		height: 1.05em;
+		line-height: 1.05;
+		width: var(--hk-breite, auto); /* ohne JS: auto = Satz steht */
+	}
+	/* GETIPPT AUS DER MITTE (Fred 11.10., fuenfte Bauform): „immer in der
+	   Mitte anfangen, dann nach links wandern, waehrend es tippt; wenn es
+	   an den Rand stoesst, nach rechts weiter und in die zweite Zeile".
+	   Technik: der Text ist im Rahmen LINKS verankert, die Rahmenbreite
+	   waechst Buchstabe fuer Buchstabe. Weil die Zeile (Zeichen + Rahmen)
+	   zentriert ist, verschiebt jeder neue Buchstabe die Zeile um seine
+	   halbe Breite nach links: das vordere Zeichen wandert nach links,
+	   waehrend rechts getippt wird. Ist Zeile 1 voll, kommt Zeile 2 und
+	   tippt aus der Mitte ihrer eigenen Zeile. Abbau spiegelbildlich: von
+	   hinten geloescht, das Zeichen wandert zurueck in die Mitte. */
+	.hk-text {
+		position: absolute;
+		left: 0;
+		top: 0;
+		white-space: nowrap;
+		line-height: 1.05;
+	}
+	/* SCHLUSSZEICHEN WIE EIN BUCHSTABE (Fred 11.10.): es steht IM Text am
+	   Ende der letzten Zeile, wird mit dem Text geschrieben und mit ihm
+	   geloescht. Ausrichtung wie in der Wortmarke: Oberkante an der
+	   Oberlaenge (vertical-align 0,378 em), Abstand 0,049 em. */
+	.hk-text .hk-zeichen--zu {
+		display: inline-block;
+		vertical-align: 0.378em;
+		margin-left: 0.049em;
+		transform: none;
+	}
+	/* ZWEI ANFUEHRUNGSZEICHEN (Fred 11.10.: „die Animation jetzt mit zwei
+	   Anfuehrungszeichen", nach dem Vergleich der Bildmarken; das einzelne Atom
+	   wurde als Komma gelesen): jedes Zeichen ist jetzt das Atom doppelt, Luecke
+	   8 Einheiten. Oeffnend = deutsches „ (zwei gleiche unten), schliessend =
+	   zwei gespiegelte oben. Breite 76.44/46,2 × 0,322 em = 0.5328 em. */
+	.hk-zeichen { display: block; width: 0.5328em; height: 0.322em; flex: 0 0 auto; }
+	.hk-zeichen svg { display: block; width: 100%; height: 100%; }
+	.hk-zeichen--auf { transform: translateY(-0.0765em); margin-right: 0.049em; }
+	.hk-zeichen--zu { transform: translateY(-0.603em); margin-left: 0.049em; }
+	/* Mit JS: oeffnendes Zeichen erst im ersten Takt sichtbar */
+	.hk[data-hk-laeuft] .hk-zeichen--auf { opacity: 0; }
+	.hk[data-hk-laeuft][data-hk-zeichen] .hk-zeichen--auf { opacity: 1; }
+	@media (prefers-reduced-motion: no-preference) {
+		.hk[data-hk-laeuft] .hk-zeichen { transition: opacity 265ms ease; }
+	}
+
+	.hk-unterzeile {
+		margin: clamp(20px, 3vh, 40px) auto 0;
+		max-width: 90vw;
+		text-align: center;
+		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
+		font-weight: 400;
+		font-size: var(--text-md);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
+		text-transform: none;
+		color: #fff;
+	}
+	.hk-unterzeile[data-hk-wartet] { opacity: 0; }
+	@media (prefers-reduced-motion: no-preference) {
+		.hk-unterzeile { transition: opacity 530ms ease; }
+	}
+</style>
+
+<script>
+	const START_MS = 300;
+	const TAKT_MS = 530;          // Cursor-Takt: Erscheinen des Zeichens, Pause zwischen Zeilen
+	const TIPP_MS = 55;           // je Buchstabe beim Tippen
+	const LOESCH_MS = 55;         // je Buchstabe beim Loeschen; Fred 11.10.: Abbau so lang wie der Aufbau (vorher 28, dann 14)
+	const STAND_MS = 3200;
+	const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
+
+	let lauf = 0; // Laufzaehler: ein Neustart stoppt alte Schleifen
+
+	function neueZeile(text: string): HTMLElement {
+		const z = document.createElement("span");
+		z.className = "hk-zeile"; z.setAttribute("data-hk-zeile", "");
+		const r = document.createElement("span");
+		r.className = "hk-rahmen"; r.setAttribute("data-hk-rahmen", "");
+		r.style.setProperty("--hk-breite", "0px");
+		const t = document.createElement("span");
+		t.className = "hk-text"; t.setAttribute("data-hk-text", ""); t.textContent = text;
+		r.appendChild(t); z.appendChild(r);
+		return z;
+	}
+
+	function starten() {
+		const my = ++lauf;
+		document.querySelectorAll<HTMLElement>("[data-hk]").forEach((hk) => {
+			const folge: string[][] = JSON.parse(hk.dataset.folge || "[]");
+			const aufSvg = hk.querySelector(".hk-zeichen--auf")?.outerHTML || "";
+			const zuSvg = hk.querySelector(".hk-zeichen--zu")?.outerHTML || "";
+			const unterzeile = hk.parentElement?.querySelector<HTMLElement>("[data-hk-unterzeile]");
+			if (!folge.length || !aufSvg || !zuSvg) return;
+			const rahmen = () => Array.from(hk.querySelectorAll<HTMLElement>("[data-hk-rahmen]"));
+
+			// GROESSE UND UMBRUCH (Fred 11.10.: „Buchstaben doppelt so gross,
+			// dadurch kommen wir in drei Zeilen"): Grundgroesse wie bisher (die
+			// laengste von Hand gesetzte Zeile auf 90 % der Breite), davon das
+			// Doppelte, gedeckelt durch die Hoehe fuer drei Zeilen. Die Zeilen
+			// werden dann AUTOMATISCH umbrochen (Wort fuer Wort, so viel wie auf
+			// 90 % der Breite passt); die Umbrueche in der Liste oben sind nur
+			// noch die Reihenfolge der Woerter. Der Block ist so hoch wie der
+			// Satz mit den meisten Zeilen, die Unterzeile bleibt fest.
+			const FAKTOR = 2;
+			const MAX_ZEILEN = 3;
+			let umbrochen: string[][] = folge;
+			const passen = () => {
+				hk.style.removeProperty("--hk-fs");
+				const fs0 = parseFloat(getComputedStyle(hk).fontSize);
+				const probe = document.createElement("span");
+				probe.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit;letter-spacing:inherit";
+				hk.appendChild(probe);
+				const breite = (t: string) => { probe.textContent = t; return probe.offsetWidth; };
+				let breitEm = 0;
+				for (const block of folge) for (const z of block) breitEm = Math.max(breitEm, breite(z) / fs0);
+				const zeichenEm = 2 * 0.5328 + 2 * 0.049; // doppelte Zeichen (11.10.)
+				const basis = (0.9 * window.innerWidth) / (breitEm + zeichenEm);
+				// Umbruch fuer eine Schriftgroesse: Woerter, so viele auf die Zeile
+				// passen. Breiten werden bei fs0 gemessen und linear skaliert.
+				const umbrechen = (fs: number) => {
+					const grenze = (0.9 * window.innerWidth - zeichenEm * fs) * (fs0 / fs);
+					return folge.map((block) => {
+						const woerter = block.join(" ").split(/\s+/);
+						const zeilen: string[] = [];
+						let akt = "";
+						for (const w of woerter) {
+							const versuch = akt ? `${akt} ${w}` : w;
+							if (akt && breite(versuch) > grenze) { zeilen.push(akt); akt = w; }
+							else akt = versuch;
+						}
+						if (akt) zeilen.push(akt);
+						return zeilen;
+					});
+				};
+				// Start beim Doppelten (gedeckelt durch die Hoehe fuer drei Zeilen),
+				// dann in 2-%-Schritten kleiner, bis jeder Satz in hoechstens drei
+				// Zeilen passt.
+				let fs = Math.min(basis * FAKTOR, (window.innerHeight - 460) / (MAX_ZEILEN * 1.05));
+				umbrochen = umbrechen(fs);
+				while (fs > basis && umbrochen.some((b) => b.length > MAX_ZEILEN)) {
+					fs *= 0.98;
+					umbrochen = umbrechen(fs);
+				}
+				hk.style.setProperty("--hk-fs", `${fs}px`);
+				probe.remove();
+				const maxZeilen = Math.max(2, ...umbrochen.map((b) => b.length));
+				hk.style.setProperty("--hk-zeilen", String(maxZeilen));
+			};
+
+			// ZOOM wieder raus (Fred 11.10.: „das mit dem Zoomen canceln wir, das
+			// macht's zu unruhig"). Zwei Fassungen waren gebaut (Kamera folgt dem
+			// sichtbaren Inhalt; Zoom ueber den ganzen Satz mit Kamerafahrt); beide
+			// liegen in der Git-Historie dieses Tages. Was bleibt: alle Masse im
+			// Script sind Layoutmasse (offsetWidth/offsetLeft).
+
+			const voll = (r: HTMLElement) => r.style.setProperty("--hk-breite", `${r.querySelector<HTMLElement>("[data-hk-text]")!.offsetWidth}px`);
+			let fertig = false;
+			const onResize = () => { passen(); if (fertig) rahmen().forEach(voll); };
+			window.addEventListener("resize", onResize, { passive: true });
+
+			if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+				passen();
+				rahmen().forEach(voll);
+				hk.setAttribute("data-hk-zeichen", "");
+				return;
+			}
+
+			// FLUESSIG (Fred 11.10.: „ein bisschen staccato, wieder fluessig"):
+			// statt Buchstabe fuer Buchstabe gleitet die Rahmenbreite linear von
+			// 0 auf die volle Breite; die Dauer folgt der Zeichenzahl, damit lange
+			// und kurze Zeilen im selben Tempo laufen. Das Zeichen wandert dabei
+			// gleichmaessig nach links. Loeschen spiegelbildlich, doppelt so schnell.
+			const gleiten = async (r: HTMLElement, von: number, bis: number, ms: number, kurve: string) => {
+				const a = r.animate([{ width: `${von}px` }, { width: `${bis}px` }], { duration: ms, easing: kurve, fill: "forwards" });
+				await a.finished.catch(() => {});
+				a.cancel();
+				r.style.setProperty("--hk-breite", `${bis}px`);
+			};
+			const zeichenZahl = (r: HTMLElement) => (r.querySelector<HTMLElement>("[data-hk-text]")!.textContent || "").length + 1;
+			const tippen = async (r: HTMLElement) => {
+				const ziel = r.querySelector<HTMLElement>("[data-hk-text]")!.offsetWidth;
+				await gleiten(r, 0, ziel, zeichenZahl(r) * TIPP_MS, "cubic-bezier(0.3, 0, 0.6, 1)");
+			};
+			const loeschen = async (r: HTMLElement) => {
+				const von = r.offsetWidth;
+				await gleiten(r, von, 0, zeichenZahl(r) * LOESCH_MS, "cubic-bezier(0.4, 0, 0.7, 1)");
+			};
+
+			// ZWEITE ZEILE AN IHREM PLATZ (Fred 11.10.: „die zweite Zeile nicht
+			// von der Mitte, sondern von links, an der Stelle, wo der Text dann
+			// wirklich steht"): der Rahmen hat sofort seine volle Breite, die
+			// Zeile steht also zentriert an ihrem Endplatz, und der Text wird per
+			// clip-path von links nach rechts freigelegt. Loeschen: von rechts.
+			const freilegen = async (r: HTMLElement, von: string, bis: string, ms: number, kurve: string) => {
+				const a = r.animate([{ clipPath: von }, { clipPath: bis }], { duration: ms, easing: kurve, fill: "forwards" });
+				await a.finished.catch(() => {});
+				a.cancel();
+				r.style.clipPath = bis;
+			};
+			const tippenAmPlatz = async (r: HTMLElement) => {
+				r.style.setProperty("--hk-breite", `${r.querySelector<HTMLElement>("[data-hk-text]")!.offsetWidth}px`);
+				r.style.clipPath = "inset(0 100% 0 0)";
+				await freilegen(r, "inset(0 100% 0 0)", "inset(0 0% 0 0)", zeichenZahl(r) * TIPP_MS, "cubic-bezier(0.3, 0, 0.6, 1)");
+			};
+			const loeschenAmPlatz = async (r: HTMLElement) => {
+				await freilegen(r, "inset(0 0% 0 0)", "inset(0 100% 0 0)", zeichenZahl(r) * LOESCH_MS, "cubic-bezier(0.4, 0, 0.7, 1)");
+			};
+
+			const satzAufbauen = async (block: string[]) => {
+				hk.querySelectorAll("[data-hk-zeile]").forEach((z) => z.remove());
+				const z1 = neueZeile(block[0]);
+				z1.insertAdjacentHTML("afterbegin", aufSvg);
+				if (block.length === 1) z1.querySelector("[data-hk-text]")!.insertAdjacentHTML("beforeend", zuSvg);
+				hk.appendChild(z1);
+				fertig = false;
+				await tippen(z1.querySelector<HTMLElement>("[data-hk-rahmen]")!);
+				for (let i = 1; i < block.length; i++) {           // weitere Zeilen: aus der Mitte ihrer Zeile
+					if (my !== lauf) return;
+					await wait(TIPP_MS * 3);
+					const z = neueZeile(block[i]);
+					if (i === block.length - 1) z.querySelector("[data-hk-text]")!.insertAdjacentHTML("beforeend", zuSvg);
+					hk.appendChild(z);
+					await tippenAmPlatz(z.querySelector<HTMLElement>("[data-hk-rahmen]")!);
+				}
+				fertig = true;
+			};
+
+			// SCHLUSSZEICHEN LAEUFT MIT ZURUECK (Fred 11.10., Korrektur: „sichtbar
+			// bleiben und mit zuruecklaufen, nicht im Raum stehen bleiben"): beim
+			// Abbau wird es aus dem Text geloest und als Nachbar HINTER den Rahmen
+			// der jeweils zu loeschenden Zeile gesetzt. Schrumpft der Rahmen, laeuft
+			// es an der Loeschkante mit nach links. Ist eine untere Zeile leer,
+			// springt es ans Ende der Zeile darueber. Zuletzt schrumpft Zeile 1 in
+			// die Mitte, beide Zeichen treffen sich, dann geht das Schlusszeichen.
+			const satzAbbauen = async () => {
+				fertig = false;
+				const zu = hk.querySelector<HTMLElement>(".hk-zeichen--zu");
+				const rs = rahmen();
+				for (let i = rs.length - 1; i >= 0; i--) {
+					if (my !== lauf) return;
+					const r = rs[i], zeile = r.parentElement as HTMLElement, text = r.querySelector<HTMLElement>("[data-hk-text]")!;
+					if (i > 0) {
+						// Zeile an ihrem Platz festhalten: linksbuendig mit gemessenem Einzug
+						const einzug = r.offsetLeft - zeile.offsetLeft;            // ungezoomt (offset statt Bildschirmmass)
+						zeile.style.justifyContent = "flex-start";
+						zeile.style.paddingLeft = `${einzug}px`;
+					}
+					// Schlusszeichen hinter den Rahmen. Kommt es aus einer Zeile darunter
+					// (Sprung nach oben), darf es die zentrierte Zeile nicht verbreitern,
+					// sonst rueckt deren Text beim Sprung um eine halbe Zeichenbreite
+					// (Fred 11.10.: „kleiner Sprung von der zweiten auf die erste Zeile"):
+					// negativer rechter Rand = eigene Breite + Abstand (0,2875 em), es
+					// haengt dann rechts an der Kante, ohne Platz zu nehmen.
+					if (zu) {
+						const ausEigenemText = !!text.querySelector(".hk-zeichen--zu");
+						zeile.appendChild(zu);
+						zu.style.marginRight = ausEigenemText || i > 0 ? "" : "-0.5818em";
+					}
+					r.style.clipPath = "";
+					const von = text.offsetWidth;          // Textbreite ohne Schlusszeichen
+					r.style.setProperty("--hk-breite", `${von}px`);
+					const dauer = zeichenZahl(r) * LOESCH_MS;
+					const schliessen = gleiten(r, von, 0, dauer, "cubic-bezier(0.3, 0, 0.6, 1)"); // gleiche Kurve wie beim Tippen
+					// Hing das Schlusszeichen platzlos an Zeile 1, bekommt es waehrend des
+					// Schrumpfens seinen Platz zurueck: am Ende steht wieder das Paar in
+					// der Mitte, und das weiche Ausblenden mit Gleiten in die Mitte (Fred
+					// 11.10.: „ist schoen") laeuft fuer alle Saetze gleich.
+					if (zu && i === 0 && zu.style.marginRight) {
+						const m = zu.animate([{ marginRight: "-0.5818em" }, { marginRight: "0em" }], { duration: dauer, easing: "cubic-bezier(0.3, 0, 0.6, 1)", fill: "forwards" });
+						m.finished.then(() => { m.cancel(); zu.style.marginRight = ""; }).catch(() => {});
+					}
+					await schliessen;
+					if (my !== lauf) return;
+					if (i > 0) { zeile.remove(); await wait(TIPP_MS * 3); }   // gleiche Pause wie beim Aufbau
+				}
+				// beide Zeichen stehen zusammen in der Mitte, das Schlusszeichen noch
+				// einen Moment sichtbar (Fred 11.10.: „am Ende noch ein bisschen stehen
+				// lassen"), dann geht es
+				await wait(TAKT_MS * 2);
+				if (my !== lauf) return;
+				// OHNE SPRUNG (Fred 11.10.: „wenn es verschwindet, springt das erste
+				// Anfuehrungszeichen"): das Schlusszeichen nimmt beim Ausblenden
+				// seinen Platz in der Zeile mit (negativer rechter Rand bis zu seiner
+				// eigenen Breite + Abstand = 0,2875 em), so gleitet das vordere
+				// Zeichen in derselben Zeit weich in die Mitte, statt beim Entfernen
+				// zu springen.
+				if (zu) {
+					const vonRand = getComputedStyle(zu).marginRight;     // 0 oder schon −0,2875 em (dann gleitet nichts)
+					const a = zu.animate([{ opacity: 1, marginRight: vonRand }, { opacity: 0, marginRight: "-0.5818em" }], { duration: TAKT_MS, easing: "cubic-bezier(0.3, 0, 0.6, 1)", fill: "forwards" });
+					await a.finished.catch(() => {});
+					zu.remove();
+				}
+			};
+
+			const run = async () => {
+				passen();
+				hk.setAttribute("data-hk-laeuft", "");
+				hk.removeAttribute("data-hk-zeichen");
+				unterzeile?.setAttribute("data-hk-wartet", "");
+				hk.querySelectorAll("[data-hk-zeile]").forEach((z) => z.remove());
+				const z0 = neueZeile(""); z0.insertAdjacentHTML("afterbegin", aufSvg); hk.appendChild(z0);
+				await wait(START_MS);
+				if (my !== lauf) return;
+				hk.setAttribute("data-hk-zeichen", "");            // das vordere Zeichen erscheint in der Mitte
+				await wait(TAKT_MS);
+				let i = 0;
+				while (my === lauf) {
+					await satzAufbauen(umbrochen[i]);
+					if (my !== lauf) return;
+					unterzeile?.removeAttribute("data-hk-wartet");
+					if (folge.length < 2) return;
+					await wait(STAND_MS);
+					if (my !== lauf) return;
+					await satzAbbauen();
+					if (my !== lauf) return;
+					await wait(TAKT_MS);                            // Zeichen steht kurz allein in der Mitte
+					i = (i + 1) % folge.length;
+				}
+			};
+			const sicher = () => run().catch(() => {});
+			if (document.fonts && document.fonts.status !== "loaded") document.fonts.ready.then(sicher);
+			else sicher();
+		});
+	}
+	document.addEventListener("astro:page-load", starten);
+</script>

@@ -1,3 +1,6 @@
+---
+import Wortmarke from "./Wortmarke.astro";
+---
 {/* Sticky-Reveal-Footer (Fred 30.08. nachts, "bau den Footer") — exakt das
    BBH-Muster, das Maximilian auf der Nuxt-Seite 1:1 kopiert hat und das wir
    dort nachgemessen haben: der Footer klebt mit sticky/bottom:0 auf Ebene 0
@@ -20,7 +23,11 @@
 		{/* aria-hidden liegt nur noch auf dem img (leeres alt) — der Container
 		   trägt jetzt auch die Rechts-Links und darf nicht versteckt sein. */}
 		<div class="site-footer__logo">
-			<img src="/parley/parley-text.svg" alt="" class="site-footer__text" aria-hidden="true" />
+			{/* PROBE LOKAL (Fred 10.10.): Wortmarke ‚parley‛ statt des alten
+			   „The Parley"-Schriftzugs; Groesse ueber die Containerbreite, damit
+			   die Marke wie bisher von Kante zu Kante laeuft (Wortbreite 3,0 em
+			   plus zwei Zeichen und Luft = ca. 3,6 em → 27cqw). */}
+			<Wortmarke class="site-footer__wortmarke" />
 		{/* Pflicht-Links IM Freiraum der Wortmarke (Fred 31.08.): rechts neben
 		   dem "e" von "The" bleibt ein großes schwarzes Feld — dahin wandern
 		   Impressum/Datenschutz (absolut positioniert, Maße aus dem SVG
@@ -121,8 +128,18 @@
 	   Seitenverhältnis 1986.93×1057.41, bei 1920 also ~1022px hoch. */
 	.site-footer__logo {
 		width: 100%;
+		container-type: inline-size;
 		/* Anker für die absolut positionierten Rechts-Links im Freiraum. */
 		position: relative;
+	}
+
+	.site-footer :global(.site-footer__wortmarke) {
+		display: block;
+		text-align: center;
+		font-size: 26cqw; /* 27 lief 31 px ueber die Breite (2048er Fenster) */
+		line-height: 1;
+		color: #ededed;
+		padding: 0.12em 0 0.2em;
 	}
 
 	.site-footer__text {

@@ -6,6 +6,8 @@ import SplitFlap from "../components/SplitFlap.astro";
 // Multi-Output jetzt als zwei Kacheln. MultiOutputTafel.astro bleibt als
 // Datei im Repo, ist aber nirgends mehr eingebunden.
 import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
+import HeroKlammer from "../components/HeroKlammer.astro";
+import Wortmarke from "../components/Wortmarke.astro";
 
 // ZIEL→FORMAT-TAFEL (Fred 13.09., Probe-Einbau "nur dass ich es mal sehe"):
 // Ziel links, Pfeil, Format rechts — BEWUSST EIN SplitFlap-Board statt zwei
@@ -86,6 +88,11 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 <Layout title="Start" gateMenuBehindHero>
 	<header class="hero">
+		{/* KOPF (Fred 10.10.): die Wortmarke ‚parley‛ klein oben in der Mitte,
+		   seit der Hero selbst die mehrzeilige Klammer traegt. */}
+		{/* Kopf-Wortmarke oben Mitte (10.10.) wieder raus (Fred 11.10.: „mach oben
+		   parley weg in der Mitte"). Markup als Vorrat:
+		   <a href="/" class="hero-kopf" aria-label="parley, Startseite"><Wortmarke class="hero-kopf__marke" /></a> */}
 		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler aus der Essenz-Spalte
 		   wird der Hero ("echt starker Hero"), "Kein Business ohne Witness."
 		   wandert dafür in die Essenz-Spalte der Plädoyer-Sektion. Drei Sätze =
@@ -121,7 +128,12 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   PARLEY_ZEICHEN.md), als Inline-SVG auf Versalhoehe (0,725 em) und
 		   Grundlinie gesetzt; der Buchstabe steht fuer Vorleser unsichtbar
 		   daneben. Pfad aus public/favicon.svg, Box 393 × 461 Einheiten. */}
-		<h1><span><span class="hero-wort">Eure</span> <span class="hero-wort">Expertise</span></span><span><span class="hero-wort">ist</span> <span class="hero-wort">Programm.</span></span></h1>
+		{/* HERO = WORTMARKE (Fred 10.10.: „mach es gleich auch auf der
+		   Localhost-Seite"): die animierte Klammer ‚parley‛ (HeroKlammer.astro)
+		   ersetzt die vier Zeilen „Eure Expertise ist Programm.". Der alte
+		   Vierzeiler als Vorrat:
+		   <h1><span><span class="hero-wort">Eure</span> <span class="hero-wort">Expertise</span></span><span><span class="hero-wort">ist</span> <span class="hero-wort">Programm.</span></span></h1> */}
+		<HeroKlammer />
 		{/* Vorrat (28.09., wieder raus auf Freds Wunsch): Erklaerungs-Zeile unterm
 		   Hero in md-Groesse, zuletzt "Aus echten Gespraechen entwickeln wir
 		   passende Formate, die das Vertrauen in eure Kompetenz greifbar
@@ -700,6 +712,18 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
+		position: relative;
+	}
+	.hero-kopf {
+		position: absolute;
+		top: clamp(20px, 3vh, 36px);
+		left: 50%;
+		transform: translateX(-50%);
+		color: #ededed;
+		text-decoration: none;
+		font-size: clamp(22px, 2.2vw, 36px);
+		line-height: 1;
+		z-index: 2;
 	}
 
 	.hero-headline {
@@ -763,7 +787,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Reserve 380 px (Fahne 84 px + Luft oben und unten) → em ≤ (100vh −
 		   380px) / 3,52 = 28,4vh − 108px. Bei 1632×937 (Freds Fenster): 158 px
 		   Schrift, Block 556 px, Unterkante ~107 px ueber der Fahne. */
-		font-size: min(15.7cqw, calc(28.4vh - 108px));
+		font-size: min(15.7cqw, calc(28.4vh - 108px)); /* Reserve wie bisher: unten in Ruhe nur die 33-px-Bildmarke (10.10.) */
 		font-weight: 900;
 		text-transform: uppercase; /* PROBE (Fred 23.09.): alles in Grossbuchstaben, wie die Turm-Statements */
 		line-height: 0.88; /* Versalien ohne Unterlaengen: enger als 0.92 der Mischschrift, lockerer als BBHs 0.82 */
@@ -776,10 +800,11 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	/* Parley-P im Wort PROGRAMM: Versalhoehe der Forma-Versalien ist 0,725 em,
 	   der Kasten sitzt auf der Grundlinie (inline-block ohne Text = Unterkante
 	   auf Grundlinie). Rechts ein Hauch Luft wie die Nachbreite eines P. */
-	/* PARLEY-P RAUS (Fred 11.10., live): die Klapp-Konstruktion vom 29.09.
-	   (Forma-P klappt auf das P mit Play-Punze) ist entfernt; die Markenbasis
-	   vom 10.10. kennt kein Parley-P mehr. Markup und CSS in der Git-Historie
-	   (Commit 7138fa3). */
+	/* PARLEY-P RAUS (Fred 10.10.: „Play-Button wieder aus dem P raus, das
+	   normale P"): die Klapp-Konstruktion vom 29.09. (vier Schichten, Forma-P
+	   klappt auf das P mit Play-Punze) ist entfernt; sie gehoerte zur alten
+	   Zeichenregel, die Markenbasis vom 10.10. kennt kein Parley-P mehr.
+	   Markup und CSS liegen in der Git-Historie (Commit 7138fa3). */
 	.hero h1 > span {
 		/* Beide Zeilen WISCHEN gemeinsam herein wie der Seitenübergang
 		   (Fred 2026-06-14: "der ganze Text mit diesem schwarzen Swipe von
