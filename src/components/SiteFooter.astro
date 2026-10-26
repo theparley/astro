@@ -20,9 +20,15 @@
 		{/* aria-hidden liegt nur noch auf dem img (leeres alt) — der Container
 		   trägt jetzt auch die Rechts-Links und darf nicht versteckt sein. */}
 		<div class="site-footer__logo">
-			<img src="/parley/parley-text.svg" alt="" class="site-footer__text" aria-hidden="true" />
-		{/* Pflicht-Links IM Freiraum der Wortmarke (Fred 31.08.): rechts neben
-		   dem "e" von "The" bleibt ein großes schwarzes Feld — dahin wandern
+			{/* „Parley“ statt „The Parley“ (Rasul 26.10.2026, Namensregel: The
+			   Parley ist jetzt das Studio). Text in Forma DJR Black statt des
+			   alten Bilds public/parley/parley-text.svg (bleibt im Repo); eine
+			   Zeile von Kante zu Kante. */}
+			<p class="site-footer__wortmarke">Parley</p>
+		{/* Seit 26.10.2026: Freiraum über „ey“ (zwischen Mittel- und
+		   Versalhöhe), Oberkante der Links = Oberkante der Versalien wie
+		   bisher. Verlauf: Pflicht-Links IM Freiraum der Wortmarke (Fred 31.08.): rechts neben
+		   dem "e" von "The" blieb ein großes schwarzes Feld — dahin wandern
 		   Impressum/Datenschutz (absolut positioniert, Maße aus dem SVG
 		   gemessen: Freiraum ab ~66% Breite, Mitte der oberen Zeile bei ~22%
 		   Höhe). Die eigene Link-Zeile unter der Marke entfällt damit — der
@@ -114,33 +120,49 @@
 		color: inherit;
 	}
 
-	/* Nur die Wortmarke "The Parley", randlos von Kante zu Kante (Fred 30.08.
-	   nachts, "volle Breite, nicht den Content-Rahmen"): der Ausbrecher-Trick
-	   width:100vw + margin-left:calc(50% - 50vw) sprengt den zentrierten,
-	   gepolsterten Innenrahmen — die Links darüber behalten ihn.
-	   Seitenverhältnis 1986.93×1057.41, bei 1920 also ~1022px hoch. */
+	/* Nur die Wortmarke, randlos von Kante zu Kante (Fred 30.08. nachts,
+	   "volle Breite, nicht den Content-Rahmen"); seit 26.10.2026 „Parley“
+	   statt „The Parley“. */
 	.site-footer__logo {
 		width: 100%;
 		/* Anker für die absolut positionierten Rechts-Links im Freiraum. */
 		position: relative;
+		/* Bezugsgröße für die cqw-Schriftgröße darunter. */
+		container-type: inline-size;
 	}
 
-	.site-footer__text {
-		display: block;
-		width: 100%;
-		height: auto;
-		/* Höhen-Deckel (Fred 31.08., "Impressum wieder weg"): der Footer darf
-		   nie höher werden als das Fenster — sonst kappt sticky bottom-0 die
-		   OBERKANTE, und die oben an den Buchstaben ausgerichteten Links
-		   liegen außerhalb des Bildes (auf großen Monitoren: 1920er Marke ist
-		   ~1022px hoch, typischer Browser-Viewport ~950). Bei flachen
-		   Fenstern skaliert die Marke also leicht runter und bekommt etwas
-		   Seitenluft; object-fit hält die Glyphen im Element zentriert, die
-		   Oberkante der Buchstaben bleibt die Oberkante des Elements. 36px =
-		   Innenpolster des Footers (24 oben + 12 unten). */
-		max-height: calc(100dvh - 36px);
-		object-fit: contain;
+	/* Größe über die Containerbreite (cqw), damit „Parley“ von Kante zu
+	   Kante läuft (Forma DJR Black, gemessen 26.10.: Tinte 2,95 em breit,
+	   Versalhöhe 0,70 em, Unterlänge y 0,17 em). Deckel über die
+	   Fensterhöhe wie beim alten Bild: Element ist 0,9 em hoch, plus 36 px
+	   Innenpolster. Rand oben −0,1 em: bei line-height 1 liegt die
+	   Versal-Oberkante 0,1 em unter der Elementkante; so sitzt sie genau
+	   auf der Oberkante, und die Links (top: 0) bleiben an den Buchstaben
+	   ausgerichtet. */
+	.site-footer__wortmarke {
+		margin: -0.1em 0 0;
+		font-size: min(33.8cqw, calc((100dvh - 36px) / 0.9));
+		font-weight: 900;
+		line-height: 1;
+		letter-spacing: -0.01em;
+		text-align: center;
+		color: var(--white);
+		white-space: nowrap;
 	}
+
+	/* Schmale Fenster: der Freiraum über „ey“ (0,17 em) ist unter ~900 px
+	   Breite niedriger als die zwei Link-Zeilen. Dann stehen die Links in
+	   einer Zeile rechts unter dem Schriftzug. */
+	@container (max-width: 900px) {
+		nav {
+			position: static;
+			flex-direction: row;
+			justify-content: flex-end;
+			gap: 16px;
+			padding: 8px clamp(16px, 3vw, 56px) 0;
+		}
+	}
+
 </style>
 
 <script>
