@@ -17,10 +17,11 @@ import Layout from "../layouts/Layout.astro";
 
 		<h2>2. Diese Website im Überblick</h2>
 		<p>
-			Diese Seite verzichtet bewusst auf Drittanbieter-Einbettungen, Analyse-Tools und Werbe-Pixel (kein
-			Meta-, TikTok- oder LinkedIn-Tracking, keine Google Fonts von fremden Servern). Die verwendete Schrift
-			(Forma DJR) wird selbst gehostet und lädt keine externen Ressourcen nach. Es werden keine Cookies zur
-			Analyse oder für Werbezwecke gesetzt.
+			Diese Seite verzichtet bewusst auf Drittanbieter-Einbettungen, Werbe-Pixel und Analyse-Tools, die
+			Besucher verfolgen (kein Meta-, TikTok- oder LinkedIn-Tracking, keine Google Fonts von fremden Servern).
+			Die verwendete Schrift (Forma DJR) wird selbst gehostet und lädt keine externen Ressourcen nach. Es
+			werden keine Cookies zur Analyse oder für Werbezwecke gesetzt. Für die Reichweitenmessung nutzen wir
+			allein die cookielose Messung unseres Hosting-Anbieters (siehe Abschnitt 4).
 		</p>
 
 		<h2>3. Hosting</h2>
@@ -34,7 +35,25 @@ import Layout from "../layouts/Layout.astro";
 			Bereitstellung des Angebots (Art. 6 Abs. 1 lit. f DSGVO).
 		</p>
 
-		<h2>4. Ihre Rechte</h2>
+		<h2>4. Reichweitenmessung (Cloudflare Web Analytics)</h2>
+		<!-- ENTWURF Claude 03.11.2026: Fakten nach developers.cloudflare.com/web-analytics (FAQ, Data metrics) und cloudflare.com/web-analytics; von Fred prüfen lassen -->
+		<p>
+			Um zu verstehen, welche Seiten besucht werden und wie schnell sie laden, nutzen wir Cloudflare Web
+			Analytics, einen Dienst unseres Hosting-Anbieters Cloudflare (siehe Abschnitt 3). Dafür lädt beim
+			Seitenaufruf ein kleines Skript von Cloudflare, das Messwerte an unsere eigene Domain übermittelt. Es
+			setzt keine Cookies, legt nichts auf Ihrem Gerät ab (auch kein localStorage) und erkennt Sie nicht
+			wieder: Cloudflare bildet nach eigenen Angaben keine Profile und verfolgt Besucher weder über die
+			IP-Adresse noch über andere Merkmale. Verarbeitet werden die aufgerufene Seite (ohne URL-Parameter),
+			die Seite, von der Sie kommen (Referrer), Land, Browser, Betriebssystem und Gerätetyp sowie Ladezeiten
+			und Leistungswerte der Seite. Ihre IP-Adresse wird nur für die technische Übermittlung verwendet. Wir
+			sehen ausschließlich zusammengefasste Statistiken, keine Angaben zu einzelnen Personen. Cloudflare
+			speichert die Messdaten nach eigenen Angaben sieben Tage vollständig und danach nur noch
+			zusammengefasst. Rechtsgrundlage ist unser berechtigtes Interesse an einer nutzerfreundlichen und
+			technisch einwandfreien Website (Art. 6 Abs. 1 lit. f DSGVO). Mit Cloudflare besteht ein Vertrag zur
+			Auftragsverarbeitung.
+		</p>
+
+		<h2>5. Ihre Rechte</h2>
 		<p>
 			Sie haben jederzeit das Recht auf unentgeltliche Auskunft über Ihre bei uns gespeicherten
 			personenbezogenen Daten, deren Herkunft und Empfänger sowie den Zweck der Datenverarbeitung, und ggf.
@@ -43,7 +62,7 @@ import Layout from "../layouts/Layout.astro";
 			Datenschutz können Sie sich jederzeit an die oben genannte Adresse wenden.
 		</p>
 
-		<h2>5. Terminbuchung</h2>
+		<h2>6. Terminbuchung</h2>
 		<!-- ENTWURF Claude 30.08. — von Fred vor Live-Gang auf theparley.de prüfen lassen -->
 		<p>
 			Bei einer Terminbuchung über unsere Buchungsstrecke (/termin) werden die von Ihnen eingegebenen Daten
@@ -55,7 +74,7 @@ import Layout from "../layouts/Layout.astro";
 			Zeitpunkt unsere Server in Richtung Ihres Browsers.
 		</p>
 
-		<h2>6. Anfrage-Formular</h2>
+		<h2>7. Anfrage-Formular</h2>
 		<!-- ENTWURF Claude — Lücke bei den Launch-Restschritten gefunden (MailerLite fehlte komplett, Formular-Port kam nach dem Datenschutz-Audit); von Fred vor Live-Gang prüfen lassen -->
 		<p>
 			Wenn Sie uns über das Anfrage-Formular kontaktieren, werden die von Ihnen eingegebenen Daten (Name,
