@@ -137,6 +137,13 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		<BrandLogo />
 	</header>
 
+	{/* SZENE (07.11.2026, Übergabe „Website · Gestaltung“): Video 16:9 unter
+	   dem Hero, später mit Sprechblasen ringsum (nicht in diesem Schritt).
+	   PROBE LOKAL mit neutralem Testvideo, nicht live vor Rasuls Abnahme. */}
+	<section class="szene" aria-label="Szene">
+		<video class="szene-video" src="/test/testvideo-16x9.mp4" autoplay muted loop playsinline></video>
+	</section>
+
 	{/* "Der Paragraph" (Fred 2026-06-14): Fließtext über die ganze Breite,
 	   Paragraph-Größe (gleiche BBH-Lead-Typo wie bisher) — ersetzt die
 	   zweigeteilte Plädoyer-Sektion (Akten-Form + Essenz-Spalte). "Kein
@@ -693,6 +700,31 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Multi-Output-Sektion; die Wand darüber endet auf 0). */
 		padding: var(--abstand-xl) 16px clamp(48px, 8vh, 96px);
 		overflow-x: auto;
+	}
+
+	/* SZENE: Videogröße (07.11.2026). Gleiche Bauart wie die Schrift- und
+	   Abstands-Tokens in Layout.astro (BBH-Rezept): linear in vw, oben bei
+	   1728 px Fenster gedeckelt, damit das Video in Maßen bleibt und die
+	   Fläche drumherum den Blasen gehört. Geeicht auf die Richtwerte aus
+	   dem Browser-Modell: 1440 → 530, 1100 → 455. Untergrenze 400 px
+	   (Tablet/Desktop anschaubar); darunter greift min() mit dem 16-px-Rand
+	   der Seite, auf dem Handy also fast randvoll (375 → 343). Alles stetig:
+	   kein Umschalten, nur Knicke, wo eine Grenze einsetzt.
+	   Verlauf: ≤432 randvoll · 432–850 400 px · 850–1728 wachsend · ab 1728 594 px. */
+	.szene {
+		--szene-video-b: min(calc(100vw - 32px), clamp(400px, 212.4px + 22.06vw, 593.5px));
+		display: flex;
+		justify-content: center;
+		padding: 0 16px;
+	}
+
+	.szene-video {
+		display: block;
+		width: var(--szene-video-b);
+		aspect-ratio: 16 / 9;
+		height: auto;
+		object-fit: cover;
+		background: var(--panel);
 	}
 
 	.hero {
