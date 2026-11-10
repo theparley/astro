@@ -121,7 +121,14 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   PARLEY_ZEICHEN.md), als Inline-SVG auf Versalhoehe (0,725 em) und
 		   Grundlinie gesetzt; der Buchstabe steht fuer Vorleser unsichtbar
 		   daneben. Pfad aus public/favicon.svg, Box 393 × 461 Einheiten. */}
-		<h1><span><span class="hero-wort">Eure</span> <span class="hero-wort">Expertise</span></span><span><span class="hero-wort">ist</span> <span class="hero-wort">Programm.</span></span></h1>
+		{/* NEUER HERO (Übergabe „Website · Gestaltung“ 10.11.2026, von Rasul
+		   freigegeben): drei feste Zeilen, die erste im Grau der Palette;
+		   darunter ein Textblock in der Breite der Textspalte. Herleitung im
+		   Marketing-Ordner, website/Website_Startseite_Aufbau_Entwurf_2026-11.md
+		   (Einträge 10.11.). Vorheriger Hero „Eure Expertise ist Programm.“
+		   in der Git-Historie. */}
+		<h1><span class="hero-zeile hero-zeile--grau">Überall Experten.</span><span class="hero-zeile">Zeit für den</span><span class="hero-zeile">Videobeweis.</span></h1>
+		<p class="hero-text">Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen und haben euch auf&nbsp;dem&nbsp;Schirm, noch vor dem ersten Kontakt.</p>
 		{/* Vorrat (28.09., wieder raus auf Freds Wunsch): Erklaerungs-Zeile unterm
 		   Hero in md-Groesse, zuletzt "Aus echten Gespraechen entwickeln wir
 		   passende Formate, die das Vertrauen in eure Kompetenz greifbar
@@ -727,44 +734,26 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		background: var(--panel);
 	}
 
+	/* HERO (10.11.2026, Übergabe „Website · Gestaltung“, von Rasul
+	   freigegeben). Ganz im BBH-System: Überschrift nach BBHs Hero-Regel
+	   (BBH /about: text-[10vw], ohne Obergrenze, Zeilenhöhe 0,95), Text in
+	   --text-lg, Abstände aus den Tokens. Überschrift und Text stehen
+	   zusammen senkrecht mittig im ersten Bildschirm; ist der Block höher
+	   (z. B. 1280 × 720), läuft er einfach über die Höhe hinaus. Der frühere
+	   Versatz translateY(-2.5vh) und die Höhen-Deckel des Vierzeilers sind
+	   raus (Verlauf in der Git-Historie). */
 	.hero {
-		min-height: 100dvh;
+		min-height: 100svh;
+		padding: var(--abstand-md) 0;
 		display: flex;
 		flex-direction: column;
 	}
 
 	.hero-headline {
-		/* Hero-Korrektur nach BBHs Statement-Rezept (Fred 30.08., live auf der
-		   BBH-Startseite gemessen — deren Original-Hero ist ein vollbreites
-		   Video, die SCHRIFT-Statements laufen aber nie bis an den Rand):
-		   (1) site-container-Deckel 1728px, mittig — bei 1920er-Viewport
-		   entstehen dadurch allein 96px Luft je Seite, plus 32px px-site-
-		   Padding = 128px gemessener Zeilen-Einzug. (2) text-center (BBHs
-		   Statements sind zentriert, nicht linksbündig — daher wirkte unseres
-		   "bis an den Rand gezogen"). */
 		width: 100%;
-		/* Deckel ENTFERNT (Fred 15.09. früh: der Hero soll den Viewport
-		   IMMER zu füllen versuchen — vorher stoppte die Schrift am
-		   1728px-site-container und ab da wuchs nur noch die Randluft).
-		   Die 15.6cqw-Kalibrierung skaliert damit unbegrenzt mit der
-		   Fensterbreite; die BBH-Randluft-Messung von 30.08. gilt für die
-		   ÜBRIGEN Sektionen weiter. */
-		max-width: none;
 		margin: auto;
 		padding: 0 16px;
 		text-align: center;
-		/* Optischer Ausgleich (Fred 30.08.): geometrisch war der Block exakt
-		   mittig (320px oben wie unten, gemessen), wirkte aber leicht zu tief —
-		   Unterlängen wiegen unten schwerer, und das fixierte Logo füllt die
-		   untere Bildhälfte zusätzlich. Leichter Hub nach oben, skaliert mit
-		   der Viewport-Höhe (~16px bei 1080er-Höhe). */
-		transform: translateY(-2.5vh);
-		/* Schrift skaliert wieder mit dem CONTAINER (cqw), nicht dem Viewport —
-		   dadurch füllt die Zeile die Deckel-Breite exakt aus (Fred 30.08.:
-		   "größer, bis sie bei der Breite ist") und hört bei 1728px einfach
-		   auf zu wachsen: ab da entsteht die BBH-Luft (96px Deckel-Rand + 32px
-		   Padding = 128px Zeilen-Einzug bei 1920, exakt BBHs Messwert). */
-		container-type: inline-size;
 	}
 
 	@media (min-width: 1024px) {
@@ -774,65 +763,53 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	}
 
 	.hero h1 {
-		/* Wie auf bartleboglehegarty.com: text-wrap:balance statt fester <br>-Umbrüche.
-		   Der Browser entscheidet selbst, wie viele Zeilen und welche Wortgruppen —
-		   kein manuelles Umschalten zwischen Zeilenzahlen nötig.
-		   Größe füllt die Zeilen auf die Container-Breite; der Container ist
-		   bei 1728px gedeckelt, die Schrift wächst ab da nicht mehr mit und
-		   die BBH-Randluft entsteht von selbst. Hero-Rücktausch (Fred
-		   2026-06-14): "Kein Business / ohne Witness." ist zurück — damit gilt
-		   wieder die historische Kalibrierung 15.6cqw (längste Zeile "Kein
-		   Business", ~97% Container-Auslastung; für den zwischenzeitlichen
-		   Dreizeiler galten 9.6cqw). Zeilenhöhe bleibt 0.92 statt BBHs 0.82:
-		   deren Statements sind VERSAL (keine Unterlängen), unsere
-		   Mischschrift würde bei 0.82 kollidieren. */
-		/* VIERZEILIG AUF ALLEN BREITEN (Fred 28.09.: „von Anfang an vierzeilig,
-		   aber genuegend Abstand unten zur Fahne"). Zwei Deckel: Breite
-		   (laengstes Wort PROGRAMM. auf ~97 % der Zeile = 15,7cqw) und HOEHE:
-		   vier Zeilen à 0,88 em sind 3,52 em; der Block sitzt mittig im
-		   Vollbild-Hero, die Fahne (BrandLogo, 84 px) haengt fixiert unten.
-		   Reserve 380 px (Fahne 84 px + Luft oben und unten) → em ≤ (100vh −
-		   380px) / 3,52 = 28,4vh − 108px. Bei 1632×937 (Freds Fenster): 158 px
-		   Schrift, Block 556 px, Unterkante ~107 px ueber der Fahne. */
-		font-size: min(15.7cqw, calc(28.4vh - 108px));
+		margin: 0;
+		font-size: 10vw; /* auch auf dem Handy 10vw: jede Zeile bleibt einzeilig von 320 bis 2560 px (gemessen 10.11.) */
 		font-weight: 900;
-		text-transform: uppercase; /* PROBE (Fred 23.09.): alles in Grossbuchstaben, wie die Turm-Statements */
-		line-height: 0.88; /* Versalien ohne Unterlaengen: enger als 0.92 der Mischschrift, lockerer als BBHs 0.82 */
-		letter-spacing: -0.01em;
+		line-height: 0.95;
+		letter-spacing: 0.02em; /* nach Augenmaß an BBH angeglichen, Forma 900 läuft dichter */
+		font-optical-sizing: auto;
 	}
 
-	.hero h1 .hero-wort {
-		display: block; /* Wort je Zeile, auf allen Breiten (Fred 28.09.) */
-	}
-	/* Parley-P im Wort PROGRAMM: Versalhoehe der Forma-Versalien ist 0,725 em,
-	   der Kasten sitzt auf der Grundlinie (inline-block ohne Text = Unterkante
-	   auf Grundlinie). Rechts ein Hauch Luft wie die Nachbreite eines P. */
-	/* PARLEY-P RAUS (Fred 11.10., live): die Klapp-Konstruktion vom 29.09.
-	   (Forma-P klappt auf das P mit Play-Punze) ist entfernt; die Markenbasis
-	   vom 10.10. kennt kein Parley-P mehr. Markup und CSS in der Git-Historie
-	   (Commit 7138fa3). */
-	.hero h1 > span {
-		/* Beide Zeilen WISCHEN gemeinsam herein wie der Seitenübergang
-		   (Fred 2026-06-14: "der ganze Text mit diesem schwarzen Swipe von
-		   links nach rechts" — die frühere Von-oben-Animation der zweiten
-		   Zeile ist raus): gleiche Technik (clip-path legt von links frei),
-		   gleiche Dauer (800ms) und exakt PageWipes symmetrische BBH-Kurve.
-		   Selektor auf DIREKTE Kinder verengt (Hero-Breakpoint 14.09.):
-		   die inneren Wort-Spans dürfen nicht mitanimieren. */
+	/* Jede Zeile ein eigener Block (die Umbrüche sind Bedeutung). Die
+	   Wisch-Animation bleibt an den Zeilen, wie beim vorherigen Hero:
+	   clip-path legt von links frei, 800 ms, PageWipes BBH-Kurve. */
+	.hero h1 > .hero-zeile {
 		display: block;
+		white-space: nowrap;
 		animation: hero-line-wipe 800ms cubic-bezier(0.76, 0, 0.24, 1) 100ms both;
 	}
 
-	/* Hero-Breakpoint (Fred 14.09., Schwellwert ungelockt): vier Wort-
-	   Zeilen, Schrift neu kalibriert — längste Zeile ist jetzt "Business"
-	   (8 Zeichen statt 13), die Schrift darf entsprechend wachsen. */
-	@media (max-width: 640px) {
-		.hero h1 {
-			font-size: 15.4cqw; /* PROBE (Fred 28.09.): am Handy VIER Zeilen (Wort je Zeile), laengstes Wort „PROGRAMM." auf ~97 % von 343 px; vorher 12,9cqw fuer AUGENZEUGEN. */
-		}
+	.hero h1 > .hero-zeile--grau {
+		color: var(--gray);
+	}
 
-		.hero h1 .hero-wort {
-			display: block;
+	/* Text unter der Überschrift: ein Block, so breit wie die Textspalte
+	   der zweispaltigen Abschnitte (.paragraph-text im Plädoyer), damit
+	   sich die Breite auf der Seite wiederholt: ab 800 px halbe Container-
+	   breite (Container höchstens 1728 px, Innenabstand 16 px, ab 1024 px
+	   32 px), darunter die volle Spalte. Block mittig, Text linksbündig. */
+	.hero-text {
+		max-width: 100%;
+		margin: var(--abstand-md) auto 0;
+		font-size: var(--text-lg);
+		font-weight: 400;
+		line-height: 1.08;
+		letter-spacing: -0.01em;
+		color: var(--white);
+		text-align: left;
+		text-wrap: pretty;
+	}
+
+	@media (min-width: 800px) {
+		.hero-text {
+			max-width: calc((min(100vw, 1728px) - 32px) / 2);
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.hero-text {
+			max-width: calc((min(100vw, 1728px) - 64px) / 2);
 		}
 	}
 
@@ -853,7 +830,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.hero h1 > span {
+		.hero h1 > .hero-zeile {
 			animation: none;
 		}
 	}
