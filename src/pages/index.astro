@@ -689,8 +689,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 
 	.tafel-intro {
 		font-size: var(--text-md); /* = BBH md (ehem. clamp 1.125rem…1.9444rem, war schon BBHs md) */;
-		line-height: 1.3;
-		letter-spacing: -0.01em;
+		font-weight: var(--lesetext-gewicht);
+		line-height: var(--lesetext-zeilenhoehe);
+		letter-spacing: var(--lesetext-laufweite);
+		font-optical-sizing: auto;
 		max-width: 46rem;
 		/* Linksbündig wie die Paragraph-Absätze oben (Fred 13.09.) — der
 		   Block bleibt mittig in der Sektion, der Text darin läuft links. */
@@ -957,8 +959,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	.kontakt-zeile {
 		margin: 0;
 		font-size: var(--text-md); /* = BBH md (ehem. clamp 1.125rem…1.9444rem, war schon BBHs md) */;
-		line-height: 1.3;
-		letter-spacing: -0.01em;
+		font-weight: var(--lesetext-gewicht);
+		line-height: var(--lesetext-zeilenhoehe);
+		letter-spacing: var(--lesetext-laufweite);
+		font-optical-sizing: auto;
 	}
 
 
@@ -1070,11 +1074,10 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   Gerade rekonstruiert: clamp(18px, 14.55px + 0.9583vw, 31.11px).
 		   Zeilenhöhe dort 1.3 (nicht 1.2), Laufweite -0.02em unverändert. */
 		font-size: var(--text-md); /* = BBH md (ehem. clamp 1.125rem…1.9444rem, war schon BBHs md) */;
-		line-height: 1.3;
-		/* Laufweiten-Korrektur (Fred 2026-06-15, "minimal zu eng"): BBH fährt
-		   -0.02em auf GEIST SANS — Forma DJR läuft von Haus aus enger zu,
-		   dasselbe em-Maß drückt hier spürbar mehr. Halbe Stufe zurück. */
-		letter-spacing: -0.01em;
+		font-weight: var(--lesetext-gewicht);
+		line-height: var(--lesetext-zeilenhoehe);
+		letter-spacing: var(--lesetext-laufweite);
+		font-optical-sizing: auto;
 		color: var(--white);
 	}
 
@@ -1087,7 +1090,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	   (Globales p{margin:0} in Layout.astro würde die Absätze sonst
 	   zusammenkleben lassen.) */
 	.plaedoyer-text + .plaedoyer-text {
-		margin-top: 1.5rem;
+		margin-top: var(--lesetext-absatz);
 	}
 
 	.proof {

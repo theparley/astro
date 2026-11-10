@@ -160,6 +160,17 @@ const websiteJsonLd = JSON.stringify({
 		--text-sm: clamp(13.6px, 12.26px + 0.3728vw, 18.7px);
 		--text-base: clamp(16px, 14.42px + 0.4386vw, 22px);
 		--text-md: clamp(18px, 14.55px + 0.9576vw, 31.11px);
+		/* Lesetext (Rasul 10.11.2026, eingestellt auf fliesstext-bbh-forma.html
+		   gegen BBHs Geist): Größe --text-md, Zeilenhöhe 1,3, Absätze 24 px sind
+		   BBH-System; Gewicht 355 und Laufweite +0,0425em gleichen Forma gegen
+		   Geist (400, -0,02em) aus. Optische Größe automatisch, bewusst KEIN
+		   fester opsz-Wert (Forma tauscht sonst a und l aus), kein eigener
+		   Wortabstand. Gilt für alle Lesetexte, nicht für Hero-Text (lg),
+		   Labels, sm, Knöpfe, fette Fragen. */
+		--lesetext-gewicht: 355;
+		--lesetext-laufweite: 0.0425em;
+		--lesetext-zeilenhoehe: 1.3;
+		--lesetext-absatz: 1.5rem;
 		--text-lg: clamp(20.25px, 14px + 1.7347vw, 43.98px);
 		--text-xl: clamp(22.78px, 12.41px + 2.881vw, 62.19px);
 		--text-2xl: clamp(25.63px, 9.24px + 4.554vw, 87.93px);
