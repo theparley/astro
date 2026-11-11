@@ -296,8 +296,14 @@ interface Props {
 		// von r naeher am Zentrum und schiebt sich waehrend ihrer Fuellung nach
 		// aussen auf ihren Platz. 0 = aus (Startseite).
 		ausdehnen?: number;
+		// NUR UHR (Startseiten-Dummy 11.11.2026, Übergabe „Website · Gestaltung“):
+		// zeigt allein die Uhren-Kachel (Kachel 2 ohne Kopf), für Abschnitt 4
+		// „Die Augenzeugen“. Sektionskopf und Fallblatt-Kachel bleiben im Markup,
+		// sind aber ausgeblendet; Hülle ist dann ein div statt section.
+		nurUhr?: boolean;
 	}
-const { fassung = "brett", stoppuhr = true, bezug2, ausdehnen = 0 } = Astro.props;
+const { fassung = "brett", stoppuhr = true, bezug2, ausdehnen = 0, nurUhr = false } = Astro.props;
+const Huelle = nurUhr ? "div" : "section";
 // Beschlag als drei T-Pfade (Krone, Druecker links, Druecker rechts),
 // relativ zur Uhrmitte, je mit Drehung. EIN Pfad je T, nicht zwei
 // Rechtecke: an der gemeinsamen Kante zweier Rechtecke bleibt sonst eine
@@ -333,7 +339,7 @@ const beschlagStriche = [
 ];
 ---
 
-<section class="mo-sektion">
+<Huelle class:list={["mo-sektion", nurUhr && "nur-uhr"]}>
 	<div class="mo-kopf">
 		{/* Überschrift FINAL (Fred 14.09.); Sub-Zeile = das gelockte
 		   Zahlen-Staccato (der frühere Satz 2 mit Content-Output/Beispiel
@@ -652,9 +658,30 @@ const beschlagStriche = [
 		   Markup liegt in der Git-Historie (Stand 20.09.), samt der zwei
 		   Hintergrund-Ebenen und dem Zoom aus der Mitte. */}
 	</div>
-</section>
+</Huelle>
 
 <style>
+	/* Nur die Uhren-Kachel (Startseiten-Dummy 11.11.): Breite wie in der
+	   Werkstatt-Vorschau min(542px, 100 %), mittig. */
+	.mo-sektion.nur-uhr {
+		padding: 0;
+		gap: 0;
+		align-items: center;
+	}
+	.nur-uhr .mo-kopf,
+	.nur-uhr .feld:first-child,
+	.nur-uhr .kachel-kopf {
+		display: none;
+	}
+	.nur-uhr .kachel-reihe {
+		display: block !important;
+		max-width: none;
+	}
+	.nur-uhr .feld {
+		display: block !important;
+		width: min(542px, 100%);
+		margin: 0 auto;
+	}
 	/* ACHTUNG beim Kopieren aus MultiOutputTafel.astro: dort steht direkt
 	   ueber .mo-sektion die Zeile `<style is:global>`. Beim Umzug am 21.09.
 	   ist sie mit in diesen Block gerutscht — eine Tag-Zeile mitten im CSS

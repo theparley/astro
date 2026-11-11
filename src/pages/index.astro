@@ -82,6 +82,37 @@ const produkteZeile = "Videopodcast. Webinar. Clip. Kundentestimonial.";
 const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 // Vorrat/Alternativen, noch nicht entschieden: "1 Gespräch. 1000 Augenzeugen."
 // (Zahlen-Fassung, für Beiträge/Splitflap), "KI ist kein Augenzeuge."
+
+// STARTSEITE ALS DUMMY (11.11.2026, Übergabe „Website · Gestaltung“).
+// Alte Sektionen (Plädoyer, Multiplikation, Format-Tafel) bis zu Rasuls
+// Bestätigung nur ausgeblendet, nicht gelöscht.
+const ALTE_SEKTIONEN = false;
+// Abschnitt 3: sechs Formate als Beweisstücke A bis F (Texte wörtlich aus der
+// Werkstatt-Vorschau). Videopodcast und Clip zeigen das Testvideo.
+const FORMATE = [
+	{ buchstabe: "A", name: "Videopodcast", form: "169", art: "video", text: "Das ganze Gespräch, so wie es war. Für alle, die euch länger zuhören wollen." },
+	{ buchstabe: "B", name: "Audio-Podcast", form: "11", art: "audio", text: "Dieselbe Folge zum Hören, unterwegs oder beim Laufen." },
+	{ buchstabe: "C", name: "Clip", form: "916", art: "video", text: "Eine Frage, eine Antwort. Kurz genug für den Feed, lang genug, um zu zeigen, wie ihr denkt." },
+	{ buchstabe: "D", name: "Zitat", form: "11", art: "zitat", text: "Ein Satz, der hängen bleibt. Zum Teilen und Zitieren." },
+	{ buchstabe: "E", name: "Newsletter", form: "45", art: "newsletter", text: "Die Folge zum Lesen, direkt im Postfach eurer Kunden." },
+	{ buchstabe: "F", name: "Transkript", form: "45", art: "transkript", text: "Jedes Wort zum Nachlesen, damit euch Suchmaschinen und KI-Assistenten finden." },
+];
+const WELLE = Array.from({ length: 28 }, (_, i) => ({ verz: ((i * 0.13) % 1.3).toFixed(2), hoehe: 30 + ((i * 37) % 60) }));
+const papierZeilen = (n: number, kurz: number) => Array.from({ length: n }, (_, i) => (i === n - 1 ? kurz : 92 - (i % 3) * 9));
+const FRAGEN = [
+	["Wie viel Zeit kostet uns das?", "Unter zwei Stunden im Monat, davon eine im Gespräch. Vorher ein kurzes Telefonat zu Thema und Gast, danach die Freigabe am Rechner. Skript, Technik, Schnitt und Ausspielung übernehmen wir."],
+	["Müssen wir etwas vorbereiten?", "Nein. Ihr redet über das, was ihr ohnehin wisst. Die Fragen stellen wir."],
+	["Wir sind keine Creator. Passt das trotzdem?", "Genau dafür ist es gemacht. Ihr müsst euch nicht anpreisen, ihr werdet gefragt."],
+	["Unser Thema haben doch schon alle besprochen.", "Gesagt haben es viele. Im Gespräch hört man, wie ihr darüber denkt. Das kann niemand kopieren."],
+	["Was, wenn uns ein Satz nicht gefällt?", "Nichts geht raus, was ihr nicht freigegeben habt. Ihr bekommt eine Korrekturliste und entscheidet."],
+	["Wo nehmen wir auf?", "Im Blickkontaktstudio in Karlsruhe, mit unserem mobilen Studio bei euch oder in einem eigenen Studio, das wir bei euch einrichten."],
+	["Was kostet das?", "Ihr bezahlt kein Paket, sondern das, was ihr braucht: je Gespräch, je Beitrag und monatlich für die Formatredaktion, die euren Kanal führt. Die Preise stehen gleich darunter."],
+];
+const PREISE = [
+	["Gespräch", "Die Aufnahme mit allem, was zur Folge gehört.", ""],
+	["Beitrag", "Der fertige Ausschnitt samt Text.", ""],
+	["Formatredaktion", "Redaktion, Ausspielung, Kommentare und Monatsbericht.", " je Monat"],
+];
 ---
 
 <Layout gateMenuBehindHero>
@@ -150,6 +181,132 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	<section class="szene" aria-label="Szene">
 		<video class="szene-video" src="/test/testvideo-16x9.mp4" autoplay muted loop playsinline></video>
 	</section>
+
+	{/* STARTSEITE ALS DUMMY (11.11.2026, Übergabe „Website · Gestaltung“,
+	   website/Uebergabe_Startseite_Dummy_auf_dev_2026-11.md im Worktree
+	   nice-davinci-84b273): Abschnitte 2, 3, 4, 6, 7, 8, 9 nach der
+	   Werkstatt-Vorschau szenen-vorschau.html (ohne Parameter). Testvideo
+	   statt Gast-Clips, gelbe Platzhalter bleiben sichtbar. Ab jetzt ist
+	   localhost:4321 die Grundlage der Gestaltung. */}
+
+	{/* 2 · Die Beweisaufnahme (die Szene darüber gehört dazu) */}
+	<section class="ab ab-zwei-text" aria-labelledby="ab2-titel">
+		<p class="ab-label">Die Beweisaufnahme</p>
+		<h2 class="ab-titel" id="ab2-titel">Das echte Gespräch wird zu Filmmaterial.</h2>
+		<p class="ab-text">Vor einer normalen Kamera schaut ihr entweder euer Gegenüber an oder das Objektiv. Bei uns geht beides zugleich: Ihr seht euch in die Augen, und die Kamera sitzt unsichtbar mitten in diesem Blick. So vergesst ihr die Kamera und führt einfach ein Gespräch.</p>
+	</section>
+
+	{/* 3 · Das Beweismaterial: Fließband mit sechs Formaten, endlos von
+	   rechts nach links, hält nicht an. Darüber die Namenszeile mit Punkt;
+	   Name und Punkt der mittleren Kachel werden weiß (Skript unten). */}
+	<section class="fm" aria-labelledby="ab3-titel">
+		<p class="ab-label">Das Beweismaterial</p>
+		<h2 class="ab-titel" id="ab3-titel">Aus Filmmaterial wird Beweismaterial.</h2>
+		<p class="ab-text">Unsere Formatredaktion macht aus der Aufnahme, was euer Format braucht: Videopodcast und Audio-Podcast, kurze Clips mit einer Frage und der Antwort darauf, Zitate, Newsletter und Transkript. Sendefertig für die Kanäle, auf denen eure Entscheider unterwegs sind: LinkedIn, eure Website, Newsletter und Vertrieb. Mit jeder Folge wächst ein Fundus an Beweisstücken, auf den ihr jederzeit zurückgreifen könnt. Im Feed dagegen geht ein einzelner Beitrag schnell unter. Entscheidend ist der Takt.</p>
+		<div class="fm-index" data-fm-index>
+			{FORMATE.map((f, n) => (
+				<span data-n={n}><i></i><b><em>{f.buchstabe}</em>{f.name}</b></span>
+			))}
+		</div>
+		<div class="fm-band" data-fm-band>
+			<div class="fm-band-spur">
+				{[0, 1].map((runde) => FORMATE.map((f) => (
+					<figure class:list={["fm-k", `fm-${f.form}`]} aria-hidden={runde === 1 ? "true" : undefined}>
+						<div class="fm-flaeche">
+							{f.art === "video" && <video src="/test/testvideo-16x9.mp4" muted loop playsinline autoplay></video>}
+							{f.art === "audio" && (
+								<div class="fm-audio"><div class="fm-cover"></div><div class="fm-welle">{WELLE.map((w) => <i style={`animation-delay:${w.verz}s;height:${w.hoehe}%`}></i>)}</div></div>
+							)}
+							{f.art === "zitat" && (
+								<div class="fm-zitat"><span class="entwurf fm-zitat-ph">Platzhalter: Zitat erst mit Freigabe</span><q>Ein Satz, der hängen bleibt.</q></div>
+							)}
+							{f.art === "newsletter" && (
+								<div class="fm-papier"><div class="fm-bild"></div><div class="fm-zeilen">{papierZeilen(5, 55).map((b) => <i style={`width:${b}%`}></i>)}</div></div>
+							)}
+							{f.art === "transkript" && (
+								<div class="fm-papier"><div class="fm-zeilen">
+									<em></em>{papierZeilen(3, 70).map((b) => <i style={`width:${b}%`}></i>)}
+									<em></em>{papierZeilen(4, 40).map((b) => <i style={`width:${b}%`}></i>)}
+									<em></em>{papierZeilen(2, 60).map((b) => <i style={`width:${b}%`}></i>)}
+								</div></div>
+							)}
+						</div>
+						<figcaption><span class="fm-bs">Beweisstück {f.buchstabe}</span><b>{f.name}</b>{f.text}</figcaption>
+					</figure>
+				)))}
+			</div>
+		</div>
+		<p class="fm-kanaele">LinkedIn · Website · Newsletter · Vertrieb</p>
+		<p class="ab-mitte"><span class="entwurf">Dummy: Testvideo statt Kundenclips, keine Kundenfreigabe. Später ein echtes Kundenbeispiel mit Freigabe.</span></p>
+	</section>
+
+	{/* 4 · Die Augenzeugen: Grafik noch nicht entschieden → Platzhalter-Kachel */}
+	<section class="ab" aria-labelledby="ab4-titel">
+		<p class="ab-label">Die Augenzeugen</p>
+		<h2 class="ab-titel" id="ab4-titel">Beweisstücke schaffen Augenzeugen.</h2>
+		<p class="ab-text">Aus einem Gespräch im Monat wird ein Takt: Woche für Woche neue Ausschnitte, jeden Monat eine neue Folge. Jeden Tag kommen neue Augenzeugen dazu. Und je mehr Augenzeugen ihr habt, desto glaubwürdiger wird eure Expertise.</p>
+		<div class="ab-inhalt"><div class="ab-kachel az-platzhalter"><span class="entwurf">Platzhalter: Augenzeugen-Grafik folgt</span></div></div>
+		<div class="ab-inhalt">
+			<div class="ab-zahl">41,8</div>
+			<p class="ab-zahlzeile">Stunden Zuschauerzeit für ein einziges Format, in fünf Monaten.</p>
+			<p class="ab-quelle">Industry Impact (Impact Strategies), LinkedIn, Clips vom 02.04. bis 01.09.2026.<br /><span class="entwurf">Platzhalter: nur mit Einverständnis von Impact Strategies</span></p>
+		</div>
+		<div class="ab-inhalt ab-uhren"><MultiOutputKacheln nurUhr /></div>
+		<p class="ab-hinweis">Bleibt ihr im Takt, wird eure Stimme in der Branche mit der Zeit gehört.</p>
+	</section>
+
+	{/* 6 · Die Befragung: Akkordeon nach BBH /offices/bbh-studios, hell */}
+	<section class="ab ab-hell" aria-labelledby="ab6-titel">
+		<p class="ab-label">Die Befragung</p>
+		<h2 class="ab-titel" id="ab6-titel">Was ihr uns oft fragt.</h2>
+		<div class="akk" data-akk>
+			{FRAGEN.map(([frage, antwort]) => (
+				<div class="akk-item">
+					<button type="button" class="akk-kopf" aria-expanded="false"><span class="akk-frage">{frage}</span><span class="akk-zeichen" aria-hidden="true">+</span></button>
+					<div class="akk-inhalt"><div><p>{antwort}</p></div></div>
+				</div>
+			))}
+		</div>
+	</section>
+
+	{/* 7 · Die Kosten */}
+	<section class="ab" aria-labelledby="ab7-titel">
+		<p class="ab-label">Die Kosten</p>
+		<h2 class="ab-titel" id="ab7-titel">Ihr bezahlt, was ihr braucht.</h2>
+		<p class="ab-text">Je Gespräch die Aufnahme mit allem, was zur Folge gehört. Je Beitrag der fertige Ausschnitt samt Text. Und monatlich die Formatredaktion, die euren Kanal führt: Redaktion, Ausspielung, Kommentare und Monatsbericht. Was das für euer Format heißt, rechnen wir am besten gemeinsam durch.</p>
+		<div class="ab-inhalt ab-drei">
+			{PREISE.map(([name, satz, je]) => (
+				<div class="ab-preis"><b>{name}</b><span class="ab-betrag">[Preis offen]{je}</span><p>{satz}</p></div>
+			))}
+		</div>
+		<p class="ab-mitte"><span class="entwurf">Platzhalter: Preise offen</span></p>
+	</section>
+
+	{/* 8 · Zur Person */}
+	<section class="ab" aria-labelledby="ab8-titel">
+		<p class="ab-label">Zur Person</p>
+		<h2 class="ab-titel" id="ab8-titel">Ich stelle die Fragen.</h2>
+		<p class="ab-text">Ich bin Fred Eric Eckert. Mit Parley Film bringe ich Experten ins Gespräch, im Blickkontaktstudio in Karlsruhe, mit dem mobilen Studio bei euch oder in einem Studio, das wir bei euch einrichten. Am liebsten lerne ich euch persönlich kennen.</p>
+		<p class="ab-mitte"><span class="entwurf">Platzhalter: Ich-Text aus der Gesamtgeschichte einarbeiten</span></p>
+		<div class="ab-inhalt ab-zwei">
+			<div class="ab-kachel ab-foto"><span>[Foto Fred]</span><span class="entwurf">Platzhalter: Foto</span></div>
+			<div class="ab-kachel ab-foto"><span>[Foto Studio Lotzbeckstraße]</span><span class="entwurf">Platzhalter: Foto</span></div>
+		</div>
+	</section>
+
+	{/* 9 · Der Termin */}
+	<section class="ab ab-letzter" aria-labelledby="ab9-titel">
+		<p class="ab-label">Der Termin</p>
+		<h2 class="ab-titel" id="ab9-titel">Euer Gespräch fängt hier an.</h2>
+		<p class="ab-text">Kommt zum Studiotermin, schaut euch das Blickkontaktstudio an und erzählt uns, worüber ihr sprechen wollt. In 30 Minuten wisst ihr, welches Format zu euch passt. Online geht es auch.</p>
+		<p class="ab-mitte ab-knopfzeile"><a class="ab-knopf" href="/termin">Let’s Parley</a></p>
+	</section>
+
+	{/* BIS ZUR BESTÄTIGUNG AUSGEBLENDET (Dummy 11.11.2026, offene Aufgaben 4
+	   und 12 der Gestaltung): Plädoyer, „Die Multiplikation eines Gesprächs“
+	   und die Format-Tafel stehen nicht mehr auf der Startseite, bleiben aber
+	   im Code. Zurückholen: ALTE_SEKTIONEN = true. */}
+	{ALTE_SEKTIONEN && (<Fragment>
 
 	{/* "Der Paragraph" (Fred 2026-06-14): Fließtext über die ganze Breite,
 	   Paragraph-Größe (gleiche BBH-Lead-Typo wie bisher) — ersetzt die
@@ -572,6 +729,7 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		   (einfach sichtbar) oder mit einer an die Viewport-Höhe gebundenen
 		   Zone statt der festen 160/140 px. */}
 	</section>
+	</Fragment>)}
 
 	{/* Produkte-Zeile + In-Flow-CTA weiter draußen (Fred 30.08. nachts,
 	   "erstmal komplett raus"); Wortlaut der Produkte-Zeile lebt in der
@@ -1195,6 +1353,518 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 		color: inherit;
 	}
 
+
+	/* ── STARTSEITE ALS DUMMY (11.11.2026, Übergabe „Website · Gestaltung“) ──
+	   Werte aus der Werkstatt-Vorschau szenen-vorschau.html (Endstand der
+	   Überschreibungen, Schriftsystem Punkte 14a und 15). Nur Tokens
+	   --text-sm … --text-mega. Fett (900) nur im Großen, Mono für Labels und
+	   Knöpfe, Hervorhebung über Weiß und Grau.
+	   Raster nach BBH: Container höchstens 1728 px, Innenabstand 32 px
+	   (unter 800 px 16 px), Abschnittsabstand --abstand-xl. */
+	.ab,
+	.fm {
+		max-width: 1728px;
+		margin: 0 auto;
+		padding: var(--abstand-xl) 32px 0;
+		box-sizing: border-box;
+		color: var(--white);
+		overflow-x: clip;
+	}
+	/* Abschnitt 2 hängt an der Szene: --abstand-md darunter statt --abstand-xl */
+	.ab-zwei-text {
+		max-width: none;
+		padding: var(--abstand-md) 16px 0;
+	}
+	.ab-letzter {
+		padding-bottom: var(--abstand-xl);
+	}
+
+	/* Label: Mono, Versalien, Stufe base, 400, +0,025 em, Zeilenhöhe 1,22, Grau */
+	.ab-label {
+		margin: 0 0 16px;
+		text-align: center;
+		font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
+		text-transform: uppercase;
+		font-size: var(--text-base);
+		font-weight: 400;
+		letter-spacing: 0.025em;
+		line-height: 1.22;
+		color: var(--gray);
+	}
+
+	/* Abschnittstitel: --text-2xl, Forma 900, 0 em, Zeilenhöhe 1,0 */
+	.ab-titel {
+		margin: 0;
+		text-align: center;
+		font-size: var(--text-2xl);
+		font-weight: 900;
+		letter-spacing: 0;
+		line-height: 1;
+		font-optical-sizing: auto;
+		text-wrap: balance;
+	}
+
+	/* Lesetext: Tokens aus Layout.astro, Breite = Textspalte (wie .hero-text) */
+	.ab-text {
+		max-width: 100%;
+		margin: var(--abstand-md) auto 0;
+		font-size: var(--text-md);
+		font-weight: var(--lesetext-gewicht);
+		letter-spacing: var(--lesetext-laufweite);
+		line-height: var(--lesetext-zeilenhoehe);
+		font-optical-sizing: auto;
+		text-align: left;
+		text-wrap: pretty;
+	}
+	@media (min-width: 800px) {
+		.ab-text { max-width: calc((min(100vw, 1728px) - 32px) / 2); }
+	}
+	@media (min-width: 1024px) {
+		.ab-text { max-width: calc((min(100vw, 1728px) - 64px) / 2); }
+	}
+
+	.ab-inhalt {
+		margin-top: var(--abstand-lg);
+	}
+	.ab-mitte {
+		margin: 16px 0 0;
+		text-align: center;
+	}
+	.ab-kachel {
+		background: var(--panel);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* Platzhalter-Markierung (gelb), wie in der Vorschau */
+	.entwurf {
+		display: inline-block;
+		font: 600 12px/1.3 system-ui, sans-serif;
+		letter-spacing: 0;
+		text-transform: none;
+		color: #f2a541;
+		border: 1px solid #f2a541;
+		border-radius: 6px;
+		padding: 3px 8px;
+	}
+
+	/* ── 3 · Fließband ── */
+	.fm {
+		/* Kachelbreite: ein Drittel des Inhalts, 16 px Abstand */
+		--fm-kb: calc((min(100vw, 1728px) - 64px - 32px) / 3);
+	}
+	.fm-index {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 8px 28px;
+		margin: var(--abstand-lg) 0 0;
+	}
+	/* Namenszeile: Stufe sm, 430, +0,015 em, Zeilenhöhe 1,21; Kennbuchstabe weiß */
+	.fm-index span {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		font-size: var(--text-sm);
+		font-weight: 430;
+		letter-spacing: 0.015em;
+		line-height: 1.21;
+		color: var(--gray);
+		transition: color 0.4s;
+	}
+	.fm-index b { font-weight: inherit; }
+	.fm-index em { font-style: normal; font-weight: 430; color: var(--white); margin-right: 0.3em; }
+	.fm-index i {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: #404040;
+		transition: background 0.4s, box-shadow 0.4s;
+	}
+	.fm-index span.aktiv { color: var(--white); }
+	.fm-index span.aktiv i { background: var(--white); box-shadow: 0 0 8px rgba(255, 255, 255, 0.7); }
+
+	.fm-band {
+		margin: var(--abstand-md) -32px 0;
+		overflow: hidden;
+	}
+	.fm-band-spur {
+		display: flex;
+		gap: 16px;
+		width: max-content;
+		padding-left: 32px;
+		animation: fm-band 48s linear infinite;
+	}
+	@keyframes fm-band {
+		to { transform: translateX(calc(-50% - 8px)); }
+	}
+	.fm-k {
+		margin: 0;
+		flex: none;
+		width: var(--fm-kb);
+	}
+	.fm-flaeche {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		background: var(--panel);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		container-type: size;
+	}
+	.fm-flaeche > * {
+		display: block;
+		flex: none;
+		object-fit: cover;
+	}
+	.fm-169 .fm-flaeche > * { aspect-ratio: 16 / 9; height: auto; width: min(86cqw, 80cqh * 16 / 9); }
+	.fm-916 .fm-flaeche > * { aspect-ratio: 9 / 16; height: 86cqh; width: auto; }
+	.fm-11 .fm-flaeche > * { aspect-ratio: 1; height: 80cqh; width: auto; }
+	.fm-45 .fm-flaeche > * { aspect-ratio: 4 / 5; height: 86cqh; width: auto; }
+
+	/* Bildunterschrift: Stufe base, 400, +0,025 em, 1,22, Grau; Name weiß */
+	.fm-k figcaption {
+		max-width: 34em;
+		margin-top: 16px;
+		font-size: var(--text-base);
+		font-weight: 400;
+		letter-spacing: 0.025em;
+		line-height: 1.22;
+		color: var(--gray);
+	}
+	.fm-k figcaption b {
+		display: block;
+		color: var(--white);
+		font-weight: 400;
+		line-height: 1.2;
+	}
+	/* „Beweisstück A“ … in der kleinsten Stufe, grau */
+	.fm-bs {
+		display: block;
+		margin-bottom: 4px;
+		font-size: var(--text-sm);
+		font-weight: 430;
+		letter-spacing: 0.015em;
+		line-height: 1.21;
+	}
+
+	/* Audio-Podcast: Cover (neutral grau statt Gast-Standbild) mit Wellenform */
+	.fm-audio {
+		display: flex;
+		flex-direction: column;
+		background: #000;
+	}
+	.fm-cover {
+		flex: 1;
+		background: #3a3a3a;
+	}
+	.fm-welle {
+		height: 22%;
+		display: flex;
+		align-items: center;
+		gap: 3%;
+		padding: 0 6%;
+	}
+	.fm-welle i {
+		flex: 1;
+		background: var(--white);
+		animation: fm-welle 1.3s ease-in-out infinite alternate;
+		transform-origin: center;
+	}
+	@keyframes fm-welle {
+		from { transform: scaleY(0.3); }
+		to { transform: scaleY(1); }
+	}
+
+	/* Zitat: Hintergrund neutral grau statt Gast-Standbild, Satz im Stil der
+	   Abschnittstitel (900, 0 em, 1,0), Größe an die Kachel gebunden */
+	.fm-zitat {
+		position: relative;
+		display: flex;
+		align-items: flex-end;
+		background: #3a3a3a;
+		container-type: inline-size;
+	}
+	.fm-zitat::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.1) 70%);
+	}
+	.fm-zitat q {
+		position: relative;
+		padding: 8%;
+		font-size: 7.5cqw;
+		font-weight: 900;
+		letter-spacing: 0;
+		line-height: 1;
+		color: var(--white);
+		quotes: "„" "“";
+	}
+	.fm-zitat-ph {
+		position: absolute;
+		top: 6%;
+		left: 6%;
+		z-index: 1;
+	}
+
+	/* Newsletter und Transkript auf Papier */
+	.fm-papier {
+		background: #ededed;
+		padding: 8%;
+		box-sizing: border-box;
+		container-type: inline-size;
+	}
+	.fm-bild {
+		height: 45%;
+		background: #9a9a9a;
+		margin-bottom: 8%;
+	}
+	.fm-zeilen i,
+	.fm-zeilen em {
+		display: block;
+		height: 2.8cqw;
+		margin: 0 0 3.6cqw;
+		background: #9a9a9a;
+		border-radius: 2px;
+	}
+	.fm-zeilen em {
+		width: 22%;
+		margin-top: 5cqw;
+		background: #404040;
+	}
+
+	/* Kanalzeile: Lesetext-Stil, mittig */
+	.fm-kanaele {
+		margin: var(--abstand-md) 0 0;
+		text-align: center;
+		font-size: var(--text-md);
+		font-weight: var(--lesetext-gewicht);
+		letter-spacing: var(--lesetext-laufweite);
+		line-height: var(--lesetext-zeilenhoehe);
+	}
+
+	@media (max-width: 799px) {
+		.ab,
+		.fm { padding-left: 16px; padding-right: 16px; }
+		.fm { --fm-kb: calc(100vw - 64px); }
+		.fm-band { margin-inline: -16px; }
+		.fm-band-spur { padding-left: 16px; }
+		/* Handy: nur die Punkte */
+		.fm-index { gap: 10px; }
+		.fm-index span { font-size: 0; gap: 0; }
+	}
+
+	/* ── 4 · Die Augenzeugen ── */
+	/* Platzhalter in der Höhe der Grafik (Vorschau: 16 : 9, unter 800 px 4 : 5) */
+	.az-platzhalter {
+		aspect-ratio: 16 / 9;
+	}
+	@media (max-width: 799px) {
+		.az-platzhalter { aspect-ratio: 4 / 5; }
+	}
+	/* Zahl: Stufe mega, 900, 0 em, Zeilenhöhe 0,82 */
+	.ab-zahl {
+		text-align: center;
+		font-size: var(--text-mega);
+		font-weight: 900;
+		letter-spacing: 0;
+		line-height: 0.82;
+	}
+	/* Zeile zur Zahl: Stufe lg, 510, +0,02 em, 1,1 */
+	.ab-zahlzeile {
+		margin: 16px auto 0;
+		text-align: center;
+		font-size: var(--text-lg);
+		font-weight: 510;
+		letter-spacing: 0.02em;
+		line-height: 1.1;
+	}
+	/* Quelle: Stufe sm, 430, +0,015 em, 1,21, Grau */
+	.ab-quelle {
+		margin: 16px 0 0;
+		text-align: center;
+		font-size: var(--text-sm);
+		font-weight: 430;
+		letter-spacing: 0.015em;
+		line-height: 1.21;
+		color: var(--gray);
+	}
+	.ab-uhren {
+		display: flex;
+		justify-content: center;
+	}
+	.ab-uhren > :global(*) {
+		width: 100%;
+	}
+	/* Hinweis: Stufe base, 400, +0,025 em, 1,22, Grau */
+	.ab-hinweis {
+		margin: var(--abstand-md) 0 0;
+		text-align: center;
+		font-size: var(--text-base);
+		font-weight: 400;
+		letter-spacing: 0.025em;
+		line-height: 1.22;
+		color: var(--gray);
+	}
+
+	/* ── 6 · Die Befragung, hell wie BBH Studios ── */
+	.ab-hell {
+		max-width: none;
+		margin-top: var(--abstand-xl);
+		padding-bottom: var(--abstand-xl);
+		background: #fff;
+		color: #000;
+	}
+	/* Akkordeon: ab 768 px 8 von 12 Rasterspalten (Abstand 16 px), mittig */
+	.akk {
+		max-width: 100%;
+		margin: var(--abstand-md) auto 0;
+		text-align: left;
+	}
+	@media (min-width: 768px) {
+		.akk { max-width: calc((min(100vw, 1728px) - 32px - 176px) / 12 * 8 + 112px); }
+	}
+	@media (min-width: 1024px) {
+		.akk { max-width: calc((min(100vw, 1728px) - 64px - 176px) / 12 * 8 + 112px); }
+	}
+	/* Wie in der Vorschau: je Frage zusätzlich 24 px oben und unten und eine
+	   Linie --line darüber (in der Vorschau aus der älteren Fragenliste
+	   .ab-fragen > div übernommen) */
+	.akk-item {
+		padding: 24px 0;
+		border-top: 1px solid var(--line);
+	}
+	.akk-item:last-child {
+		border-bottom: 1px solid var(--line);
+	}
+	.akk-kopf {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 24px;
+		width: 100%;
+		padding: 24px 0;
+		margin: 0;
+		border: 0;
+		border-bottom: 1px solid var(--gray);
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+	/* Frage: Abschnittstitel-Stil (900, 0 em, 1,0) in xl */
+	.akk-frage {
+		font-size: var(--text-xl);
+		font-weight: 900;
+		letter-spacing: 0;
+		line-height: 1;
+	}
+	.akk-zeichen {
+		flex: none;
+		font-size: var(--text-lg);
+		font-weight: 400;
+		line-height: 1.08;
+	}
+	.akk-inhalt {
+		display: grid;
+		grid-template-rows: 0fr;
+		transition: grid-template-rows 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.akk-item.offen .akk-inhalt { grid-template-rows: 1fr; }
+	.akk-inhalt > div { overflow: hidden; }
+	/* Antwort: Hinweise-Stil (base 400, +0,025 em, 1,22) */
+	.akk-inhalt p {
+		margin: 0;
+		padding: 32px 0;
+		font-size: var(--text-base);
+		font-weight: 400;
+		letter-spacing: 0.025em;
+		line-height: 1.22;
+	}
+
+	/* ── 7 · Die Kosten ── */
+	.ab-drei,
+	.ab-zwei {
+		display: grid;
+		gap: 32px 16px;
+	}
+	.ab-drei { grid-template-columns: repeat(3, 1fr); }
+	.ab-zwei { grid-template-columns: repeat(2, 1fr); }
+	.ab-preis {
+		aspect-ratio: 4 / 3;
+		padding: 32px;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		background: var(--panel);
+	}
+	/* Kachel-Titel: Stil Hero-Lesetext der Vorschau (lg, 510, +0,02 em, 1,1) */
+	.ab-preis b {
+		font-size: var(--text-lg);
+		font-weight: 510;
+		letter-spacing: 0.02em;
+		line-height: 1.1;
+	}
+	/* Betrag: Lesetext-Stil, gelb (Platzhalter) */
+	.ab-betrag {
+		font-size: var(--text-md);
+		font-weight: var(--lesetext-gewicht);
+		letter-spacing: var(--lesetext-laufweite);
+		line-height: var(--lesetext-zeilenhoehe);
+		color: #f2a541;
+	}
+	.ab-preis p {
+		margin: 0;
+		font-size: var(--text-base);
+		font-weight: 400;
+		letter-spacing: 0.025em;
+		line-height: 1.22;
+		color: var(--gray);
+	}
+
+	/* ── 8 · Zur Person ── */
+	.ab-foto {
+		aspect-ratio: 4 / 3;
+		flex-direction: column;
+		gap: 12px;
+		font-size: var(--text-base);
+		color: var(--gray);
+	}
+
+	/* ── 9 · Der Termin: Knopf im Label-Stil (Mono, Versalien, 400, +0,025 em) in md ── */
+	.ab-knopfzeile {
+		margin-top: var(--abstand-md);
+	}
+	.ab-knopf {
+		display: inline-block;
+		padding: 0.7em 1.4em;
+		background: var(--white);
+		color: #000;
+		font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
+		font-size: var(--text-md);
+		font-weight: 400;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+		line-height: 1.22;
+		text-decoration: none;
+	}
+
+	@media (max-width: 799px) {
+		.ab-drei,
+		.ab-zwei { grid-template-columns: 1fr; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fm-band-spur,
+		.fm-welle i { animation: none; }
+	}
+
 </style>
 
 <style is:global>
@@ -1278,4 +1948,47 @@ const soloLine = "Ein Gespräch mit tausend Augenzeugen.";
 	}
 
 	document.addEventListener("astro:page-load", mountTuer);
+</script>
+
+<script>
+	// STARTSEITEN-DUMMY (11.11.2026): Namenszeile über dem Fließband markiert
+	// die Kachel in der Bandmitte; Akkordeon der Befragung auf und zu.
+	let dummyCleanup: (() => void) | null = null;
+	function mountDummy() {
+		if (dummyCleanup) dummyCleanup();
+		dummyCleanup = null;
+		let laeuft = true;
+		const band = document.querySelector<HTMLElement>("[data-fm-band]");
+		const idx = Array.from(document.querySelectorAll<HTMLElement>("[data-fm-index] span"));
+		if (band && idx.length) {
+			const ks = Array.from(band.querySelectorAll<HTMLElement>(".fm-k"));
+			let alt = -1;
+			const lauf = () => {
+				if (!laeuft) return;
+				const r = band.getBoundingClientRect();
+				if (r.bottom > 0 && r.top < innerHeight) {
+					const mitte = r.left + r.width / 2;
+					let best = 0, d = Infinity;
+					ks.forEach((k, i) => { const b = k.getBoundingClientRect(); const m = Math.abs(b.left + b.width / 2 - mitte); if (m < d) { d = m; best = i; } });
+					const n = best % idx.length;
+					if (n !== alt) { idx.forEach((e, j) => e.classList.toggle("aktiv", j === n)); alt = n; }
+				}
+				requestAnimationFrame(lauf);
+			};
+			requestAnimationFrame(lauf);
+		}
+		const kopfe = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-akk] .akk-kopf"));
+		const klick = (e: Event) => {
+			const kopf = e.currentTarget as HTMLButtonElement;
+			const item = kopf.parentElement!;
+			const offen = !item.classList.contains("offen");
+			item.classList.toggle("offen", offen);
+			kopf.setAttribute("aria-expanded", String(offen));
+			const z = kopf.querySelector(".akk-zeichen");
+			if (z) z.textContent = offen ? "–" : "+";
+		};
+		kopfe.forEach((k) => k.addEventListener("click", klick));
+		dummyCleanup = () => { laeuft = false; kopfe.forEach((k) => k.removeEventListener("click", klick)); };
+	}
+	document.addEventListener("astro:page-load", mountDummy);
 </script>
