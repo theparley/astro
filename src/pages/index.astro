@@ -943,7 +943,7 @@ const PREISE = [
 	.hero-logo {
 		display: block;
 		align-self: flex-start;
-		margin: 0 32px;
+		margin: 0 32px var(--abstand-md);
 		color: var(--white);
 		line-height: 0;
 	}
@@ -951,7 +951,7 @@ const PREISE = [
 	.hero-logo :global(.hero-logo-gross) { width: calc(2.8964 * 96px); }
 	.hero-logo :global(.hero-logo-klein) { display: none; width: calc(2.8964 * 40px); }
 	@media (max-width: 799px) {
-		.hero-logo { margin: 0 16px; }
+		.hero-logo { margin: 0 16px var(--abstand-md); }
 		.hero-logo :global(.hero-logo-gross) { display: none; }
 		.hero-logo :global(.hero-logo-klein) { display: block; }
 	}
