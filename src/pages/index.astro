@@ -971,10 +971,12 @@ const PREISE = [
 
 	.hero h1 {
 		margin: 0;
-		font-size: 10vw; /* auch auf dem Handy 10vw: jede Zeile bleibt einzeilig von 320 bis 2560 px (gemessen 10.11.) */
+		/* Seit 13.11.2026 in der normalen Überschriftsgröße wie .ab-titel (Rasul: „mach die Überschrift
+		   auf normale Überschriftsgröße“); vorher 10vw, Zeilenhöhe 0,95, Laufweite +0,02 em. */
+		font-size: var(--text-2xl);
 		font-weight: 900;
-		line-height: 0.95;
-		letter-spacing: 0.02em; /* nach Augenmaß an BBH angeglichen, Forma 900 läuft dichter */
+		line-height: 1;
+		letter-spacing: 0;
 		font-optical-sizing: auto;
 	}
 
