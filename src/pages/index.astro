@@ -947,13 +947,13 @@ const PREISE = [
 		color: var(--white);
 		line-height: 0;
 	}
-	.hero-logo svg { display: block; height: auto; }
-	.hero-logo-gross { width: calc(2.8964 * 96px); }
-	.hero-logo-klein { display: none; width: calc(2.8964 * 40px); }
+	.hero-logo :global(svg) { display: block; height: auto; }
+	.hero-logo :global(.hero-logo-gross) { width: calc(2.8964 * 96px); }
+	.hero-logo :global(.hero-logo-klein) { display: none; width: calc(2.8964 * 40px); }
 	@media (max-width: 799px) {
 		.hero-logo { margin: 0 16px; }
-		.hero-logo-gross { display: none; }
-		.hero-logo-klein { display: block; }
+		.hero-logo :global(.hero-logo-gross) { display: none; }
+		.hero-logo :global(.hero-logo-klein) { display: block; }
 	}
 
 	.hero-headline {
