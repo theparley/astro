@@ -175,12 +175,6 @@ const PREISE = [
 		<BrandLogo />
 	</header>
 
-	{/* SZENE (07.11.2026, Übergabe „Website · Gestaltung“): Video 16:9 unter
-	   dem Hero, später mit Sprechblasen ringsum (nicht in diesem Schritt).
-	   PROBE LOKAL mit neutralem Testvideo, nicht live vor Rasuls Abnahme. */}
-	<section class="szene" aria-label="Szene">
-		<video class="szene-video" src="/test/testvideo-16x9.mp4" autoplay muted loop playsinline></video>
-	</section>
 
 	{/* STARTSEITE ALS DUMMY (11.11.2026, Übergabe „Website · Gestaltung“,
 	   website/Uebergabe_Startseite_Dummy_auf_dev_2026-11.md im Worktree
@@ -189,12 +183,20 @@ const PREISE = [
 	   statt Gast-Clips, gelbe Platzhalter bleiben sichtbar. Ab jetzt ist
 	   localhost:4321 die Grundlage der Gestaltung. */}
 
-	{/* 2 · Die Beweisaufnahme (die Szene darüber gehört dazu) */}
+	{/* 2 · Die Beweisaufnahme (die Szene darunter gehört dazu, seit 12.11.2026) */}
 	<section class="ab ab-zwei-text" aria-labelledby="ab2-titel">
 		<p class="ab-label">Die Beweisaufnahme</p>
 		{/* Fassung P2 (Aufbau Rasul 12.11.2026, Probe auf localhost); vorher I, davor „Das echte Gespräch wird zu Filmmaterial.“ */}
 		<h2 class="ab-titel" id="ab2-titel">Echte Gespräche.<br />Filmreif ohne Kamerastress.</h2>
 		<p class="ab-text">Eine Aufnahme, der man sich schwer entziehen kann, überzeugt nicht nur mit ihren Inhalten, sondern vor allem mit der Natürlichkeit eines echten Gesprächs wie am Küchentisch. Genau das macht eure Kompetenz spürbar: Man erlebt eure Expertise und den Menschen dahinter. Deshalb bringen wir euch zuerst in den Gesprächsmodus und fangen das Gespräch dann mit unserer Blickkontakttechnik&nbsp;ein.</p>
+	</section>
+
+	{/* SZENE (07.11.2026, Übergabe „Website · Gestaltung“): Video 16:9, seit
+	   12.11.2026 UNTER dem Text von Block 2 (Rasul: „Ja, verschieben“; der Text
+	   bereitet das Anschauen vor), vorher unter dem Hero; später mit Sprechblasen ringsum (nicht in diesem Schritt).
+	   PROBE LOKAL mit neutralem Testvideo, nicht live vor Rasuls Abnahme. */}
+	<section class="szene" aria-label="Szene">
+		<video class="szene-video" src="/test/testvideo-16x9.mp4" autoplay muted loop playsinline></video>
 	</section>
 
 	{/* 3 · Das Beweismaterial: Fließband mit sechs Formaten, endlos von
@@ -880,10 +882,12 @@ const PREISE = [
 	   kein Umschalten, nur Knicke, wo eine Grenze einsetzt.
 	   Verlauf: ≤432 randvoll · 432–850 400 px · 850–1728 wachsend · ab 1728 594 px. */
 	.szene {
+		padding-top: var(--abstand-md);
 		--szene-video-b: min(calc(100vw - 32px), clamp(400px, 212.4px + 22.06vw, 593.5px));
 		display: flex;
 		justify-content: center;
-		padding: 0 16px;
+		padding-left: 16px;
+		padding-right: 16px;
 	}
 
 	.szene-video {
@@ -1371,11 +1375,9 @@ const PREISE = [
 		color: var(--white);
 		overflow-x: clip;
 	}
-	/* Abschnitt 2 hängt an der Szene: --abstand-md darunter statt --abstand-xl */
-	.ab-zwei-text {
-		max-width: none;
-		padding: var(--abstand-md) 16px 0;
-	}
+	/* Abschnitt 2 steht seit 12.11.2026 direkt unter dem Hero (normaler
+	   Abschnittsabstand); die Szene hängt mit --abstand-md darunter. */
+	.ab-zwei-text {}
 	.ab-letzter {
 		padding-bottom: var(--abstand-xl);
 	}
