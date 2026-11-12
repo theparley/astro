@@ -970,13 +970,17 @@ const PREISE = [
 	   sich die Breite auf der Seite wiederholt: ab 800 px halbe Container-
 	   breite (Container höchstens 1728 px, Innenabstand 16 px, ab 1024 px
 	   32 px), darunter die volle Spalte. Block mittig, Text linksbündig. */
+	/* Seit 12.11.2026 dieselbe Lesetext-Schrift wie .ab-text weiter unten
+	   (Rasul: „beides mal das gleiche und beides mal die Paragraphenschrift,
+	   die wir weiter unten verwenden“); vorher --text-lg, 400, Zeilenhöhe 1,08. */
 	.hero-text {
 		max-width: 100%;
 		margin: var(--abstand-md) auto 0;
-		font-size: var(--text-lg);
-		font-weight: 400;
-		line-height: 1.08;
-		letter-spacing: -0.01em;
+		font-size: var(--text-md);
+		font-weight: var(--lesetext-gewicht);
+		line-height: var(--lesetext-zeilenhoehe);
+		letter-spacing: var(--lesetext-laufweite);
+		font-optical-sizing: auto;
 		color: var(--white);
 		text-align: left;
 		text-wrap: pretty;
