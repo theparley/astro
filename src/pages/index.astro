@@ -119,7 +119,7 @@ const PREISE = [
 <Layout gateMenuBehindHero>
 	<header class="hero">
 		{/* LOGO PROBE (Rasul 13.11.2026: „Lass uns noch das Logo einbinden.“): Rechteck mit Biss,
-		   „parley Film“ in der unsichtbaren Blase, oben links; Rechteckhöhe 96 px (Stufe 1 ab 96 px,
+		   „parley Film“ in der unsichtbaren Blase, seit 13.11. mittig oben (vorher oben links); Rechteckhöhe 96 px (Stufe 1 ab 96 px,
 		   Logo-Erkenntnisse), unter 800 px nur die Fläche mit Schutzraum (Stufe 3, 40 px).
 		   Komponente erzeugt von branding/aktiv/generatoren/biss_logo_website.py. */}
 		<a class="hero-logo" href="/" aria-label="parley Film, Startseite">
@@ -942,8 +942,8 @@ const PREISE = [
 	/* Logo oben links (Probe 13.11.2026). Breite = 2,8964 × Rechteckhöhe (viewBox samt Schutzraum). */
 	.hero-logo {
 		display: block;
-		align-self: flex-start;
-		margin: 0 32px var(--abstand-md);
+		align-self: center; /* mittig oben (Rasul 13.11.2026) */
+		margin: 0 auto var(--abstand-md);
 		color: var(--white);
 		line-height: 0;
 	}
@@ -951,7 +951,7 @@ const PREISE = [
 	.hero-logo :global(.hero-logo-gross) { width: calc(2.8964 * 96px); }
 	.hero-logo :global(.hero-logo-klein) { display: none; width: calc(2.8964 * 40px); }
 	@media (max-width: 799px) {
-		.hero-logo { margin: 0 16px var(--abstand-md); }
+		.hero-logo { margin: 0 auto var(--abstand-md); }
 		.hero-logo :global(.hero-logo-gross) { display: none; }
 		.hero-logo :global(.hero-logo-klein) { display: block; }
 	}
