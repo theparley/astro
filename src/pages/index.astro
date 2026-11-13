@@ -1486,6 +1486,8 @@ const PREISE = [
 	   zwei Hälften exakt 50/50 (minmax(0, 1fr), Fuge 0), beide auf einer Mittelachse (align-items:
 	   center). Links die Überschrift in Sektionstitel-Größe huge, Zeilenhöhe 0,9, mittig in ihrer
 	   Hälfte; rechts der Lesetext, linksbündig. Unter 800 px untereinander wie bisher. */
+	/* Überschrift im Split immer linksbündig, auch auf dem Handy (Rasul 13.11.2026) */
+	.ab-split > .ab-titel { text-align: left; }
 	@media (min-width: 800px) {
 		.ab-split {
 			display: grid;
