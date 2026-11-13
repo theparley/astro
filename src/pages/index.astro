@@ -85,7 +85,7 @@ const FORMATE = [
 			   VERGLEICH (Rasul 13.11.2026: „Oder könnte unser Satz doch funktionieren, überall Experten? Zeit für
 			   den Videobeweis.“): drei Statements, umschaltbar mit „Satz · A · B · C“ oder ?satz=a|b|c (nur lokal
 			   gedacht, bis Rasul entscheidet). A: neu 13.11.; B: Hero vom 10.11.; C: Kandidat „zu Bekannten“. */}
-			<div class="satz satz--a"><Haltung ebene="h1" aufdecken zeilen={["Wir bringen Experten in echte Gespräche."]} /></div>
+			<div class="satz satz--a"><Haltung ebene="p" aufdecken zeilen={["Wir bringen Experten in echte Gespräche."]} /></div>
 			<div class="satz satz--b"><Haltung ebene="p" aufdecken zeilen={["Überall Experten.", "Zeit für den Videobeweis."]} /></div>
 			<div class="satz satz--c"><Haltung ebene="p" aufdecken zeilen={["Wir machen Experten zu Bekannten."]} /></div>
 			{/* D: Rasul 13.11.2026: „Wir bringen Experten auf den Schirm von Entscheidern.“ */}
@@ -94,6 +94,9 @@ const FORMATE = [
 			<div class="satz satz--e"><Haltung ebene="p" aufdecken zeilen={["Wir liefern den Videobeweis.", "Für Experten mit echten Gesprächen."]} /></div>
 			{/* F: Rasul 13.11.2026: „Wir geben eurer Expertise einen Videobeweis.“ */}
 			<div class="satz satz--f"><Haltung ebene="p" aufdecken zeilen={["Wir geben eurer Expertise einen Videobeweis."]} /></div>
+			{/* G: Rasul 13.11.2026: „Wir machen echte Gespräche zum Videobeweis.“ Favorit: „Den finde ich
+			   eigentlich ziemlich gut.“ Deshalb Grundeinstellung und h1. */}
+			<div class="satz satz--g"><Haltung ebene="h1" aufdecken zeilen={["Wir machen echte Gespräche zum Videobeweis."]} /></div>
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
@@ -173,7 +176,9 @@ const FORMATE = [
 <style>
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
-	:global(html:not([data-satz="b"]):not([data-satz="c"]):not([data-satz="d"]):not([data-satz="e"]):not([data-satz="f"])) .satz--a,
+	:global(html[data-satz="a"]) .satz--a,
+	:global(html:not([data-satz])) .satz--g,
+	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="f"]) .satz--f,
 	:global(html[data-satz="e"]) .satz--e,
 	:global(html[data-satz="d"]) .satz--d,
