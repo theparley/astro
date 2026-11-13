@@ -212,7 +212,17 @@ const PREISE = [
 		   aus der Session „Website · Video“ (Katrin, Ute, Hagen, Erik, 28 s). NUR LOKAL: Datei liegt in
 		   public/lokal/ (gitignored, Verweis auf ~/Movies/Website-Video/), weil die Freigaben der Gäste
 		   fehlen. Vor jedem Hochladen durch den freigegebenen Clip ersetzen. */}
-		<div class="ab-split-video"><video class="szene-video" src="/lokal/szene-beweisaufnahme.mp4" autoplay muted loop playsinline></video></div>
+		{/* Sprechblasen zum Rohschnitt (Rasul 13.11.2026: „Hol die Blasen für den Rohschnitt jetzt auf die Website.“).
+		   Sätze und Reihenfolge aus website/video/Szene_Beweisaufnahme_Clipvorschlag_2026-11.md, Schnittstellen im
+		   Rohschnitt gemessen (4,5 · 9 · 18 · 24 s). Form und Farbe wie in der Szenen-Vorschau (Oval 1,4 : 1, Zipfel,
+		   Blau #0379A6, Text weiß 800), hier vereinfacht: eine Blase zur Zeit, oben am Video eingehängt. Nur lokal,
+		   Freigaben der Gäste fehlen. */}
+		<div class="ab-split-video">
+			<div class="ab-szene" data-ab-szene>
+				<video class="szene-video" src="/lokal/szene-beweisaufnahme.mp4" autoplay muted loop playsinline></video>
+				<div class="ab-blase" aria-hidden="true"><svg><path class="ab-oval" /></svg><div class="ab-btext"><p></p></div></div>
+			</div>
+		</div>
 	</section>
 
 	{/* Dummy-Szene unter Block 2 entfernt (Rasul 13.11.2026: „die Dummy-Videos rausmachen“); das Video steht jetzt im Split von Block 2. */}
@@ -1491,6 +1501,16 @@ const PREISE = [
 	@media (min-width: 800px) {
 		.ab-split > .ab-split-video { grid-column: 1; grid-row: 1 / span 3; align-self: center; margin-top: 0; } /* Video links, Schrift rechts (Rasul 13.11.2026) */
 	}
+	/* Sprechblasen am Video (Probe 13.11.2026, nach der Szenen-Vorschau) */
+	.ab-szene { position: relative; container-type: inline-size; }
+	.ab-blase { position: absolute; inset: 0; pointer-events: none; opacity: 0; transform: scale(0.55);
+		transition: opacity 0.18s ease-in, transform 0.25s ease-in; z-index: 2; }
+	.ab-blase.an { opacity: 1; transform: none; transition: opacity 0.2s ease-out, transform 0.45s cubic-bezier(0.2, 1.3, 0.4, 1); }
+	.ab-blase svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+	.ab-oval { fill: #0379A6; }
+	.ab-btext { position: absolute; display: flex; align-items: center; justify-content: center; }
+	.ab-btext p { margin: 0; color: #fff; font-weight: 800; line-height: 1.12; text-align: center; text-wrap: balance; }
+	@media (max-width: 799px) { .ab-split-video { margin-top: calc(var(--abstand-md) + 14vw); } }
 	/* Folgeabsatz im Lesetext: Absatzabstand statt Abschnittsabstand (Rasul 13.11.2026: Absatz bei den Entscheidern) */
 	.ab-text + .ab-text { margin-top: var(--lesetext-absatz) !important; }
 	/* Überschrift im Split immer linksbündig, auch auf dem Handy (Rasul 13.11.2026) */
@@ -2012,6 +2032,70 @@ const PREISE = [
 		--sf-font-size: var(--text-md); /* = BBH md (ehem. clamp 1.125rem…1.9444rem, war schon BBHs md) */;
 	}
 </style>
+
+<script>
+	/* Sprechblasen zum Rohschnitt „Szene Beweisaufnahme“ (Probe 13.11.2026). Zeiten in Sekunden des Rohschnitts. */
+	(() => {
+		const szene = document.querySelector("[data-ab-szene]");
+		if (!szene) return;
+		const video = szene.querySelector("video");
+		const blase = szene.querySelector(".ab-blase");
+		const pfad = blase.querySelector("path");
+		const box = blase.querySelector(".ab-btext");
+		const p = box.querySelector("p");
+		const BLASEN = [
+			{ an: 0.4, aus: 4.4, stelle: "OR", text: "Es fühlt sich so natürlich an, hier zu sitzen." },                       // Katrin
+			{ an: 4.9, aus: 8.9, stelle: "OL", text: "Die gesamte Angst vor Kamera ist null." },                              // Ute
+			{ an: 9.4, aus: 17.9, stelle: "OR", text: "… dass ich dir direkt in die Augen schaue und gleichzeitig der Zuschauer meinen Augenkontakt hat." }, // Hagen
+			{ an: 18.4, aus: 23.9, stelle: "OL", text: "Er sitzt hier zwei Meter von mir weg in einem Display in Lebensgröße." }, // Erik
+			{ an: 24.3, aus: 26.6, stelle: "OL", text: "Wir können es sehr empfehlen, oder?" },                               // Ute (Split)
+			{ an: 26.7, aus: 28.2, stelle: "OR", text: "Total." },                                                             // Katrin (Split)
+		];
+		const STUFEN = ["--text-lg", "--text-md", "--text-base", "--text-sm"];
+		const ZIPFEL = { laenge: 0.3, breite: 13, schraeg: 14 };   // wie Szenen-Vorschau (Rasul 08.11.)
+		const ANTEIL = 0.62;   // Blasenbreite in Videobreiten (Vorschau: 0,95; hier enger, weil die Halbspalte schmal ist)
+
+		function zipfel(rx, winkel) {
+			const ry = rx / 1.4, m = (winkel * Math.PI) / 180;
+			const ziel = Math.sin(m) >= 0 ? Math.PI / 2 : -Math.PI / 2;
+			const sch = Math.abs(Math.cos(m)) < 0.15 ? 0 : Math.sign(Math.atan2(Math.sin(ziel - m), Math.cos(ziel - m))) * (ZIPFEL.schraeg * Math.PI) / 180;
+			return [rx * (1 + ZIPFEL.laenge) * Math.cos(m + sch), ry * (1 + ZIPFEL.laenge) * Math.sin(m + sch)];
+		}
+		function setze(b) {
+			const W = szene.clientWidth, H = video.clientHeight || W * 9 / 16;
+			const rx = (W * ANTEIL) / 2, ry = rx / 1.4;
+			const rechts = b.stelle === "OR";
+			const winkel = rechts ? 125 : 55;                       // Zipfel zeigt schräg nach unten ins Bild
+			const anker = [W * (rechts ? 0.66 : 0.34), H * 0.1];   // Wurzel des Zipfels knapp im Bild
+			const m = (winkel * Math.PI) / 180;
+			const cx = anker[0] - rx * Math.cos(m), cy = anker[1] - ry * Math.sin(m);
+			const half = (ZIPFEL.breite * Math.PI) / 180, z = zipfel(rx, winkel);
+			const pts = [];
+			for (let i = 0; i <= 120; i++) { const t = m + half + ((2 * Math.PI - 2 * half) * i) / 120; pts.push([cx + rx * Math.cos(t), cy + ry * Math.sin(t)]); }
+			pts.push([cx + z[0], cy + z[1]]);
+			pfad.setAttribute("d", "M" + pts.map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L") + "Z");
+			blase.style.transformOrigin = `${cx + z[0]}px ${cy + z[1]}px`;
+			const bw = rx * 1.32, bh = ry * 1.16;
+			Object.assign(box.style, { left: `${cx - bw / 2}px`, top: `${cy - bh / 2}px`, width: `${bw}px`, height: `${bh}px` });
+			p.textContent = b.text;
+			for (const st of STUFEN) { p.style.fontSize = `var(${st})`; if (p.scrollHeight <= box.clientHeight && p.scrollWidth <= box.clientWidth + 1) break; }
+		}
+		let aktiv = null, wechsel = 0;
+		function schritt() {
+			const t = video.currentTime;
+			const b = BLASEN.find((x) => t >= x.an && t < x.aus) || null;
+			if (b !== aktiv) {
+				aktiv = b;
+				clearTimeout(wechsel);
+				blase.classList.remove("an");
+				if (b) wechsel = setTimeout(() => { setze(b); blase.classList.add("an"); }, 120);
+			}
+			requestAnimationFrame(schritt);
+		}
+		window.addEventListener("resize", () => { if (aktiv) setze(aktiv); });
+		requestAnimationFrame(schritt);
+	})();
+</script>
 
 <script>
 	// Tür FORMATBERATUNG: Wisch DIREKT ans Scrollen gekoppelt (Fred 14.09.
