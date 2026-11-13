@@ -965,11 +965,15 @@ const PREISE = [
 
 	/* Bühne des ersten Bildschirms (Rasul 13.11.2026): Logo oben, drei Zeilen mittig im Rest;
 	   der Erklärtext folgt darunter, unterhalb des ersten Bildschirms. */
+	/* Rasul 13.11.2026: Logo und Schrift etwas höher, unten soll die erste Zeile des Erklärtexts
+	   noch zu sehen sein. Bühne = Fensterhöhe minus Kopfabstand (32 px), minus Abstand zum Text,
+	   minus eine Textzeile (1,3 × --text-md) und 24 px Luft darunter. */
 	.hero-buehne {
 		display: flex;
 		flex-direction: column;
-		min-height: calc(100svh - 2 * var(--abstand-md));
+		min-height: calc(100svh - 32px - var(--abstand-md) - 1.3 * var(--text-md) - 24px);
 	}
+	.hero { padding-top: 32px; }
 	.hero-text--unten {
 		margin-top: var(--abstand-md);
 		padding: 0 16px;
