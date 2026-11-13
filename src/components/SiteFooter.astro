@@ -91,24 +91,23 @@ import LogoBiss from "./LogoBiss.astro";
 
 
 	nav {
-		/* Eigene Zeile über dem Schriftzug, rechtsbündig mit dem Seitenrand
-		   der Links von früher; Abstand nach unten, damit sie klar über der
-		   Oberkante von P und l stehen. */
-		display: flex;
-		justify-content: flex-end;
-		gap: clamp(16px, 2vw, 32px);
-		padding: 0 clamp(16px, 3vw, 56px);
-		margin-bottom: clamp(12px, 1.5vw, 24px);
-		/* Der negative Rand oben am Schriftzug (−0,1 em, s. u.) zieht dessen
-		   Box unter die Linkzeile; die Links bleiben darüber klickbar. */
-		position: relative;
+		/* Links über der weißen Sprechblase, linksbündig mit ihrer Kante (Rasul 13.11.2026 abends: „Impressum und
+		   Datenschutz legt man auf die Höhe links über das weiße Quadrat.“). Vorher eigene Zeile rechts über dem
+		   ganzen Logo; dort standen sie ganz oben im Fuß und wurden erst beim letzten Pixel freigelegt.
+		   Lage: Die Blase beginnt bei y = 0 der viewBox (−60,32 bis 100), ihre Oberkante liegt also 100 / 160,32 =
+		   62,4 % der Logohöhe über der Unterkante; die Links stehen 12 px darüber. */
+		position: absolute;
+		/* eingerückt um den Seitenrand wie der Inhalt darüber; die Blase selbst beginnt an der Bildschirmkante */
+		left: var(--rand);
+		bottom: calc(62.4% + 12px);
 		z-index: 1;
-		/* Fred 23.09.: „ein bisschen duenn und klein" — auf BBHs Fussmass:
-		   text-sm (17 px bei 1400) und Gewicht 400 statt der Body-300. */
+		display: flex;
+		gap: clamp(16px, 2vw, 32px);
 		font-size: var(--text-sm);
 		font-weight: 400;
 		color: var(--gray);
 	}
+
 
 	a {
 		text-decoration: none;
@@ -119,9 +118,11 @@ import LogoBiss from "./LogoBiss.astro";
 	   "volle Breite, nicht den Content-Rahmen"); seit 26.10.2026 „Parley“
 	   statt „The Parley“. */
 	.site-footer__logo {
-		width: 100%;
-		/* Bezugsgröße für die cqw-Schriftgröße darunter. */
-		container-type: inline-size;
+		/* So breit wie das Logo (Deckel über die Fensterhöhe, siehe unten), damit die Rechtslinks sich am Logo
+		   ausrichten können. */
+		position: relative;
+		width: min(100%, calc((100dvh - 96px) * 1.8066));
+		margin: 0 auto;
 	}
 
 	/* Größe über die Containerbreite (cqw), damit „Parley“ von Kante zu
@@ -137,9 +138,8 @@ import LogoBiss from "./LogoBiss.astro";
 	   Seitenverhältnis des Logos samt Schutzraum: 289,64 : 160,32. */
 	:global(.site-footer__wortmarke) {
 		display: block;
-		width: min(100%, calc((100dvh - 96px) * 1.8066));
+		width: 100%;
 		height: auto;
-		margin: 0 auto;
 		color: var(--white);
 	}
 
