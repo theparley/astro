@@ -24,16 +24,15 @@ const { startseite = false } = Astro.props;
 // „Videobeweis“ (Rasul 13.11.2026 abends): Rückweg zu den Kacheln wie „Work“ bei BBH, aber als Sprung an die Stelle
 // auf der Startseite, nicht als eigene Übersichtsseite und nicht an den Anfang. Rasul: „Okay, dann machen wir den
 // Sprung. Aber ich finde es gut, dass es dann der Sprung ist, auf die Hauptseite an die Stelle und nicht die
-// Hauptseite nochmal neu startet.“
+// Hauptseite nochmal neu startet.“ Mit drei Einträgen kommt „Home“ dazu, 2 × 2.
 const links = [
 	{ href: "/#kap-titel", text: "Videobeweis" },
 	{ href: "/termin", text: "Termin" },
 	{ href: "/kontakt", text: "Kontakt" },
 ];
-// Kein „Home“ mehr (Rasul 13.11.2026 abends: „Okay, wir haben einen Home-Button. Jetzt im Menü brauchen wir den
-// überhaupt? Unser Logo ist der Home Button.“). Bei ungerader Zahl geht stattdessen die erste Kachel über die ganze
-// Breite, damit das Raster ohne leere Ecke aufgeht.
-const breitErste = links.length % 2 === 1;
+// „Home“ bleibt (Rasul 13.11.2026 abends erst: „Unser Logo ist der Home Button“, kurz danach: „Mach den Home-Button
+// wieder rein.“). Zwischenstand ohne Home (Videobeweis als breite Kachel) liegt in Git, Commit 196caac.
+if (links.length % 2 === 1) links.unshift({ href: "/", text: "Home" });
 const spalten = Math.ceil(links.length / 2);
 const pfad = Astro.url.pathname.replace(/\/$/, "") || "/";
 const aktiv = (href: string) => (href === "/" ? pfad === "/" : pfad.startsWith(href));
@@ -65,7 +64,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{startseite && <a href="/" class="bbh-menu__name" tabindex="-1" aria-hidden="true"><span>parley</span></a>}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
-				<a href={l.href} class:list={["bbh-menu__kachel", breitErste && i === 0 && "bbh-menu__kachel--breit"]} style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
+				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
 					<span>{l.text}</span>
 				</a>
 			))}
@@ -83,7 +82,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		--dauer: 300ms;
 		--kurve: cubic-bezier(0.4, 0, 0.2, 1);
 		--maske: cubic-bezier(0.77, 0, 0.18, 1);
-		--nav-breite: calc(var(--spalten) * var(--k) + (var(--spalten) - 1) * var(--fuge));
+		/* Menükachel so breit, dass das längste Wort passt („Videobeweis“ 5,24 em plus 16 px Polster, gemessen
+		   13.11.2026), mindestens aber eine Kachel. */
+		--kn: max(var(--k), calc(var(--text-sm) * 5.7 + 16px));
+		--nav-breite: calc(var(--spalten) * var(--kn) + (var(--spalten) - 1) * var(--fuge));
 		/* Schließen wartet, bis die Kacheln einzeln weg sind: 50 ms × Anzahl + 300 ms */
 		--out-delay: calc(50ms * var(--anzahl) + 300ms);
 	}
@@ -141,7 +143,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 
 	.bbh-menu__nav {
 		display: grid;
-		grid-template-columns: repeat(var(--spalten), var(--k));
+		grid-template-columns: repeat(var(--spalten), var(--kn));
 		grid-auto-rows: var(--halb);
 		gap: var(--fuge);
 		width: 0;
@@ -173,7 +175,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			width var(--dauer) var(--kurve) var(--in-delay);
 	}
 	.offen .bbh-menu__kachel {
-		width: var(--k);
+		width: var(--kn);
 		height: var(--halb);
 		opacity: 1;
 		/* Öffnen: Breite sofort, Höhe verzögert */
@@ -182,9 +184,6 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			height var(--dauer) var(--kurve) var(--in-delay),
 			opacity var(--dauer) var(--kurve) var(--in-delay);
 	}
-	/* Erste Kachel über beide Spalten (ungerade Zahl, siehe oben); „Videobeweis“ passt so auch in die schmale Kachel. */
-	.bbh-menu__kachel--breit { grid-column: 1 / -1; }
-	.offen .bbh-menu__kachel--breit { width: calc(2 * var(--k) + var(--fuge)); }
 	.bbh-menu__kachel span {
 		position: relative;
 		z-index: 1;
