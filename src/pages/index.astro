@@ -137,6 +137,8 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			<div class="satz satz--v"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Video aus echten Gesprächen"]} /></div>
 			<!-- W: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos echter Gespräche.“ -->
 			<div class="satz satz--w"><Haltung ebene="h1" aufdecken zeilen={["Wir beweisen Expertise mit Videos echter Gespräche"]} /></div>
+			<!-- X: W mit festen Zeilen. Rasul 13.11.2026 abends: „Machen wir mal als Versuch eine Zeile mehr draus. Und teile es so auf, dass da steht, wir beweisen in einer Zeile. Expertise in einer Zeile mit Videos in einer Zeile. Und den nächsten Teil echter Gespräche.“ -->
+			<div class="satz satz--x"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "echter Gespräche"]} /></div>
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
 			   Film nur lokal (Freigabe fehlt). */}
@@ -203,6 +205,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-satz="u"]) .satz--u,
 	:global(html[data-satz="v"]) .satz--v,
 	:global(html[data-satz="w"]) .satz--w,
+	:global(html[data-satz="x"]) .satz--x,
 	:global(html[data-satz="f"]) .satz--f,
 	:global(html[data-satz="e"]) .satz--e,
 	:global(html[data-satz="d"]) .satz--d,
