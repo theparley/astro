@@ -215,11 +215,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
 	// Brennweite von 1000 auf 430. So bleibt die vordere Person die ganze Fahrt im Bild (gerechnet 13.11.2026; eine
 	// gerade Bahn ließ sie in der Mitte der Fahrt unten aus dem Bild laufen).
-	// Ende auf Augenhöhe (Rasul 13.11.2026 abends: „dann muss die Kamera noch tiefer fahren, der Horizont muss in einer
-	// Linie sein mit den hinteren Personen“): Kamerahöhe am Ende 49 = Höhe der Kopfmitte (14,5 von 19 Teilen einer
-	// 64 hohen Person), damit liegen alle Köpfe auf dem Horizont. Winkel 5,1°, Abstand 552, Brennweite 300 (gerechnet:
-	// vorne 2,9-fach, hinten 0,4-fach, die vordere Person bleibt während der ganzen Fahrt im Bild).
-	const A0 = Math.PI / 2, A1 = 5.1 * Math.PI / 180, R0 = 1000, R1 = 552, LZ1 = 150, F0 = 1000, F1 = 300;
+	const A0 = Math.PI / 2, A1 = 15 * Math.PI / 180, R0 = 1000, R1 = 620, LZ1 = 150, F0 = 1000, F1 = 430;
 	function bahn(e: number, fEnde = F1) {
 		const a = A0 + (A1 - A0) * e, R = R0 + (R1 - R0) * e, lz = LZ1 * e;
 		const Lk: [number, number] = [0, lz], C: [number, number] = [R * Math.sin(a), lz - R * Math.cos(a)];
