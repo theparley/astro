@@ -1,2 +1,9 @@
 /buchen /termin 301
 /buchen/ /termin 301
+# Alte Adressen aus der Zeit mit Forma und Werkstatt (Rasul 13.11.2026: „Ja, live“).
+# Der Speicher von parleyfilm.com ohne www lieferte sie nach dem Leeren weiter aus.
+/fonts/FormaDJRVariable.woff2 / 301
+/fonts/FormaDJRMonoVariable.woff2 / 301
+/werkstatt / 301
+/werkstatt/ / 301
+/werkstatt/* / 301
