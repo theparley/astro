@@ -171,11 +171,12 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			     sondern als Probe in einer eigenen hellen Form nach BBH: Band (B6 Text-Bild hell) oder breite Kachel (B20).
 			     Schalter „Kacheln · Videobeweis / Band / Kachel“ oder ?kopf=…; Text des Anlasses ist Entwurf Claude. */}
 			<div class="anlass anlass--band">
-				<TextBild titelZeilen={["Überall Experten.", "Zeit für den Videobeweis."]} seite="links" medium="voll">
-					<div slot="medium" class="anlass__bild"><BlasenVideo src="/lokal/szene-beweisaufnahme.mp4" von={25.5} bis={28} blasen={[]} format="4/3" stillbild /></div>
-					<p><span class="entwurf">Entwurf</span></p>
-					<p>Auf LinkedIn, in Podcasts, auf jeder Bühne: Überall sprechen Experten. Behaupten kann das jeder. Ob jemand wirklich etwas kann, sieht man erst im Gespräch. Dafür gibt es den Videobeweis.</p>
-				</TextBild>
+				{/* Ohne Bild (Rasul 13.11.2026 abends: „Im Prinzip also erstmal der Farbwechsel, den finde ich gut. Und ich würde
+				     auch lieber mit dem Bild vielleicht arbeiten, aber wir haben kein Bild zu dem Thema. Wir können die Szene
+				     eigentlich nur setzen mit unserem Satz.“). Erklärtext (Entwurf Claude) vorerst nicht gesetzt: „Auf LinkedIn,
+				     in Podcasts, auf jeder Bühne: Überall sprechen Experten. Behaupten kann das jeder. Ob jemand wirklich etwas
+				     kann, sieht man erst im Gespräch. Dafür gibt es den Videobeweis.“ */}
+				<p class="anlass__satz rahmen">Überall Experten.<br />Zeit für den Video&shy;beweis.</p>
 			</div>
 			<div class="anlass anlass--kachel rahmen">
 				<div class="anlass__kachel">
@@ -295,7 +296,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-kopf="kachel"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	/* B6 hell (BBH theme:light): weiße Fläche, schwarze Schrift, Innenabstand lg */
 	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-lg) 0; margin-bottom: var(--abstand-lg); }
-	.anlass--band :global(.entwurf) { margin-bottom: 8px; }
+	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
 	/* B20 (BBH „Nächstes Projekt“): Fläche 2:1, Schrift Bogle groß und mittig; hier hell statt Projektfarbe */
 	.anlass--kachel { margin-bottom: 16px; }
 	.anlass__kachel { display: grid; place-content: center; gap: 32px; text-align: center; background: var(--surface); color: var(--black); border-radius: 4px; padding: 64px 16px; }

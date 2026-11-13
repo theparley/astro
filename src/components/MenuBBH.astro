@@ -25,8 +25,10 @@ const { startseite = false } = Astro.props;
 // auf der Startseite, nicht als eigene Übersichtsseite und nicht an den Anfang. Rasul: „Okay, dann machen wir den
 // Sprung. Aber ich finde es gut, dass es dann der Sprung ist, auf die Hauptseite an die Stelle und nicht die
 // Hauptseite nochmal neu startet.“ Mit drei Einträgen kommt „Home“ dazu, 2 × 2.
+// „Videobeweis“ wieder heraus (Rasul 13.11.2026 abends: „Wir nehmen das Wort Videobeweis wieder raus aus dem Menü, da
+// müssen wir ein anderes Wort finden.“). Der Platz bleibt für das neue Wort, Sprungziel weiter /#kap-titel.
+// Bis dahin zwei Einträge, damit fällt „Home“ nach der Regel unten weg (wie auf der Live-Seite).
 const links = [
-	{ href: "/#kap-titel", text: "Videobeweis" },
 	{ href: "/termin", text: "Termin" },
 	{ href: "/kontakt", text: "Kontakt" },
 ];
@@ -82,9 +84,9 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		--dauer: 300ms;
 		--kurve: cubic-bezier(0.4, 0, 0.2, 1);
 		--maske: cubic-bezier(0.77, 0, 0.18, 1);
-		/* Menükachel so breit, dass das längste Wort passt („Videobeweis“ 5,24 em plus 16 px Polster, gemessen
-		   13.11.2026), mindestens aber eine Kachel. */
-		--kn: max(var(--k), calc(var(--text-sm) * 5.7 + 16px));
+		/* Menükachel wie BBH eine Kachel breit. Mit „Videobeweis“ war sie breiter (5,24 em plus 16 px Polster,
+		   gemessen 13.11.2026: --kn: max(var(--k), calc(var(--text-sm) * 5.7 + 16px))); beim neuen Wort neu messen. */
+		--kn: var(--k);
 		--nav-breite: calc(var(--spalten) * var(--kn) + (var(--spalten) - 1) * var(--fuge));
 		/* Schließen wartet, bis die Kacheln einzeln weg sind: 50 ms × Anzahl + 300 ms */
 		--out-delay: calc(50ms * var(--anzahl) + 300ms);
