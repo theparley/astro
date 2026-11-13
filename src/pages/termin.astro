@@ -13,7 +13,7 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
    getestet (Brief-Fortschritt 2026-06-14), der Kalender ist scharf.
    Das Anfrage-Formular lebt jetzt auf /kontakt (stilles Fallnetz, nie
    als CTA beworben — Ein-Tür-Konvention bleibt intakt). */}
-<Layout title="Termin" description="Let's Parley: Welches Format passt? 30 Minuten. Buche direkt einen Termin mit Parley Film.">
+<Layout title="Termin" description="Let's Parley: Buche direkt einen Termin mit Parley Film.">
 	<main class="buchen">
 		{/* Headline = Name der Terminart (Fred 2026-06-14): "Let's Parley" —
 		   identisch mit meetergo-Terminart. Unterzeile (Fred 2026-09-13):
@@ -24,7 +24,8 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
 		   Seitentitel B1, Bartle huge, mittig; Unterzeile mittig darunter. Vorher h1 1,9 rem fett und Unterzeile grau
 		   (Unterzeile Fred 15.09.: „Welches Format passt? 30 Minuten.“, wörtlich übernommen). */}
 		<div class="termin-titel">
-			<Seitentitel ebene="h1" titel="Let’s Parley" unter="Welches Format passt? 30 Minuten." />
+			<Seitentitel ebene="h1" titel="Let’s Parley" />
+			{/* Unterzeile „Welches Format passt? 30 Minuten.“ heraus (Rasul 13.11.2026 abends: „Der Satz ist noch auf der Terminseite drauf … Das können wir erstmal rausnehmen.“) */}
 		</div>
 
 		<div id="kalenderTeil">
@@ -43,7 +44,7 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
 			</div>
 		</div>
 		<aside id="sidePanel">
-			<p class="side-hint" id="sideHint">Wähle links einen Tag —<br />die freien Uhrzeiten erscheinen hier.</p>
+			<p class="side-hint" id="sideHint">Wähle links einen Tag.<br />Die freien Uhrzeiten erscheinen hier.</p>
 		</aside>
 		{/* Dritte Spalte (Fred 2026-06-14): ab 1150px wandert Schritt 3
 		   (Formular) in eine eigene Spalte — 1 Tag · 2 Uhrzeit · 3 Daten
@@ -764,7 +765,7 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
 				} else {
 					btn.className = "slot taken";
 					btn.disabled = true;
-					btn.setAttribute("aria-label", `${label} Uhr — bereits vergeben`);
+					btn.setAttribute("aria-label", `${label} Uhr, bereits vergeben`);
 				}
 				slotsGrid.appendChild(btn);
 			});
