@@ -161,8 +161,8 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(location.search).get("form");
 					try {
 						if (q === "figur" || q === "punkt") localStorage.setItem("parley-form", q);
-						return localStorage.getItem("parley-form") || "figur";
-					} catch (e) { return q || "figur"; }
+						return localStorage.getItem("parley-form") || "punkt";
+					} catch (e) { return q || "punkt"; }
 				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
@@ -393,8 +393,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-kopf="videobeweis"] .menu-wahl [data-kopf-wahl="videobeweis"],
-	html:not([data-form="punkt"]) .menu-wahl [data-form-wahl="figur"],
-	html[data-form="punkt"] .menu-wahl [data-form-wahl="punkt"],
+	html[data-form="figur"] .menu-wahl [data-form-wahl="figur"],
+	html:not([data-form="figur"]) .menu-wahl [data-form-wahl="punkt"],
 	html:not([data-rahmen="16"]) .menu-wahl [data-rahmen-wahl="21"],
 	html[data-rahmen="16"] .menu-wahl [data-rahmen-wahl="16"],
 	html[data-ende="drei"] .menu-wahl [data-ende-wahl="drei"],

@@ -228,7 +228,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const zc = vy * -Math.sin(phi) + vz * Math.cos(phi), yc = vy * Math.cos(phi) + vz * Math.sin(phi);
 		return { x: CX + F * X / zc, y: CY - F * yc / zc, g: F / zc, zc, phi };
 	}
-	const form = () => (document.documentElement.dataset.form === "punkt" ? "punkt" : "figur");
+	// Grundeinstellung „punkt“ seit 13.11.2026 abends (Rasul: „Lass uns doch mal probieren, ob wir mit Punkten starten
+	// können, die dann zu Männchen werden“); „figur“ bleibt im Schalter.
+	const form = () => (document.documentElement.dataset.form === "figur" ? "figur" : "punkt");
 	// Aufstellung, die von oben ungeordnet wirkt und von vorne trägt: einer vorne, zwei dahinter, zwei Reihen, viele hinten
 	function personenFahrt(): Person[] {
 		const rnd = zufall(23), liste: Person[] = [];
@@ -283,6 +285,25 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			e = { c, pad }; BILDER.set(stufe, e);
 		}
 		return e;
+	}
+	// Verwandlung Punkt zu Person (Rasul 13.11.2026 abends: „ob wir mit Punkten starten können, die dann zu Männchen werden“):
+	// Der Punkt auf dem Boden wird zum Kopf und hebt sich an seinen Platz, die Schultern wachsen unter ihm heraus.
+	// p = 0 Punkt, p = 1 fertige Person. fy = Bodenpunkt, y = Mitte der fertigen Person.
+	function zeichneVerwandlung(ctx: CanvasRenderingContext2D, x: number, fy: number, y: number, g: number, alpha: number, p: number) {
+		if (alpha <= 0) return;
+		const u = (64 * g) / 19, rPunkt = 13 * g;
+		const kx = x, ky = fy + (y - 5.5 * u - fy) * p, kr = rPunkt + (4.6 * u - rPunkt) * p;
+		ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.beginPath();
+		ctx.moveTo(kx + kr, ky); ctx.arc(kx, ky, kr, 0, Math.PI * 2);
+		if (p > 0.02) {
+			// Schultern wachsen aus dem Hals: Breite und Höhe mit p
+			const hx = x, hy = ky + kr + 1.4 * u * p, b = 8.5 * u * p, h = 8.5 * u * p; // Hals unter dem Kopf, bei p = 1 genau wie die Person
+			ctx.moveTo(hx - b, hy + h);
+			ctx.bezierCurveTo(hx - b, hy + h * 0.24, hx - b * 0.53, hy, hx, hy);
+			ctx.bezierCurveTo(hx + b * 0.53, hy, hx + b, hy + h * 0.24, hx + b, hy + h);
+			ctx.closePath();
+		}
+		ctx.fill(); ctx.globalAlpha = 1;
 	}
 	function zeichneUnscharf(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, unsch: number) {
 		if (alpha <= 0) return;
@@ -390,16 +411,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const u = (64 * q.s * pr.g) / 19;
 						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15), g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y };
 					}).sort((a, b) => b.zc - a.zc);
-					const m = sanft(anteil(e, 0.3, 0.7)); // Unschärfe und Helligkeit wachsen mit der Fahrt
+					// Unschärfe und Helligkeit wachsen mit der Fahrt; bei Punkten erst, wenn die Verwandlung fertig ist
+					const m = punkte ? sanft(anteil(e, 0.5, 0.5)) : sanft(anteil(e, 0.3, 0.7));
 					for (const { q, x, y, g, kipp, fy } of lage) {
 						const ein = weich((t - q.ein) / 0.5);
 						const [b1, a1] = STUFE[q.ebene];
 						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * e : 0.85 + (a1 - 0.85) * m);
 						if (punkte) {
-							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen
-							const p = sanft(anteil(kipp, 0.1, 0.5));
-							if (p < 1) { ctx.globalAlpha = alpha * (1 - p); ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(x, fy, 13 * g, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
-							if (p > 0) zeichneUnscharf(ctx, x, y, g, alpha * p, b1 * m);
+							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen (Kopf hebt sich, Schultern wachsen)
+							const p = sanft(anteil(kipp, 0.05, 0.4));
+							if (p < 1) zeichneVerwandlung(ctx, x, fy, y, g, alpha, p);
+							else zeichneUnscharf(ctx, x, y, g, alpha, b1 * m);
 						} else zeichneUnscharf(ctx, x, y, g, alpha, b1 * m);
 					}
 					return;
