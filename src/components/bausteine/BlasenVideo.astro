@@ -9,11 +9,27 @@
    Abschnitte mit je einer Sache zerlegt werden kann, ohne neu zu schneiden (Rasul: „einzelne Videos, die
    jeweils eine Sache erklären“). */
 interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
-interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number }
-const { src, blasen, format = "16/9", von, bis } = Astro.props;
+/* steuerung (13.11.2026, Rasul: „dürfen die Videos jetzt an der Stelle nicht laufen, sondern müssen pausiert
+   sein. Die brauchen einen großen Startbutton in der Mitte. Und noch ein Button für Ton an, Ton aus.“):
+   Video steht beim ersten Bild still, großer Startknopf in der Mitte (Kachel wie im Menü), Lautsprecher unten
+   rechts wie BBHs Player („Unmute audio“). Start stumm wie bei BBH (dort startet kein Video mit Ton), Ton per
+   Lautsprecher. Klick aufs laufende Video hält an; aus dem Bild gescrollt hält es an. */
+interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number; steuerung?: boolean }
+const { src, blasen, format = "16/9", von, bis, steuerung = false } = Astro.props;
 ---
-<div class="blasenvideo" data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} style={`--format:${format}`}>
+<div class:list={["blasenvideo", steuerung && "blasenvideo--steuerung"]} data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} data-steuerung={steuerung ? "" : undefined} style={`--format:${format}`}>
 	<video src={src} muted loop playsinline preload="metadata"></video>
+	{steuerung && (
+		<>
+			<button type="button" class="blasenvideo__start" aria-label="Video abspielen">
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5 L20 12 L7 19.5 Z" /></svg>
+			</button>
+			<button type="button" class="blasenvideo__ton" aria-label="Ton an" aria-pressed="false">
+				<svg class="aus" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" /><path d="M16 9l5 6M21 9l-5 6" /></svg>
+				<svg class="an" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" /><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" /></svg>
+			</button>
+		</>
+	)}
 	<div class="blase" aria-hidden="true"><svg><path /></svg><div class="blase__text"><p></p></div></div>
 </div>
 <style>
@@ -24,6 +40,30 @@ const { src, blasen, format = "16/9", von, bis } = Astro.props;
 	.blase svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
 	.blase path { fill: #0379A6; }
 	.blase__text { position: absolute; display: flex; align-items: center; justify-content: center; }
+	/* Steuerung: Startknopf als Kachel wie im Menü (88 px, #ededed 95 %), Lautsprecher unten rechts wie BBH */
+	.blasenvideo__start {
+		position: absolute; left: 50%; top: 50%; z-index: 2;
+		width: 88px; height: 88px; transform: translate(-50%, -50%);
+		display: grid; place-items: center;
+		border: 0; padding: 0; cursor: pointer;
+		background: rgba(237, 237, 237, 0.95); color: #000;
+		transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 50ms;
+	}
+	.blasenvideo__start:active { transform: translate(-50%, -50%) scale(0.95); }
+	.blasenvideo__start svg { width: 40px; height: 40px; fill: currentColor; }
+	.blasenvideo--steuerung.spielt .blasenvideo__start { opacity: 0; pointer-events: none; }
+	.blasenvideo--steuerung video { cursor: pointer; }
+	.blasenvideo__ton {
+		position: absolute; right: 12px; bottom: 12px; z-index: 2;
+		width: 44px; height: 44px; display: grid; place-items: center;
+		border: 0; padding: 0; cursor: pointer; background: transparent; color: #fff;
+		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+	}
+	.blasenvideo__ton svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+	.blasenvideo__ton svg path:first-child { fill: currentColor; }
+	.blasenvideo__ton .an { display: none; }
+	.blasenvideo__ton[aria-pressed="true"] .an { display: block; }
+	.blasenvideo__ton[aria-pressed="true"] .aus { display: none; }
 	.blase__text p { margin: 0; color: #fff; font-family: var(--schrift-lesen); font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; text-align: center; text-wrap: balance; }
 </style>
 <script>
@@ -103,8 +143,39 @@ const { src, blasen, format = "16/9", von, bis } = Astro.props;
 				video.addEventListener("timeupdate", wache);
 				aufraeumen.push(() => video.removeEventListener("timeupdate", wache));
 			}
-			// Nur spielen, solange mindestens 20 % zu sehen sind (BBH, Analyse 1.7).
-			const beobachter = new IntersectionObserver(([e]) => { if (e.isIntersecting) { video.muted = true; video.play().catch(() => {}); } else video.pause(); }, { threshold: 0.2 });
+			const mitSteuerung = szene.hasAttribute("data-steuerung");
+			if (mitSteuerung) {
+				const start = szene.querySelector<HTMLButtonElement>(".blasenvideo__start")!;
+				const ton = szene.querySelector<HTMLButtonElement>(".blasenvideo__ton")!;
+				video.removeAttribute("loop");
+				const zeigeStand = () => szene.classList.toggle("spielt", !video.paused);
+				const abspielen = () => { video.play().catch(() => {}); };
+				const umschalten = () => { if (video.paused) abspielen(); else video.pause(); };
+				const tonUm = () => {
+					video.muted = !video.muted;
+					ton.setAttribute("aria-pressed", String(!video.muted));
+					ton.setAttribute("aria-label", video.muted ? "Ton an" : "Ton aus");
+				};
+				start.addEventListener("click", abspielen);
+				video.addEventListener("click", umschalten);
+				ton.addEventListener("click", tonUm);
+				video.addEventListener("play", zeigeStand);
+				video.addEventListener("pause", zeigeStand);
+				// Ohne Ausschnitt: am Filmende zurück auf Anfang und Startknopf zeigen
+				const ende = () => { video.currentTime = szene.dataset.von ? parseFloat(szene.dataset.von) : 0; zeigeStand(); };
+				video.addEventListener("ended", ende);
+				aufraeumen.push(() => {
+					start.removeEventListener("click", abspielen); video.removeEventListener("click", umschalten);
+					ton.removeEventListener("click", tonUm); video.removeEventListener("play", zeigeStand);
+					video.removeEventListener("pause", zeigeStand); video.removeEventListener("ended", ende);
+				});
+			}
+			// Nur spielen, solange mindestens 20 % zu sehen sind (BBH, Analyse 1.7). Mit Steuerung: nur anhalten,
+			// nie von selbst starten.
+			const beobachter = new IntersectionObserver(([e]) => {
+				if (e.isIntersecting) { if (!mitSteuerung) { video.muted = true; video.play().catch(() => {}); } }
+				else video.pause();
+			}, { threshold: 0.2 });
 			beobachter.observe(szene);
 			aufraeumen.push(() => { laeuft = false; beobachter.disconnect(); window.removeEventListener("resize", neu); });
 		});
