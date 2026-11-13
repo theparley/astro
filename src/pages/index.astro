@@ -122,8 +122,11 @@ const PREISE = [
 		   „parley Film“ in der unsichtbaren Blase, seit 13.11. mittig oben (vorher oben links); Rechteckhöhe 96 px (Stufe 1 ab 96 px,
 		   Logo-Erkenntnisse), unter 800 px nur die Fläche mit Schutzraum (Stufe 3, 40 px).
 		   Komponente erzeugt von branding/aktiv/generatoren/biss_logo_website.py. */}
-		{/* Logo oben wieder raus (Rasul 13.11.2026: „Mach mal mein Logo oben wieder weg.“); Markup:
-		   <a class="hero-logo" href="/"><LogoBiss class="hero-logo-gross" stufe={1} /><LogoBiss class="hero-logo-klein" stufe={3} /></a> */}
+		{/* Logo mittig oben (Rasul 13.11.2026: „Das Logo wieder mittig oben drüber.“; zwischendurch raus) */}
+		<a class="hero-logo" href="/" aria-label="parley Film, Startseite">
+			<LogoBiss class="hero-logo-gross" stufe={1} />
+			<LogoBiss class="hero-logo-klein" stufe={3} />
+		</a>
 		{/* Hero-Tausch (Fred 30.08. spät): der Dreizeiler aus der Essenz-Spalte
 		   wird der Hero ("echt starker Hero"), "Kein Business ohne Witness."
 		   wandert dafür in die Essenz-Spalte der Plädoyer-Sektion. Drei Sätze =
