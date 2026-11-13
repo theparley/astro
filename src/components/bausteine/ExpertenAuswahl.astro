@@ -19,9 +19,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 </figure>
 
 <style>
-	.experten { position: relative; margin: 0 auto; width: 100%; max-width: 960px; }
-	.experten__bild { display: block; width: 100%; aspect-ratio: 16 / 9; cursor: pointer; }
-	.experten__nochmal { position: absolute; right: 0; bottom: -28px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 0; cursor: pointer; opacity: 0; transition: opacity var(--tempo) var(--kurve); }
+	/* Über die ganze Breite des Bandes (Rasul 13.11.2026 abends: „bei der Kamerafahrt werden jetzt rechts und links
+	   Personen abgeschnitten. Ich fände es für den Effekt super, wenn die nicht abgeschnitten würden und sogar noch weiter
+	   in die Breite gehen, als sie vorher waren.“). Die Höhe bleibt die der 16:9-Fläche von höchstens 960 px Breite; der
+	   Rahmen der Geste steht in deren Mitte, nach dem Kippen dürfen die hinteren bis an den Rand des Bandes. */
+	.experten { --innen: min(960px, 100vw - 2 * var(--rand)); position: relative; width: 100vw; margin-left: calc(50% - 50vw); max-width: none; }
+	.experten__bild { display: block; width: 100%; height: calc(var(--innen) * 9 / 16); cursor: pointer; }
+	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2); bottom: -28px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 0; cursor: pointer; opacity: 0; transition: opacity var(--tempo) var(--kurve); }
 	.experten[data-fertig] .experten__nochmal { opacity: 1; }
 </style>
 
@@ -108,15 +112,18 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const rest = liste.filter((q) => q.ebene > 1).sort((a, b) => a.wz - b.wz);
 		rest.forEach((q, i) => {
 			// seitlich etwas zur Mitte, damit nach dem Kippen niemand aus dem Bild ragt
-			if (i < 10) { q.ebene = 2; q.tz = Math.max(q.wz, -40) + 120; q.tx = q.wx * 0.8; }
-			else { q.ebene = 3; q.tz = 300 + (q.wz + 307) * 0.9; q.tx = q.wx * 0.95; }
+			// Breite nach dem Kippen als Anteil der verfügbaren halben Breite (wird beim Zeichnen aus der Fläche gerechnet)
+			if (i < 10) { q.ebene = 2; q.tz = Math.max(q.wz, -40) + 120; q.fb = 0.7; }
+			else { q.ebene = 3; q.tz = 300 + (q.wz + 307) * 0.9; q.fb = 0.95; }
+			q.fx = Math.max(-1, Math.min(1, q.wx / (RW / 2 - RAND)));
+			q.zcE = kamera(0, q.tz, PHI_ENDE, 1, KD_ENDE).zc;
 		});
 		return liste;
 	}
 	function kameraTiefe(Z: number, phi: number) { return kamera(0, Z, phi).zc; }
 
 	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
-	interface Person { x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
+	interface Person { fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
 	function personen(): Person[] {
 		const rnd = zufall(7), liste: Person[] = [];
 		let versuche = 0;
@@ -217,7 +224,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
-				octx.setTransform(off.width / W, 0, 0, off.height / H, 0, 0); octx.globalCompositeOperation = "lighten";
+				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
+				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
 				if (t >= T_GESTE - 0.25 && t < T_GESTE) deck = (t - T_GESTE + 0.25) / 0.25;
 				else if (t >= T_GESTE && t < T_GESTE + DAUER) { s = kubisch((t - T_GESTE) / DAUER); deck = 1; }
@@ -232,11 +240,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
 				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
 				ctx.globalCompositeOperation = "difference";
-				ctx.filter = `blur(${(DICKE * 0.7 * cv.width / W).toFixed(1)}px)`; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0);
+				ctx.filter = `blur(${(DICKE * 0.7 * sc).toFixed(1)}px)`; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0);
 				ctx.filter = "none"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
 				ctx.globalCompositeOperation = "source-over";
 				// Personen
-				ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+				ctx.setTransform(sc, 0, 0, sc, ox, 0);
+				const halbe = (cv.width / sc) / 2 - 70; // verfügbare halbe Breite in Flächeneinheiten, mit Rand
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
 				if (ende() === "kamera") {
 					// Kamerafahrt: alle gehen zu ihrem Platz, die Kamera kippt; Unschärfe und Helligkeit je Ebene wie bei „ebenen“
@@ -248,7 +257,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					const phi = Math.PI / 2 - (Math.PI / 2 - PHI_ENDE) * kk;
 					const f1 = weich((t - T_AUSWAHL - D_KIPP * 0.6) / (D_KIPP * 0.5));
 					const lage = leute.map((q) => {
-						const X = q.wx + (q.tx - q.wx) * geh, Z = q.wz + (q.tz - q.wz) * geh;
+						const tx = q.fx !== undefined ? (q.fx * (q.fb ?? 1) * halbe * (q.zcE ?? KD)) / KD : q.tx;
+						const X = q.wx + (tx - q.wx) * geh, Z = q.wz + (q.tz - q.wz) * geh;
 						const pr = kamera(X, Z, phi, 1, abstand), u = (64 * q.s * pr.g) / 19;
 						return { q, x: pr.x, y: pr.y - 9 * u * kk, g: q.s * pr.g, zc: pr.zc }; // Füße auf dem Boden, sobald gekippt
 					}).sort((a, b) => b.zc - a.zc);
@@ -258,7 +268,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const m = q.ebene === 1 ? f1 : q.ebene >= 2 ? kk : 0;
 						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * kk : 0.85 + (a1 - 0.85) * m); // vorne erst mit dem Kippen schwarz
 						const unsch = b1 * m;
-						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * cv.width / W).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
+						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * sc).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
 						else zeichnePerson(ctx, x, y, g, alpha);
 					}
 					return;
@@ -281,7 +291,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const g = q.s + (q.eg - q.s) * k;
 						const alpha = ein * (q.ebene <= 1 ? (0.85 + 0.15 * k) * (1 - (1 - a1) * m) : 0.85 * (1 - (1 - a1 / 0.85) * m));
 						const unsch = b1 * m;
-						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * cv.width / W).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
+						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * sc).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
 						else zeichnePerson(ctx, x, y, g, alpha);
 					}
 					return;
@@ -295,7 +305,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						if (e === "eins") zeichnePerson(ctx, x, y, g, alpha * (1 - f));
 						else if (e === "grau") zeichnePerson(ctx, x, y, g, alpha * (1 - 0.8 * f));
 						else if (e === "unscharf" && f > 0) {
-							ctx.save(); ctx.filter = `blur(${(14 * f * cv.width / W).toFixed(1)}px)`;
+							ctx.save(); ctx.filter = `blur(${(14 * f * sc).toFixed(1)}px)`;
 							zeichnePerson(ctx, x, y, g, alpha * (1 - 0.35 * f)); ctx.restore();
 						} else zeichnePerson(ctx, x, y, g, alpha);
 					} else {

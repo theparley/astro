@@ -317,7 +317,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-kopf="band"] #kap-titel),
 	:global(html[data-kopf="kachel"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	/* B6 hell (BBH theme:light): weiße Fläche, schwarze Schrift, Innenabstand lg */
-	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-lg) 0; margin-bottom: var(--abstand-lg); }
+	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-lg) 0; margin-bottom: var(--abstand-lg); overflow-x: clip; }
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
