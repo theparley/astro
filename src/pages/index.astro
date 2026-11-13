@@ -25,6 +25,8 @@ import Kapitelende from "../components/abschnitte/Kapitelende.astro";
 		min-height: 100svh;
 		display: grid;
 		place-items: center;
-		padding-block: var(--abstand-xl);
+		/* unten Platz für das Menü (Kachel 88 px, am Handy 72 px, plus Luft), damit es die letzte Zeile nicht überdeckt */
+		padding-top: 32px;
+		padding-bottom: 136px;
 	}
 </style>

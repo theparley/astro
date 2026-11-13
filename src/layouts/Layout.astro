@@ -111,8 +111,10 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(location.search).get("lage");
 					try {
 						if (q === "unten" || q === "links" || q === "gemischt") localStorage.setItem("parley-lage", q);
-						return localStorage.getItem("parley-lage") || "gemischt";
-					} catch (e) { return q || "gemischt"; }
+						// Zweig minimal: Menü auf allen Breiten unten mittig (Rasul 13.11.2026 abends: „Oder wir machen es schon
+						// unten hin in dem Fall. Wie auf dem Handy später auch.“; links mittig überdeckte den großen Satz).
+						return "unten";
+					} catch (e) { return "unten"; }
 				}
 				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis y; Grundeinstellung y (Rasul 13.11. abends: „Ja, wir nehmen ypsilon.“; davor w, v, i)
 				function liesSatz() {
