@@ -1499,7 +1499,13 @@ const PREISE = [
 	.ab-split-video { margin-top: var(--abstand-md); padding: 0 16px; }
 	.ab-split-video .szene-video { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; background: var(--panel); }
 	@media (min-width: 800px) {
-		.ab-split > .ab-split-video { grid-column: 1; grid-row: 1 / span 3; align-self: center; margin-top: 0; } /* Video links, Schrift rechts (Rasul 13.11.2026) */
+		.ab-split > .ab-split-video { grid-column: 1; grid-row: 1 / span 3; align-self: start; margin-top: 0; } /* Video links, Schrift rechts (Rasul 13.11.2026) */
+		/* VERSETZT statt BBH-Mittelachse (Rasul 13.11.2026: „Jetzt brechen wir mit der BBH-Logik. Wir versetzen
+		   die beiden Hälften, schieben das Video nach oben, sodass sie nicht nebeneinander sind, sondern versetzt.“):
+		   Video oben bündig, die Schrift beginnt um gut die halbe Videohöhe tiefer
+		   (Videohöhe ≈ halbe Containerbreite × 9/16; Versatz 0,6 davon). */
+		.ab-split { align-items: start; }
+		.ab-split > .ab-titel { margin-top: calc((min(100vw, 1728px) - 64px) / 2 * 9 / 16 * 0.6); }
 	}
 	/* Sprechblasen am Video (Probe 13.11.2026, nach der Szenen-Vorschau) */
 	.ab-szene { position: relative; container-type: inline-size; }
