@@ -97,6 +97,8 @@ const FORMATE = [
 			{/* G: Rasul 13.11.2026: „Wir machen echte Gespräche zum Videobeweis.“ Favorit: „Den finde ich
 			   eigentlich ziemlich gut.“ Deshalb Grundeinstellung und h1. */}
 			<div class="satz satz--g"><Haltung ebene="h1" aufdecken zeilen={["Wir machen echte Gespräche zum Videobeweis."]} /></div>
+			{/* H: Rasul 13.11.2026: „Wir liefern den Videobeweis mit echten Gesprächen.“ */}
+			<div class="satz satz--h"><Haltung ebene="p" aufdecken zeilen={["Wir liefern den Videobeweis mit echten Gesprächen."]} /></div>
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
@@ -179,6 +181,7 @@ const FORMATE = [
 	:global(html[data-satz="a"]) .satz--a,
 	:global(html:not([data-satz])) .satz--g,
 	:global(html[data-satz="g"]) .satz--g,
+	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="f"]) .satz--f,
 	:global(html[data-satz="e"]) .satz--e,
 	:global(html[data-satz="d"]) .satz--d,
