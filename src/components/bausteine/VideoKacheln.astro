@@ -26,13 +26,13 @@ interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
 interface Plakat { satz: string; marke: string; bild: number }
 /* href (13.11.2026, Kachel-Startseite): Kachel ist ein Link zu einer Unterseite wie bei BBH, kein Player. */
 interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat; href?: string }
-interface Props { titel?: string; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
-const { titel, id, link, einleitung, kacheln } = Astro.props;
+interface Props { titel?: string; titelStufe?: "2xl"; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
+const { titel, titelStufe, id, link, einleitung, kacheln } = Astro.props;
 ---
 <div class="videokacheln rahmen">
 	{(titel || link) && (
 		<div class="videokacheln__kopf">
-			{titel && <h2 class="t-abschnitt videokacheln__titel" id={id} set:html={titel} />}
+			{titel && <h2 class:list={["t-abschnitt videokacheln__titel", titelStufe && `videokacheln__titel--${titelStufe}`]} id={id} set:html={titel} />}
 			{link && <div class="videokacheln__link"><Knopf href={link.href} text={link.text} /></div>}
 		</div>
 	)}
@@ -109,6 +109,11 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 	/* Sehr schmale Handys (unter 420 px): eine Stufe kleiner, sonst läuft „VERFAHREN“ (11,7 em) über den Rand
 	   (Platz bei 375 px: 11,5 em; gemessen 13.11.2026). Gilt für alle großen Abschnittsköpfe gleich. */
 	@media (max-width: 419px) { .videokacheln__titel { font-size: var(--text-2xl); line-height: var(--zeile-2xl); } }
+	/* titelStufe="2xl" (Rasul 13.11.2026 abends: „kriegst du Videobeweis in eine Zeile?“): „VIDEOBEWEIS“ ist in der
+	   Bartle 15 em breit und passt in Abschnittsgröße (huge) bei keiner Fensterbreite. Eine Stufe kleiner (2xl) passt
+	   es ab etwa 640 px Fensterbreite in eine Zeile; Breite automatisch statt min-content, damit das Wort nicht an der
+	   Trennstelle bricht, solange Platz ist. Darunter trennt es wie bisher (VIDEO-/BEWEIS). */
+	.videokacheln__titel--2xl { width: auto; font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
 </style>
 
 <script>

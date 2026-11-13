@@ -134,9 +134,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			<!-- U: Rasul 13.11.2026 abends: „Die Frage ist, ob die Doppeldeutigkeit tatsächlich so schlecht ist.“ S gekürzt auf vier Zeilen, Doppeldeutigkeit bleibt -->
 			<div class="satz satz--u"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit echten Gesprächen"]} /></div>
 			<!-- V: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Video aus echten Gesprächen. Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ -->
-			<div class="satz satz--v"><Haltung ebene="h1" aufdecken zeilen={["Wir beweisen Expertise mit Video aus echten Gesprächen"]} /></div>
+			<div class="satz satz--v"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Video aus echten Gesprächen"]} /></div>
 			<!-- W: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos echter Gespräche.“ -->
-			<div class="satz satz--w"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Videos echter Gespräche"]} /></div>
+			<div class="satz satz--w"><Haltung ebene="h1" aufdecken zeilen={["Wir beweisen Expertise mit Videos echter Gespräche"]} /></div>
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
 			   Film nur lokal (Freigabe fehlt). */}
@@ -157,8 +157,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   Überschrift „BEWEIS-/FÜHRUNG“ ist ein Vorschlag; graue Zeilen sind Entwurf. Umschalten: Schalter „Aufbau“. */}
 	<div class="aufbau aufbau--kacheln">
 		<section class="abschnitt" aria-labelledby="kap-titel">
-			<!-- Überschrift Rasul 13.11.2026 abends: „Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ (vorher „Beweisführung“) -->
-			<VideoKacheln id="kap-titel" titel="Der Video&shy;beweis" kacheln={[
+			<!-- Überschrift Rasul 13.11.2026 abends: „Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ (vorher „Beweisführung“);
+			     dann „Nimm mal bei Videobeweis noch den Artikel weg, also nur Videobeweis.“ -->
+			<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" kacheln={[
 				{ nr: "01", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
 				{ nr: "02", titel: "Beweisverfahren", zeile: "Von der Vorbereitung bis zur Verteilung", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
@@ -184,7 +185,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,
-	:global(html:not([data-satz])) .satz--v,
+	:global(html:not([data-satz])) .satz--w,
 	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="i"]) .satz--i,
