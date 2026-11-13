@@ -83,8 +83,14 @@ const { src, blasen, format = "16/9" } = Astro.props;
 			const neu = () => { if (aktiv) setze(aktiv); };
 			window.addEventListener("resize", neu);
 			requestAnimationFrame(schritt);
+			// Immer ohne Ton (Rasul 13.11.2026: „Im ersten Schritt sollte es mal nicht automatisch einen Ton
+			// abspielen“). Das muted-Attribut allein reicht nicht: nach einem Seitenwechsel über Astros
+			// ClientRouter steht es zwar im HTML, die Eigenschaft video.muted ist aber false (gemessen),
+			// das Video lief mit Ton. Deshalb hier hart setzen, auch vor jedem Abspielen.
+			video.muted = true;
+			video.defaultMuted = true;
 			// Nur spielen, solange mindestens 20 % zu sehen sind (BBH, Analyse 1.7).
-			const beobachter = new IntersectionObserver(([e]) => { if (e.isIntersecting) video.play().catch(() => {}); else video.pause(); }, { threshold: 0.2 });
+			const beobachter = new IntersectionObserver(([e]) => { if (e.isIntersecting) { video.muted = true; video.play().catch(() => {}); } else video.pause(); }, { threshold: 0.2 });
 			beobachter.observe(szene);
 			aufraeumen.push(() => { laeuft = false; beobachter.disconnect(); window.removeEventListener("resize", neu); });
 		});
