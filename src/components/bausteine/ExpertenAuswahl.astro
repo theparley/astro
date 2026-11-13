@@ -46,7 +46,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// startet, die Zeit ist noch zu lang. Mach es mal gleichzeitig, in dem Moment, wo der Text erscheint, erscheinen auch
 	// oben die ersten beiden Punkte“, korrigiert: „nicht die ersten beiden, sondern die beiden Punkte“): Mit der Freigabe blenden Nachsatz und die beiden Fingerpunkte zugleich ein (0,25 s),
 	// direkt danach beginnen Geste und Kamerafahrt. Vorher 1,6 s Lesepause.
-	const T_PAUSE = 2.2, D_LESEN = 0.25, T_TEXT = T_PAUSE;
+	// Übergang ohne Lücke (Rasul 14.11.2026: „der Übergang zwischen dem Erscheinen der Personen und dem Einblenden vom Text
+	// und dem Starten fühlt sich an wie ein kleiner Bruch“). Befund: Die letzten Personen waren meist schon vor 2,2 s fertig,
+	// dann stand das Bild kurz still, und danach kam alles neu auf einmal: Text (1 s Blende), Fingerpunkte (nur 0,25 s, wirkten
+	// wie ein Aufploppen), Bewegung. Jetzt überlappend wie im Trickfilm: Text ab 1,6 s, während die letzten Personen noch
+	// erscheinen; Fingerpunkte blenden in 0,6 s ein (D_FINGER); Geste und Kamera starten bei 2,45 s wie bisher.
+	const T_PAUSE = 2.2, D_LESEN = 0.25, T_TEXT = 1.6, D_FINGER = 0.6;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
@@ -555,13 +560,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// an dem Zoom-in, Zoom-out und an der Länge“): Beim Ende „kamera“ beginnen Geste und Fahrt gleichzeitig, dauern
 				// gleich lang und folgen demselben Verlauf (glatt). Vorher: Geste 1,6 s, Fahrt erst danach.
 				const kam = ende() === "kamera", gDauer = kam ? D_KAMERA : DAUER;
-				if (t >= T_GESTE - 0.25 && t <= T_GESTE + gDauer + GLIMM + 0.45) {
+				if (t >= T_GESTE - D_FINGER && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
-				if (t >= T_GESTE - 0.25 && t < T_GESTE) deck = (t - T_GESTE + 0.25) / 0.25;
+				if (t >= T_GESTE - D_FINGER && t < T_GESTE) deck = sanft((t - T_GESTE + D_FINGER) / D_FINGER);
 				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = 1; }
 				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
@@ -671,7 +676,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
 					uhr = T_PAUSE; bild(uhr, jetzt); haelt = true; return;
 				}
-				if (uhr >= T_PAUSE && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, dann Lesepause
+				if (uhr >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
 				bild(uhr, jetzt);
 				const schluss = ende() === "kamera" ? T_GESTE + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
 				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
