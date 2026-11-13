@@ -389,5 +389,11 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   Titelblock; research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md), fest auf allen Breiten. Vorher --abstand-md
 	   (69 px bei 1440 px). Das Raster setzt --abstand-md, deshalb hier die Differenz. */
 	.anlass--band .anlass__text { margin-top: calc(3rem - var(--abstand-md)); }
+	/* Mittig wie BBH bei großer Schrift mit kleinem Text darunter (Rasul 14.11.2026: „passen die Abstände, passt die Breite?
+	   … müsste der kleine Text breiter oder schmaler sein“): BBH setzt den Text dann mittig und ausgeglichen (simpleText:
+	   text-md, max-w-[46ch], mx-auto, text-center, text-balance; Titelblock: mt-12, text-center, text-balance;
+	   research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md). Größe (text-md) und Breite (46 Zeichen) hatten wir schon;
+	   vorher linksbündig. */
+	.anlass--band .anlass__text { text-align: center; }
 </style>
 
