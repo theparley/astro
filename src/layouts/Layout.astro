@@ -118,7 +118,7 @@ const websiteJsonLd = JSON.stringify({
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v") localStorage.setItem("parley-satz", q);
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v" || q === "w") localStorage.setItem("parley-satz", q);
 						return localStorage.getItem("parley-satz") || "v";
 					} catch (e) { return q || "v"; }
 				}
@@ -194,6 +194,7 @@ const websiteJsonLd = JSON.stringify({
 				<button type="button" data-satz-wahl="t">T</button>
 				<button type="button" data-satz-wahl="u">U</button>
 				<button type="button" data-satz-wahl="v">V</button>
+				<button type="button" data-satz-wahl="w">W</button>
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
@@ -290,6 +291,7 @@ const websiteJsonLd = JSON.stringify({
 	html[data-satz="t"] .menu-wahl [data-satz-wahl="t"],
 	html[data-satz="u"] .menu-wahl [data-satz-wahl="u"],
 	html[data-satz="v"] .menu-wahl [data-satz-wahl="v"],
+	html[data-satz="w"] .menu-wahl [data-satz-wahl="w"],
 	html[data-satz="a"] .menu-wahl [data-satz-wahl="a"],
 	html[data-satz="b"] .menu-wahl [data-satz-wahl="b"],
 	html[data-satz="c"] .menu-wahl [data-satz-wahl="c"],
