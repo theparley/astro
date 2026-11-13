@@ -2012,6 +2012,28 @@ const PREISE = [
 		.fm-welle i { animation: none; }
 	}
 
+
+	/* ALLE TEXTE UNTER DEM HERO LINKSBÜNDIG (Rasul 13.11.2026: „Wir machen doch alle Texte unten linksbündig,
+	   nicht mittig.“): Überschriften und kleine Zeilen stehen in derselben Textspalte wie der Lesetext und
+	   beginnen an ihrer linken Kante. Block 2 (Split) hat seine eigene Breite und bleibt davon unberührt.
+	   Mittig bleiben nur die große Zahl und die Knöpfe. */
+	.ab:not(.ab-split) .ab-titel,
+	.fm .ab-titel,
+	.ab-hinweis,
+	.ab-zahlzeile,
+	.ab-quelle,
+	.fm-kanaele {
+		text-align: left;
+		max-width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	@media (min-width: 800px) {
+		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: calc((min(100vw, 1728px) - 32px) / 2); }
+	}
+	@media (min-width: 1024px) {
+		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: calc((min(100vw, 1728px) - 64px) / 2); }
+	}
 </style>
 
 <style is:global>
