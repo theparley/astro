@@ -333,8 +333,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-kopf="kachel"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	/* B6 hell (BBH theme:light): weiße Fläche, schwarze Schrift, Innenabstand lg */
 	/* Innenabstand oben md statt lg, damit das Band mit Überschrift und Animation auf einen Bildschirm passt (13.11.2026) */
-	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-md) 0 var(--abstand-lg); margin-bottom: var(--abstand-lg); overflow-x: clip; }
-	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
+	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-md) 0; margin-bottom: var(--abstand-lg); overflow-x: clip; }
+	/* Abstände im Band klein (32 px), damit Überschrift, Animation und Lesetext auf einen Bildschirm passen (13.11.2026) */
+	.anlass__band-innen { display: grid; gap: 32px; }
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
 	/* B20 (BBH „Nächstes Projekt“): Fläche 2:1, Schrift Bogle groß und mittig; hier hell statt Projektfarbe */

@@ -376,12 +376,18 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					// Reicht der Platz nicht, wird der 16:9-Rahmen schmaler als die Überschrift.
 					// Danach Rasul: „Es ist immer noch größer als eine Seite.“ Deshalb zählt jetzt das ganze weiße Band ab seiner
 					// Oberkante: Innenabstand oben, Überschrift, Abstand, Animation und 32 px Luft unten müssen in das Fenster passen.
+					// Danach Rasul: „Die weiße Fläche, also mit der Überschrift, der Animation und dem kleinen Text, muss auf eine
+					// Seite passen.“ Also zählen auch Lesetext, Abstand darüber und Innenabstand unten.
 					const band = fig.closest(".anlass--band") as HTMLElement | null;
-					const oben = band ? parseFloat(getComputedStyle(band).paddingTop) || 0 : 32;
+					const bs = band ? getComputedStyle(band) : null;
+					const oben = bs ? parseFloat(bs.paddingTop) || 0 : 32, unten = bs ? parseFloat(bs.paddingBottom) || 0 : 32;
+					const text = band?.querySelector(".anlass__text");
 					const abstand = Math.max(0, fig.getBoundingClientRect().top - satz.getBoundingClientRect().bottom);
-					const frei = window.innerHeight - oben - satz.getBoundingClientRect().height - abstand - 32;
+					const abstand2 = text ? Math.max(0, text.getBoundingClientRect().top - fig.getBoundingClientRect().bottom) : 0;
+					const textHoehe = text ? text.getBoundingClientRect().height : 0;
+					const frei = window.innerHeight - oben - satz.getBoundingClientRect().height - abstand - abstand2 - textHoehe - unten;
 					const wunsch = px / format() / 0.86;
-					if (px > 0) cv.style.height = `${Math.max(180, Math.min(wunsch, frei)).toFixed(1)}px`;
+					if (px > 0) cv.style.height = `${Math.max(160, Math.min(wunsch, frei)).toFixed(1)}px`;
 				}
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
