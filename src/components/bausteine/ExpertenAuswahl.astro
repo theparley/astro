@@ -81,12 +81,37 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	const KD = 1000, PHI_ENDE = 12 * Math.PI / 180;
 	// zoom: Brennweite als Vielfaches von KD; während der Fahrt kurz größer, damit die Personen in der Mitte der Fahrt
 	// nicht klein zusammenrutschen (Anfang und Ende bleiben 1).
-	function kamera(X: number, Z: number, phi: number, zoom = 1) {
-		const cy = KD * Math.sin(phi), cz = -KD * Math.cos(phi);
+	function kamera(X: number, Z: number, phi: number, zoom = 1, abstand = KD) {
+		const cy = abstand * Math.sin(phi), cz = -abstand * Math.cos(phi);
 		const vy = -cy, vz = Z - cz;
 		const zc = vy * -Math.sin(phi) + vz * Math.cos(phi), yc = vy * Math.cos(phi) + vz * Math.sin(phi);
 		const F = KD * zoom;
 		return { x: CX + F * X / zc, y: CY - F * yc / zc, g: F / zc, zc };
+	}
+	const KD_ENDE = 660; // die Kamera fährt beim Kippen heran (Abstand 1000 auf 660), damit vorne einer groß wird
+
+	// Anordnung für „kamera“ (Rasul 13.11.2026 abends: „jetzt springen mir die Personen zu arg. Also das Kippen ist gut,
+	// aber die Bewegung findet vielleicht am Ende statt … dass wir die schon so anordnen, dass wenn man das kippt, der eine
+	// im Vordergrund ist und die anderen zwei im Hintergrund. Und der Rest dahinter darf sich ein bisschen bewegen, aber
+	// nicht so stark.“). Die drei stehen schon in der Draufsicht an ihrem Platz (einer unten mittig = vorne, zwei darüber
+	// links und rechts); die übrigen rücken nur etwas nach hinten.
+	function personenKamera(): Person[] {
+		const rnd = zufall(11), liste: Person[] = [];
+		const neu = (x: number, y: number, ebene: number): Person => ({ x, y, s: 1, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: ebene <= 1, rang: ebene === 0 ? 1 : 0, ebene, ex: x, ey: y, eg: 1, z: 1, wx: x - CX, wz: CY - y, tx: x - CX, tz: CY - y });
+		liste.push(neu(CX, CY + 250, 0), neu(CX - 190, CY + 120, 1), neu(CX + 190, CY + 120, 1));
+		const RAND = 80; let versuche = 0;
+		while (liste.length < 34 && versuche++ < 6000) {
+			// die übrigen nicht ganz unten: dort steht nur der eine vorne (sonst sind sie beim Kippen kurz groß im Vordergrund)
+			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (CY + 190 - T - RAND);
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 125)) { const q = neu(x, y, 3); q.s = 0.85 + rnd() * 0.3; liste.push(q); }
+		}
+		const rest = liste.filter((q) => q.ebene > 1).sort((a, b) => a.wz - b.wz);
+		rest.forEach((q, i) => {
+			// seitlich etwas zur Mitte, damit nach dem Kippen niemand aus dem Bild ragt
+			if (i < 10) { q.ebene = 2; q.tz = Math.max(q.wz, -40) + 120; q.tx = q.wx * 0.8; }
+			else { q.ebene = 3; q.tz = 300 + (q.wz + 307) * 0.9; q.tx = q.wx * 0.95; }
+		});
+		return liste;
 	}
 	function kameraTiefe(Z: number, phi: number) { return kamera(0, Z, phi).zc; }
 
@@ -156,7 +181,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			if (fig.dataset.bereit) return; fig.dataset.bereit = "1";
 			const cv = fig.querySelector("canvas")!, ctx = cv.getContext("2d")!;
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
-			const leute = personen();
+			const leuteFlach = personen(), leuteRaum = personenKamera();
+			let leute = leuteFlach;
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
 			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -187,6 +213,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			};
 
 			const bild = (t: number, jetzt: number) => {
+				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
@@ -215,20 +242,21 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					// Kamerafahrt: alle gehen zu ihrem Platz, die Kamera kippt; Unschärfe und Helligkeit je Ebene wie bei „ebenen“
 					const STUFE: [number, number][] = [[0, 1], [5, 0.7], [11, 0.4], [18, 0.22]];
 					const kk = kubisch(Math.max(0, Math.min(1, (t - T_AUSWAHL) / D_KIPP)));
-					// Gehen beginnt erst, wenn die Kamera schon kippt; sonst laufen die hinteren in der Draufsicht aus dem Bild
-					const geh = kubisch(Math.max(0, Math.min(1, (t - T_AUSWAHL - D_KIPP * 0.3) / (D_KIPP * 0.7))));
+					// Die hinteren rücken erst gegen Ende ein Stück nach hinten, weich (die drei vorne bewegen sich nicht)
+					const geh = kubisch(Math.max(0, Math.min(1, (t - T_AUSWAHL - D_KIPP * 0.5) / (D_KIPP * 0.6))));
+					const abstand = KD - (KD - KD_ENDE) * kk;
 					const phi = Math.PI / 2 - (Math.PI / 2 - PHI_ENDE) * kk;
 					const f1 = weich((t - T_AUSWAHL - D_KIPP * 0.6) / (D_KIPP * 0.5));
 					const lage = leute.map((q) => {
 						const X = q.wx + (q.tx - q.wx) * geh, Z = q.wz + (q.tz - q.wz) * geh;
-						const pr = kamera(X, Z, phi, 1 + 0.6 * Math.sin(Math.PI * kk) * (1 - geh)), u = (64 * q.s * pr.g) / 19;
+						const pr = kamera(X, Z, phi, 1, abstand), u = (64 * q.s * pr.g) / 19;
 						return { q, x: pr.x, y: pr.y - 9 * u * kk, g: q.s * pr.g, zc: pr.zc }; // Füße auf dem Boden, sobald gekippt
 					}).sort((a, b) => b.zc - a.zc);
 					for (const { q, x, y, g } of lage) {
 						const ein = weich((t - q.ein) / 0.5);
 						const [b1, a1] = STUFE[q.ebene];
 						const m = q.ebene === 1 ? f1 : q.ebene >= 2 ? kk : 0;
-						const alpha = ein * (q.ebene === 0 ? 1 : 0.85 + (a1 - 0.85) * m);
+						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * kk : 0.85 + (a1 - 0.85) * m); // vorne erst mit dem Kippen schwarz
 						const unsch = b1 * m;
 						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * cv.width / W).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
 						else zeichnePerson(ctx, x, y, g, alpha);
