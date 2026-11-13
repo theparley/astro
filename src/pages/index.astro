@@ -786,6 +786,15 @@ const PREISE = [
 </Layout>
 
 <style>
+	/* EINE SPALTE FÜR ALLES (Rasul 13.11.2026: „Können wir einen einfachen Container so einstellen, dass wir
+	   alles strikt linksbündig haben?“). --spalte ist die Breite der Textspalte, mittig auf der Seite:
+	   unter 800 px die volle Breite (Seitenrand 16 px), ab 800 px die halbe Containerbreite (Container
+	   höchstens 1728 px, Rand 16 bzw. ab 1024 px 32 px). Hero-Text, Lesetexte, Überschriften und das
+	   Video von Block 2 richten sich alle danach, also beginnen alle an derselben linken Kante. */
+	:global(:root) { --spalte: 100%; }
+	@media (min-width: 800px) { :global(:root) { --spalte: calc((min(100vw, 1728px) - 32px) / 2); } }
+	@media (min-width: 1024px) { :global(:root) { --spalte: calc((min(100vw, 1728px) - 64px) / 2); } }
+
 	/* Randabstand 1:1 von BBH übernommen (live gemessen): 16px bis 1024px
 	   Breite, danach 32px — statt unserem vorherigen festen 24px ohne
 	   Zwischenschritt. Gilt für .wrap UND .hero-headline, damit große Texte
@@ -990,6 +999,7 @@ const PREISE = [
 		margin-top: var(--abstand-md);
 		padding: 0 16px;
 	}
+	@media (min-width: 800px) { .hero-text--unten { padding: 0; } } /* gleiche linke Kante wie die Spalte (13.11.) */
 
 	.hero-headline {
 		width: 100%;
@@ -1053,13 +1063,13 @@ const PREISE = [
 
 	@media (min-width: 800px) {
 		.hero-text {
-			max-width: calc((min(100vw, 1728px) - 32px) / 2);
+			max-width: var(--spalte);
 		}
 	}
 
 	@media (min-width: 1024px) {
 		.hero-text {
-			max-width: calc((min(100vw, 1728px) - 64px) / 2);
+			max-width: var(--spalte);
 		}
 	}
 
@@ -1505,7 +1515,7 @@ const PREISE = [
 		   das Video und dann den Text dazu.“; Versatz und Nebeneinander zurückgenommen): Video über die ganze
 		   Breite beider Hälften, höchstens 1200 px, mittig; darunter Überschrift und Text in der rechten Hälfte. */
 		.ab-split { align-items: start; }
-		.ab-split > .ab-split-video { grid-column: 1 / span 2; grid-row: 1; justify-self: center; width: min(100%, 50vw); /* halbe Fensterbreite (Rasul 13.11.2026), vorher bis 1200 px */ margin: 0 0 var(--abstand-lg); }
+		.ab-split > .ab-split-video { grid-column: 1 / span 2; grid-row: 1; justify-self: center; width: min(100%, var(--spalte)); /* halbe Fensterbreite (Rasul 13.11.2026), vorher bis 1200 px */ margin: 0 0 var(--abstand-lg); }
 	}
 	/* Sprechblasen am Video (Probe 13.11.2026, nach der Szenen-Vorschau) */
 	.ab-szene { position: relative; container-type: inline-size; }
@@ -1533,7 +1543,7 @@ const PREISE = [
 		   Linke Hälfte bleibt frei; Überschrift und Text stehen untereinander in der rechten Hälfte,
 		   linksbündig an derselben Kante. */
 		.ab-split > .ab-titel {
-			grid-column: 1 / span 2; justify-self: center; width: min(100%, 50vw); box-sizing: border-box; /* mittig unter dem Video, Kanten wie das Video (Rasul 13.11.2026) */
+			grid-column: 1 / span 2; justify-self: center; width: min(100%, var(--spalte)); box-sizing: border-box; /* mittig unter dem Video, Kanten wie das Video (Rasul 13.11.2026) */
 			grid-row: 2; /* Reihe 1 = Video über beide Hälften (Rasul 13.11.) */
 			font-size: var(--text-2xl); /* Rasul 13.11.2026: „in der nächst kleineren Schriftgröße“ (vorher huge) */
 			line-height: 0.9;
@@ -1543,7 +1553,7 @@ const PREISE = [
 			padding: 0;
 		}
 		.ab-split > .ab-text {
-			grid-column: 1 / span 2; justify-self: center; width: min(100%, 50vw); box-sizing: border-box;
+			grid-column: 1 / span 2; justify-self: center; width: min(100%, var(--spalte)); box-sizing: border-box;
 			grid-row: auto;
 			margin: var(--abstand-md) 0 0;
 			max-width: none;
@@ -1564,10 +1574,10 @@ const PREISE = [
 		text-wrap: pretty;
 	}
 	@media (min-width: 800px) {
-		.ab-text { max-width: calc((min(100vw, 1728px) - 32px) / 2); }
+		.ab-text { max-width: var(--spalte); }
 	}
 	@media (min-width: 1024px) {
-		.ab-text { max-width: calc((min(100vw, 1728px) - 64px) / 2); }
+		.ab-text { max-width: var(--spalte); }
 	}
 
 	.ab-inhalt {
@@ -1873,10 +1883,10 @@ const PREISE = [
 		text-align: left;
 	}
 	@media (min-width: 768px) {
-		.akk { max-width: calc((min(100vw, 1728px) - 32px - 176px) / 12 * 8 + 112px); }
+		.akk { max-width: var(--spalte); } /* in der einen Spalte (Rasul 13.11.2026), vorher 8 von 12 Rasterspalten */
 	}
 	@media (min-width: 1024px) {
-		.akk { max-width: calc((min(100vw, 1728px) - 64px - 176px) / 12 * 8 + 112px); }
+		.akk { max-width: var(--spalte); } /* in der einen Spalte (Rasul 13.11.2026), vorher 8 von 12 Rasterspalten */
 	}
 	/* Wie in der Vorschau: je Frage zusätzlich 24 px oben und unten und eine
 	   Linie --line darüber (in der Vorschau aus der älteren Fragenliste
@@ -2029,10 +2039,10 @@ const PREISE = [
 		margin-right: auto;
 	}
 	@media (min-width: 800px) {
-		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: calc((min(100vw, 1728px) - 32px) / 2); }
+		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: var(--spalte); }
 	}
 	@media (min-width: 1024px) {
-		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: calc((min(100vw, 1728px) - 64px) / 2); }
+		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: var(--spalte); }
 	}
 </style>
 
