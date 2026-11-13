@@ -1990,7 +1990,7 @@ const PREISE = [
 		const cv = document.querySelector(".hero-geste");
 		if (!cv || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 		const zeilen = [...document.querySelectorAll(".hero-beweis > .hero-zeile")];
-		zeilen.forEach((z) => (z.style.animation = "none"));          // Zeilen warten auf das Ende der Geste
+		zeilen.forEach((z) => (z.style.animationPlayState = "paused")); // Zeilen bleiben verdeckt (Wartezeit der CSS-Animation), bis die Geste fertig ist
 		const ctx = cv.getContext("2d");
 		const off = document.createElement("canvas"), octx = off.getContext("2d");
 		const START = 1.2, DAUER = 1.6, WELLE = 0.9, VERGEHEN = 0.5;
