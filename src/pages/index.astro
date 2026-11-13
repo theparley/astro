@@ -165,12 +165,15 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 		<section class="abschnitt" aria-labelledby="kap-titel">
 			<!-- Überschrift Rasul 13.11.2026 abends: „Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ (vorher „Beweisführung“);
 			     dann „Nimm mal bei Videobeweis noch den Artikel weg, also nur Videobeweis.“ -->
-			<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" kacheln={[
-				{ nr: "01", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
+			{/* Probe 13.11.2026 abends (Schalter „Kacheln“): Fassung „Überall Experten“ setzt die Szene über den Kacheln, die
+			     Zeilen erzählen die Geschichte in einem Zug (Rasul: „dass die Kacheln … beim Drübergucken schon die Geschichte
+			     erzählen“). Kandidaten Claude, nicht entschieden: website/Website_Neustart_2026-11.md, „Kacheln als Fenster“. */}
+			<VideoKacheln id="kap-titel" titel={`<span class="kopf-heute">Video&shy;beweis</span><span class="kopf-szene">Überall Experten.<br />Zeit für den Video&shy;beweis.</span>`} titelStufe="2xl" kacheln={[
+				{ nr: "01", titel: "Beweisaufnahme", zeile: `<span class="kopf-heute">Das echte Gespräch, filmreif ohne Kamerastress</span><span class="kopf-szene">Das echte Gespräch, filmreif ohne Kamerastress.</span>`, src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
-				{ nr: "02", titel: "Beweisverfahren", zeile: "Von der Vorbereitung bis zur Verteilung", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
-				{ nr: "03", titel: "Beweisstücke", zeile: "Videopodcast, Clip, Zitat, Newsletter, Transkript", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
-				{ nr: "04", titel: "Augenzeugen", zeile: "Aus Zuschauern werden Augenzeugen", src: "/lokal/szene-beweisaufnahme.mp4", von: 25.5, bis: 28, href: "/augenzeugen" },
+				{ nr: "02", titel: "Beweisverfahren", zeile: `<span class="kopf-heute">Von der Vorbereitung bis zur Verteilung</span><span class="kopf-szene">Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.</span>`, src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
+				{ nr: "03", titel: "Beweisstücke", zeile: `<span class="kopf-heute">Videopodcast, Clip, Zitat, Newsletter, Transkript</span><span class="kopf-szene">Aus einem Gespräch werden viele Beweisstücke.</span>`, src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
+				{ nr: "04", titel: "Augenzeugen", zeile: `<span class="kopf-heute">Aus Zuschauern werden Augenzeugen</span><span class="kopf-szene">Entscheider haben euch auf dem Schirm, wenn sie einen Experten brauchen.</span>`, src: "/lokal/szene-beweisaufnahme.mp4", von: 25.5, bis: 28, href: "/augenzeugen" },
 			]} />
 		</section>
 		<Kapitelende />

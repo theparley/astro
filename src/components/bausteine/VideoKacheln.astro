@@ -55,7 +55,7 @@ const { titel, titelStufe, id, link, einleitung, kacheln } = Astro.props;
 				)}
 				<span class="videokachel__text">
 					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.titel}</span>
-					<span class="videokachel__zeile">{k.zeile}</span>
+					<span class="videokachel__zeile" set:html={k.zeile} />
 				</span>
 			</Tag>
 		); })}

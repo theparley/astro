@@ -129,6 +129,15 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-umlaut") || "ecken"; // Grundeinstellung „Ecken“ seit 13.11.2026 abends
 					} catch (e) { return q || "ecken"; }
 				}
+				// Kopf über den Kacheln (13.11.2026 abends): ?kopf=videobeweis|szene; Grundeinstellung „videobeweis“.
+				// Rasul: „sollen wir nicht erst nochmal dann die Szene setzen, also jetzt den Spruch bringen? Oder gleich einsteigen?“
+				function liesKopf() {
+					var q = new URLSearchParams(location.search).get("kopf");
+					try {
+						if (q === "videobeweis" || q === "szene") localStorage.setItem("parley-kopf", q);
+						return localStorage.getItem("parley-kopf") || "videobeweis";
+					} catch (e) { return q || "videobeweis"; }
+				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
 					var q = new URLSearchParams(location.search).get("aufbau");
@@ -140,6 +149,7 @@ const websiteJsonLd = JSON.stringify({
 				function setze() {
 					document.documentElement.dataset.aufbau = liesAufbau();
 					document.documentElement.dataset.umlaut = liesUmlaut();
+					document.documentElement.dataset.kopf = liesKopf();
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
 					var h = liesHero();
@@ -176,6 +186,11 @@ const websiteJsonLd = JSON.stringify({
 					<span>Aufbau</span>
 					<button type="button" data-aufbau-wahl="abschnitte">Abschnitte</button>
 					<button type="button" data-aufbau-wahl="kacheln">Kacheln</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Kacheln</span>
+					<button type="button" data-kopf-wahl="videobeweis">Videobeweis</button>
+					<button type="button" data-kopf-wahl="szene">Überall Experten</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Umlaut</span>
@@ -328,6 +343,8 @@ const websiteJsonLd = JSON.stringify({
 	}
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
+	html:not([data-kopf="szene"]) .menu-wahl [data-kopf-wahl="videobeweis"],
+	html[data-kopf="szene"] .menu-wahl [data-kopf-wahl="szene"],
 	html[data-umlaut="innen"] .menu-wahl [data-umlaut-wahl="innen"],
 	html[data-umlaut="ecken"] .menu-wahl [data-umlaut-wahl="ecken"],
 	html:not([data-umlaut="innen"]):not([data-umlaut="ecken"]) .menu-wahl [data-umlaut-wahl="aussen"],
@@ -390,6 +407,13 @@ const websiteJsonLd = JSON.stringify({
 		if (aufbau) {
 			try { localStorage.setItem("parley-aufbau", aufbau.dataset.aufbauWahl!); } catch {}
 			location.reload();
+			return;
+		}
+		const kopf = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-kopf-wahl]");
+		if (kopf) {
+			const w = kopf.dataset.kopfWahl!;
+			try { localStorage.setItem("parley-kopf", w); } catch {}
+			document.documentElement.dataset.kopf = w;
 			return;
 		}
 		const umlaut = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-umlaut-wahl]");
