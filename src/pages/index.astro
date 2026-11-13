@@ -26,7 +26,6 @@ import Textblock from "../components/bausteine/Textblock.astro";
 import BlasenVideo from "../components/bausteine/BlasenVideo.astro";
 import Platzhalter from "../components/bausteine/Platzhalter.astro";
 import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
-import ZeigerFilm from "../components/bausteine/ZeigerFilm.astro";
 import VideoKacheln from "../components/bausteine/VideoKacheln.astro";
 import Abschnittskopf from "../components/bausteine/Abschnittskopf.astro";
 import Karussell from "../components/bausteine/Karussell.astro";
@@ -144,7 +143,10 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
 			   Film nur lokal (Freigabe fehlt). */}
-			<ZeigerFilm src="/lokal/hagen-empfehlung.mp4" titel="Hagen: Empfehlung" bereich=".hero__buehne" />
+			{/* Zeiger-Film herausgenommen (Rasul 13.11.2026 abends: „Das kleine Video mit dem Mauszeiger über dem fünf Zeilen
+			    großen Text, das kannst du erstmal wieder rausnehmen. Ich habe dafür keine wirklich gute Funktion im Moment.
+			    Also es bringt dem Besucher nichts.“). Baustein bleibt (src/components/bausteine/ZeigerFilm.astro); Rückweg:
+			    <ZeigerFilm src="/lokal/hagen-empfehlung.mp4" titel="Hagen: Empfehlung" bereich=".hero__buehne" /> */}
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
