@@ -1982,14 +1982,16 @@ const PREISE = [
 <script>
 	/* Videobeweis-Geste im Hero (Probe 13.11.2026). Zwei Fingerkuppen starten nebeneinander oben in
 	   der Mitte des Rahmens, ziehen ihn als Leuchtspur in Fingerdicke nach und treffen sich unten
-	   wieder; die Spur bleibt weiß, bis der Satz steht, und blendet dann langsam ganz aus. Werte wie Probe 2 der Werkstatt (Fingerdicke 34 und
+	   wieder; die Spur bleibt weiß, bis der Satz steht, blendet dann langsam ab und schimmert leise weiter. Werte wie Probe 2 der Werkstatt (Fingerdicke 34 und
 	   Lücke 8 bei Rahmenhöhe 640 → 5,3 % und 1,25 % der Höhe). */
 	(() => {
 		const cv = document.querySelector(".hero-geste");
 		if (!cv || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 		const ctx = cv.getContext("2d");
 		const off = document.createElement("canvas"), octx = off.getContext("2d");
-		const DAUER = 1.6, START = 0.15, SATZ = 2.5, AUS = 3.0; /* 13.11. (Rasul): Spur bleibt weiß, bis der Satz steht (Zeilen wischen 1,7 s + 0,8 s), dann blendet sie über 3 s ganz langsam aus */
+		const DAUER = 1.6, START = 0.15, SATZ = 2.5, AUS = 3.0, REST = 0.28, SCHIMMER = 0.08, TAKT = 4.5;
+		/* 13.11. (Rasul): Spur bleibt weiß, bis der Satz steht, blendet dann über 3 s langsam ab, aber nicht ganz:
+		   „so ein bisschen vor sich hinschimmern“ (Helligkeit 28 % ± 8 %, ein Atemzug alle 4,5 s). */
 		const kubisch = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 		let teile = [], laenge = 0, dicke = 10, rand = 0, w = 0, h = 0;
 
@@ -2043,8 +2045,11 @@ const PREISE = [
 			if (t >= 0 && t <= DAUER + 0.02) spur.push([anteil, jetzt]);   /* Weg-Anteil statt Position: die Spur folgt so auch in schnellen Ecken dem Bogen */
 
 			const d = cv.width / w;
-			const aus = t <= SATZ ? 1 : Math.max(0, 1 - (t - SATZ) / AUS);
-			const hell = Math.round(255 * (aus < 1 ? 0.5 - 0.5 * Math.cos(Math.PI * aus) : 1));   // weich ausblenden
+			let f = 1;                                               // Helligkeit des Rahmens
+			if (t > SATZ && t < SATZ + AUS) { const u = (t - SATZ) / AUS; f = REST + (1 - REST) * (0.5 + 0.5 * Math.cos(Math.PI * u)); }
+			else if (t >= SATZ + AUS) f = REST + SCHIMMER * Math.sin((2 * Math.PI * (t - SATZ - AUS)) / TAKT - Math.PI / 2) + SCHIMMER;
+			if (t > SATZ && voll) { malen(voll, f, d); requestAnimationFrame(bild); return; }   // ab hier nur noch das fertige Bild dimmen
+			const hell = 255;
 			octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 			octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 			octx.setTransform(d, 0, 0, d, 0, 0); octx.globalCompositeOperation = "lighten";
@@ -2067,12 +2072,17 @@ const PREISE = [
 				octx.fillStyle = `rgb(${v},${v},${v})`;
 				for (const [x, y] of [pr, pl]) { octx.beginPath(); octx.arc(x, y, dicke / 2, 0, Math.PI * 2); octx.fill(); }
 			}
+			if (t > SATZ && !voll) { voll = document.createElement("canvas"); voll.width = off.width; voll.height = off.height; voll.getContext("2d").drawImage(off, 0, 0); }
+			malen(off, f, d);
+			requestAnimationFrame(bild);
+		}
+		let voll = null;
+		function malen(quelle, f, d) {
 			ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
 			ctx.globalCompositeOperation = "screen";       // Schwarz der Ebene bleibt durchsichtig
-			ctx.filter = `blur(${(dicke * 0.7 * d).toFixed(1)}px)`; ctx.globalAlpha = 0.7; ctx.drawImage(off, 0, 0);
-			ctx.filter = "none"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
-			if (t < SATZ + AUS + 0.1) requestAnimationFrame(bild);
-			else ctx.clearRect(0, 0, cv.width, cv.height);
+			ctx.filter = `blur(${(dicke * 0.7 * d).toFixed(1)}px)`; ctx.globalAlpha = 0.7 * f; ctx.drawImage(quelle, 0, 0);
+			ctx.filter = "none"; ctx.globalAlpha = f; ctx.drawImage(quelle, 0, 0);
+			ctx.globalAlpha = 1;
 		}
 		const los = () => { vermessen(); requestAnimationFrame(bild); };
 		(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(los);
