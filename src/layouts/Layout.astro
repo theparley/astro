@@ -8,6 +8,8 @@ import { ClientRouter } from "astro:transitions";
 // erscheint deshalb auf JEDER Seite, auch /termin (die frühere hideCta-Logik
 // entfällt). TileMenu.astro (BBH-Kachelmenü) bleibt weiter archiviert.
 import MenuTile from "../components/MenuTile.astro";
+// Alternative nach BBH (Rasul 13.11.2026, „Als Alternative“), umschaltbar, siehe Menü-Wahl unten.
+import MenuBBH from "../components/MenuBBH.astro";
 import PageWipe from "../components/PageWipe.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 // Designsystem nach BBH (Neustart 13.11.2026): Schriften, Tokens, Raster, Textstile, Bewegung.
@@ -78,10 +80,40 @@ const websiteJsonLd = JSON.stringify({
 		<meta property="og:url" content={canonicalUrl} />
 		{!title && <script type="application/ld+json" set:html={websiteJsonLd} />}
 		<ClientRouter />
+		{/* Menü-Wahl (Rasul 13.11.2026): Zwetschke-Knopf (Standard) oder BBH-Kachelmenü.
+		   Umschalten mit ?menu=bbh bzw. ?menu=zwetschke oder dem Schalter unten rechts;
+		   die Wahl bleibt im Browser gespeichert und überlebt Seitenwechsel. */}
+		<script is:inline>
+			(function () {
+				var K = "parley-menu";
+				function lies() {
+					var q = new URLSearchParams(location.search).get("menu");
+					try {
+						if (q === "bbh" || q === "zwetschke") localStorage.setItem(K, q);
+						return localStorage.getItem(K) || "zwetschke";
+					} catch (e) { return q || "zwetschke"; }
+				}
+				function setze() { document.documentElement.dataset.menu = lies(); }
+				setze();
+				if (!window.__parleyMenuWahl) {
+					window.__parleyMenuWahl = true;
+					document.addEventListener("astro:after-swap", setze);
+				}
+			})();
+		</script>
 	</head>
 	<body>
 		<PageWipe />
 		<MenuTile gateBehindHero={gateMenuBehindHero} />
+		<MenuBBH startseite={gateMenuBehindHero} />
+		{/* Schalter zum Ausprobieren, nur lokal (npm run dev) sichtbar, nie auf der Live-Seite. */}
+		{import.meta.env.DEV && (
+			<div class="menu-wahl" aria-label="Menü zum Testen umschalten">
+				<span>Menü</span>
+				<button type="button" data-wahl="zwetschke">Zwetschke</button>
+				<button type="button" data-wahl="bbh">BBH</button>
+			</div>
+		)}
 		{/* Sticky-Reveal-Stapel (BBH-/Nuxt-Muster, siehe SiteFooter.astro):
 		   Inhalt auf Ebene 10 mit eigenem schwarzen Grund, Footer klebt auf
 		   Ebene 0 darunter und wird beim Zuendescrollen freigelegt. Der
@@ -121,9 +153,54 @@ const websiteJsonLd = JSON.stringify({
 	body > * { order: 9999; }
 	body > .site-content { order: 1; }
 	body > .site-footer { order: 2; }
+
+	/* Menü-Wahl: immer nur eines der beiden Menüs zeigen */
+	html[data-menu="bbh"] .menu-root { display: none; }
+	html:not([data-menu="bbh"]) .bbh-menu { display: none; }
+	/* BBH-Menü sitzt oben links und ist auf der Startseite anfangs offen: unter 768 px würde es
+	   das Hero-Logo überdecken (gemessen bei 375 px), deshalb rückt die Bühne dann tiefer. */
+	@media (max-width: 767px) {
+		html[data-menu="bbh"] .hero__buehne { padding-top: calc(72px + var(--abstand-md, 16px)); }
+	}
+
+	.menu-wahl {
+		position: fixed;
+		right: 8px;
+		bottom: 8px;
+		z-index: 9000;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 4px;
+		background: rgba(20, 20, 20, 0.9);
+		border: 1px solid rgba(255, 255, 255, 0.25);
+		font-family: var(--schrift-mono);
+		font-size: var(--text-sm);
+		color: var(--grey, #999894);
+	}
+	.menu-wahl span { padding: 0 4px; }
+	.menu-wahl button {
+		font: inherit;
+		color: var(--white);
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.25);
+		padding: 2px 8px;
+		cursor: pointer;
+	}
+	html[data-menu="bbh"] .menu-wahl [data-wahl="bbh"],
+	html:not([data-menu="bbh"]) .menu-wahl [data-wahl="zwetschke"] { background: var(--white); color: var(--black); }
 </style>
 
 <script>
+	/* Menü-Schalter (nur lokal): Wahl speichern und sofort umschalten. */
+	document.addEventListener("click", (e) => {
+		const knopf = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-wahl]");
+		if (!knopf) return;
+		const wahl = knopf.dataset.wahl!;
+		try { localStorage.setItem("parley-menu", wahl); } catch {}
+		document.documentElement.dataset.menu = wahl;
+	});
+
 	/* Einblenden wie BBH (Analyse 1.9): Elemente mit data-einblenden blenden über die
 	   Deckkraft ein, sobald sie 20 % vor der Fensterunterkante sind, und beim
 	   Zurückscrollen wieder aus. Bei jedem Seitenwechsel neu (Astro-Seitenübergänge). */

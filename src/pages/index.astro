@@ -21,10 +21,6 @@ import BlasenVideo from "../components/bausteine/BlasenVideo.astro";
 import Platzhalter from "../components/bausteine/Platzhalter.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
-import Seitentitel from "../components/bausteine/Seitentitel.astro";
-import Akkordeon from "../components/bausteine/Akkordeon.astro";
-import Karten from "../components/bausteine/Karten.astro";
-import Aufruf from "../components/bausteine/Aufruf.astro";
 
 // Sprechblasen zum Rohschnitt „Szene Beweisaufnahme“ v1 (Rasul 13.11.2026). Sätze aus
 // website/video/Szene_Beweisaufnahme_Clipvorschlag_2026-11.md, Schnitte bei 4,5 · 9 · 18 · 24 s.
@@ -46,21 +42,6 @@ const FORMATE = [
 	{ buchstabe: "F", name: "Transkript", form: "45", art: "transkript", text: "Jedes Wort zum Nachlesen, damit euch Suchmaschinen und KI-Assistenten finden." },
 ];
 
-const FRAGEN = [
-	["Wie viel Zeit kostet uns das?", "Unter zwei Stunden im Monat, davon eine im Gespräch. Vorher ein kurzes Telefonat zu Thema und Gast, danach die Freigabe am Rechner. Skript, Technik, Schnitt und Ausspielung übernehmen wir."],
-	["Müssen wir etwas vorbereiten?", "Nein. Ihr redet über das, was ihr ohnehin wisst. Die Fragen stellen wir."],
-	["Wir sind keine Creator. Passt das trotzdem?", "Genau dafür ist es gemacht. Ihr müsst euch nicht anpreisen, ihr werdet gefragt."],
-	["Unser Thema haben doch schon alle besprochen.", "Gesagt haben es viele. Im Gespräch hört man, wie ihr darüber denkt. Das kann niemand kopieren."],
-	["Was, wenn uns ein Satz nicht gefällt?", "Nichts geht raus, was ihr nicht freigegeben habt. Ihr bekommt eine Korrekturliste und entscheidet."],
-	["Wo nehmen wir auf?", "Im Blickkontaktstudio in Karlsruhe, mit unserem mobilen Studio bei euch oder in einem eigenen Studio, das wir bei euch einrichten."],
-	["Was kostet das?", "Ihr bezahlt kein Paket, sondern das, was ihr braucht: je Gespräch, je Beitrag und monatlich für die Formatredaktion, die euren Kanal führt. Die Preise stehen gleich darunter."],
-];
-
-const PREISE = [
-	{ titel: "Gespräch", zeile: "Die Aufnahme mit allem, was zur Folge gehört.<br />[Preis offen]", platzhalter: "Platzhalter: Preis offen" },
-	{ titel: "Beitrag", zeile: "Der fertige Ausschnitt samt Text.<br />[Preis offen]", platzhalter: "Platzhalter: Preis offen" },
-	{ titel: "Formatredaktion", zeile: "Redaktion, Ausspielung, Kommentare und Monatsbericht.<br />[Preis offen] je Monat", platzhalter: "Platzhalter: Preis offen" },
-];
 ---
 
 <Layout gateMenuBehindHero>
@@ -120,7 +101,7 @@ const PREISE = [
 
 	{/* ── 5 · DIE AUGENZEUGEN ── Baustein B6 Text-Bild (Grafik als Anker links), darunter
 	   B18 Kennzahl als mittige Einheit (Analyse 2.2), die Uhr und der Hinweis als kurzer Satz. */}
-	<section class="abschnitt" aria-labelledby="ab5-titel">
+	<section class="abschnitt abschnitt--letzter" aria-labelledby="ab5-titel">
 		<TextBild id="ab5-titel" titel="Die Augenzeugen.">
 			<Platzhalter slot="medium" format="4/5" text="Platzhalter: Augenzeugen-Grafik folgt" />
 			<p>Unsere Beweisstücke machen aus Zuschauern Augenzeugen. Wir messen die Zuschauerzeit und justieren die Formate daran. Mit der richtigen Frequenz haben Entscheider euch dann aktiv auf dem Schirm, wenn sie einen Experten&nbsp;brauchen.</p>
@@ -130,38 +111,6 @@ const PREISE = [
 		</div>
 		<div class="uhr rahmen"><MultiOutputKacheln nurUhr /></div>
 		<KurzSaetze klein saetze={["Bleibt ihr im Takt, wird eure Stimme in der Branche mit der Zeit gehört."]} />
-	</section>
-
-	{/* ── 6 · DIE BEFRAGUNG ── hell (BBH: Lektüre hell). Seitentitel B1 mittig, Akkordeon B11
-	   ohne Titel: Mitte 8 von 12. Texte noch nicht abgenommen. */}
-	<section class="abschnitt hell" aria-labelledby="ab6-titel">
-		<Seitentitel id="ab6-titel" titel="Was ihr uns oft fragt." />
-		<div class="nach-titel"><Akkordeon fragen={FRAGEN} /></div>
-	</section>
-
-	{/* ── 7 · DIE KOSTEN ── Textblock in der Mitte, darunter drei Karten (B7, Drittel).
-	   Texte noch nicht abgenommen, Preise offen. */}
-	<section class="abschnitt" aria-labelledby="ab7-titel">
-		<Textblock id="ab7-titel" titel="Ihr bezahlt, was ihr braucht.">
-			<p>Je Gespräch die Aufnahme mit allem, was zur Folge gehört. Je Beitrag der fertige Ausschnitt samt Text. Und monatlich die Formatredaktion, die euren Kanal führt: Redaktion, Ausspielung, Kommentare und Monatsbericht. Was das für euer Format heißt, rechnen wir am besten gemeinsam durch.</p>
-		</Textblock>
-		<div class="nach-textbild"><Karten spalten={3} format="4/3" karten={PREISE} /></div>
-	</section>
-
-	{/* ── 8 · ZUR PERSON ── B6 Text-Bild, Foto als Anker links. Texte noch nicht abgenommen. */}
-	<section class="abschnitt" aria-labelledby="ab8-titel">
-		<TextBild id="ab8-titel" titel="Ich stelle die Fragen.">
-			<Platzhalter slot="medium" format="1/1" text="Platzhalter: Foto Fred" />
-			<p>Ich bin Fred Eric Eckert. Mit Parley Film bringe ich Experten ins Gespräch, im Blickkontaktstudio in Karlsruhe, mit dem mobilen Studio bei euch oder in einem Studio, das wir bei euch einrichten. Am liebsten lerne ich euch persönlich kennen.</p>
-			<p><span class="entwurf">Platzhalter: Ich-Text aus der Gesamtgeschichte einarbeiten; Foto Studio Lotzbeckstraße</span></p>
-		</TextBild>
-	</section>
-
-	{/* ── 9 · DER TERMIN ── Aufruf R11: Bogle xl, ein Satz, ein Knopf, mittig. */}
-	<section class="abschnitt abschnitt--letzter" aria-labelledby="ab9-titel">
-		<Aufruf id="ab9-titel" titel="Euer Gespräch fängt hier an." knopf={{ href: "/termin", text: "Let’s Parley" }}>
-			<p>Kommt zum Studiotermin, schaut euch das Blickkontaktstudio an und erzählt uns, worüber ihr sprechen wollt. In 30 Minuten wisst ihr, welches Format zu euch passt. Online geht es auch.</p>
-		</Aufruf>
 	</section>
 </Layout>
 
@@ -190,7 +139,6 @@ const PREISE = [
 	.kanaele { margin-top: var(--abstand-md); }
 	.nach-band { margin-top: var(--abstand-lg); }
 	.nach-textbild { margin-top: var(--abstand-lg); }
-	.nach-titel { margin-top: var(--abstand-md); }
 	.uhr { margin-top: var(--abstand-lg); }   /* die Uhr bringt ihre Breite selbst mit: min(542 px, 100 %), mittig */
 	.uhr + :global(.kurzsaetze) { margin-top: var(--abstand-md); }
 	.abschnitt--letzter { margin-bottom: var(--abstand-xl); }

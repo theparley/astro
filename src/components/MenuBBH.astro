@@ -1,0 +1,280 @@
+---
+/* Menü nach BBH als Alternative zum Zwetschke-Knopf (Rasul 13.11.2026: „Das finde ich okay,
+   aber ich würde gerne das andere auch noch testen können. Als Alternative“).
+   Gebaut nach den gemessenen BBH-Werten, Marketing-Ordner
+   research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md Kapitel 5 und B_Seitenaufbau.md 6.1:
+   - Kachel-Cluster oben links: Logo-Kachel + Hamburger-Kachel, 72 px, ab 768 px 88 px, 2 px Fuge,
+     Fläche #ededed mit 95 % Deckkraft.
+   - Menükacheln in zwei Reihen, halbe Kachelhöhe, Text oben links in Geist.
+   - Öffnen mit der Maus beim Überfahren, auf Touch per Tipp auf den Hamburger; Hintergrund
+     schwarz 10 % mit Unschärfe, Tipp darauf schließt.
+   - Staffel: Hamburger-Breite 300 ms auf 0; Kachel-Verzögerung 50 ms × Index + 300 ms;
+     Öffnen Breite sofort und Höhe verzögert, Schließen Höhe sofort und Breite verzögert.
+   - Startseite: offen, bis 100 px gescrollt ist, dann klappt es ein (bei BBH steht der Cluster
+     dort mittig im Video-Hero; bei uns oben, weil der Hero in der Mitte Logo und Text trägt).
+   - Hover auf Kachel: Balken in Textfarbe, 15 % Deckkraft, wischt von links, 150 ms;
+     aktuelle Seite trägt den Balken dauerhaft.
+   Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
+interface Props { startseite?: boolean }
+const { startseite = false } = Astro.props;
+
+// Wie im Zwetschke-Menü (MenuTile.astro): Home ist die Logo-Kachel, dazu Termin und Kontakt.
+// BBH-Regel: Menükacheln in zwei Reihen, Spalten = Hälfte der Links; bei ungerader Zahl kommt
+// „Home“ dazu, damit das Raster aufgeht. Kommen Studios oder Format dazu, wird es 2 × 2.
+const links = [
+	{ href: "/termin", text: "Termin" },
+	{ href: "/kontakt", text: "Kontakt" },
+];
+if (links.length % 2 === 1) links.unshift({ href: "/", text: "Home" });
+const spalten = Math.ceil(links.length / 2);
+const pfad = Astro.url.pathname.replace(/\/$/, "") || "/";
+const aktiv = (href: string) => (href === "/" ? pfad === "/" : pfad.startsWith(href));
+const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class={`bbh-menu${startseite ? " bbh-menu--start offen" : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
+	<div class="bbh-menu__cluster">
+		<a href="/" class="bbh-menu__logo" aria-label="parley Film, Startseite">
+			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
+			   biss_logo_website.py), hier nur auf das Rechteck zugeschnitten, damit es mittig sitzt. */}
+			<svg viewBox="0 0 177.8 100" aria-hidden="true">
+				<defs>
+					<mask id={maskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
+						<rect x="-10" y="-70" width="320" height="200" fill="#fff" />
+						<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+					</mask>
+				</defs>
+				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="currentColor" mask={`url(#${maskeId})`} />
+			</svg>
+		</a>
+		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
+			<span></span><span></span><span></span>
+		</button>
+		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
+			{links.map((l, i) => (
+				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
+					<span>{l.text}</span>
+				</a>
+			))}
+		</nav>
+	</div>
+	<button type="button" class="bbh-menu__schleier" aria-label="Menü schließen" tabindex="-1"></button>
+</div>
+
+<style>
+	.bbh-menu {
+		--k: 72px;
+		--fuge: 2px;
+		--halb: calc((var(--k) - var(--fuge)) / 2);
+		--flaeche: rgba(237, 237, 237, 0.95);
+		--dauer: 300ms;
+		--kurve: cubic-bezier(0.4, 0, 0.2, 1);
+		--maske: cubic-bezier(0.77, 0, 0.18, 1);
+		--nav-breite: calc(var(--spalten) * var(--k) + (var(--spalten) - 1) * var(--fuge));
+		/* Schließen wartet, bis die Kacheln einzeln weg sind: 50 ms × Anzahl + 300 ms */
+		--out-delay: calc(50ms * var(--anzahl) + 300ms);
+	}
+	@media (min-width: 768px) {
+		.bbh-menu { --k: 88px; }
+	}
+
+	.bbh-menu__cluster {
+		position: fixed;
+		top: var(--fuge);
+		left: var(--fuge);
+		z-index: 900;
+		display: flex;
+		align-items: flex-start;
+		gap: var(--fuge);
+	}
+
+	.bbh-menu__logo,
+	.bbh-menu__burger {
+		width: var(--k);
+		height: var(--k);
+		background: var(--flaeche);
+		backdrop-filter: blur(2px);
+		-webkit-backdrop-filter: blur(2px);
+		color: #000;
+		border: 0;
+		padding: 0;
+		display: grid;
+		place-items: center;
+		flex: none;
+		cursor: pointer;
+		animation: bbh-maske 500ms var(--maske) both;
+	}
+	.bbh-menu__logo { transition: transform 50ms var(--kurve); }
+	.bbh-menu__logo:active { transform: scale(0.98); }
+	.bbh-menu__logo svg { width: 56%; height: auto; display: block; }
+
+	.bbh-menu__burger {
+		overflow: hidden;
+		align-content: center;
+		gap: 6px;
+		transition: width var(--dauer) var(--kurve) var(--out-delay), margin var(--dauer) var(--kurve) var(--out-delay);
+	}
+	.bbh-menu__burger span {
+		display: block;
+		width: calc(var(--k) * 0.36);
+		height: 2px;
+		background: #000;
+	}
+	.offen .bbh-menu__burger {
+		width: 0;
+		margin-left: calc(-1 * var(--fuge));
+		transition-delay: 0ms;
+	}
+
+	.bbh-menu__nav {
+		display: grid;
+		grid-template-columns: repeat(var(--spalten), var(--k));
+		grid-auto-rows: var(--halb);
+		gap: var(--fuge);
+		width: 0;
+		overflow: hidden;
+		transition: width var(--dauer) var(--kurve) var(--out-delay);
+	}
+	.offen .bbh-menu__nav {
+		width: var(--nav-breite);
+		transition-delay: 0ms;
+	}
+
+	.bbh-menu__kachel {
+		--in-delay: calc(50ms * var(--i) + 300ms);
+		position: relative;
+		display: block;
+		width: 0;
+		height: 0;
+		opacity: 0;
+		overflow: hidden;
+		background: var(--flaeche);
+		backdrop-filter: blur(2px);
+		-webkit-backdrop-filter: blur(2px);
+		color: #000;
+		text-decoration: none;
+		/* Schließen: Höhe sofort, Breite verzögert */
+		transition:
+			height var(--dauer) var(--kurve) 0ms,
+			opacity var(--dauer) var(--kurve) 0ms,
+			width var(--dauer) var(--kurve) var(--in-delay);
+	}
+	.offen .bbh-menu__kachel {
+		width: var(--k);
+		height: var(--halb);
+		opacity: 1;
+		/* Öffnen: Breite sofort, Höhe verzögert */
+		transition:
+			width var(--dauer) var(--kurve) 0ms,
+			height var(--dauer) var(--kurve) var(--in-delay),
+			opacity var(--dauer) var(--kurve) var(--in-delay);
+	}
+	.bbh-menu__kachel span {
+		position: relative;
+		z-index: 1;
+		display: block;
+		padding: 6px 8px;
+		font-family: var(--schrift-lesen);
+		font-weight: 500;
+		font-size: var(--text-sm);
+		line-height: 1;
+		white-space: nowrap;
+	}
+	/* Balken: Textfarbe mit 15 % Deckkraft, wischt von links auf, 150 ms */
+	.bbh-menu__kachel::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: currentColor;
+		opacity: 0.15;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 150ms ease-in-out;
+	}
+	.bbh-menu__kachel[aria-current="page"]::before { transform: scaleX(1); transition-delay: var(--out-delay); }
+	@media (hover: hover) {
+		.bbh-menu__kachel:hover::before { transform: scaleX(1); transition-delay: 0ms; }
+	}
+
+	.bbh-menu__schleier {
+		position: fixed;
+		inset: 0;
+		z-index: 899;
+		border: 0;
+		padding: 0;
+		background: rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity var(--dauer) ease-in-out;
+	}
+	/* Auf der Startseite erst nach dem Scrollen (oben ist das Menü ohnehin offen) */
+	.offen:not(.bbh-menu--oben) .bbh-menu__schleier {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	/* Startseite oben: Menükacheln wischen beim Laden ein (BBH: 1000 ms ab 1000 ms) */
+	.bbh-menu--start.bbh-menu--oben .bbh-menu__nav { animation: bbh-maske 1000ms var(--maske) 1000ms both; }
+
+	@keyframes bbh-maske {
+		from { clip-path: inset(0 100% 0 0); }
+		to { clip-path: inset(0 0 0 0); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.bbh-menu *, .bbh-menu *::before { transition-duration: 0ms !important; transition-delay: 0ms !important; animation: none !important; }
+	}
+</style>
+
+<script>
+	let aufraeumen: (() => void) | null = null;
+
+	function bbhMenu() {
+		aufraeumen?.();
+		aufraeumen = null;
+		const menu = document.querySelector<HTMLElement>("[data-bbh-menu]");
+		if (!menu) return;
+		const cluster = menu.querySelector<HTMLElement>(".bbh-menu__cluster")!;
+		const burger = menu.querySelector<HTMLButtonElement>(".bbh-menu__burger")!;
+		const schleier = menu.querySelector<HTMLButtonElement>(".bbh-menu__schleier")!;
+		const startseite = menu.classList.contains("bbh-menu--start");
+		const maus = window.matchMedia("(hover: hover)").matches;
+		let gehalten = false; // per Klick/Tipp geöffnet
+		let ueber = false; // Maus über dem Cluster
+
+		const setze = () => {
+			const oben = startseite && window.scrollY <= 100;
+			menu.classList.toggle("bbh-menu--oben", oben);
+			const offen = oben || gehalten || ueber;
+			menu.classList.toggle("offen", offen);
+			burger.setAttribute("aria-expanded", String(offen));
+		};
+
+		const rein = () => { ueber = true; setze(); };
+		const raus = () => { ueber = false; setze(); };
+		const klick = () => { gehalten = !gehalten; setze(); };
+		const zu = () => { gehalten = false; ueber = false; setze(); };
+		const scroll = () => setze();
+
+		if (maus) {
+			cluster.addEventListener("mouseenter", rein);
+			cluster.addEventListener("mouseleave", raus);
+		}
+		burger.addEventListener("click", klick);
+		schleier.addEventListener("click", zu);
+		window.addEventListener("scroll", scroll, { passive: true });
+		setze();
+
+		aufraeumen = () => {
+			cluster.removeEventListener("mouseenter", rein);
+			cluster.removeEventListener("mouseleave", raus);
+			burger.removeEventListener("click", klick);
+			schleier.removeEventListener("click", zu);
+			window.removeEventListener("scroll", scroll);
+		};
+	}
+
+	document.addEventListener("astro:page-load", bbhMenu);
+</script>
