@@ -384,5 +384,10 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	@media (min-width: 1024px) { .anlass__kachel { aspect-ratio: 2 / 1; padding: 32px; } }
 	.anlass__gross { margin: 0; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
 	.anlass__text { margin: 0 auto; max-width: 46ch; text-wrap: balance; }
+	/* Abstand Überschrift zum Text wie bei BBH (Rasul 14.11.2026: „Der kommt mir ein bisschen groß vor. Orientier dich da mal
+	   an der BBH-Seite.“): BBH setzt nach großen Überschriften überall 48 px (mb-12 / mt-12, Text-Bild, Fachbereiche,
+	   Titelblock; research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md), fest auf allen Breiten. Vorher --abstand-md
+	   (69 px bei 1440 px). Das Raster setzt --abstand-md, deshalb hier die Differenz. */
+	.anlass--band .anlass__text { margin-top: calc(3rem - var(--abstand-md)); }
 </style>
 
