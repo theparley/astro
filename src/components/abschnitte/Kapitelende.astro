@@ -4,7 +4,7 @@
    wollen.“ Deshalb: Weiter zum nächsten Schritt und darunter der Aufruf zum Studiotermin (Titel und Satz wie die
    Terminseite: „Let’s Parley“, „Welches Format passt? 30 Minuten.“). */
 import Knopf from "../bausteine/Knopf.astro";
-import Aufruf from "../bausteine/Aufruf.astro";
+import Seitentitel from "../bausteine/Seitentitel.astro";
 interface Props { weiter?: { href: string; nr: string; titel: string } }
 const { weiter } = Astro.props;
 ---
@@ -14,12 +14,15 @@ const { weiter } = Astro.props;
 		<Knopf href={weiter.href} text={`${weiter.nr} ${weiter.titel}`} />
 	</nav>
 )}
+{/* Gleich gesetzt wie die Terminseite (Rasul 13.11.2026 abends: „unter den Kacheln schon Let's Parley stehen.
+   Das sieht aber anders ausgeschrieben als das Let's Parley auf der Terminseite.“): Seitentitel Bartle huge mit
+   Unterzeile, darunter der Knopf. Vorher Aufruf R11 (Bogle xl). */}
 <section class="abschnitt kapitelende__aufruf" aria-label="Studiotermin">
-	<Aufruf titel="Let’s Parley" knopf={{ href: "/termin", text: "Studiotermin" }}>
-		<p>Welches Format passt? 30 Minuten.</p>
-	</Aufruf>
+	<Seitentitel titel="Let’s Parley" unter="Welches Format passt? 30 Minuten." />
+	<p class="kapitelende__knopf"><Knopf href="/termin" text="Studiotermin" /></p>
 </section>
 <style>
 	.kapitelende__weiter { display: flex; justify-content: flex-end; align-items: baseline; gap: 16px; margin-top: var(--abstand-lg); }
 	.kapitelende__aufruf { margin-bottom: var(--abstand-xl); }
+	.kapitelende__knopf { display: flex; justify-content: center; margin-top: 48px; }
 </style>

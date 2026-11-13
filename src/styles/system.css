@@ -44,10 +44,7 @@
 @font-face { font-family: "BBH-DE-Ecken Bartle"; src: url("/fonts/frei/BBH-DE-Ecken-Bartle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BBH-DE-Ecken Bogle"; src: url("/fonts/frei/BBH-DE-Ecken-Bogle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BBH-DE-Ecken Hegarty"; src: url("/fonts/frei/BBH-DE-Ecken-Hegarty.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
-/* Forma DJR nur noch für die Werkstatt- und Demo-Seiten (/werkstatt, /tafel, Fallblatt).
-   Eine Schrift wird nur geladen, wenn eine Seite sie benutzt: Die Website selbst lädt Forma
-   nicht mehr. Nicht in neuen Bausteinen verwenden (Lizenz offen, WEBSITE.md 3n). */
-@font-face { font-family: "Forma DJR"; src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+/* Forma DJR seit 13.11.2026 abends nur noch in src/styles/forma-werkstatt.css (Werkstatt- und Probeseiten, nur lokal). */
 
 /* ── 2  Tokens ───────────────────────────────────────────────────────── */
 :root {

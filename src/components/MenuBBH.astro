@@ -257,8 +257,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 
 	.bbh-menu__name span {
 		white-space: nowrap;
-		font-family: "Forma DJR", var(--schrift-lesen);
-		font-variation-settings: "opsz" 72, "wght" 900;
+		/* Geist statt Forma DJR (13.11.2026 abends, Rasul „Ja, entfernen“: die neue Fassung kommt ohne Forma aus, bis
+		   die Lizenz gekauft ist). Rückweg: font-family "Forma DJR"; font-variation-settings "opsz" 72, "wght" 900. */
+		font-family: var(--schrift-lesen);
+		font-weight: 900;
 		font-size: calc(var(--k) * 0.9);
 		line-height: 1;
 		letter-spacing: -0.02em;

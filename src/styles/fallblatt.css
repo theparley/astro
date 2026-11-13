@@ -13,13 +13,9 @@
 /* Forma DJR Mono — Variable-Font wght 1–900, konvertiert aus Freds lokalem
    Bestand. ACHTUNG Lizenz: Quelldatei ist eine "-Testing"-Fassung
    (DJR-Trial) — Mono-Webfont-Lizenz vor dem Feinschliff klären (Brief). */
-@font-face {
-	font-family: "Forma DJR Mono";
-	src: url("/fonts/FormaDJRMonoVariable.woff2") format("woff2-variations");
-	font-weight: 1 900;
-	font-style: normal;
-	font-display: swap;
-}
+/* Seit 13.11.2026 abends Geist Mono statt Forma DJR Mono (Rasul „Ja, entfernen“: die hochgeladene Fassung liefert
+   keine Forma aus, solange nur Testlizenzen vorliegen). Die Werkstatt-Seiten holen sich Forma Mono lokal über
+   src/styles/forma-werkstatt.css zurück (@font-face dort, Schrift und Versatz als Variablen). */
 
 .sf-tile {
 	position: relative;
@@ -87,7 +83,7 @@
 	/* Forma DJR MONO (Fred 30.08. nachts): die Mono-Schwester löst das
 	   Kachelbreiten-Problem an der Wurzel — jedes Zeichen ist gleich breit,
 	   das Raster kann nie springen. Gewicht 900 ("mach mal die Fetteste"). */
-	font-family: "Forma DJR Mono", "Forma DJR", ui-monospace, monospace;
+	font-family: var(--sf-schrift, "Geist Mono", ui-monospace, monospace);
 	font-weight: 900;
 	font-size: var(--sf-font-size);
 	line-height: 1;
@@ -98,8 +94,10 @@
 	   aber die Versalien der Forma DJR Mono sitzen 0.05em ÜBER der
 	   Box-Mitte, mit der Flexbox zentriert (Cap-Mitte 35/100 über der
 	   Baseline, Em-Box-Mitte 30/100 — Canvas-TextMetrics). Der Shift
-	   holt die TINTE auf die Scharnier-Achse. */
-	transform: translateY(0.05em);
+	   holt die TINTE auf die Scharnier-Achse.
+	   Geist Mono: Versal-Mitte und Box-Mitte fallen zusammen (gemessen 13.11.2026: Versalhöhe 710, Ober- und
+	   Unterlänge 1005 und −295 bei 1000 Einheiten), Versatz 0. Forma Mono (Werkstatt): 0,05 em. */
+	transform: translateY(var(--sf-versatz, 0em));
 }
 
 /* AUSNAHME (Fred 14.09. abends, zweite Runde: "Kreise und Logos nicht
