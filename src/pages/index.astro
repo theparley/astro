@@ -118,6 +118,8 @@ const PREISE = [
 
 <Layout gateMenuBehindHero>
 	<header class="hero">
+		{/* Erster Bildschirm = Logo + drei Zeilen; der Erklärtext darf darunter liegen, man scrollt zu ihm (Rasul 13.11.2026) */}
+		<div class="hero-buehne">
 		{/* LOGO PROBE (Rasul 13.11.2026: „Lass uns noch das Logo einbinden.“): Rechteck mit Biss,
 		   „parley Film“ in der unsichtbaren Blase, seit 13.11. mittig oben (vorher oben links); Rechteckhöhe 96 px (Stufe 1 ab 96 px,
 		   Logo-Erkenntnisse), unter 800 px nur die Fläche mit Schutzraum (Stufe 3, 40 px).
@@ -172,7 +174,6 @@ const PREISE = [
 		   raus. Und machen es wieder dreizeilig.“). Fassung mit Geste in der Git-Historie (Commit 79362ba)
 		   und beschrieben in branding/aktiv/Parley_Videobeweis_Geste_2026-11.md. */}
 		<h1><span class="hero-zeile">Überall Experten.</span><span class="hero-zeile">Zeit für den</span><span class="hero-zeile">Videobeweis.</span></h1>
-		<p class="hero-text">Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt.</p>
 		{/* Vorrat (28.09., wieder raus auf Freds Wunsch): Erklaerungs-Zeile unterm
 		   Hero in md-Groesse, zuletzt "Aus echten Gespraechen entwickeln wir
 		   passende Formate, die das Vertrauen in eure Kompetenz greifbar
@@ -180,6 +181,8 @@ const PREISE = [
 		   Programm.", "Euer Gespraech ist Programm." (Umlaut-Zeile brauchte
 		   0,07 em Luft nach oben). */}
 		</div>
+		</div>
+		<p class="hero-text hero-text--unten">Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt.</p>
 		{/* Seit 26.10.2026 kein Logo unten mehr (Fahne „The Parley“ raus, Fred
 		   10.10.); BrandLogo.astro ist nur noch der Schalter, der den
 		   Menüknopf ab 50 px Scrollweg erscheinen lässt. Verlauf des Logos
@@ -952,12 +955,24 @@ const PREISE = [
 		line-height: 0;
 	}
 	.hero-logo :global(svg) { display: block; height: auto; }
-	.hero-logo :global(.hero-logo-gross) { width: calc(2.8964 * 48px); } /* halb so groß (Rasul 13.11.2026), vorher 96 px */
+	.hero-logo :global(.hero-logo-gross) { width: calc(2.8964 * 96px); } /* Rasul 13.11.2026: wieder doppelt so groß (zwischendurch 48 px) */
 	.hero-logo :global(.hero-logo-klein) { display: none; width: calc(2.8964 * 40px); }
 	@media (max-width: 799px) {
 		.hero-logo { margin: 0 auto var(--abstand-md); }
 		.hero-logo :global(.hero-logo-gross) { display: none; }
 		.hero-logo :global(.hero-logo-klein) { display: block; }
+	}
+
+	/* Bühne des ersten Bildschirms (Rasul 13.11.2026): Logo oben, drei Zeilen mittig im Rest;
+	   der Erklärtext folgt darunter, unterhalb des ersten Bildschirms. */
+	.hero-buehne {
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100svh - 2 * var(--abstand-md));
+	}
+	.hero-text--unten {
+		margin-top: var(--abstand-md);
+		padding: 0 16px;
 	}
 
 	.hero-headline {
