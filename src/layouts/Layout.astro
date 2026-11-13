@@ -118,7 +118,7 @@ const websiteJsonLd = JSON.stringify({
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t") localStorage.setItem("parley-satz", q);
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u") localStorage.setItem("parley-satz", q);
 						return localStorage.getItem("parley-satz") || "i";
 					} catch (e) { return q || "i"; }
 				}
@@ -192,6 +192,7 @@ const websiteJsonLd = JSON.stringify({
 				<button type="button" data-satz-wahl="r">R</button>
 				<button type="button" data-satz-wahl="s">S</button>
 				<button type="button" data-satz-wahl="t">T</button>
+				<button type="button" data-satz-wahl="u">U</button>
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
@@ -286,6 +287,7 @@ const websiteJsonLd = JSON.stringify({
 	html:not([data-umlaut="innen"]):not([data-umlaut="ecken"]) .menu-wahl [data-umlaut-wahl="aussen"],
 	html[data-satz="s"] .menu-wahl [data-satz-wahl="s"],
 	html[data-satz="t"] .menu-wahl [data-satz-wahl="t"],
+	html[data-satz="u"] .menu-wahl [data-satz-wahl="u"],
 	html[data-satz="a"] .menu-wahl [data-satz-wahl="a"],
 	html[data-satz="b"] .menu-wahl [data-satz-wahl="b"],
 	html[data-satz="c"] .menu-wahl [data-satz-wahl="c"],
