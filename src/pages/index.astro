@@ -255,7 +255,15 @@ const FORMATE = [
 		.hero__logo :global(.hero__logo--gross) { display: block; }
 		.hero__logo :global(.hero__logo--klein) { display: none; }
 	}
+	/* Abgleich mit BBH 13.11.2026: Schrift, Größe und Breite des kleinen Texts gleich wie BBH About (Geist
+	   Medium, text-lg, Zeilenhöhe 1,1, Laufweite −0,04 em, max. 1024 px). */
 	.hero :global(.kurzsaetze) { margin-top: var(--abstand-md); }
+	/* Unter dem Film (Film-Hero) wie BBH: Statement und kleiner Text als Einheit mit genau lg Abstand
+	   (Join Us: „Black Sheep Wanted“ → Intro, gemessen 160 px bei 2048 px). Ohne die Reserve der Text-Variante
+	   (Mindesthöhe der Bühne) und ohne Innenabstand unter dem Statement. Vorher gemessen 218 px. */
+	:global(html[data-hero="film"]) .hero__buehne { min-height: 0; }
+	:global(html[data-hero="film"]) .satz :global(.haltung) { padding-bottom: 0; }
+	:global(html[data-hero="film"]) .hero :global(.kurzsaetze) { margin-top: var(--abstand-lg); }
 
 	/* Abstände innerhalb eines Abschnitts (BBH: Text zu Medium lg, Überschrift zu Text md) */
 	.kanaele { margin-top: var(--abstand-md); }
