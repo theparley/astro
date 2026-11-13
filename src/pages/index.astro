@@ -1503,7 +1503,7 @@ const PREISE = [
 		   das Video und dann den Text dazu.“; Versatz und Nebeneinander zurückgenommen): Video über die ganze
 		   Breite beider Hälften, höchstens 1200 px, mittig; darunter Überschrift und Text in der rechten Hälfte. */
 		.ab-split { align-items: start; }
-		.ab-split > .ab-split-video { grid-column: 1 / span 2; grid-row: 1; justify-self: center; width: min(100%, 1200px); margin: 0 0 var(--abstand-lg); }
+		.ab-split > .ab-split-video { grid-column: 1 / span 2; grid-row: 1; justify-self: center; width: min(100%, 50vw); /* halbe Fensterbreite (Rasul 13.11.2026), vorher bis 1200 px */ margin: 0 0 var(--abstand-lg); }
 	}
 	/* Sprechblasen am Video (Probe 13.11.2026, nach der Szenen-Vorschau) */
 	.ab-szene { position: relative; container-type: inline-size; }
@@ -2057,7 +2057,7 @@ const PREISE = [
 		];
 		const STUFEN = ["--text-lg", "--text-md", "--text-base", "--text-sm"];
 		const ZIPFEL = { laenge: 0.3, breite: 13, schraeg: 14 };   // wie Szenen-Vorschau (Rasul 08.11.)
-		const ANTEIL = 0.42;   // Blasenbreite in Videobreiten (Vorschau: 0,95; seit 13.11. Video breit über beide Hälften)
+		const ANTEIL = 0.6;   // Blasenbreite in Videobreiten (Vorschau: 0,95; Video seit 13.11. halbe Fensterbreite)
 
 		function zipfel(rx, winkel) {
 			const ry = rx / 1.4, m = (winkel * Math.PI) / 180;
