@@ -401,7 +401,6 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
 				if (ende() === "kamera") {
 					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
-					const STUFE: [number, number][] = [[0, 1], [4, 0.75], [9, 0.45], [16, 0.25]];
 					const e = glatt(anteil(t, T_AUSWAHL, D_KAMERA));
 					const { C, Lk, F } = bahn(e, F1 * zoomEnde);
 					const punkte = form() === "punkt";
@@ -411,18 +410,25 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const u = (64 * q.s * pr.g) / 19;
 						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15), g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y };
 					}).sort((a, b) => b.zc - a.zc);
-					// Unschärfe und Helligkeit wachsen mit der Fahrt; bei Punkten erst, wenn die Verwandlung fertig ist
-					const m = punkte ? sanft(anteil(e, 0.5, 0.5)) : sanft(anteil(e, 0.3, 0.7));
-					for (const { q, x, y, g, kipp, fy } of lage) {
+					// Rasul 13.11.2026 abends: „die sind jetzt schon im Hintergrund und werden kurz scharf und dann unscharf. Das
+					// stimmt von der Perspektivenwirkung der Kamera dann nicht mehr.“ Deshalb: Verwandlung ganz am Anfang des
+					// Kippens (Kamera fast senkrecht, alle etwa gleich weit weg) und Unschärfe aus der Entfernung:
+					// Schärfe wie bei einem Objektiv: scharfgestellt ist die vordere Person; Unschärfe und Blässe wachsen mit dem
+					// Abstand hinter ihr (Zerstreuungskreis ~ F · (1/zFokus − 1/z)). Von oben sind alle gleich weit weg, also
+					// scharf; mit dem Kippen entsteht die Tiefe und mit ihr die Unschärfe, in jedem Moment passend.
+					const fokus = lage.find((l) => l.q.ebene === 0)?.zc ?? lage[lage.length - 1].zc;
+					const F_jetzt = F;
+					for (const { q, x, y, g, kipp, fy, zc } of lage) {
 						const ein = weich((t - q.ein) / 0.5);
-						const [b1, a1] = STUFE[q.ebene];
-						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * e : 0.85 + (a1 - 0.85) * m);
+						const tiefe = Math.max(0, 1 - fokus / zc); // 0 = auf der Schärfeebene
+						const unsch = 8 * F_jetzt * Math.max(0, 1 / fokus - 1 / zc);
+						const alpha = ein * (0.85 + 0.15 * e) * (1 - 0.95 * tiefe);
 						if (punkte) {
 							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen (Kopf hebt sich, Schultern wachsen)
-							const p = sanft(anteil(kipp, 0.05, 0.4));
+							const p = sanft(anteil(kipp, 0.01, 0.17));
 							if (p < 1) zeichneVerwandlung(ctx, x, fy, y, g, alpha, p);
-							else zeichneUnscharf(ctx, x, y, g, alpha, b1 * m);
-						} else zeichneUnscharf(ctx, x, y, g, alpha, b1 * m);
+							else zeichneUnscharf(ctx, x, y, g, alpha, unsch);
+						} else zeichneUnscharf(ctx, x, y, g, alpha, unsch);
 					}
 					return;
 				}
