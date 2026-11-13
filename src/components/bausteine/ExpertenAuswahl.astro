@@ -371,7 +371,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// über den gesamten Viewport. Den Text lässt man dann erst beim Runterscrollen.“): am Rechner (ab 1024 px) so hoch
 				// wie das Fenster; am Handy so hoch, wie der 16:9-Rahmen in der Breite braucht (sonst fast nur Weiß im Hochformat).
 				// Vorher: das ganze Band passte auf eine Seite und die Animation bekam den Rest (Git-Geschichte).
-				if (window.innerWidth >= 1024) cv.style.height = `${window.innerHeight}px`;
+				// Danach Rasul: „lass uns das definieren über die Viewporthöhe. Wie ist es dann aber auf dem Handy oder
+				// zwischendrin?“ Geprüft 13.11.2026: Im Hochformat (Handy 375 × 812, Tablet 768 × 1024) wird der Rahmen schmal und
+				// hoch, die Personen drängen sich oben. Regel deshalb nach der Form des Fensters statt nach einer Breite:
+				// Querformat (Breite ≥ Höhe) = Fensterhöhe; Hochformat = so hoch, wie der 16:9-Rahmen in der Breite braucht.
+				if (window.innerWidth >= window.innerHeight) cv.style.height = `${window.innerHeight}px`;
 				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
