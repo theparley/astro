@@ -208,15 +208,14 @@ const PREISE = [
 		<h2 class="ab-titel" id="ab2-titel">Die Beweiskraft<br />echter Gespräche.</h2>
 		<p class="ab-text">Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie am Küchentisch.</p>
 		<p class="ab-text">Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
+		{/* Video rechts neben Überschrift und Text (Rasul 13.11.2026): Rohschnitt „Szene Beweisaufnahme“ v1
+		   aus der Session „Website · Video“ (Katrin, Ute, Hagen, Erik, 28 s). NUR LOKAL: Datei liegt in
+		   public/lokal/ (gitignored, Verweis auf ~/Movies/Website-Video/), weil die Freigaben der Gäste
+		   fehlen. Vor jedem Hochladen durch den freigegebenen Clip ersetzen. */}
+		<div class="ab-split-video"><video class="szene-video" src="/lokal/szene-beweisaufnahme.mp4" autoplay muted loop playsinline></video></div>
 	</section>
 
-	{/* SZENE (07.11.2026, Übergabe „Website · Gestaltung“): Video 16:9, seit
-	   12.11.2026 UNTER dem Text von Block 2 (Rasul: „Ja, verschieben“; der Text
-	   bereitet das Anschauen vor), vorher unter dem Hero; später mit Sprechblasen ringsum (nicht in diesem Schritt).
-	   PROBE LOKAL mit neutralem Testvideo, nicht live vor Rasuls Abnahme. */}
-	<section class="szene" aria-label="Szene">
-		<video class="szene-video" src="/test/testvideo-16x9.mp4" autoplay muted loop playsinline></video>
-	</section>
+	{/* Dummy-Szene unter Block 2 entfernt (Rasul 13.11.2026: „die Dummy-Videos rausmachen“); das Video steht jetzt im Split von Block 2. */}
 
 	{/* 3 · Die Methode (Rasul 12.11.2026: „Block 3 müsste dann eigentlich heißen: die
 	   Methode. Und die würde ich auch gerne nur kurz anreißen. Da könnten wir das Video
@@ -230,9 +229,7 @@ const PREISE = [
 		<h2 class="ab-titel" id="ab3m-titel">Das Beweisverfahren.</h2>
 		<p class="ab-text">Echte Experten haben keine Zeit für Videos. Müssen sie auch nicht. Wir gehen den ganzen Weg mit euch: von der redaktionellen Vorbereitung über die Aufnahme im Gesprächsmodus inklusive Live-Regie bis zur Verteilung des&nbsp;Beweismaterials.</p>
 	</section>
-	<section class="szene" aria-label="Hagen über den Blickkontakt (Testvideo)">
-		<video class="szene-video" src="/test/testvideo-16x9.mp4" autoplay muted loop playsinline></video>
-	</section>
+	{/* Hagen-Platz (Testvideo) entfernt (Rasul 13.11.2026); Hagens Clip kommt mit Freigabe. */}
 
 	{/* 4 · Das Beweismaterial (vorher 3): Fließband mit sechs Formaten, endlos von
 	   rechts nach links, hält nicht an. Darüber die Namenszeile mit Punkt;
@@ -251,7 +248,7 @@ const PREISE = [
 				{[0, 1].map((runde) => FORMATE.map((f) => (
 					<figure class:list={["fm-k", `fm-${f.form}`]} aria-hidden={runde === 1 ? "true" : undefined}>
 						<div class="fm-flaeche">
-							{f.art === "video" && <video src="/test/testvideo-16x9.mp4" muted loop playsinline autoplay></video>}
+							{/* Testvideo entfernt (Rasul 13.11.2026), Kachel bleibt als Fläche */}
 							{f.art === "audio" && (
 								<div class="fm-audio"><div class="fm-cover"></div><div class="fm-welle">{WELLE.map((w) => <i style={`animation-delay:${w.verz}s;height:${w.hoehe}%`}></i>)}</div></div>
 							)}
@@ -1487,6 +1484,13 @@ const PREISE = [
 	   zwei Hälften exakt 50/50 (minmax(0, 1fr), Fuge 0), beide auf einer Mittelachse (align-items:
 	   center). Links die Überschrift in Sektionstitel-Größe huge, Zeilenhöhe 0,9, mittig in ihrer
 	   Hälfte; rechts der Lesetext, linksbündig. Unter 800 px untereinander wie bisher. */
+	/* Video im Split (Rasul 13.11.2026): rechte Hälfte, über die Höhe von Überschrift und Text,
+	   senkrecht mittig; Breite = Hälfte minus Rand. Unter 800 px unter dem Text. */
+	.ab-split-video { margin-top: var(--abstand-md); padding: 0 16px; }
+	.ab-split-video .szene-video { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; background: var(--panel); }
+	@media (min-width: 800px) {
+		.ab-split > .ab-split-video { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin-top: 0; }
+	}
 	/* Folgeabsatz im Lesetext: Absatzabstand statt Abschnittsabstand (Rasul 13.11.2026: Absatz bei den Entscheidern) */
 	.ab-text + .ab-text { margin-top: var(--lesetext-absatz) !important; }
 	/* Überschrift im Split immer linksbündig, auch auf dem Handy (Rasul 13.11.2026) */
@@ -1502,7 +1506,7 @@ const PREISE = [
 		   Linke Hälfte bleibt frei; Überschrift und Text stehen untereinander in der rechten Hälfte,
 		   linksbündig an derselben Kante. */
 		.ab-split > .ab-titel {
-			grid-column: 2;
+			grid-column: 1;
 			grid-row: 1;
 			font-size: var(--text-2xl); /* Rasul 13.11.2026: „in der nächst kleineren Schriftgröße“ (vorher huge) */
 			line-height: 0.9;
@@ -1512,7 +1516,7 @@ const PREISE = [
 			padding: 0 16px;
 		}
 		.ab-split > .ab-text {
-			grid-column: 2;
+			grid-column: 1;
 			grid-row: auto;
 			margin: var(--abstand-md) 0 0;
 			max-width: 46rem;

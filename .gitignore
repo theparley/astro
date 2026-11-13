@@ -34,3 +34,6 @@ pnpm-debug.log*
 # der Dev-Server sie unter localhost:4321/lab/<name>.html ausliefert. Nie
 # committen: alles in public/ geht sonst öffentlich auf die Website.
 /public/lab
+
+# Nur lokal: Gast-Clips ohne Freigabe (Verweise auf ~/Movies), nie hochladen (Rasul 13.11.2026)
+public/lokal/
