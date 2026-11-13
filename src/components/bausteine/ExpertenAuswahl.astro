@@ -374,8 +374,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					// Überschrift und Animation müssen zusammen auf einen Bildschirm passen (Rasul 13.11.2026 abends: „jetzt passt
 					// es nicht mehr auf eine Seite“): Höhe höchstens Fensterhöhe minus Überschrift, Abstand und je 32 px Rand.
 					// Reicht der Platz nicht, wird der 16:9-Rahmen schmaler als die Überschrift.
+					// Danach Rasul: „Es ist immer noch größer als eine Seite.“ Deshalb zählt jetzt das ganze weiße Band ab seiner
+					// Oberkante: Innenabstand oben, Überschrift, Abstand, Animation und 32 px Luft unten müssen in das Fenster passen.
+					const band = fig.closest(".anlass--band") as HTMLElement | null;
+					const oben = band ? parseFloat(getComputedStyle(band).paddingTop) || 0 : 32;
 					const abstand = Math.max(0, fig.getBoundingClientRect().top - satz.getBoundingClientRect().bottom);
-					const frei = window.innerHeight - satz.getBoundingClientRect().height - abstand - 64;
+					const frei = window.innerHeight - oben - satz.getBoundingClientRect().height - abstand - 32;
 					const wunsch = px / format() / 0.86;
 					if (px > 0) cv.style.height = `${Math.max(180, Math.min(wunsch, frei)).toFixed(1)}px`;
 				}
@@ -542,7 +546,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const beob = new IntersectionObserver((e) => { if (e[0].isIntersecting) { beob.disconnect(); spiele(); } }, { threshold: 0.5 });
 			beob.observe(fig);
 			fig.addEventListener("click", spiele);
-			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } });
+			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
+			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)
+			document.fonts?.ready.then(() => { if (start < 0) { groesse(); bild(0, 0); } });
 		});
 	}
 	document.addEventListener("astro:page-load", experten);

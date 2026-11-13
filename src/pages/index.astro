@@ -332,7 +332,8 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	/* In der Probe „breite Kachel“ entfällt die Überschrift sichtbar; sie bleibt als Sprungziel des Menüs im Code. */
 	:global(html[data-kopf="kachel"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	/* B6 hell (BBH theme:light): weiße Fläche, schwarze Schrift, Innenabstand lg */
-	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-lg) 0; margin-bottom: var(--abstand-lg); overflow-x: clip; }
+	/* Innenabstand oben md statt lg, damit das Band mit Überschrift und Animation auf einen Bildschirm passt (13.11.2026) */
+	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-md) 0 var(--abstand-lg); margin-bottom: var(--abstand-lg); overflow-x: clip; }
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
