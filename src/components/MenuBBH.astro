@@ -258,6 +258,29 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	/* Startseite oben: Menükacheln wischen beim Laden ein (BBH: 1000 ms ab 1000 ms) */
 	.bbh-menu--start.bbh-menu--oben .bbh-menu__nav { animation: bbh-maske 1000ms var(--maske) 1000ms both; }
 
+	/* Film-Hero (Demo, Rasul 13.11.2026): Menü wie bei BBH ausgeklappt links auf halber Höhe des
+	   Films, wandert beim Scrollen mit hoch und klebt dann oben (BBH: Hülle absolut über die ganze
+	   Seitenhöhe ab calc(50vh − 44 px), Cluster darin sticky top-0; Hochformat: Mitte des 3:4-Films). */
+	:global(html[data-hero="film"]) .bbh-menu--start {
+		position: absolute;
+		top: calc(50svh - var(--k) / 2);
+		left: 0;
+		bottom: 0;
+		z-index: 900;
+		pointer-events: none;
+	}
+	@media (orientation: portrait) {
+		:global(html[data-hero="film"]) .bbh-menu--start { top: calc(66.666vw - var(--k) / 2); }
+	}
+	:global(html[data-hero="film"]) .bbh-menu--start .bbh-menu__cluster {
+		position: sticky;
+		top: var(--fuge);
+		left: auto;
+		margin-left: var(--fuge);
+		width: max-content;
+		pointer-events: auto;
+	}
+
 	@keyframes bbh-maske {
 		from { clip-path: inset(0 100% 0 0); }
 		to { clip-path: inset(0 0 0 0); }
@@ -285,7 +308,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		let ueber = false; // Maus über dem Cluster
 
 		const setze = () => {
-			const oben = startseite && window.scrollY <= 100;
+			// BBH: offen, bis 100 px über die Lage des Clusters hinaus gescrollt ist (im Film-Hero
+			// steht er auf halber Höhe, sonst oben)
+			const film = document.documentElement.dataset.hero === "film";
+			const schwelle = film ? menu.getBoundingClientRect().top + window.scrollY + 100 : 100;
+			const oben = startseite && window.scrollY <= schwelle;
 			menu.classList.toggle("bbh-menu--oben", oben);
 			const offen = oben || gehalten || ueber;
 			menu.classList.toggle("offen", offen);

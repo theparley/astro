@@ -93,7 +93,21 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem(K) || "zwetschke";
 					} catch (e) { return q || "zwetschke"; }
 				}
-				function setze() { document.documentElement.dataset.menu = lies(); }
+				// Hero-Demo (Rasul 13.11.2026: „machen wir doch jetzt mal kurz eine Demo, wo wir unser Video
+				// Bildschirmflächen machen, voll machen und das Menü so drübersetzen wie BBH“): ?hero=film|text.
+				// Im Film-Modus gilt immer das BBH-Menü.
+				function liesHero() {
+					var q = new URLSearchParams(location.search).get("hero");
+					try {
+						if (q === "film" || q === "text") localStorage.setItem("parley-hero", q);
+						return localStorage.getItem("parley-hero") || "text";
+					} catch (e) { return q || "text"; }
+				}
+				function setze() {
+					var h = liesHero();
+					document.documentElement.dataset.hero = h;
+					document.documentElement.dataset.menu = h === "film" ? "bbh" : lies();
+				}
 				setze();
 				if (!window.__parleyMenuWahl) {
 					window.__parleyMenuWahl = true;
@@ -112,6 +126,9 @@ const websiteJsonLd = JSON.stringify({
 				<span>Menü</span>
 				<button type="button" data-wahl="zwetschke">Zwetschke</button>
 				<button type="button" data-wahl="bbh">BBH</button>
+				<span>Hero</span>
+				<button type="button" data-hero-wahl="text">Text</button>
+				<button type="button" data-hero-wahl="film">Film</button>
 			</div>
 		)}
 		{/* Sticky-Reveal-Stapel (BBH-/Nuxt-Muster, siehe SiteFooter.astro):
@@ -160,6 +177,8 @@ const websiteJsonLd = JSON.stringify({
 	/* Mit dem BBH-Menü entfällt das Logo im Hero (Rasul 13.11.2026: „Wir könnten uns dann tatsächlich
 	   unser Logo auf der Seite rausnehmen“); die Logo-Kachel und der Name „parley“ im Menü übernehmen. */
 	html[data-menu="bbh"] .hero__logo { display: none; }
+	/* Film-Hero (Demo): Fläche für das mitwandernde Menü (MenuBBH, absolut über die ganze Seitenhöhe) */
+	html[data-hero="film"] body { position: relative; }
 	/* BBH-Menü sitzt oben links und ist auf der Startseite anfangs offen: unter 768 px würde es
 	   das Hero-Logo überdecken (gemessen bei 375 px), deshalb rückt die Bühne dann tiefer. */
 	@media (max-width: 767px) {
@@ -190,6 +209,8 @@ const websiteJsonLd = JSON.stringify({
 		padding: 2px 8px;
 		cursor: pointer;
 	}
+	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
+	html:not([data-hero="film"]) .menu-wahl [data-hero-wahl="text"],
 	html[data-menu="bbh"] .menu-wahl [data-wahl="bbh"],
 	html:not([data-menu="bbh"]) .menu-wahl [data-wahl="zwetschke"] { background: var(--white); color: var(--black); }
 </style>
@@ -197,6 +218,13 @@ const websiteJsonLd = JSON.stringify({
 <script>
 	/* Menü-Schalter (nur lokal): Wahl speichern und sofort umschalten. */
 	document.addEventListener("click", (e) => {
+		const hero = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-hero-wahl]");
+		if (hero) {
+			// Hero-Wechsel ändert Aufbau und Menülage: Seite neu laden
+			try { localStorage.setItem("parley-hero", hero.dataset.heroWahl!); } catch {}
+			location.reload();
+			return;
+		}
 		const knopf = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-wahl]");
 		if (!knopf) return;
 		const wahl = knopf.dataset.wahl!;

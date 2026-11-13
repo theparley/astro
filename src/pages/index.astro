@@ -48,6 +48,14 @@ const FORMATE = [
 	{/* ── HERO ── Baustein B3 Haltungssatz (BBH: Hegarty-Statement auf Start und About), erster
 	   Auftritt mit BBHs Masken-Wisch. Darüber das Logo mittig (Rasul 13.11.2026). Darunter der
 	   Erklärtext als Baustein B4 Kurze Sätze (Regel R5: mehrere kurze Sätze → mittig). */}
+	{/* DEMO Film-Hero (Rasul 13.11.2026: „machen wir doch jetzt mal kurz eine Demo, wo wir unser Video
+	   Bildschirmflächen machen, voll machen und das Menü so drübersetzen wie BBH. Ich möchte es einmal
+	   sehen“). Nur sichtbar mit ?hero=film bzw. Schalter „Hero · Film“; Vorbild BBH Hero H1
+	   (Nachschlagewerk Seite 01): randlos, volle Fensterhöhe, im Hochformat 3:4, stumm, Schleife.
+	   Video nur lokal (Freigaben der Gäste fehlen). */}
+	<div class="filmhero" aria-hidden="true">
+		<video src="/lokal/szene-beweisaufnahme.mp4" muted loop playsinline preload="metadata"></video>
+	</div>
 	<header class="hero">
 		<div class="hero__buehne rahmen">
 			<a class="hero__logo" href="/" aria-label="parley Film, Startseite">
@@ -115,6 +123,13 @@ const FORMATE = [
 </Layout>
 
 <style>
+	.filmhero { display: none; }
+	:global(html[data-hero="film"]) .filmhero { display: block; height: 100dvh; background: var(--black); }
+	@media (orientation: portrait) {
+		:global(html[data-hero="film"]) .filmhero { height: 133.333vw; }
+	}
+	.filmhero video { display: block; width: 100%; height: 100%; object-fit: cover; }
+
 	/* Hero: erster Bildschirm = Logo + drei Zeilen; die erste Zeile des Erklärtexts lugt unten
 	   hervor (Rasul 13.11.2026). */
 	.hero__buehne {
@@ -143,3 +158,14 @@ const FORMATE = [
 	.uhr + :global(.kurzsaetze) { margin-top: var(--abstand-md); }
 	.abschnitt--letzter { margin-bottom: var(--abstand-xl); }
 </style>
+
+<script>
+	/* Film-Hero (Demo): stumm erzwingen (nach Seitenwechsel geht „muted“ sonst verloren) und nur
+	   spielen, solange zu sehen. */
+	document.addEventListener("astro:page-load", () => {
+		const v = document.querySelector<HTMLVideoElement>(".filmhero video");
+		if (!v || document.documentElement.dataset.hero !== "film") return;
+		v.muted = true;
+		new IntersectionObserver(([e]) => { if (e.isIntersecting) { v.muted = true; v.play().catch(() => {}); } else v.pause(); }, { threshold: 0.2 }).observe(v);
+	});
+</script>
