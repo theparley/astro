@@ -651,7 +651,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const bandA = fig.closest(".anlass--band");
 			const zeileEins = bandA?.querySelector(".anlass__satz--eins"), nachsatz = bandA?.querySelector(".anlass__nachsatz");
 			if (!nachsatz) freigabe = true;
-			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: zeileEins ? 0.6 : 0.9 });
+			// früher (Rasul 13.11.2026 abends: „jetzt kann die Animation ein bisschen früher anfangen. Also wenn unten der Text
+			// erscheint … dann könnten oben schon die Punkte erscheinen“): Start, sobald „Überall Experten.“ unten ins Bild kommt
+			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: zeileEins ? 0.01 : 0.9 });
 			beob.observe(zeileEins ?? fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			if (nachsatz) {
