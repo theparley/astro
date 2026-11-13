@@ -154,12 +154,15 @@ const FORMATE = [
 	   04, damit die Reihenfolge erhalten bleibt (Rasuls Einwand „eins nach dem anderen“). Einleitung: der frühere
 	   kleine Text unter dem Statement. Kacheltitel sind Arbeitstitel. Rückweg zur Fassung mit vier Text-Bild-
 	   Abschnitten: Commit 6b72e74 im Website-Repository. */}
+	{/* Einleitung unter dem Titel entfernt (Rasul 13.11.2026: „der Erklärtext unter dem Wort Beweisaufnahme muss
+	   weg, der muss vielleicht in die Kachel rein, aber optisch stört er“). Text zum Wiederverwenden:
+	   „Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne
+	   Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten Kontakt.“ */}
 	<section class="abschnitt" aria-labelledby="ab2-titel">
 		<VideoKacheln
 			id="ab2-titel"
 			titel="Beweis&shy;aufnahme"
 			link={{ href: "/termin", text: "Studiotermin" }}
-			einleitung="Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."
 			kacheln={[
 				{ nr: "01", titel: "Wie am Küchentisch", zeile: "Szene Beweisaufnahme, 0:00 bis 0:04", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, blasen: [BLASEN[0]] as any },
 				{ nr: "02", titel: "Ohne Kamerastress", zeile: "Szene Beweisaufnahme, 0:04 bis 0:09", src: "/lokal/szene-beweisaufnahme.mp4", von: 4.5, bis: 9, blasen: [BLASEN[1]] as any },

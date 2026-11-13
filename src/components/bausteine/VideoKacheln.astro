@@ -6,7 +6,8 @@
    Wie BBH:
    - Kopf: Titel Bartle huge links, Knopf-Link rechts auf der Grundlinie (am Handy darunter, wenn kein Platz).
    - Raster zwei Spalten, 16 px Fuge, am Handy eine Spalte. Kachel 4:3, leicht abgerundet.
-   - In jeder Kachel läuft der Film stumm in Schleife, sobald er zu mindestens 20 % zu sehen ist (BBH Autoplay).
+   - BBH: in jeder Kachel läuft der Film stumm in Schleife. Bei uns NICHT (Rasul 13.11.2026: „In den Kacheln dürfen
+     die Videos noch nicht laufen. Das erschlägt einem, das ist zu hektisch.“): Standbild mit Blase, Film erst per Klick.
    - Darunter zwei kurze Zeilen: Titel, grau eine zweite Zeile (bei BBH der Kunde).
    - Darüberfahren: Bild 3 % größer und −0,25° gedreht, Kachel etwas blasser (BBH, 400 ms).
    Abweichung: Klick öffnet den Film groß auf derselben Seite (BBHs Player vom Statement), nicht eine eigene Seite;
@@ -29,7 +30,7 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 		{kacheln.map((k) => (
 			<button type="button" class="videokachel" data-src={k.src} data-von={k.von} data-bis={k.bis} aria-label={`${k.nr} ${k.titel}: Film groß ansehen`}>
 				<span class="videokachel__bild">
-					<BlasenVideo src={k.src} von={k.von} bis={k.bis} blasen={(k.blasen ?? []) as any} format="4/3" blasenlage="innen" />
+					<BlasenVideo src={k.src} von={k.von} bis={k.bis} blasen={(k.blasen ?? []) as any} format="4/3" blasenlage="innen" stillbild />
 				</span>
 				<span class="videokachel__text">
 					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.titel}</span>

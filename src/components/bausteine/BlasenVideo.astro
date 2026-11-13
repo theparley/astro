@@ -16,10 +16,12 @@ interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
    Lautsprecher. Klick aufs laufende Video hält an; aus dem Bild gescrollt hält es an. */
 /* blasenlage (13.11.2026): "aussen" (Standard) = Blase wächst oben aus dem Video heraus; "innen" = kleiner und
    ganz im Bild, für Kacheln (VideoKacheln), damit sie nicht in die Reihe darüber ragt. */
-interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number; steuerung?: boolean; blasenlage?: "aussen" | "innen" }
-const { src, blasen, format = "16/9", von, bis, steuerung = false, blasenlage = "aussen" } = Astro.props;
+/* stillbild (13.11.2026, Rasul: „In den Kacheln dürfen die Videos noch nicht laufen. Das erschlägt einem, das ist
+   zu hektisch.“): kein Abspielen, das Video steht auf dem Bild in der Mitte der ersten Blase, die Blase ist zu sehen. */
+interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number; steuerung?: boolean; blasenlage?: "aussen" | "innen"; stillbild?: boolean }
+const { src, blasen, format = "16/9", von, bis, steuerung = false, blasenlage = "aussen", stillbild = false } = Astro.props;
 ---
-<div class:list={["blasenvideo", steuerung && "blasenvideo--steuerung"]} data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} data-steuerung={steuerung ? "" : undefined} data-blasenlage={blasenlage} style={`--format:${format}`}>
+<div class:list={["blasenvideo", steuerung && "blasenvideo--steuerung"]} data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} data-steuerung={steuerung ? "" : undefined} data-blasenlage={blasenlage} data-still={stillbild ? "" : undefined} style={`--format:${format}`}>
 	<video src={src} muted loop playsinline preload="metadata"></video>
 	{steuerung && (
 		<>
@@ -147,6 +149,15 @@ const { src, blasen, format = "16/9", von, bis, steuerung = false, blasenlage = 
 				video.addEventListener("timeupdate", wache);
 				aufraeumen.push(() => video.removeEventListener("timeupdate", wache));
 			}
+			const still = szene.hasAttribute("data-still");
+			if (still) {
+				// Standbild: auf die Mitte der ersten Blase springen, nie abspielen
+				const b0 = BLASEN[0];
+				const ziel = b0 ? (b0.an + b0.aus) / 2 : (szene.dataset.von ? parseFloat(szene.dataset.von) + 1 : 1);
+				const hin = () => { video.currentTime = ziel; };
+				if (video.readyState >= 1) hin(); else video.addEventListener("loadedmetadata", hin, { once: true });
+				video.removeAttribute("loop");
+			}
 			const mitSteuerung = szene.hasAttribute("data-steuerung");
 			if (mitSteuerung) {
 				const start = szene.querySelector<HTMLButtonElement>(".blasenvideo__start")!;
@@ -177,7 +188,7 @@ const { src, blasen, format = "16/9", von, bis, steuerung = false, blasenlage = 
 			// Nur spielen, solange mindestens 20 % zu sehen sind (BBH, Analyse 1.7). Mit Steuerung: nur anhalten,
 			// nie von selbst starten.
 			const beobachter = new IntersectionObserver(([e]) => {
-				if (e.isIntersecting) { if (!mitSteuerung) { video.muted = true; video.play().catch(() => {}); } }
+				if (e.isIntersecting) { if (!mitSteuerung && !still) { video.muted = true; video.play().catch(() => {}); } }
 				else video.pause();
 			}, { threshold: 0.2 });
 			beobachter.observe(szene);
