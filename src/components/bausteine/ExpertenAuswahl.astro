@@ -39,7 +39,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
 	// „Animation“ (html data-ende): drei | eins | grau | unscharf. Der Fokus folgt nach der Auswahl.
 	const T_FOKUS = T_AUSWAHL + D_AUSWAHL + 0.3, D_FOKUS = 0.9;
-	const D_KIPP = 2.2; // Kamerafahrt beim Ende „kamera“
+	const D_KIPP = 2.6; // Kamerafahrt beim Ende „kamera“ (gleichmäßiger Verlauf, siehe sanft)
 	const ENDE = Math.max(T_FOKUS + D_FOKUS, T_AUSWAHL + D_KIPP + 0.5) + 0.2;
 	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
 	// Entschieden: „unscharf“ (Rasul 13.11.2026 abends). Ohne Schalter (auf der hochgeladenen Seite) gilt das.
@@ -51,6 +51,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	function zufall(saat: number) { return () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; }; }
 	const kubisch = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 	const weich = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3);
+	// Sinus-Verlauf: sanft an, sanft aus, ohne den starken Tempo-Sprung in der Mitte wie bei kubisch (Rasul 13.11.2026:
+	// „sie ruckelt ein bisschen, sie verändert die Geschwindigkeit“)
+	const sanft = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * x);
+	const anteil = (t: number, von: number, dauer: number) => Math.max(0, Math.min(1, (t - von) / dauer));
 
 	// Rahmen 16:9 mittig, so groß, dass alle Personen darin stehen (Rasul 13.11.2026 abends: „mach lieber den Frame
 	// größer und lass alle Personen drin sein“); Höhe 86 % der Fläche, je Finger ein halber Umlauf von oben nach unten
@@ -72,8 +76,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	}
 	const WEG_R = halbweg(1), WEG_L = halbweg(-1);
 	function punkt(w: ReturnType<typeof halbweg>, s: number): [number, number] {
-		const ziel = s * w.ges; let i = 1;
-		while (i < w.lang.length - 1 && w.lang[i] < ziel) i++;
+		const ziel = s * w.ges; let lo = 1, hi = w.lang.length - 1; // binäre Suche statt Durchlaufen
+		while (lo < hi) { const mid = (lo + hi) >> 1; if (w.lang[mid] < ziel) lo = mid + 1; else hi = mid; }
+		const i = lo;
 		const a = w.lang[i - 1], b = w.lang[i], f = b > a ? (ziel - a) / (b - a) : 0;
 		return [w.p[i - 1][0] + (w.p[i][0] - w.p[i - 1][0]) * f, w.p[i - 1][1] + (w.p[i][1] - w.p[i - 1][1]) * f];
 	}
@@ -107,8 +112,14 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		while (liste.length < 34 && versuche++ < 6000) {
 			// die übrigen nicht ganz unten: dort steht nur der eine vorne (sonst sind sie beim Kippen kurz groß im Vordergrund)
 			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (CY + 190 - T - RAND);
-			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 125)) { const q = neu(x, y, 3); q.s = 0.85 + rnd() * 0.3; liste.push(q); }
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 125)) liste.push(neu(x, y, 3)); // alle gleich groß
 		}
+		// Erscheinen (Rasul 13.11.2026 abends: „hörst jetzt auf, neue Personen erscheinen zu lassen, kurz bevor wir den
+		// Videobeweis machen … während der Videobeweisanimation mit den Linien dürfen innerhalb des Fensters immer noch welche
+		// entstehen … am Ende nur noch ganz dezent im Hintergrund … kurz vorher dann auch gar nicht mehr, dass es zur Ruhe
+		// kommt“; „mach sie mal alle gleich groß. Der größte Unterschied kommt jetzt über die Perspektive.“).
+		// Die drei zuerst, die übrigen verteilt bis kurz vor Ende der Geste.
+		liste.forEach((q, i) => { q.ein = i < 3 ? rnd() * 0.8 : 0.2 + rnd() * (T_GESTE + DAUER - 0.5); });
 		const rest = liste.filter((q) => q.ebene > 1).sort((a, b) => a.wz - b.wz);
 		rest.forEach((q, i) => {
 			// seitlich etwas zur Mitte, damit nach dem Kippen niemand aus dem Bild ragt
@@ -118,19 +129,27 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			q.fx = Math.max(-1, Math.min(1, q.wx / (RW / 2 - RAND)));
 			q.zcE = kamera(0, q.tz, PHI_ENDE, 1, KD_ENDE).zc;
 		});
+		// Während der Kamerafahrt kommen nur noch wenige ganz hinten dazu, leise (Ebene 3), und ab drei Vierteln keine mehr
+		for (let i = 0; i < 10; i++) {
+			const q = neu(CX, CY, 3); q.spaet = true; q.bleibt = false;
+			q.tz = 450 + rnd() * 500; q.fb = 0.95; q.fx = -1 + 2 * ((i + 0.5) / 10) + (rnd() - 0.5) * 0.12;
+			q.zcE = kamera(0, q.tz, PHI_ENDE, 1, KD_ENDE).zc;
+			q.ein = T_AUSWAHL + D_KIPP * (0.3 + 0.45 * rnd());
+			liste.push(q);
+		}
 		return liste;
 	}
 	function kameraTiefe(Z: number, phi: number) { return kamera(0, Z, phi).zc; }
 
 	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
-	interface Person { fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
+	interface Person { spaet?: boolean; fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
 	function personen(): Person[] {
 		const rnd = zufall(7), liste: Person[] = [];
 		let versuche = 0;
 		const RAND = 80; // Abstand der Personen zur Spur
 		while (liste.length < 34 && versuche++ < 6000) {
 			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (RH - 2 * RAND);
-			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 0.85 + rnd() * 0.3, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false, rang: -1, ebene: 3, ex: x, ey: y, eg: 1, z: 1, wx: x - CX, wz: CY - y, tx: 0, tz: 0 });
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 1, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false, rang: -1, ebene: 3, ex: x, ey: y, eg: 1, z: 1, wx: x - CX, wz: CY - y, tx: 0, tz: 0 });
 		}
 		const nah = [...liste].sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY)).slice(0, 3).sort((a, b) => a.x - b.x);
 		nah.forEach((q, i) => { q.bleibt = true; q.rang = i; q.zx = CX + (i - 1) * 380; q.zy = CY + 10; });
@@ -183,11 +202,40 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
 	}
 
+	// Unscharfe Personen als vorbereitete Bilder (Messung 13.11.2026: Weichzeichnen jeder Person in jedem Bild kostete bis
+	// zu 0,5 s pro Bild und ließ die Animation ruckeln). Je Unschärfe-Stufe wird die Person einmal klein weichgezeichnet und
+	// danach nur noch skaliert gesetzt. b = Unschärfe in Personen-Einheiten (Bildschirm-Unschärfe geteilt durch Größe).
+	const BILDER = new Map<number, { c: HTMLCanvasElement; pad: number }>();
+	const AUF = 3; // Pixel je Einheit im vorbereiteten Bild
+	function personBild(b: number) {
+		const stufe = b < 4 ? Math.round(b * 2) / 2 : b < 12 ? Math.round(b) : Math.round(b / 2) * 2;
+		let e = BILDER.get(stufe);
+		if (!e) {
+			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * AUF, h = (64.4 + 2 * pad) * AUF;
+			const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h);
+			const x = c.getContext("2d")!; x.filter = `blur(${(stufe * AUF).toFixed(1)}px)`; x.scale(AUF, AUF); // Unschärfe in Bildpixeln
+			zeichnePerson(x, 28.65 + pad, 34 + pad, 1, 1);
+			e = { c, pad }; BILDER.set(stufe, e);
+		}
+		return e;
+	}
+	function zeichneUnscharf(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, unsch: number) {
+		if (alpha <= 0) return;
+		const b = unsch / Math.max(0.05, g);
+		if (b < 0.25) { zeichnePerson(ctx, x, y, g, alpha); return; }
+		const { c, pad } = personBild(b);
+		ctx.globalAlpha = alpha;
+		ctx.drawImage(c, x - (28.65 + pad) * g, y - (34 + pad) * g, (c.width / AUF) * g, (c.height / AUF) * g);
+		ctx.globalAlpha = 1;
+	}
+
 	function experten() {
 		document.querySelectorAll<HTMLElement>("[data-experten]").forEach((fig) => {
 			if (fig.dataset.bereit) return; fig.dataset.bereit = "1";
 			const cv = fig.querySelector("canvas")!, ctx = cv.getContext("2d")!;
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
+			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
+			const glut = document.createElement("canvas"), gctx = glut.getContext("2d")!;
 			const leuteFlach = personen(), leuteRaum = personenKamera();
 			let leute = leuteFlach;
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
@@ -196,6 +244,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const groesse = () => {
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
+				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
 			};
 
 			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number) => {
@@ -204,12 +253,15 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				for (let i = 1; i < s.length; i++) {
 					const [s0, t0] = s[i - 1], [s1, t1] = s[i];
 					const n = Math.max(1, Math.ceil((s1 - s0) / schritt));
-					let vorher = punkt(w, s0);
+					if (1 - (jetzt - t1) / GLIMM <= 0) continue; // dieses Stück ist ganz verglüht
+					let vorher: [number, number] | null = null;
 					for (let j = 1; j <= n; j++) {
 						const f = j / n, tt = t0 + (t1 - t0) * f;
 						const a = Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
+						if (a <= 0) { vorher = null; continue; }
+						if (!vorher) vorher = punkt(w, s0 + (s1 - s0) * (j - 1) / n);
 						const jetztP = punkt(w, s0 + (s1 - s0) * f);
-						if (a > 0) {
+						{
 							const v = Math.round(255 * Math.pow(a, 1.6));
 							octx.strokeStyle = `rgb(${v},${v},${v})`;
 							octx.beginPath(); octx.moveTo(vorher[0], vorher[1]); octx.lineTo(jetztP[0], jetztP[1]); octx.stroke();
@@ -221,10 +273,14 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 
 			const bild = (t: number, jetzt: number) => {
 				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
+				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
+				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
+				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+				// Spur nur rechnen, solange sie zu sehen ist
+				if (t >= T_GESTE - 0.25 && t <= T_GESTE + DAUER + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
-				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
 				if (t >= T_GESTE - 0.25 && t < T_GESTE) deck = (t - T_GESTE + 0.25) / 0.25;
@@ -237,12 +293,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
 					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
 				}
-				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
-				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+				gctx.setTransform(1, 0, 0, 1, 0, 0); gctx.filter = "none"; gctx.clearRect(0, 0, glut.width, glut.height);
+				gctx.filter = `blur(${(DICKE * 0.7 * sc / 4).toFixed(1)}px)`; gctx.drawImage(off, 0, 0, glut.width, glut.height);
 				ctx.globalCompositeOperation = "difference";
-				ctx.filter = `blur(${(DICKE * 0.7 * sc).toFixed(1)}px)`; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0);
-				ctx.filter = "none"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
+				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
+				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
 				ctx.globalCompositeOperation = "source-over";
+				}
 				// Personen
 				ctx.setTransform(sc, 0, 0, sc, ox, 0);
 				const halbe = (cv.width / sc) / 2 - 70; // verfügbare halbe Breite in Flächeneinheiten, mit Rand
@@ -250,15 +307,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				if (ende() === "kamera") {
 					// Kamerafahrt: alle gehen zu ihrem Platz, die Kamera kippt; Unschärfe und Helligkeit je Ebene wie bei „ebenen“
 					const STUFE: [number, number][] = [[0, 1], [5, 0.7], [11, 0.4], [18, 0.22]];
-					const kk = kubisch(Math.max(0, Math.min(1, (t - T_AUSWAHL) / D_KIPP)));
+					// ein gemeinsamer, gleichmäßiger Verlauf: Kippen über die ganze Fahrt, Nachrücken in der zweiten Hälfte,
+					// beides endet gleichzeitig (vorher kubisch mit versetzten Enden, das wirkte wie Tempowechsel)
+					const kk = sanft(anteil(t, T_AUSWAHL, D_KIPP));
 					// Die hinteren rücken erst gegen Ende ein Stück nach hinten, weich (die drei vorne bewegen sich nicht)
-					const geh = kubisch(Math.max(0, Math.min(1, (t - T_AUSWAHL - D_KIPP * 0.5) / (D_KIPP * 0.6))));
+					const geh = sanft(anteil(t, T_AUSWAHL + D_KIPP * 0.35, D_KIPP * 0.65));
 					const abstand = KD - (KD - KD_ENDE) * kk;
 					const phi = Math.PI / 2 - (Math.PI / 2 - PHI_ENDE) * kk;
-					const f1 = weich((t - T_AUSWAHL - D_KIPP * 0.6) / (D_KIPP * 0.5));
+					const f1 = sanft(anteil(t, T_AUSWAHL + D_KIPP * 0.5, D_KIPP * 0.5));
 					const lage = leute.map((q) => {
 						const tx = q.fx !== undefined ? (q.fx * (q.fb ?? 1) * halbe * (q.zcE ?? KD)) / KD : q.tx;
-						const X = q.wx + (tx - q.wx) * geh, Z = q.wz + (q.tz - q.wz) * geh;
+						const X = q.spaet ? tx : q.wx + (tx - q.wx) * geh, Z = q.spaet ? q.tz : q.wz + (q.tz - q.wz) * geh;
 						const pr = kamera(X, Z, phi, 1, abstand), u = (64 * q.s * pr.g) / 19;
 						return { q, x: pr.x, y: pr.y - 9 * u * kk, g: q.s * pr.g, zc: pr.zc }; // Füße auf dem Boden, sobald gekippt
 					}).sort((a, b) => b.zc - a.zc);
@@ -268,8 +327,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const m = q.ebene === 1 ? f1 : q.ebene >= 2 ? kk : 0;
 						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * kk : 0.85 + (a1 - 0.85) * m); // vorne erst mit dem Kippen schwarz
 						const unsch = b1 * m;
-						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * sc).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
-						else zeichnePerson(ctx, x, y, g, alpha);
+						zeichneUnscharf(ctx, x, y, g, alpha, unsch);
 					}
 					return;
 				}
@@ -291,8 +349,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const g = q.s + (q.eg - q.s) * k;
 						const alpha = ein * (q.ebene <= 1 ? (0.85 + 0.15 * k) * (1 - (1 - a1) * m) : 0.85 * (1 - (1 - a1 / 0.85) * m));
 						const unsch = b1 * m;
-						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * sc).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
-						else zeichnePerson(ctx, x, y, g, alpha);
+						zeichneUnscharf(ctx, x, y, g, alpha, unsch);
 					}
 					return;
 				}
@@ -305,8 +362,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						if (e === "eins") zeichnePerson(ctx, x, y, g, alpha * (1 - f));
 						else if (e === "grau") zeichnePerson(ctx, x, y, g, alpha * (1 - 0.8 * f));
 						else if (e === "unscharf" && f > 0) {
-							ctx.save(); ctx.filter = `blur(${(14 * f * sc).toFixed(1)}px)`;
-							zeichnePerson(ctx, x, y, g, alpha * (1 - 0.35 * f)); ctx.restore();
+							zeichneUnscharf(ctx, x, y, g, alpha * (1 - 0.35 * f), 14 * f);
 						} else zeichnePerson(ctx, x, y, g, alpha);
 					} else {
 						zeichnePerson(ctx, q.x, q.y, q.s, ein * 0.85 * (1 - weich((t - T_AUSWAHL + 0.3) / 0.8)));
