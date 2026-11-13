@@ -701,7 +701,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			beob.observe(fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			if (nachsatz) {
-				const beob2 = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob2.disconnect(); freigabe = true; weiter(); } }, { threshold: 1 });
+				// Auslöser wie BBHs Zeilen-Blende (Rasul 13.11.2026 abends: „Das können wir doch übernehmen, die zwanzig Prozent
+				// über dem Fensterrand“): Freigabe, sobald die Oberkante des Nachsatzes 20 % der Fensterhöhe über der Unterkante
+				// steht. Vorher: Nachsatz vollständig im Bild.
+				const beob2 = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob2.disconnect(); freigabe = true; weiter(); } }, { rootMargin: "0px 0px -20% 0px", threshold: 0 });
 				beob2.observe(nachsatz);
 			}
 			fig.addEventListener("click", spiele);
