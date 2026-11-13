@@ -37,7 +37,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	const T_FOKUS = T_AUSWAHL + D_AUSWAHL + 0.3, D_FOKUS = 0.9;
 	const ENDE = T_FOKUS + D_FOKUS + 0.2;
 	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
-	const ende = () => document.documentElement.dataset.ende || "drei";
+	// Entschieden: „unscharf“ (Rasul 13.11.2026 abends). Ohne Schalter (auf der hochgeladenen Seite) gilt das.
+	const ende = () => document.documentElement.dataset.ende || "unscharf";
 
 	// fester Zufall, damit jedes Abspielen gleich aussieht
 	function zufall(saat: number) { return () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; }; }
