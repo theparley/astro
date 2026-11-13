@@ -34,7 +34,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	                                // zwischen zwei Bildern (sonst entstehen bei ausgelassenen Bildern Balken quer durch)
 	const W = 1600, H = 900;
 	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 8;
-	const T_PERSONEN = 1.4, T_GESTE = 1.8, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
+	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
+	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
+	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
+	const T_TEXT = 1.8;
+	const T_PERSONEN = 1.4, T_GESTE = T_TEXT + 1.0, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
 	// „Animation“ (html data-ende): drei | eins | grau | unscharf. Der Fokus folgt nach der Auswahl.
@@ -253,7 +257,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const halb = RW / 2 - 80;
 		const neu = (X: number, Z: number, ebene: number, ein: number): Person => ({ x: CX + X, y: CY - Z, s: 1, ein, zx: 0, zy: 0, bleibt: ebene <= 1, rang: 0, ebene, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z });
 		const j = (w: number) => (rnd() - 0.5) * w;
-		const spaeter = () => 0.2 + rnd() * (T_GESTE + DAUER - 0.5);
+		// drei Viertel erscheinen vor dem Nachsatz („wenn die ganz vielen Punkte da sind“), der Rest noch während der Geste
+		const spaeter = () => (rnd() < 0.75 ? 0.2 + rnd() * (T_TEXT - 0.3) : T_TEXT + rnd() * (T_GESTE + DAUER - 0.5 - T_TEXT));
 		liste.push(neu(0, -300, 0, rnd() * 0.5), neu(-200 + j(30), -170 + j(30), 1, rnd() * 0.7), neu(200 + j(30), -170 + j(30), 1, rnd() * 0.7));
 		const reihe = (n: number, zVon: number, zBis: number, breite: number, ebene: number, ein: () => number) => {
 			for (let i = 0; i < n; i++) {
@@ -579,7 +584,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			phase("warten");
 			const schritt = () => {
 				const jetzt = performance.now() / 1000, t = jetzt - start;
-				if (t >= T_GESTE && fig.dataset.phase !== "geste") phase("geste");
+				if (t >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden (vor der Geste)
 				bild(t, jetzt);
 				if (t < ENDE + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
@@ -597,7 +602,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// Nachsatz 90 % der Animation.
 			// Danach (Rasul 13.11.2026 abends): „in dem Moment, wo man den Text sieht beim Scrollen, fängt die Animation an“
 			// → Auslöser ist „Überall Experten.“ unter der Animation, sobald vollständig sichtbar.
-			const ausloeser = fig.closest(".anlass--band")?.querySelector(".anlass__satz--eins");
+			// Danach (Rasul 13.11.2026 abends): „Sobald der so weit reingescrollt ist, dass sich die beiden anderen Zeilen unten
+			// drunter auch lesen könnte, dann geht die Animation los. Man sieht aber die beiden Zeilen noch nicht.“ → Auslöser ist
+			// der (noch unsichtbare) Nachsatz, sobald sein Platz vollständig im Bild ist.
+			const ausloeser = fig.closest(".anlass--band")?.querySelector(".anlass__nachsatz") ?? fig.closest(".anlass--band")?.querySelector(".anlass__satz--eins");
 			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: ausloeser ? 1 : 0.9 });
 			beob.observe(ausloeser ?? fig);
 			fig.addEventListener("click", spiele);
