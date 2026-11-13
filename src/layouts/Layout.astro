@@ -114,13 +114,13 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-lage") || "gemischt";
 					} catch (e) { return q || "gemischt"; }
 				}
-				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis w; Grundeinstellung w (Rasul 13.11. abends: „Nochmal W.“; davor v, davor i)
+				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis y; Grundeinstellung y (Rasul 13.11. abends: „Ja, wir nehmen ypsilon.“; davor w, v, i)
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
 						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v" || q === "w" || q === "x" || q === "y") localStorage.setItem("parley-satz", q);
-						return localStorage.getItem("parley-satz") || "w";
-					} catch (e) { return q || "w"; }
+						return localStorage.getItem("parley-satz") || "y";
+					} catch (e) { return q || "y"; }
 				}
 				function liesUmlaut() {
 					var q = new URLSearchParams(location.search).get("umlaut");

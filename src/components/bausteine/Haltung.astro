@@ -12,9 +12,11 @@ const { zeilen, ebene = "h2", aufdecken = false, id, wechselglyphen = false, stu
 const H = ebene;
 ---
 <H class:list={["t-haltung", "haltung", wechselglyphen && "haltung--wechsel", stufe === "huge" && "haltung--huge"]} id={id} data-aufdecken={aufdecken ? "" : undefined} data-einblenden={aufdecken ? undefined : ""}>
-	{zeilen.map((z, i) => <span class:list={[i === absatz && "haltung__absatz"]} style={`--i:${i}`}>{z}</span>)}
+	{zeilen.map((z, i) => <span class:list={[i === absatz && "haltung__absatz"]} style={`--i:${i}`}>{z}{i < zeilen.length - 1 ? " " : ""}</span>)}
 </H>
 <style>
+	/* Leerzeichen am Zeilenende (unsichtbar, Zeilen sind Blöcke), damit der Text für Vorleseprogramme und Suchmaschinen
+	   nicht zusammenklebt („beweisenExpertise“, gefunden 13.11.2026). */
 	.haltung span { display: block; }
 	.haltung__absatz { margin-top: 0.4em; }
 	.haltung--huge { font-size: var(--text-huge); line-height: var(--zeile-huge); }
