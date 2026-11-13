@@ -113,11 +113,11 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-lage") || "links";
 					} catch (e) { return q || "links"; }
 				}
-				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a|b|c|d|e|f|g|h|i; Grundeinstellung g (Rasuls Favorit 13.11.)
+				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis k; Grundeinstellung g (Rasuls Favorit 13.11.)
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i") localStorage.setItem("parley-satz", q);
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k") localStorage.setItem("parley-satz", q);
 						return localStorage.getItem("parley-satz") || "g";
 					} catch (e) { return q || "g"; }
 				}
@@ -156,6 +156,8 @@ const websiteJsonLd = JSON.stringify({
 				<button type="button" data-satz-wahl="g">G</button>
 				<button type="button" data-satz-wahl="h">H</button>
 				<button type="button" data-satz-wahl="i">I</button>
+				<button type="button" data-satz-wahl="j">J</button>
+				<button type="button" data-satz-wahl="k">K</button>
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
@@ -251,6 +253,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-satz="g"] .menu-wahl [data-satz-wahl="g"],
 	html[data-satz="h"] .menu-wahl [data-satz-wahl="h"],
 	html[data-satz="i"] .menu-wahl [data-satz-wahl="i"],
+	html[data-satz="j"] .menu-wahl [data-satz-wahl="j"],
+	html[data-satz="k"] .menu-wahl [data-satz-wahl="k"],
 	html[data-lage="unten"] .menu-wahl [data-lage-wahl="unten"],
 	html:not([data-lage="unten"]) .menu-wahl [data-lage-wahl="links"],
 	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
