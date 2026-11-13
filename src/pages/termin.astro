@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Seitentitel from "../components/bausteine/Seitentitel.astro";
 ---
 
 {/* /termin — DIE eine Tür der Seite (Struktur-Entscheid Fred 2026-06-14:
@@ -18,11 +19,13 @@ import Layout from "../layouts/Layout.astro";
 		   identisch mit meetergo-Terminart. Unterzeile (Fred 2026-09-13):
 		   schließt die Erwartungs-Brücke vom FORMATBERATUNG-Knopf der
 		   Startseite — wer ihn klickt, findet das Wort hier wieder. */}
-		<h1>Let's Parley</h1>
-		{/* Sub neu (Fred 15.09. früh, Diktat): "Formatberatung" und "nichts
-	   vorbereiten" raus, stattdessen die Frage als Einstieg. "30 Minuten"
-	   behalten (nicht erwähnt, tragende Info). */}
-	<p class="sub">Welches Format passt? 30 Minuten.</p>
+		{/* BBH-Stil wie „Get in touch“ (Kontaktseite, Nachschlagewerk Seite 07; Rasul 13.11.2026: „Könnten wir
+		   den Stil übernehmen, bei denen ist es glaube ich get in touch und wir könnten sagen Let's Parley“):
+		   Seitentitel B1, Bartle huge, mittig; Unterzeile mittig darunter. Vorher h1 1,9 rem fett und Unterzeile grau
+		   (Unterzeile Fred 15.09.: „Welches Format passt? 30 Minuten.“, wörtlich übernommen). */}
+		<div class="termin-titel">
+			<Seitentitel ebene="h1" titel="Let’s Parley" unter="Welches Format passt? 30 Minuten." />
+		</div>
 
 		<div id="kalenderTeil">
 		{/* Desktop-Zweispalter (Fred 2026-06-14, revidiert FINALE-Spec-Punkt
@@ -126,7 +129,7 @@ import Layout from "../layouts/Layout.astro";
 	.buchen {
 		max-width: 520px;
 		margin: 0 auto;
-		padding: 64px 16px 140px;
+		padding: var(--abstand-xl) 16px 140px; /* oben wie BBH py-xl (13.11.2026), vorher 64 px */
 		/* Mindesthöhe = Viewport (Fred-Befund 2026-06-14): Während der Kalender
 		   lädt, war die Seite nur wenige hundert Pixel hoch — der Sticky-Footer
 		   (Parley-Monument, z-0) stand dadurch beim Laden im Viewport und wurde
@@ -193,12 +196,8 @@ import Layout from "../layouts/Layout.astro";
 		}
 	}
 
-	h1 {
-		font-size: 1.9rem;
-		font-weight: 800;
-		letter-spacing: -0.01em;
-		line-height: 1.1;
-	}
+	/* Titel ragt über die schmale Kalenderspalte hinaus auf volle Breite (BBH: Titel im Rahmen max. 1280 px) */
+	.termin-titel { width: 100vw; margin-left: calc(50% - 50vw); margin-bottom: var(--abstand-lg); }
 
 	.sub {
 		color: var(--gray);

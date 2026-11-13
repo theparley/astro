@@ -1,0 +1,32 @@
+---
+/* Rechtstext nach BBH (Privacy Notice, Legal Documents; Rasul 13.11.2026: „Für Datenschutz und Impressum
+   könnten wir da schon mal den Stil übernehmen von BBH“). Gemessen auf bartleboglehegarty.com/privacy-notice:
+   eine Spalte mittig, max-w-screen-md (1024 px) mit Seitenrand, alles in Geist text-md, Zeilenhöhe 1,4,
+   Laufweite −0,02 em, Gewicht 400; Zwischentitel gleich groß und gleich fett wie der Text, nur 3 em Abstand
+   darüber; Absätze 1 em Abstand; Links unterstrichen in Textfarbe. Darüber der Seitentitel (B1). */
+---
+<div class="rechtstext">
+	<slot />
+</div>
+<style>
+	.rechtstext {
+		max-width: 1024px;
+		margin: 0 auto;
+		padding: 0 var(--rand);
+		font-family: var(--schrift-lesen);
+		font-size: var(--text-md);
+		font-weight: 400;
+		line-height: 1.4;
+		letter-spacing: -0.02em;
+	}
+	.rechtstext > :global(* + *) { margin-top: 1em; }
+	.rechtstext :global(h2) { font: inherit; margin-top: 3em; }
+	.rechtstext :global(h3) { font: inherit; color: var(--grey, #999894); margin-top: 2em; }
+	.rechtstext :global(h2 + *), .rechtstext :global(h3 + *) { margin-top: 0.5em; }
+	.rechtstext :global(p), .rechtstext :global(ul) { margin-bottom: 0; }
+	.rechtstext :global(ul) { padding-left: 0.85em; list-style: disc outside; }
+	.rechtstext :global(li + li) { margin-top: 0.75em; }
+	.rechtstext :global(a) { color: currentColor; text-decoration: underline; text-underline-offset: 0.15em; }
+	.rechtstext :global(em) { color: var(--grey, #999894); font-style: normal; }
+	.rechtstext :global(.zurueck) { margin-top: 3em; }
+</style>

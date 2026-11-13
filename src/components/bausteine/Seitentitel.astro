@@ -1,16 +1,21 @@
 ---
 /* B1 Seitentitel zentriert: Bartle huge, Großbuchstaben, mittig, ausbalanciert;
    optional eine Unterzeile. BBH: Offices, News, Contact, Rechtsseiten. */
-interface Props { titel: string; unter?: string; ebene?: "h1" | "h2"; id?: string }
-const { titel, unter, ebene = "h2", id } = Astro.props;
+/* stufe (13.11.2026): Bartle ist so breit, dass lange deutsche Wörter in huge nicht in die Zeile passen
+   (gemessen: „IMPRESSUM“ ist 11,9 em, „DATENSCHUTZ“ 14 em breit; BBH selbst schneidet am Handy
+   „DOCUMENTS“ ab). Dann die nächstkleinere Stufe 2xl nehmen. Weiche Trennstelle (&shy;) im Titel erlaubt
+   zusätzlich einen Umbruch am Handy. */
+interface Props { titel: string; unter?: string; ebene?: "h1" | "h2"; id?: string; stufe?: "huge" | "2xl" }
+const { titel, unter, ebene = "h2", id, stufe = "huge" } = Astro.props;
 const H = ebene;
 ---
 <div class="seitentitel rahmen">
-	<H class="t-seitentitel" id={id} data-einblenden>{titel}</H>
+	<H class:list={["t-seitentitel", stufe === "2xl" && "t-seitentitel--2xl"]} id={id} data-einblenden set:html={titel} />
 	{unter && <p class="t-lesen seitentitel__unter">{unter}</p>}
 </div>
 <style>
 	.seitentitel { max-width: 1280px; text-align: center; }
 	@media (min-width: 1024px) { .seitentitel { padding-inline: 5vw; } }
+	.seitentitel :global(.t-seitentitel--2xl) { font-size: var(--text-2xl); line-height: var(--zeile-2xl); hyphens: manual; }
 	.seitentitel__unter { margin-top: 48px; line-height: 1.1; text-wrap: balance; }
 </style>

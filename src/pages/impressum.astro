@@ -1,10 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Seitentitel from "../components/bausteine/Seitentitel.astro";
+import Rechtstext from "../components/bausteine/Rechtstext.astro";
+import Knopf from "../components/bausteine/Knopf.astro";
 ---
 
 <Layout title="Impressum" description="Impressum und Anbieterkennzeichnung gemäß § 5 TMG für Parley Film.">
-	<main class="wrap">
-		<h1>Impressum</h1>
+	{/* BBH-Stil wie Privacy Notice / Legal Documents (Rasul 13.11.2026). Titel in Stufe 2xl: lange
+	   deutsche Wörter passen in der breiten Bartle sonst nicht in die Zeile (Seitentitel.astro). */}
+	<main class="recht">
+		<Seitentitel ebene="h1" titel="Impressum" stufe="2xl" />
+		<Rechtstext>
 
 		<p>
 			Fred Eric Eckert | SIGNPAGE UG (haftungsbeschränkt)<br />
@@ -75,53 +81,12 @@ import Layout from "../layouts/Layout.astro";
 			hinzuweisen. Wir werden rechtswidrige Inhalte und Links nach Kenntnisnahme unverzüglich entfernen.
 		</p>
 
-		<p class="back"><a href="/">← Zurück</a></p>
+		<p class="zurueck"><Knopf href="/" text="Zur Startseite" /></p>
+		</Rechtstext>
 	</main>
 </Layout>
 
 <style>
-	.wrap {
-		max-width: 680px;
-		margin: 0 auto;
-		padding: 96px 24px 64px;
-	}
-
-	h1 {
-		font-size: 2rem;
-		font-weight: 500;
-		margin-bottom: 40px;
-	}
-
-	h2 {
-		font-size: 1.1rem;
-		font-weight: 500;
-		margin: 40px 0 12px;
-	}
-
-	h3 {
-		font-size: 1rem;
-		font-weight: 500;
-		color: var(--gray);
-		margin: 28px 0 10px;
-	}
-
-	p {
-		line-height: 1.6;
-		margin-bottom: 12px;
-	}
-
-	a {
-		text-decoration: underline;
-	}
-
-	.back {
-		margin-top: 48px;
-		padding-top: 24px;
-		border-top: 1px solid var(--line);
-	}
-
-	.back a {
-		text-decoration: none;
-		color: var(--gray);
-	}
+	/* BBH: Stapel grid space-y-xl py-xl (Titel, dann Text) */
+	.recht { display: grid; gap: var(--abstand-xl); padding-block: var(--abstand-xl); }
 </style>
