@@ -206,7 +206,8 @@ const PREISE = [
 		{/* Kein Label (Rasul 12.11.2026: „Label weglassen“): die Überschrift „Die Beweisaufnahme im Gespräch.“ sagt es schon. */}
 		{/* Fassung P2 (Aufbau Rasul 12.11.2026, Probe auf localhost); vorher I, davor „Das echte Gespräch wird zu Filmmaterial.“ */}
 		<h2 class="ab-titel" id="ab2-titel">Die Beweiskraft<br />echter Gespräche.</h2>
-		<p class="ab-text">Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie am Küchentisch. Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
+		<p class="ab-text">Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie am Küchentisch.</p>
+		<p class="ab-text">Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
 	</section>
 
 	{/* SZENE (07.11.2026, Übergabe „Website · Gestaltung“): Video 16:9, seit
@@ -1486,6 +1487,8 @@ const PREISE = [
 	   zwei Hälften exakt 50/50 (minmax(0, 1fr), Fuge 0), beide auf einer Mittelachse (align-items:
 	   center). Links die Überschrift in Sektionstitel-Größe huge, Zeilenhöhe 0,9, mittig in ihrer
 	   Hälfte; rechts der Lesetext, linksbündig. Unter 800 px untereinander wie bisher. */
+	/* Folgeabsatz im Lesetext: Absatzabstand statt Abschnittsabstand (Rasul 13.11.2026: Absatz bei den Entscheidern) */
+	.ab-text + .ab-text { margin-top: var(--lesetext-absatz) !important; }
 	/* Überschrift im Split immer linksbündig, auch auf dem Handy (Rasul 13.11.2026) */
 	.ab-split > .ab-titel { text-align: left; }
 	@media (min-width: 800px) {
@@ -1510,7 +1513,7 @@ const PREISE = [
 		}
 		.ab-split > .ab-text {
 			grid-column: 2;
-			grid-row: 2;
+			grid-row: auto;
 			margin: var(--abstand-md) 0 0;
 			max-width: 46rem;
 			padding: 0 16px;
