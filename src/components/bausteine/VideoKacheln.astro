@@ -24,19 +24,22 @@ interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
    Klammern] hellblau; das Standbild als Band; weiße Blase greift über den oberen Fotorand (dort #RévèleToi,
    bei uns marke); unten rechts das Logo klein. */
 interface Plakat { satz: string; marke: string; bild: number }
-interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat }
-interface Props { titel: string; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
+/* href (13.11.2026, Kachel-Startseite): Kachel ist ein Link zu einer Unterseite wie bei BBH, kein Player. */
+interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat; href?: string }
+interface Props { titel?: string; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
 const { titel, id, link, einleitung, kacheln } = Astro.props;
 ---
 <div class="videokacheln rahmen">
-	<div class="videokacheln__kopf">
-		<h2 class="t-abschnitt videokacheln__titel" id={id} set:html={titel} />
-		{link && <div class="videokacheln__link"><Knopf href={link.href} text={link.text} /></div>}
-	</div>
+	{(titel || link) && (
+		<div class="videokacheln__kopf">
+			{titel && <h2 class="t-abschnitt videokacheln__titel" id={id} set:html={titel} />}
+			{link && <div class="videokacheln__link"><Knopf href={link.href} text={link.text} /></div>}
+		</div>
+	)}
 	{einleitung && <p class="t-lesen videokacheln__einleitung" set:html={einleitung} />}
 	<div class="videokacheln__raster">
-		{kacheln.map((k) => (
-			<button type="button" class="videokachel" data-src={k.src} data-von={k.von} data-bis={k.bis} aria-label={`${k.nr} ${k.titel}: Film groß ansehen`}>
+		{kacheln.map((k) => { const Tag = k.href ? "a" : "button"; return (
+			<Tag href={k.href} type={k.href ? undefined : "button"} class="videokachel" data-src={k.href ? undefined : k.src} data-von={k.von} data-bis={k.bis} aria-label={k.href ? `${k.nr} ${k.titel}` : `${k.nr} ${k.titel}: Film groß ansehen`}>
 				{k.plakat ? (
 					<span class="videokachel__bild plakat">
 						<span class="plakat__foto"><video src={k.src} muted playsinline preload="metadata" data-standbild={k.plakat.bild}></video></span>
@@ -54,8 +57,8 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.titel}</span>
 					<span class="videokachel__zeile">{k.zeile}</span>
 				</span>
-			</button>
-		))}
+			</Tag>
+		); })}
 	</div>
 </div>
 <div class="videokacheln__gross" data-videokacheln-gross hidden>
@@ -71,6 +74,7 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 	.videokacheln__einleitung { max-width: 46ch; margin: -16px 0 48px; }
 	.videokacheln__raster { display: grid; grid-template-columns: 1fr; gap: 32px 16px; }
 	@media (min-width: 1024px) { .videokacheln__raster { grid-template-columns: 1fr 1fr; } }
+	a.videokachel { text-decoration: none; }
 	.videokachel { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 50ms; }
 	.videokachel:active { transform: scale(0.99); }
 	.videokachel__bild { display: block; border-radius: 4px; overflow: hidden; }
@@ -111,36 +115,41 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 	let weg: (() => void)[] = [];
 	function videokacheln() {
 		weg.forEach((f) => f()); weg = [];
-		const gross = document.querySelector<HTMLElement>("[data-videokacheln-gross]");
-		if (!gross) return;
-		const film = gross.querySelector("video")!;
 		// Plakat-Standbilder: auf die gewünschte Sekunde springen, nie abspielen
 		document.querySelectorAll<HTMLVideoElement>("video[data-standbild]").forEach((v) => {
 			const t = parseFloat(v.dataset.standbild || "1");
 			const hin = () => { v.currentTime = t; };
 			if (v.readyState >= 1) hin(); else v.addEventListener("loadedmetadata", hin, { once: true });
 		});
-		let bis: number | null = null, von = 0;
-		const wache = () => { if (bis !== null && film.currentTime >= bis) { film.pause(); film.currentTime = von; } };
-		film.addEventListener("timeupdate", wache);
-		const zu = () => { gross.hidden = true; film.pause(); document.documentElement.style.overflow = ""; };
+		// Jede Kachel öffnet den Player ihres eigenen Bausteins (es kann mehrere auf einer Seite geben)
+		let offen: HTMLElement | null = null;
+		const zu = () => {
+			if (!offen) return;
+			offen.hidden = true; offen.querySelector("video")!.pause();
+			document.documentElement.style.overflow = ""; offen = null;
+		};
 		const auf = (k: HTMLElement) => {
-			von = k.dataset.von ? parseFloat(k.dataset.von) : 0;
-			bis = k.dataset.bis ? parseFloat(k.dataset.bis) : null;
+			const gross = k.closest(".videokacheln")?.nextElementSibling as HTMLElement | null;
+			if (!gross || !gross.matches("[data-videokacheln-gross]")) return;
+			const film = gross.querySelector("video")!;
+			const von = k.dataset.von ? parseFloat(k.dataset.von) : 0;
+			const bis = k.dataset.bis ? parseFloat(k.dataset.bis) : null;
+			film.ontimeupdate = () => { if (bis !== null && film.currentTime >= bis) { film.pause(); film.currentTime = von; } };
 			film.src = k.dataset.src!;
 			film.muted = true; // wie BBH: auch der große Player startet stumm
 			film.addEventListener("loadedmetadata", () => { film.currentTime = von; film.play().catch(() => {}); }, { once: true });
-			gross.hidden = false;
+			gross.hidden = false; offen = gross;
 			document.documentElement.style.overflow = "hidden";
 		};
-		const klick = (e: Event) => { const k = (e.target as HTMLElement).closest<HTMLElement>(".videokachel"); if (k) auf(k); };
-		const taste = (e: KeyboardEvent) => { if (e.key === "Escape" && !gross.hidden) zu(); };
-		const hinter = (e: Event) => { if (e.target === gross) zu(); };
+		const klick = (e: Event) => {
+			const ziel = e.target as HTMLElement;
+			if (ziel.closest(".videokacheln__zu") || (ziel.matches("[data-videokacheln-gross]"))) { zu(); return; }
+			const k = ziel.closest<HTMLElement>("button.videokachel"); if (k) auf(k);
+		};
+		const taste = (e: KeyboardEvent) => { if (e.key === "Escape") zu(); };
 		document.addEventListener("click", klick);
 		document.addEventListener("keydown", taste);
-		gross.addEventListener("click", hinter);
-		gross.querySelector(".videokacheln__zu")!.addEventListener("click", zu);
-		weg.push(() => { document.removeEventListener("click", klick); document.removeEventListener("keydown", taste); gross.removeEventListener("click", hinter); film.removeEventListener("timeupdate", wache); zu(); });
+		weg.push(() => { document.removeEventListener("click", klick); document.removeEventListener("keydown", taste); zu(); });
 	}
 	document.addEventListener("astro:page-load", videokacheln);
 </script>

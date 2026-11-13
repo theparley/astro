@@ -10,6 +10,12 @@
    Startseite steht im Zweig dev.
    ═══════════════════════════════════════════════════════════════════════ */
 import Layout from "../layouts/Layout.astro";
+import { BLASEN, FORMATE } from "../daten/startseite";
+import Beweisaufnahme from "../components/abschnitte/Beweisaufnahme.astro";
+import Beweisverfahren from "../components/abschnitte/Beweisverfahren.astro";
+import Beweisstuecke from "../components/abschnitte/Beweisstuecke.astro";
+import Augenzeugen from "../components/abschnitte/Augenzeugen.astro";
+import Kapitelende from "../components/abschnitte/Kapitelende.astro";
 import BrandLogo from "../components/BrandLogo.astro";
 import LogoBiss from "../components/LogoBiss.astro";
 import MultiOutputKacheln from "../components/MultiOutputKacheln.astro";
@@ -27,25 +33,9 @@ import Karussell from "../components/bausteine/Karussell.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 
-// Sprechblasen zum Rohschnitt „Szene Beweisaufnahme“ v1 (Rasul 13.11.2026). Sätze aus
-// website/video/Szene_Beweisaufnahme_Clipvorschlag_2026-11.md, Schnitte bei 4,5 · 9 · 18 · 24 s.
-const BLASEN = [
-	{ an: 0.4, aus: 4.4, stelle: "OR", text: "Es fühlt sich so natürlich an, hier zu sitzen." },
-	{ an: 4.9, aus: 8.9, stelle: "OL", text: "Die gesamte Angst vor Kamera ist null." },
-	{ an: 9.4, aus: 17.9, stelle: "OR", text: "… dass ich dir direkt in die Augen schaue und gleichzeitig der Zuschauer meinen Augenkontakt hat." },
-	{ an: 18.4, aus: 23.9, stelle: "OL", text: "Er sitzt hier zwei Meter von mir weg in einem Display in Lebensgröße." },
-	{ an: 24.3, aus: 26.6, stelle: "OL", text: "Wir können es sehr empfehlen, oder?" },
-	{ an: 26.7, aus: 28.2, stelle: "OR", text: "Total." },
-] as const;
 
-const FORMATE = [
-	{ buchstabe: "A", name: "Videopodcast", form: "169", art: "video", text: "Das ganze Gespräch, so wie es war. Für alle, die euch länger zuhören wollen." },
-	{ buchstabe: "B", name: "Audio-Podcast", form: "11", art: "audio", text: "Dieselbe Folge zum Hören, unterwegs oder beim Laufen." },
-	{ buchstabe: "C", name: "Clip", form: "916", art: "video", text: "Eine Frage, eine Antwort. Kurz genug für den Feed, lang genug, um zu zeigen, wie ihr denkt." },
-	{ buchstabe: "D", name: "Zitat", form: "11", art: "zitat", text: "Ein Satz, der hängen bleibt. Zum Teilen und Zitieren." },
-	{ buchstabe: "E", name: "Newsletter", form: "45", art: "newsletter", text: "Die Folge zum Lesen, direkt im Postfach eurer Kunden." },
-	{ buchstabe: "F", name: "Transkript", form: "45", art: "transkript", text: "Jedes Wort zum Nachlesen, damit euch Suchmaschinen und KI-Assistenten finden." },
-];
+
+
 
 ---
 
@@ -145,105 +135,39 @@ const FORMATE = [
 		<BrandLogo />
 	</header>
 
-	{/* ── 2 · DIE BEWEISKRAFT ── Baustein B6 Text-Bild: das Video ist der Anker links, Text rechts
-	   (Analyse Teil 3, 2.1). ACHTUNG: Rasul hat „Video links, Schrift rechts“ am 13.11. ausprobiert
-	   und zurückgenommen; hier steht es als Vorschlag. Rückweg auf „Video über dem Text“: Baustein
-	   Textblock mit dem Video darüber. Video nur lokal (Freigaben der Gäste fehlen). */}
-	{/* BEWEISAUFNAHME als große Kacheln nach BBH B7W (Rasul 13.11.2026: „lass uns erstmal die Kacheln von BBH
-	   übernehmen, die großen … die schreiben ja groß drüber Work. Und da könnten wir doch Beweisaufnahme
-	   drüberschreiben. Und dann gibt es Kacheln, die sich thematisch mit dem Thema Beweisaufnahmen beschäftigen.“).
-	   Je Kachel ein Ausschnitt der Szene mit seiner Blase, stumm in Schleife; Klick öffnet groß. Nummeriert 01 bis
-	   04, damit die Reihenfolge erhalten bleibt (Rasuls Einwand „eins nach dem anderen“). Einleitung: der frühere
-	   kleine Text unter dem Statement. Kacheltitel sind Arbeitstitel. Rückweg zur Fassung mit vier Text-Bild-
-	   Abschnitten: Commit 6b72e74 im Website-Repository.
-	   PROBE Plakat (Rasul 13.11.2026: „jede Kachel designen wie ein Plakat von Graphéine“, „Ja, du sollst.“):
-	   nur Kachel 01 als Plakat, 02 bis 04 als Standbild mit Blase, zum Vergleich nebeneinander. */}
-	{/* Einleitung unter dem Titel entfernt (Rasul 13.11.2026: „der Erklärtext unter dem Wort Beweisaufnahme muss
-	   weg, der muss vielleicht in die Kachel rein, aber optisch stört er“). Text zum Wiederverwenden:
-	   „Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne
-	   Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten Kontakt.“
-	   Link „Studiotermin“ rechts neben dem Titel ebenfalls entfernt (Rasul 13.11.2026: „da ist noch ein Bullet Point
-	   mit Studiotermin, das muss weg“). */}
-	<section class="abschnitt" aria-labelledby="ab2-titel">
-		<VideoKacheln
-			id="ab2-titel"
-			titel="Beweis&shy;aufnahme"
-			kacheln={[
-				{ nr: "01", titel: "Wie am Küchentisch", zeile: "Szene Beweisaufnahme, 0:00 bis 0:04", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, blasen: [BLASEN[0]] as any,
+	{/* Die vier Abschnitte liegen seit 13.11.2026 als Bausteine in src/components/abschnitte/ (auch für die
+	   Unterseiten). Aufbau umschaltbar: „Abschnitte“ (bisher) oder „Kacheln“ (vier Kacheln zu den Unterseiten). */}
+	{/* VARIANTE Kachel-Startseite (Rasul 13.11.2026: „wir machen aus den Kacheln tatsächlich unsere Reihenfolge. … Dann
+	   hätten wir übersichtlich diese vier Schritte … auf Einblick in vier Kacheln und wer es vertiefen will, kann
+	   reinklicken.“ und „Ja, mach's mal als Variante zum Ausprobieren. … dass unsere Seite ja am Ende aber auch
+	   Studiogäste generieren soll … Aber wir hätten erstmal einen starken Hero. Eine klare Aussage, was wir machen.
+	   Vier Abschnitte, die zeigen, wie wir es machen und was es bringt am Ende.“). Wie BBHs Startseite: nach dem
+	   Statement vier große Kacheln, jede führt auf eine Unterseite; danach der Aufruf zum Studiotermin.
+	   Überschrift „BEWEIS-/FÜHRUNG“ ist ein Vorschlag; graue Zeilen sind Entwurf. Umschalten: Schalter „Aufbau“. */}
+	<div class="aufbau aufbau--kacheln">
+		<section class="abschnitt" aria-labelledby="kap-titel">
+			<VideoKacheln id="kap-titel" titel="Beweis&shy;führung" kacheln={[
+				{ nr: "01", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
-				{ nr: "02", titel: "Ohne Kamerastress", zeile: "Szene Beweisaufnahme, 0:04 bis 0:09", src: "/lokal/szene-beweisaufnahme.mp4", von: 4.5, bis: 9, blasen: [BLASEN[1]] as any },
-				{ nr: "03", titel: "Blickkontakt mit dem Zuschauer", zeile: "Szene Beweisaufnahme, 0:09 bis 0:18", src: "/lokal/szene-beweisaufnahme.mp4", von: 9, bis: 18, blasen: [BLASEN[2]] as any },
-				{ nr: "04", titel: "Das Blickkontaktstudio", zeile: "Szene Beweisaufnahme, 0:18 bis 0:24", src: "/lokal/szene-beweisaufnahme.mp4", von: 18, bis: 24, blasen: [BLASEN[3]] as any },
-			]}
-		/>
-	</section>
-	{/* RÜCKWEG (bis 13.11.2026 vormittags):
-	<section class="abschnitt" aria-labelledby="ab2-titel">
-		<TextBild id="ab2-titel" medium="voll" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
-			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" blasen={BLASEN as any} />
-			<p>Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie Gespräche am Küchentisch.</p>
-			<p>Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
-		</TextBild>
-	</section>
-	*/}
-
-	{/* ── 3 · DAS BEWEISVERFAHREN ── Baustein B6 Text-Bild, Grafik als Anker rechts (Seitenwechsel
-	   gibt Rhythmus wie bei BBH). Grafik offen: WEBSITE.md 3j. */}
-	{/* Überschrift wie „Beweisaufnahme“ (Rasul 13.11.2026: „jetzt geben wir dem nächsten Abschnitt, Beweisverfahren,
-	   auch die Überschrift wie Beweisaufnahme“). Grafik offen: Recherche Abfolgen bei BBH, sonst eigene Grafik. */}
-	<section class="abschnitt" aria-labelledby="ab3-titel">
-		<div class="rahmen"><Abschnittskopf id="ab3-titel" titel="Beweis&shy;verfahren" /></div>
-		{/* Karussell nach BBH B8 (Rasul 13.11.2026: „Ja, Karussell bauen“): der Weg als Karten zum Durchziehen.
-		   Schritte aus dem bisherigen Text („von der redaktionellen Vorbereitung über die Aufnahme im Gesprächsmodus
-		   inklusive Live-Regie bis zur Verteilung des Beweismaterials“) und der Methode Fangen · Veredeln · Verteilen.
-		   Bilder und Sätze sind Platzhalter. Bisheriger Absatz, nicht gelöscht: „Echte Experten haben keine Zeit für
-		   Videos. Müssen sie auch nicht. Wir gehen den ganzen Weg mit euch: von der redaktionellen Vorbereitung über
-		   die Aufnahme im Gesprächsmodus inklusive Live-Regie bis zur Verteilung des Beweismaterials.“ */}
-		<Karussell label="Die Schritte des Beweisverfahrens" karten={[
-			{ nr: "01", titel: "Redaktionelle Vorbereitung", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
-			{ nr: "02", titel: "Aufnahme im Gesprächsmodus", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
-			{ nr: "03", titel: "Live-Regie", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
-			{ nr: "04", titel: "Veredeln", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
-			{ nr: "05", titel: "Verteilen", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
-		]} />
-	</section>
-
-	{/* ── 4 · DIE BEWEISSTÜCKE ── Band (nach BBH-Karussell B8) über der Überschrift (Rasul 13.11.2026:
-	   „Ich setze die Animation für die Beweisstücke über die Beweisstücke.“). Überschrift und Text
-	   ohne Anker, deshalb nach BBH in der Mitte (Textblock, 6 von 12). Kanalzeile als kurzer Satz mittig. */}
-	{/* Überschrift wie „Beweisaufnahme“ über dem Band (Rasul 13.11.2026: „den nächsten Abschnitt Beweisstücke nehmen
-	   wir auch wieder die Art von Überschrift. Da haben wir ja schon eine Animation. Ich glaube, die können wir so
-	   verwenden.“). Vorher stand „Die Beweisstücke.“ als Blocküberschrift unter dem Band. */}
-	<section class="abschnitt" aria-labelledby="ab4-titel">
-		<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" /></div>
-		<Band formate={FORMATE} />
-		<div class="kanaele">
-			<KurzSaetze klein saetze={["LinkedIn · Website · Newsletter · Vertrieb"]} />
-		</div>
-		<div class="nach-band">
-			<Textblock>
-				<p>Der Beweis ist das echte Gespräch. Daraus werden skalierbare Beweisstücke für jeden eurer&nbsp;Kanäle.</p>
-				<p><span class="entwurf">Dummy: Kacheln ohne Kundenclips, keine Kundenfreigabe. Später ein echtes Kundenbeispiel mit Freigabe.</span></p>
-			</Textblock>
-		</div>
-	</section>
-
-	{/* ── 5 · DIE AUGENZEUGEN ── Baustein B6 Text-Bild (Grafik als Anker links), darunter
-	   B18 Kennzahl als mittige Einheit (Analyse 2.2), die Uhr und der Hinweis als kurzer Satz. */}
-	<section class="abschnitt abschnitt--letzter" aria-labelledby="ab5-titel">
-		<TextBild id="ab5-titel" titel="Die Augenzeugen.">
-			<Platzhalter slot="medium" format="4/5" text="Platzhalter: Augenzeugen-Grafik folgt" />
-			<p>Unsere Beweisstücke machen aus Zuschauern Augenzeugen. Wir messen die Zuschauerzeit und justieren die Formate daran. Mit der richtigen Frequenz haben Entscheider euch dann aktiv auf dem Schirm, wenn sie einen Experten&nbsp;brauchen.</p>
-		</TextBild>
-		<div class="nach-textbild">
-			<Kennzahlen gross zahlen={[{ wert: "41,8", zeile: "Stunden Zuschauerzeit für ein einziges Format, in fünf Monaten." }]} quelle={'Industry Impact (Impact Strategies), LinkedIn, Clips vom 02.04. bis 01.09.2026.<br /><span class="entwurf">Platzhalter: nur mit Einverständnis von Impact Strategies</span>'} />
-		</div>
-		<div class="uhr rahmen"><MultiOutputKacheln nurUhr /></div>
-		<KurzSaetze klein saetze={["Bleibt ihr im Takt, wird eure Stimme in der Branche mit der Zeit gehört."]} />
-	</section>
+				{ nr: "02", titel: "Beweisverfahren", zeile: "Von der Vorbereitung bis zur Verteilung", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
+				{ nr: "03", titel: "Beweisstücke", zeile: "Videopodcast, Clip, Zitat, Newsletter, Transkript", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
+				{ nr: "04", titel: "Augenzeugen", zeile: "Aus Zuschauern werden Augenzeugen", src: "/lokal/szene-beweisaufnahme.mp4", von: 25.5, bis: 28, href: "/augenzeugen" },
+			]} />
+		</section>
+		<Kapitelende />
+	</div>
+	<div class="aufbau aufbau--abschnitte">
+		<Beweisaufnahme />
+		<Beweisverfahren />
+		<Beweisstuecke />
+		<Augenzeugen />
+	</div>
 </Layout>
 
 <style>
+	/* Aufbau-Variante: Abschnitte (bisher, Grundeinstellung) oder Kacheln (vier Kacheln zu Unterseiten) */
+	:global(html:not([data-aufbau="kacheln"])) .aufbau--kacheln { display: none; }
+	:global(html[data-aufbau="kacheln"]) .aufbau--abschnitte { display: none; }
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,

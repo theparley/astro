@@ -1,0 +1,33 @@
+---
+/* Abschnitt der Startseite als eigener Baustein (13.11.2026), benutzt von der Startseite und der Unterseite.
+   Inhalt unverändert aus src/pages/index.astro übernommen, samt Entscheidungs-Kommentaren. */
+import Abschnittskopf from "../bausteine/Abschnittskopf.astro";
+import Band from "../bausteine/Band.astro";
+import KurzSaetze from "../bausteine/KurzSaetze.astro";
+import Textblock from "../bausteine/Textblock.astro";
+import { FORMATE } from "../../daten/startseite";
+---
+{/* ── 4 · DIE BEWEISSTÜCKE ── Band (nach BBH-Karussell B8) über der Überschrift (Rasul 13.11.2026:
+   „Ich setze die Animation für die Beweisstücke über die Beweisstücke.“). Überschrift und Text
+   ohne Anker, deshalb nach BBH in der Mitte (Textblock, 6 von 12). Kanalzeile als kurzer Satz mittig. */}
+{/* Überschrift wie „Beweisaufnahme“ über dem Band (Rasul 13.11.2026: „den nächsten Abschnitt Beweisstücke nehmen
+   wir auch wieder die Art von Überschrift. Da haben wir ja schon eine Animation. Ich glaube, die können wir so
+   verwenden.“). Vorher stand „Die Beweisstücke.“ als Blocküberschrift unter dem Band. */}
+<section class="abschnitt" aria-labelledby="ab4-titel">
+	<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" /></div>
+	<Band formate={FORMATE} />
+	<div class="kanaele">
+		<KurzSaetze klein saetze={["LinkedIn · Website · Newsletter · Vertrieb"]} />
+	</div>
+	<div class="nach-band">
+		<Textblock>
+			<p>Der Beweis ist das echte Gespräch. Daraus werden skalierbare Beweisstücke für jeden eurer&nbsp;Kanäle.</p>
+			<p><span class="entwurf">Dummy: Kacheln ohne Kundenclips, keine Kundenfreigabe. Später ein echtes Kundenbeispiel mit Freigabe.</span></p>
+		</Textblock>
+	</div>
+</section>
+
+<style>
+	.kanaele { margin-top: var(--abstand-md); }
+	.nach-band { margin-top: var(--abstand-lg); }
+</style>

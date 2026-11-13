@@ -1,0 +1,25 @@
+---
+/* Ende jeder Kapitel-Unterseite (13.11.2026, Kachel-Startseite als Variante). Rasul: „wir müssen nochmal ein bisschen
+   daran denken, dass unsere Seite ja am Ende aber auch Studiogäste generieren soll, als Leute, die Studio ausprobieren
+   wollen.“ Deshalb: Weiter zum nächsten Schritt und darunter der Aufruf zum Studiotermin (Titel und Satz wie die
+   Terminseite: „Let’s Parley“, „Welches Format passt? 30 Minuten.“). */
+import Knopf from "../bausteine/Knopf.astro";
+import Aufruf from "../bausteine/Aufruf.astro";
+interface Props { weiter?: { href: string; nr: string; titel: string } }
+const { weiter } = Astro.props;
+---
+{weiter && (
+	<nav class="kapitelende__weiter rahmen" aria-label="Nächster Schritt">
+		<span class="t-label">Weiter</span>
+		<Knopf href={weiter.href} text={`${weiter.nr} ${weiter.titel}`} />
+	</nav>
+)}
+<section class="abschnitt kapitelende__aufruf" aria-label="Studiotermin">
+	<Aufruf titel="Let’s Parley" knopf={{ href: "/termin", text: "Studiotermin" }}>
+		<p>Welches Format passt? 30 Minuten.</p>
+	</Aufruf>
+</section>
+<style>
+	.kapitelende__weiter { display: flex; justify-content: flex-end; align-items: baseline; gap: 16px; margin-top: var(--abstand-lg); }
+	.kapitelende__aufruf { margin-bottom: var(--abstand-xl); }
+</style>

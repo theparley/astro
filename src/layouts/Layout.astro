@@ -129,7 +129,16 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-umlaut") || "aussen";
 					} catch (e) { return q || "aussen"; }
 				}
+				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln
+				function liesAufbau() {
+					var q = new URLSearchParams(location.search).get("aufbau");
+					try {
+						if (q === "abschnitte" || q === "kacheln") localStorage.setItem("parley-aufbau", q);
+						return localStorage.getItem("parley-aufbau") || "abschnitte";
+					} catch (e) { return q || "abschnitte"; }
+				}
 				function setze() {
+					document.documentElement.dataset.aufbau = liesAufbau();
 					document.documentElement.dataset.umlaut = liesUmlaut();
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
@@ -155,6 +164,9 @@ const websiteJsonLd = JSON.stringify({
 				<span>Menü</span>
 				<button type="button" data-wahl="zwetschke">Zwetschke</button>
 				<button type="button" data-wahl="bbh">BBH</button>
+				<span>Aufbau</span>
+				<button type="button" data-aufbau-wahl="abschnitte">Abschnitte</button>
+				<button type="button" data-aufbau-wahl="kacheln">Kacheln</button>
 				<span>Umlaut</span>
 				<button type="button" data-umlaut-wahl="aussen">Außen</button>
 				<button type="button" data-umlaut-wahl="innen">Innen</button>
@@ -264,6 +276,8 @@ const websiteJsonLd = JSON.stringify({
 		padding: 2px 8px;
 		cursor: pointer;
 	}
+	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
+	html:not([data-aufbau="kacheln"]) .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-umlaut="innen"] .menu-wahl [data-umlaut-wahl="innen"],
 	html:not([data-umlaut="innen"]) .menu-wahl [data-umlaut-wahl="aussen"],
 	html[data-satz="a"] .menu-wahl [data-satz-wahl="a"],
@@ -296,6 +310,12 @@ const websiteJsonLd = JSON.stringify({
 <script>
 	/* Menü-Schalter (nur lokal): Wahl speichern und sofort umschalten. */
 	document.addEventListener("click", (e) => {
+		const aufbau = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-aufbau-wahl]");
+		if (aufbau) {
+			try { localStorage.setItem("parley-aufbau", aufbau.dataset.aufbauWahl!); } catch {}
+			location.reload();
+			return;
+		}
 		const umlaut = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-umlaut-wahl]");
 		if (umlaut) {
 			const w = umlaut.dataset.umlautWahl!;

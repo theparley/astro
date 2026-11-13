@@ -1,0 +1,48 @@
+---
+/* Abschnitt der Startseite als eigener Baustein (13.11.2026), benutzt von der Startseite und der Unterseite.
+   Inhalt unverändert aus src/pages/index.astro übernommen, samt Entscheidungs-Kommentaren. */
+import VideoKacheln from "../bausteine/VideoKacheln.astro";
+import { BLASEN } from "../../daten/startseite";
+---
+{/* ── 2 · DIE BEWEISKRAFT ── Baustein B6 Text-Bild: das Video ist der Anker links, Text rechts
+   (Analyse Teil 3, 2.1). ACHTUNG: Rasul hat „Video links, Schrift rechts“ am 13.11. ausprobiert
+   und zurückgenommen; hier steht es als Vorschlag. Rückweg auf „Video über dem Text“: Baustein
+   Textblock mit dem Video darüber. Video nur lokal (Freigaben der Gäste fehlen). */}
+{/* BEWEISAUFNAHME als große Kacheln nach BBH B7W (Rasul 13.11.2026: „lass uns erstmal die Kacheln von BBH
+   übernehmen, die großen … die schreiben ja groß drüber Work. Und da könnten wir doch Beweisaufnahme
+   drüberschreiben. Und dann gibt es Kacheln, die sich thematisch mit dem Thema Beweisaufnahmen beschäftigen.“).
+   Je Kachel ein Ausschnitt der Szene mit seiner Blase, stumm in Schleife; Klick öffnet groß. Nummeriert 01 bis
+   04, damit die Reihenfolge erhalten bleibt (Rasuls Einwand „eins nach dem anderen“). Einleitung: der frühere
+   kleine Text unter dem Statement. Kacheltitel sind Arbeitstitel. Rückweg zur Fassung mit vier Text-Bild-
+   Abschnitten: Commit 6b72e74 im Website-Repository.
+   PROBE Plakat (Rasul 13.11.2026: „jede Kachel designen wie ein Plakat von Graphéine“, „Ja, du sollst.“):
+   nur Kachel 01 als Plakat, 02 bis 04 als Standbild mit Blase, zum Vergleich nebeneinander. */}
+{/* Einleitung unter dem Titel entfernt (Rasul 13.11.2026: „der Erklärtext unter dem Wort Beweisaufnahme muss
+   weg, der muss vielleicht in die Kachel rein, aber optisch stört er“). Text zum Wiederverwenden:
+   „Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne
+   Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten Kontakt.“
+   Link „Studiotermin“ rechts neben dem Titel ebenfalls entfernt (Rasul 13.11.2026: „da ist noch ein Bullet Point
+   mit Studiotermin, das muss weg“). */}
+<section class="abschnitt" aria-labelledby="ab2-titel">
+	<VideoKacheln
+		id="ab2-titel"
+		titel="Beweis&shy;aufnahme"
+		kacheln={[
+			{ nr: "01", titel: "Wie am Küchentisch", zeile: "Szene Beweisaufnahme, 0:00 bis 0:04", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, blasen: [BLASEN[0]] as any,
+			  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
+			{ nr: "02", titel: "Ohne Kamerastress", zeile: "Szene Beweisaufnahme, 0:04 bis 0:09", src: "/lokal/szene-beweisaufnahme.mp4", von: 4.5, bis: 9, blasen: [BLASEN[1]] as any },
+			{ nr: "03", titel: "Blickkontakt mit dem Zuschauer", zeile: "Szene Beweisaufnahme, 0:09 bis 0:18", src: "/lokal/szene-beweisaufnahme.mp4", von: 9, bis: 18, blasen: [BLASEN[2]] as any },
+			{ nr: "04", titel: "Das Blickkontaktstudio", zeile: "Szene Beweisaufnahme, 0:18 bis 0:24", src: "/lokal/szene-beweisaufnahme.mp4", von: 18, bis: 24, blasen: [BLASEN[3]] as any },
+		]}
+	/>
+</section>
+{/* RÜCKWEG (bis 13.11.2026 vormittags):
+<section class="abschnitt" aria-labelledby="ab2-titel">
+	<TextBild id="ab2-titel" medium="voll" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
+		<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" blasen={BLASEN as any} />
+		<p>Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie Gespräche am Küchentisch.</p>
+		<p>Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
+	</TextBild>
+</section>
+*/}
+

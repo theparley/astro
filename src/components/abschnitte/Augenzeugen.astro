@@ -1,0 +1,32 @@
+---
+/* Abschnitt der Startseite als eigener Baustein (13.11.2026), benutzt von der Startseite und der Unterseite.
+   Inhalt unverändert aus src/pages/index.astro übernommen, samt Entscheidungs-Kommentaren. */
+import TextBild from "../bausteine/TextBild.astro";
+import Abschnittskopf from "../bausteine/Abschnittskopf.astro";
+import Platzhalter from "../bausteine/Platzhalter.astro";
+import Kennzahlen from "../bausteine/Kennzahlen.astro";
+import KurzSaetze from "../bausteine/KurzSaetze.astro";
+import MultiOutputKacheln from "../MultiOutputKacheln.astro";
+---
+{/* ── 5 · DIE AUGENZEUGEN ── Baustein B6 Text-Bild (Grafik als Anker links), darunter
+   B18 Kennzahl als mittige Einheit (Analyse 2.2), die Uhr und der Hinweis als kurzer Satz. */}
+<section class="abschnitt abschnitt--letzter" aria-labelledby="ab5-titel">
+	{/* Große Überschrift wie bei den anderen drei Schritten (13.11.2026, Kachel-Aufbau mit vier Kapiteln) */}
+	<div class="rahmen"><Abschnittskopf id="ab5-titel" titel="Augen&shy;zeugen" /></div>
+	<TextBild>
+		<Platzhalter slot="medium" format="4/5" text="Platzhalter: Augenzeugen-Grafik folgt" />
+		<p>Unsere Beweisstücke machen aus Zuschauern Augenzeugen. Wir messen die Zuschauerzeit und justieren die Formate daran. Mit der richtigen Frequenz haben Entscheider euch dann aktiv auf dem Schirm, wenn sie einen Experten&nbsp;brauchen.</p>
+	</TextBild>
+	<div class="nach-textbild">
+		<Kennzahlen gross zahlen={[{ wert: "41,8", zeile: "Stunden Zuschauerzeit für ein einziges Format, in fünf Monaten." }]} quelle={'Industry Impact (Impact Strategies), LinkedIn, Clips vom 02.04. bis 01.09.2026.<br /><span class="entwurf">Platzhalter: nur mit Einverständnis von Impact Strategies</span>'} />
+	</div>
+	<div class="uhr rahmen"><MultiOutputKacheln nurUhr /></div>
+	<KurzSaetze klein saetze={["Bleibt ihr im Takt, wird eure Stimme in der Branche mit der Zeit gehört."]} />
+</section>
+
+<style>
+	.nach-textbild { margin-top: var(--abstand-lg); }
+	.uhr { margin-top: var(--abstand-lg); }   /* die Uhr bringt ihre Breite selbst mit: min(542 px, 100 %), mittig */
+	.uhr + :global(.kurzsaetze) { margin-top: var(--abstand-md); }
+	.abschnitt--letzter { margin-bottom: var(--abstand-xl); }
+</style>

@@ -1,0 +1,19 @@
+---
+/* Unterseite 01 Beweisaufnahme (13.11.2026, Variante Kachel-Startseite; Rasul: „Ja, mach's mal als Variante zum
+   Ausprobieren“). Inhalt ist derselbe Baustein wie auf der Startseite (src/components/abschnitte/Beweisaufnahme.astro).
+   Noch nicht in der Sitemap, bis Rasul über den Aufbau entscheidet. */
+import Layout from "../layouts/Layout.astro";
+import Beweisaufnahme from "../components/abschnitte/Beweisaufnahme.astro";
+import Kapitelende from "../components/abschnitte/Kapitelende.astro";
+---
+<Layout title="Beweisaufnahme" description="01 Beweisaufnahme: so arbeitet Parley Film.">
+	<main class="kapitel">
+		<Beweisaufnahme />
+		<Kapitelende weiter={{ href: "/beweisverfahren", nr: "02", titel: "Beweisverfahren" }} />
+	</main>
+</Layout>
+<style>
+	.kapitel { padding-top: 0; }   /* oben genügt der xl-Abstand des Abschnitts (BBH: Titel mit py-xl) */
+	/* letzter Abschnitt der Startseite bringt unten xl mit; auf der Unterseite folgt noch das Kapitel-Ende */
+	.kapitel :global(.abschnitt--letzter) { margin-bottom: 0; }
+</style>
