@@ -51,7 +51,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// dann stand das Bild kurz still, und danach kam alles neu auf einmal: Text (1 s Blende), Fingerpunkte (nur 0,25 s, wirkten
 	// wie ein Aufploppen), Bewegung. Jetzt überlappend wie im Trickfilm: Text ab 1,6 s, während die letzten Personen noch
 	// erscheinen; Fingerpunkte blenden in 0,6 s ein (D_FINGER); Geste und Kamera starten bei 2,45 s wie bisher.
-	const T_PAUSE = 2.2, D_LESEN = 0.25, T_TEXT = 1.6, D_FINGER = 0.6;
+	// Danach Rasul 14.11.2026: „ich glaube, es ist der Stopp, dass die zwei Punkte erscheinen und noch nichts passiert. Und
+	// da dürfen auch noch zwei, drei Männchen erscheinen … bis der Videobeweis startet und bis er zur Hälfte durch ist.“
+	// Jetzt: keine Wartezeit mehr vor der Geste (D_LESEN 0, Geste und Kamera ab 2,2 s); die Fingerpunkte blenden in den
+	// ersten 0,4 s der Bewegung ein, statt vorher stillzustehen; drei Personen erscheinen noch bis zur Hälfte der Geste
+	// (siehe uebergang()).
+	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
@@ -276,6 +281,15 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// entschieden: „Zurück zu Figuren“. Grundeinstellung „figur“, „punkt“ bleibt im Schalter.
 	const form = () => (document.documentElement.dataset.form === "punkt" ? "punkt" : "figur");
 	// Aufstellung, die von oben ungeordnet wirkt und von vorne trägt: einer vorne, zwei dahinter, zwei Reihen, viele hinten
+	// Drei Personen erscheinen noch im Übergang, vom Text bis zur Hälfte der Geste (Rasul 14.11.2026, siehe oben): eine aus
+	// den mittleren Reihen, zwei von hinten; fester Zufall, damit jedes Abspielen gleich aussieht
+	function uebergang(liste: Person[]): Person[] {
+		const r = zufall(41), bis = T_GESTE + D_KAMERA * 0.5 - 0.5; // Einblendung dauert 0,5 s
+		const mitte = liste.filter((q) => q.ebene === 2 && !q.spaet), hinten = liste.filter((q) => q.ebene === 3 && !q.spaet);
+		const wahl = [mitte[Math.floor(r() * mitte.length)], hinten[Math.floor(r() * hinten.length)], hinten[Math.floor(r() * hinten.length)]].filter(Boolean);
+		wahl.forEach((q, i) => { q.ein = T_TEXT + ((i + 0.3 + r() * 0.4) / wahl.length) * (bis - T_TEXT); });
+		return liste;
+	}
 	function personenFahrt(): Person[] {
 		const rnd = zufall(23), liste: Person[] = [];
 		const halb = RW / 2 - 80;
@@ -311,7 +325,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const X = j(2 * halb), Z = 90 + rnd() * 40;
 				if (frei(X, Z)) { const q = neu(X, Z, 3, spaetZeit()); q.spaet = true; liste.push(q); m++; }
 			}
-			return liste;
+			return uebergang(liste);
 		}
 		// Grundform: Reihen, mehr Personen vor allem hinten (Rasul 13.11.2026 abends: „setz dann mehr Personen rein, auch
 		// vor allem in den Hintergrund“)
@@ -332,7 +346,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
 		reihe(12, 230, 330, halb * 0.95, 3, spaetZeit);
 		liste.slice(-12).forEach((q) => { q.spaet = true; });
-		return liste;
+		return uebergang(liste);
 	}
 
 	// Person in derselben Form wie die Augenzeugen-Animationen (Werkstatt augenzeugen-kacheln.js, personPfad):
@@ -560,14 +574,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// an dem Zoom-in, Zoom-out und an der Länge“): Beim Ende „kamera“ beginnen Geste und Fahrt gleichzeitig, dauern
 				// gleich lang und folgen demselben Verlauf (glatt). Vorher: Geste 1,6 s, Fahrt erst danach.
 				const kam = ende() === "kamera", gDauer = kam ? D_KAMERA : DAUER;
-				if (t >= T_GESTE - D_FINGER && t <= T_GESTE + gDauer + GLIMM + 0.45) {
+				if (t >= T_GESTE && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
-				if (t >= T_GESTE - D_FINGER && t < T_GESTE) deck = sanft((t - T_GESTE + D_FINGER) / D_FINGER);
-				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = 1; }
+				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
 				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
