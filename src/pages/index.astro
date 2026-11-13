@@ -165,15 +165,30 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 		<section class="abschnitt" aria-labelledby="kap-titel">
 			<!-- Überschrift Rasul 13.11.2026 abends: „Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ (vorher „Beweisführung“);
 			     dann „Nimm mal bei Videobeweis noch den Artikel weg, also nur Videobeweis.“ -->
-			{/* Probe 13.11.2026 abends (Schalter „Kacheln“): Fassung „Überall Experten“ setzt die Szene über den Kacheln, die
-			     Zeilen erzählen die Geschichte in einem Zug (Rasul: „dass die Kacheln … beim Drübergucken schon die Geschichte
-			     erzählen“). Kandidaten Claude, nicht entschieden: website/Website_Neustart_2026-11.md, „Kacheln als Fenster“. */}
-			<VideoKacheln id="kap-titel" titel={`<span class="kopf-heute">Video&shy;beweis</span><span class="kopf-szene">Überall Experten.<br />Zeit für den Video&shy;beweis.</span>`} titelStufe="2xl" kacheln={[
-				{ nr: "01", titel: "Beweisaufnahme", zeile: `<span class="kopf-heute">Das echte Gespräch, filmreif ohne Kamerastress</span><span class="kopf-szene">Das echte Gespräch, filmreif ohne Kamerastress.</span>`, src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
+			{/* Zeilen der Kacheln erzählen die Geschichte in einem Zug (Rasul 13.11.2026 abends: „inhaltlich ja, finde ich gut,
+			     können wir so machen.“). Der Anlass „Überall Experten. Zeit für den Videobeweis.“ steht NICHT als Überschrift
+			     über den Kacheln (Rasul: „ich will nicht großen weißen Text, dann mehrzeilig dann nochmal weißen Text …“),
+			     sondern als Probe in einer eigenen hellen Form nach BBH: Band (B6 Text-Bild hell) oder breite Kachel (B20).
+			     Schalter „Kacheln · Videobeweis / Band / Kachel“ oder ?kopf=…; Text des Anlasses ist Entwurf Claude. */}
+			<div class="anlass anlass--band">
+				<TextBild titelZeilen={["Überall Experten.", "Zeit für den Videobeweis."]} seite="links" medium="voll">
+					<div slot="medium" class="anlass__bild"><BlasenVideo src="/lokal/szene-beweisaufnahme.mp4" von={25.5} bis={28} blasen={[]} format="4/3" stillbild /></div>
+					<p><span class="entwurf">Entwurf</span></p>
+					<p>Auf LinkedIn, in Podcasts, auf jeder Bühne: Überall sprechen Experten. Behaupten kann das jeder. Ob jemand wirklich etwas kann, sieht man erst im Gespräch. Dafür gibt es den Videobeweis.</p>
+				</TextBild>
+			</div>
+			<div class="anlass anlass--kachel rahmen">
+				<div class="anlass__kachel">
+					<p class="anlass__gross">Überall Experten.<br />Zeit für den Video&shy;beweis.</p>
+					<p class="t-lesen anlass__text"><span class="entwurf">Entwurf</span><br />Behaupten kann das jeder. Ob jemand wirklich etwas kann, sieht man erst im Gespräch.</p>
+				</div>
+			</div>
+			<VideoKacheln id="kap-titel" titel={"Überall Experten.<br />Zeit für den Video&shy;beweis."} titelStufe="2xl" kacheln={[
+				{ nr: "01", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
-				{ nr: "02", titel: "Beweisverfahren", zeile: `<span class="kopf-heute">Von der Vorbereitung bis zur Verteilung</span><span class="kopf-szene">Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.</span>`, src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
-				{ nr: "03", titel: "Beweisstücke", zeile: `<span class="kopf-heute">Videopodcast, Clip, Zitat, Newsletter, Transkript</span><span class="kopf-szene">Aus einem Gespräch werden viele Beweisstücke.</span>`, src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
-				{ nr: "04", titel: "Augenzeugen", zeile: `<span class="kopf-heute">Aus Zuschauern werden Augenzeugen</span><span class="kopf-szene">Entscheider haben euch auf dem Schirm, wenn sie einen Experten brauchen.</span>`, src: "/lokal/szene-beweisaufnahme.mp4", von: 25.5, bis: 28, href: "/augenzeugen" },
+				{ nr: "02", titel: "Beweisverfahren", zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
+				{ nr: "03", titel: "Beweisstücke", zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
+				{ nr: "04", titel: "Augenzeugen", zeile: "Entscheider haben euch auf dem Schirm, wenn sie einen Experten brauchen.", src: "/lokal/szene-beweisaufnahme.mp4", von: 25.5, bis: 28, href: "/augenzeugen" },
 			]} />
 		</section>
 		<Kapitelende />
@@ -271,5 +286,21 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.blasen-buehne { width: 74%; margin: calc(var(--abstand-lg) + 22vw) auto 0; }
 	@media (min-width: 1024px) { .blasen-buehne { width: 66.666%; max-width: 1150px; margin-top: calc(var(--abstand-lg) + 14vw); } }
 	.abschnitt--letzter { margin-bottom: var(--abstand-xl); }
+	/* Anlass vor den Kacheln (Probe 13.11.2026 abends, Schalter „Kacheln“) */
+	.anlass { display: none; }
+	:global(html[data-kopf="band"]) .anlass--band,
+	:global(html[data-kopf="kachel"]) .anlass--kachel { display: block; }
+	/* In beiden Proben entfällt die Überschrift „Videobeweis“ sichtbar; sie bleibt als Sprungziel des Menüs im Code. */
+	:global(html[data-kopf="band"] #kap-titel),
+	:global(html[data-kopf="kachel"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+	/* B6 hell (BBH theme:light): weiße Fläche, schwarze Schrift, Innenabstand lg */
+	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-lg) 0; margin-bottom: var(--abstand-lg); }
+	.anlass--band :global(.entwurf) { margin-bottom: 8px; }
+	/* B20 (BBH „Nächstes Projekt“): Fläche 2:1, Schrift Bogle groß und mittig; hier hell statt Projektfarbe */
+	.anlass--kachel { margin-bottom: 16px; }
+	.anlass__kachel { display: grid; place-content: center; gap: 32px; text-align: center; background: var(--surface); color: var(--black); border-radius: 4px; padding: 64px 16px; }
+	@media (min-width: 1024px) { .anlass__kachel { aspect-ratio: 2 / 1; padding: 32px; } }
+	.anlass__gross { margin: 0; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
+	.anlass__text { margin: 0 auto; max-width: 46ch; text-wrap: balance; }
 </style>
 

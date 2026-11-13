@@ -29,10 +29,6 @@
    Nie von Googles Servern laden (Datenschutz), nur von hier.
    RÜCKWEG ZU FORMA (Rasul 13.11.: „Wenn wir dann die Lizenz bei Forma bezahlt
    haben“): nur die Tokens in Abschnitt 2 umstellen, sonst nichts. */
-/* Probe Kopf über den Kacheln (13.11.2026 abends): zwei Fassungen im Code, Schalter „Kacheln“ (data-kopf). */
-.kopf-szene { display: none; }
-html[data-kopf="szene"] .kopf-szene { display: inline; }
-html[data-kopf="szene"] .kopf-heute { display: none; }
 @font-face { font-family: "Geist"; src: url("/fonts/frei/Geist-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 @font-face { font-family: "Geist Mono"; src: url("/fonts/frei/GeistMono-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 @font-face { font-family: "BBH-DE Bartle"; src: url("/fonts/frei/BBH-DE-Bartle.woff2?v=2") format("woff2"); font-weight: 400; font-display: swap; }
