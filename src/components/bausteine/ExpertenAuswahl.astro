@@ -37,8 +37,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
 	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
 	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
-	const T_TEXT = 1.8;
-	const T_PERSONEN = 1.4, T_GESTE = T_TEXT + 1.0, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
+	// Danach in zwei Abschnitten (Rasul 13.11.2026 abends: „Vielleicht müssen wir die Animation unterteilen. In dem Moment,
+	// wo die erste Zeile erscheint, kann die Animation starten. Und sie stoppt, wenn alle Menschen erschienen sind. Und erst
+	// wenn so weitergescrollt ist, dass man die nächsten beiden Zeilen sehen könnte, erscheint auch Zeit für den Videobeweis
+	// … Dann einen Moment warten, die Zeit, die man braucht zum Lesen. Und dann geht die Animation weiter.“):
+	// T_PAUSE = alle Personen sind da, hier hält die Uhr an bis zur Freigabe; dann Nachsatz, Lesepause D_LESEN, Geste.
+	const T_PAUSE = 2.2, D_LESEN = 1.6, T_TEXT = T_PAUSE;
+	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
 	// „Animation“ (html data-ende): drei | eins | grau | unscharf. Der Fokus folgt nach der Auswahl.
@@ -257,8 +262,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const halb = RW / 2 - 80;
 		const neu = (X: number, Z: number, ebene: number, ein: number): Person => ({ x: CX + X, y: CY - Z, s: 1, ein, zx: 0, zy: 0, bleibt: ebene <= 1, rang: 0, ebene, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z });
 		const j = (w: number) => (rnd() - 0.5) * w;
-		// drei Viertel erscheinen vor dem Nachsatz („wenn die ganz vielen Punkte da sind“), der Rest noch während der Geste
-		const spaeter = () => (rnd() < 0.75 ? 0.2 + rnd() * (T_TEXT - 0.3) : T_TEXT + rnd() * (T_GESTE + DAUER - 0.5 - T_TEXT));
+		// alle erscheinen im ersten Abschnitt, bis kurz vor der Pause (letzte Einblendung dauert 0,5 s)
+		const spaeter = () => 0.2 + rnd() * (T_PAUSE - 0.75);
 		liste.push(neu(0, -300, 0, rnd() * 0.5), neu(-200 + j(30), -170 + j(30), 1, rnd() * 0.7), neu(200 + j(30), -170 + j(30), 1, rnd() * 0.7));
 		const reihe = (n: number, zVon: number, zBis: number, breite: number, ebene: number, ein: () => number) => {
 			for (let i = 0; i < n; i++) {
@@ -582,19 +587,27 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const bandPhase = fig.closest<HTMLElement>(".anlass--band");
 			const phase = (w: string) => { fig.dataset.phase = w; if (bandPhase) bandPhase.dataset.phase = w; };
 			phase("warten");
+			// eigene Uhr, damit die Animation bei T_PAUSE anhalten kann
+			let uhr = 0, zuletzt = 0, freigabe = false, haelt = false;
 			const schritt = () => {
-				const jetzt = performance.now() / 1000, t = jetzt - start;
-				if (t >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden (vor der Geste)
-				bild(t, jetzt);
-				if (t < ENDE + GLIMM) lauf = requestAnimationFrame(schritt);
+				const jetzt = performance.now() / 1000;
+				uhr += Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
+				if (uhr >= T_PAUSE && !freigabe) {
+					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
+					uhr = T_PAUSE; bild(uhr, jetzt); haelt = true; return;
+				}
+				if (uhr >= T_PAUSE && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, dann Lesepause
+				bild(uhr, jetzt);
+				if (uhr < ENDE + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
 			};
+			const weiter = () => { if (haelt) { haelt = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); } };
 			const spiele = () => {
-				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig;
+				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false;
 				spurR = []; spurL = [];
 				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); return; }
 				phase("warten");
-				start = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+				start = performance.now() / 1000; uhr = 0; zuletzt = start; lauf = requestAnimationFrame(schritt);
 			};
 			groesse(); bild(0, 0);
 			// Start erst, wenn die ganze Gruppe im Bild ist (Rasul 13.11.2026 abends: „die Animation startet zu früh … ab einem
@@ -605,9 +618,18 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// Danach (Rasul 13.11.2026 abends): „Sobald der so weit reingescrollt ist, dass sich die beiden anderen Zeilen unten
 			// drunter auch lesen könnte, dann geht die Animation los. Man sieht aber die beiden Zeilen noch nicht.“ → Auslöser ist
 			// der (noch unsichtbare) Nachsatz, sobald sein Platz vollständig im Bild ist.
-			const ausloeser = fig.closest(".anlass--band")?.querySelector(".anlass__nachsatz") ?? fig.closest(".anlass--band")?.querySelector(".anlass__satz--eins");
-			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: ausloeser ? 1 : 0.9 });
-			beob.observe(ausloeser ?? fig);
+			// Zwei Auslöser: Start, wenn „Überall Experten.“ erscheint (zu 60 % sichtbar); Freigabe für den zweiten Abschnitt,
+			// wenn der Platz des Nachsatzes vollständig im Bild ist. Ohne diese Zeilen: Start bei 90 % der Animation, frei.
+			const bandA = fig.closest(".anlass--band");
+			const zeileEins = bandA?.querySelector(".anlass__satz--eins"), nachsatz = bandA?.querySelector(".anlass__nachsatz");
+			if (!nachsatz) freigabe = true;
+			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: zeileEins ? 0.6 : 0.9 });
+			beob.observe(zeileEins ?? fig);
+			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
+			if (nachsatz) {
+				const beob2 = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob2.disconnect(); freigabe = true; weiter(); } }, { threshold: 1 });
+				beob2.observe(nachsatz);
+			}
 			fig.addEventListener("click", spiele);
 			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
 			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)
