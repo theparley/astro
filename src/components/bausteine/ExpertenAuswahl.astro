@@ -42,7 +42,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// wenn so weitergescrollt ist, dass man die nächsten beiden Zeilen sehen könnte, erscheint auch Zeit für den Videobeweis
 	// … Dann einen Moment warten, die Zeit, die man braucht zum Lesen. Und dann geht die Animation weiter.“):
 	// T_PAUSE = alle Personen sind da, hier hält die Uhr an bis zur Freigabe; dann Nachsatz, Lesepause D_LESEN, Geste.
-	const T_PAUSE = 2.2, D_LESEN = 1.6, T_TEXT = T_PAUSE;
+	// Lesepause gestrichen (Rasul 13.11.2026 abends: „die Zeit, wo der zweite Text erscheint und die Videobeweisanimation
+	// startet, die Zeit ist noch zu lang. Mach es mal gleichzeitig, in dem Moment, wo der Text erscheint, erscheinen auch
+	// oben die ersten beiden Punkte“, korrigiert: „nicht die ersten beiden, sondern die beiden Punkte“): Mit der Freigabe blenden Nachsatz und die beiden Fingerpunkte zugleich ein (0,25 s),
+	// direkt danach beginnen Geste und Kamerafahrt. Vorher 1,6 s Lesepause.
+	const T_PAUSE = 2.2, D_LESEN = 0.25, T_TEXT = T_PAUSE;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
