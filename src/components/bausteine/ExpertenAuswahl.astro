@@ -371,7 +371,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
 			const glut = document.createElement("canvas"), gctx = glut.getContext("2d")!;
 			let leuteFlach = personen(), leuteRaum = personenKamera();
-			let leute = leuteFlach, zoomEnde = 1;
+			let leute = leuteFlach, zoomEnde = 1, hebung = 0;
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
 			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -391,7 +391,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// 90 % oder 80 % der Viewport-Höhe verwenden für die Animation“): Schalter „Animation hoch“ (html data-animhoehe =
 				// 100 | 90 | 80), Grundeinstellung 80.
 				const anteilHoehe = (Number(document.documentElement.dataset.animhoehe) || 80) / 100;
-				if (window.innerWidth >= window.innerHeight) cv.style.height = `${(window.innerHeight * anteilHoehe).toFixed(1)}px`;
+				// Mit Überschrift oben und Nachsatz unten (13.11.2026 abends): alle drei müssen zusammen ins Fenster passen
+				const bandEl = fig.closest(".anlass--band");
+				const oben = bandEl?.querySelector(".anlass__satz--oben"), unten = bandEl?.querySelector(".anlass__nachsatz");
+				const extra = (oben ? oben.getBoundingClientRect().height + 24 : 0) + (unten ? unten.getBoundingClientRect().height + 24 : 0) + 48;
+				const passend = window.innerHeight - extra;
+				if (window.innerWidth >= window.innerHeight) cv.style.height = `${Math.max(200, Math.min(window.innerHeight * anteilHoehe, passend)).toFixed(1)}px`;
 				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
@@ -407,6 +412,19 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const ende1 = bahn(1, F1, 1);
 				for (const q of leuteRaum) { const p = fahrtKamera(q.wx, q.wz, ende1.C, ende1.Lk, ende1.F); weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
 				zoomEnde = Math.min(1, halbe / Math.max(1, weit));
+				// Bildausschnitt am Ende wie bei unseren Interviews (Rasul 13.11.2026 abends: „wenn ich Kameramann wäre und den
+				// 16:9-Frame mir vorstelle, dann habe ich das Gefühl, würde die Person zu tief im Bild sitzen … im Endeffekt
+				// setzen wir ja auch in unseren Videos die Leute in eine gewisse Position“): Der Kopf der vorderen Person liegt
+				// am Ende auf der oberen Drittellinie des 16:9-Rahmens. Umgesetzt als Verschiebung des Bildausschnitts (wie ein
+				// Shift-Objektiv), die Perspektive bleibt gleich; sie wächst mit der Fahrt.
+				{
+					const vorne = leuteRaum.find((q) => q.ebene === 0);
+					if (vorne) {
+						const p = fahrtKamera(vorne.wx, vorne.wz, ende1.C, ende1.Lk, F1 * zoomEnde);
+						const kopf = p.y - 14.5 * (64 * p.g) / 19;
+						hebung = kopf - (T + RH / 3);
+					}
+				}
 			};
 
 			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number) => {
@@ -475,7 +493,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const pr = fahrtKamera(q.wx, q.wz, C, Lk, F);
 						const kipp = 1 - pr.phi / (Math.PI / 2); // 0 = von oben, nahe 1 = von vorne
 						const u = (64 * q.s * pr.g) / 19;
-						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15), g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y };
+						const hoch = hebung * e; // Bildausschnitt wandert mit der Fahrt nach oben (Kopf auf die obere Drittellinie)
+						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15) - hoch, g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y - hoch };
 					}).sort((a, b) => b.zc - a.zc);
 					// Rasul 13.11.2026 abends: „die sind jetzt schon im Hintergrund und werden kurz scharf und dann unscharf. Das
 					// stimmt von der Perspektivenwirkung der Kamera dann nicht mehr.“ Deshalb: Verwandlung ganz am Anfang des
@@ -540,8 +559,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				}
 			};
 
+			// Phase für den Nachsatz unter der Animation: „warten“ bis zur Geste, dann „geste“
+			fig.dataset.phase = "warten";
 			const schritt = () => {
 				const jetzt = performance.now() / 1000, t = jetzt - start;
+				if (t >= T_GESTE && fig.dataset.phase !== "geste") fig.dataset.phase = "geste";
 				bild(t, jetzt);
 				if (t < ENDE + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
@@ -549,12 +571,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const spiele = () => {
 				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig;
 				spurR = []; spurL = [];
-				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; return; }
+				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; fig.dataset.phase = "geste"; return; }
+				fig.dataset.phase = "warten";
 				start = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
 			};
 			groesse(); bild(0, 0);
-			const beob = new IntersectionObserver((e) => { if (e[0].isIntersecting) { beob.disconnect(); spiele(); } }, { threshold: 0.5 });
-			beob.observe(fig);
+			// Start erst, wenn die ganze Gruppe im Bild ist (Rasul 13.11.2026 abends: „die Animation startet zu früh … ab einem
+			// gewissen Punkt soll die starten“): Der Nachsatz unter der Animation muss vollständig sichtbar sein; ohne
+			// Nachsatz 90 % der Animation.
+			const nachsatz = fig.closest(".anlass--band")?.querySelector(".anlass__nachsatz");
+			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: nachsatz ? 1 : 0.9 });
+			beob.observe(nachsatz ?? fig);
 			fig.addEventListener("click", spiele);
 			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
 			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)

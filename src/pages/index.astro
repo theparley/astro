@@ -183,9 +183,14 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     oder den nächstkleineren, vielleicht muss der gar nicht so groß sein.“). Überschrift eine Stufe kleiner (2xl). */}
 					{/* Animation als Probe (Rasul 13.11.2026 abends: „viele Icons von Personen … Dann kommt diese Bewegung. Und
 					     dann reduziert sich das auf 3. Probier es mal, ob das Sinn macht“). Baustein ExpertenAuswahl.astro. */}
+					{/* Neu geteilt (Rasul 13.11.2026 abends: „vielleicht geben wir ihm doch die Überschrift, aber da sagen wir nur
+					     Überall Experten? Und darunter die Animation. Kannst du das timen? In dem Moment, wo der Videobeweis, die
+					     Bewegung erscheint, schreiben wir unten drunter hin Zeit für den Videobeweis auch im Business“): oben
+					     „Überall Experten.“, dann die Animation, darunter der Nachsatz, der mit der Geste einblendet (die Animation
+					     setzt data-phase am Baustein). Vorher dreizeilig unter der Animation (entschieden „Dreizeilig lassen“). */}
+					{/* Zurück (Rasul 13.11.2026 abends: „mit der Überschrift ist nicht gut. Wieder zurück, wir lassen es unten
+					     drunter.“): Animation zuerst, darunter die Überschrift dreizeilig. */}
 					<ExpertenAuswahl />
-					{/* Entschieden (Rasul 13.11.2026 abends: „Dreizeilig lassen“). Kandidat davor, Rasul: „Damit unsere Animation verstanden wird. Könnten wir in der Überschrift sagen:
-					     Zeit für den Videobeweis auch im Business.“ Vorher: „Überall Experten. / Zeit für den Videobeweis.“ */}
 					<p class="anlass__satz">Überall Experten.<br />Zeit für den Video&shy;beweis<br />auch im Business.</p>
 					{/* Bandtext als Probe (Rasul 13.11.2026 abends, gesammelt: KI-Slop, „generierte und gelebte Expertise“, viele
 					     Anbieter wollen bei Entscheidern auf den Schirm, „weil es so einfach ist, jetzt eine Expertise zu behaupten,
@@ -346,6 +351,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass--band { background: var(--white); color: var(--black); padding: 0 0 var(--abstand-lg); margin-bottom: var(--abstand-lg); overflow-x: clip; }
 	/* Abstände im Band klein (32 px), damit Überschrift, Animation und Lesetext auf einen Bildschirm passen (13.11.2026) */
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
+
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
 	/* Schriftgröße der Überschrift im Band (Rasul 13.11.2026 abends: „ob wir wirklich die ganz große Schrift hier brauchen.
