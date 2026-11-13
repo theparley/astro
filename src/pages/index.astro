@@ -112,7 +112,19 @@ const FORMATE = [
 			   Videobeweise aus echten Gesprächen. Gar nicht schlecht.“ Danach Grundeinstellung und h1, Rasul: „Wir fangen
 			   echte Gespräche ein, hilft dem Kunden nichts? Aber wir sichern Videobeweise aus echten Gesprächen. Das
 			   sagt nämlich, wenn sich keiner darum kümmert, wird's nicht gesichert.“ */}
-			<div class="satz satz--l"><Haltung ebene="h1" aufdecken zeilen={["Wir sichern Videobeweise aus echten Gesprächen"]} /></div>
+			<div class="satz satz--l"><Haltung ebene="p" aufdecken zeilen={["Wir sichern Videobeweise aus echten Gesprächen"]} /></div>
+			{/* M, N: Rasul 13.11.2026: „Jetzt fehlt noch, dass es um Experten geht, dann wird es aber wieder zu lang,
+			   kriegen wir es trotzdem irgendwie hin. Also um Expertise geht.“ Kandidaten Claude: „echte Gespräche“
+			   zeigt der Film darüber, deshalb raus, Platz für „eurer Expertise“. */}
+			<div class="satz satz--m"><Haltung ebene="p" aufdecken zeilen={["Wir sichern den Videobeweis eurer Expertise"]} /></div>
+			<div class="satz satz--n"><Haltung ebene="p" aufdecken zeilen={["Wir sichern Videobeweise eurer Expertise"]} /></div>
+			{/* O: Rasul 13.11.2026: „Vielleicht kommt sichern einen Schritt später, vielleicht ist es zu früh. Glaubt
+			   man versteht den Satz nicht im ersten Moment? Aber wir liefern den Videobeweis eurer Expertise, den
+			   verstehe ich sofort. Versuch's nochmal.“ Grundeinstellung und h1.
+			   P, Q: Kandidaten Claude in derselben Klarheit. */}
+			<div class="satz satz--o"><Haltung ebene="h1" aufdecken zeilen={["Wir liefern den Videobeweis eurer Expertise"]} /></div>
+			<div class="satz satz--p"><Haltung ebene="p" aufdecken zeilen={["Wir machen eure Expertise zum Videobeweis"]} /></div>
+			<div class="satz satz--q"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise eurer Expertise"]} /></div>
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
@@ -193,13 +205,18 @@ const FORMATE = [
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,
-	:global(html:not([data-satz])) .satz--l,
+	:global(html:not([data-satz])) .satz--o,
 	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="i"]) .satz--i,
 	:global(html[data-satz="j"]) .satz--j,
 	:global(html[data-satz="k"]) .satz--k,
 	:global(html[data-satz="l"]) .satz--l,
+	:global(html[data-satz="m"]) .satz--m,
+	:global(html[data-satz="n"]) .satz--n,
+	:global(html[data-satz="o"]) .satz--o,
+	:global(html[data-satz="p"]) .satz--p,
+	:global(html[data-satz="q"]) .satz--q,
 	:global(html[data-satz="f"]) .satz--f,
 	:global(html[data-satz="e"]) .satz--e,
 	:global(html[data-satz="d"]) .satz--d,

@@ -113,13 +113,13 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-lage") || "links";
 					} catch (e) { return q || "links"; }
 				}
-				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis l; Grundeinstellung l (Rasul 13.11.: sichern sagt, ohne uns wird nichts gesichert)
+				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis q; Grundeinstellung o (Rasul 13.11.: „den verstehe ich sofort“)
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l") localStorage.setItem("parley-satz", q);
-						return localStorage.getItem("parley-satz") || "l";
-					} catch (e) { return q || "l"; }
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q") localStorage.setItem("parley-satz", q);
+						return localStorage.getItem("parley-satz") || "o";
+					} catch (e) { return q || "o"; }
 				}
 				function setze() {
 					document.documentElement.dataset.satz = liesSatz();
@@ -159,6 +159,11 @@ const websiteJsonLd = JSON.stringify({
 				<button type="button" data-satz-wahl="j">J</button>
 				<button type="button" data-satz-wahl="k">K</button>
 				<button type="button" data-satz-wahl="l">L</button>
+				<button type="button" data-satz-wahl="m">M</button>
+				<button type="button" data-satz-wahl="n">N</button>
+				<button type="button" data-satz-wahl="o">O</button>
+				<button type="button" data-satz-wahl="p">P</button>
+				<button type="button" data-satz-wahl="q">Q</button>
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
@@ -257,6 +262,11 @@ const websiteJsonLd = JSON.stringify({
 	html[data-satz="j"] .menu-wahl [data-satz-wahl="j"],
 	html[data-satz="k"] .menu-wahl [data-satz-wahl="k"],
 	html[data-satz="l"] .menu-wahl [data-satz-wahl="l"],
+	html[data-satz="m"] .menu-wahl [data-satz-wahl="m"],
+	html[data-satz="n"] .menu-wahl [data-satz-wahl="n"],
+	html[data-satz="o"] .menu-wahl [data-satz-wahl="o"],
+	html[data-satz="p"] .menu-wahl [data-satz-wahl="p"],
+	html[data-satz="q"] .menu-wahl [data-satz-wahl="q"],
 	html[data-lage="unten"] .menu-wahl [data-lage-wahl="unten"],
 	html:not([data-lage="unten"]) .menu-wahl [data-lage-wahl="links"],
 	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
