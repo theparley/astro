@@ -294,10 +294,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Person in derselben Form wie die Augenzeugen-Animationen (Werkstatt augenzeugen-kacheln.js, personPfad):
 	// Kopf als Kreis, Schultern als Bogen, Maß in Neunzehnteln der Höhe. Rasul 13.11.2026: „gucken, dass die nachher
 	// zusammenpassen, was Formen, Geschwindigkeiten, Erzähltiefe angeht“.
-	function zeichnePerson(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number) {
+	function zeichnePerson(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, farbe = "#000") {
 		if (alpha <= 0) return;
 		const u = (64 * g) / 19;
-		ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.beginPath();
+		ctx.globalAlpha = alpha; ctx.fillStyle = farbe; ctx.beginPath();
 		ctx.moveTo(x + 4.6 * u, y - 5.5 * u); ctx.arc(x, y - 5.5 * u, 4.6 * u, 0, Math.PI * 2);
 		ctx.moveTo(x - 8.5 * u, y + 9 * u);
 		ctx.bezierCurveTo(x - 8.5 * u, y + 2.5 * u, x - 4.5 * u, y + 0.5 * u, x, y + 0.5 * u);
@@ -310,15 +310,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// danach nur noch skaliert gesetzt. b = Unschärfe in Personen-Einheiten (Bildschirm-Unschärfe geteilt durch Größe).
 	const BILDER = new Map<number, { c: HTMLCanvasElement; pad: number }>();
 	const AUF = 3; // Pixel je Einheit im vorbereiteten Bild
-	function personBild(b: number) {
+	// farbe: "#000" für die Figur, "#fff" für die deckende Fläche darunter (siehe zeichneUnscharf)
+	function personBild(b: number, farbe = "#000") {
 		const stufe = b < 4 ? Math.round(b * 2) / 2 : b < 12 ? Math.round(b) : Math.round(b / 2) * 2;
-		let e = BILDER.get(stufe);
+		const schluessel = stufe + (farbe === "#fff" ? 1000 : 0);
+		let e = BILDER.get(schluessel);
 		if (!e) {
 			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * AUF, h = (64.4 + 2 * pad) * AUF;
 			const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h);
 			const x = c.getContext("2d")!; x.filter = `blur(${(stufe * AUF).toFixed(1)}px)`; x.scale(AUF, AUF); // Unschärfe in Bildpixeln
-			zeichnePerson(x, 28.65 + pad, 34 + pad, 1, 1);
-			e = { c, pad }; BILDER.set(stufe, e);
+			zeichnePerson(x, 28.65 + pad, 34 + pad, 1, 1, farbe);
+			e = { c, pad }; BILDER.set(schluessel, e);
 		}
 		return e;
 	}
@@ -341,13 +343,23 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		}
 		ctx.fill(); ctx.globalAlpha = 1;
 	}
-	function zeichneUnscharf(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, unsch: number) {
+	// deckend (0 bis 1): Wenn gesetzt, liegt unter der Figur eine weiße, deckende Fläche gleicher Form. So verdeckt jede
+	// Person die hinter ihr, auch wenn sie selbst heller (halb durchsichtig) gezeichnet wird (Rasul 13.11.2026 abends:
+	// „dass bei der Kamerafahrt, beim Blurren die Personen kurz durchsichtig werden. Das sollte nicht sein.“).
+	function zeichneUnscharf(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, unsch: number, deckend = 0) {
 		if (alpha <= 0) return;
 		const b = unsch / Math.max(0.05, g);
-		if (b < 0.25) { zeichnePerson(ctx, x, y, g, alpha); return; }
-		const { c, pad } = personBild(b);
-		ctx.globalAlpha = alpha;
-		ctx.drawImage(c, x - (28.65 + pad) * g, y - (34 + pad) * g, (c.width / AUF) * g, (c.height / AUF) * g);
+		if (b < 0.25) {
+			if (deckend > 0) zeichnePerson(ctx, x, y, g, deckend, "#fff");
+			zeichnePerson(ctx, x, y, g, alpha); return;
+		}
+		const setze = (farbe: string, a: number) => {
+			const { c, pad } = personBild(b, farbe);
+			ctx.globalAlpha = a;
+			ctx.drawImage(c, x - (28.65 + pad) * g, y - (34 + pad) * g, (c.width / AUF) * g, (c.height / AUF) * g);
+		};
+		if (deckend > 0) setze("#fff", deckend);
+		setze("#000", alpha);
 		ctx.globalAlpha = 1;
 	}
 
@@ -484,8 +496,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen (Kopf hebt sich, Schultern wachsen)
 							const p = sanft(anteil(kipp, 0.01, 0.17));
 							if (p < 1) zeichneVerwandlung(ctx, x, fy, y, g, alpha, p);
-							else zeichneUnscharf(ctx, x, y, g, alpha, unsch);
-						} else zeichneUnscharf(ctx, x, y, g, alpha, unsch);
+							else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
+						} else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
 					}
 					return;
 				}
