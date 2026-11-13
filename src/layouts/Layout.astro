@@ -90,8 +90,8 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(location.search).get("menu");
 					try {
 						if (q === "bbh" || q === "zwetschke") localStorage.setItem(K, q);
-						return localStorage.getItem(K) || "zwetschke";
-					} catch (e) { return q || "zwetschke"; }
+						return "bbh"; // Zweig minimal: immer BBH-Menü
+					} catch (e) { return "bbh"; }
 				}
 				// Hero-Demo (Rasul 13.11.2026: „machen wir doch jetzt mal kurz eine Demo, wo wir unser Video
 				// Bildschirmflächen machen, voll machen und das Menü so drübersetzen wie BBH“): ?hero=film|text.
@@ -101,8 +101,8 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(location.search).get("hero");
 					try {
 						if (q === "film" || q === "text") localStorage.setItem("parley-hero", q);
-						return localStorage.getItem("parley-hero") || "film";
-					} catch (e) { return q || "film"; }
+						return "text"; // Zweig minimal: kein Film-Hero
+					} catch (e) { return "text"; }
 				}
 				// Grundeinstellung „gemischt“ (Rasul 13.11.2026: „Ja, Gemischt“).
 				// Menülage (Rasul 13.11.2026: „wir kleben es gleich unten mittig an den Bildschirm. Und beim

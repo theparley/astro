@@ -8,7 +8,7 @@ import type { APIRoute } from "astro";
 // Mit Schrägstrich am Ende wie die Canonical-Adressen (Pages leitet /termin
 // per 308 auf /termin/ um).
 // Vier Kapitel-Unterseiten seit 13.11.2026 (Rasul entscheidet „Kacheln“ als Aufbau der Startseite).
-const PAGES = ["/", "/beweisaufnahme/", "/beweisverfahren/", "/beweisstuecke/", "/augenzeugen/", "/termin/", "/kontakt/", "/impressum/", "/datenschutz/"];
+const PAGES = ["/", "/termin/", "/kontakt/", "/impressum/", "/datenschutz/"]; // Zweig minimal: ohne Kapitel-Unterseiten
 
 export const GET: APIRoute = ({ site }) => {
 	const urls = PAGES.map((path) => `\t<url><loc>${new URL(path, site).href}</loc></url>`).join("\n");
