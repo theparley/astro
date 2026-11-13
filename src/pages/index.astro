@@ -190,8 +190,13 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     setzt data-phase am Baustein). Vorher dreizeilig unter der Animation (entschieden „Dreizeilig lassen“). */}
 					{/* Zurück (Rasul 13.11.2026 abends: „mit der Überschrift ist nicht gut. Wieder zurück, wir lassen es unten
 					     drunter.“): Animation zuerst, darunter die Überschrift dreizeilig. */}
+					{/* Rasul 13.11.2026 abends: „Wir machen mal 70 % noch für die Animation. Und wir würden erst schreiben Überall
+					     Experten, und in dem Moment, wo man den Text sieht beim Scrollen, fängt die Animation an. Und dann gucken wir,
+					     ob bei den 70 Prozent dann so viel Platz unten drunter ist, dass wir dann Zeit für den Videobeweis auch im
+					     Business einblenden können.“ Der Nachsatz blendet mit der Geste ein (die Animation setzt data-phase am Band). */}
 					<ExpertenAuswahl />
-					<p class="anlass__satz">Überall Experten.<br />Zeit für den Video&shy;beweis<br />auch im Business.</p>
+					<p class="anlass__satz anlass__satz--eins">Überall Experten.</p>
+					<p class="anlass__satz anlass__nachsatz">Zeit für den Video&shy;beweis<br />auch im Business.</p>
 					{/* Bandtext als Probe (Rasul 13.11.2026 abends, gesammelt: KI-Slop, „generierte und gelebte Expertise“, viele
 					     Anbieter wollen bei Entscheidern auf den Schirm, „weil es so einfach ist, jetzt eine Expertise zu behaupten,
 					     schießen die Experten natürlich auch wie Pilze aus dem Boden“, „wie soll denn der entscheiden jetzt, wer da
@@ -351,6 +356,11 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass--band { background: var(--white); color: var(--black); padding: 0 0 var(--abstand-lg); margin-bottom: var(--abstand-lg); overflow-x: clip; }
 	/* Abstände im Band klein (32 px), damit Überschrift, Animation und Lesetext auf einen Bildschirm passen (13.11.2026) */
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
+	/* „Überall Experten.“ nah unter der Animation, der Nachsatz direkt darunter wie die nächste Zeile derselben Überschrift */
+	/* mit .anlass--band davor, sonst gewinnt „.anlass__satz { margin: 0 auto }“, das später im Stil steht */
+	.anlass--band .anlass__satz--eins { margin-top: calc(32px - var(--abstand-md)); }
+	.anlass--band .anlass__nachsatz { margin-top: calc(0px - var(--abstand-md)); transition: opacity 700ms var(--kurve), transform 700ms var(--kurve); }
+	:global(.anlass--band[data-phase="warten"] .anlass__nachsatz) { opacity: 0; transform: translateY(12px); }
 
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
