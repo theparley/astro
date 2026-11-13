@@ -416,28 +416,6 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					// Schärfe wie bei einem Objektiv: scharfgestellt ist die vordere Person; Unschärfe und Blässe wachsen mit dem
 					// Abstand hinter ihr (Zerstreuungskreis ~ F · (1/zFokus − 1/z)). Von oben sind alle gleich weit weg, also
 					// scharf; mit dem Kippen entsteht die Tiefe und mit ihr die Unschärfe, in jedem Moment passend.
-					// Horizont (Rasul 13.11.2026 abends: „ob wir beim Runterkippen hintendran nicht so einen Horizont entstehen lassen
-					// können … eine Linie, auch geblurrt“). Er liegt dort, wo der Boden im Unendlichen endet (y = Mitte − F · tan φ):
-					// bei senkrechtem Blick weit oben außerhalb, mit dem Kippen wandert er von selbst ins Bild. Weich gezeichnet als
-					// Band aus dünnen Streifen (Glockenkurve senkrecht), zu den Rändern hin auslaufend; kein Weichzeichner nötig.
-					{
-						const phiK = Math.atan2(C[0] - Lk[0], Lk[1] - C[1]);
-						const hy = CY - F * Math.tan(phiK);
-						const sicht = sanft(anteil(1 - phiK / (Math.PI / 2), 0.35, 0.5));
-						if (sicht > 0 && hy > -50) {
-							const links = -ox / sc, rechts = (cv.width - ox) / sc, breite = rechts - links;
-							const verlauf = ctx.createLinearGradient(links, 0, rechts, 0);
-							verlauf.addColorStop(0, "rgba(0,0,0,0)"); verlauf.addColorStop(0.2, "rgba(0,0,0,1)");
-							verlauf.addColorStop(0.8, "rgba(0,0,0,1)"); verlauf.addColorStop(1, "rgba(0,0,0,0)");
-							ctx.fillStyle = verlauf;
-							const HALB = 14; // halbe Höhe des Bandes in Flächeneinheiten
-							for (let d = -HALB; d <= HALB; d += 2) {
-								ctx.globalAlpha = 0.16 * sicht * Math.exp(-(d * d) / (2 * 5 * 5));
-								ctx.fillRect(links, hy + d - 1, breite, 2);
-							}
-							ctx.globalAlpha = 1;
-						}
-					}
 					const fokus = lage.find((l) => l.q.ebene === 0)?.zc ?? lage[lage.length - 1].zc;
 					const F_jetzt = F;
 					for (const { q, x, y, g, kipp, fy, zc } of lage) {
