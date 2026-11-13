@@ -698,23 +698,22 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// Zwei Auslöser: Start, wenn „Überall Experten.“ erscheint (zu 60 % sichtbar); Freigabe für den zweiten Abschnitt,
 			// wenn der Platz des Nachsatzes vollständig im Bild ist. Ohne diese Zeilen: Start bei 90 % der Animation, frei.
 			const bandA = fig.closest(".anlass--band");
-			const zeileEins = bandA?.querySelector(".anlass__satz--eins"), nachsatz = bandA?.querySelector(".anlass__nachsatz");
-			if (!nachsatz) freigabe = true;
+			const nachsatz = bandA?.querySelector(".anlass__nachsatz");
+			// Ohne Zweiteilung (Rasul 14.11.2026: „wir machen mal die Zweiteilung weg, wir lassen es bei 50 und die Animation
+			// startet, wenn die unterste Zeile über diese 20 Prozent drüber ist, also die BBH-Regel“): Die Animation läuft ohne
+			// Halt durch (Personen, dann Nachsatz mit Fingerpunkten, Geste, Kamerafahrt). Vorher: Halt nach den Personen bis zur
+			// Freigabe durch den Nachsatz (Git-Geschichte).
+			freigabe = true;
 			// früher (Rasul 13.11.2026 abends: „jetzt kann die Animation ein bisschen früher anfangen. Also wenn unten der Text
 			// erscheint … dann könnten oben schon die Punkte erscheinen“): Start, sobald „Überall Experten.“ unten ins Bild kommt
 			// noch früher (Rasul 13.11.2026 abends: „zeig mal die Punkte in dem Moment, wo du unten auch den Text zeigst. Die
 			// geht jetzt deutlich zu spät los“): Start, sobald ein Drittel der Animation im Bild ist, nicht erst mit der Zeile
-			// Start und Freigabe bleiben scharf (nicht abgemeldet), weil die Animation sich zurücksetzen kann (siehe unten)
-			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting)) spiele(); }, { threshold: zeileEins ? 0.33 : 0.9 });
-			beob.observe(fig);
+			// Start nach der BBH-Regel: sobald die unterste Zeile der Überschrift (der Nachsatz) ganz über der Linie 20 % über
+			// der Fensterunterkante steht. Ohne Nachsatz: 90 % der Animation im Bild. Bleibt scharf, weil sie sich zurücksetzen kann.
+			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting)) spiele(); },
+				nachsatz ? { rootMargin: "0px 0px -20% 0px", threshold: 1 } : { threshold: 0.9 });
+			beob.observe(nachsatz ?? fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
-			if (nachsatz) {
-				// Auslöser wie BBHs Zeilen-Blende (Rasul 13.11.2026 abends: „Das können wir doch übernehmen, die zwanzig Prozent
-				// über dem Fensterrand“): Freigabe, sobald die Oberkante des Nachsatzes 20 % der Fensterhöhe über der Unterkante
-				// steht. Vorher: Nachsatz vollständig im Bild.
-				const beob2 = new IntersectionObserver((e) => { if (!freigabe && e.some((x) => x.isIntersecting)) { freigabe = true; weiter(); } }, { rootMargin: "0px 0px -20% 0px", threshold: 0 });
-				beob2.observe(nachsatz);
-			}
 			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
 			// research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md 3.4 und 4.1):
 			// 1. Rausgescrollt, bevor sie fertig ist: Sie hält an und läuft beim Zurückkommen an derselben Stelle weiter
@@ -724,7 +723,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			//    Anfang zurück und spielt beim nächsten Herunterscrollen neu (wie BBHs Unterschrift, die sich neu schreibt).
 			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
 			const zuruecksetzen = () => {
-				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = !nachsatz;
+				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
 				uhr = 0; spurR = []; spurL = []; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
 			};
 			const sicht = new IntersectionObserver((e) => {
