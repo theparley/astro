@@ -672,8 +672,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				else fig.dataset.fertig = "";
 			};
 			const weiter = () => { if (haelt) { haelt = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); } };
+			let gestartet = false, pausiert = false, pauseSeit = 0;
 			const spiele = () => {
-				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false;
+				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
 				spurR = []; spurL = [];
 				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); return; }
 				phase("warten");
@@ -697,16 +698,47 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// erscheint … dann könnten oben schon die Punkte erscheinen“): Start, sobald „Überall Experten.“ unten ins Bild kommt
 			// noch früher (Rasul 13.11.2026 abends: „zeig mal die Punkte in dem Moment, wo du unten auch den Text zeigst. Die
 			// geht jetzt deutlich zu spät los“): Start, sobald ein Drittel der Animation im Bild ist, nicht erst mit der Zeile
-			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: zeileEins ? 0.33 : 0.9 });
+			// Start und Freigabe bleiben scharf (nicht abgemeldet), weil die Animation sich zurücksetzen kann (siehe unten)
+			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting)) spiele(); }, { threshold: zeileEins ? 0.33 : 0.9 });
 			beob.observe(fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			if (nachsatz) {
 				// Auslöser wie BBHs Zeilen-Blende (Rasul 13.11.2026 abends: „Das können wir doch übernehmen, die zwanzig Prozent
 				// über dem Fensterrand“): Freigabe, sobald die Oberkante des Nachsatzes 20 % der Fensterhöhe über der Unterkante
 				// steht. Vorher: Nachsatz vollständig im Bild.
-				const beob2 = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob2.disconnect(); freigabe = true; weiter(); } }, { rootMargin: "0px 0px -20% 0px", threshold: 0 });
+				const beob2 = new IntersectionObserver((e) => { if (!freigabe && e.some((x) => x.isIntersecting)) { freigabe = true; weiter(); } }, { rootMargin: "0px 0px -20% 0px", threshold: 0 });
 				beob2.observe(nachsatz);
 			}
+			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
+			// research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md 3.4 und 4.1):
+			// 1. Rausgescrollt, bevor sie fertig ist: Sie hält an und läuft beim Zurückkommen an derselben Stelle weiter
+			//    (BBH-Regel für Videos).
+			// 2. Nach unten weitergescrollt und wieder hoch: Das Schlussbild bleibt stehen (wer zurückblättert, will nachlesen).
+			// 3. Ganz nach oben zurück, über das Band hinaus (Animation liegt unterhalb des Fensters): Sie setzt sich auf den
+			//    Anfang zurück und spielt beim nächsten Herunterscrollen neu (wie BBHs Unterschrift, die sich neu schreibt).
+			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
+			const zuruecksetzen = () => {
+				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = !nachsatz;
+				uhr = 0; spurR = []; spurL = []; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
+			};
+			const sicht = new IntersectionObserver((e) => {
+				const x = e[e.length - 1];
+				if (x.isIntersecting) {
+					if (pausiert) {
+						// Leuchtspur hängt an der Uhrzeit: um die Pause verschieben, sonst wäre sie beim Weiterlaufen verglüht
+						pausiert = false; const d = performance.now() / 1000 - pauseSeit;
+						spurR = spurR.map(([a, t]) => [a, t + d]); spurL = spurL.map(([a, t]) => [a, t + d]);
+						zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+					}
+					return;
+				}
+				const unten = window.innerHeight;
+				if (x.boundingClientRect.top >= (x.rootBounds?.bottom ?? unten)) { if (gestartet && !still) zuruecksetzen(); return; }
+				if (gestartet && !haelt && !pausiert && fig.dataset.fertig === undefined) {
+					cancelAnimationFrame(lauf); pausiert = true; pauseSeit = performance.now() / 1000;
+				}
+			}, { threshold: 0 });
+			sicht.observe(fig);
 			fig.addEventListener("click", spiele);
 			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
 			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)
