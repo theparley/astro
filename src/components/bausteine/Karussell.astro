@@ -1,0 +1,121 @@
+---
+/* Karussell nach BBH B8 (Fähigkeiten-Karussell der Büroseiten; Analyse B 3 B8, C 8.2). Rasul 13.11.2026 für das
+   Beweisverfahren: „Ja, Karussell bauen“ (Vorschlag: der Weg wird wörtlich ein Weg zum Durchziehen).
+   Wie BBH:
+   - Karten quadratisch (1:1), am Rechner 30 % des Rahmens (gut drei sichtbar, die vierte angeschnitten),
+     am Handy 75 % (die nächste lugt hervor), 16 px Abstand; links an der Rahmenkante, rechts bis an den
+     Fensterrand.
+   - Darunter Titel und grauer Text.
+   - Weiter per Ziehen oder Wischen mit Einrasten (kein Endlos-Lauf, kein Selbstlauf); Pfeile und Punkte unten
+     rechts; Pfeil gedimmt (50 %), wenn es in die Richtung nicht weitergeht. Punkte 8 × 8 px, aktiv 100 %.
+   Umsetzung ohne Bibliothek: waagerechtes Scrollen mit Einrasten (scroll-snap), Maus kann ziehen. */
+import Platzhalter from "./Platzhalter.astro";
+interface Karte { nr: string; titel: string; text: string; bild?: string }
+interface Props { karten: Karte[]; label?: string }
+const { karten, label = "Schritte" } = Astro.props;
+---
+<div class="karussell" data-karussell>
+	<div class="karussell__fenster" tabindex="0" aria-label={label}>
+		<ol class="karussell__spur">
+			{karten.map((k) => (
+				<li class="karussell__karte">
+					<div class="karussell__bild">
+						{k.bild ? <img src={k.bild} alt="" loading="lazy" /> : <Platzhalter format="1/1" text={`Platzhalter: Bild ${k.nr} ${k.titel}`} />}
+					</div>
+					<p class="karussell__titel"><span class="karussell__nr">{k.nr}</span> {k.titel}</p>
+					<p class="karussell__text" set:html={k.text} />
+				</li>
+			))}
+		</ol>
+	</div>
+	<div class="karussell__steuerung rahmen">
+		<div class="karussell__punkte" aria-hidden="true">{karten.map(() => <span></span>)}</div>
+		<button type="button" class="karussell__pfeil" data-richtung="-1" aria-label="Zurück">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" /></svg>
+		</button>
+		<button type="button" class="karussell__pfeil" data-richtung="1" aria-label="Weiter">
+			<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 L16 12 L9 19" /></svg>
+		</button>
+	</div>
+</div>
+
+<style>
+	.karussell { --kb: calc((min(100vw, 1728px) - 2 * var(--rand)) * 0.75); --start: max(var(--rand), (100vw - 1728px) / 2 + var(--rand)); }
+	@media (min-width: 1024px) { .karussell { --kb: calc((min(100vw, 1728px) - 2 * var(--rand)) * 0.3); } }
+	.karussell__fenster {
+		width: 100vw;
+		margin-left: calc(50% - 50vw);
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scroll-padding-left: var(--start);
+		scrollbar-width: none;
+		cursor: grab;
+		outline: none;
+	}
+	.karussell__fenster::-webkit-scrollbar { display: none; }
+	.karussell__fenster.zieht { cursor: grabbing; scroll-snap-type: none; }
+	.karussell__spur { display: flex; gap: 16px; margin: 0; padding: 0 var(--start); list-style: none; width: max-content; }
+	.karussell__karte { flex: none; width: var(--kb); scroll-snap-align: start; }
+	.karussell__bild { border-radius: 4px; overflow: hidden; }
+	.karussell__bild img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+	.karussell__titel { margin: 16px 0 0; font-family: var(--schrift-lesen); font-size: var(--text-base); line-height: 1.3; letter-spacing: -0.02em; }
+	.karussell__nr { font-family: var(--schrift-mono, ui-monospace, monospace); margin-right: 4px; }
+	.karussell__text { margin: 4px 0 0; font-family: var(--schrift-lesen); font-size: var(--text-base); line-height: 1.3; letter-spacing: -0.02em; color: var(--grey, #999894); }
+	.karussell__steuerung { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 40px; }
+	.karussell__punkte { display: flex; gap: 8px; margin-right: 8px; }
+	.karussell__punkte span { width: 8px; height: 8px; background: #fff; opacity: 0.5; transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1); }
+	.karussell__punkte span.aktiv { opacity: 1; }
+	.karussell__pfeil { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(255, 255, 255, 0.4); background: transparent; color: #fff; cursor: pointer; transition: opacity 150ms; }
+	.karussell__pfeil svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+	.karussell__pfeil:disabled { opacity: 0.5; cursor: default; }
+	@media (max-width: 1023px) { .karussell__steuerung { margin-top: 24px; } }
+</style>
+
+<script>
+	let weg: (() => void)[] = [];
+	function karussell() {
+		weg.forEach((f) => f()); weg = [];
+		document.querySelectorAll<HTMLElement>("[data-karussell]").forEach((k) => {
+			const fenster = k.querySelector<HTMLElement>(".karussell__fenster")!;
+			const karten = [...k.querySelectorAll<HTMLElement>(".karussell__karte")];
+			const punkte = [...k.querySelectorAll<HTMLElement>(".karussell__punkte span")];
+			const [zurueck, weiter] = [...k.querySelectorAll<HTMLButtonElement>(".karussell__pfeil")];
+			const schritt = () => (karten[1] ? karten[1].offsetLeft - karten[0].offsetLeft : fenster.clientWidth);
+			const stand = () => {
+				const i = Math.round(fenster.scrollLeft / schritt());
+				punkte.forEach((p, n) => p.classList.toggle("aktiv", n === Math.min(i, punkte.length - 1)));
+				zurueck.disabled = fenster.scrollLeft <= 2;
+				weiter.disabled = fenster.scrollLeft >= fenster.scrollWidth - fenster.clientWidth - 2;
+			};
+			const pfeil = (e: Event) => {
+				const r = Number((e.currentTarget as HTMLElement).dataset.richtung);
+				fenster.scrollBy({ left: r * schritt(), behavior: "smooth" });
+			};
+			// Ziehen mit der Maus (Touch scrollt ohnehin)
+			let ziehtX: number | null = null, start = 0;
+			const runter = (e: PointerEvent) => { if (e.pointerType !== "mouse") return; ziehtX = e.clientX; start = fenster.scrollLeft; fenster.classList.add("zieht"); };
+			const bewegen = (e: PointerEvent) => { if (ziehtX === null) return; fenster.scrollLeft = start - (e.clientX - ziehtX); };
+			const hoch = () => {
+				if (ziehtX === null) return;
+				ziehtX = null; fenster.classList.remove("zieht");
+				const i = Math.round(fenster.scrollLeft / schritt());
+				fenster.scrollTo({ left: i * schritt(), behavior: "smooth" });
+			};
+			fenster.addEventListener("scroll", stand, { passive: true });
+			fenster.addEventListener("pointerdown", runter);
+			window.addEventListener("pointermove", bewegen);
+			window.addEventListener("pointerup", hoch);
+			zurueck.addEventListener("click", pfeil); weiter.addEventListener("click", pfeil);
+			window.addEventListener("resize", stand);
+			stand();
+			weg.push(() => {
+				fenster.removeEventListener("scroll", stand); fenster.removeEventListener("pointerdown", runter);
+				window.removeEventListener("pointermove", bewegen); window.removeEventListener("pointerup", hoch);
+				zurueck.removeEventListener("click", pfeil); weiter.removeEventListener("click", pfeil);
+				window.removeEventListener("resize", stand);
+			});
+		});
+	}
+	document.addEventListener("astro:page-load", karussell);
+</script>

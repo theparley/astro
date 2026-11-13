@@ -13,4 +13,7 @@ const { titel, link, id } = Astro.props;
 	.abschnittskopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 16px; margin-bottom: 48px; }
 	/* Titel darf &shy; enthalten (lange deutsche Wörter in Bartle, z. B. BEWEIS-/VERFAHREN; 13.11.2026) */
 	.abschnittskopf__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
+	/* Sehr schmale Handys (unter 420 px): eine Stufe kleiner, sonst läuft „VERFAHREN“ (11,7 em) über den Rand
+	   (Platz bei 375 px: 11,5 em; gemessen 13.11.2026). Gilt für alle großen Abschnittsköpfe gleich. */
+	@media (max-width: 419px) { .abschnittskopf__titel { font-size: var(--text-2xl); line-height: var(--zeile-2xl); } }
 </style>

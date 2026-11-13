@@ -23,6 +23,7 @@ import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
 import ZeigerFilm from "../components/bausteine/ZeigerFilm.astro";
 import VideoKacheln from "../components/bausteine/VideoKacheln.astro";
 import Abschnittskopf from "../components/bausteine/Abschnittskopf.astro";
+import Karussell from "../components/bausteine/Karussell.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 
@@ -192,10 +193,19 @@ const FORMATE = [
 	   auch die Überschrift wie Beweisaufnahme“). Grafik offen: Recherche Abfolgen bei BBH, sonst eigene Grafik. */}
 	<section class="abschnitt" aria-labelledby="ab3-titel">
 		<div class="rahmen"><Abschnittskopf id="ab3-titel" titel="Beweis&shy;verfahren" /></div>
-		<TextBild seite="rechts">
-			<Platzhalter slot="medium" format="4/5" text="Platzhalter: Grafik Beweisverfahren (Kick-off bis Messen), WEBSITE.md 3j" />
-			<p>Echte Experten haben keine Zeit für Videos. Müssen sie auch nicht. Wir gehen den ganzen Weg mit euch: von der redaktionellen Vorbereitung über die Aufnahme im Gesprächsmodus inklusive Live-Regie bis zur Verteilung des&nbsp;Beweismaterials.</p>
-		</TextBild>
+		{/* Karussell nach BBH B8 (Rasul 13.11.2026: „Ja, Karussell bauen“): der Weg als Karten zum Durchziehen.
+		   Schritte aus dem bisherigen Text („von der redaktionellen Vorbereitung über die Aufnahme im Gesprächsmodus
+		   inklusive Live-Regie bis zur Verteilung des Beweismaterials“) und der Methode Fangen · Veredeln · Verteilen.
+		   Bilder und Sätze sind Platzhalter. Bisheriger Absatz, nicht gelöscht: „Echte Experten haben keine Zeit für
+		   Videos. Müssen sie auch nicht. Wir gehen den ganzen Weg mit euch: von der redaktionellen Vorbereitung über
+		   die Aufnahme im Gesprächsmodus inklusive Live-Regie bis zur Verteilung des Beweismaterials.“ */}
+		<Karussell label="Die Schritte des Beweisverfahrens" karten={[
+			{ nr: "01", titel: "Redaktionelle Vorbereitung", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
+			{ nr: "02", titel: "Aufnahme im Gesprächsmodus", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
+			{ nr: "03", titel: "Live-Regie", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
+			{ nr: "04", titel: "Veredeln", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
+			{ nr: "05", titel: "Verteilen", text: '<span class="entwurf">Platzhalter: ein Satz</span>' },
+		]} />
 	</section>
 
 	{/* ── 4 · DIE BEWEISSTÜCKE ── Band (nach BBH-Karussell B8) über der Überschrift (Rasul 13.11.2026:
