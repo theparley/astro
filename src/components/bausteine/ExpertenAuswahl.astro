@@ -1,0 +1,187 @@
+---
+/* Experten-Auswahl: viele Personen, die Videobeweis-Geste, am Ende bleiben drei.
+   Rasul 13.11.2026 abends: „die einzigste Animation wäre unsere Videobeweisanimation, diese Bewegung in der Luft, die
+   jemand macht, und wir würden jetzt einfach unsortiert auf einer Fläche sehen ganz viele Icons von Personen. Das wären
+   unsere Experten. Dann kommt diese Bewegung. Und dann reduziert sich das auf 3. Probier es mal, ob das Sinn macht, ob
+   man sowas angucken will.“
+   Geste wie Probe 2 (Marketing-Ordner branding/aktiv/Parley_Videobeweis_Geste_2026-11.md: 16:9, Ecken wie das Logo,
+   1,6 s, Tempo wie eine Hand, Nachleuchten 0,9 s, Fingerdicke 34, Lücke 8, Glühen), hier dunkel auf hellem Grund.
+   Ablauf: Personen erscheinen verstreut (bis 1,4 s), die Finger ziehen den Rahmen (ab 1,8 s), während die Spur
+   verglimmt, verschwinden alle bis auf drei, die drei rücken in die Mitte des Rahmens. Spielt einmal, sobald die
+   Fläche zur Hälfte sichtbar ist; Klick spielt noch einmal. Bei reduzierter Bewegung sofort das Endbild.
+   Endbild steht allein (Grafik-Leitfaden Abschnitt 2): drei Personen. */
+interface Props { label?: string }
+const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei bleiben übrig." } = Astro.props;
+---
+<figure class="experten" data-experten>
+	<canvas class="experten__bild" role="img" aria-label={label}></canvas>
+	<button type="button" class="experten__nochmal" aria-label="Animation noch einmal abspielen">Noch einmal</button>
+</figure>
+
+<style>
+	.experten { position: relative; margin: 0 auto; width: 100%; max-width: 960px; }
+	.experten__bild { display: block; width: 100%; aspect-ratio: 16 / 9; cursor: pointer; }
+	.experten__nochmal { position: absolute; right: 0; bottom: -28px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 0; cursor: pointer; opacity: 0; transition: opacity var(--tempo) var(--kurve); }
+	.experten[data-fertig] .experten__nochmal { opacity: 1; }
+</style>
+
+<script>
+	type Spur = [number, number][]; // [Weg-Anteil s, Zeit]: gezeichnet wird entlang des echten Wegs, nicht als Gerade
+	                                // zwischen zwei Bildern (sonst entstehen bei ausgelassenen Bildern Balken quer durch)
+	const W = 1600, H = 900;
+	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 8;
+	const T_PERSONEN = 1.4, T_GESTE = 1.8, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
+	const ENDE = T_AUSWAHL + D_AUSWAHL + 0.2;
+
+	// fester Zufall, damit jedes Abspielen gleich aussieht
+	function zufall(saat: number) { return () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; }; }
+	const kubisch = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+	const weich = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3);
+
+	// Rahmen 16:9 mittig, so groß, dass alle Personen darin stehen (Rasul 13.11.2026 abends: „mach lieber den Frame
+	// größer und lass alle Personen drin sein“); Höhe 86 % der Fläche, je Finger ein halber Umlauf von oben nach unten
+	const RH = H * 0.86, RW = RH * 16 / 9, CX = W / 2, CY = H / 2;
+	const L = CX - RW / 2, T = CY - RH / 2, B = CY + RH / 2, RAD = RH * 0.05;
+	const G = (DICKE + LUECKE) / 2;
+	function halbweg(seite: 1 | -1) {
+		const p: [number, number][] = [];
+		const x = (v: number) => CX + seite * v;
+		const kante = RW / 2;
+		for (let v = G; v <= kante - RAD; v += 3) p.push([x(v), T]);
+		for (let a = 0; a <= 90; a += 6) { const r = a * Math.PI / 180; p.push([x(kante - RAD + Math.sin(r) * RAD), T + RAD - Math.cos(r) * RAD]); }
+		for (let y = T + RAD; y <= B - RAD; y += 3) p.push([x(kante), y]);
+		for (let a = 0; a <= 90; a += 6) { const r = a * Math.PI / 180; p.push([x(kante - RAD + Math.cos(r) * RAD), B - RAD + Math.sin(r) * RAD]); }
+		for (let v = kante - RAD; v >= G; v -= 3) p.push([x(v), B]);
+		const lang = [0];
+		for (let i = 1; i < p.length; i++) lang.push(lang[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+		return { p, lang, ges: lang[lang.length - 1] };
+	}
+	const WEG_R = halbweg(1), WEG_L = halbweg(-1);
+	function punkt(w: ReturnType<typeof halbweg>, s: number): [number, number] {
+		const ziel = s * w.ges; let i = 1;
+		while (i < w.lang.length - 1 && w.lang[i] < ziel) i++;
+		const a = w.lang[i - 1], b = w.lang[i], f = b > a ? (ziel - a) / (b - a) : 0;
+		return [w.p[i - 1][0] + (w.p[i][0] - w.p[i - 1][0]) * f, w.p[i - 1][1] + (w.p[i][1] - w.p[i - 1][1]) * f];
+	}
+
+	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
+	interface Person { x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean }
+	function personen(): Person[] {
+		const rnd = zufall(7), liste: Person[] = [];
+		let versuche = 0;
+		const RAND = 80; // Abstand der Personen zur Spur
+		while (liste.length < 34 && versuche++ < 6000) {
+			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (RH - 2 * RAND);
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 0.85 + rnd() * 0.3, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false });
+		}
+		const nah = [...liste].sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY)).slice(0, 3).sort((a, b) => a.x - b.x);
+		nah.forEach((q, i) => { q.bleibt = true; q.zx = CX + (i - 1) * 260; q.zy = CY; });
+		return liste;
+	}
+
+	// Person in derselben Form wie die Augenzeugen-Animationen (Werkstatt augenzeugen-kacheln.js, personPfad):
+	// Kopf als Kreis, Schultern als Bogen, Maß in Neunzehnteln der Höhe. Rasul 13.11.2026: „gucken, dass die nachher
+	// zusammenpassen, was Formen, Geschwindigkeiten, Erzähltiefe angeht“.
+	function zeichnePerson(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number) {
+		if (alpha <= 0) return;
+		const u = (64 * g) / 19;
+		ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.beginPath();
+		ctx.moveTo(x + 4.6 * u, y - 5.5 * u); ctx.arc(x, y - 5.5 * u, 4.6 * u, 0, Math.PI * 2);
+		ctx.moveTo(x - 8.5 * u, y + 9 * u);
+		ctx.bezierCurveTo(x - 8.5 * u, y + 2.5 * u, x - 4.5 * u, y + 0.5 * u, x, y + 0.5 * u);
+		ctx.bezierCurveTo(x + 4.5 * u, y + 0.5 * u, x + 8.5 * u, y + 2.5 * u, x + 8.5 * u, y + 9 * u);
+		ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+	}
+
+	function experten() {
+		document.querySelectorAll<HTMLElement>("[data-experten]").forEach((fig) => {
+			if (fig.dataset.bereit) return; fig.dataset.bereit = "1";
+			const cv = fig.querySelector("canvas")!, ctx = cv.getContext("2d")!;
+			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
+			const leute = personen();
+			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
+			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+			const groesse = () => {
+				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
+			};
+
+			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number) => {
+				octx.lineCap = "round"; octx.lineJoin = "round"; octx.lineWidth = DICKE;
+				const schritt = 3 / w.ges;
+				for (let i = 1; i < s.length; i++) {
+					const [s0, t0] = s[i - 1], [s1, t1] = s[i];
+					const n = Math.max(1, Math.ceil((s1 - s0) / schritt));
+					let vorher = punkt(w, s0);
+					for (let j = 1; j <= n; j++) {
+						const f = j / n, tt = t0 + (t1 - t0) * f;
+						const a = Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
+						const jetztP = punkt(w, s0 + (s1 - s0) * f);
+						if (a > 0) {
+							const v = Math.round(255 * Math.pow(a, 1.6));
+							octx.strokeStyle = `rgb(${v},${v},${v})`;
+							octx.beginPath(); octx.moveTo(vorher[0], vorher[1]); octx.lineTo(jetztP[0], jetztP[1]); octx.stroke();
+						}
+						vorher = jetztP;
+					}
+				}
+			};
+
+			const bild = (t: number, jetzt: number) => {
+				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
+				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
+				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
+				octx.setTransform(off.width / W, 0, 0, off.height / H, 0, 0); octx.globalCompositeOperation = "lighten";
+				let s = 0, deck = 0;
+				if (t >= T_GESTE - 0.25 && t < T_GESTE) deck = (t - T_GESTE + 0.25) / 0.25;
+				else if (t >= T_GESTE && t < T_GESTE + DAUER) { s = kubisch((t - T_GESTE) / DAUER); deck = 1; }
+				else if (t >= T_GESTE + DAUER) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - DAUER) / 0.4); }
+				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
+				if (t >= T_GESTE && t <= T_GESTE + DAUER + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
+				spur(spurR, WEG_R, jetzt); spur(spurL, WEG_L, jetzt);
+				if (deck > 0) {
+					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
+					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
+				}
+				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
+				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+				ctx.globalCompositeOperation = "difference";
+				ctx.filter = `blur(${(DICKE * 0.7 * cv.width / W).toFixed(1)}px)`; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0);
+				ctx.filter = "none"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
+				ctx.globalCompositeOperation = "source-over";
+				// Personen
+				ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
+				for (const q of leute) {
+					const ein = weich((t - q.ein) / 0.5);
+					if (q.bleibt) {
+						const x = q.x + (q.zx - q.x) * k, y = q.y + (q.zy - q.y) * k;
+						zeichnePerson(ctx, x, y, q.s + (1.5 - q.s) * k, ein * (0.85 + 0.15 * k));
+					} else {
+						zeichnePerson(ctx, q.x, q.y, q.s, ein * 0.85 * (1 - weich((t - T_AUSWAHL + 0.3) / 0.8)));
+					}
+				}
+			};
+
+			const schritt = () => {
+				const jetzt = performance.now() / 1000, t = jetzt - start;
+				bild(t, jetzt);
+				if (t < ENDE + GLIMM) lauf = requestAnimationFrame(schritt);
+				else fig.dataset.fertig = "";
+			};
+			const spiele = () => {
+				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig;
+				spurR = []; spurL = [];
+				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; return; }
+				start = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+			};
+			groesse(); bild(0, 0);
+			const beob = new IntersectionObserver((e) => { if (e[0].isIntersecting) { beob.disconnect(); spiele(); } }, { threshold: 0.5 });
+			beob.observe(fig);
+			fig.addEventListener("click", spiele);
+			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } });
+		});
+	}
+	document.addEventListener("astro:page-load", experten);
+</script>
