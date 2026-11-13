@@ -1,0 +1,24 @@
+---
+/* Textblock ohne Anker. Nach BBH steht Text ohne Bild daneben nie in einer Hälfte,
+   sondern in der Mitte (Analyse 1.5):
+   lage="mitte6"  Mitte 6 von 12, linksbündig gelesen (BBH-Artikel, R9)
+   lage="schmal"  Mitte, höchstens 46 Zeichen, mittig gesetzt (BBH simpleText, B12)
+   Überschrift als Blocküberschrift (Bogle 2xl, Großbuchstaben). */
+interface Props { titel?: string; id?: string; lage?: "mitte6" | "schmal"; titelZeilen?: string[] }
+const { titel, id, lage = "mitte6", titelZeilen } = Astro.props;
+---
+<div class:list={["textblock", "rahmen", lage === "mitte6" && "raster"]}>
+	<div class:list={[lage === "mitte6" ? "sp-mitte6" : "textblock--schmal"]}>
+		{(titel || titelZeilen) && (
+			<h2 class="t-block textblock__titel" id={id} data-einblenden>
+				{titelZeilen ? titelZeilen.map((z, i) => <Fragment>{i > 0 && <br />}{z}</Fragment>) : titel}
+			</h2>
+		)}
+		<div class="t-lesen" data-einblenden><slot /></div>
+	</div>
+</div>
+<style>
+	.textblock__titel { margin-bottom: 48px; }
+	.textblock--schmal { max-width: 46ch; margin-inline: auto; text-align: center; }
+	.textblock--schmal :global(.t-lesen) { text-wrap: balance; }
+</style>

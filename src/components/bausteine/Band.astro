@@ -1,0 +1,98 @@
+---
+/* Band (Parley-eigen, nach BBHs Karussell B8): Kacheln laufen endlos von rechts nach links,
+   über der Spur eine Namenszeile, deren mittlerer Eintrag weiß wird. Kachelbreite wie BBHs
+   Karussell: 30 % des Rahmens, auf dem Handy 75 % (die nächste Kachel lugt hervor). Neu im
+   Neustart: Das Band läuft bis an den Fensterrand, auch über 1728 px (BBH, Analyse 2.3);
+   links beginnt es an der Rahmenkante. Inhalte der Kacheln wie bisher (Platzhalterflächen).
+   Rasul 13.11.2026: „Ich setze die Animation für die Beweisstücke über die Beweisstücke.“ */
+export interface Format { buchstabe: string; name: string; form: string; art: string; text: string }
+interface Props { formate: Format[] }
+const { formate } = Astro.props;
+const WELLE = Array.from({ length: 28 }, (_, i) => ({ verz: ((i * 0.13) % 1.3).toFixed(2), hoehe: 30 + ((i * 37) % 60) }));
+const zeilen = (n: number, kurz: number) => Array.from({ length: n }, (_, i) => (i === n - 1 ? kurz : 92 - (i % 3) * 9));
+---
+<div class="band" data-band>
+	<div class="band__namen rahmen" data-band-namen>
+		{formate.map((f, n) => <span data-n={n}><i></i><b><em>{f.buchstabe}</em>{f.name}</b></span>)}
+	</div>
+	<div class="band__fenster">
+		<div class="band__spur">
+			{[0, 1].map((runde) => formate.map((f) => (
+				<figure class:list={["band__k", `band__k--${f.form}`]} aria-hidden={runde === 1 ? "true" : undefined}>
+					<div class="band__flaeche">
+						{f.art === "video" && <div class="band__video"></div>}
+						{f.art === "audio" && <div class="band__audio"><div class="band__cover"></div><div class="band__welle">{WELLE.map((w) => <i style={`animation-delay:${w.verz}s;height:${w.hoehe}%`}></i>)}</div></div>}
+						{f.art === "zitat" && <div class="band__zitat"><span class="entwurf band__ph">Platzhalter: Zitat erst mit Freigabe</span><q>Ein Satz, der hängen bleibt.</q></div>}
+						{f.art === "newsletter" && <div class="band__papier"><div class="band__bild"></div><div class="band__zeilen">{zeilen(5, 55).map((b) => <i style={`width:${b}%`}></i>)}</div></div>}
+						{f.art === "transkript" && <div class="band__papier"><div class="band__zeilen"><em></em>{zeilen(3, 70).map((b) => <i style={`width:${b}%`}></i>)}<em></em>{zeilen(4, 40).map((b) => <i style={`width:${b}%`}></i>)}<em></em>{zeilen(2, 60).map((b) => <i style={`width:${b}%`}></i>)}</div></div>}
+					</div>
+					<figcaption><span class="t-label band__bs">Beweisstück {f.buchstabe}</span><b>{f.name}</b>{f.text}</figcaption>
+				</figure>
+			)))}
+		</div>
+	</div>
+</div>
+<style>
+	.band { --kb: calc((min(100vw, 1728px) - 2 * var(--rand)) * 0.75); --start: max(var(--rand), (100vw - 1728px) / 2 + var(--rand)); }
+	@media (min-width: 1024px) { .band { --kb: calc((min(100vw, 1728px) - 2 * var(--rand)) * 0.3); } }
+	.band__namen { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 28px; }
+	.band__namen span { display: inline-flex; flex-direction: column; align-items: center; gap: 8px; font-size: var(--text-sm); color: var(--gray); transition: color 0.4s; }
+	.band__namen b { font-weight: 400; }
+	.band__namen em { font-style: normal; color: var(--white); margin-right: 0.3em; }
+	.band__namen i { width: 6px; height: 6px; border-radius: 50%; background: var(--tile); transition: background 0.4s, box-shadow 0.4s; }
+	.band__namen span.aktiv { color: var(--white); }
+	.band__namen span.aktiv i { background: var(--white); box-shadow: 0 0 8px rgba(255, 255, 255, 0.7); }
+	@media (max-width: 1023px) { .band__namen { gap: 10px; } .band__namen span { font-size: 0; gap: 0; } }
+	.band__fenster { margin-top: var(--abstand-md); overflow: hidden; }
+	.band__spur { display: flex; gap: var(--fuge); width: max-content; padding-left: var(--start); animation: band 48s linear infinite; }
+	@keyframes band { to { transform: translateX(calc(-50% - var(--fuge) / 2 + var(--start) / 2)); } }
+	.band__k { flex: none; width: var(--kb); }
+	.band__flaeche { width: 100%; aspect-ratio: 4 / 3; background: var(--panel); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; container-type: size; }
+	.band__flaeche > * { display: block; flex: none; }
+	.band__k--169 .band__flaeche > * { aspect-ratio: 16 / 9; width: min(86cqw, 80cqh * 16 / 9); }
+	.band__k--916 .band__flaeche > * { aspect-ratio: 9 / 16; height: 86cqh; }
+	.band__k--11 .band__flaeche > * { aspect-ratio: 1; height: 80cqh; }
+	.band__k--45 .band__flaeche > * { aspect-ratio: 4 / 5; height: 86cqh; }
+	.band__video { background: var(--tile); }
+	.band__k figcaption { max-width: 34em; margin-top: var(--fuge); font-size: var(--text-base); line-height: 1.3; color: var(--gray); text-wrap: pretty; }
+	.band__k figcaption b { display: block; color: var(--white); font-weight: 400; }
+	.band__bs { display: block; margin-bottom: 4px; }
+	.band__audio { display: flex; flex-direction: column; background: #000; }
+	.band__cover { flex: 1; background: var(--tile); }
+	.band__welle { height: 22%; display: flex; align-items: center; gap: 3%; padding: 0 6%; }
+	.band__welle i { flex: 1; background: var(--white); animation: welle 1.3s ease-in-out infinite alternate; }
+	@keyframes welle { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+	.band__zitat { position: relative; display: flex; align-items: flex-end; background: var(--tile); container-type: inline-size; }
+	.band__zitat q { position: relative; padding: 8%; font-family: var(--schrift-haltung); font-size: 9cqw; line-height: var(--zeile-mega); text-transform: uppercase; color: var(--white); quotes: "„" "“"; }
+	.band__ph { position: absolute; top: 6%; left: 6%; }
+	.band__papier { background: var(--surface); padding: 8%; container-type: inline-size; }
+	.band__bild { height: 45%; background: #9a9a9a; margin-bottom: 8%; }
+	.band__zeilen i, .band__zeilen em { display: block; height: 2.8cqw; margin: 0 0 3.6cqw; background: #9a9a9a; border-radius: 2px; }
+	.band__zeilen em { width: 22%; margin-top: 5cqw; background: var(--tile); }
+</style>
+<script>
+	let bandStopp: (() => void) | null = null;
+	function band() {
+		bandStopp?.();
+		const fenster = document.querySelector<HTMLElement>("[data-band] .band__fenster");
+		const namen = Array.from(document.querySelectorAll<HTMLElement>("[data-band-namen] span"));
+		if (!fenster || !namen.length) return;
+		const kacheln = Array.from(fenster.querySelectorAll<HTMLElement>(".band__k"));
+		let laeuft = true, alt = -1;
+		const lauf = () => {
+			if (!laeuft) return;
+			const r = fenster.getBoundingClientRect();
+			if (r.bottom > 0 && r.top < innerHeight) {
+				const mitte = innerWidth / 2;
+				let best = 0, d = Infinity;
+				kacheln.forEach((k, i) => { const b = k.getBoundingClientRect(); const m = Math.abs(b.left + b.width / 2 - mitte); if (m < d) { d = m; best = i; } });
+				const n = best % namen.length;
+				if (n !== alt) { namen.forEach((e, j) => e.classList.toggle("aktiv", j === n)); alt = n; }
+			}
+			requestAnimationFrame(lauf);
+		};
+		requestAnimationFrame(lauf);
+		bandStopp = () => { laeuft = false; };
+	}
+	document.addEventListener("astro:page-load", band);
+</script>

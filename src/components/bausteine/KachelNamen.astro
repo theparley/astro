@@ -1,0 +1,18 @@
+---
+/* B13 Kacheln mit mittigem Namen: 16:9, Hegarty 2xl in Großbuchstaben, dunkle Fläche mit
+   grauer Linie. BBH: Unterbüros, Fachbereiche. Für Parley denkbar: die drei Studios
+   (Blickkontaktstudio, mobiles Studio, Studio bei euch) oder Formate. */
+interface Props { namen: { name: string; href?: string }[]; spalten?: 2 | 3 }
+const { namen, spalten = 3 } = Astro.props;
+---
+<div class:list={["kacheln", "rahmen", `kacheln--${spalten}`]}>
+	{namen.map((n) => {
+		const Tag = n.href ? "a" : "div";
+		return <Tag class="kachel" href={n.href} data-einblenden>{n.name}</Tag>;
+	})}
+</div>
+<style>
+	.kacheln { display: grid; gap: var(--fuge); }
+	@media (min-width: 1024px) { .kacheln--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kacheln--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+	.kachel { display: grid; place-content: center; aspect-ratio: 16 / 9; padding: 16px; background: var(--off-black); border: 1px solid var(--gray); border-radius: 4px; font-family: var(--schrift-haltung); font-size: var(--text-xl); line-height: var(--zeile-huge);   /* BBH 2xl; deutsche Wörter sind länger, deshalb xl */ text-transform: uppercase; text-align: center; text-decoration: none; color: inherit; text-wrap: balance; hyphens: auto; overflow-wrap: anywhere; min-width: 0; }
+</style>

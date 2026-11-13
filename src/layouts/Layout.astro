@@ -10,6 +10,8 @@ import { ClientRouter } from "astro:transitions";
 import MenuTile from "../components/MenuTile.astro";
 import PageWipe from "../components/PageWipe.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+// Designsystem nach BBH (Neustart 13.11.2026): Schriften, Tokens, Raster, Textstile, Bewegung.
+import "../styles/system.css";
 
 interface Props {
 	// Ohne title = Startseite (eigener Tab-Titel, s. unten).
@@ -61,21 +63,11 @@ const websiteJsonLd = JSON.stringify({
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
-		{/* Font-Preload (Fred-Befund 2026-06-14, "Kontaktseite springt nach dem
-		   Laden"): Forma DJR lädt sonst nach dem ersten Render nach (font-display:
-		   swap) und reflowt die Seite — der kleine Sprung. Mit Preload ist die
-		   Schrift beim ersten Paint da. */}
-		<link rel="preload" href="/fonts/FormaDJRVariable.woff2" as="font" type="font/woff2" crossorigin />
-		{/* MONO ebenfalls vorladen (Fred-Befund 20.09. abends, "auf dem Handy
-		   läuft das Flipperboard ruckelig"): die Fallblatt-Kacheln setzen
-		   Forma DJR Mono. Ohne Preload wird die Datei erst entdeckt, wenn die
-		   erste Kachel beschriftet wird — also MITTEN in der Animation. Bis
-		   sie da ist, rendern alle Kacheln in ui-monospace, und beim Eintreffen
-		   stylt und misst der Browser die ganze Wand auf einen Schlag neu
-		   (rund 8.600 Knoten). Auf dem Desktop fällt das nicht auf, weil die
-		   Datei längst im Cache liegt. 107 KB, kommt vor dem 485-KB-Textschnitt
-		   an. */}
-		<link rel="preload" href="/fonts/FormaDJRMonoVariable.woff2" as="font" type="font/woff2" crossorigin />
+		{/* Schriften vorladen (Neustart 13.11.2026): Lesetext und Hero-Schrift sind beim ersten Bild da,
+		   sonst springt die Seite nach dem Laden (Befund 14.06.2026). Alle frei, selbst gehostet. */}
+		<link rel="preload" href="/fonts/frei/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/frei/BBH-DE-Hegarty.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/frei/BBH-DE-Bogle.woff2" as="font" type="font/woff2" crossorigin />
 		<title>{pageTitle}</title>
 		<link rel="canonical" href={canonicalUrl} />
 		<meta property="og:type" content="website" />
@@ -110,113 +102,12 @@ const websiteJsonLd = JSON.stringify({
 </html>
 
 <style is:global>
-	@font-face {
-		font-family: "Forma DJR";
-		src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations");
-		font-weight: 100 900;
-		font-style: normal;
-		font-display: swap;
-	}
+	/* Tokens, Schriften, Raster und Textstile stehen seit dem Neustart (13.11.2026) in
+	   src/styles/system.css. Hier nur noch der Stapel für die Fußzeile. */
 
-	:root {
-		/* Farb-Treppe (29.08., aus BBHs ausgeliefertem CSS gemessen + für Parley
-		   adaptiert — gilt seitenweit als Token-Satz, siehe Website-Brief
-		   /buchen-Kapitel). Ersetzt die vorherigen Ad-hoc-Werte (--white war
-		   #fafafa, --gray war #888) durch die entschiedenen Spec-Werte. */
-		--black: #000000;
-		--panel: #1a1a1a; /* BBH-Wert (vorher #0d0d0d): weniger dunkle Stufen dicht beieinander (Fred 23.09.) */
-		/* Kachelgrund der Multi-Output-Kacheln (Fred 21.09., Handy: „kann die
-		   beiden Flaechen nicht vom Hintergrund unterscheiden"). #0d0d0d auf
-		   #000 sind 5 % Helligkeitsabstand, auf OLED-Handys mit dunkler
-		   Gammakurve unsichtbar. #212121 ist die vierte Stufe der Farb-Treppe
-		   (Website-Brief: Panel #0d0d0d, Zwischenstufen #1a1a1a / #212121) —
-		   der naechste Ton, der sich vom Grund noch abhebt. Die dunklen
-		   Ziffernblaetter in Kachel 2 haengen am selben Token, damit sie auf
-		   dem Kachelgrund unsichtbar bleiben. */
-		--kachel: #212121;
-		--tile: #404040;
-		--tile-text: #cccccc; /* BBH #ccc (vorher #c8c8c8) */
-		--surface: #ededed;
-		/* Knopf-/Kachel-Fläche (Menü-Knopf, Menü-Zeilen, Formatberatung-CTA):
-		   EIN Token, damit die Flächen nie auseinanderlaufen (Fred-Sichtung
-		   2026-09-13: "wirkt weißer" — war Simultankontrast, Werte identisch). */
-		--tile-surface: rgba(237, 237, 237, 0.95);
-		--white: #ffffff;
-		/* BBH-Farben im Petto (Fred 23.09.): Signal und Weiss-Stufen, damit
-		   Zustaende ohne neue Grautoene auskommen. */
-		--white-80: rgba(255, 255, 255, 0.8);
-		--white-20: rgba(255, 255, 255, 0.2);
-		--signal-rot: #e74c3c;
-		--signal-gruen: #2ecc71;
-		--fehler: #ff0000;
-		/* SCHRIFTSKALA = BBH (Fred 23.09.: „uebernehmen wir die Schriftgroessen
-		   von BBH, bis auf unseren Hero, der bei uns einfach groesser ist").
-		   Aus deren CSS gerechnet: Grund 16 px bei 360 px Fenster, 22 px bei
-		   1728 px, Stufenfaktor 1,125 (klein) → 1,414 (gross), dazwischen
-		   linear in vw. Stufen wie bei BBH benannt. Der Hero bleibt cqw-
-		   kalibriert (index.astro), die Kachel-Zahlen bleiben Kachel-gebunden.
-		   Zeilenhoehen bei BBH: base 1,2 · md/lg 1,08 · xl 0,85 · 2xl 1 ·
-		   huge 0,85 · mega 0,82. */
-		--text-sm: clamp(13.6px, 12.26px + 0.3728vw, 18.7px);
-		--text-base: clamp(16px, 14.42px + 0.4386vw, 22px);
-		--text-md: clamp(18px, 14.55px + 0.9576vw, 31.11px);
-		/* Lesetext (Rasul 10.11.2026, eingestellt auf fliesstext-bbh-forma.html
-		   gegen BBHs Geist): Größe --text-md, Zeilenhöhe 1,3, Absätze 24 px sind
-		   BBH-System; Gewicht 355 und Laufweite +0,0425em gleichen Forma gegen
-		   Geist (400, -0,02em) aus. Optische Größe automatisch, bewusst KEIN
-		   fester opsz-Wert (Forma tauscht sonst a und l aus), kein eigener
-		   Wortabstand. Gilt für alle Lesetexte, nicht für Hero-Text (lg),
-		   Labels, sm, Knöpfe, fette Fragen. */
-		--lesetext-gewicht: 355;
-		--lesetext-laufweite: 0.0425em;
-		--lesetext-zeilenhoehe: 1.3;
-		--lesetext-absatz: 1.5rem;
-		--text-lg: clamp(20.25px, 14px + 1.7347vw, 43.98px);
-		--text-xl: clamp(22.78px, 12.41px + 2.881vw, 62.19px);
-		--text-2xl: clamp(25.63px, 9.24px + 4.554vw, 87.93px);
-		--text-huge: clamp(28.83px, 3.7px + 6.982vw, 124.34px);
-		--text-mega: clamp(32.44px, -5.29px + 10.48vw, 175.8px);
-		--gray: #999894;
-		--line: rgba(255, 255, 255, 0.2); /* BBH-Muster: Linien als Weiss 20 % (#fff3), keine eigene Graustufe (vorher #2a2a2a) */
-		/* Falltafel-Material (Fred 14.09. nacht): Zarge = Einfassung außen,
-		   Wand = Grundfläche hinter den Kacheln (Fugen). ABGELEITET aus der
-		   Kachelfarbe (Fred: "den Farbwert von der Kachel, dann die
-		   Helligkeit ändern") — die Prozente sind die Helligkeits-Regler:
-		   white X% = heller als die Kachel, black X% = dunkler. Stand nach
-		   Freds Regler-Runde: 50% Richtung Schwarz (≈ #070707, halber Weg
-		   zwischen Kachel #0d0d0d und Seitengrund). Ändert sich die
-		   Kachelfarbe, wandern Zarge und Wand automatisch mit. */
-		--tafel-zarge: color-mix(in srgb, var(--panel), black 50%);
-		--tafel-wand: color-mix(in srgb, var(--panel), black 50%);
-		--max-width: 1100px;
-		/* Abstands-Treppe 1:1 aus BBHs ausgeliefertem CSS (--spacing-md/lg/xl,
-		   ea792231…css, gezogen 2026-09-14): XL ist deren SEKTIONS-Abstand
-		   (space-y-xl zwischen allen Sektionen), lg/md die kleineren Stufen.
-		   Für alle künftigen Sektions-Übergänge DIESE Tokens nutzen statt
-		   je Fläche neu zu clampen. */
-		--abstand-md: clamp(30px, 14.9398px + 3.7651vw, 80px);
-		--abstand-lg: clamp(60px, 29.8795px + 7.5301vw, 160px);
-		--abstand-xl: clamp(120px, 59.759px + 15.0602vw, 320px);
-		/* Nur noch von den archivierten Komponenten gelesen (Header.astro,
-		   TileMenu.astro — beide "nirgends eingebunden", siehe deren eigene
-		   Archiv-Kommentare). BrandLogo.astro, das aktive Hero-Logo, definiert
-		   sein --logo-h lokal (1.5× dieser Basis). Bleibt hier stehen statt
-		   gelöscht zu werden, damit eine Reaktivierung der archivierten
-		   Komponenten den globalen Wert sofort wieder vorfindet (Audit-Fix B7). */
-		--logo-h: clamp(32px, 4.4vw, 56px);
-	}
-
-	* {
-		box-sizing: border-box;
-	}
-
-	/* Inhalts-Ebene des Sticky-Reveal-Stapels (siehe body-Markup oben).
-	   min-height (Fred-Befund 2026-06-14, systemischer Fix): Der Footer ist
-	   ungewöhnlich groß — jede Seite, deren Inhalt kürzer als der Viewport
-	   ist (oder es während eines Ladevorgangs kurz ist), legt ihn sonst
-	   sofort frei (Flackern, durchblitzende Buchstaben-Spitzen). Hier im
-	   Layout garantiert, damit auch jede KÜNFTIGE Seite automatisch safe
-	   ist — nicht nur die, an die man beim Bauen denkt. */
+	/* Inhalts-Ebene des Sticky-Reveal-Stapels: Inhalt auf Ebene 10 mit eigenem
+	   schwarzen Grund, Fußzeile klebt darunter (BBH). min-height, damit kurze
+	   Seiten die Fußzeile nicht sofort freilegen (Befund 14.06.2026). */
 	.site-content {
 		position: relative;
 		z-index: 10;
@@ -224,49 +115,28 @@ const websiteJsonLd = JSON.stringify({
 		min-height: 100dvh;
 	}
 
-	html {
-		background: var(--black);
-	}
-
-	body {
-		margin: 0;
-		background: var(--black);
-		color: var(--white);
-		font-family: "Forma DJR", Helvetica, Arial, sans-serif;
-		/* 300 statt 400 (Fred 14.09. nacht, "normale Schrift auf 300"):
-		   leichterer Lauftext, mehr Fallhöhe zu den 900er-Fetten. */
-		font-weight: 300;
-		-webkit-font-smoothing: antialiased;
-		/* Extension-Panzerung (Befund 2026-06-14): Browser-Extensions (konkret
-		   Apollo.io, DIV.zp-open-popup-button, 45px) injizieren Elemente in den
-		   Body — nach Astros View-Transition-Swap landete das VOR .site-content
-		   im Fluss und schob die ganze Seite runter (Footer-Spitzen oben links).
-		   Body als Flex-Spalte mit expliziter Ordnung: unsere Bausteine haben
-		   feste order-Werte, ALLES Fremde bekommt order:9999 und landet
-		   layoutmäßig am Ende — egal wann/wo eine Extension es einfügt.
-		   Relevant auch für echte Besucher mit solchen Extensions (Sales-Tools
-		   im ICP). */
-		display: flex;
-		flex-direction: column;
-	}
-
-	body > * {
-		order: 9999;
-	}
-
-	body > .site-content {
-		order: 1;
-	}
-
-	body > .site-footer {
-		order: 2;
-	}
-
-	a {
-		color: inherit;
-	}
-
-	h1, h2, h3, p {
-		margin: 0;
-	}
+	/* Schutz gegen Browser-Erweiterungen, die Elemente in den body schieben
+	   (Befund 14.06.2026): unsere Bausteine haben feste Plätze, Fremdes ans Ende. */
+	body { display: flex; flex-direction: column; }
+	body > * { order: 9999; }
+	body > .site-content { order: 1; }
+	body > .site-footer { order: 2; }
 </style>
+
+<script>
+	/* Einblenden wie BBH (Analyse 1.9): Elemente mit data-einblenden blenden über die
+	   Deckkraft ein, sobald sie 20 % vor der Fensterunterkante sind, und beim
+	   Zurückscrollen wieder aus. Bei jedem Seitenwechsel neu (Astro-Seitenübergänge). */
+	let einblendenBeobachter: IntersectionObserver | null = null;
+	function einblenden() {
+		einblendenBeobachter?.disconnect();
+		const ziele = document.querySelectorAll<HTMLElement>("[data-einblenden]");
+		if (!ziele.length) return;
+		einblendenBeobachter = new IntersectionObserver(
+			(eintraege) => eintraege.forEach((e) => e.target.classList.toggle("sichtbar", e.isIntersecting)),
+			{ rootMargin: "0px 0px -20% 0px" },
+		);
+		ziele.forEach((z) => einblendenBeobachter!.observe(z));
+	}
+	document.addEventListener("astro:page-load", einblenden);
+</script>

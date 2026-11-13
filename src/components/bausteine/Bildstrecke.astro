@@ -1,0 +1,23 @@
+---
+/* B19 Bildstrecke: volle Breite im Wechsel mit Paaren (ab 768 px nebeneinander) und
+   1 groß + 2 klein. Läuft ohne 1728-Deckel bis an den Rand (32 px), wie BBHs Arbeitsbilder.
+   art: "voll" | "paar" | "eins-zwei". Inhalte über Platzhalter-Texte, bis echtes Material da ist. */
+import Platzhalter from "./Platzhalter.astro";
+interface Props { art?: "voll" | "paar" | "eins-zwei"; texte: string[] }
+const { art = "voll", texte } = Astro.props;
+---
+<div class:list={["strecke", `strecke--${art}`]} data-einblenden>
+	{art === "voll" && <Platzhalter format="16/9" text={texte[0]} />}
+	{art === "paar" && texte.slice(0, 2).map((t) => <Platzhalter format="4/5" text={t} />)}
+	{art === "eins-zwei" && (
+		<Fragment>
+			<Platzhalter format="4/5" text={texte[0]} />
+			<div class="strecke__klein"><Platzhalter format="16/9" text={texte[1]} /><Platzhalter format="16/9" text={texte[2]} /></div>
+		</Fragment>
+	)}
+</div>
+<style>
+	.strecke { padding-inline: var(--rand); display: grid; gap: var(--fuge); }
+	@media (min-width: 768px) { .strecke--paar, .strecke--eins-zwei { grid-template-columns: 1fr 1fr; } }
+	.strecke__klein { display: grid; gap: var(--fuge); align-content: space-between; }
+</style>

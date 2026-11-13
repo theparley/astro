@@ -1,0 +1,13 @@
+---
+/* Platzhalter für ein Medium (Bild, Grafik, Video), bis das echte kommt.
+   format: Seitenverhältnis wie bei BBH (1/1, 4/3, 4/5, 16/9, 2/1, 3/1). */
+interface Props { format?: string; text: string; hell?: boolean }
+const { format = "16/9", text, hell = false } = Astro.props;
+---
+<div class:list={["platzhalter", hell && "platzhalter--hell"]} style={`aspect-ratio:${format}`}>
+	<span class="entwurf">{text}</span>
+</div>
+<style>
+	.platzhalter { width: 100%; display: grid; place-items: center; background: var(--panel); border-radius: 4px; padding: 16px; text-align: center; }
+	.platzhalter--hell { background: var(--surface); }
+</style>

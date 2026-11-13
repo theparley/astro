@@ -1,0 +1,179 @@
+---
+/* ═══════════════════════════════════════════════════════════════════════
+   BAUSTEIN-KATALOG (Neustart 13.11.2026). Rasul: „Dann könnten wir doch
+   gucken, welche Segmente, welche unterschiedlichen hat in BBH und wenn ich
+   dann eine Idee habe für ein Segment, dann können wir doch gucken, welches
+   Segment würde denn von BBH dazu passen. Das machen wir dann gemeinsam.“
+   Jeder Abschnittstyp von BBH als Parley-Baustein, mit Vorbild und Regel.
+   Nummern B1 bis B22 und Regeln R1 bis R24 aus dem Teilbericht
+   research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md (Marketing-Ordner).
+   Nicht in der Sitemap; Arbeitsseite.
+   ═══════════════════════════════════════════════════════════════════════ */
+import Layout from "../layouts/Layout.astro";
+import Seitentitel from "../components/bausteine/Seitentitel.astro";
+import Abschnittskopf from "../components/bausteine/Abschnittskopf.astro";
+import Haltung from "../components/bausteine/Haltung.astro";
+import KurzSaetze from "../components/bausteine/KurzSaetze.astro";
+import TextBild from "../components/bausteine/TextBild.astro";
+import Textblock from "../components/bausteine/Textblock.astro";
+import Karten from "../components/bausteine/Karten.astro";
+import Band from "../components/bausteine/Band.astro";
+import Akkordeon from "../components/bausteine/Akkordeon.astro";
+import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
+import Aufruf from "../components/bausteine/Aufruf.astro";
+import Bildstrecke from "../components/bausteine/Bildstrecke.astro";
+import Teaser from "../components/bausteine/Teaser.astro";
+import KachelNamen from "../components/bausteine/KachelNamen.astro";
+import Platzhalter from "../components/bausteine/Platzhalter.astro";
+import Knopf from "../components/bausteine/Knopf.astro";
+
+const BAND = [
+	{ buchstabe: "A", name: "Videopodcast", form: "169", art: "video", text: "Beispieltext der Kachel." },
+	{ buchstabe: "B", name: "Audio-Podcast", form: "11", art: "audio", text: "Beispieltext der Kachel." },
+	{ buchstabe: "C", name: "Clip", form: "916", art: "video", text: "Beispieltext der Kachel." },
+	{ buchstabe: "D", name: "Zitat", form: "11", art: "zitat", text: "Beispieltext der Kachel." },
+];
+const BEISPIEL = "Beispieltext. Hier steht später, was der Abschnitt sagen soll. Zwei, drei Sätze reichen, damit man sieht, wie der Baustein mit echtem Text wirkt.";
+---
+
+<Layout title="Bausteine">
+	<header class="kopf rahmen">
+		<p class="t-label grau">Arbeitsseite · nicht öffentlich verlinkt</p>
+		<h1 class="t-seitentitel">Bausteine</h1>
+		<p class="t-lesen kopf__text">Jeder Abschnittstyp der BBH-Seite als Parley-Baustein. Für eine neue Idee hier den passenden Baustein suchen. Grundlage: research/BBH_Website_Analyse_2026-11.md. Die Nummern (B1, R5 …) verweisen auf den Teilbericht zum Seitenaufbau.</p>
+		<nav class="kopf__liste t-mini">
+			<a href="#b1">B1 Seitentitel</a><a href="#b2">B2 Abschnittskopf</a><a href="#b3">B3 Haltungssatz</a><a href="#b4">B4 Kurze Sätze</a><a href="#b6">B6 Text-Bild</a><a href="#b12">B12 Textblock</a><a href="#b7">B7 Karten</a><a href="#b8">B8 Band</a><a href="#b11">B11 Akkordeon</a><a href="#b18">B18 Kennzahlen</a><a href="#r11">R11 Aufruf</a><a href="#b13">B13 Kacheln</a><a href="#b19">B19 Bildstrecke</a><a href="#b20">B20 Teaser</a><a href="#b21">B21 Knopf</a><a href="#schrift">Schrift und Raster</a>
+		</nav>
+	</header>
+
+	<section class="eintrag" id="b1">
+		<div class="info rahmen"><b>B1 Seitentitel</b><span>BBH: Offices, News, Kontakt, Rechtsseiten. Bartle huge, mittig. <em>Wann:</em> eine Seite oder ein großer Abschnitt braucht einen Titel (R1).</span></div>
+		<Seitentitel titel="Was ihr uns oft fragt." unter="Optionale Unterzeile in Lesegröße." />
+	</section>
+
+	<section class="eintrag" id="b2">
+		<div class="info rahmen"><b>B2 Abschnittskopf mit Link</b><span>BBH: „WORK · View all work“ über dem Projektraster. Bartle huge links, Link rechts. <em>Wann:</em> ein Abschnitt führt eine Sammlung an (R3). <em>Achtung:</em> Bartle ist extrem breit, nur kurze Wörter (BBH: „Work“, „Offices“); „Beweisstücke“ passt in huge nicht in eine Zeile.</span></div>
+		<div class="rahmen"><Abschnittskopf titel="Arbeiten" link={{ href: "#b2", text: "Alle ansehen" }} /></div>
+		<Karten spalten={2} karten={[{ titel: "Kunde A", zeile: "Format, Thema", platzhalter: "Bild 4:3" }, { titel: "Kunde B", zeile: "Format, Thema", platzhalter: "Bild 4:3" }]} />
+	</section>
+
+	<section class="eintrag" id="b3">
+		<div class="info rahmen"><b>B3 Haltungssatz</b><span>BBH: „When the world zigs, zag“ auf Start und About. Hegarty in Großbuchstaben, mittig, harte Zeilenumbrüche; Wechselglyphen möglich. <em>Wann:</em> ein Satz drückt Haltung aus (R4). Bei uns: der Hero.</span></div>
+		<Haltung zeilen={["Überall", "Experten."]} />
+		<div class="abstand"></div>
+		<Haltung wechselglyphen zeilen={["Zeit für den", "Videobeweis."]} />
+	</section>
+
+	<section class="eintrag" id="b4">
+		<div class="info rahmen"><b>B4 Kurze Sätze</b><span>BBH: About („Standout creativity. Exceptional strategy. …“). Mittig, lg mittelfett, jeder Satz blendet ein. <em>Wann:</em> mehrere kurze Sätze hintereinander (R5). Bei uns: Erklärtext unter dem Hero, Kanalzeile, Hinweise.</span></div>
+		<KurzSaetze saetze={["Erster kurzer Satz.", "Zweiter kurzer Satz.", "Dritter kurzer Satz."]} />
+	</section>
+
+	<section class="eintrag" id="b6">
+		<div class="info rahmen"><b>B6 Text-Bild</b><span>BBH: „What we do“, Fachbereiche. Medium als Anker in der einen Hälfte, Text in der anderen, senkrecht mittig; auf dem Handy Medium zuerst. Bild 60 % seiner Hälfte („klein“) oder volle Hälfte („voll“). <em>Wann:</em> Text und Bild erklären zusammen (R6); jeder Text in einer Hälfte braucht einen Anker (Analyse 1.5).</span></div>
+		<TextBild titel="Medium links, klein">
+			<Platzhalter slot="medium" format="4/5" text="Bild 4:5" />
+			<p>{BEISPIEL}</p>
+		</TextBild>
+		<div class="abstand"></div>
+		<TextBild titel="Medium rechts, voll" seite="rechts" medium="voll">
+			<Platzhalter slot="medium" format="16/9" text="Video 16:9" />
+			<p>{BEISPIEL}</p>
+		</TextBild>
+	</section>
+
+	<section class="eintrag" id="b12">
+		<div class="info rahmen"><b>B12 Textblock ohne Anker</b><span>BBH: Artikel (Mitte 6 von 12, links gelesen) und „Get in touch“ (schmal, mittig gesetzt). <em>Wann:</em> Text ohne Bild daneben (R9). Nie in einer Hälfte allein.</span></div>
+		<Textblock titel="Mitte, 6 von 12"><p>{BEISPIEL}</p><p>{BEISPIEL}</p></Textblock>
+		<div class="abstand"></div>
+		<Textblock titel="Schmal, mittig" lage="schmal"><p>{BEISPIEL}</p></Textblock>
+	</section>
+
+	<section class="eintrag" id="b7">
+		<div class="info rahmen"><b>B7 Karten</b><span>BBH: Projekte 4:3 in zwei Spalten, Beiträge 4:5 in drei, Menschen 1:1. Unterschrift links, Zeile grau. <em>Wann:</em> Arbeiten, Beiträge oder Menschen zeigen (R12 bis R14).</span></div>
+		<Karten spalten={3} format="4/5" karten={[{ titel: "Beitrag", zeile: "Datum, Thema", platzhalter: "4:5" }, { titel: "Beitrag", zeile: "Datum, Thema", platzhalter: "4:5" }, { titel: "Beitrag", zeile: "Datum, Thema", platzhalter: "4:5" }]} />
+	</section>
+
+	<section class="eintrag" id="b8">
+		<div class="info rahmen"><b>B8 Band (Parley-eigen, nach BBHs Karussell)</b><span>Kacheln laufen endlos, die mittlere wird oben benannt. Kachel 30 % des Rahmens, Handy 75 %; läuft bis an den Fensterrand. <em>Wann:</em> mehr Einträge als eine Zeile fasst (R15). Bei uns: die Beweisstücke.</span></div>
+		<Band formate={BAND} />
+	</section>
+
+	<section class="eintrag hell" id="b11">
+		<div class="info rahmen"><b>B11 Akkordeon</b><span>BBH: BBH Studios, London. Ohne Titel Mitte 8 von 12, mit Titel links Titel, rechts Akkordeon. <em>Wann:</em> Einträge auf- und zuklappen (R10). Bei uns: die Befragung.</span></div>
+		<Akkordeon fragen={[["Eine Frage?", "Die Antwort."], ["Noch eine Frage?", "Die zweite Antwort."]]} />
+		<div class="abstand"></div>
+		<Akkordeon titel="Mit Titel" fragen={[["Eine Frage?", "Die Antwort."], ["Noch eine Frage?", "Die zweite Antwort."]]} />
+	</section>
+
+	<section class="eintrag" id="b18">
+		<div class="info rahmen"><b>B18 Kennzahlen</b><span>BBH: drei Ergebnisse unter jeder Projektbeschreibung. Bartle, mittig, Erklärzeile darunter. <em>Wann:</em> Ergebnisse als Zahlen (R17). Nur echte Zahlen mit Quelle.</span></div>
+		<Kennzahlen zahlen={[{ wert: "00", zeile: "Erklärzeile der ersten Zahl" }, { wert: "00", zeile: "Erklärzeile der zweiten Zahl" }, { wert: "00", zeile: "Erklärzeile der dritten Zahl" }]} quelle="Quelle der Zahlen" />
+	</section>
+
+	<section class="eintrag" id="r11">
+		<div class="info rahmen"><b>R11 Aufruf</b><span>BBH: „Get in touch“. Bogle xl, ein Satz, ein Knopf, mittig. <em>Wann:</em> ein kurzer Aufruf (Kontakt, Termin).</span></div>
+		<Aufruf titel="Euer Gespräch fängt hier an." knopf={{ href: "#r11", text: "Let’s Parley" }}><p>Ein Satz, der zum Termin einlädt.</p></Aufruf>
+	</section>
+
+	<section class="eintrag" id="b13">
+		<div class="info rahmen"><b>B13 Kacheln mit Namen</b><span>BBH: Unterbüros und Fachbereiche, 16:9, Name mittig in Hegarty. <em>Wann:</em> wenige gleichrangige Türen. Für uns denkbar: die drei Studios.</span></div>
+		<KachelNamen namen={[{ name: "Blickkontaktstudio" }, { name: "Mobiles Studio" }, { name: "Studio bei euch" }]} />
+	</section>
+
+	<section class="eintrag" id="b19">
+		<div class="info rahmen"><b>B19 Bildstrecke</b><span>BBH: Bildmaterial jeder Projektseite. Volle Breite, Paare (ab 768 px nebeneinander), 1 groß + 2 klein; ohne 1728-Deckel. <em>Wann:</em> Material eines Projekts zeigen (R16).</span></div>
+		<Bildstrecke art="voll" texte={["Volle Breite 16:9"]} />
+		<div class="abstand-klein"></div>
+		<Bildstrecke art="paar" texte={["Paar links", "Paar rechts"]} />
+		<div class="abstand-klein"></div>
+		<Bildstrecke art="eins-zwei" texte={["Groß", "Klein oben", "Klein unten"]} />
+	</section>
+
+	<section class="eintrag" id="b20">
+		<div class="info rahmen"><b>B20 Teaser „nächster Schritt“</b><span>BBH: „Next Project“ am Ende jeder Projektseite. Fläche 2:1 (Handy 1:1), Bogle huge mittig. <em>Wann:</em> eine Seite endet und soll weiterführen (R18).</span></div>
+		<Teaser text="Zum Studiotermin" href="#b20" />
+	</section>
+
+	<section class="eintrag" id="b21">
+		<div class="info rahmen"><b>B21 Knopf</b><span>BBH-Markenknopf: kleines Quadrat, wächst beim Darüberfahren, Fläche füllt sich. Steht im Fluss, nie als Fläche. <em>Wann:</em> jeder Link, der eine Handlung auslöst.</span></div>
+		<div class="rahmen"><Knopf href="#b21" text="Let’s Parley" /></div>
+	</section>
+
+	<section class="eintrag" id="schrift">
+		<div class="info rahmen"><b>Schrift und Raster</b><span>Stufen sm bis mega (BBH-Treppe), Zeilenhöhe fest je Stufe. Titelschriften immer in Großbuchstaben, Lesetext nie. Raster: 4 Spalten, ab 1024 px 12, Fuge 16 px, Rand 16 / 32 px, Rahmen 1728 px.</span></div>
+		<div class="rahmen schriftprobe">
+			<p class="t-seitentitel" style="text-align:left">Bartle · Seitentitel</p>
+			<p class="t-block">Bogle · Blocküberschrift</p>
+			<p class="t-aufruf">Bogle · Aufruf</p>
+			<p class="t-haltung" style="font-size:var(--text-2xl);text-align:left">Hegarty · Haltung</p>
+			<p class="t-lead">Geist mittelfett · kurze Sätze</p>
+			<p class="t-lesen">Geist · Lesetext in md mit Zeilenhöhe 1,3. Größe, Gewicht und Laufweite kommen aus den Tokens in src/styles/system.css.</p>
+			<p class="t-label">Geist Mono · Label</p>
+		</div>
+		<div class="rahmen raster rasterprobe">{Array.from({ length: 12 }, (_, i) => <span>{i + 1}</span>)}</div>
+	</section>
+</Layout>
+
+<style>
+	.kopf { padding-top: 48px; }
+	.kopf h1 { margin-top: 24px; }
+	.kopf__text { max-width: 46ch; margin: 32px auto 0; text-align: center; }
+	.kopf__liste { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; margin-top: 32px; color: var(--gray); }
+	.kopf__liste a { text-decoration: none; }
+	.eintrag { padding-top: var(--abstand-lg); }
+	.eintrag.hell { margin-top: var(--abstand-lg); }
+	.info { display: grid; gap: 6px; margin-bottom: var(--abstand-md); padding-top: 16px; border-top: 1px solid var(--line); font-size: var(--text-sm); color: var(--gray); }
+	.hell .info { border-color: rgba(0, 0, 0, 0.2); }
+	.info b { font-family: var(--schrift-mono); font-weight: 500; text-transform: uppercase; letter-spacing: 0.02em; color: var(--white); }
+	.hell .info b { color: var(--black); }
+	.info em { font-style: normal; color: var(--white); }
+	.hell .info em { color: var(--black); }
+	.abstand { height: var(--abstand-lg); }
+	.abstand-klein { height: var(--fuge); }
+	.schriftprobe { display: grid; gap: 24px; }
+	.schriftprobe p { overflow-wrap: anywhere; }
+	.rasterprobe { margin-top: 48px; padding-bottom: var(--abstand-xl); }
+	.rasterprobe span { grid-column: auto !important; height: 64px; display: grid; place-items: center; background: var(--panel); font-size: var(--text-sm); color: var(--gray); }
+	@media (max-width: 1023px) { .rasterprobe span:nth-child(n + 5) { display: none; } }
+</style>

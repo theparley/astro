@@ -1,0 +1,27 @@
+---
+/* B18 Kennzahlen: Zahl in Bartle, darunter die Erklärzeile, alles mittig. Bis zu drei
+   nebeneinander, auf dem Handy untereinander. gross=true setzt eine einzelne Zahl in mega
+   statt xl (Parley: „41,8“ als Hauptbeleg). quelle steht klein darunter. */
+interface Props { zahlen: { wert: string; zeile: string }[]; gross?: boolean; quelle?: string }
+const { zahlen, gross = false, quelle } = Astro.props;
+---
+<div class="kennzahlen rahmen" data-einblenden>
+	<div class:list={["kennzahlen__reihe", `kennzahlen__reihe--${zahlen.length}`]}>
+		{zahlen.map((z) => (
+			<div class="kennzahl">
+				<div class:list={["t-zahl", gross && "kennzahl--gross"]}>{z.wert}</div>
+				<p class="kennzahl__zeile">{z.zeile}</p>
+			</div>
+		))}
+	</div>
+	{quelle && <p class="t-mini grau kennzahlen__quelle" set:html={quelle} />}
+	<slot />
+</div>
+<style>
+	.kennzahlen { text-align: center; }
+	.kennzahlen__reihe { display: grid; gap: 32px 64px; justify-content: center; }
+	@media (min-width: 1024px) { .kennzahlen__reihe--2 { grid-template-columns: repeat(2, auto); } .kennzahlen__reihe--3 { grid-template-columns: repeat(3, auto); } }
+	.kennzahl--gross { font-size: var(--text-mega); line-height: var(--zeile-mega); }
+	.kennzahl__zeile { margin: 16px auto 0; max-width: 46ch; font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
+	.kennzahlen__quelle { margin: 16px auto 0; max-width: 60ch; text-wrap: balance; }
+</style>

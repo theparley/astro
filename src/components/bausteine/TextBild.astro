@@ -1,0 +1,35 @@
+---
+/* B6 Text-Bild-Block: zwei Hälften auf dem 12er-Raster, senkrecht mittig zueinander.
+   Das Medium ist der Anker, der Text steht in der anderen Hälfte (Anker-Regel, Analyse 1.5).
+   Auf dem Handy kommt das Medium immer zuerst. BBH nimmt das Bild nur 60 % seiner Hälfte
+   breit (medium="klein"); ein Video mit Sprechblasen braucht die volle Hälfte (medium="voll").
+   Slots: "medium" für Bild, Grafik oder Video; Standard-Slot für den Text. */
+interface Props { titel?: string; id?: string; seite?: "links" | "rechts"; medium?: "klein" | "voll"; titelZeilen?: string[] }
+const { titel, id, seite = "links", medium = "klein", titelZeilen } = Astro.props;
+---
+<div class:list={["textbild", "rahmen", "raster", `textbild--${seite}`]}>
+	<div class:list={["textbild__medium", seite === "links" ? "sp-links" : "sp-rechts", `textbild__medium--${medium}`]}>
+		<slot name="medium" />
+	</div>
+	<div class:list={["textbild__text", seite === "links" ? "sp-rechts" : "sp-links"]}>
+		{(titel || titelZeilen) && (
+			<h2 class="t-block textbild__titel" id={id} data-einblenden>
+				{titelZeilen ? titelZeilen.map((z, i) => <Fragment>{i > 0 && <br />}{z}</Fragment>) : titel}
+			</h2>
+		)}
+		<div class="t-lesen" data-einblenden><slot /></div>
+	</div>
+</div>
+<style>
+	.textbild { row-gap: 48px; align-items: center; }
+	.textbild__medium { display: flex; justify-content: center; }
+	.textbild .textbild__medium > :global(*) { width: 100%; }
+	.textbild__titel { margin-bottom: 48px; }
+	@media (min-width: 1024px) {
+		.textbild--links .textbild__medium { order: 1; }
+		.textbild--links .textbild__text { order: 2; }
+		.textbild--rechts .textbild__medium { order: 2; }
+		.textbild--rechts .textbild__text { order: 1; grid-row: 1; }
+		.textbild .textbild__medium--klein > :global(*) { width: 60%; }   /* Präfix .textbild: schlägt die eigene Breite der Bausteine (Platzhalter) */
+	}
+</style>

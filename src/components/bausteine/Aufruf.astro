@@ -1,0 +1,17 @@
+---
+/* R11 Kurzer Aufruf: Bogle xl in Großbuchstaben, ein Satz, ein Knopf, alles mittig,
+   höchstens 46 Zeichen breit. BBH: „Get in touch“ auf den Fachbereichsseiten. */
+import Knopf from "./Knopf.astro";
+interface Props { titel: string; id?: string; knopf?: { href: string; text: string } }
+const { titel, id, knopf } = Astro.props;
+---
+<div class="aufruf rahmen" data-einblenden>
+	<h2 class="t-aufruf" id={id}>{titel}</h2>
+	<div class="t-lesen aufruf__text"><slot /></div>
+	{knopf && <p class="aufruf__knopf"><Knopf href={knopf.href} text={knopf.text} /></p>}
+</div>
+<style>
+	.aufruf { text-align: center; }
+	.aufruf__text { max-width: 46ch; margin: 32px auto 0; text-wrap: balance; }   /* 46 Zeichen der Lesegröße, wie BBH md:max-w-[46ch] */
+	.aufruf__knopf { margin-top: 32px; }
+</style>

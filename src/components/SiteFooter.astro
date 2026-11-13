@@ -1,3 +1,6 @@
+---
+import LogoBiss from "./LogoBiss.astro";
+---
 {/* Sticky-Reveal-Footer (Fred 30.08. nachts, "bau den Footer") — exakt das
    BBH-Muster, das Maximilian auf der Nuxt-Seite 1:1 kopiert hat und das wir
    dort nachgemessen haben: der Footer klebt mit sticky/bottom:0 auf Ebene 0
@@ -37,7 +40,10 @@
 			   „Parley klein schreiben beziehungsweise parley Film nennen, die Variante, wo Film einen großen
 			   Anfangsbuchstaben hat, mittig“). Zeilenabstand wie im Logo: Grundlinie zu Grundlinie
 			   1,19 × Versalhöhe (0,70 em) = 0,833 em. */}
-			<p class="site-footer__wortmarke" aria-label="parley Film"><span>parley</span><span>Film</span></p>
+			{/* Neustart 13.11.2026: das Logo über die volle Breite wie bei BBH (dort die Wortmarke als SVG,
+			   Analyse B_Seitenaufbau 6.2). Vorher „parley / Film“ als Text in Forma DJR Black; mit dem
+			   Schriftwechsel (WEBSITE.md 3n) wäre der Text sonst in Geist gesetzt worden. Rückweg: Git. */}
+			<LogoBiss class="site-footer__wortmarke" stufe={1} titel="parley Film" />
 		</div>
 	</div>
 </footer>
@@ -126,17 +132,16 @@
 	   Versal-Oberkante 0,1 em unter der Elementkante; so sitzt sie genau
 	   auf der Oberkante, und der Abstand zur Linkzeile darüber ist genau
 	   deren margin-bottom. */
-	.site-footer__wortmarke {
-		margin: -0.1em 0 0;
-		font-size: min(33.8cqw, calc((100dvh - 36px - 60px) / 1.75)); /* 60 px = Linkzeile über dem Wort; zwei Zeilen */
-		font-weight: 900;
-		line-height: 0.833;
-		letter-spacing: -0.01em;
-		text-align: center;
+	/* Logo von Kante zu Kante (Breite des Inhalts), gedeckelt über die Fensterhöhe,
+	   damit es samt Linkzeile (60 px) und Polster (36 px) in den Bildschirm passt.
+	   Seitenverhältnis des Logos samt Schutzraum: 289,64 : 160,32. */
+	:global(.site-footer__wortmarke) {
+		display: block;
+		width: min(100%, calc((100dvh - 96px) * 1.8066));
+		height: auto;
+		margin: 0 auto;
 		color: var(--white);
-		white-space: nowrap;
 	}
-	.site-footer__wortmarke span { display: block; }
 
 </style>
 

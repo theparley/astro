@@ -1,0 +1,16 @@
+---
+/* B20 Teaser „nächster Schritt“: große Fläche 2:1 (Handy 1:1), Bogle huge mittig.
+   BBH: „Next Project“ am Ende jeder Projektseite. */
+interface Props { text: string; href: string; farbe?: string }
+const { text, href, farbe = "var(--panel)" } = Astro.props;
+---
+<div class="rahmen">
+	<a class="teaser" href={href} style={`background:${farbe}`} data-einblenden><span class="teaser__text">{text}</span></a>
+</div>
+<style>
+	.teaser { display: grid; place-items: center; aspect-ratio: 1; border-radius: 4px; overflow: clip; text-decoration: none; color: var(--white); padding: var(--rand); transition: opacity var(--tempo) var(--kurve); }
+	@media (min-width: 1024px) { .teaser { aspect-ratio: 2 / 1; } }
+	.teaser__text { font-family: var(--schrift-schmal); font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-align: center; text-wrap: balance; }
+	@media (hover: hover) { .teaser:hover { opacity: 0.9; } }
+	.teaser:active { transform: scale(0.995); }
+</style>

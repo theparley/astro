@@ -1,0 +1,15 @@
+---
+/* B3 Haltungssatz: Hegarty in Großbuchstaben, mittig über die volle Rahmenbreite,
+   harte Zeilenumbrüche (jede Zeile ein Eintrag). BBH: Markenbotschaft auf Start und About.
+   aufdecken: erster Auftritt mit BBHs Masken-Wisch (500 ms), Zeilen gestaffelt. */
+interface Props { zeilen: string[]; ebene?: "h1" | "h2" | "p"; aufdecken?: boolean; id?: string; wechselglyphen?: boolean }
+const { zeilen, ebene = "h2", aufdecken = false, id, wechselglyphen = false } = Astro.props;
+const H = ebene;
+---
+<H class:list={["t-haltung", "haltung", wechselglyphen && "haltung--wechsel"]} id={id} data-aufdecken={aufdecken ? "" : undefined} data-einblenden={aufdecken ? undefined : ""}>
+	{zeilen.map((z, i) => <span style={`--i:${i}`}>{z}</span>)}
+</H>
+<style>
+	.haltung span { display: block; }
+	.haltung--wechsel { font-feature-settings: "ss01" 1, "ss02" 1, "ss03" 1, "ss04" 1; }
+</style>

@@ -1,0 +1,16 @@
+---
+/* B4 Kurze Sätze hintereinander: mittig, höchstens 1024 px, lg mittelfett, ausbalanciert;
+   jeder Satz blendet für sich ein. BBH: About („Standout creativity. …“), Join-Us-Intro.
+   Regel R5: mehrere kurze Sätze → mittig. */
+interface Props { saetze: string[]; klein?: boolean }
+const { saetze, klein = false } = Astro.props;
+---
+<div class="kurzsaetze rahmen">
+	{saetze.map((s) => <p class:list={["t-lead", klein && "kurzsaetze--klein"]} data-einblenden set:html={s} />)}
+</div>
+<style>
+	.kurzsaetze { max-width: 1024px; text-align: center; }
+	.kurzsaetze p + p { margin-top: 20px; }
+	@media (min-width: 1024px) { .kurzsaetze p + p { margin-top: 40px; } }
+	.kurzsaetze--klein { font-size: var(--text-md); font-weight: 400; letter-spacing: var(--laufweite-lesen); line-height: var(--zeile-lesen); }
+</style>

@@ -1,0 +1,45 @@
+---
+/* B11 Akkordeon. Ohne Titel: Mitte 8 von 12. Mit Titel: Titel links (Bartle huge),
+   Akkordeon rechts. Zeilen: Frage in Bogle xl, Großbuchstaben; Antwort klappt über das
+   Raster auf (150 ms, BBH). */
+interface Props { fragen: string[][]; titel?: string; id?: string }
+const { fragen, titel, id } = Astro.props;
+---
+<div class="akkordeon rahmen raster" data-akkordeon>
+	{titel && <h2 class="t-abschnitt sp-links akkordeon__titel" id={id} data-einblenden>{titel}</h2>}
+	<div class:list={[titel ? "sp-rechts" : "sp-mitte8"]}>
+		{fragen.map(([frage, antwort]) => (
+			<div class="akk-zeile">
+				<button type="button" class="akk-kopf" aria-expanded="false"><span class="t-aufruf akk-frage">{frage}</span><span class="akk-zeichen" aria-hidden="true">+</span></button>
+				<div class="akk-inhalt"><div><p>{antwort}</p></div></div>
+			</div>
+		))}
+	</div>
+</div>
+<style>
+	.akkordeon__titel { margin-bottom: 32px; }
+	.akk-zeile { border-bottom: 1px solid var(--gray); }
+	.akk-kopf { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; padding: 24px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+	.akk-frage { text-align: left; }
+	.akk-zeichen { flex: none; font-size: var(--text-lg); line-height: 1; }
+	.akk-inhalt { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--tempo) var(--kurve); }
+	.akk-zeile.offen .akk-inhalt { grid-template-rows: 1fr; }
+	.akk-inhalt > div { overflow: hidden; }
+	.akk-inhalt p { padding: 0 0 32px; font-size: var(--text-base); line-height: 1.2; letter-spacing: -0.01em; max-width: 60ch; }
+</style>
+<script>
+	function akkordeon() {
+		document.querySelectorAll<HTMLButtonElement>("[data-akkordeon] .akk-kopf").forEach((kopf) => {
+			if (kopf.dataset.bereit) return;
+			kopf.dataset.bereit = "1";
+			kopf.addEventListener("click", () => {
+				const zeile = kopf.parentElement!;
+				const offen = !zeile.classList.contains("offen");
+				zeile.classList.toggle("offen", offen);
+				kopf.setAttribute("aria-expanded", String(offen));
+				kopf.querySelector(".akk-zeichen")!.textContent = offen ? "−" : "+";
+			});
+		});
+	}
+	document.addEventListener("astro:page-load", akkordeon);
+</script>

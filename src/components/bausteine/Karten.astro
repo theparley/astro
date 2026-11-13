@@ -1,0 +1,32 @@
+---
+/* B7 Kartenraster: feste Formate wie BBH (4:3 Arbeiten, 4:5 Beiträge, 1:1 Menschen und
+   Themen), Unterschrift links: Titel weiß, Zeile grau. 2 oder 3 Spalten, Handy einspaltig.
+   Darüberfahren: Bild 103 %, leicht gedreht, Karte 80 % Deckkraft (BBH). */
+interface Karte { titel: string; zeile?: string; href?: string; platzhalter?: string }
+interface Props { karten: Karte[]; spalten?: 2 | 3; format?: string }
+const { karten, spalten = 2, format = "4/3" } = Astro.props;
+---
+<div class:list={["karten", "rahmen", `karten--${spalten}`]}>
+	{karten.map((k) => {
+		const Tag = k.href ? "a" : "div";
+		return (
+			<Tag class="karte" href={k.href} data-einblenden>
+				<div class="karte__bild" style={`aspect-ratio:${format}`}><div class="karte__flaeche">{k.platzhalter && <span class="entwurf">{k.platzhalter}</span>}</div></div>
+				<div class="karte__text"><h3>{k.titel}</h3>{k.zeile && <p class="grau" set:html={k.zeile} />}</div>
+			</Tag>
+		);
+	})}
+</div>
+<style>
+	.karten { display: grid; grid-template-columns: 1fr; gap: 32px var(--fuge); }
+	@media (min-width: 1024px) { .karten--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .karten--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+	.karte { display: block; text-decoration: none; color: inherit; transition: opacity var(--tempo) var(--kurve); }
+	.karte__bild { border-radius: 4px; overflow: clip; background: var(--panel); }
+	.karte__flaeche { width: 100%; height: 100%; display: grid; place-items: center; transition: transform var(--tempo) var(--kurve); }
+	.karte__text { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; font-size: var(--text-base); }
+	.karte__text h3 { font-weight: 400; font-size: inherit; }
+	.karte__text p { line-height: 1.3; text-wrap: pretty; }
+	@media (min-width: 1024px) { .karte__text { margin-top: 16px; } }
+	@media (hover: hover) { a.karte:hover { opacity: 0.8; } a.karte:hover .karte__flaeche { transform: scale(1.03) rotate(-0.25deg); } }
+	a.karte:active { transform: scale(0.99); }
+</style>

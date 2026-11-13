@@ -677,7 +677,9 @@ const beschlagStriche = [
 		display: block !important;
 		max-width: none;
 	}
-	.nur-uhr .feld {
+	/* :not(:first-child), sonst schlägt das !important das Ausblenden der ersten Kachel
+	   (Befund Analyse 13.11.2026, D_Parley_Bestand C3: es standen zwei Kacheln statt einer). */
+	.nur-uhr .feld:not(:first-child) {
 		display: block !important;
 		width: min(542px, 100%);
 		margin: 0 auto;

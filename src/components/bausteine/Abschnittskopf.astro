@@ -1,0 +1,14 @@
+---
+/* B2 Abschnittstitel mit Link: Bartle huge links, Link rechts auf der Grundlinie.
+   BBH: „WORK“ über dem Projektraster. Ohne Link: nur der Titel links. */
+import Knopf from "./Knopf.astro";
+interface Props { titel: string; link?: { href: string; text: string }; id?: string }
+const { titel, link, id } = Astro.props;
+---
+<div class="abschnittskopf">
+	<h2 class="t-abschnitt" id={id} data-einblenden>{titel}</h2>
+	{link && <Knopf href={link.href} text={link.text} />}
+</div>
+<style>
+	.abschnittskopf { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-bottom: 48px; }
+</style>

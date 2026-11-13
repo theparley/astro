@@ -1,0 +1,222 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   PARLEY FILM · DESIGNSYSTEM NACH BBH (Neustart, Rasul 13.11.2026 nachts)
+   ═══════════════════════════════════════════════════════════════════════
+   Grundlage: research/BBH_Website_Analyse_2026-11.md im Marketing-Ordner
+   (Teil 1: Gerüst, Schrift, Abstände, Anker-Regel, Überschriften, Medien,
+   Bewegung). Rasul: „ich würde jetzt gerne einmal neu starten“ und „wenn ich
+   dann eine Idee habe für ein Segment, dann können wir doch gucken, welches
+   Segment würde denn von BBH dazu passen“.
+
+   Aufbau dieser Datei:
+     1  Schriften (frei, selbst gehostet)
+     2  Tokens: Schrift, Zeilenhöhe, Abstand, Farbe, Bewegung
+     3  Grundlage (html, body, Links)
+     4  Rahmen und Raster (4 / 12 Spalten, Umbruch 1024)
+     5  Textstile (Stufen mit fester Zeilenhöhe)
+     6  Bewegung (Einblenden, reduzierte Bewegung)
+
+   Umbruchpunkte wie BBH: 768 (Medienpaare), 1024 (zwei Hälften, Rand 32),
+   1728 (Deckel). Keine anderen Umbruchpunkte erfinden.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1  Schriften ────────────────────────────────────────────────────────
+   Alle frei (SIL Open Font License, Lizenztexte in public/fonts/frei/).
+   Geist (Vercel) für Lesetext, Geist Mono für Labels. Die drei BBH-Schriften
+   (Studio DRAMA für BBH, Google Fonts) haben keine Umlaute; Ä Ö Ü ä ö ü sind
+   selbst ergänzt (Generator branding/aktiv/generatoren/bbh_umlaute_probe.py
+   im Marketing-Ordner). ß braucht es nicht: Die Titelschriften stehen immer
+   in Großbuchstaben, der Browser setzt dann „SS“.
+   Nie von Googles Servern laden (Datenschutz), nur von hier.
+   RÜCKWEG ZU FORMA (Rasul 13.11.: „Wenn wir dann die Lizenz bei Forma bezahlt
+   haben“): nur die Tokens in Abschnitt 2 umstellen, sonst nichts. */
+@font-face { font-family: "Geist"; src: url("/fonts/frei/Geist-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("/fonts/frei/GeistMono-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "BBH-DE Bartle"; src: url("/fonts/frei/BBH-DE-Bartle.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BBH-DE Bogle"; src: url("/fonts/frei/BBH-DE-Bogle.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BBH-DE Hegarty"; src: url("/fonts/frei/BBH-DE-Hegarty.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+/* Forma DJR nur noch für die Werkstatt- und Demo-Seiten (/werkstatt, /tafel, Fallblatt).
+   Eine Schrift wird nur geladen, wenn eine Seite sie benutzt: Die Website selbst lädt Forma
+   nicht mehr. Nicht in neuen Bausteinen verwenden (Lizenz offen, WEBSITE.md 3n). */
+@font-face { font-family: "Forma DJR"; src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+
+/* ── 2  Tokens ───────────────────────────────────────────────────────── */
+:root {
+	/* Schriften. Rollen wie bei BBH (Analyse 1.4):
+	   breit  = Seitentitel, Abschnittstitel über Sammlungen, Kennzahlen
+	   schmal = Blocküberschriften, Akkordeon, Aufrufe
+	   haltung = Haltungssätze, Hero
+	   lesen  = alles, was gelesen wird (nie Großbuchstaben) */
+	--schrift-breit: "BBH-DE Bartle", "Arial Black", sans-serif;
+	--schrift-schmal: "BBH-DE Bogle", "Arial Narrow", sans-serif;
+	--schrift-haltung: "BBH-DE Hegarty", "Arial Black", sans-serif;
+	--schrift-lesen: "Geist", -apple-system, "Helvetica Neue", Arial, sans-serif;
+	--schrift-mono: "Geist Mono", ui-monospace, Menlo, monospace;
+
+	/* Schriftgrößen: BBHs zwei Treppen (Handy 16 × 1,125ⁿ, Desktop 22 × 1,414ⁿ,
+	   gleitend zwischen 360 und 1728 px). Gleiche Werte wie bisher. */
+	--text-sm: clamp(13.6px, 12.26px + 0.3728vw, 18.7px);
+	--text-base: clamp(16px, 14.42px + 0.4386vw, 22px);
+	--text-md: clamp(18px, 14.55px + 0.9576vw, 31.11px);
+	--text-lg: clamp(20.25px, 14px + 1.7347vw, 43.98px);
+	--text-xl: clamp(22.78px, 12.41px + 2.881vw, 62.19px);
+	--text-2xl: clamp(25.63px, 9.24px + 4.554vw, 87.93px);
+	--text-huge: clamp(28.83px, 3.7px + 6.982vw, 124.34px);
+	--text-mega: clamp(32.44px, -5.29px + 10.48vw, 175.8px);
+	--text-hero: calc(var(--text-mega) * 0.95);
+
+	/* Zeilenhöhe gehört zur Stufe (Analyse 1.4, BBH-CSS). Nicht pro Stelle
+	   neu setzen, sondern diese Werte nehmen. */
+	--zeile-sm: 1.2;
+	--zeile-base: 1.2;
+	--zeile-md: 1.08;
+	--zeile-lg: 1.08;
+	--zeile-xl: 0.85;
+	--zeile-2xl: 1;
+	--zeile-huge: 0.85;
+	--zeile-mega: 0.82;
+	--zeile-lesen: 1.3;   /* Lesetext md, BBH Text-Bild-Block und einfacher Text */
+
+	/* Laufweite: Geist −0,02 em (BBH body), Titelschriften 0 */
+	--laufweite-lesen: -0.02em;
+
+	/* Abstände: BBH 1 : 2 : 4, gleitend 400 bis 1728 px; darunter 4-px-Treppe */
+	--abstand-md: clamp(30px, 14.9398px + 3.7651vw, 80px);
+	--abstand-lg: clamp(60px, 29.8795px + 7.5301vw, 160px);
+	--abstand-xl: clamp(120px, 59.759px + 15.0602vw, 320px);
+	--fuge: 16px;          /* Spaltenfuge, Abstand Bild zu Bildunterschrift */
+	--rand: 16px;          /* Seitenrand, ab 1024 px 32 px */
+	--rahmen-max: 1728px;
+
+	/* Farben (BBH-Treppe, wie bisher) */
+	--black: #000000;
+	--off-black: #0d0d0d;
+	--panel: #1a1a1a;
+	--kachel: #212121;
+	--tile: #404040;
+	--tile-text: #cccccc;
+	--surface: #ededed;
+	--tile-surface: rgba(237, 237, 237, 0.95);
+	--white: #ffffff;
+	--white-80: rgba(255, 255, 255, 0.8);
+	--white-20: rgba(255, 255, 255, 0.2);
+	--gray: #999894;
+	--line: rgba(255, 255, 255, 0.2);
+	--signal-rot: #e74c3c;
+	--signal-gruen: #2ecc71;
+	--fehler: #ff0000;
+
+	/* Bewegung (Analyse 1.9) */
+	--tempo: 150ms;                                  /* alle kleinen Übergänge */
+	--kurve: cubic-bezier(0.4, 0, 0.2, 1);
+	--kurve-aufdecken: cubic-bezier(0.77, 0, 0.18, 1); /* Masken-Wisch, 500 ms */
+	--kurve-wechsel: cubic-bezier(0.76, 0, 0.24, 1);   /* Seitenwechsel, 800 ms */
+
+	/* Altlasten, die Unterseiten und Bauteile noch lesen (Lesetext-Satz aus der
+	   Forma-Zeit, jetzt auf Geist gestellt). Neue Bausteine nutzen .t-lesen. */
+	--lesetext-gewicht: 400;
+	--lesetext-laufweite: var(--laufweite-lesen);
+	--lesetext-zeilenhoehe: var(--zeile-lesen);
+	--lesetext-absatz: 1.5rem;
+	--max-width: 1100px;
+	--tafel-zarge: color-mix(in srgb, var(--panel), black 50%);
+	--tafel-wand: color-mix(in srgb, var(--panel), black 50%);
+	--logo-h: clamp(32px, 4.4vw, 56px);
+}
+@media (min-width: 1024px) {
+	:root { --rand: 32px; }
+}
+
+/* ── 3  Grundlage ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--black); }
+body {
+	margin: 0;
+	background: var(--black);
+	color: var(--white);
+	font-family: var(--schrift-lesen);
+	font-size: var(--text-base);
+	font-weight: 400;
+	letter-spacing: var(--laufweite-lesen);
+	line-height: var(--zeile-base);
+	-webkit-font-smoothing: antialiased;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+}
+a { color: inherit; }
+h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
+p:empty { display: none; }
+
+/* ── 4  Rahmen und Raster ────────────────────────────────────────────────
+   .rahmen  Inhaltsrahmen: höchstens 1728 px, mittig, Rand 16 / 32 px.
+   .raster  4 Spalten, ab 1024 px 12 Spalten, Fuge immer 16 px.
+   Spannen (gelten erst ab 1024 px; darunter immer volle Breite):
+   .sp-links / .sp-rechts   die beiden Hälften (6 + 6)
+   .sp-mitte6               Mitte 6 von 12 (Artikel, Text ohne Anker)
+   .sp-mitte8               Mitte 8 von 12 (Akkordeon ohne Titel)
+   .sp-drittel              ein Drittel (4 von 12)
+   Anker-Regel (Analyse 1.5): Text steht nur rechts, wenn links etwas steht. */
+.rahmen {
+	width: 100%;
+	max-width: var(--rahmen-max);
+	margin-inline: auto;
+	padding-inline: var(--rand);
+}
+.raster {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	column-gap: var(--fuge);
+}
+.raster > * { grid-column: 1 / -1; min-width: 0; }
+@media (min-width: 1024px) {
+	.raster { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+	.raster > .sp-links { grid-column: 1 / span 6; }
+	.raster > .sp-rechts { grid-column: 7 / span 6; }
+	.raster > .sp-mitte6 { grid-column: 4 / span 6; }
+	.raster > .sp-mitte8 { grid-column: 3 / span 8; }
+	.raster > .sp-drittel { grid-column: span 4; }
+}
+/* Abschnitte: genau ein --abstand-xl dazwischen (BBH space-y-xl) */
+.abschnitt { margin-top: var(--abstand-xl); }
+/* Helle Fläche (BBH: Arbeit und Lektüre hell, Marke dunkel) */
+.hell { background: var(--white); color: var(--black); padding-block: var(--abstand-lg); }
+.hell + .abschnitt { margin-top: var(--abstand-xl); }
+
+/* ── 5  Textstile ────────────────────────────────────────────────────────
+   Regel ohne Ausnahme (BBH): Titelschriften immer in Großbuchstaben,
+   Lesetext nie. Mittig = soll erfasst werden; links = wird gelesen.
+   Bartle (t-seitentitel, t-abschnitt, t-zahl) ist extrem breit: nur kurze Wörter. Ein langes
+   deutsches Wort wie „Beweisstücke“ passt in huge nicht in eine Zeile (geprüft 13.11.2026). */
+.t-seitentitel { font-family: var(--schrift-breit); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); letter-spacing: 0; text-transform: uppercase; text-wrap: balance; text-align: center; }
+.t-abschnitt   { font-family: var(--schrift-breit); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); letter-spacing: 0; text-transform: uppercase; text-wrap: balance; }
+.t-block       { font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); letter-spacing: 0; text-transform: uppercase; text-wrap: balance; }
+.t-aufruf      { font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-xl); line-height: var(--zeile-xl); letter-spacing: 0; text-transform: uppercase; text-wrap: balance; }
+.t-haltung     { font-family: var(--schrift-haltung); font-weight: 400; font-size: var(--text-hero); line-height: var(--zeile-mega); letter-spacing: 0; text-transform: uppercase; text-wrap: balance; text-align: center; }
+.t-zahl        { font-family: var(--schrift-breit); font-weight: 400; font-size: var(--text-xl); line-height: var(--zeile-xl); letter-spacing: 0; text-transform: uppercase; }
+.t-lead        { font-family: var(--schrift-lesen); font-weight: 500; font-size: var(--text-lg); line-height: 1.1; letter-spacing: -0.04em; text-wrap: balance; }
+.t-lesen       { font-family: var(--schrift-lesen); font-weight: 400; font-size: var(--text-md); line-height: var(--zeile-lesen); letter-spacing: var(--laufweite-lesen); text-wrap: pretty; }
+.t-lesen > * + * { margin-top: 24px; }
+.t-klein       { font-size: var(--text-base); line-height: 1.3; color: var(--gray); text-wrap: pretty; }
+.t-mini        { font-size: var(--text-sm); line-height: var(--zeile-sm); }
+.t-label       { font-family: var(--schrift-mono); font-size: var(--text-sm); line-height: var(--zeile-sm); letter-spacing: 0.02em; text-transform: uppercase; }
+.grau          { color: var(--gray); }
+
+/* Unterstrich-Links (BBH B22): Strich wächst beim Darüberfahren */
+.unterstrich a { text-decoration: none; background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat; transition: background-size var(--tempo) var(--kurve); }
+@media (hover: hover) { .unterstrich a:hover { background-size: 100% 1px; } }
+
+/* Platzhalter-Marke (gelb, nur Entwurf) */
+.entwurf { display: inline-block; font: 600 12px/1.3 system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: #f2a541; border: 1px solid #f2a541; border-radius: 6px; padding: 3px 8px; }
+
+/* ── 6  Bewegung ─────────────────────────────────────────────────────────
+   [data-einblenden]: BBHs Zeilen-Blende, nur Deckkraft, 1 s, ausgelöst 20 %
+   vor der Fensterunterkante, beim Zurückscrollen wieder aus (Skript in
+   Layout.astro). [data-aufdecken]: BBHs Masken-Wisch von links, 500 ms,
+   für den ersten Auftritt (Hero). Kinder per --i gestaffelt. */
+[data-einblenden] { opacity: 0; transition: opacity 1s ease-in-out; }
+[data-einblenden].sichtbar { opacity: 1; }
+[data-aufdecken] > * { clip-path: inset(-0.2em 100% -0.2em 0); animation: aufdecken 500ms var(--kurve-aufdecken) both; animation-delay: calc(300ms + var(--i, 0) * 100ms); }
+@keyframes aufdecken { to { clip-path: inset(-0.2em 0 -0.2em 0); } }
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+	[data-einblenden] { opacity: 1; }
+}
