@@ -109,7 +109,7 @@ const websiteJsonLd = JSON.stringify({
 				function liesLage() {
 					var q = new URLSearchParams(location.search).get("lage");
 					try {
-						if (q === "unten" || q === "links") localStorage.setItem("parley-lage", q);
+						if (q === "unten" || q === "links" || q === "gemischt") localStorage.setItem("parley-lage", q);
 						return localStorage.getItem("parley-lage") || "links";
 					} catch (e) { return q || "links"; }
 				}
@@ -179,6 +179,7 @@ const websiteJsonLd = JSON.stringify({
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
+				<button type="button" data-lage-wahl="gemischt">Gemischt</button>
 				<span>Hero</span>
 				<button type="button" data-hero-wahl="text">Text</button>
 				<button type="button" data-hero-wahl="film">Film</button>
@@ -283,7 +284,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-satz="q"] .menu-wahl [data-satz-wahl="q"],
 	html[data-satz="r"] .menu-wahl [data-satz-wahl="r"],
 	html[data-lage="unten"] .menu-wahl [data-lage-wahl="unten"],
-	html:not([data-lage="unten"]) .menu-wahl [data-lage-wahl="links"],
+	html[data-lage="gemischt"] .menu-wahl [data-lage-wahl="gemischt"],
+	html:not([data-lage="unten"]):not([data-lage="gemischt"]) .menu-wahl [data-lage-wahl="links"],
 	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
 	html:not([data-hero="film"]) .menu-wahl [data-hero-wahl="text"],
 	html[data-menu="bbh"] .menu-wahl [data-wahl="bbh"],
