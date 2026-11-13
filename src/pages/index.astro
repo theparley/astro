@@ -1883,10 +1883,10 @@ const PREISE = [
 		text-align: left;
 	}
 	@media (min-width: 768px) {
-		.akk { max-width: var(--spalte); } /* in der einen Spalte (Rasul 13.11.2026), vorher 8 von 12 Rasterspalten */
+		.akk { max-width: calc((min(100vw, 1728px) - 32px - 176px) / 12 * 8 + 112px); } /* BBH: 8 von 12 Spalten, mittig (wiederhergestellt 13.11.2026, Rasul: „die ist bei BBH mittig“) */
 	}
 	@media (min-width: 1024px) {
-		.akk { max-width: var(--spalte); } /* in der einen Spalte (Rasul 13.11.2026), vorher 8 von 12 Rasterspalten */
+		.akk { max-width: calc((min(100vw, 1728px) - 64px - 176px) / 12 * 8 + 112px); } /* BBH: 8 von 12 Spalten, mittig */
 	}
 	/* Wie in der Vorschau: je Frage zusätzlich 24 px oben und unten und eine
 	   Linie --line darüber (in der Vorschau aus der älteren Fragenliste
@@ -2027,7 +2027,7 @@ const PREISE = [
 	   nicht mittig.“): Überschriften und kleine Zeilen stehen in derselben Textspalte wie der Lesetext und
 	   beginnen an ihrer linken Kante. Block 2 (Split) hat seine eigene Breite und bleibt davon unberührt.
 	   Mittig bleiben nur die große Zahl und die Knöpfe. */
-	.ab:not(.ab-split) .ab-titel,
+	.ab:not(.ab-split):not(.ab-hell) .ab-titel,
 	.fm .ab-titel,
 	.ab-hinweis,
 	.ab-zahlzeile,
@@ -2039,10 +2039,10 @@ const PREISE = [
 		margin-right: auto;
 	}
 	@media (min-width: 800px) {
-		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: var(--spalte); }
+		.ab:not(.ab-split):not(.ab-hell) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: var(--spalte); }
 	}
 	@media (min-width: 1024px) {
-		.ab:not(.ab-split) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: var(--spalte); }
+		.ab:not(.ab-split):not(.ab-hell) .ab-titel, .fm .ab-titel, .ab-hinweis, .ab-zahlzeile, .ab-quelle, .fm-kanaele { max-width: var(--spalte); }
 	}
 
 	/* SPALTE AB DER MITTELLINIE (Rasul 13.11.2026: „Ja, rechte Hälfte“; nach BBH /about, wo der Lesetext
@@ -2053,13 +2053,12 @@ const PREISE = [
 		.hero-text--unten,
 		.ab:not(.ab-split) .ab-text,
 		.fm .ab-text,
-		.ab:not(.ab-split) .ab-titel,
+		.ab:not(.ab-split):not(.ab-hell) .ab-titel,
 		.fm .ab-titel,
 		.ab-hinweis,
 		.ab-zahlzeile,
 		.ab-quelle,
-		.fm-kanaele,
-		.akk {
+		.fm-kanaele {
 			margin-left: 50%;
 			margin-right: 0;
 			max-width: var(--spalte);
