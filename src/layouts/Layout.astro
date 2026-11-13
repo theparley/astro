@@ -113,13 +113,13 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-lage") || "links";
 					} catch (e) { return q || "links"; }
 				}
-				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis l; Grundeinstellung g (Rasuls Favorit 13.11.)
+				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis l; Grundeinstellung l (Rasul 13.11.: sichern sagt, ohne uns wird nichts gesichert)
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
 						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l") localStorage.setItem("parley-satz", q);
-						return localStorage.getItem("parley-satz") || "g";
-					} catch (e) { return q || "g"; }
+						return localStorage.getItem("parley-satz") || "l";
+					} catch (e) { return q || "l"; }
 				}
 				function setze() {
 					document.documentElement.dataset.satz = liesSatz();

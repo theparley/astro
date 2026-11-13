@@ -98,7 +98,7 @@ const FORMATE = [
 			<div class="satz satz--f"><Haltung ebene="p" aufdecken zeilen={["Wir geben eurer Expertise einen Videobeweis"]} /></div>
 			{/* G: Rasul 13.11.2026: „Wir machen echte Gespräche zum Videobeweis.“ Favorit: „Den finde ich
 			   eigentlich ziemlich gut.“ Deshalb Grundeinstellung und h1. */}
-			<div class="satz satz--g"><Haltung ebene="h1" aufdecken zeilen={["Wir machen echte Gespräche zum Videobeweis"]} /></div>
+			<div class="satz satz--g"><Haltung ebene="p" aufdecken zeilen={["Wir machen echte Gespräche zum Videobeweis"]} /></div>
 			{/* H: Rasul 13.11.2026: „Wir liefern den Videobeweis mit echten Gesprächen.“ */}
 			<div class="satz satz--h"><Haltung ebene="p" aufdecken zeilen={["Wir liefern den Videobeweis mit echten Gesprächen"]} /></div>
 			{/* I: Rasul 13.11.2026: „Wir liefern Videobeweise aus echten Gesprächen.“ */}
@@ -109,8 +109,10 @@ const FORMATE = [
 			<div class="satz satz--j"><Haltung ebene="p" aufdecken zeilen={["Wir fangen echte Gespräche ein"]} /></div>
 			<div class="satz satz--k"><Haltung ebene="p" aufdecken zeilen={["Wir fangen echte Gespräche als Videobeweis ein"]} /></div>
 			{/* L: Kandidat Claude („sichern“: Beweissicherung), Rasul 13.11.2026: „Ich finde tatsächlich, wir sichern
-			   Videobeweise aus echten Gesprächen. Gar nicht schlecht.“ */}
-			<div class="satz satz--l"><Haltung ebene="p" aufdecken zeilen={["Wir sichern Videobeweise aus echten Gesprächen"]} /></div>
+			   Videobeweise aus echten Gesprächen. Gar nicht schlecht.“ Danach Grundeinstellung und h1, Rasul: „Wir fangen
+			   echte Gespräche ein, hilft dem Kunden nichts? Aber wir sichern Videobeweise aus echten Gesprächen. Das
+			   sagt nämlich, wenn sich keiner darum kümmert, wird's nicht gesichert.“ */}
+			<div class="satz satz--l"><Haltung ebene="h1" aufdecken zeilen={["Wir sichern Videobeweise aus echten Gesprächen"]} /></div>
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
@@ -191,7 +193,7 @@ const FORMATE = [
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,
-	:global(html:not([data-satz])) .satz--g,
+	:global(html:not([data-satz])) .satz--l,
 	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="i"]) .satz--i,
