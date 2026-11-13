@@ -447,7 +447,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// 100 | 90 | 80), Grundeinstellung 80.
 				// Grundeinstellung 60 % (Rasul 13.11.2026 abends: „dann mach mal 60 % Viewport. Ich muss ausprobieren, ab wann es
 				// die Wirkung verliert in der Breite.“; davor 70 %)
-				const anteilHoehe = (Number(document.documentElement.dataset.animhoehe) || 60) / 100;
+				const anteilHoehe = (Number(document.documentElement.dataset.animhoehe) || 50) / 100; // Grundeinstellung 50 % seit 14.11.2026 (vorher 60)
 				if (window.innerWidth >= window.innerHeight) cv.style.height = `${(window.innerHeight * anteilHoehe).toFixed(1)}px`;
 				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
