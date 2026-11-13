@@ -4,12 +4,15 @@
    (Oval 1,4 : 1, Zipfel, Blau #0379A6, Text weiß), Schriftgröße die erste passende Stufe
    xl bis sm. Neu im Neustart: Das Video spielt nur, solange es zu mindestens 20 % zu sehen
    ist (BBH), und das Skript läuft nach jedem Seitenwechsel neu an.
-   blasen: Zeiten in Sekunden des Videos, stelle "OL" (oben links) oder "OR" (oben rechts). */
+   blasen: Zeiten in Sekunden des Videos, stelle "OL" (oben links) oder "OR" (oben rechts).
+   von, bis (13.11.2026): nur diesen Ausschnitt in Schleife spielen, damit ein langer Film in einzelne
+   Abschnitte mit je einer Sache zerlegt werden kann, ohne neu zu schneiden (Rasul: „einzelne Videos, die
+   jeweils eine Sache erklären“). */
 interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
-interface Props { src: string; blasen: Blase[]; format?: string }
-const { src, blasen, format = "16/9" } = Astro.props;
+interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number }
+const { src, blasen, format = "16/9", von, bis } = Astro.props;
 ---
-<div class="blasenvideo" data-blasenvideo data-blasen={JSON.stringify(blasen)} style={`--format:${format}`}>
+<div class="blasenvideo" data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} style={`--format:${format}`}>
 	<video src={src} muted loop playsinline preload="metadata"></video>
 	<div class="blase" aria-hidden="true"><svg><path /></svg><div class="blase__text"><p></p></div></div>
 </div>
@@ -89,6 +92,17 @@ const { src, blasen, format = "16/9" } = Astro.props;
 			// das Video lief mit Ton. Deshalb hier hart setzen, auch vor jedem Abspielen.
 			video.muted = true;
 			video.defaultMuted = true;
+			// Ausschnitt in Schleife (von, bis)
+			const von = szene.dataset.von ? parseFloat(szene.dataset.von) : null;
+			const bis = szene.dataset.bis ? parseFloat(szene.dataset.bis) : null;
+			if (von !== null || bis !== null) {
+				const start = von ?? 0;
+				const zumStart = () => { if (Math.abs(video.currentTime - start) > 0.2) video.currentTime = start; };
+				if (video.readyState >= 1) zumStart(); else video.addEventListener("loadedmetadata", zumStart, { once: true });
+				const wache = () => { if ((bis !== null && video.currentTime >= bis) || video.currentTime < start - 0.3) video.currentTime = start; };
+				video.addEventListener("timeupdate", wache);
+				aufraeumen.push(() => video.removeEventListener("timeupdate", wache));
+			}
 			// Nur spielen, solange mindestens 20 % zu sehen sind (BBH, Analyse 1.7).
 			const beobachter = new IntersectionObserver(([e]) => { if (e.isIntersecting) { video.muted = true; video.play().catch(() => {}); } else video.pause(); }, { threshold: 0.2 });
 			beobachter.observe(szene);

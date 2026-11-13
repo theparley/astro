@@ -146,22 +146,41 @@ const FORMATE = [
 	   (Analyse Teil 3, 2.1). ACHTUNG: Rasul hat „Video links, Schrift rechts“ am 13.11. ausprobiert
 	   und zurückgenommen; hier steht es als Vorschlag. Rückweg auf „Video über dem Text“: Baustein
 	   Textblock mit dem Video darüber. Video nur lokal (Freigaben der Gäste fehlen). */}
-	{/* TEST Blasen (Rasul 13.11.2026: „ausprobieren, ob das funktioniert, wenn wir das Video kleiner
-	   machen, aber nicht wie vorher auf halbe Bildschirmbreite, sondern größer und sozusagen dann die
-	   Blasen dazu machen, dass das sozusagen das Gesamtvideo gibt“). Video mittig, am Rechner zwei Drittel
-	   der Breite, am Handy 74 %: die Blasen ragen links und rechts je rund 13 % der Videobreite über das
-	   Video hinaus und haben so Platz. Text mittig darunter (Textblock, R9). Rückweg: die Fassung
-	   „Text-Bild, Video links“ steht als Kommentar direkt darunter. */}
+	{/* PROBE Einzelvideos (Rasul 13.11.2026, „Yeah.“ auf den Vorschlag): Statt eines langen Blasen-Videos zeigt
+	   jeder Abschnitt genau eine Sache (Rasul: „einzelne Videos, die jeweils eine Sache erklären“). Kein neuer
+	   Schnitt: jeder Abschnitt spielt seinen Teil der Szene in Schleife (BlasenVideo von/bis), mit seiner einen
+	   Blase. Abwechselnd Video links und rechts (BBH Text-Bild B6), die Blase zeigt zum Text. Davor als
+	   Einleitung der bisherige kleine Text unter dem Statement (Rasul: „daraus den nächsten Abschnitt machen
+	   oder ihn in den nächsten Abschnitt integrieren“). Titel und Texte von Abschnitt 2 bis 4 sind Platzhalter.
+	   Rückweg zur Gesamtvideo-Fassung: Commit 6223855 im Website-Repository. */}
+	<section class="abschnitt" aria-label="Einleitung">
+		<Textblock lage="schmal">
+			<p>Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt.</p>
+		</Textblock>
+	</section>
 	<section class="abschnitt" aria-labelledby="ab2-titel">
-		<div class="blasen-buehne">
-			<BlasenVideo src="/lokal/szene-beweisaufnahme.mp4" blasen={BLASEN as any} />
-		</div>
-		<div class="nach-textbild">
-			<Textblock id="ab2-titel" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
-				<p>Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie Gespräche am Küchentisch.</p>
-				<p>Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
-			</Textblock>
-		</div>
+		<TextBild id="ab2-titel" medium="voll" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
+			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={0} bis={4.5} blasen={[BLASEN[0]] as any} />
+			<p>Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie Gespräche am Küchentisch.</p>
+		</TextBild>
+	</section>
+	<section class="abschnitt" aria-labelledby="ab2b-titel">
+		<TextBild id="ab2b-titel" seite="rechts" medium="voll" titel="Ohne Kamerastress.">
+			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={4.5} bis={9} blasen={[BLASEN[1]] as any} />
+			<p><span class="entwurf">Platzhalter: Arbeitstitel und ein, zwei Sätze gemeinsam schreiben</span></p>
+		</TextBild>
+	</section>
+	<section class="abschnitt" aria-labelledby="ab2c-titel">
+		<TextBild id="ab2c-titel" medium="voll" titel="Blickkontakt.">
+			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={9} bis={18} blasen={[BLASEN[2]] as any} />
+			<p><span class="entwurf">Platzhalter: Arbeitstitel und ein, zwei Sätze gemeinsam schreiben</span></p>
+		</TextBild>
+	</section>
+	<section class="abschnitt" aria-labelledby="ab2d-titel">
+		<TextBild id="ab2d-titel" seite="rechts" medium="voll" titel="Das Blickkontaktstudio.">
+			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={18} bis={24} blasen={[BLASEN[3]] as any} />
+			<p><span class="entwurf">Platzhalter: Arbeitstitel und ein, zwei Sätze gemeinsam schreiben</span></p>
+		</TextBild>
 	</section>
 	{/* RÜCKWEG (bis 13.11.2026 vormittags):
 	<section class="abschnitt" aria-labelledby="ab2-titel">
