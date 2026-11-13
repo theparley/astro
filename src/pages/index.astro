@@ -166,8 +166,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 
 <style>
 	/* Aufbau-Variante: Abschnitte (bisher, Grundeinstellung) oder Kacheln (vier Kacheln zu Unterseiten) */
-	:global(html:not([data-aufbau="kacheln"])) .aufbau--kacheln { display: none; }
-	:global(html[data-aufbau="kacheln"]) .aufbau--abschnitte { display: none; }
+	/* Grundeinstellung seit 13.11.2026 „Kacheln“ (Rasul: „Kacheln“); ohne Angabe gilt Kacheln */
+	:global(html[data-aufbau="abschnitte"]) .aufbau--kacheln { display: none; }
+	:global(html:not([data-aufbau="abschnitte"])) .aufbau--abschnitte { display: none; }
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,

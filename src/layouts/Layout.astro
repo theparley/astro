@@ -129,13 +129,13 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-umlaut") || "aussen";
 					} catch (e) { return q || "aussen"; }
 				}
-				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln
+				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
 					var q = new URLSearchParams(location.search).get("aufbau");
 					try {
 						if (q === "abschnitte" || q === "kacheln") localStorage.setItem("parley-aufbau", q);
-						return localStorage.getItem("parley-aufbau") || "abschnitte";
-					} catch (e) { return q || "abschnitte"; }
+						return localStorage.getItem("parley-aufbau") || "kacheln";
+					} catch (e) { return q || "kacheln"; }
 				}
 				function setze() {
 					document.documentElement.dataset.aufbau = liesAufbau();
@@ -277,7 +277,7 @@ const websiteJsonLd = JSON.stringify({
 		cursor: pointer;
 	}
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
-	html:not([data-aufbau="kacheln"]) .menu-wahl [data-aufbau-wahl="abschnitte"],
+	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-umlaut="innen"] .menu-wahl [data-umlaut-wahl="innen"],
 	html:not([data-umlaut="innen"]) .menu-wahl [data-umlaut-wahl="aussen"],
 	html[data-satz="a"] .menu-wahl [data-satz-wahl="a"],
