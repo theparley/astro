@@ -228,7 +228,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// 3,2 s für die ganze Fahrt (Rasul 13.11.2026 abends: „die Kamerafahrt ist jetzt zu lang. Und vor allem zu aufgeteilt.
 	// Die Kamera fährt runter und dann ran, kann sie beides gleichzeitig … das fühlt sich so abgehackt an“): Kranfahrt und
 	// Ranfahrt sind jetzt eine Bewegung mit einem gemeinsamen Ease-in und Ease-out (vorher 3,4 s plus 1,8 s Ranfahrt).
-	const D_KAMERA = 3.2;
+	// Kürzer, ohne hektisch zu werden (Rasul 14.11.2026: „ich würde die gesamte Animation gerne noch ein bisschen kürzer
+	// haben, aber ohne dass sie hektisch wird“): 2,6 s statt 3,2 s, Zeitverlauf kubisch (smoothstep, Spitzentempo 1,5-fach
+	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
+	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
+	const D_KAMERA = 2.6;
+	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
 	// Brennweite von 1000 auf 430. So bleibt die vordere Person die ganze Fahrt im Bild (gerechnet 13.11.2026; eine
@@ -531,7 +536,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(q.wx, q.wz, b.C, b.Lk, b.F).g;
 			};
 			const verlauf = (t: number) => {
-				const tz = glatt(anteil(t, T_GESTE, D_KAMERA));
+				const tz = weichKubisch(anteil(t, T_GESTE, D_KAMERA));
 				if (tz <= 0 || tz >= 1) return { e: tz, s: tz };
 				const L = Math.log(Math.max(1.001, groesseVorne(1))), ziel = tz * L;
 				let lo = 0, hi = 1;
@@ -668,7 +673,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				}
 				if (uhr >= T_PAUSE && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, dann Lesepause
 				bild(uhr, jetzt);
-				if (uhr < ENDE + GLIMM) lauf = requestAnimationFrame(schritt);
+				const schluss = ende() === "kamera" ? T_GESTE + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
+				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
 			};
 			const weiter = () => { if (haelt) { haelt = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); } };
