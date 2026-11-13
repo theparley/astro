@@ -47,12 +47,6 @@ import LogoBiss from "./LogoBiss.astro";
 			   Grund: Die Umrisse von „parley Film“ sind aus Forma DJR gebaut, die Lizenz ist offen (Marketing-Ordner
 			   website/WEBSITE.md Punkt 18). Rückweg: stufe={1}. */}
 			<LogoBiss class="site-footer__wortmarke" stufe={3} titel="parley Film" />
-			{/* PARLEY in der schwarzen Blase des Logos (Rasul 13.11.2026 abends: „beim Footer könntest du das parley in die
-			   schwarze Blase schreiben. Und nimm das parley, das wir gerade eben gemacht haben im Menü, die Form.“):
-			   BBH-DE Bartle, Abstände je Buchstabenpaar wie im Menü (P–A −0,19, A–R −0,022, R–L −0,06, L–E −0,043,
-			   E–Y −0,005 em). Lage: Mitte der Blase im Logo (x 205,19 von 289,64 = 70,84 %, y 0 in der viewBox −60,32
-			   bis 100 = 37,62 %); Breite etwa wie die frühere Wortmarke (rund 110 Einheiten = 38 % der Logobreite). */}
-			<span class="site-footer__name" aria-hidden="true">{[["P", -0.19], ["A", -0.022], ["R", -0.06], ["L", -0.043], ["E", -0.005], ["Y", 0]].map(([b, m]) => <i style={`margin-right:${m}em`}>{b}</i>)}</span>
 		</div>
 	</div>
 </footer>
@@ -99,21 +93,6 @@ import LogoBiss from "./LogoBiss.astro";
 	}
 
 
-	.site-footer__name {
-		position: absolute;
-		left: 70.84%;
-		top: 37.62%;
-		transform: translate(-50%, -50%);
-		font-family: var(--schrift-breit);
-		font-weight: 400;
-		font-size: calc(38cqw / 7.422);   /* 7,422 em = Breite PARLEY mit den Abständen */
-		line-height: 1;
-		color: var(--white);
-		white-space: nowrap;
-		pointer-events: none;
-	}
-	.site-footer__name i { font-style: normal; }
-
 	nav {
 		/* Links über der weißen Sprechblase, linksbündig mit ihrer Kante (Rasul 13.11.2026 abends: „Impressum und
 		   Datenschutz legt man auf die Höhe links über das weiße Quadrat.“). Vorher eigene Zeile rechts über dem
@@ -143,9 +122,8 @@ import LogoBiss from "./LogoBiss.astro";
 	   statt „The Parley“. */
 	.site-footer__logo {
 		/* So breit wie das Logo (Deckel über die Fensterhöhe, siehe unten), damit die Rechtslinks sich am Logo
-		   ausrichten können. Bezugsgröße (cqw) für PARLEY in der Blase. */
+		   ausrichten können. */
 		position: relative;
-		container-type: inline-size;
 		width: min(100%, calc((100dvh - 96px) * 1.8066));
 		margin: 0 auto;
 	}
