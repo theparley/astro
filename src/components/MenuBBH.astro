@@ -248,7 +248,9 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		font-size: calc(var(--k) * 0.9);
 		line-height: 1;
 		letter-spacing: -0.02em;
-		margin-top: -0.12em; /* optisch mittig: Unterlänge von p und y */
+		/* Lage (Rasul 13.11.2026: „ein bisschen tiefer setzen, das L stößt oben mehr an als unten P und Y“):
+		   gemessen bei -0,12 em oben 8 px, unten 12 px Luft; jetzt -0,07 em, oben gut 10 px, unten knapp 10 px. */
+		margin-top: -0.07em;
 	}
 	.bbh-menu--oben .bbh-menu__name {
 		width: calc(var(--k) * 3.09);
