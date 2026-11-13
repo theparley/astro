@@ -33,7 +33,11 @@
 			   Parley ist jetzt das Studio). Text in Forma DJR Black statt des
 			   alten Bilds public/parley/parley-text.svg (bleibt im Repo); eine
 			   Zeile von Kante zu Kante. */}
-			<p class="site-footer__wortmarke">Parley</p>
+			{/* Seit 13.11.2026 „parley“ über „Film“, mittig, wie der Name in der Blase des Logos (Rasul:
+			   „Parley klein schreiben beziehungsweise parley Film nennen, die Variante, wo Film einen großen
+			   Anfangsbuchstaben hat, mittig“). Zeilenabstand wie im Logo: Grundlinie zu Grundlinie
+			   1,19 × Versalhöhe (0,70 em) = 0,833 em. */}
+			<p class="site-footer__wortmarke" aria-label="parley Film"><span>parley</span><span>Film</span></p>
 		</div>
 	</div>
 </footer>
@@ -124,14 +128,15 @@
 	   deren margin-bottom. */
 	.site-footer__wortmarke {
 		margin: -0.1em 0 0;
-		font-size: min(33.8cqw, calc((100dvh - 36px - 60px) / 0.9)); /* 60 px = Linkzeile über dem Wort */
+		font-size: min(33.8cqw, calc((100dvh - 36px - 60px) / 1.75)); /* 60 px = Linkzeile über dem Wort; zwei Zeilen */
 		font-weight: 900;
-		line-height: 1;
+		line-height: 0.833;
 		letter-spacing: -0.01em;
 		text-align: center;
 		color: var(--white);
 		white-space: nowrap;
 	}
+	.site-footer__wortmarke span { display: block; }
 
 </style>
 
