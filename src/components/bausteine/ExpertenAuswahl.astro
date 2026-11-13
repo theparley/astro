@@ -228,9 +228,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const zc = vy * -Math.sin(phi) + vz * Math.cos(phi), yc = vy * Math.cos(phi) + vz * Math.sin(phi);
 		return { x: CX + F * X / zc, y: CY - F * yc / zc, g: F / zc, zc, phi };
 	}
-	// Grundeinstellung „punkt“ seit 13.11.2026 abends (Rasul: „Lass uns doch mal probieren, ob wir mit Punkten starten
-	// können, die dann zu Männchen werden“); „figur“ bleibt im Schalter.
-	const form = () => (document.documentElement.dataset.form === "figur" ? "figur" : "punkt");
+	// Probe „punkt“ (Rasul 13.11.2026 abends: „ob wir mit Punkten starten können, die dann zu Männchen werden“), danach
+	// entschieden: „Zurück zu Figuren“. Grundeinstellung „figur“, „punkt“ bleibt im Schalter.
+	const form = () => (document.documentElement.dataset.form === "punkt" ? "punkt" : "figur");
 	// Aufstellung, die von oben ungeordnet wirkt und von vorne trägt: einer vorne, zwei dahinter, zwei Reihen, viele hinten
 	function personenFahrt(): Person[] {
 		const rnd = zufall(23), liste: Person[] = [];
