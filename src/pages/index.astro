@@ -997,10 +997,13 @@ const PREISE = [
 	   Abstand zur ersten Zeile 0,25 em. Die Zeilen erscheinen nach der Geste (1,6 s + 0,15 s). */
 	.hero h1 > .hero-beweis {
 		position: relative;
-		display: block;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		aspect-ratio: 16 / 9; /* Rasul 13.11.2026: „mach die Animation in 16 zu 9“, Schrift bleibt gleich groß */
 		width: fit-content;
 		margin: 0.25em auto 0;
-		padding: 0.22em 0.42em 0.26em;
+		padding: 0 0.42em;
 	}
 	.hero-beweis > .hero-zeile {
 		position: relative;
