@@ -239,7 +239,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Kranfahrt von oben (Top Shot, Crane Down mit Tilt Up) und danach Push-in. Die Kamera fährt in gleicher Höhe und
 	// mit gleichem Blickwinkel geradeaus nach vorne (Kamera und Blickziel um RAN_Z weiter), beginnt kurz vor Ende der
 	// Kranfahrt, eigener weicher Verlauf.
-	const D_RAN = 1.8, RAN_Z = 30;
+	// Weg der Ranfahrt wird in groesse() aus der Bildregel berechnet (siehe dort), Startwert 30
+	const D_RAN = 1.8;
+	let RAN_Z = 30;
 	function bahn(e: number, fEnde = F1, ran = 0) {
 		const { A1, R1 } = endWerte();
 		const a = A0 + (A1 - A0) * e, R = R0 + (R1 - R0) * e, lz = LZ1 * e + RAN_Z * ran;
@@ -430,11 +432,32 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// Am Ende darf niemand abgeschnitten sein: falls nötig zoomt die Kamera mit der Fahrt etwas heraus (Brennweite),
 				// statt Personen seitlich zu verschieben
 				const halbe = breite / 2 - 70;
-				let weit = 0;
 				F1 = endWerte().F1;
-				const ende1 = bahn(1, F1, 1);
-				for (const q of leuteRaum) { const p = fahrtKamera(q.wx, q.wz, ende1.C, ende1.Lk, ende1.F); weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
+				// Ranfahrt aus der Bildregel (Rasul 13.11.2026 abends: „das Männchen muss am Ende größer sein, das heißt, die
+				// Kamera muss näher an die Person ran. Mach's mal so nah, dass der angeschnittene Körper von dem Männchen am
+				// unteren Bildrand aufsetzt.“): Augenlinie (Kopfmitte, 14,5 Teile über der Unterkante der Figur) auf der oberen
+				// Drittellinie, Unterkante der Figur auf der Unterkante des 16:9-Rahmens, also Figur von Augen bis Unterkante
+				// zwei Drittel der Rahmenhöhe. Gesucht wird der Weg RAN_Z, bei dem die vordere Person diese Größe hat.
+				const vorneP = leuteRaum.find((q) => q.ebene === 0);
+				const gZiel = ((2 / 3) * RH) / ((14.5 * 64) / 19);
+				const loese = (fEnde: number) => {
+					if (!vorneP) return;
+					let lo = 0, hi = 600;
+					for (let i = 0; i < 40; i++) {
+						const mid = (lo + hi) / 2; RAN_Z = mid;
+						const b = bahn(1, fEnde, 1), p = fahrtKamera(vorneP.wx, vorneP.wz, b.C, b.Lk, b.F);
+						if (p.zc > 1 && p.g < gZiel) lo = mid; else hi = mid;
+					}
+					RAN_Z = lo;
+				};
+				loese(F1);
+				// Einpassen in die Breite nur für die hinteren Reihen: Die Nahen dürfen angeschnitten sein wie bei einer Kamera
+				let weit = 0;
+				const ende0 = bahn(1, F1, 1);
+				for (const q of leuteRaum) { if (q.ebene < 2) continue; const p = fahrtKamera(q.wx, q.wz, ende0.C, ende0.Lk, ende0.F); if (p.zc > 1) weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
 				zoomEnde = Math.min(1, halbe / Math.max(1, weit));
+				if (zoomEnde < 1) loese(F1 * zoomEnde);
+				const ende1 = bahn(1, F1, 1);
 				// Bildausschnitt am Ende wie bei unseren Interviews (Rasul 13.11.2026 abends: „wenn ich Kameramann wäre und den
 				// 16:9-Frame mir vorstelle, dann habe ich das Gefühl, würde die Person zu tief im Bild sitzen … im Endeffekt
 				// setzen wir ja auch in unseren Videos die Leute in eine gewisse Position“): Der Kopf der vorderen Person liegt
@@ -518,7 +541,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 						const u = (64 * q.s * pr.g) / 19;
 						const hoch = hebung * e; // Bildausschnitt wandert mit der Fahrt nach oben (Kopf auf die obere Drittellinie)
 						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15) - hoch, g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y - hoch };
-					}).sort((a, b) => b.zc - a.zc);
+					}).filter((l) => l.zc > 5).sort((a, b) => b.zc - a.zc); // nichts hinter der Kamera zeichnen
 					// Rasul 13.11.2026 abends: „die sind jetzt schon im Hintergrund und werden kurz scharf und dann unscharf. Das
 					// stimmt von der Perspektivenwirkung der Kamera dann nicht mehr.“ Deshalb: Verwandlung ganz am Anfang des
 					// Kippens (Kamera fast senkrecht, alle etwa gleich weit weg) und Unschärfe aus der Entfernung:
