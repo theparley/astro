@@ -31,7 +31,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	const W = 1600, H = 900;
 	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 8;
 	const T_PERSONEN = 1.4, T_GESTE = 1.8, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
-	const ENDE = T_AUSWAHL + D_AUSWAHL + 0.2;
+	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
+	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
+	// „Animation“ (html data-ende): drei | eins | grau | unscharf. Der Fokus folgt nach der Auswahl.
+	const T_FOKUS = T_AUSWAHL + D_AUSWAHL + 0.3, D_FOKUS = 0.9;
+	const ENDE = T_FOKUS + D_FOKUS + 0.2;
+	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
+	const ende = () => document.documentElement.dataset.ende || "drei";
 
 	// fester Zufall, damit jedes Abspielen gleich aussieht
 	function zufall(saat: number) { return () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; }; }
@@ -65,17 +71,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	}
 
 	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
-	interface Person { x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean }
+	interface Person { x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number }
 	function personen(): Person[] {
 		const rnd = zufall(7), liste: Person[] = [];
 		let versuche = 0;
 		const RAND = 80; // Abstand der Personen zur Spur
 		while (liste.length < 34 && versuche++ < 6000) {
 			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (RH - 2 * RAND);
-			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 0.85 + rnd() * 0.3, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false });
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 0.85 + rnd() * 0.3, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false, rang: -1 });
 		}
 		const nah = [...liste].sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY)).slice(0, 3).sort((a, b) => a.x - b.x);
-		nah.forEach((q, i) => { q.bleibt = true; q.zx = CX + (i - 1) * 260; q.zy = CY; });
+		nah.forEach((q, i) => { q.bleibt = true; q.rang = i; q.zx = CX + (i - 1) * 380; q.zy = CY + 10; });
 		return liste;
 	}
 
@@ -156,8 +162,15 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				for (const q of leute) {
 					const ein = weich((t - q.ein) / 0.5);
 					if (q.bleibt) {
-						const x = q.x + (q.zx - q.x) * k, y = q.y + (q.zy - q.y) * k;
-						zeichnePerson(ctx, x, y, q.s + (1.5 - q.s) * k, ein * (0.85 + 0.15 * k));
+						const x = q.x + (q.zx - q.x) * k, y = q.y + (q.zy - q.y) * k, g = q.s + (GROSS - q.s) * k;
+						const f = q.rang === 1 ? 0 : weich((t - T_FOKUS) / D_FOKUS), e = ende();
+						const alpha = ein * (0.85 + 0.15 * k);
+						if (e === "eins") zeichnePerson(ctx, x, y, g, alpha * (1 - f));
+						else if (e === "grau") zeichnePerson(ctx, x, y, g, alpha * (1 - 0.8 * f));
+						else if (e === "unscharf" && f > 0) {
+							ctx.save(); ctx.filter = `blur(${(14 * f * cv.width / W).toFixed(1)}px)`;
+							zeichnePerson(ctx, x, y, g, alpha * (1 - 0.35 * f)); ctx.restore();
+						} else zeichnePerson(ctx, x, y, g, alpha);
 					} else {
 						zeichnePerson(ctx, q.x, q.y, q.s, ein * 0.85 * (1 - weich((t - T_AUSWAHL + 0.3) / 0.8)));
 					}
