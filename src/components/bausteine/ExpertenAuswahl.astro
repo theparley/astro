@@ -84,7 +84,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// textBreite: Breite der längsten Zeile der Überschrift darüber (Rasul 13.11.2026 abends: „Mach ihn so breit wie die
 	// Schrift, die oben dran ist.“); ohne Überschrift gilt das Format aus dem Schalter.
 	function rahmen(flaecheBreite: number, textBreite?: number) {
-		RW = Math.min(textBreite ?? RH * format(), flaecheBreite - 160); L = CX - RW / 2;
+		RW = Math.min(textBreite ?? RH * format(), flaecheBreite - 60); L = CX - RW / 2;
 		WEG_R = halbweg(1); WEG_L = halbweg(-1);
 	}
 	function punkt(w: ReturnType<typeof halbweg>, s: number): [number, number] {
@@ -367,17 +367,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// Rahmen 16:9 und so breit wie die längste Zeile der Überschrift (Rasul 13.11.2026 abends: „Mach ihn so breit
 				// wie die Schrift, die oben dran ist“ und „dann machen wir doch wieder 16 zu 9, dass es verständlicher ist.
 				// Unseren Videobeweis.“): Die Höhe der Fläche wird dafür aus der Textbreite gerechnet (Rahmen = 86 % der Höhe).
-				// Höhe: Das ganze weiße Band (Innenabstände, Animation, Überschrift, Lesetext) passt in die Fensterhöhe, die
-				// Animation bekommt den Rest, höchstens so viel, dass der 16:9-Rahmen die Inhaltsbreite füllt (Reihenfolge seit
-				// 13.11.2026 abends: Animation, Überschrift, Text; Rasul: „Wenn wir die Animation zuerst machen …“).
-				const band = fig.closest(".anlass--band") as HTMLElement | null;
-				if (band && band.getClientRects().length) {
-					const rest = band.getBoundingClientRect().height - cv.getBoundingClientRect().height;
-					const frei = window.innerHeight - rest;
-					const inhalt = Math.min(1200, window.innerWidth - 64);
-					const wunsch = inhalt / format() / 0.86;
-					cv.style.height = `${Math.max(160, Math.min(wunsch, frei)).toFixed(1)}px`;
-				}
+				// Höhe (Rasul 13.11.2026 abends: „wir dürfen richtig bold sein. Wir gehen mal ins Extrem. Mach mal die Animation
+				// über den gesamten Viewport. Den Text lässt man dann erst beim Runterscrollen.“): am Rechner (ab 1024 px) so hoch
+				// wie das Fenster; am Handy so hoch, wie der 16:9-Rahmen in der Breite braucht (sonst fast nur Weiß im Hochformat).
+				// Vorher: das ganze Band passte auf eine Seite und die Animation bekam den Rest (Git-Geschichte).
+				if (window.innerWidth >= 1024) cv.style.height = `${window.innerHeight}px`;
+				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
 				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
