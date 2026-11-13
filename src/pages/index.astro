@@ -126,11 +126,12 @@ const FORMATE = [
 			   man versteht den Satz nicht im ersten Moment? Aber wir liefern den Videobeweis eurer Expertise, den
 			   verstehe ich sofort. Versuch's nochmal.“ Grundeinstellung und h1.
 			   P, Q: Kandidaten Claude in derselben Klarheit. */}
-			<div class="satz satz--o"><Haltung ebene="h1" aufdecken zeilen={["Wir liefern den Videobeweis eurer Expertise"]} /></div>
+			<div class="satz satz--o"><Haltung ebene="p" aufdecken zeilen={["Wir liefern den Videobeweis eurer Expertise"]} /></div>
 			<div class="satz satz--p"><Haltung ebene="p" aufdecken zeilen={["Wir machen eure Expertise zum Videobeweis"]} /></div>
 			<div class="satz satz--q"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise eurer Expertise"]} /></div>
-			{/* R: Rasul 13.11.2026: „Wir liefern Videobeweise für echte Experten. Probier mal den Satz.“ */}
-			<div class="satz satz--r"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise für echte Experten"]} /></div>
+			{/* R: Rasul 13.11.2026: „Wir liefern Videobeweise für echte Experten. Probier mal den Satz.“
+			   ENTSCHIEDEN (Rasul 13.11.2026: „Ja, R nehmen“), ersetzt O. Grundeinstellung und h1. */}
+			<div class="satz satz--r"><Haltung ebene="h1" aufdecken zeilen={["Wir liefern Videobeweise für echte Experten"]} /></div>
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
@@ -211,7 +212,7 @@ const FORMATE = [
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,
-	:global(html:not([data-satz])) .satz--o,
+	:global(html:not([data-satz])) .satz--r,
 	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="i"]) .satz--i,
