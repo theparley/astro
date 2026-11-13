@@ -80,7 +80,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		--dauer: 300ms;
 		--kurve: cubic-bezier(0.4, 0, 0.2, 1);
 		--maske: cubic-bezier(0.77, 0, 0.18, 1);
-		--nav-breite: calc(var(--spalten) * var(--k) + (var(--spalten) - 1) * var(--fuge));
+		/* Menükachel so breit, dass das längste Wort passt („Videobeweis“ 5,24 em plus 16 px Polster, gemessen
+		   13.11.2026), mindestens aber eine Kachel. */
+		--kn: max(var(--k), calc(var(--text-sm) * 5.7 + 16px));
+		--nav-breite: calc(var(--spalten) * var(--kn) + (var(--spalten) - 1) * var(--fuge));
 		/* Schließen wartet, bis die Kacheln einzeln weg sind: 50 ms × Anzahl + 300 ms */
 		--out-delay: calc(50ms * var(--anzahl) + 300ms);
 	}
@@ -138,7 +141,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 
 	.bbh-menu__nav {
 		display: grid;
-		grid-template-columns: repeat(var(--spalten), var(--k));
+		grid-template-columns: repeat(var(--spalten), var(--kn));
 		grid-auto-rows: var(--halb);
 		gap: var(--fuge);
 		width: 0;
@@ -170,7 +173,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			width var(--dauer) var(--kurve) var(--in-delay);
 	}
 	.offen .bbh-menu__kachel {
-		width: var(--k);
+		width: var(--kn);
 		height: var(--halb);
 		opacity: 1;
 		/* Öffnen: Breite sofort, Höhe verzögert */
@@ -245,7 +248,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		margin-left: calc(-1 * var(--fuge));
 		overflow: hidden;
 		transition: clip-path 500ms var(--maske), opacity 500ms var(--kurve), width 500ms var(--maske), margin-left 500ms var(--maske);
-	}
+	}	/* Schmale Handys (unter 520 px): Namenskachel aus. Logo, Hamburger, Menü (je 2 Spalten) und „parley“ zusammen
+	   wären breiter als der Bildschirm, das Logo ragte links hinaus (gemessen 13.11.2026 bei 375 px: −58 bis 430 px;
+	   schon vor „Videobeweis“ −37 bis 408 px). */
+	@media (max-width: 519px) { .bbh-menu__name { display: none; } }
+
 	.bbh-menu__name span {
 		white-space: nowrap;
 		font-family: "Forma DJR", var(--schrift-lesen);

@@ -159,53 +159,71 @@ const websiteJsonLd = JSON.stringify({
 		<MenuTile gateBehindHero={gateMenuBehindHero} />
 		<MenuBBH startseite={gateMenuBehindHero} />
 		{/* Schalter zum Ausprobieren, nur lokal (npm run dev) sichtbar, nie auf der Live-Seite. */}
-		{import.meta.env.DEV && (
-			<div class="menu-wahl" aria-label="Menü zum Testen umschalten">
-				<span>Menü</span>
-				<button type="button" data-wahl="zwetschke">Zwetschke</button>
-				<button type="button" data-wahl="bbh">BBH</button>
-				<span>Aufbau</span>
-				<button type="button" data-aufbau-wahl="abschnitte">Abschnitte</button>
-				<button type="button" data-aufbau-wahl="kacheln">Kacheln</button>
-				<span>Umlaut</span>
-				<button type="button" data-umlaut-wahl="aussen">Außen</button>
-				<button type="button" data-umlaut-wahl="innen">Innen</button>
-				<button type="button" data-umlaut-wahl="ecken">Ecken</button>
-				<span>Satz</span>
-				<button type="button" data-satz-wahl="a">A</button>
-				<button type="button" data-satz-wahl="b">B</button>
-				<button type="button" data-satz-wahl="c">C</button>
-				<button type="button" data-satz-wahl="d">D</button>
-				<button type="button" data-satz-wahl="e">E</button>
-				<button type="button" data-satz-wahl="f">F</button>
-				<button type="button" data-satz-wahl="g">G</button>
-				<button type="button" data-satz-wahl="h">H</button>
-				<button type="button" data-satz-wahl="i">I</button>
-				<button type="button" data-satz-wahl="j">J</button>
-				<button type="button" data-satz-wahl="k">K</button>
-				<button type="button" data-satz-wahl="l">L</button>
-				<button type="button" data-satz-wahl="m">M</button>
-				<button type="button" data-satz-wahl="n">N</button>
-				<button type="button" data-satz-wahl="o">O</button>
-				<button type="button" data-satz-wahl="p">P</button>
-				<button type="button" data-satz-wahl="q">Q</button>
-				<button type="button" data-satz-wahl="r">R</button>
-				<button type="button" data-satz-wahl="s">S</button>
-				<button type="button" data-satz-wahl="t">T</button>
-				<button type="button" data-satz-wahl="u">U</button>
-				<button type="button" data-satz-wahl="v">V</button>
-				<button type="button" data-satz-wahl="w">W</button>
-				<button type="button" data-satz-wahl="x">X</button>
-				<button type="button" data-satz-wahl="y">Y</button>
-				<span>Lage</span>
-				<button type="button" data-lage-wahl="links">Links</button>
-				<button type="button" data-lage-wahl="unten">Unten</button>
-				<button type="button" data-lage-wahl="gemischt">Gemischt</button>
-				<span>Hero</span>
-				<button type="button" data-hero-wahl="text">Text</button>
-				<button type="button" data-hero-wahl="film">Film</button>
+		{import.meta.env.DEV && (<>
+			{/* Einstellungen nur lokal, seit 13.11.2026 abends als Knopf unten rechts zum Auf- und Zumachen (Rasul: „Ich habe
+			    jetzt so einen riesen Einstellungsmenü quer über den Bildschirm oben. Mach mir das mal rechts unten hin als
+			    Knopf zum Auf- und Zumachen.“). Zustand offen/zu bleibt im Browser gespeichert. */}
+			<button type="button" class="menu-wahl-knopf" aria-controls="menu-wahl" aria-expanded="false" aria-label="Einstellungen zum Testen">
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2.2" /><circle cx="15" cy="12" r="2.2" /><circle cx="7" cy="18" r="2.2" /></svg>
+			</button>
+			<div class="menu-wahl" id="menu-wahl" aria-label="Menü zum Testen umschalten" hidden>
+				<div class="menu-wahl__zeile">
+					<span>Menü</span>
+					<button type="button" data-wahl="zwetschke">Zwetschke</button>
+					<button type="button" data-wahl="bbh">BBH</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Aufbau</span>
+					<button type="button" data-aufbau-wahl="abschnitte">Abschnitte</button>
+					<button type="button" data-aufbau-wahl="kacheln">Kacheln</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Umlaut</span>
+					<button type="button" data-umlaut-wahl="aussen">Außen</button>
+					<button type="button" data-umlaut-wahl="innen">Innen</button>
+					<button type="button" data-umlaut-wahl="ecken">Ecken</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Satz</span>
+					<button type="button" data-satz-wahl="a">A</button>
+					<button type="button" data-satz-wahl="b">B</button>
+					<button type="button" data-satz-wahl="c">C</button>
+					<button type="button" data-satz-wahl="d">D</button>
+					<button type="button" data-satz-wahl="e">E</button>
+					<button type="button" data-satz-wahl="f">F</button>
+					<button type="button" data-satz-wahl="g">G</button>
+					<button type="button" data-satz-wahl="h">H</button>
+					<button type="button" data-satz-wahl="i">I</button>
+					<button type="button" data-satz-wahl="j">J</button>
+					<button type="button" data-satz-wahl="k">K</button>
+					<button type="button" data-satz-wahl="l">L</button>
+					<button type="button" data-satz-wahl="m">M</button>
+					<button type="button" data-satz-wahl="n">N</button>
+					<button type="button" data-satz-wahl="o">O</button>
+					<button type="button" data-satz-wahl="p">P</button>
+					<button type="button" data-satz-wahl="q">Q</button>
+					<button type="button" data-satz-wahl="r">R</button>
+					<button type="button" data-satz-wahl="s">S</button>
+					<button type="button" data-satz-wahl="t">T</button>
+					<button type="button" data-satz-wahl="u">U</button>
+					<button type="button" data-satz-wahl="v">V</button>
+					<button type="button" data-satz-wahl="w">W</button>
+					<button type="button" data-satz-wahl="x">X</button>
+					<button type="button" data-satz-wahl="y">Y</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Lage</span>
+					<button type="button" data-lage-wahl="links">Links</button>
+					<button type="button" data-lage-wahl="unten">Unten</button>
+					<button type="button" data-lage-wahl="gemischt">Gemischt</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Hero</span>
+					<button type="button" data-hero-wahl="text">Text</button>
+					<button type="button" data-hero-wahl="film">Film</button>
+				</div>
 			</div>
-		)}
+		</>)}
 		{/* Sticky-Reveal-Stapel (BBH-/Nuxt-Muster, siehe SiteFooter.astro):
 		   Inhalt auf Ebene 10 mit eigenem schwarzen Grund, Footer klebt auf
 		   Ebene 0 darunter und wird beim Zuendescrollen freigelegt. Der
@@ -260,22 +278,46 @@ const websiteJsonLd = JSON.stringify({
 		html[data-menu="bbh"] .hero__buehne { padding-top: calc(72px + var(--abstand-md, 16px)); }
 	}
 
+	.menu-wahl-knopf {
+		position: fixed;
+		right: 4px;
+		bottom: 4px;
+		z-index: 9001;
+		width: 28px;
+		height: 28px;
+		display: grid;
+		place-items: center;
+		padding: 0;
+		background: rgba(20, 20, 20, 0.9);
+		border: 1px solid rgba(255, 255, 255, 0.35);
+		color: var(--white);
+		cursor: pointer;
+	}
+	.menu-wahl-knopf svg { width: 18px; height: 18px; fill: rgba(20, 20, 20, 1); stroke: currentColor; stroke-width: 1.5; }
+	.menu-wahl-knopf[aria-expanded="true"] { background: var(--white); color: var(--black); }
+	.menu-wahl-knopf[aria-expanded="true"] svg { fill: var(--white); }
 	.menu-wahl {
 		position: fixed;
-		right: 8px;
-		top: 8px; /* oben, damit er die Karussell-Punkte unten rechts nicht verdeckt */
+		right: 4px;
+		bottom: 36px;
 		z-index: 9000;
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		gap: 4px;
-		padding: 4px;
+		width: max-content;
+		max-width: calc(100vw - 8px);
+		max-height: calc(100dvh - 48px);
+		overflow: auto;
+		padding: 6px;
 		background: rgba(20, 20, 20, 0.9);
 		border: 1px solid rgba(255, 255, 255, 0.25);
 		font-family: var(--schrift-mono);
 		font-size: var(--text-sm);
 		color: var(--grey, #999894);
 	}
-	.menu-wahl span { padding: 0 4px; }
+	.menu-wahl[hidden] { display: none; }
+	.menu-wahl__zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 440px; }
+	.menu-wahl span { padding: 0 4px; min-width: 56px; }
 	.menu-wahl button {
 		font: inherit;
 		color: var(--white);
@@ -325,7 +367,25 @@ const websiteJsonLd = JSON.stringify({
 
 <script>
 	/* Menü-Schalter (nur lokal): Wahl speichern und sofort umschalten. */
+	const wahlZustand = () => {
+		const knopf = document.querySelector<HTMLElement>(".menu-wahl-knopf");
+		const tafel = document.querySelector<HTMLElement>(".menu-wahl");
+		if (!knopf || !tafel) return;
+		let offen = false;
+		try { offen = localStorage.getItem("parley-einstellungen") === "offen"; } catch {}
+		tafel.hidden = !offen;
+		knopf.setAttribute("aria-expanded", String(offen));
+	};
+	document.addEventListener("astro:page-load", wahlZustand);
 	document.addEventListener("click", (e) => {
+		if ((e.target as HTMLElement).closest(".menu-wahl-knopf")) {
+			const tafel = document.querySelector<HTMLElement>(".menu-wahl")!;
+			const offen = tafel.hidden;
+			tafel.hidden = !offen;
+			(e.target as HTMLElement).closest(".menu-wahl-knopf")!.setAttribute("aria-expanded", String(offen));
+			try { localStorage.setItem("parley-einstellungen", offen ? "offen" : "zu"); } catch {}
+			return;
+		}
 		const aufbau = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-aufbau-wahl]");
 		if (aufbau) {
 			try { localStorage.setItem("parley-aufbau", aufbau.dataset.aufbauWahl!); } catch {}
