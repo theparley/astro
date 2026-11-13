@@ -200,7 +200,9 @@ const PREISE = [
 	   localhost:4321 die Grundlage der Gestaltung. */}
 
 	{/* 2 · Die Beweisaufnahme (die Szene darunter gehört dazu, seit 12.11.2026) */}
-	<section class="ab ab-zwei-text" aria-labelledby="ab2-titel">
+	{/* SPLIT wie „Der Paragraph“ (14.09.2026, nach BBH; Rasul 13.11.2026: „die Struktur, die wir uns von BBH
+	   abgeguckt hatten“): Überschrift links, Text rechts, exakt 50/50, beide Hälften auf einer Mittelachse. */}
+	<section class="ab ab-zwei-text ab-split" aria-labelledby="ab2-titel">
 		{/* Kein Label (Rasul 12.11.2026: „Label weglassen“): die Überschrift „Die Beweisaufnahme im Gespräch.“ sagt es schon. */}
 		{/* Fassung P2 (Aufbau Rasul 12.11.2026, Probe auf localhost); vorher I, davor „Das echte Gespräch wird zu Filmmaterial.“ */}
 		<h2 class="ab-titel" id="ab2-titel">Die Beweiskraft<br />echter Gespräche.</h2>
@@ -1478,6 +1480,32 @@ const PREISE = [
 		line-height: 1;
 		font-optical-sizing: auto;
 		text-wrap: balance;
+	}
+
+	/* SPLIT (Rekonstruktion 13.11.2026 aus „Der Paragraph“, Fred 14.09.2026, nach BBH): ab 800 px
+	   zwei Hälften exakt 50/50 (minmax(0, 1fr), Fuge 0), beide auf einer Mittelachse (align-items:
+	   center). Links die Überschrift in Sektionstitel-Größe huge, Zeilenhöhe 0,9, mittig in ihrer
+	   Hälfte; rechts der Lesetext, linksbündig. Unter 800 px untereinander wie bisher. */
+	@media (min-width: 800px) {
+		.ab-split {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: 0;
+			align-items: center;
+		}
+		.ab-split > .ab-titel {
+			font-size: var(--text-huge);
+			line-height: 0.9;
+			letter-spacing: -0.01em;
+			text-align: center;
+			text-wrap: balance;
+			padding: 0 16px;
+		}
+		.ab-split > .ab-text {
+			margin: 0;
+			max-width: 46rem;
+			padding: 0 16px;
+		}
 	}
 
 	/* Lesetext: Tokens aus Layout.astro, Breite = Textspalte (wie .hero-text) */
