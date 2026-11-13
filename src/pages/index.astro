@@ -99,8 +99,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			<div class="satz satz--g"><Haltung ebene="p" aufdecken zeilen={["Wir machen echte Gespräche zum Videobeweis"]} /></div>
 			{/* H: Rasul 13.11.2026: „Wir liefern den Videobeweis mit echten Gesprächen.“ */}
 			<div class="satz satz--h"><Haltung ebene="p" aufdecken zeilen={["Wir liefern den Videobeweis mit echten Gesprächen"]} /></div>
-			{/* I: Rasul 13.11.2026: „Wir liefern Videobeweise aus echten Gesprächen.“ */}
-			<div class="satz satz--i"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise aus echten Gesprächen"]} /></div>
+			{/* I: Rasul 13.11.2026: „Wir liefern Videobeweise aus echten Gesprächen.“ ENTSCHIEDEN (Rasul 13.11.2026
+			   nachmittags: „Änder nochmal den Text in Wir liefern Videobeweise aus echten Gesprächen.“), ersetzt R. */}
+			<div class="satz satz--i"><Haltung ebene="h1" aufdecken zeilen={["Wir liefern Videobeweise aus echten Gesprächen"]} /></div>
 			{/* J: Rasul 13.11.2026: „Nochmal eine Variante, wir fangen echte Gespräche ein.“ (Methode Fangen ·
 			   Veredeln · Verteilen; LinkedIn-Headline „Wir fangen echte Gespräche ein“).
 			   K: Kandidat Claude dazu, mit dem Beweis im selben Satz. */}
@@ -125,7 +126,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			<div class="satz satz--q"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise eurer Expertise"]} /></div>
 			{/* R: Rasul 13.11.2026: „Wir liefern Videobeweise für echte Experten. Probier mal den Satz.“
 			   ENTSCHIEDEN (Rasul 13.11.2026: „Ja, R nehmen“), ersetzt O. Grundeinstellung und h1. */}
-			<div class="satz satz--r"><Haltung ebene="h1" aufdecken zeilen={["Wir liefern Videobeweise für echte Experten"]} /></div>
+			<div class="satz satz--r"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise für echte Experten"]} /></div>
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
 			   Film nur lokal (Freigabe fehlt). */}
@@ -172,7 +173,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,
-	:global(html:not([data-satz])) .satz--r,
+	:global(html:not([data-satz])) .satz--i,
 	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="i"]) .satz--i,
