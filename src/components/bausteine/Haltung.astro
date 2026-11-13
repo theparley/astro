@@ -5,15 +5,18 @@
 /* stufe="huge": eine Stufe kleiner, jede Zeile bricht ausgewogen selbst um (für längere Sätze; Hegarty
    ist breit: „KAMERASTRESS.“ ist 10,2 em und passt in der Hero-Stufe ab 1024 px nicht in eine Zeile,
    gemessen 13.11.2026). */
-interface Props { zeilen: string[]; ebene?: "h1" | "h2" | "p"; aufdecken?: boolean; id?: string; wechselglyphen?: boolean; stufe?: "hero" | "huge" }
-const { zeilen, ebene = "h2", aufdecken = false, id, wechselglyphen = false, stufe = "hero" } = Astro.props;
+/* absatz: Index der Zeile, vor der ein Abstand steht (neuer Satz ohne Punkt davor; Rasul 13.11.2026:
+   „Mach mal den Punkt weg. Und mach mal einen Abstand zwischen den zwei Sätzen.“). */
+interface Props { zeilen: string[]; ebene?: "h1" | "h2" | "p"; aufdecken?: boolean; id?: string; wechselglyphen?: boolean; stufe?: "hero" | "huge"; absatz?: number }
+const { zeilen, ebene = "h2", aufdecken = false, id, wechselglyphen = false, stufe = "hero", absatz } = Astro.props;
 const H = ebene;
 ---
 <H class:list={["t-haltung", "haltung", wechselglyphen && "haltung--wechsel", stufe === "huge" && "haltung--huge"]} id={id} data-aufdecken={aufdecken ? "" : undefined} data-einblenden={aufdecken ? undefined : ""}>
-	{zeilen.map((z, i) => <span style={`--i:${i}`}>{z}</span>)}
+	{zeilen.map((z, i) => <span class:list={[i === absatz && "haltung__absatz"]} style={`--i:${i}`}>{z}</span>)}
 </H>
 <style>
 	.haltung span { display: block; }
+	.haltung__absatz { margin-top: 0.4em; }
 	.haltung--huge { font-size: var(--text-huge); line-height: var(--zeile-huge); }
 	.haltung--huge span { text-wrap: balance; }
 	.haltung--wechsel { font-feature-settings: "ss01" 1, "ss02" 1, "ss03" 1, "ss04" 1; }
