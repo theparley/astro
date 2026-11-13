@@ -2056,7 +2056,7 @@ const PREISE = [
 			{ an: 24.3, aus: 26.6, stelle: "OL", text: "Wir können es sehr empfehlen, oder?" },                               // Ute (Split)
 			{ an: 26.7, aus: 28.2, stelle: "OR", text: "Total." },                                                             // Katrin (Split)
 		];
-		const STUFEN = ["--text-lg", "--text-md", "--text-base", "--text-sm"];
+		const STUFEN = ["--text-xl", "--text-lg", "--text-md", "--text-base", "--text-sm"];   // 13.11.: eine Stufe größer (Rasul: „präsenter“)
 		const ZIPFEL = { laenge: 0.3, breite: 13, schraeg: 14 };   // wie Szenen-Vorschau (Rasul 08.11.)
 		const ANTEIL = 0.6;   // Blasenbreite in Videobreiten (Vorschau: 0,95; Video seit 13.11. halbe Fensterbreite)
 
@@ -2080,7 +2080,7 @@ const PREISE = [
 			pts.push([cx + z[0], cy + z[1]]);
 			pfad.setAttribute("d", "M" + pts.map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L") + "Z");
 			blase.style.transformOrigin = `${cx + z[0]}px ${cy + z[1]}px`;
-			const bw = rx * 1.32, bh = ry * 1.16;
+			const bw = rx * 1.42, bh = ry * 1.3;   // Textfeld nutzt mehr vom Oval (13.11., vorher 1,32 × 1,16)
 			Object.assign(box.style, { left: `${cx - bw / 2}px`, top: `${cy - bh / 2}px`, width: `${bw}px`, height: `${bh}px` });
 			p.textContent = b.text;
 			for (const st of STUFEN) { p.style.fontSize = `var(${st})`; if (p.scrollHeight <= box.clientHeight && p.scrollWidth <= box.clientWidth + 1) break; }
