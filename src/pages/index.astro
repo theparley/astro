@@ -22,6 +22,7 @@ import Platzhalter from "../components/bausteine/Platzhalter.astro";
 import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
 import ZeigerFilm from "../components/bausteine/ZeigerFilm.astro";
 import VideoKacheln from "../components/bausteine/VideoKacheln.astro";
+import Abschnittskopf from "../components/bausteine/Abschnittskopf.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 
@@ -187,8 +188,11 @@ const FORMATE = [
 
 	{/* ── 3 · DAS BEWEISVERFAHREN ── Baustein B6 Text-Bild, Grafik als Anker rechts (Seitenwechsel
 	   gibt Rhythmus wie bei BBH). Grafik offen: WEBSITE.md 3j. */}
+	{/* Überschrift wie „Beweisaufnahme“ (Rasul 13.11.2026: „jetzt geben wir dem nächsten Abschnitt, Beweisverfahren,
+	   auch die Überschrift wie Beweisaufnahme“). Grafik offen: Recherche Abfolgen bei BBH, sonst eigene Grafik. */}
 	<section class="abschnitt" aria-labelledby="ab3-titel">
-		<TextBild id="ab3-titel" seite="rechts" titel="Das Beweisverfahren.">
+		<div class="rahmen"><Abschnittskopf id="ab3-titel" titel="Beweis&shy;verfahren" /></div>
+		<TextBild seite="rechts">
 			<Platzhalter slot="medium" format="4/5" text="Platzhalter: Grafik Beweisverfahren (Kick-off bis Messen), WEBSITE.md 3j" />
 			<p>Echte Experten haben keine Zeit für Videos. Müssen sie auch nicht. Wir gehen den ganzen Weg mit euch: von der redaktionellen Vorbereitung über die Aufnahme im Gesprächsmodus inklusive Live-Regie bis zur Verteilung des&nbsp;Beweismaterials.</p>
 		</TextBild>
@@ -197,13 +201,17 @@ const FORMATE = [
 	{/* ── 4 · DIE BEWEISSTÜCKE ── Band (nach BBH-Karussell B8) über der Überschrift (Rasul 13.11.2026:
 	   „Ich setze die Animation für die Beweisstücke über die Beweisstücke.“). Überschrift und Text
 	   ohne Anker, deshalb nach BBH in der Mitte (Textblock, 6 von 12). Kanalzeile als kurzer Satz mittig. */}
+	{/* Überschrift wie „Beweisaufnahme“ über dem Band (Rasul 13.11.2026: „den nächsten Abschnitt Beweisstücke nehmen
+	   wir auch wieder die Art von Überschrift. Da haben wir ja schon eine Animation. Ich glaube, die können wir so
+	   verwenden.“). Vorher stand „Die Beweisstücke.“ als Blocküberschrift unter dem Band. */}
 	<section class="abschnitt" aria-labelledby="ab4-titel">
+		<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" /></div>
 		<Band formate={FORMATE} />
 		<div class="kanaele">
 			<KurzSaetze klein saetze={["LinkedIn · Website · Newsletter · Vertrieb"]} />
 		</div>
 		<div class="nach-band">
-			<Textblock id="ab4-titel" titel="Die Beweisstücke.">
+			<Textblock>
 				<p>Der Beweis ist das echte Gespräch. Daraus werden skalierbare Beweisstücke für jeden eurer&nbsp;Kanäle.</p>
 				<p><span class="entwurf">Dummy: Kacheln ohne Kundenclips, keine Kundenfreigabe. Später ein echtes Kundenbeispiel mit Freigabe.</span></p>
 			</Textblock>

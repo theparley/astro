@@ -6,9 +6,11 @@ interface Props { titel: string; link?: { href: string; text: string }; id?: str
 const { titel, link, id } = Astro.props;
 ---
 <div class="abschnittskopf">
-	<h2 class="t-abschnitt" id={id} data-einblenden>{titel}</h2>
+	<h2 class="t-abschnitt abschnittskopf__titel" id={id} data-einblenden set:html={titel} />
 	{link && <Knopf href={link.href} text={link.text} />}
 </div>
 <style>
-	.abschnittskopf { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-bottom: 48px; }
+	.abschnittskopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 16px; margin-bottom: 48px; }
+	/* Titel darf &shy; enthalten (lange deutsche Wörter in Bartle, z. B. BEWEIS-/VERFAHREN; 13.11.2026) */
+	.abschnittskopf__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
 </style>
