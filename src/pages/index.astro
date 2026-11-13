@@ -21,6 +21,7 @@ import BlasenVideo from "../components/bausteine/BlasenVideo.astro";
 import Platzhalter from "../components/bausteine/Platzhalter.astro";
 import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
 import ZeigerFilm from "../components/bausteine/ZeigerFilm.astro";
+import VideoKacheln from "../components/bausteine/VideoKacheln.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 
@@ -146,39 +147,26 @@ const FORMATE = [
 	   (Analyse Teil 3, 2.1). ACHTUNG: Rasul hat „Video links, Schrift rechts“ am 13.11. ausprobiert
 	   und zurückgenommen; hier steht es als Vorschlag. Rückweg auf „Video über dem Text“: Baustein
 	   Textblock mit dem Video darüber. Video nur lokal (Freigaben der Gäste fehlen). */}
-	{/* PROBE Einzelvideos (Rasul 13.11.2026, „Yeah.“ auf den Vorschlag): Statt eines langen Blasen-Videos zeigt
-	   jeder Abschnitt genau eine Sache (Rasul: „einzelne Videos, die jeweils eine Sache erklären“). Kein neuer
-	   Schnitt: jeder Abschnitt spielt seinen Teil der Szene in Schleife (BlasenVideo von/bis), mit seiner einen
-	   Blase. Abwechselnd Video links und rechts (BBH Text-Bild B6), die Blase zeigt zum Text. Der bisherige
-	   kleine Text unter dem Statement steht im ersten Abschnitt (Rasul: „daraus den nächsten Abschnitt machen
-	   oder ihn in den nächsten Abschnitt integrieren“). Titel und Texte von Abschnitt 2 bis 4 sind Platzhalter.
-	   Rückweg zur Gesamtvideo-Fassung: Commit 6223855 im Website-Repository. */}
+	{/* BEWEISAUFNAHME als große Kacheln nach BBH B7W (Rasul 13.11.2026: „lass uns erstmal die Kacheln von BBH
+	   übernehmen, die großen … die schreiben ja groß drüber Work. Und da könnten wir doch Beweisaufnahme
+	   drüberschreiben. Und dann gibt es Kacheln, die sich thematisch mit dem Thema Beweisaufnahmen beschäftigen.“).
+	   Je Kachel ein Ausschnitt der Szene mit seiner Blase, stumm in Schleife; Klick öffnet groß. Nummeriert 01 bis
+	   04, damit die Reihenfolge erhalten bleibt (Rasuls Einwand „eins nach dem anderen“). Einleitung: der frühere
+	   kleine Text unter dem Statement. Kacheltitel sind Arbeitstitel. Rückweg zur Fassung mit vier Text-Bild-
+	   Abschnitten: Commit 6b72e74 im Website-Repository. */}
 	<section class="abschnitt" aria-labelledby="ab2-titel">
-		<TextBild id="ab2-titel" medium="voll" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
-			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={0} bis={4.5} steuerung blasen={[BLASEN[0]] as any} />
-			{/* Einleitung integriert (Rasul 13.11.2026: „Aber jetzt hast du den kleinen Text doch wieder da so im
-			   freien Raum stehen.“); vorher eigener Abschnitt mittig. */}
-			<p>Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt.</p>
-			<p>Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie Gespräche am Küchentisch.</p>
-		</TextBild>
-	</section>
-	<section class="abschnitt" aria-labelledby="ab2b-titel">
-		<TextBild id="ab2b-titel" seite="rechts" medium="voll" titel="Ohne Kamerastress.">
-			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={4.5} bis={9} steuerung blasen={[BLASEN[1]] as any} />
-			<p><span class="entwurf">Platzhalter: Arbeitstitel und ein, zwei Sätze gemeinsam schreiben</span></p>
-		</TextBild>
-	</section>
-	<section class="abschnitt" aria-labelledby="ab2c-titel">
-		<TextBild id="ab2c-titel" medium="voll" titel="Blickkontakt.">
-			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={9} bis={18} steuerung blasen={[BLASEN[2]] as any} />
-			<p><span class="entwurf">Platzhalter: Arbeitstitel und ein, zwei Sätze gemeinsam schreiben</span></p>
-		</TextBild>
-	</section>
-	<section class="abschnitt" aria-labelledby="ab2d-titel">
-		<TextBild id="ab2d-titel" seite="rechts" medium="voll" titel="Das Blickkontaktstudio.">
-			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" von={18} bis={24} steuerung blasen={[BLASEN[3]] as any} />
-			<p><span class="entwurf">Platzhalter: Arbeitstitel und ein, zwei Sätze gemeinsam schreiben</span></p>
-		</TextBild>
+		<VideoKacheln
+			id="ab2-titel"
+			titel="Beweis&shy;aufnahme"
+			link={{ href: "/termin", text: "Studiotermin" }}
+			einleitung="Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."
+			kacheln={[
+				{ nr: "01", titel: "Wie am Küchentisch", zeile: "Szene Beweisaufnahme, 0:00 bis 0:04", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, blasen: [BLASEN[0]] as any },
+				{ nr: "02", titel: "Ohne Kamerastress", zeile: "Szene Beweisaufnahme, 0:04 bis 0:09", src: "/lokal/szene-beweisaufnahme.mp4", von: 4.5, bis: 9, blasen: [BLASEN[1]] as any },
+				{ nr: "03", titel: "Blickkontakt mit dem Zuschauer", zeile: "Szene Beweisaufnahme, 0:09 bis 0:18", src: "/lokal/szene-beweisaufnahme.mp4", von: 9, bis: 18, blasen: [BLASEN[2]] as any },
+				{ nr: "04", titel: "Das Blickkontaktstudio", zeile: "Szene Beweisaufnahme, 0:18 bis 0:24", src: "/lokal/szene-beweisaufnahme.mp4", von: 18, bis: 24, blasen: [BLASEN[3]] as any },
+			]}
+		/>
 	</section>
 	{/* RÜCKWEG (bis 13.11.2026 vormittags):
 	<section class="abschnitt" aria-labelledby="ab2-titel">

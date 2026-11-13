@@ -1,0 +1,105 @@
+---
+/* Video-Kacheln nach BBH B7W (Projektraster der Startseite; Nachschlagewerk Kapitel 2, Analyse B 3 B7).
+   Rasul 13.11.2026: „lass uns erstmal die Kacheln von BBH übernehmen, die großen. Das probieren wir mal. Und die
+   schreiben ja groß drüber Work. Und da könnten wir doch Beweisaufnahme drüberschreiben. Und dann gibt es Kacheln,
+   die sich thematisch mit dem Thema Beweisaufnahmen beschäftigen.“
+   Wie BBH:
+   - Kopf: Titel Bartle huge links, Knopf-Link rechts auf der Grundlinie (am Handy darunter, wenn kein Platz).
+   - Raster zwei Spalten, 16 px Fuge, am Handy eine Spalte. Kachel 4:3, leicht abgerundet.
+   - In jeder Kachel läuft der Film stumm in Schleife, sobald er zu mindestens 20 % zu sehen ist (BBH Autoplay).
+   - Darunter zwei kurze Zeilen: Titel, grau eine zweite Zeile (bei BBH der Kunde).
+   - Darüberfahren: Bild 3 % größer und −0,25° gedreht, Kachel etwas blasser (BBH, 400 ms).
+   Abweichung: Klick öffnet den Film groß auf derselben Seite (BBHs Player vom Statement), nicht eine eigene Seite;
+   startet stumm wie bei BBH, Ton über die Steuerleiste. Die Blase sitzt innen in der Kachel (blasenlage innen).
+   Titel darf ein &shy; enthalten (BEWEIS-/AUFNAHME passt in Bartle huge nur getrennt, gemessen 13.11.2026). */
+import BlasenVideo from "./BlasenVideo.astro";
+import Knopf from "./Knopf.astro";
+interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
+interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[] }
+interface Props { titel: string; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
+const { titel, id, link, einleitung, kacheln } = Astro.props;
+---
+<div class="videokacheln rahmen">
+	<div class="videokacheln__kopf">
+		<h2 class="t-abschnitt videokacheln__titel" id={id} set:html={titel} />
+		{link && <div class="videokacheln__link"><Knopf href={link.href} text={link.text} /></div>}
+	</div>
+	{einleitung && <p class="t-lesen videokacheln__einleitung" set:html={einleitung} />}
+	<div class="videokacheln__raster">
+		{kacheln.map((k) => (
+			<button type="button" class="videokachel" data-src={k.src} data-von={k.von} data-bis={k.bis} aria-label={`${k.nr} ${k.titel}: Film groß ansehen`}>
+				<span class="videokachel__bild">
+					<BlasenVideo src={k.src} von={k.von} bis={k.bis} blasen={(k.blasen ?? []) as any} format="4/3" blasenlage="innen" />
+				</span>
+				<span class="videokachel__text">
+					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.titel}</span>
+					<span class="videokachel__zeile">{k.zeile}</span>
+				</span>
+			</button>
+		))}
+	</div>
+</div>
+<div class="videokacheln__gross" data-videokacheln-gross hidden>
+	<button type="button" class="videokacheln__zu" aria-label="Film schließen">Schließen</button>
+	<video controls playsinline></video>
+</div>
+
+<style>
+	.videokacheln__kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 16px; margin-bottom: 48px; }
+	/* Titel nur so breit wie nötig, damit der Link rechts daneben auf der Grundlinie stehen kann (BBH) */
+	.videokacheln__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
+	.videokacheln__link { flex: none; }
+	.videokacheln__einleitung { max-width: 46ch; margin: -16px 0 48px; }
+	.videokacheln__raster { display: grid; grid-template-columns: 1fr; gap: 32px 16px; }
+	@media (min-width: 1024px) { .videokacheln__raster { grid-template-columns: 1fr 1fr; } }
+	.videokachel { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 50ms; }
+	.videokachel:active { transform: scale(0.99); }
+	.videokachel__bild { display: block; border-radius: 4px; overflow: hidden; }
+	.videokachel__bild :global(.blasenvideo) { transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1); }
+	.videokachel__bild :global(video) { border-radius: 0; }
+	@media (hover: hover) {
+		.videokachel:hover { opacity: 0.8; }
+		.videokachel:hover .videokachel__bild :global(.blasenvideo) { transform: scale(1.03) rotate(-0.25deg); }
+	}
+	.videokachel__text { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; font-family: var(--schrift-lesen); font-size: var(--text-base); line-height: 1.3; letter-spacing: -0.02em; }
+	.videokachel__nr { font-family: var(--schrift-mono, ui-monospace, monospace); margin-right: 4px; }
+	.videokachel__zeile { color: var(--grey, #999894); }
+
+	.videokacheln__gross { position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, 0.92); display: grid; place-items: center; animation: vk-auf 300ms ease-in-out both; }
+	.videokacheln__gross[hidden] { display: none; }
+	.videokacheln__gross video { width: min(100vw, calc(100dvh * 16 / 9)); max-height: 100dvh; }
+	.videokacheln__zu { position: absolute; top: 16px; right: 16px; z-index: 1; font: inherit; font-size: var(--text-sm); color: var(--white); background: transparent; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 12px; cursor: pointer; }
+	@keyframes vk-auf { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } }
+</style>
+
+<script>
+	let weg: (() => void)[] = [];
+	function videokacheln() {
+		weg.forEach((f) => f()); weg = [];
+		const gross = document.querySelector<HTMLElement>("[data-videokacheln-gross]");
+		if (!gross) return;
+		const film = gross.querySelector("video")!;
+		let bis: number | null = null, von = 0;
+		const wache = () => { if (bis !== null && film.currentTime >= bis) { film.pause(); film.currentTime = von; } };
+		film.addEventListener("timeupdate", wache);
+		const zu = () => { gross.hidden = true; film.pause(); document.documentElement.style.overflow = ""; };
+		const auf = (k: HTMLElement) => {
+			von = k.dataset.von ? parseFloat(k.dataset.von) : 0;
+			bis = k.dataset.bis ? parseFloat(k.dataset.bis) : null;
+			film.src = k.dataset.src!;
+			film.muted = true; // wie BBH: auch der große Player startet stumm
+			film.addEventListener("loadedmetadata", () => { film.currentTime = von; film.play().catch(() => {}); }, { once: true });
+			gross.hidden = false;
+			document.documentElement.style.overflow = "hidden";
+		};
+		const klick = (e: Event) => { const k = (e.target as HTMLElement).closest<HTMLElement>(".videokachel"); if (k) auf(k); };
+		const taste = (e: KeyboardEvent) => { if (e.key === "Escape" && !gross.hidden) zu(); };
+		const hinter = (e: Event) => { if (e.target === gross) zu(); };
+		document.addEventListener("click", klick);
+		document.addEventListener("keydown", taste);
+		gross.addEventListener("click", hinter);
+		gross.querySelector(".videokacheln__zu")!.addEventListener("click", zu);
+		weg.push(() => { document.removeEventListener("click", klick); document.removeEventListener("keydown", taste); gross.removeEventListener("click", hinter); film.removeEventListener("timeupdate", wache); zu(); });
+	}
+	document.addEventListener("astro:page-load", videokacheln);
+</script>

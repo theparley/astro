@@ -14,10 +14,12 @@ interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
    Video steht beim ersten Bild still, großer Startknopf in der Mitte (Kachel wie im Menü), Lautsprecher unten
    rechts wie BBHs Player („Unmute audio“). Start stumm wie bei BBH (dort startet kein Video mit Ton), Ton per
    Lautsprecher. Klick aufs laufende Video hält an; aus dem Bild gescrollt hält es an. */
-interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number; steuerung?: boolean }
-const { src, blasen, format = "16/9", von, bis, steuerung = false } = Astro.props;
+/* blasenlage (13.11.2026): "aussen" (Standard) = Blase wächst oben aus dem Video heraus; "innen" = kleiner und
+   ganz im Bild, für Kacheln (VideoKacheln), damit sie nicht in die Reihe darüber ragt. */
+interface Props { src: string; blasen: Blase[]; format?: string; von?: number; bis?: number; steuerung?: boolean; blasenlage?: "aussen" | "innen" }
+const { src, blasen, format = "16/9", von, bis, steuerung = false, blasenlage = "aussen" } = Astro.props;
 ---
-<div class:list={["blasenvideo", steuerung && "blasenvideo--steuerung"]} data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} data-steuerung={steuerung ? "" : undefined} style={`--format:${format}`}>
+<div class:list={["blasenvideo", steuerung && "blasenvideo--steuerung"]} data-blasenvideo data-blasen={JSON.stringify(blasen)} data-von={von} data-bis={bis} data-steuerung={steuerung ? "" : undefined} data-blasenlage={blasenlage} style={`--format:${format}`}>
 	<video src={src} muted loop playsinline preload="metadata"></video>
 	{steuerung && (
 		<>
@@ -93,10 +95,12 @@ const { src, blasen, format = "16/9", von, bis, steuerung = false } = Astro.prop
 			};
 			const setze = (b: Blase) => {
 				const W = szene.clientWidth, H = video.clientHeight || (W * 9) / 16;
-				const rx = (W * ANTEIL) / 2, ry = rx / 1.4;
+				const innen = szene.dataset.blasenlage === "innen";
+				const rx = (W * (innen ? 0.42 : ANTEIL)) / 2, ry = rx / 1.4;
 				const rechts = b.stelle === "OR";
 				const winkel = rechts ? 125 : 55;
-				const anker = [W * (rechts ? 0.66 : 0.34), H * 0.1];
+				// innen: Zipfelspitze tiefer, so dass die ganze Blase im Bild bleibt
+				const anker = [W * (rechts ? 0.62 : 0.38), innen ? ry * 2.25 + H * 0.04 : H * 0.1];
 				const m = (winkel * Math.PI) / 180;
 				const cx = anker[0] - rx * Math.cos(m), cy = anker[1] - ry * Math.sin(m);
 				const half = (ZIPFEL.breite * Math.PI) / 180, z = zipfel(rx, winkel);
