@@ -65,7 +65,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// „Rahmen“ (html data-rahmen = 21 | 16); höchstens so breit, wie die Fläche es erlaubt (siehe rahmen()).
 	const RH = H * 0.86, CX = W / 2, CY = H / 2, T = CY - RH / 2, B = CY + RH / 2, RAD = RH * 0.05;
 	let RW = RH * 16 / 9, L = CX - RW / 2;
-	const format = () => (document.documentElement.dataset.rahmen === "16" ? 16 / 9 : 21 / 9);
+	const format = () => (document.documentElement.dataset.rahmen === "21" ? 21 / 9 : 16 / 9); // Grundeinstellung wieder 16:9
 	const G = (DICKE + LUECKE) / 2;
 	function halbweg(seite: 1 | -1) {
 		const p: [number, number][] = [];
@@ -364,22 +364,21 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 			const groesse = () => {
+				// Rahmen 16:9 und so breit wie die längste Zeile der Überschrift (Rasul 13.11.2026 abends: „Mach ihn so breit
+				// wie die Schrift, die oben dran ist“ und „dann machen wir doch wieder 16 zu 9, dass es verständlicher ist.
+				// Unseren Videobeweis.“): Die Höhe der Fläche wird dafür aus der Textbreite gerechnet (Rahmen = 86 % der Höhe).
+				const satz = fig.closest(".anlass--band")?.querySelector(".anlass__satz");
+				if (satz && satz.getClientRects().length) {
+					const bereich = document.createRange(); bereich.selectNodeContents(satz);
+					const px = Math.max(0, ...[...bereich.getClientRects()].map((z) => z.width));
+					if (px > 0) cv.style.height = `${(px / format() / 0.86).toFixed(1)}px`;
+				}
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
 				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
 				// Rahmen und Personen passend zur Fläche neu legen
 				const breite = cv.width / (cv.height / H);
-				// Breite der längsten Zeile der Überschrift im Band messen und in Flächeneinheiten umrechnen
-				let textBreite: number | undefined;
-				const satz = fig.closest(".anlass--band")?.querySelector(".anlass__satz");
-				if (satz && satz.getClientRects().length) {
-					const bereich = document.createRange(); bereich.selectNodeContents(satz);
-					const zeilen = [...bereich.getClientRects()];
-					const px = Math.max(0, ...zeilen.map((z) => z.width));
-					const proPx = H / cv.getBoundingClientRect().height;
-					if (px > 0) textBreite = px * proPx;
-				}
-				rahmen(breite, textBreite); leuteFlach = personen(); leuteRaum = personenFahrt();
+				rahmen(breite); leuteFlach = personen(); leuteRaum = personenFahrt();
 				// Am Ende darf niemand abgeschnitten sein: falls nötig zoomt die Kamera mit der Fahrt etwas heraus (Brennweite),
 				// statt Personen seitlich zu verschieben
 				const halbe = breite / 2 - 70;
