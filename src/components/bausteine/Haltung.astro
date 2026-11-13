@@ -2,14 +2,20 @@
 /* B3 Haltungssatz: Hegarty in Großbuchstaben, mittig über die volle Rahmenbreite,
    harte Zeilenumbrüche (jede Zeile ein Eintrag). BBH: Markenbotschaft auf Start und About.
    aufdecken: erster Auftritt mit BBHs Masken-Wisch (500 ms), Zeilen gestaffelt. */
-interface Props { zeilen: string[]; ebene?: "h1" | "h2" | "p"; aufdecken?: boolean; id?: string; wechselglyphen?: boolean }
-const { zeilen, ebene = "h2", aufdecken = false, id, wechselglyphen = false } = Astro.props;
+/* stufe="huge": eine Stufe kleiner, jede Zeile bricht ausgewogen selbst um (für längere Sätze; Hegarty
+   ist breit: „KAMERASTRESS.“ ist 10,2 em und passt in der Hero-Stufe ab 1024 px nicht in eine Zeile,
+   gemessen 13.11.2026). */
+interface Props { zeilen: string[]; ebene?: "h1" | "h2" | "p"; aufdecken?: boolean; id?: string; wechselglyphen?: boolean; stufe?: "hero" | "huge" }
+const { zeilen, ebene = "h2", aufdecken = false, id, wechselglyphen = false, stufe = "hero" } = Astro.props;
 const H = ebene;
 ---
-<H class:list={["t-haltung", "haltung", wechselglyphen && "haltung--wechsel"]} id={id} data-aufdecken={aufdecken ? "" : undefined} data-einblenden={aufdecken ? undefined : ""}>
+<H class:list={["t-haltung", "haltung", wechselglyphen && "haltung--wechsel", stufe === "huge" && "haltung--huge"]} id={id} data-aufdecken={aufdecken ? "" : undefined} data-einblenden={aufdecken ? undefined : ""}>
 	{zeilen.map((z, i) => <span style={`--i:${i}`}>{z}</span>)}
 </H>
 <style>
 	.haltung span { display: block; }
+	.haltung--huge { font-size: var(--text-huge); line-height: var(--zeile-huge); }
+	.haltung--huge span { text-wrap: balance; }
+	.haltung--huge span + span { margin-top: 0.2em; }
 	.haltung--wechsel { font-feature-settings: "ss01" 1, "ss02" 1, "ss03" 1, "ss04" 1; }
 </style>

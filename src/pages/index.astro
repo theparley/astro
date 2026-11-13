@@ -69,9 +69,14 @@ const FORMATE = [
 				<LogoBiss class="hero__logo--gross" stufe={1} />
 				<LogoBiss class="hero__logo--klein" stufe={3} />
 			</a>
-			{/* Vier Zeilen statt drei: Hegarty ist breiter als Forma, „Überall Experten.“ braucht 11,8 em und
-			   passt in mega nicht in eine Zeile. Alternative für Rasul: drei Zeilen in huge (passt ab 400 px). */}
-			<Haltung ebene="h1" aufdecken zeilen={["Überall", "Experten.", "Zeit für den", "Videobeweis."]} />
+			{/* Statement nach BBH (B3, „We create iconic brands using difference“). Rasul 13.11.2026: „der erste
+			   Text unter dem Video doch ein anderer. Da müssen wir jetzt kein Problem mehr schildern. Da können
+			   wir wie BBH groß und fett sagen, was wir machen. Wir bringen Menschen in echte Gespräche. Filmreif
+			   ohne Kamerastress. Und anstatt Menschen könnten wir Experten sagen.“ Formel wörtlich, ohne „und“.
+			   Stufe huge, freier ausgewogener Umbruch (gemessen: passt ab 375 px ohne Überlauf).
+			   Vorher (Rasul 10.11.): „Überall Experten. / Zeit für den Videobeweis.“, archiviert in
+			   branding/aktiv/Parley_Website_Startseite_Texte_2026-11.md. */}
+			<Haltung ebene="h1" aufdecken stufe="huge" zeilen={["Wir bringen Experten in echte Gespräche.", "Filmreif ohne Kamerastress."]} />
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
