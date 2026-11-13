@@ -19,6 +19,7 @@ import TextBild from "../components/bausteine/TextBild.astro";
 import Textblock from "../components/bausteine/Textblock.astro";
 import BlasenVideo from "../components/bausteine/BlasenVideo.astro";
 import Platzhalter from "../components/bausteine/Platzhalter.astro";
+import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 
@@ -54,7 +55,13 @@ const FORMATE = [
 	   (Nachschlagewerk Seite 01): randlos, volle Fensterhöhe, im Hochformat 3:4, stumm, Schleife.
 	   Video nur lokal (Freigaben der Gäste fehlen). */}
 	<div class="filmhero" aria-hidden="true">
-		<video src="/lokal/szene-beweisaufnahme.mp4" muted loop playsinline preload="metadata"></video>
+		{/* Filme im Wechsel wie BBH (Rasul 13.11.2026). Austauschen = Liste ändern. Alle drei nur lokal
+		   (public/lokal ist nicht versioniert), Freigaben der Gäste fehlen. Welcher Film: offen. */}
+		<FilmKarussell filme={[
+			{ src: "/lokal/szene-beweisaufnahme.mp4", titel: "Szene Beweisaufnahme" },
+			{ src: "/lokal/hagen-blickkontakt.mp4", titel: "Hagen: Blickkontakt" },
+			{ src: "/lokal/hagen-empfehlung.mp4", titel: "Hagen: Empfehlung" },
+		]} />
 	</div>
 	<header class="hero">
 		<div class="hero__buehne rahmen">
@@ -128,7 +135,6 @@ const FORMATE = [
 	@media (orientation: portrait) {
 		:global(html[data-hero="film"]) .filmhero { height: 133.333vw; }
 	}
-	.filmhero video { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 	/* Hero: erster Bildschirm = Logo + drei Zeilen; die erste Zeile des Erklärtexts lugt unten
 	   hervor (Rasul 13.11.2026). */
@@ -159,13 +165,3 @@ const FORMATE = [
 	.abschnitt--letzter { margin-bottom: var(--abstand-xl); }
 </style>
 
-<script>
-	/* Film-Hero (Demo): stumm erzwingen (nach Seitenwechsel geht „muted“ sonst verloren) und nur
-	   spielen, solange zu sehen. */
-	document.addEventListener("astro:page-load", () => {
-		const v = document.querySelector<HTMLVideoElement>(".filmhero video");
-		if (!v || document.documentElement.dataset.hero !== "film") return;
-		v.muted = true;
-		new IntersectionObserver(([e]) => { if (e.isIntersecting) { v.muted = true; v.play().catch(() => {}); } else v.pause(); }, { threshold: 0.2 }).observe(v);
-	});
-</script>
