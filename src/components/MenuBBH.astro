@@ -61,7 +61,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   (Rasul 13.11.2026: „Ganz am Anfang sieht man das ganze Menü und noch den Namen BBH hintendran.
 		   Da würden wir einmal den kleinen parley schreiben. Dann nehmen wir unsere Forma DJR-Schrift“).
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
-		{startseite && <a href="/" class="bbh-menu__name" tabindex="-1" aria-hidden="true"><span>parley</span></a>}
+		{/* Zweig minimal: Buchstaben einzeln ausgeglichen (Rasul 13.11.2026: „Jetzt kleben die Buchstaben aneinander, die
+		   haben schon ein bisschen eine Lücke.“). Bartle hat für PARLEY ungleiche Abstände (Tintenlücken P-A 0,008,
+		   A-R 0,052, R-L 0,09, L-E 0,073, E-Y 0,035 em); jedes Paar auf 0,03 em gebracht, P-A bleibt (A ist unten
+		   breit, oben ist Luft). BBH gemessen: rund 1 px Lücke bei 52 px hohen Buchstaben. */}
+		{startseite && <a href="/" class="bbh-menu__name" tabindex="-1" aria-hidden="true"><span>{[["P", 0], ["A", -0.022], ["R", -0.06], ["L", -0.043], ["E", -0.005], ["Y", 0]].map(([b, m]) => <i style={`margin-right:${m}em`}>{b}</i>)}</span></a>}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
@@ -257,6 +261,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	/* Zweig minimal: PARLEY in Bartle ist rund 7 Kacheln breit; unter 900 px hätte das Menü samt Namen keinen Platz */
 	@media (max-width: 899px) { .bbh-menu__name { display: none; } }
 
+	.bbh-menu__name i { font-style: normal; }
 	.bbh-menu__name span {
 		white-space: nowrap;
 		/* Geist statt Forma DJR (13.11.2026 abends, Rasul „Ja, entfernen“: die neue Fassung kommt ohne Forma aus, bis
@@ -271,17 +276,15 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		text-transform: uppercase;
 		font-size: calc(var(--k) * 0.864);
 		line-height: 1;
-		/* enger wie BBH (Rasul: „Das sieht so aus, als ob BBH die Abstände zwischen den Buchstaben verringert hat.“):
-		   BBH-Wortmarke 272 × 52 px, Bartle „BBH“ bei 52 px Versalhöhe 288,5 px Tinte → −0,11 em je Zwischenraum.
-		   Der Abstand nach dem letzten Buchstaben wird mit padding-left ausgeglichen, damit es mittig bleibt. */
-		letter-spacing: -0.11em;
-		padding-left: 0.055em; /* gemessen: so links und rechts gleich viel Rand */
+		/* enger wie BBH (Rasul: „Das sieht so aus, als ob BBH die Abstände zwischen den Buchstaben verringert hat.“),
+		   aber je Buchstabenpaar (siehe Markup oben), nicht als gleichmäßige Laufweite. */
+		letter-spacing: 0;
 		/* Lage (Rasul 13.11.2026: „ein bisschen tiefer setzen, das L stößt oben mehr an als unten P und Y“):
 		   gemessen bei -0,12 em oben 8 px, unten 12 px Luft; jetzt -0,07 em, oben gut 10 px, unten knapp 10 px. */
 		margin-top: 0;   /* Bartle: Versalmitte = Boxmitte (Ober-/Unterlänge 950/−250, Versal 700) */
 	}
 	.bbh-menu--oben .bbh-menu__name {
-		width: calc(var(--k) * 0.864 * (7.742 - 6 * 0.11) + 48px);
+		width: calc(var(--k) * 0.864 * (7.742 - 0.13) + 48px);
 		margin-left: 0;
 		clip-path: inset(0 0 0 0);
 		opacity: 1;
