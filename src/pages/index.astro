@@ -1491,18 +1491,25 @@ const PREISE = [
 			display: grid;
 			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 			gap: 0;
-			align-items: center;
+			align-items: start;
 		}
+		/* Rasul 13.11.2026: „Mach die Überschrift über den Text, dass beides auf der rechten Seite ist.“
+		   Linke Hälfte bleibt frei; Überschrift und Text stehen untereinander in der rechten Hälfte,
+		   linksbündig an derselben Kante. */
 		.ab-split > .ab-titel {
+			grid-column: 2;
+			grid-row: 1;
 			font-size: var(--text-2xl); /* Rasul 13.11.2026: „in der nächst kleineren Schriftgröße“ (vorher huge) */
 			line-height: 0.9;
 			letter-spacing: -0.01em;
-			text-align: center;
+			text-align: left;
 			text-wrap: balance;
 			padding: 0 16px;
 		}
 		.ab-split > .ab-text {
-			margin: 0;
+			grid-column: 2;
+			grid-row: 2;
+			margin: var(--abstand-md) 0 0;
 			max-width: 46rem;
 			padding: 0 16px;
 		}
