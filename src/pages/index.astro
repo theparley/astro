@@ -985,6 +985,7 @@ const PREISE = [
 	}
 	.hero { padding-top: 32px; padding-bottom: 0; } /* unten 0 (Rasul 13.11.2026: Abstand zu Block 2 zu groß): zwischen Abschnitten liegt nach BBH-Regel genau ein --abstand-xl, den bringt Block 2 mit */
 	.hero-text--unten {
+		position: relative; z-index: 1; /* Blasen von Block 2 dürfen hierunter laufen (Rasul 13.11.2026) */
 		margin-top: var(--abstand-md);
 		padding: 0 16px;
 	}
@@ -1508,7 +1509,7 @@ const PREISE = [
 	/* Sprechblasen am Video (Probe 13.11.2026, nach der Szenen-Vorschau) */
 	.ab-szene { position: relative; container-type: inline-size; }
 	.ab-blase { position: absolute; inset: 0; pointer-events: none; opacity: 0; transform: scale(0.55);
-		transition: opacity 0.18s ease-in, transform 0.25s ease-in; z-index: 2; }
+		transition: opacity 0.18s ease-in, transform 0.25s ease-in; z-index: 0; } /* über dem Video, aber hinter der Schrift darüber (Rasul 13.11.2026) */
 	.ab-blase.an { opacity: 1; transform: none; transition: opacity 0.2s ease-out, transform 0.45s cubic-bezier(0.2, 1.3, 0.4, 1); }
 	.ab-blase svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
 	.ab-oval { fill: #0379A6; }
