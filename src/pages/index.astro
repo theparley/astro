@@ -82,6 +82,8 @@ const FORMATE = [
 			<div class="satz satz--a"><Haltung ebene="h1" aufdecken stufe="huge" zeilen={["Wir bringen Experten in echte Gespräche.", "Filmreif ohne Kamerastress."]} /></div>
 			<div class="satz satz--b"><Haltung ebene="p" aufdecken stufe="huge" zeilen={["Überall Experten.", "Zeit für den Videobeweis."]} /></div>
 			<div class="satz satz--c"><Haltung ebene="p" aufdecken stufe="huge" zeilen={["Wir machen Experten zu Bekannten.", "Filmreif ohne Kamerastress."]} /></div>
+			{/* D: Rasul 13.11.2026: „Wir bringen Experten auf den Schirm von Entscheidern.“ */}
+			<div class="satz satz--d"><Haltung ebene="p" aufdecken stufe="huge" zeilen={["Wir bringen Experten auf den Schirm von Entscheidern.", "Filmreif ohne Kamerastress."]} /></div>
 		</div>
 		<KurzSaetze saetze={["Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne Kamerastress. So werden Entscheider zu Augenzeugen eurer Kompetenz, noch vor dem ersten&nbsp;Kontakt."]} />
 		<BrandLogo />
@@ -161,7 +163,8 @@ const FORMATE = [
 <style>
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
-	:global(html:not([data-satz="b"]):not([data-satz="c"])) .satz--a,
+	:global(html:not([data-satz="b"]):not([data-satz="c"]):not([data-satz="d"])) .satz--a,
+	:global(html[data-satz="d"]) .satz--d,
 	:global(html[data-satz="b"]) .satz--b,
 	:global(html[data-satz="c"]) .satz--c { display: block; }
 	.satz :global(.haltung) { margin: 0; padding-block: var(--abstand-md); }
