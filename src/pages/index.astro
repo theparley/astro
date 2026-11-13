@@ -1980,14 +1980,14 @@ const PREISE = [
 <script>
 	/* Videobeweis-Geste im Hero (Probe 13.11.2026). Zwei Fingerkuppen starten nebeneinander oben in
 	   der Mitte des Rahmens, ziehen ihn als Leuchtspur in Fingerdicke nach und treffen sich unten
-	   wieder; die Spur verglimmt nach 0,9 s. Werte wie Probe 2 der Werkstatt (Fingerdicke 34 und
+	   wieder; die Spur verglimmt in 1,8 s bis auf einen schwachen Rest, der stehen bleibt. Werte wie Probe 2 der Werkstatt (Fingerdicke 34 und
 	   Lücke 8 bei Rahmenhöhe 640 → 5,3 % und 1,25 % der Höhe). */
 	(() => {
 		const cv = document.querySelector(".hero-geste");
 		if (!cv || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 		const ctx = cv.getContext("2d");
 		const off = document.createElement("canvas"), octx = off.getContext("2d");
-		const DAUER = 1.6, GLIMM = 0.9, START = 0.15;
+		const DAUER = 1.6, GLIMM = 1.8, START = 0.15, REST = 46; /* 13.11.: länger nachglühen (vorher 0,9 s), Rest bleibt stehen (Grauwert 46) */
 		const kubisch = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 		let teile = [], laenge = 0, dicke = 10, rand = 0, w = 0, h = 0;
 
@@ -2035,8 +2035,8 @@ const PREISE = [
 			const jetzt = jetztMs / 1000, t = (jetztMs - t0) / 1000 - START;
 			let anteil = 0, deck = 0;
 			if (t < 0) deck = 0;
-			else if (t < DAUER) { anteil = kubisch(t / DAUER); deck = Math.min(1, t / 0.15); }
-			else { anteil = 1; deck = Math.max(0, 1 - (t - DAUER) / 0.4); }
+			else if (t < DAUER) { anteil = kubisch(t / DAUER); deck = Math.min(1, t / 0.15, (1 - t / DAUER) / 0.3); } /* Finger blenden im letzten Drittel aus */
+			else { anteil = 1; deck = 0; }
 			const pr = punkt(anteil), pl = [spiegel - pr[0], pr[1]];
 			if (t >= 0 && t <= DAUER + 0.02) { spurR.push([pr[0], pr[1], jetzt]); spurL.push([pl[0], pl[1], jetzt]); }
 
@@ -2048,8 +2048,7 @@ const PREISE = [
 			for (const spur of [spurR, spurL]) {
 				for (let i = 1; i < spur.length; i++) {
 					const a = Math.max(0, 1 - (jetzt - spur[i][2]) / GLIMM);
-					if (a <= 0) continue;
-					const v = Math.round(255 * Math.pow(a, 1.6));
+					const v = Math.max(REST, Math.round(255 * Math.pow(a, 1.6)));
 					octx.strokeStyle = `rgb(${v},${v},${v})`;
 					octx.beginPath(); octx.moveTo(spur[i - 1][0], spur[i - 1][1]); octx.lineTo(spur[i][0], spur[i][1]); octx.stroke();
 				}
@@ -2063,8 +2062,7 @@ const PREISE = [
 			ctx.globalCompositeOperation = "screen";       // Schwarz der Ebene bleibt durchsichtig
 			ctx.filter = `blur(${(dicke * 0.7 * d).toFixed(1)}px)`; ctx.globalAlpha = 0.7; ctx.drawImage(off, 0, 0);
 			ctx.filter = "none"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
-			if (t < DAUER + GLIMM + 0.5) requestAnimationFrame(bild);
-			else ctx.clearRect(0, 0, cv.width, cv.height);
+			if (t < DAUER + GLIMM + 0.5) requestAnimationFrame(bild); /* danach bleibt der Rest stehen */
 		}
 		const los = () => { vermessen(); requestAnimationFrame(bild); };
 		(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(los);
