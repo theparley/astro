@@ -296,7 +296,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const neu = (X: number, Z: number, ebene: number, ein: number): Person => ({ x: CX + X, y: CY - Z, s: 1, ein, zx: 0, zy: 0, bleibt: ebene <= 1, rang: 0, ebene, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z });
 		const j = (w: number) => (rnd() - 0.5) * w;
 		// alle erscheinen im ersten Abschnitt, bis kurz vor der Pause (letzte Einblendung dauert 0,5 s)
-		const spaeter = () => 0.2 + rnd() * (T_PAUSE - 0.75);
+		// Tempo des Erscheinens (Rasul 14.11.2026: „Gib dem Erscheinen der Männchen auch mal eine Geschwindigkeit. Lass es mal
+		// langsam anfangen, steigern und wieder abflachen.“): Die Zeitpunkte folgen einem Sinus-Verlauf (Umkehrung von sanft),
+		// also erst wenige, in der Mitte die meisten, am Ende wieder wenige. Vorher gleichmäßig verteilt. Gleich viele
+		// Zufallszahlen wie vorher, die Plätze bleiben deshalb dieselben.
+		const spaeter = () => 0.2 + (T_PAUSE - 0.75) * (Math.acos(1 - 2 * rnd()) / Math.PI);
 		// Links und rechts ungleich (Rasul 13.11.2026 abends: „in der Endposition sind die Hintergrundmännchen rechts und
 		// links … ein bisschen ähnlich … mach da mal eine Seite ein bisschen größer und mehr und auf der anderen Seite ein
 		// bisschen weniger, dass es organischer aussieht“): links stehen mehr Personen und näher an der Kamera (also größer),
