@@ -281,6 +281,22 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		pointer-events: auto;
 	}
 
+	/* Variante unten mittig (Rasul 13.11.2026): Cluster klebt von Anfang an unten in der Mitte, auf der
+	   Startseite ausgeklappt mit Namen, nach 100 px Scrollen fährt es zu Logo und Hamburger zusammen.
+	   Doppelte Klasse, damit es die Film-Hero-Lage (absolut, sticky) sicher überschreibt. */
+	:global(html[data-lage="unten"]) .bbh-menu.bbh-menu {
+		position: static;
+	}
+	:global(html[data-lage="unten"]) .bbh-menu .bbh-menu__cluster.bbh-menu__cluster {
+		position: fixed;
+		top: auto;
+		bottom: var(--fuge);
+		left: 50%;
+		margin-left: 0;
+		transform: translateX(-50%);
+		pointer-events: auto;
+	}
+
 	@keyframes bbh-maske {
 		from { clip-path: inset(0 100% 0 0); }
 		to { clip-path: inset(0 0 0 0); }
@@ -311,7 +327,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			// BBH: offen, bis 100 px über die Lage des Clusters hinaus gescrollt ist (im Film-Hero
 			// steht er auf halber Höhe, sonst oben)
 			const film = document.documentElement.dataset.hero === "film";
-			const schwelle = film ? menu.getBoundingClientRect().top + window.scrollY + 100 : 100;
+			const unten = document.documentElement.dataset.lage === "unten";
+			const schwelle = film && !unten ? menu.getBoundingClientRect().top + window.scrollY + 100 : 100;
 			const oben = startseite && window.scrollY <= schwelle;
 			menu.classList.toggle("bbh-menu--oben", oben);
 			const offen = oben || gehalten || ueber;

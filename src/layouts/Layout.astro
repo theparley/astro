@@ -104,7 +104,17 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-hero") || "film";
 					} catch (e) { return q || "film"; }
 				}
+				// Menülage (Rasul 13.11.2026: „wir kleben es gleich unten mittig an den Bildschirm. Und beim
+				// Scrollen fährt es dann zusammen, das gucken wir uns mal als Variante an“): ?lage=unten|links.
+				function liesLage() {
+					var q = new URLSearchParams(location.search).get("lage");
+					try {
+						if (q === "unten" || q === "links") localStorage.setItem("parley-lage", q);
+						return localStorage.getItem("parley-lage") || "links";
+					} catch (e) { return q || "links"; }
+				}
 				function setze() {
+					document.documentElement.dataset.lage = liesLage();
 					var h = liesHero();
 					document.documentElement.dataset.hero = h;
 					document.documentElement.dataset.menu = h === "film" ? "bbh" : lies();
@@ -127,6 +137,9 @@ const websiteJsonLd = JSON.stringify({
 				<span>Menü</span>
 				<button type="button" data-wahl="zwetschke">Zwetschke</button>
 				<button type="button" data-wahl="bbh">BBH</button>
+				<span>Lage</span>
+				<button type="button" data-lage-wahl="links">Links</button>
+				<button type="button" data-lage-wahl="unten">Unten</button>
 				<span>Hero</span>
 				<button type="button" data-hero-wahl="text">Text</button>
 				<button type="button" data-hero-wahl="film">Film</button>
@@ -210,6 +223,8 @@ const websiteJsonLd = JSON.stringify({
 		padding: 2px 8px;
 		cursor: pointer;
 	}
+	html[data-lage="unten"] .menu-wahl [data-lage-wahl="unten"],
+	html:not([data-lage="unten"]) .menu-wahl [data-lage-wahl="links"],
 	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
 	html:not([data-hero="film"]) .menu-wahl [data-hero-wahl="text"],
 	html[data-menu="bbh"] .menu-wahl [data-wahl="bbh"],
@@ -219,6 +234,12 @@ const websiteJsonLd = JSON.stringify({
 <script>
 	/* Menü-Schalter (nur lokal): Wahl speichern und sofort umschalten. */
 	document.addEventListener("click", (e) => {
+		const lage = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-lage-wahl]");
+		if (lage) {
+			try { localStorage.setItem("parley-lage", lage.dataset.lageWahl!); } catch {}
+			location.reload();
+			return;
+		}
 		const hero = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-hero-wahl]");
 		if (hero) {
 			// Hero-Wechsel ändert Aufbau und Menülage: Seite neu laden
