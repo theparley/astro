@@ -114,13 +114,13 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-lage") || "gemischt";
 					} catch (e) { return q || "gemischt"; }
 				}
-				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis q; Grundeinstellung i (Rasul 13.11. nachmittags: „Änder nochmal den Text in Wir liefern Videobeweise aus echten Gesprächen.“)
+				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis v; Grundeinstellung v (Rasul 13.11. abends: „Nimm trotzdem mal V.“; davor i)
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
 						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v") localStorage.setItem("parley-satz", q);
-						return localStorage.getItem("parley-satz") || "i";
-					} catch (e) { return q || "i"; }
+						return localStorage.getItem("parley-satz") || "v";
+					} catch (e) { return q || "v"; }
 				}
 				function liesUmlaut() {
 					var q = new URLSearchParams(location.search).get("umlaut");

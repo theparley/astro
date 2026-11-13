@@ -101,7 +101,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			<div class="satz satz--h"><Haltung ebene="p" aufdecken zeilen={["Wir liefern den Videobeweis mit echten Gesprächen"]} /></div>
 			{/* I: Rasul 13.11.2026: „Wir liefern Videobeweise aus echten Gesprächen.“ ENTSCHIEDEN (Rasul 13.11.2026
 			   nachmittags: „Änder nochmal den Text in Wir liefern Videobeweise aus echten Gesprächen.“), ersetzt R. */}
-			<div class="satz satz--i"><Haltung ebene="h1" aufdecken zeilen={["Wir liefern Videobeweise aus echten Gesprächen"]} /></div>
+			<div class="satz satz--i"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise aus echten Gesprächen"]} /></div>
 			{/* J: Rasul 13.11.2026: „Nochmal eine Variante, wir fangen echte Gespräche ein.“ (Methode Fangen ·
 			   Veredeln · Verteilen; LinkedIn-Headline „Wir fangen echte Gespräche ein“).
 			   K: Kandidat Claude dazu, mit dem Beweis im selben Satz. */}
@@ -134,7 +134,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			<!-- U: Rasul 13.11.2026 abends: „Die Frage ist, ob die Doppeldeutigkeit tatsächlich so schlecht ist.“ S gekürzt auf vier Zeilen, Doppeldeutigkeit bleibt -->
 			<div class="satz satz--u"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit echten Gesprächen"]} /></div>
 			<!-- V: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Video aus echten Gesprächen. Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ -->
-			<div class="satz satz--v"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Video aus echten Gesprächen"]} /></div>
+			<div class="satz satz--v"><Haltung ebene="h1" aufdecken zeilen={["Wir beweisen Expertise mit Video aus echten Gesprächen"]} /></div>
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
 			   Film nur lokal (Freigabe fehlt). */}
@@ -182,7 +182,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	/* Satz-Vergleich: nur der gewählte Satz ist sichtbar (Grundeinstellung A) */
 	.satz { display: none; margin: auto 0; }
 	:global(html[data-satz="a"]) .satz--a,
-	:global(html:not([data-satz])) .satz--i,
+	:global(html:not([data-satz])) .satz--v,
 	:global(html[data-satz="g"]) .satz--g,
 	:global(html[data-satz="h"]) .satz--h,
 	:global(html[data-satz="i"]) .satz--i,
