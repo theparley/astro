@@ -50,6 +50,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
 			<span></span><span></span><span></span>
 		</button>
+		{/* Namenskachel wie BBHs Wortmarke neben dem Menü, nur auf der Startseite, solange oben
+		   (Rasul 13.11.2026: „Ganz am Anfang sieht man das ganze Menü und noch den Namen BBH hintendran.
+		   Da würden wir einmal den kleinen parley schreiben. Dann nehmen wir unsere Forma DJR-Schrift“).
+		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
+		{startseite && <a href="/" class="bbh-menu__name" tabindex="-1" aria-hidden="true"><span>parley</span></a>}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
@@ -214,6 +219,41 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		opacity: 1;
 		pointer-events: auto;
 	}
+
+	/* Namenskachel: BBH `logotype bg-white/90`, 272 px breit bei 88 px Kachel */
+	.bbh-menu__name {
+		order: 9;
+		display: grid;
+		place-items: center;
+		width: calc(var(--k) * 3.09);
+		height: var(--k);
+		background: rgba(255, 255, 255, 0.9);
+		color: #000;
+		text-decoration: none;
+		flex: none;
+		clip-path: inset(0 100% 0 0);
+		opacity: 0;
+		pointer-events: none;
+		/* Einklappen beim Scrollen: nach rechts weg plus Deckkraft, 500 ms (BBH) */
+		transition: clip-path 500ms var(--maske), opacity 500ms var(--kurve);
+	}
+	.bbh-menu__name span {
+		font-family: "Forma DJR", var(--schrift-lesen);
+		font-variation-settings: "opsz" 72, "wght" 900;
+		font-size: calc(var(--k) * 0.9);
+		line-height: 1;
+		letter-spacing: -0.02em;
+		margin-top: -0.12em; /* optisch mittig: Unterlänge von p und y */
+	}
+	.bbh-menu--oben .bbh-menu__name {
+		clip-path: inset(0 0 0 0);
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	/* Anfangsanimation der Startseite wie BBH (Analyse C 5.2): Logo 500 ms ab 0, Name 500 ms ab
+	   500 ms, Menükacheln 1000 ms ab 1000 ms, jeweils als Maske von links. */
+	.bbh-menu--start.bbh-menu--oben .bbh-menu__name { animation: bbh-maske 500ms var(--maske) 500ms both; }
 
 	/* Startseite oben: Menükacheln wischen beim Laden ein (BBH: 1000 ms ab 1000 ms) */
 	.bbh-menu--start.bbh-menu--oben .bbh-menu__nav { animation: bbh-maske 1000ms var(--maske) 1000ms both; }

@@ -157,6 +157,9 @@ const websiteJsonLd = JSON.stringify({
 	/* Menü-Wahl: immer nur eines der beiden Menüs zeigen */
 	html[data-menu="bbh"] .menu-root { display: none; }
 	html:not([data-menu="bbh"]) .bbh-menu { display: none; }
+	/* Mit dem BBH-Menü entfällt das Logo im Hero (Rasul 13.11.2026: „Wir könnten uns dann tatsächlich
+	   unser Logo auf der Seite rausnehmen“); die Logo-Kachel und der Name „parley“ im Menü übernehmen. */
+	html[data-menu="bbh"] .hero__logo { display: none; }
 	/* BBH-Menü sitzt oben links und ist auf der Startseite anfangs offen: unter 768 px würde es
 	   das Hero-Logo überdecken (gemessen bei 375 px), deshalb rückt die Bühne dann tiefer. */
 	@media (max-width: 767px) {
