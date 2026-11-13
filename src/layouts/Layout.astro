@@ -135,8 +135,8 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(location.search).get("kopf");
 					try {
 						if (q === "videobeweis" || q === "band" || q === "kachel") localStorage.setItem("parley-kopf", q);
-						return localStorage.getItem("parley-kopf") || "videobeweis";
-					} catch (e) { return q || "videobeweis"; }
+						return localStorage.getItem("parley-kopf") || "band"; // Grundeinstellung „band“ seit 13.11.2026 abends (Rasul: Aufbau Film, Satz, Problem, Kacheln „Beweis“)
+					} catch (e) { return q || "band"; }
 				}
 				// Ende der Animation Experten-Auswahl (13.11.2026 abends): ?ende=drei|eins|grau|unscharf; Grundeinstellung „unscharf“
 				// (Rasul 13.11.2026 abends: „Unscharf“; dazu: „Es würde unbewusst klarmachen, dass wir einen Fokus geben.“)
@@ -146,6 +146,14 @@ const websiteJsonLd = JSON.stringify({
 						if (q === "drei" || q === "eins" || q === "grau" || q === "unscharf" || q === "ebenen" || q === "kamera") localStorage.setItem("parley-ende", q);
 						return localStorage.getItem("parley-ende") || "kamera";
 					} catch (e) { return q || "kamera"; }
+				}
+				// Rahmen der Experten-Auswahl (13.11.2026 abends): ?rahmen=21|16; Grundeinstellung 21 (21:9, Rasul: „Probier mal 21 zu 9“)
+				function liesRahmen() {
+					var q = new URLSearchParams(location.search).get("rahmen");
+					try {
+						if (q === "21" || q === "16") localStorage.setItem("parley-rahmen", q);
+						return localStorage.getItem("parley-rahmen") || "21";
+					} catch (e) { return q || "21"; }
 				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
@@ -160,6 +168,7 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.umlaut = liesUmlaut();
 					document.documentElement.dataset.kopf = liesKopf();
 					document.documentElement.dataset.ende = liesEnde();
+					document.documentElement.dataset.rahmen = liesRahmen();
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
 					var h = liesHero();
@@ -211,6 +220,11 @@ const websiteJsonLd = JSON.stringify({
 					<button type="button" data-ende-wahl="unscharf">Unscharf</button>
 					<button type="button" data-ende-wahl="ebenen">Ebenen</button>
 					<button type="button" data-ende-wahl="kamera">Kamera</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Rahmen</span>
+					<button type="button" data-rahmen-wahl="21">21:9</button>
+					<button type="button" data-rahmen-wahl="16">16:9</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Umlaut</span>
@@ -363,14 +377,16 @@ const websiteJsonLd = JSON.stringify({
 	}
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
-	html:not([data-kopf="band"]):not([data-kopf="kachel"]) .menu-wahl [data-kopf-wahl="videobeweis"],
+	html[data-kopf="videobeweis"] .menu-wahl [data-kopf-wahl="videobeweis"],
+	html:not([data-rahmen="16"]) .menu-wahl [data-rahmen-wahl="21"],
+	html[data-rahmen="16"] .menu-wahl [data-rahmen-wahl="16"],
 	html[data-ende="drei"] .menu-wahl [data-ende-wahl="drei"],
 	html[data-ende="eins"] .menu-wahl [data-ende-wahl="eins"],
 	html[data-ende="grau"] .menu-wahl [data-ende-wahl="grau"],
 	html[data-ende="unscharf"] .menu-wahl [data-ende-wahl="unscharf"],
 	html[data-ende="ebenen"] .menu-wahl [data-ende-wahl="ebenen"],
 	html:not([data-ende="drei"]):not([data-ende="eins"]):not([data-ende="grau"]):not([data-ende="unscharf"]):not([data-ende="ebenen"]) .menu-wahl [data-ende-wahl="kamera"],
-	html[data-kopf="band"] .menu-wahl [data-kopf-wahl="band"],
+	html:not([data-kopf="videobeweis"]):not([data-kopf="kachel"]) .menu-wahl [data-kopf-wahl="band"],
 	html[data-kopf="kachel"] .menu-wahl [data-kopf-wahl="kachel"],
 	html[data-umlaut="innen"] .menu-wahl [data-umlaut-wahl="innen"],
 	html[data-umlaut="ecken"] .menu-wahl [data-umlaut-wahl="ecken"],
@@ -434,6 +450,14 @@ const websiteJsonLd = JSON.stringify({
 		if (aufbau) {
 			try { localStorage.setItem("parley-aufbau", aufbau.dataset.aufbauWahl!); } catch {}
 			location.reload();
+			return;
+		}
+		const rahmenWahl = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-rahmen-wahl]");
+		if (rahmenWahl) {
+			const w = rahmenWahl.dataset.rahmenWahl!;
+			try { localStorage.setItem("parley-rahmen", w); } catch {}
+			document.documentElement.dataset.rahmen = w;
+			document.querySelector<HTMLElement>("[data-experten]")?.click(); // neu legen und abspielen
 			return;
 		}
 		const endeWahl = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-ende-wahl]");

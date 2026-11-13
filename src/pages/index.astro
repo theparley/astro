@@ -213,7 +213,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					<p class="t-lesen anlass__text"><span class="entwurf">Entwurf</span><br />Behaupten kann das jeder. Ob jemand wirklich etwas kann, sieht man erst im Gespräch.</p>
 				</div>
 			</div>
-			<VideoKacheln id="kap-titel" titel={"Überall Experten.<br />Zeit für den Video&shy;beweis."} titelStufe="2xl" kacheln={[
+			<VideoKacheln id="kap-titel" titel={`<span class="titel-videobeweis">Video&shy;beweis</span><span class="titel-beweis">Beweis</span>`} titelStufe="2xl" kacheln={[
 				{ nr: "01", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
 				{ nr: "02", titel: "Beweisverfahren", zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
@@ -320,8 +320,13 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass { display: none; }
 	:global(html[data-kopf="band"]) .anlass--band,
 	:global(html[data-kopf="kachel"]) .anlass--kachel { display: block; }
-	/* In beiden Proben entfällt die Überschrift „Videobeweis“ sichtbar; sie bleibt als Sprungziel des Menüs im Code. */
-	:global(html[data-kopf="band"] #kap-titel),
+	/* Mit dem Band heißt die Überschrift über den Kacheln „Beweis“ (Rasul 13.11.2026 abends: „so sieht es aus, das ist das,
+	   was wir machen, und das ist das Problem, das wir sehen. Dann kämen unsere Kacheln und dann können wir auch Beweis
+	   hinschreiben. Als Überschrift für die Kacheln.“). Ein Wort wie BBHs „Work“. */
+	:global(.titel-beweis) { display: none; }
+	:global(html[data-kopf="band"] .titel-beweis) { display: inline; }
+	:global(html[data-kopf="band"] .titel-videobeweis) { display: none; }
+	/* In der Probe „breite Kachel“ entfällt die Überschrift sichtbar; sie bleibt als Sprungziel des Menüs im Code. */
 	:global(html[data-kopf="kachel"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	/* B6 hell (BBH theme:light): weiße Fläche, schwarze Schrift, Innenabstand lg */
 	.anlass--band { background: var(--white); color: var(--black); padding: var(--abstand-lg) 0; margin-bottom: var(--abstand-lg); overflow-x: clip; }
