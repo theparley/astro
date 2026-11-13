@@ -127,6 +127,10 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			{/* R: Rasul 13.11.2026: „Wir liefern Videobeweise für echte Experten. Probier mal den Satz.“
 			   ENTSCHIEDEN (Rasul 13.11.2026: „Ja, R nehmen“), ersetzt O. Grundeinstellung und h1. */}
 			<div class="satz satz--r"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise für echte Experten"]} /></div>
+			<!-- S: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos aus echten Gesprächen.“ Dazu: „Der Satz ist natürlich ein bisschen doppeldeutig, weil es auch ein bisschen nach Eigenlob riecht.“
+			     T: Gegenvorschlag mit „eure“, damit klar ist, wessen Expertise bewiesen wird -->
+			<div class="satz satz--s"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Videos aus echten Gesprächen"]} /></div>
+			<div class="satz satz--t"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen eure Expertise mit Videos aus echten Gesprächen"]} /></div>
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
 			   Film nur lokal (Freigabe fehlt). */}
@@ -186,6 +190,8 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-satz="p"]) .satz--p,
 	:global(html[data-satz="q"]) .satz--q,
 	:global(html[data-satz="r"]) .satz--r,
+	:global(html[data-satz="s"]) .satz--s,
+	:global(html[data-satz="t"]) .satz--t,
 	:global(html[data-satz="f"]) .satz--f,
 	:global(html[data-satz="e"]) .satz--e,
 	:global(html[data-satz="d"]) .satz--d,

@@ -118,14 +118,14 @@ const websiteJsonLd = JSON.stringify({
 				function liesSatz() {
 					var q = new URLSearchParams(location.search).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r") localStorage.setItem("parley-satz", q);
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t") localStorage.setItem("parley-satz", q);
 						return localStorage.getItem("parley-satz") || "i";
 					} catch (e) { return q || "i"; }
 				}
 				function liesUmlaut() {
 					var q = new URLSearchParams(location.search).get("umlaut");
 					try {
-						if (q === "innen" || q === "aussen") localStorage.setItem("parley-umlaut", q);
+						if (q === "innen" || q === "aussen" || q === "ecken") localStorage.setItem("parley-umlaut", q);
 						return localStorage.getItem("parley-umlaut") || "aussen";
 					} catch (e) { return q || "aussen"; }
 				}
@@ -170,6 +170,7 @@ const websiteJsonLd = JSON.stringify({
 				<span>Umlaut</span>
 				<button type="button" data-umlaut-wahl="aussen">Außen</button>
 				<button type="button" data-umlaut-wahl="innen">Innen</button>
+				<button type="button" data-umlaut-wahl="ecken">Ecken</button>
 				<span>Satz</span>
 				<button type="button" data-satz-wahl="a">A</button>
 				<button type="button" data-satz-wahl="b">B</button>
@@ -189,6 +190,8 @@ const websiteJsonLd = JSON.stringify({
 				<button type="button" data-satz-wahl="p">P</button>
 				<button type="button" data-satz-wahl="q">Q</button>
 				<button type="button" data-satz-wahl="r">R</button>
+				<button type="button" data-satz-wahl="s">S</button>
+				<button type="button" data-satz-wahl="t">T</button>
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
@@ -279,7 +282,10 @@ const websiteJsonLd = JSON.stringify({
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-umlaut="innen"] .menu-wahl [data-umlaut-wahl="innen"],
-	html:not([data-umlaut="innen"]) .menu-wahl [data-umlaut-wahl="aussen"],
+	html[data-umlaut="ecken"] .menu-wahl [data-umlaut-wahl="ecken"],
+	html:not([data-umlaut="innen"]):not([data-umlaut="ecken"]) .menu-wahl [data-umlaut-wahl="aussen"],
+	html[data-satz="s"] .menu-wahl [data-satz-wahl="s"],
+	html[data-satz="t"] .menu-wahl [data-satz-wahl="t"],
 	html[data-satz="a"] .menu-wahl [data-satz-wahl="a"],
 	html[data-satz="b"] .menu-wahl [data-satz-wahl="b"],
 	html[data-satz="c"] .menu-wahl [data-satz-wahl="c"],

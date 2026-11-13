@@ -39,6 +39,11 @@
 @font-face { font-family: "BBH-DE-Innen Bartle"; src: url("/fonts/frei/BBH-DE-Innen-Bartle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BBH-DE-Innen Bogle"; src: url("/fonts/frei/BBH-DE-Innen-Bogle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BBH-DE-Innen Hegarty"; src: url("/fonts/frei/BBH-DE-Innen-Hegarty.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
+/* Variante „Ecken“ (Rasul 13.11.2026): Ä = normales A plus zwei quadratische Punkte in den freien oberen Ecken;
+   Ü und Ö wie „Innen“. Schalter „Umlaut“ → „Ecken“, ?umlaut=ecken. */
+@font-face { font-family: "BBH-DE-Ecken Bartle"; src: url("/fonts/frei/BBH-DE-Ecken-Bartle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BBH-DE-Ecken Bogle"; src: url("/fonts/frei/BBH-DE-Ecken-Bogle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BBH-DE-Ecken Hegarty"; src: url("/fonts/frei/BBH-DE-Ecken-Hegarty.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
 /* Forma DJR nur noch für die Werkstatt- und Demo-Seiten (/werkstatt, /tafel, Fallblatt).
    Eine Schrift wird nur geladen, wenn eine Seite sie benutzt: Die Website selbst lädt Forma
    nicht mehr. Nicht in neuen Bausteinen verwenden (Lizenz offen, WEBSITE.md 3n). */
@@ -131,6 +136,11 @@ html[data-umlaut="innen"] {
 	--schrift-breit: "BBH-DE-Innen Bartle", "Arial Black", sans-serif;
 	--schrift-schmal: "BBH-DE-Innen Bogle", "Arial Narrow", sans-serif;
 	--schrift-haltung: "BBH-DE-Innen Hegarty", "Arial Black", sans-serif;
+}
+html[data-umlaut="ecken"] {
+	--schrift-breit: "BBH-DE-Ecken Bartle", "Arial Black", sans-serif;
+	--schrift-schmal: "BBH-DE-Ecken Bogle", "Arial Narrow", sans-serif;
+	--schrift-haltung: "BBH-DE-Ecken Hegarty", "Arial Black", sans-serif;
 }
 @media (min-width: 1024px) {
 	:root { --rand: 32px; }
