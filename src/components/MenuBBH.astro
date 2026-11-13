@@ -254,22 +254,34 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	   wären breiter als der Bildschirm, das Logo ragte links hinaus (gemessen 13.11.2026 bei 375 px: −58 bis 430 px;
 	   schon vor „Videobeweis“ −37 bis 408 px). */
 	@media (max-width: 519px) { .bbh-menu__name { display: none; } }
+	/* Zweig minimal: PARLEY in Bartle ist rund 7 Kacheln breit; unter 900 px hätte das Menü samt Namen keinen Platz */
+	@media (max-width: 899px) { .bbh-menu__name { display: none; } }
 
 	.bbh-menu__name span {
 		white-space: nowrap;
 		/* Geist statt Forma DJR (13.11.2026 abends, Rasul „Ja, entfernen“: die neue Fassung kommt ohne Forma aus, bis
 		   die Lizenz gekauft ist). Rückweg: font-family "Forma DJR"; font-variation-settings "opsz" 72, "wght" 900. */
-		font-family: var(--schrift-lesen);
-		font-weight: 900;
-		font-size: calc(var(--k) * 0.9);
+		/* Zweig minimal (Rasul 13.11.2026 abends): „nicht klein. Sondern wir machen es groß und fett. Wir nehmen die
+		   gleiche Schrift, die BBH da verwendet, an der Stelle für ihren Namen im Menü.“ BBH dort: Wortmarke „BBH“ in
+		   Bartle-Form, Kachel 320 × 86 px, Buchstaben 52 px hoch (60 % der Kachel), 24 px Rand links und rechts
+		   (gemessen 13.11.2026). Hier: PARLEY in BBH-DE Bartle, Versalhöhe 0,7 em, also Schriftgröße 0,864 × Kachel;
+		   Breite „PARLEY“ 7,742 em. */
+		font-family: var(--schrift-breit);
+		font-weight: 400;
+		text-transform: uppercase;
+		font-size: calc(var(--k) * 0.864);
 		line-height: 1;
-		letter-spacing: -0.02em;
+		/* enger wie BBH (Rasul: „Das sieht so aus, als ob BBH die Abstände zwischen den Buchstaben verringert hat.“):
+		   BBH-Wortmarke 272 × 52 px, Bartle „BBH“ bei 52 px Versalhöhe 288,5 px Tinte → −0,11 em je Zwischenraum.
+		   Der Abstand nach dem letzten Buchstaben wird mit padding-left ausgeglichen, damit es mittig bleibt. */
+		letter-spacing: -0.11em;
+		padding-left: 0.055em; /* gemessen: so links und rechts gleich viel Rand */
 		/* Lage (Rasul 13.11.2026: „ein bisschen tiefer setzen, das L stößt oben mehr an als unten P und Y“):
 		   gemessen bei -0,12 em oben 8 px, unten 12 px Luft; jetzt -0,07 em, oben gut 10 px, unten knapp 10 px. */
-		margin-top: -0.07em;
+		margin-top: 0;   /* Bartle: Versalmitte = Boxmitte (Ober-/Unterlänge 950/−250, Versal 700) */
 	}
 	.bbh-menu--oben .bbh-menu__name {
-		width: calc(var(--k) * 3.09);
+		width: calc(var(--k) * 0.864 * (7.742 - 6 * 0.11) + 48px);
 		margin-left: 0;
 		clip-path: inset(0 0 0 0);
 		opacity: 1;
