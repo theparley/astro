@@ -1,0 +1,138 @@
+---
+/* Zeiger-Film nach BBH B3 („statementTextWithVideo“, Analyse C 4.4; Rasul 13.11.2026: „mach mir mal den
+   Vorschlag“ nach BBHs Startseite). Gehört zu einem großen Satz:
+   - Rechner (ab 1025 px): kleines Vorschaufenster, ein Sechstel der Fensterbreite, 16:9, abgerundet, kräftiger
+     Schatten (30 px 31 px 18 px, 35 %), folgt dem Mauszeiger mit Nachlauf (je Bild 15 % des Wegs), sichtbar nur
+     solange die Maus über dem Bereich ist (Deckkraft 0,3 s). Läuft stumm in Schleife. Zeiger wird zum Play-Zeichen.
+   - Handy: steht zwei Drittel breit mittig unter dem Satz, spielt stumm, solange zu sehen.
+   - Klick öffnet den Film groß (Vollbild, eigene Steuerung des Browsers, startet stumm), Esc oder Klick schließt.
+   bereich: CSS-Selektor des Bereichs, über dem die Vorschau folgt (Standard: das umgebende Element). */
+interface Props { src: string; titel: string; bereich?: string }
+const { src, titel, bereich = "" } = Astro.props;
+---
+<button type="button" class="zeigerfilm" data-zeigerfilm data-bereich={bereich} aria-label={`Film ansehen: ${titel}`}>
+	<video src={src} muted loop playsinline preload="metadata"></video>
+</button>
+<div class="zeigerfilm__gross" data-zeigerfilm-gross hidden>
+	<button type="button" class="zeigerfilm__zu" aria-label="Film schließen">Schließen</button>
+	<video src={src} controls playsinline></video>
+</div>
+
+<style>
+	.zeigerfilm {
+		display: block;
+		width: 66.666%;
+		margin: var(--abstand-md) auto 0;
+		padding: 0;
+		border: 0;
+		background: #111;
+		aspect-ratio: 16 / 9;
+		border-radius: 4px;
+		overflow: hidden;
+		cursor: pointer;
+	}
+	.zeigerfilm video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+	@media (min-width: 1025px) {
+		.zeigerfilm {
+			position: fixed;
+			left: 0;
+			top: 0;
+			z-index: 50;
+			width: 16.6667vw;
+			margin: 0;
+			pointer-events: none;
+			opacity: 0;
+			transition: opacity 0.3s ease-out;
+			box-shadow: 30px 31px 18px rgba(0, 0, 0, 0.35);
+			transform: translate(calc(var(--x, -999px) - 50%), calc(var(--y, -999px) - 50%));
+		}
+		.zeigerfilm.an { opacity: 1; }
+	}
+	.zeigerfilm__gross {
+		position: fixed;
+		inset: 0;
+		z-index: 2000;
+		background: rgba(0, 0, 0, 0.92);
+		display: grid;
+		place-items: center;
+		animation: zeigerfilm-auf 300ms ease-in-out both;
+	}
+	.zeigerfilm__gross[hidden] { display: none; }
+	.zeigerfilm__gross video { width: min(100vw, calc(100dvh * 16 / 9)); max-height: 100dvh; }
+	.zeigerfilm__zu {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		z-index: 1;
+		font: inherit;
+		font-size: var(--text-sm);
+		color: var(--white);
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.4);
+		padding: 6px 12px;
+		cursor: pointer;
+	}
+	@keyframes zeigerfilm-auf { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } }
+</style>
+
+<script>
+	// Play-Zeichen als Zeiger (BBH: icon-play.svg, Hotspot 11/13)
+	const PLAY = `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='22' height='26'><path d='M1.5 1.5 L20.5 13 L1.5 24.5 Z' fill='white' stroke='black' stroke-width='1.5' stroke-linejoin='round'/></svg>")}") 11 13, pointer`;
+	let aufraeumen: (() => void) | null = null;
+
+	function zeigerfilm() {
+		aufraeumen?.(); aufraeumen = null;
+		const vorschau = document.querySelector<HTMLElement>("[data-zeigerfilm]");
+		const gross = document.querySelector<HTMLElement>("[data-zeigerfilm-gross]");
+		if (!vorschau || !gross || vorschau.offsetParent === null && getComputedStyle(vorschau).position !== "fixed") return;
+		const film = vorschau.querySelector("video")!;
+		const grossFilm = gross.querySelector("video")!;
+		const bereich = (vorschau.dataset.bereich && document.querySelector<HTMLElement>(vorschau.dataset.bereich)) || vorschau.parentElement!;
+		const rechner = window.matchMedia("(min-width: 1025px)").matches;
+		film.muted = true;
+		const weg: (() => void)[] = [];
+		const an = (el: EventTarget, ev: string, fn: any, opt?: any) => { el.addEventListener(ev, fn, opt); weg.push(() => el.removeEventListener(ev, fn, opt)); };
+
+		const oeffnen = () => {
+			gross.hidden = false;
+			grossFilm.muted = true;
+			grossFilm.currentTime = film.currentTime;
+			grossFilm.play().catch(() => {});
+			document.documentElement.style.overflow = "hidden";
+		};
+		const schliessen = () => {
+			gross.hidden = true;
+			grossFilm.pause();
+			document.documentElement.style.overflow = "";
+		};
+		an(gross.querySelector(".zeigerfilm__zu")!, "click", schliessen);
+		an(gross, "click", (e: Event) => { if (e.target === gross) schliessen(); });
+		an(document, "keydown", (e: KeyboardEvent) => { if (e.key === "Escape" && !gross.hidden) schliessen(); });
+
+		if (rechner) {
+			bereich.style.cursor = PLAY;
+			let mx = 0, my = 0, x = 0, y = 0, laeuft = false, rafId = 0;
+			const schritt = () => {
+				x += (mx - x) * 0.15; y += (my - y) * 0.15;
+				vorschau.style.setProperty("--x", `${x}px`); vorschau.style.setProperty("--y", `${y}px`);
+				if (laeuft) rafId = requestAnimationFrame(schritt);
+			};
+			an(bereich, "mouseenter", (e: MouseEvent) => {
+				mx = x = e.clientX; my = y = e.clientY;
+				vorschau.classList.add("an"); film.muted = true; film.play().catch(() => {});
+				if (!laeuft) { laeuft = true; rafId = requestAnimationFrame(schritt); }
+			});
+			an(bereich, "mousemove", (e: MouseEvent) => { mx = e.clientX; my = e.clientY; });
+			an(bereich, "mouseleave", () => { vorschau.classList.remove("an"); film.pause(); laeuft = false; cancelAnimationFrame(rafId); });
+			an(bereich, "click", oeffnen);
+			weg.push(() => { laeuft = false; cancelAnimationFrame(rafId); bereich.style.cursor = ""; });
+		} else {
+			an(vorschau, "click", oeffnen);
+			const beob = new IntersectionObserver(([e]) => { if (e.isIntersecting) { film.muted = true; film.play().catch(() => {}); } else film.pause(); }, { threshold: 0.2 });
+			beob.observe(vorschau);
+			weg.push(() => beob.disconnect());
+		}
+		aufraeumen = () => { weg.forEach((f) => f()); schliessen(); };
+	}
+	document.addEventListener("astro:page-load", zeigerfilm);
+</script>
