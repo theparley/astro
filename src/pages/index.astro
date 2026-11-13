@@ -1530,21 +1530,21 @@ const PREISE = [
 		   Linke Hälfte bleibt frei; Überschrift und Text stehen untereinander in der rechten Hälfte,
 		   linksbündig an derselben Kante. */
 		.ab-split > .ab-titel {
-			grid-column: 2;
+			grid-column: 1 / span 2; justify-self: center; width: min(100%, 50vw); box-sizing: border-box; /* mittig unter dem Video, Kanten wie das Video (Rasul 13.11.2026) */
 			grid-row: 2; /* Reihe 1 = Video über beide Hälften (Rasul 13.11.) */
 			font-size: var(--text-2xl); /* Rasul 13.11.2026: „in der nächst kleineren Schriftgröße“ (vorher huge) */
 			line-height: 0.9;
 			letter-spacing: -0.01em;
 			text-align: left;
 			text-wrap: balance;
-			padding: 0 16px;
+			padding: 0;
 		}
 		.ab-split > .ab-text {
-			grid-column: 2;
+			grid-column: 1 / span 2; justify-self: center; width: min(100%, 50vw); box-sizing: border-box;
 			grid-row: auto;
 			margin: var(--abstand-md) 0 0;
-			max-width: 46rem;
-			padding: 0 16px;
+			max-width: none;
+			padding: 0;
 		}
 	}
 
