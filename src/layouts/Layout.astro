@@ -172,6 +172,14 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-hoehe") || "auge"; // Rasul 13.11.2026 abends: „Augenhöhe“
 					} catch (e) { return q || "auge"; }
 				}
+				// Aufstellung der Personen (13.11.2026 abends): ?aufstellung=reihen|nah; Grundeinstellung „reihen“
+				function liesAufstellung() {
+					var q = new URLSearchParams(location.search).get("aufstellung");
+					try {
+						if (q === "reihen" || q === "nah") localStorage.setItem("parley-aufstellung", q);
+						return localStorage.getItem("parley-aufstellung") || "reihen";
+					} catch (e) { return q || "reihen"; }
+				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
 					var q = new URLSearchParams(location.search).get("aufbau");
@@ -188,6 +196,7 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.rahmen = liesRahmen();
 					document.documentElement.dataset.form = liesForm();
 					document.documentElement.dataset.hoehe = liesHoehe();
+					document.documentElement.dataset.aufstellung = liesAufstellung();
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
 					var h = liesHero();
@@ -254,6 +263,11 @@ const websiteJsonLd = JSON.stringify({
 					<span>Höhe</span>
 					<button type="button" data-hoehe-wahl="oben">Leicht von oben</button>
 					<button type="button" data-hoehe-wahl="auge">Augenhöhe</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Aufstellung</span>
+					<button type="button" data-aufstellung-wahl="reihen">Reihen</button>
+					<button type="button" data-aufstellung-wahl="nah">Nah, locker</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Umlaut</span>
@@ -407,6 +421,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-kopf="videobeweis"] .menu-wahl [data-kopf-wahl="videobeweis"],
+	html:not([data-aufstellung="nah"]) .menu-wahl [data-aufstellung-wahl="reihen"],
+	html[data-aufstellung="nah"] .menu-wahl [data-aufstellung-wahl="nah"],
 	html[data-hoehe="oben"] .menu-wahl [data-hoehe-wahl="oben"],
 	html:not([data-hoehe="oben"]) .menu-wahl [data-hoehe-wahl="auge"],
 	html:not([data-form="punkt"]) .menu-wahl [data-form-wahl="figur"],
@@ -483,6 +499,14 @@ const websiteJsonLd = JSON.stringify({
 		if (aufbau) {
 			try { localStorage.setItem("parley-aufbau", aufbau.dataset.aufbauWahl!); } catch {}
 			location.reload();
+			return;
+		}
+		const aufstellungWahl = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-aufstellung-wahl]");
+		if (aufstellungWahl) {
+			const w = aufstellungWahl.dataset.aufstellungWahl!;
+			try { localStorage.setItem("parley-aufstellung", w); } catch {}
+			document.documentElement.dataset.aufstellung = w;
+			document.querySelector<HTMLElement>("[data-experten]")?.click();
 			return;
 		}
 		const hoeheWahl = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-hoehe-wahl]");

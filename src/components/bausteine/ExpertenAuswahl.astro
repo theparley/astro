@@ -81,8 +81,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		return { p, lang, ges: lang[lang.length - 1] };
 	}
 	let WEG_R = halbweg(1), WEG_L = halbweg(-1);
-	function rahmen(flaecheBreite: number) {
-		RW = Math.min(RH * format(), flaecheBreite - 160); L = CX - RW / 2;
+	// textBreite: Breite der längsten Zeile der Überschrift darüber (Rasul 13.11.2026 abends: „Mach ihn so breit wie die
+	// Schrift, die oben dran ist.“); ohne Überschrift gilt das Format aus dem Schalter.
+	function rahmen(flaecheBreite: number, textBreite?: number) {
+		RW = Math.min(textBreite ?? RH * format(), flaecheBreite - 160); L = CX - RW / 2;
 		WEG_R = halbweg(1); WEG_L = halbweg(-1);
 	}
 	function punkt(w: ReturnType<typeof halbweg>, s: number): [number, number] {
@@ -259,13 +261,33 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
 			}
 		};
-		reihe(4, -60, 20, Math.min(450, halb), 2, spaeter);
-		reihe(7, 70, 170, halb * 0.85, 2, spaeter);
-		reihe(16, 200, 330, halb, 3, spaeter);
-		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
 		const spaetVon = T_AUSWAHL + D_KAMERA * 0.7;
-		reihe(8, 230, 330, halb * 0.95, 3, () => spaetVon + rnd() * D_KAMERA * 0.15);
-		liste.slice(-8).forEach((q) => { q.spaet = true; });
+		const spaetZeit = () => spaetVon + rnd() * D_KAMERA * 0.15;
+		if (document.documentElement.dataset.aufstellung === "nah") {
+			// Variante „nah“ (Rasul 13.11.2026 abends: „Da müssen wir die Personen näher hinstellen, dann sieht es auch nicht
+			// so ganz vorbereitet aus, vielleicht ist das eine Variante“): weniger Tiefe (also weniger Unschärfe), locker
+			// verteilt statt in Reihen, mit Mindestabstand und frei um die drei vorne.
+			const frei = (X: number, Z: number) => liste.every((q) => Math.hypot(q.wx - X, q.wz - Z) > 78);
+			let n = 0, versuche = 0;
+			while (n < 44 && versuche++ < 8000) {
+				const X = j(2 * halb), Z = -120 + rnd() * 250;
+				if (frei(X, Z)) { liste.push(neu(X, Z, Z < 30 ? 2 : 3, spaeter())); n++; }
+			}
+			let m = 0; versuche = 0;
+			while (m < 10 && versuche++ < 4000) {
+				const X = j(2 * halb), Z = 90 + rnd() * 40;
+				if (frei(X, Z)) { const q = neu(X, Z, 3, spaetZeit()); q.spaet = true; liste.push(q); m++; }
+			}
+			return liste;
+		}
+		// Grundform: Reihen, mehr Personen vor allem hinten (Rasul 13.11.2026 abends: „setz dann mehr Personen rein, auch
+		// vor allem in den Hintergrund“)
+		reihe(5, -60, 20, Math.min(500, halb), 2, spaeter);
+		reihe(9, 70, 170, halb * 0.85, 2, spaeter);
+		reihe(26, 190, 330, halb, 3, spaeter);
+		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
+		reihe(12, 230, 330, halb * 0.95, 3, spaetZeit);
+		liste.slice(-12).forEach((q) => { q.spaet = true; });
 		return liste;
 	}
 
@@ -347,7 +369,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
 				// Rahmen und Personen passend zur Fläche neu legen
 				const breite = cv.width / (cv.height / H);
-				rahmen(breite); leuteFlach = personen(); leuteRaum = personenFahrt();
+				// Breite der längsten Zeile der Überschrift im Band messen und in Flächeneinheiten umrechnen
+				let textBreite: number | undefined;
+				const satz = fig.closest(".anlass--band")?.querySelector(".anlass__satz");
+				if (satz && satz.getClientRects().length) {
+					const bereich = document.createRange(); bereich.selectNodeContents(satz);
+					const zeilen = [...bereich.getClientRects()];
+					const px = Math.max(0, ...zeilen.map((z) => z.width));
+					const proPx = H / cv.getBoundingClientRect().height;
+					if (px > 0) textBreite = px * proPx;
+				}
+				rahmen(breite, textBreite); leuteFlach = personen(); leuteRaum = personenFahrt();
 				// Am Ende darf niemand abgeschnitten sein: falls nötig zoomt die Kamera mit der Fahrt etwas heraus (Brennweite),
 				// statt Personen seitlich zu verschieben
 				const halbe = breite / 2 - 70;
@@ -437,8 +469,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					for (const { q, x, y, g, kipp, fy, zc } of lage) {
 						const ein = weich((t - q.ein) / 0.5);
 						const tiefe = Math.max(0, 1 - fokus / zc); // 0 = auf der Schärfeebene
-						const unsch = 8 * F_jetzt * Math.max(0, 1 / fokus - 1 / zc);
-						const alpha = ein * (0.85 + 0.15 * e) * (1 - 0.95 * tiefe);
+						// sanfter abgestuft (Rasul 13.11.2026 abends: „Das ist jetzt sehr geblurrt alles im Hintergrund“): Faktor 2,5
+						// statt 8 (die Ranfahrt vergrößert das Verhältnis vorne zu hinten, deshalb so stark zurückgenommen)
+						const unsch = 2.5 * F_jetzt * Math.max(0, 1 / fokus - 1 / zc);
+						const alpha = ein * (0.85 + 0.15 * e) * (1 - 0.6 * tiefe);
 						if (punkte) {
 							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen (Kopf hebt sich, Schultern wachsen)
 							const p = sanft(anteil(kipp, 0.01, 0.17));
