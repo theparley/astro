@@ -246,8 +246,6 @@ const PREISE = [
 	   Name und Punkt der mittleren Kachel werden weiß (Skript unten). */}
 	<section class="fm" aria-labelledby="ab3-titel">
 		{/* Kein Label seit 12.11.2026 nachts; Überschrift „Die Beweisstücke.“ (Rasul: Block 3 endet auf „Beweismaterial“, Block 4 fängt mit den Beweisstücken an) */}
-		<h2 class="ab-titel" id="ab3-titel">Die Beweisstücke.</h2>
-		<p class="ab-text">Der Beweis ist das echte Gespräch. Daraus werden skalierbare Beweisstücke für jeden eurer&nbsp;Kanäle.</p>
 		<div class="fm-index" data-fm-index>
 			{FORMATE.map((f, n) => (
 				<span data-n={n}><i></i><b><em>{f.buchstabe}</em>{f.name}</b></span>
@@ -282,6 +280,9 @@ const PREISE = [
 			</div>
 		</div>
 		<p class="fm-kanaele">LinkedIn · Website · Newsletter · Vertrieb</p>
+		{/* Überschrift und Text unter dem Band (Rasul 13.11.2026: „Ich setze die Animation für die Beweisstücke über die Beweisstücke.“) */}
+		<h2 class="ab-titel fm-titel-unten" id="ab3-titel">Die Beweisstücke.</h2>
+		<p class="ab-text">Der Beweis ist das echte Gespräch. Daraus werden skalierbare Beweisstücke für jeden eurer&nbsp;Kanäle.</p>
 		<p class="ab-mitte"><span class="entwurf">Dummy: Testvideo statt Kundenclips, keine Kundenfreigabe. Später ein echtes Kundenbeispiel mit Freigabe.</span></p>
 	</section>
 
@@ -1516,6 +1517,7 @@ const PREISE = [
 	.ab-btext { position: absolute; display: flex; align-items: center; justify-content: center; }
 	.ab-btext p { margin: 0; color: #fff; font-weight: 800; line-height: 1.12; text-align: center; text-wrap: balance; }
 	@media (max-width: 799px) { .ab-split-video { margin: 14vw 0 var(--abstand-md); } }
+	.fm > .fm-titel-unten { margin-top: var(--abstand-lg); }
 	/* Folgeabsatz im Lesetext: Absatzabstand statt Abschnittsabstand (Rasul 13.11.2026: Absatz bei den Entscheidern) */
 	.ab-text + .ab-text { margin-top: var(--lesetext-absatz) !important; }
 	/* Überschrift im Split immer linksbündig, auch auf dem Handy (Rasul 13.11.2026) */
