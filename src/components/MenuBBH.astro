@@ -225,7 +225,6 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		order: 9;
 		display: grid;
 		place-items: center;
-		width: calc(var(--k) * 3.09);
 		height: var(--k);
 		background: rgba(255, 255, 255, 0.9);
 		color: #000;
@@ -234,10 +233,16 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		clip-path: inset(0 100% 0 0);
 		opacity: 0;
 		pointer-events: none;
-		/* Einklappen beim Scrollen: nach rechts weg plus Deckkraft, 500 ms (BBH) */
-		transition: clip-path 500ms var(--maske), opacity 500ms var(--kurve);
+		/* Einklappen beim Scrollen: nach rechts weg plus Deckkraft, 500 ms (BBH). Dazu schrumpft die
+		   Breite auf null (Rasul 13.11.2026: „Es muss immer sich mittig zentrieren“): sonst behält die
+		   unsichtbare Kachel ihren Platz und das Menü unten mittig sitzt eingeklappt neben der Mitte. */
+		width: 0;
+		margin-left: calc(-1 * var(--fuge));
+		overflow: hidden;
+		transition: clip-path 500ms var(--maske), opacity 500ms var(--kurve), width 500ms var(--maske), margin-left 500ms var(--maske);
 	}
 	.bbh-menu__name span {
+		white-space: nowrap;
 		font-family: "Forma DJR", var(--schrift-lesen);
 		font-variation-settings: "opsz" 72, "wght" 900;
 		font-size: calc(var(--k) * 0.9);
@@ -246,6 +251,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		margin-top: -0.12em; /* optisch mittig: Unterlänge von p und y */
 	}
 	.bbh-menu--oben .bbh-menu__name {
+		width: calc(var(--k) * 3.09);
+		margin-left: 0;
 		clip-path: inset(0 0 0 0);
 		opacity: 1;
 		pointer-events: auto;
