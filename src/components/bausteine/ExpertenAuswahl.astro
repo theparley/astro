@@ -371,7 +371,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				if (satz && satz.getClientRects().length) {
 					const bereich = document.createRange(); bereich.selectNodeContents(satz);
 					const px = Math.max(0, ...[...bereich.getClientRects()].map((z) => z.width));
-					if (px > 0) cv.style.height = `${(px / format() / 0.86).toFixed(1)}px`;
+					// Überschrift und Animation müssen zusammen auf einen Bildschirm passen (Rasul 13.11.2026 abends: „jetzt passt
+					// es nicht mehr auf eine Seite“): Höhe höchstens Fensterhöhe minus Überschrift, Abstand und je 32 px Rand.
+					// Reicht der Platz nicht, wird der 16:9-Rahmen schmaler als die Überschrift.
+					const abstand = Math.max(0, fig.getBoundingClientRect().top - satz.getBoundingClientRect().bottom);
+					const frei = window.innerHeight - satz.getBoundingClientRect().height - abstand - 64;
+					const wunsch = px / format() / 0.86;
+					if (px > 0) cv.style.height = `${Math.max(180, Math.min(wunsch, frei)).toFixed(1)}px`;
 				}
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
