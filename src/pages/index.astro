@@ -1489,7 +1489,7 @@ const PREISE = [
 	.ab-split-video { margin-top: var(--abstand-md); padding: 0 16px; }
 	.ab-split-video .szene-video { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; background: var(--panel); }
 	@media (min-width: 800px) {
-		.ab-split > .ab-split-video { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin-top: 0; }
+		.ab-split > .ab-split-video { grid-column: 1; grid-row: 1 / span 3; align-self: center; margin-top: 0; } /* Video links, Schrift rechts (Rasul 13.11.2026) */
 	}
 	/* Folgeabsatz im Lesetext: Absatzabstand statt Abschnittsabstand (Rasul 13.11.2026: Absatz bei den Entscheidern) */
 	.ab-text + .ab-text { margin-top: var(--lesetext-absatz) !important; }
@@ -1506,7 +1506,7 @@ const PREISE = [
 		   Linke Hälfte bleibt frei; Überschrift und Text stehen untereinander in der rechten Hälfte,
 		   linksbündig an derselben Kante. */
 		.ab-split > .ab-titel {
-			grid-column: 1;
+			grid-column: 2;
 			grid-row: 1;
 			font-size: var(--text-2xl); /* Rasul 13.11.2026: „in der nächst kleineren Schriftgröße“ (vorher huge) */
 			line-height: 0.9;
@@ -1516,7 +1516,7 @@ const PREISE = [
 			padding: 0 16px;
 		}
 		.ab-split > .ab-text {
-			grid-column: 1;
+			grid-column: 2;
 			grid-row: auto;
 			margin: var(--abstand-md) 0 0;
 			max-width: 46rem;
