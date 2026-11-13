@@ -205,7 +205,7 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.form = liesForm();
 					document.documentElement.dataset.hoehe = liesHoehe();
 					document.documentElement.dataset.aufstellung = liesAufstellung();
-					document.documentElement.dataset.animhoehe = liesWahl("animhoehe", ["100", "90", "80", "70"], "70");
+					document.documentElement.dataset.animhoehe = liesWahl("animhoehe", ["100", "90", "80", "70", "60"], "60");
 					document.documentElement.dataset.titelgroesse = liesWahl("titelgroesse", ["huge", "2xl"], "2xl");
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
@@ -286,6 +286,7 @@ const websiteJsonLd = JSON.stringify({
 					<button type="button" data-allg-wahl="animhoehe" data-wert="90">90 %</button>
 					<button type="button" data-allg-wahl="animhoehe" data-wert="80">80 %</button>
 					<button type="button" data-allg-wahl="animhoehe" data-wert="70">70 %</button>
+					<button type="button" data-allg-wahl="animhoehe" data-wert="60">60 %</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Überschrift</span>
@@ -453,6 +454,7 @@ const websiteJsonLd = JSON.stringify({
 	html[data-animhoehe="90"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="90"],
 	html[data-animhoehe="80"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="80"],
 	html[data-animhoehe="70"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="70"],
+	html[data-animhoehe="60"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="60"],
 	html[data-raster="aus"] .menu-wahl [data-allg-wahl="raster"][data-wert="aus"],
 	html[data-raster="an"] .menu-wahl [data-allg-wahl="raster"][data-wert="an"],
 	html[data-titelgroesse="huge"] .menu-wahl [data-allg-wahl="titelgroesse"][data-wert="huge"],

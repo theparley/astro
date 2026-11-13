@@ -358,7 +358,11 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
 	/* „Überall Experten.“ nah unter der Animation, der Nachsatz direkt darunter wie die nächste Zeile derselben Überschrift */
 	/* mit .anlass--band davor, sonst gewinnt „.anlass__satz { margin: 0 auto }“, das später im Stil steht */
-	.anlass--band .anlass__satz--eins { margin-top: calc(32px - var(--abstand-md)); }
+	/* direkt an der Unterkante der Animationsfläche: Dann ist der Abstand vom Videobeweis-Rahmen zum Text so groß wie
+	   der Abstand des Rahmens zur Oberkante der Fläche (je 7 % der Flächenhöhe). Rasul 13.11.2026 abends: „Überall
+	   Experten darf näher der Animation liegen. Du kannst als Maß nehmen … nach oben hin einen Abstand zur nächsten
+	   Fläche und den kannst du auch nach unten hin machen zum Anfang vom Text.“ */
+	.anlass--band .anlass__satz--eins { margin-top: calc(0px - var(--abstand-md)); }
 	.anlass--band .anlass__nachsatz { margin-top: calc(0px - var(--abstand-md)); transition: opacity 700ms var(--kurve), transform 700ms var(--kurve); }
 	:global(.anlass--band[data-phase="warten"] .anlass__nachsatz) { opacity: 0; transform: translateY(12px); }
 
