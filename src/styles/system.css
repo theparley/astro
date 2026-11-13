@@ -34,6 +34,11 @@
 @font-face { font-family: "BBH-DE Bartle"; src: url("/fonts/frei/BBH-DE-Bartle.woff2?v=2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BBH-DE Bogle"; src: url("/fonts/frei/BBH-DE-Bogle.woff2?v=2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "BBH-DE Hegarty"; src: url("/fonts/frei/BBH-DE-Hegarty.woff2?v=2") format("woff2"); font-weight: 400; font-display: swap; }
+/* Umlaut-Variante „innen“ (Rasul 13.11.2026): Großbuchstaben mit Umlaut oben gestaucht, Punkte innerhalb der
+   Versalhöhe. Umschalten über html[data-umlaut="innen"] (Schalter „Umlaut“, nur lokal). */
+@font-face { font-family: "BBH-DE-Innen Bartle"; src: url("/fonts/frei/BBH-DE-Innen-Bartle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BBH-DE-Innen Bogle"; src: url("/fonts/frei/BBH-DE-Innen-Bogle.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "BBH-DE-Innen Hegarty"; src: url("/fonts/frei/BBH-DE-Innen-Hegarty.woff2?v=1") format("woff2"); font-weight: 400; font-display: swap; }
 /* Forma DJR nur noch für die Werkstatt- und Demo-Seiten (/werkstatt, /tafel, Fallblatt).
    Eine Schrift wird nur geladen, wenn eine Seite sie benutzt: Die Website selbst lädt Forma
    nicht mehr. Nicht in neuen Bausteinen verwenden (Lizenz offen, WEBSITE.md 3n). */
@@ -121,6 +126,11 @@
 	--tafel-zarge: color-mix(in srgb, var(--panel), black 50%);
 	--tafel-wand: color-mix(in srgb, var(--panel), black 50%);
 	--logo-h: clamp(32px, 4.4vw, 56px);
+}
+html[data-umlaut="innen"] {
+	--schrift-breit: "BBH-DE-Innen Bartle", "Arial Black", sans-serif;
+	--schrift-schmal: "BBH-DE-Innen Bogle", "Arial Narrow", sans-serif;
+	--schrift-haltung: "BBH-DE-Innen Hegarty", "Arial Black", sans-serif;
 }
 @media (min-width: 1024px) {
 	:root { --rand: 32px; }
