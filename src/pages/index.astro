@@ -81,6 +81,24 @@ const FORMATE = [
 	   (Analyse Teil 3, 2.1). ACHTUNG: Rasul hat „Video links, Schrift rechts“ am 13.11. ausprobiert
 	   und zurückgenommen; hier steht es als Vorschlag. Rückweg auf „Video über dem Text“: Baustein
 	   Textblock mit dem Video darüber. Video nur lokal (Freigaben der Gäste fehlen). */}
+	{/* TEST Blasen (Rasul 13.11.2026: „ausprobieren, ob das funktioniert, wenn wir das Video kleiner
+	   machen, aber nicht wie vorher auf halbe Bildschirmbreite, sondern größer und sozusagen dann die
+	   Blasen dazu machen, dass das sozusagen das Gesamtvideo gibt“). Video mittig, am Rechner zwei Drittel
+	   der Breite, am Handy 74 %: die Blasen ragen links und rechts je rund 13 % der Videobreite über das
+	   Video hinaus und haben so Platz. Text mittig darunter (Textblock, R9). Rückweg: die Fassung
+	   „Text-Bild, Video links“ steht als Kommentar direkt darunter. */}
+	<section class="abschnitt" aria-labelledby="ab2-titel">
+		<div class="blasen-buehne">
+			<BlasenVideo src="/lokal/szene-beweisaufnahme.mp4" blasen={BLASEN as any} />
+		</div>
+		<div class="nach-textbild">
+			<Textblock id="ab2-titel" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
+				<p>Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. Wir fangen Gespräche ein, die so natürlich sind wie Gespräche am Küchentisch.</p>
+				<p>Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
+			</Textblock>
+		</div>
+	</section>
+	{/* RÜCKWEG (bis 13.11.2026 vormittags):
 	<section class="abschnitt" aria-labelledby="ab2-titel">
 		<TextBild id="ab2-titel" medium="voll" titelZeilen={["Die Beweiskraft", "echter Gespräche."]}>
 			<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" blasen={BLASEN as any} />
@@ -88,6 +106,7 @@ const FORMATE = [
 			<p>Denn Entscheider stellen sich zwei Fragen: Habt ihr die Expertise? Und passt es&nbsp;menschlich?</p>
 		</TextBild>
 	</section>
+	*/}
 
 	{/* ── 3 · DAS BEWEISVERFAHREN ── Baustein B6 Text-Bild, Grafik als Anker rechts (Seitenwechsel
 	   gibt Rhythmus wie bei BBH). Grafik offen: WEBSITE.md 3j. */}
@@ -162,6 +181,9 @@ const FORMATE = [
 	.nach-textbild { margin-top: var(--abstand-lg); }
 	.uhr { margin-top: var(--abstand-lg); }   /* die Uhr bringt ihre Breite selbst mit: min(542 px, 100 %), mittig */
 	.uhr + :global(.kurzsaetze) { margin-top: var(--abstand-md); }
+	/* Blasen-Test: Video mittig, Platz für die überstehenden Blasen (oben rund ein Drittel der Videobreite) */
+	.blasen-buehne { width: 74%; margin: calc(var(--abstand-lg) + 22vw) auto 0; }
+	@media (min-width: 1024px) { .blasen-buehne { width: 66.666%; max-width: 1150px; margin-top: calc(var(--abstand-lg) + 14vw); } }
 	.abschnitt--letzter { margin-bottom: var(--abstand-xl); }
 </style>
 
