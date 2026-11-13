@@ -43,7 +43,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Danach fährt die Kamera auf die vordere Person zu (Rasul 13.11.2026 abends: „die Kamera … kippt nicht nur, sondern
 	// fährt dann auch noch auf die Person zu. Dadurch wird es hinten auch breiter.“). Beginnt kurz vor Ende des Kippens.
 	const T_FAHRT = T_AUSWAHL + D_KIPP * 0.8, D_FAHRT = 1.8;
-	const ENDE = Math.max(T_FOKUS + D_FOKUS, T_FAHRT + D_FAHRT + 0.4) + 0.2;
+	const ENDE = Math.max(T_FOKUS + D_FOKUS, T_FAHRT + D_FAHRT + 0.4, T_AUSWAHL + 3.4 + 0.5) + 0.2; // 3,4 = D_KAMERA
 	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
 	// Entschieden: „unscharf“ (Rasul 13.11.2026 abends). Ohne Schalter (auf der hochgeladenen Seite) gilt das.
 	// Danach Probe „ebenen“ (Rasul 13.11.2026 abends), seitdem Grundeinstellung; „unscharf“ bleibt im Schalter.
@@ -200,6 +200,59 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		return liste;
 	}
 
+	// ── Kamerafahrt, Neubau (Rasul 13.11.2026 abends) ─────────────────────────────────────────────────────────────
+	// „Gefühl soll es ja nachher wirklich eine Kamerafahrt sein. Also wie wenn die Kamera mittig über diesen Köpfen schwebt
+	// … Und dann macht die Kamera anstatt den Blick von oben … von vorne nach hinten. Und bewegt sich in der Mitte über der
+	// Masse vor die vorderste Person. Das ist die Kamerabewegung. Die darf ein Ease-in und ein Ease-out haben … lass du mal
+	// das Rumschieben von Personen weg … da wo die Personen erscheinen, da bleiben die auch nachher stehen. Wir geben dem
+	// eben jetzt schon so eine Struktur, die nachher funktioniert, dass vorne einer steht und man dann noch ruhig zwei, drei
+	// Ebenen tief und dann den Rest und dann ganz viel lebend dran.“
+	// Welt: Boden y = 0, Personen fest auf (X, Z). Kamera nur in der Mittelebene (x = 0): Position C = [Höhe, Z], Blickziel
+	// Lk = [Höhe, Z], Brennweite F. Start: 1000 über der Mitte, Blick senkrecht nach unten, F = 1000 (Draufsicht 1 : 1 zur
+	// Fläche). Ende: knapp über dem Boden vor der vordersten Person, Blick nach hinten. Ein einziger weicher Verlauf.
+	const D_KAMERA = 3.4;
+	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
+	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
+	// Brennweite von 1000 auf 430. So bleibt die vordere Person die ganze Fahrt im Bild (gerechnet 13.11.2026; eine
+	// gerade Bahn ließ sie in der Mitte der Fahrt unten aus dem Bild laufen).
+	const A0 = Math.PI / 2, A1 = 15 * Math.PI / 180, R0 = 1000, R1 = 620, LZ1 = 150, F0 = 1000, F1 = 430;
+	function bahn(e: number, fEnde = F1) {
+		const a = A0 + (A1 - A0) * e, R = R0 + (R1 - R0) * e, lz = LZ1 * e;
+		const Lk: [number, number] = [0, lz], C: [number, number] = [R * Math.sin(a), lz - R * Math.cos(a)];
+		return { C, Lk, F: F0 + (fEnde - F0) * e };
+	}
+	const glatt = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * x * (x * (6 * x - 15) + 10); // Ease-in und Ease-out
+	function fahrtKamera(X: number, Z: number, C: [number, number], Lk: [number, number], F: number) {
+		const phi = Math.atan2(C[0] - Lk[0], Lk[1] - C[1]);
+		const vy = -C[0], vz = Z - C[1];
+		const zc = vy * -Math.sin(phi) + vz * Math.cos(phi), yc = vy * Math.cos(phi) + vz * Math.sin(phi);
+		return { x: CX + F * X / zc, y: CY - F * yc / zc, g: F / zc, zc, phi };
+	}
+	const form = () => (document.documentElement.dataset.form === "punkt" ? "punkt" : "figur");
+	// Aufstellung, die von oben ungeordnet wirkt und von vorne trägt: einer vorne, zwei dahinter, zwei Reihen, viele hinten
+	function personenFahrt(): Person[] {
+		const rnd = zufall(23), liste: Person[] = [];
+		const halb = RW / 2 - 80;
+		const neu = (X: number, Z: number, ebene: number, ein: number): Person => ({ x: CX + X, y: CY - Z, s: 1, ein, zx: 0, zy: 0, bleibt: ebene <= 1, rang: 0, ebene, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z });
+		const j = (w: number) => (rnd() - 0.5) * w;
+		const spaeter = () => 0.2 + rnd() * (T_GESTE + DAUER - 0.5);
+		liste.push(neu(0, -300, 0, rnd() * 0.5), neu(-200 + j(30), -170 + j(30), 1, rnd() * 0.7), neu(200 + j(30), -170 + j(30), 1, rnd() * 0.7));
+		const reihe = (n: number, zVon: number, zBis: number, breite: number, ebene: number, ein: () => number) => {
+			for (let i = 0; i < n; i++) {
+				const X = (n === 1 ? 0 : (i / (n - 1) - 0.5) * 2 * breite) + j((2 * breite) / n * 0.6);
+				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
+			}
+		};
+		reihe(4, -60, 20, Math.min(450, halb), 2, spaeter);
+		reihe(7, 70, 170, halb * 0.85, 2, spaeter);
+		reihe(16, 200, 330, halb, 3, spaeter);
+		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
+		const spaetVon = T_AUSWAHL + D_KAMERA * 0.7;
+		reihe(8, 230, 330, halb * 0.95, 3, () => spaetVon + rnd() * D_KAMERA * 0.15);
+		liste.slice(-8).forEach((q) => { q.spaet = true; });
+		return liste;
+	}
+
 	// Person in derselben Form wie die Augenzeugen-Animationen (Werkstatt augenzeugen-kacheln.js, personPfad):
 	// Kopf als Kreis, Schultern als Bogen, Maß in Neunzehnteln der Höhe. Rasul 13.11.2026: „gucken, dass die nachher
 	// zusammenpassen, was Formen, Geschwindigkeiten, Erzähltiefe angeht“.
@@ -259,12 +312,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
 				// Rahmen und Personen passend zur Fläche neu legen
 				const breite = cv.width / (cv.height / H);
-				rahmen(breite); leuteFlach = personen(); leuteRaum = personenKamera();
+				rahmen(breite); leuteFlach = personen(); leuteRaum = personenFahrt();
 				// Am Ende darf niemand abgeschnitten sein: falls nötig zoomt die Kamera mit der Fahrt etwas heraus (Brennweite),
 				// statt Personen seitlich zu verschieben
 				const halbe = breite / 2 - 70;
 				let weit = 0;
-				for (const q of leuteRaum) { const p = kamera(q.tx, q.tz, PHI_ENDE, 1, KD_FAHRT); weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
+				const ende1 = bahn(1);
+				for (const q of leuteRaum) { const p = fahrtKamera(q.wx, q.wz, ende1.C, ende1.Lk, ende1.F); weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
 				zoomEnde = Math.min(1, halbe / Math.max(1, weit));
 			};
 
@@ -325,30 +379,28 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				ctx.setTransform(sc, 0, 0, sc, ox, 0);
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
 				if (ende() === "kamera") {
-					// Kamerafahrt: alle gehen zu ihrem Platz, die Kamera kippt; Unschärfe und Helligkeit je Ebene wie bei „ebenen“
-					const STUFE: [number, number][] = [[0, 1], [5, 0.7], [11, 0.4], [18, 0.22]];
-					// ein gemeinsamer, gleichmäßiger Verlauf: Kippen über die ganze Fahrt, Nachrücken in der zweiten Hälfte,
-					// beides endet gleichzeitig (vorher kubisch mit versetzten Enden, das wirkte wie Tempowechsel)
-					const kk = sanft(anteil(t, T_AUSWAHL, D_KIPP));
-					// Die hinteren rücken erst gegen Ende ein Stück nach hinten, weich (die drei vorne bewegen sich nicht)
-					const geh = sanft(anteil(t, T_AUSWAHL + D_KIPP * 0.35, D_KIPP * 0.65));
-					const fahrt = sanft(anteil(t, T_FAHRT, D_FAHRT));
-					const abstand = KD - (KD - KD_ENDE) * kk - (KD_ENDE - KD_FAHRT) * fahrt;
-					const zoom = 1 + (zoomEnde - 1) * (0.5 * kk + 0.5 * fahrt);
-					const phi = Math.PI / 2 - (Math.PI / 2 - PHI_ENDE) * kk;
-					const f1 = sanft(anteil(t, T_AUSWAHL + D_KIPP * 0.5, D_KIPP * 0.5));
+					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
+					const STUFE: [number, number][] = [[0, 1], [4, 0.75], [9, 0.45], [16, 0.25]];
+					const e = glatt(anteil(t, T_AUSWAHL, D_KAMERA));
+					const { C, Lk, F } = bahn(e, F1 * zoomEnde);
+					const punkte = form() === "punkt";
 					const lage = leute.map((q) => {
-						const X = q.spaet ? q.tx : q.wx + (q.tx - q.wx) * geh, Z = q.spaet ? q.tz : q.wz + (q.tz - q.wz) * geh;
-						const pr = kamera(X, Z, phi, zoom, abstand), u = (64 * q.s * pr.g) / 19;
-						return { q, x: pr.x, y: pr.y - 9 * u * kk, g: q.s * pr.g, zc: pr.zc }; // Füße auf dem Boden, sobald gekippt
+						const pr = fahrtKamera(q.wx, q.wz, C, Lk, F);
+						const kipp = 1 - pr.phi / (Math.PI / 2); // 0 = von oben, nahe 1 = von vorne
+						const u = (64 * q.s * pr.g) / 19;
+						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15), g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y };
 					}).sort((a, b) => b.zc - a.zc);
-					for (const { q, x, y, g } of lage) {
+					const m = sanft(anteil(e, 0.3, 0.7)); // Unschärfe und Helligkeit wachsen mit der Fahrt
+					for (const { q, x, y, g, kipp, fy } of lage) {
 						const ein = weich((t - q.ein) / 0.5);
 						const [b1, a1] = STUFE[q.ebene];
-						const m = q.ebene === 1 ? f1 : q.ebene >= 2 ? kk : 0;
-						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * kk : 0.85 + (a1 - 0.85) * m); // vorne erst mit dem Kippen schwarz
-						const unsch = b1 * m;
-						zeichneUnscharf(ctx, x, y, g, alpha, unsch);
+						const alpha = ein * (q.ebene === 0 ? 0.85 + 0.15 * e : 0.85 + (a1 - 0.85) * m);
+						if (punkte) {
+							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen
+							const p = sanft(anteil(kipp, 0.1, 0.5));
+							if (p < 1) { ctx.globalAlpha = alpha * (1 - p); ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(x, fy, 13 * g, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+							if (p > 0) zeichneUnscharf(ctx, x, y, g, alpha * p, b1 * m);
+						} else zeichneUnscharf(ctx, x, y, g, alpha, b1 * m);
 					}
 					return;
 				}
