@@ -708,10 +708,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// erscheint … dann könnten oben schon die Punkte erscheinen“): Start, sobald „Überall Experten.“ unten ins Bild kommt
 			// noch früher (Rasul 13.11.2026 abends: „zeig mal die Punkte in dem Moment, wo du unten auch den Text zeigst. Die
 			// geht jetzt deutlich zu spät los“): Start, sobald ein Drittel der Animation im Bild ist, nicht erst mit der Zeile
-			// Start nach der BBH-Regel: sobald die unterste Zeile der Überschrift (der Nachsatz) ganz über der Linie 20 % über
-			// der Fensterunterkante steht. Ohne Nachsatz: 90 % der Animation im Bild. Bleibt scharf, weil sie sich zurücksetzen kann.
+			// Start nach der BBH-Regel: sobald die Oberkante des Nachsatzes (unterste Zeilen der Überschrift) die Linie 20 % über
+			// der Fensterunterkante erreicht, genau wie BBHs Zeilen-Blende (Schwelle 0). Erst „ganz über der Linie“ (Schwelle 1)
+			// war zu spät (Rasul 14.11.2026 bei 1008 px Fensterhöhe: „Eigentlich müsste die Animation jetzt starten, oder?“;
+			// gemessen: Oberkante 664 px, Unterkante 840 px, Linie bei 806 px). Ohne Nachsatz: 90 % der Animation im Bild. Bleibt scharf, weil sie sich zurücksetzen kann.
 			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting)) spiele(); },
-				nachsatz ? { rootMargin: "0px 0px -20% 0px", threshold: 1 } : { threshold: 0.9 });
+				nachsatz ? { rootMargin: "0px 0px -20% 0px", threshold: 0 } : { threshold: 0.9 });
 			beob.observe(nachsatz ?? fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
