@@ -104,14 +104,15 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-hero") || "film";
 					} catch (e) { return q || "film"; }
 				}
+				// Grundeinstellung „gemischt“ (Rasul 13.11.2026: „Ja, Gemischt“).
 				// Menülage (Rasul 13.11.2026: „wir kleben es gleich unten mittig an den Bildschirm. Und beim
 				// Scrollen fährt es dann zusammen, das gucken wir uns mal als Variante an“): ?lage=unten|links.
 				function liesLage() {
 					var q = new URLSearchParams(location.search).get("lage");
 					try {
 						if (q === "unten" || q === "links" || q === "gemischt") localStorage.setItem("parley-lage", q);
-						return localStorage.getItem("parley-lage") || "links";
-					} catch (e) { return q || "links"; }
+						return localStorage.getItem("parley-lage") || "gemischt";
+					} catch (e) { return q || "gemischt"; }
 				}
 				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis q; Grundeinstellung r (Rasul 13.11.: „Ja, R nehmen“)
 				function liesSatz() {
@@ -285,7 +286,7 @@ const websiteJsonLd = JSON.stringify({
 	html[data-satz="r"] .menu-wahl [data-satz-wahl="r"],
 	html[data-lage="unten"] .menu-wahl [data-lage-wahl="unten"],
 	html[data-lage="gemischt"] .menu-wahl [data-lage-wahl="gemischt"],
-	html:not([data-lage="unten"]):not([data-lage="gemischt"]) .menu-wahl [data-lage-wahl="links"],
+	html[data-lage="links"] .menu-wahl [data-lage-wahl="links"],
 	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
 	html:not([data-hero="film"]) .menu-wahl [data-hero-wahl="text"],
 	html[data-menu="bbh"] .menu-wahl [data-wahl="bbh"],
