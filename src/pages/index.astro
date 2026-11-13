@@ -178,12 +178,15 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 				     in Podcasts, auf jeder Bühne: Überall sprechen Experten. Behaupten kann das jeder. Ob jemand wirklich etwas
 				     kann, sieht man erst im Gespräch. Dafür gibt es den Videobeweis.“ */}
 				<div class="rahmen anlass__band-innen">
-					{/* Entschieden (Rasul 13.11.2026 abends: „Dreizeilig lassen“). Kandidat davor, Rasul: „Damit unsere Animation verstanden wird. Könnten wir in der Überschrift sagen:
-					     Zeit für den Videobeweis auch im Business.“ Vorher: „Überall Experten. / Zeit für den Videobeweis.“ */}
-					<p class="anlass__satz">Überall Experten.<br />Zeit für den Video&shy;beweis<br />auch im Business.</p>
+					{/* Reihenfolge Animation, Überschrift, Text (Rasul 13.11.2026 abends: „jetzt ist es zu klein, es geht die Wirkung
+					     verloren. Vielleicht müssen wir es anders aufteilen. Wenn wir die Animation zuerst machen, dann den großen Text
+					     oder den nächstkleineren, vielleicht muss der gar nicht so groß sein.“). Überschrift eine Stufe kleiner (2xl). */}
 					{/* Animation als Probe (Rasul 13.11.2026 abends: „viele Icons von Personen … Dann kommt diese Bewegung. Und
 					     dann reduziert sich das auf 3. Probier es mal, ob das Sinn macht“). Baustein ExpertenAuswahl.astro. */}
 					<ExpertenAuswahl />
+					{/* Entschieden (Rasul 13.11.2026 abends: „Dreizeilig lassen“). Kandidat davor, Rasul: „Damit unsere Animation verstanden wird. Könnten wir in der Überschrift sagen:
+					     Zeit für den Videobeweis auch im Business.“ Vorher: „Überall Experten. / Zeit für den Videobeweis.“ */}
+					<p class="anlass__satz">Überall Experten.<br />Zeit für den Video&shy;beweis<br />auch im Business.</p>
 					{/* Bandtext als Probe (Rasul 13.11.2026 abends, gesammelt: KI-Slop, „generierte und gelebte Expertise“, viele
 					     Anbieter wollen bei Entscheidern auf den Schirm, „weil es so einfach ist, jetzt eine Expertise zu behaupten,
 					     schießen die Experten natürlich auch wie Pilze aus dem Boden“, „wie soll denn der entscheiden jetzt, wer da
@@ -203,11 +206,11 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     generieren.“ Gesetzt: „kann man“ (gesprochener, „lässt sich“ steht schon im zweiten Satz); „heute“ aus dem
 					     zweiten Satz genommen, weil es jetzt im ersten steht. Danach Rasul: „Text und Bilder ist vielleicht zu schwach, aus dem werden
 					     ja Dinge gemacht. Textbasierte Beiträge, Content“; gesetzt „Beiträge aus Text und Bild“ (Kandidat Claude). Danach Rasul, kürzer: „Die Feeds sind voll von KI-generierten Inhalten. Jeder Beitrag steht inzwischen unter
-					     Generalverdacht. Ein echtes Gespräch kann man nicht generieren.“ Danach Rasul: „Und auch die echten Beiträge stehen damit unter Generalverdacht.“ (statt „Jeder Beitrag steht inzwischen
+					     Generalverdacht. Ein echtes Gespräch kann man nicht generieren.“ Danach Rasul: „Ich gehe doch wieder zurück, wie soll ein Entscheider euch heute noch …“ („soll“ statt „kann“). Davor Rasul: „Und auch die echten Beiträge stehen damit unter Generalverdacht.“ (statt „Jeder Beitrag steht inzwischen
 					     unter Generalverdacht.“). Davor Rasul (13.11.2026 abends), erster Satz mit Anrede: „Wie kann ein Entscheider euch heute noch als Experten
 					     erkennen?“ Vorher dazwischen: „Wissen lässt sich auf Knopfdruck
 					     recherchieren und sofort verteilen. Beiträge aus Text und Bild haben damit ihre Beweiskraft verloren.“ */}
-					<p class="t-lesen anlass__text"><span class="entwurf">Entwurf</span><br />Wie kann ein Entscheider euch heute noch als Experten erkennen? Die Feeds sind voll von KI-generierten Inhalten. Auch die echten Beiträge stehen damit unter Generalverdacht. Ein echtes Gespräch kann man nicht&nbsp;generieren.</p>
+					<p class="t-lesen anlass__text"><span class="entwurf">Entwurf</span><br />Wie soll ein Entscheider euch heute noch als Experten erkennen? Die Feeds sind voll von KI-generierten Inhalten. Auch die echten Beiträge stehen damit unter Generalverdacht. Ein echtes Gespräch kann man nicht&nbsp;generieren.</p>
 				</div>
 			</div>
 			<div class="anlass anlass--kachel rahmen">
@@ -338,6 +341,18 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass__band-innen { display: grid; gap: 32px; }
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
+	/* Stufe xl (zwei Stufen unter huge): in der halben Breite passt „Zeit für den Videobeweis“ in eine Zeile; bei 2xl
+	   brach „Video-beweis“ um (gemessen 13.11.2026 bei 1440 px) */
+	.anlass--band .anlass__satz { font-size: var(--text-xl); line-height: var(--zeile-xl); }
+	/* Aufteilung wie BBHs Projektseiten (Nachschlagewerk H8 mit B17: das Werk zuerst randlos groß, darunter links der
+	   Titel, rechts der Text; Rasul 13.11.2026 abends: „Schau da auch nochmal, ob du eine Lösung findest bei dem Design,
+	   das BBH hat für ihre Segmente.“). Ab 1024 px: Überschrift links, Lesetext rechts, oben bündig; darunter untereinander. */
+	@media (min-width: 1024px) {
+		.anlass__band-innen { grid-template-columns: 1fr 1fr; column-gap: 32px; align-items: start; }
+		.anlass__band-innen > :global(.experten) { grid-column: 1 / -1; }
+		.anlass--band .anlass__satz { grid-column: 1; text-align: left; margin: 0; }
+		.anlass--band .anlass__text { grid-column: 2; margin: 0; }
+	}
 	/* B20 (BBH „Nächstes Projekt“): Fläche 2:1, Schrift Bogle groß und mittig; hier hell statt Projektfarbe */
 	.anlass--kachel { margin-bottom: 16px; }
 	.anlass__kachel { display: grid; place-content: center; gap: 32px; text-align: center; background: var(--surface); color: var(--black); border-radius: 4px; padding: 64px 16px; }
