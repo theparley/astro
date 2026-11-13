@@ -303,6 +303,12 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   (Mindesthöhe der Bühne) und ohne Innenabstand unter dem Statement. Vorher gemessen 218 px. */
 	:global(html[data-hero="film"]) .hero__buehne { min-height: 0; }
 	:global(html[data-hero="film"]) .satz :global(.haltung) { padding-bottom: 0; }
+	/* Gleicher Abstand über und unter dem Satz (Rasul 13.11.2026 abends: „dass bei unserem Satz … der Abstand nach oben
+	   und nach unten, also der schwarze Hintergrund, unterschiedlich ist, ist das Absicht?“ Nein: gemessen oben rund
+	   100 px, unten 277 px, Rest aus der Zeit mit dem kleinen Text darunter). Jetzt oben und unten je lg. */
+	:global(html[data-hero="film"]) .hero__buehne { padding-top: 0; }
+	:global(html[data-hero="film"]) .hero__buehne :global(h1) { padding-top: var(--abstand-lg); padding-bottom: 0; margin: 0; }
+	:global(html[data-hero="film"]) .aufbau--kacheln > .abschnitt:first-child { margin-top: var(--abstand-lg); }
 	:global(html[data-hero="film"]) .hero :global(.kurzsaetze) { margin-top: var(--abstand-lg); }
 	/* Unter dem Film steht nach BBHs Startseite nur das Statement mit Zeiger-Film; der kleine Text ist hier
 	   ausgeblendet, nicht gestrichen (Rasul 13.11.2026: „den Text, der hatte ja eine Funktion. Also streichen
@@ -342,6 +348,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
+	/* Schriftgröße der Überschrift im Band (Rasul 13.11.2026 abends: „ob wir wirklich die ganz große Schrift hier brauchen.
+	   Was wäre denn die nächstkleinere?“): Schalter „Überschrift“ (html data-titelgroesse = huge | 2xl), Grundeinstellung 2xl. */
+	:global(html:not([data-titelgroesse="huge"])) .anlass--band .anlass__satz { font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
 	/* Überschrift wieder huge und mittig unter der bildschirmfüllenden Animation (13.11.2026 abends). Die Aufteilung nach
 	   BBHs Projektseite (Überschrift xl links, Text rechts) hat Rasul verworfen: „Nee, finde ich nicht, dass das passt.“ */
 	/* B20 (BBH „Nächstes Projekt“): Fläche 2:1, Schrift Bogle groß und mittig; hier hell statt Projektfarbe */

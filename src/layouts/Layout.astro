@@ -180,6 +180,14 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-aufstellung") || "reihen";
 					} catch (e) { return q || "reihen"; }
 				}
+				// Höhe der Animation in % der Fensterhöhe und Größe der Band-Überschrift (13.11.2026 abends)
+				function liesWahl(name, werte, vorgabe) {
+					var q = new URLSearchParams(location.search).get(name);
+					try {
+						if (werte.indexOf(q) >= 0) localStorage.setItem("parley-" + name, q);
+						return localStorage.getItem("parley-" + name) || vorgabe;
+					} catch (e) { return q || vorgabe; }
+				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
 					var q = new URLSearchParams(location.search).get("aufbau");
@@ -197,6 +205,8 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.form = liesForm();
 					document.documentElement.dataset.hoehe = liesHoehe();
 					document.documentElement.dataset.aufstellung = liesAufstellung();
+					document.documentElement.dataset.animhoehe = liesWahl("animhoehe", ["100", "90", "80"], "80");
+					document.documentElement.dataset.titelgroesse = liesWahl("titelgroesse", ["huge", "2xl"], "2xl");
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
 					var h = liesHero();
@@ -268,6 +278,17 @@ const websiteJsonLd = JSON.stringify({
 					<span>Aufstellung</span>
 					<button type="button" data-aufstellung-wahl="reihen">Reihen</button>
 					<button type="button" data-aufstellung-wahl="nah">Nah, locker</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Animation hoch</span>
+					<button type="button" data-allg-wahl="animhoehe" data-wert="100">100 %</button>
+					<button type="button" data-allg-wahl="animhoehe" data-wert="90">90 %</button>
+					<button type="button" data-allg-wahl="animhoehe" data-wert="80">80 %</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Überschrift</span>
+					<button type="button" data-allg-wahl="titelgroesse" data-wert="huge">huge</button>
+					<button type="button" data-allg-wahl="titelgroesse" data-wert="2xl">2xl</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Umlaut</span>
@@ -421,6 +442,11 @@ const websiteJsonLd = JSON.stringify({
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-kopf="videobeweis"] .menu-wahl [data-kopf-wahl="videobeweis"],
+	html[data-animhoehe="100"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="100"],
+	html[data-animhoehe="90"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="90"],
+	html[data-animhoehe="80"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="80"],
+	html[data-titelgroesse="huge"] .menu-wahl [data-allg-wahl="titelgroesse"][data-wert="huge"],
+	html[data-titelgroesse="2xl"] .menu-wahl [data-allg-wahl="titelgroesse"][data-wert="2xl"],
 	html:not([data-aufstellung="nah"]) .menu-wahl [data-aufstellung-wahl="reihen"],
 	html[data-aufstellung="nah"] .menu-wahl [data-aufstellung-wahl="nah"],
 	html[data-hoehe="oben"] .menu-wahl [data-hoehe-wahl="oben"],
@@ -499,6 +525,14 @@ const websiteJsonLd = JSON.stringify({
 		if (aufbau) {
 			try { localStorage.setItem("parley-aufbau", aufbau.dataset.aufbauWahl!); } catch {}
 			location.reload();
+			return;
+		}
+		const allg = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-allg-wahl]");
+		if (allg) {
+			const name = allg.dataset.allgWahl!, w = allg.dataset.wert!;
+			try { localStorage.setItem("parley-" + name, w); } catch {}
+			document.documentElement.dataset[name] = w;
+			document.querySelector<HTMLElement>("[data-experten]")?.click(); // neu messen und abspielen
 			return;
 		}
 		const aufstellungWahl = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-aufstellung-wahl]");
