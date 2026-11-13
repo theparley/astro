@@ -269,14 +269,18 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const j = (w: number) => (rnd() - 0.5) * w;
 		// alle erscheinen im ersten Abschnitt, bis kurz vor der Pause (letzte Einblendung dauert 0,5 s)
 		const spaeter = () => 0.2 + rnd() * (T_PAUSE - 0.75);
-		liste.push(neu(0, -300, 0, rnd() * 0.5), neu(-200 + j(30), -170 + j(30), 1, rnd() * 0.7), neu(200 + j(30), -170 + j(30), 1, rnd() * 0.7));
+		// Links und rechts ungleich (Rasul 13.11.2026 abends: „in der Endposition sind die Hintergrundmännchen rechts und
+		// links … ein bisschen ähnlich … mach da mal eine Seite ein bisschen größer und mehr und auf der anderen Seite ein
+		// bisschen weniger, dass es organischer aussieht“): links stehen mehr Personen und näher an der Kamera (also größer),
+		// rechts weniger und weiter hinten. Die Plätze gelten von Anfang an, verschoben wird niemand.
+		liste.push(neu(0, -300, 0, rnd() * 0.5), neu(-225 + j(20), -205 + j(20), 1, rnd() * 0.7), neu(175 + j(20), -110 + j(20), 1, rnd() * 0.7));
 		const reihe = (n: number, zVon: number, zBis: number, breite: number, ebene: number, ein: () => number) => {
 			for (let i = 0; i < n; i++) {
 				const X = (n === 1 ? 0 : (i / (n - 1) - 0.5) * 2 * breite) + j((2 * breite) / n * 0.6);
 				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
 			}
 		};
-		const spaetVon = T_AUSWAHL + D_KAMERA * 0.7;
+		const spaetVon = T_GESTE + D_KAMERA * 0.7;
 		const spaetZeit = () => spaetVon + rnd() * D_KAMERA * 0.15;
 		if (document.documentElement.dataset.aufstellung === "nah") {
 			// Variante „nah“ (Rasul 13.11.2026 abends: „Da müssen wir die Personen näher hinstellen, dann sieht es auch nicht
@@ -297,9 +301,20 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		}
 		// Grundform: Reihen, mehr Personen vor allem hinten (Rasul 13.11.2026 abends: „setz dann mehr Personen rein, auch
 		// vor allem in den Hintergrund“)
-		reihe(5, -60, 20, Math.min(500, halb), 2, spaeter);
-		reihe(9, 70, 170, halb * 0.85, 2, spaeter);
-		reihe(26, 190, 330, halb, 3, spaeter);
+		// Seite: n Personen zwischen xVon und xBis (Welt), Tiefe zVon bis zBis
+		const seite = (n: number, xVon: number, xBis: number, zVon: number, zBis: number, ebene: number, ein: () => number) => {
+			for (let i = 0; i < n; i++) {
+				const X = xVon + (n === 1 ? 0.5 : i / (n - 1)) * (xBis - xVon) + j(((xBis - xVon) / n) * 0.6);
+				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
+			}
+		};
+		const b1 = Math.min(500, halb);
+		seite(3, -b1, -130, -95, -25, 2, spaeter); // links: drei, nah
+		seite(1, 330, 330, 15, 45, 2, spaeter); // rechts: eine, weiter hinten
+		seite(6, -halb * 0.9, -110, 45, 140, 2, spaeter);
+		seite(3, 140, halb * 0.8, 110, 190, 2, spaeter);
+		seite(15, -halb, -40, 180, 320, 3, spaeter);
+		seite(11, 40, halb, 220, 340, 3, spaeter);
 		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
 		reihe(12, 230, 330, halb * 0.95, 3, spaetZeit);
 		liste.slice(-12).forEach((q) => { q.spaet = true; });
@@ -500,23 +515,48 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				}
 			};
 
+			// Verlauf der Kamerafahrt (Rasul 13.11.2026 abends: „Am Ende ist sie zu schnell. Da fehlt ihr das Ease-in.“).
+			// Gemessen: Auf den letzten 10 % des Wegs wächst die vordere Person noch fast aufs Dreifache (Größe ~ 1/Abstand),
+			// ein gleichmäßig auslaufender Weg wirkt deshalb am Ende trotzdem schnell. Darum läuft die Fahrt überwiegend nach
+			// der sichtbaren Größe der vorderen Person: deren Größe folgt im Verhältnis (wie ein Zoom, jede Verdopplung gleich
+			// lang) dem weichen Verlauf glatt, mit 15 % Anteil des gleichmäßigen Wegs, damit das Kippen nicht zu früh fertig ist.
+			// Ergebnis: Kippen und Herunterfahren vor allem in der ersten Hälfte, die Ranfahrt läuft weich aus.
+			// s = Fortschritt der Geste: Mittel aus Weg (Kippen) und Größe (Ranfahrt), so folgt die Geste der Bewegung.
+			const groesseVorne = (e: number) => {
+				const q = leuteRaum.find((x) => x.ebene === 0); if (!q) return 1;
+				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(q.wx, q.wz, b.C, b.Lk, b.F).g;
+			};
+			const verlauf = (t: number) => {
+				const tz = glatt(anteil(t, T_GESTE, D_KAMERA));
+				if (tz <= 0 || tz >= 1) return { e: tz, s: tz };
+				const L = Math.log(Math.max(1.001, groesseVorne(1))), ziel = tz * L;
+				let lo = 0, hi = 1;
+				for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (Math.log(groesseVorne(m)) < ziel) lo = m; else hi = m; }
+				const e = 0.15 * tz + 0.85 * lo;
+				return { e, s: 0.5 * (e + Math.log(groesseVorne(e)) / L) };
+			};
 			const bild = (t: number, jetzt: number) => {
 				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
 				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
 				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
 				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
 				// Spur nur rechnen, solange sie zu sehen ist
-				if (t >= T_GESTE - 0.25 && t <= T_GESTE + DAUER + GLIMM + 0.45) {
+				// Geste im Takt der Kamera (Rasul 13.11.2026 abends: „Wir koordinieren das Zeichnen von dem Videobeweissymbol mit
+				// der Zoomfahrt … wie die Striche entstehen, richtet sich an der Bewegungsgeschwindigkeit von der Kamera, also mit
+				// an dem Zoom-in, Zoom-out und an der Länge“): Beim Ende „kamera“ beginnen Geste und Fahrt gleichzeitig, dauern
+				// gleich lang und folgen demselben Verlauf (glatt). Vorher: Geste 1,6 s, Fahrt erst danach.
+				const kam = ende() === "kamera", gDauer = kam ? D_KAMERA : DAUER;
+				if (t >= T_GESTE - 0.25 && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
 				if (t >= T_GESTE - 0.25 && t < T_GESTE) deck = (t - T_GESTE + 0.25) / 0.25;
-				else if (t >= T_GESTE && t < T_GESTE + DAUER) { s = kubisch((t - T_GESTE) / DAUER); deck = 1; }
-				else if (t >= T_GESTE + DAUER) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - DAUER) / 0.4); }
+				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = 1; }
+				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
-				if (t >= T_GESTE && t <= T_GESTE + DAUER + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
+				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
 				spur(spurR, WEG_R, jetzt); spur(spurL, WEG_L, jetzt);
 				if (deck > 0) {
 					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
@@ -534,11 +574,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
 				if (ende() === "kamera") {
 					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
-					const e = glatt(anteil(t, T_AUSWAHL, D_KAMERA));
-					// Ranfahrt im selben Zug wie die Kranfahrt, aber vorne etwas früher Strecke machend: Nah an der Kamera wächst
-					// eine Person sonst in der letzten halben Sekunde sprunghaft (Größe ~ 1/Abstand)
-					const ran = 1 - (1 - e) * (1 - e);
+					const e = verlauf(t).e, ran = e; // Verlauf und Gründe siehe verlauf()
 					const { C, Lk, F } = bahn(e, F1 * zoomEnde, ran);
+					if (import.meta.env.DEV) (fig as any).__vorne = groesseVorne(e);
 					const punkte = form() === "punkt";
 					const lage = leute.map((q) => {
 						const pr = fahrtKamera(q.wx, q.wz, C, Lk, F);
@@ -653,8 +691,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			if (!nachsatz) freigabe = true;
 			// früher (Rasul 13.11.2026 abends: „jetzt kann die Animation ein bisschen früher anfangen. Also wenn unten der Text
 			// erscheint … dann könnten oben schon die Punkte erscheinen“): Start, sobald „Überall Experten.“ unten ins Bild kommt
-			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: zeileEins ? 0.01 : 0.9 });
-			beob.observe(zeileEins ?? fig);
+			// noch früher (Rasul 13.11.2026 abends: „zeig mal die Punkte in dem Moment, wo du unten auch den Text zeigst. Die
+			// geht jetzt deutlich zu spät los“): Start, sobald ein Drittel der Animation im Bild ist, nicht erst mit der Zeile
+			const beob = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob.disconnect(); spiele(); } }, { threshold: zeileEins ? 0.33 : 0.9 });
+			beob.observe(fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			if (nachsatz) {
 				const beob2 = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { beob2.disconnect(); freigabe = true; weiter(); } }, { threshold: 1 });
