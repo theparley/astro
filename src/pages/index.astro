@@ -8,14 +8,14 @@
    Wortmarke (Forma-Umrisse, Lizenz offen). Die volle Startseite liegt im Zweig `dev`. */
 import Layout from "../layouts/Layout.astro";
 import Haltung from "../components/bausteine/Haltung.astro";
-import Kapitelende from "../components/abschnitte/Kapitelende.astro";
 ---
 <Layout gateMenuBehindHero>
 	<main class="minimal">
 		<section class="minimal__satz rahmen">
 			<Haltung ebene="h1" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
 		</section>
-		<Kapitelende />
+		{/* Let’s Parley am Ende heraus (Rasul 13.11.2026 abends: „unter Let's Parley kommt kein Terminkalender, haben wir
+		   das gar nicht so gebaut. Dann machen wir Let's Parley auf der Hauptseite auch raus.“). Termin über das Menü. */}
 	</main>
 </Layout>
 
