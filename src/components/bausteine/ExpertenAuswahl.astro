@@ -38,7 +38,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	const ENDE = T_FOKUS + D_FOKUS + 0.2;
 	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
 	// Entschieden: „unscharf“ (Rasul 13.11.2026 abends). Ohne Schalter (auf der hochgeladenen Seite) gilt das.
-	const ende = () => document.documentElement.dataset.ende || "unscharf";
+	// Danach Probe „ebenen“ (Rasul 13.11.2026 abends), seitdem Grundeinstellung; „unscharf“ bleibt im Schalter.
+	const ende = () => document.documentElement.dataset.ende || "ebenen";
 
 	// fester Zufall, damit jedes Abspielen gleich aussieht
 	function zufall(saat: number) { return () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; }; }
@@ -72,17 +73,21 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	}
 
 	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
-	interface Person { x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number }
+	interface Person { x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number }
 	function personen(): Person[] {
 		const rnd = zufall(7), liste: Person[] = [];
 		let versuche = 0;
 		const RAND = 80; // Abstand der Personen zur Spur
 		while (liste.length < 34 && versuche++ < 6000) {
 			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (RH - 2 * RAND);
-			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 0.85 + rnd() * 0.3, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false, rang: -1 });
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 0.85 + rnd() * 0.3, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false, rang: -1, ebene: 3 });
 		}
 		const nah = [...liste].sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY)).slice(0, 3).sort((a, b) => a.x - b.x);
 		nah.forEach((q, i) => { q.bleibt = true; q.rang = i; q.zx = CX + (i - 1) * 380; q.zy = CY + 10; });
+		// Ebenen für das Ende „ebenen“: die nächsten zehn zur Mitte bilden Ebene 2, alle übrigen Ebene 3
+		const rest = liste.filter((q) => !q.bleibt).sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY));
+		rest.forEach((q, i) => { q.ebene = i < 10 ? 2 : 3; });
+		nah.forEach((q) => { q.ebene = q.rang === 1 ? 0 : 1; });
 		return liste;
 	}
 
@@ -160,6 +165,29 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// Personen
 				ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
+				if (ende() === "ebenen") {
+					// Vier Ebenen statt Verschwinden (Rasul 13.11.2026 abends: „dass gar keine verschwinden, sondern dass sie alle
+					// noch weiter in den Hintergrund gehen … ein vorne, auf der nächsten Ebene diese beiden und dann vielleicht
+					// nochmal eine dritte und eine vierte Ebene“). Unschärfe wirkt als Tiefe nur zusammen mit anderen Tiefenzeichen
+					// (Held, Cooper, O'Brien, Banks 2010): je Ebene unschärfer, kleiner und heller (Luftperspektive).
+					// Ebene: [Größe, Unschärfe in Flächeneinheiten, Deckkraft]
+					const STUFE: [number, number, number][] = [[2.6, 0, 1], [1.8, 5, 0.7], [1.05, 11, 0.4], [0.8, 18, 0.22]];
+					const f = weich((t - T_FOKUS) / D_FOKUS);
+					const sortiert = [...leute].sort((a, b) => b.ebene - a.ebene); // hinten zuerst, vorne zuletzt
+					for (const q of sortiert) {
+						const ein = weich((t - q.ein) / 0.5);
+						const [g1, b1, a1] = STUFE[q.ebene];
+						const m = q.ebene >= 2 ? k : q.ebene === 1 ? f : 0; // Ebene 2/3 mit der Auswahl, Ebene 1 im Fokus-Schritt
+						const x = q.bleibt ? q.x + (q.zx - q.x) * k : q.x, y = q.bleibt ? q.y + (q.zy - q.y) * k : q.y;
+						const g0 = q.bleibt ? q.s + (GROSS - q.s) * k : q.s;
+						const g = q.ebene === 0 ? q.s + (g1 - q.s) * k : q.ebene === 1 ? g0 + (g1 - g0) * f : q.s + (g1 - q.s) * m;
+						const alpha = ein * (q.ebene <= 1 ? (0.85 + 0.15 * k) * (1 - (1 - a1) * m) : 0.85 * (1 - (1 - a1 / 0.85) * m));
+						const unsch = b1 * m;
+						if (unsch > 0.2) { ctx.save(); ctx.filter = `blur(${(unsch * cv.width / W).toFixed(1)}px)`; zeichnePerson(ctx, x, y, g, alpha); ctx.restore(); }
+						else zeichnePerson(ctx, x, y, g, alpha);
+					}
+					return;
+				}
 				for (const q of leute) {
 					const ein = weich((t - q.ein) / 0.5);
 					if (q.bleibt) {

@@ -143,9 +143,9 @@ const websiteJsonLd = JSON.stringify({
 				function liesEnde() {
 					var q = new URLSearchParams(location.search).get("ende");
 					try {
-						if (q === "drei" || q === "eins" || q === "grau" || q === "unscharf") localStorage.setItem("parley-ende", q);
-						return localStorage.getItem("parley-ende") || "unscharf";
-					} catch (e) { return q || "unscharf"; }
+						if (q === "drei" || q === "eins" || q === "grau" || q === "unscharf" || q === "ebenen") localStorage.setItem("parley-ende", q);
+						return localStorage.getItem("parley-ende") || "ebenen";
+					} catch (e) { return q || "ebenen"; }
 				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
@@ -209,6 +209,7 @@ const websiteJsonLd = JSON.stringify({
 					<button type="button" data-ende-wahl="eins">Einer</button>
 					<button type="button" data-ende-wahl="grau">Grau</button>
 					<button type="button" data-ende-wahl="unscharf">Unscharf</button>
+					<button type="button" data-ende-wahl="ebenen">Ebenen</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Umlaut</span>
@@ -365,7 +366,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-ende="drei"] .menu-wahl [data-ende-wahl="drei"],
 	html[data-ende="eins"] .menu-wahl [data-ende-wahl="eins"],
 	html[data-ende="grau"] .menu-wahl [data-ende-wahl="grau"],
-	html:not([data-ende="drei"]):not([data-ende="eins"]):not([data-ende="grau"]) .menu-wahl [data-ende-wahl="unscharf"],
+	html[data-ende="unscharf"] .menu-wahl [data-ende-wahl="unscharf"],
+	html:not([data-ende="drei"]):not([data-ende="eins"]):not([data-ende="grau"]):not([data-ende="unscharf"]) .menu-wahl [data-ende-wahl="ebenen"],
 	html[data-kopf="band"] .menu-wahl [data-kopf-wahl="band"],
 	html[data-kopf="kachel"] .menu-wahl [data-kopf-wahl="kachel"],
 	html[data-umlaut="innen"] .menu-wahl [data-umlaut-wahl="innen"],
