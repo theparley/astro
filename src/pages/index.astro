@@ -986,6 +986,8 @@ const PREISE = [
 	   Wisch-Animation bleibt an den Zeilen, wie beim vorherigen Hero:
 	   clip-path legt von links frei, 800 ms, PageWipes BBH-Kurve. */
 	.hero h1 > .hero-zeile {
+		position: relative;
+		z-index: 1; /* über der Leinwand der Geste, sonst schneidet sie die Unterlängen ab (p in „Experten“, Rasul 13.11.) */
 		display: block;
 		white-space: nowrap;
 		animation: hero-line-wipe 800ms cubic-bezier(0.76, 0, 0.24, 1) 100ms both;
