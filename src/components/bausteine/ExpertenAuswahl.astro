@@ -43,7 +43,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Danach fährt die Kamera auf die vordere Person zu (Rasul 13.11.2026 abends: „die Kamera … kippt nicht nur, sondern
 	// fährt dann auch noch auf die Person zu. Dadurch wird es hinten auch breiter.“). Beginnt kurz vor Ende des Kippens.
 	const T_FAHRT = T_AUSWAHL + D_KIPP * 0.8, D_FAHRT = 1.8;
-	const ENDE = Math.max(T_FOKUS + D_FOKUS, T_FAHRT + D_FAHRT + 0.4, T_AUSWAHL + 3.4 + 0.5) + 0.2; // 3,4 = D_KAMERA
+	const ENDE = Math.max(T_FOKUS + D_FOKUS, T_FAHRT + D_FAHRT + 0.4, T_AUSWAHL + 3.4 * 0.85 + 1.8 + 0.4) + 0.2; // 3,4 = D_KAMERA, 1,8 = D_RAN
 	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
 	// Entschieden: „unscharf“ (Rasul 13.11.2026 abends). Ohne Schalter (auf der hochgeladenen Seite) gilt das.
 	// Danach Probe „ebenen“ (Rasul 13.11.2026 abends), seitdem Grundeinstellung; „unscharf“ bleibt im Schalter.
@@ -223,9 +223,15 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	const auge = () => document.documentElement.dataset.hoehe !== "oben";
 	const endWerte = () => (auge() ? { A1: 5.1 * Math.PI / 180, R1: 552, F1: 300 } : { A1: 15 * Math.PI / 180, R1: 620, F1: 430 });
 	let F1 = endWerte().F1;
-	function bahn(e: number, fEnde = F1) {
+	// Ranfahrt am Ende (Rasul 13.11.2026 abends: „dass sie sich noch mehr auf die Person zubewegt … durch das Näherfahren
+	// wird es hinten breiter … du musst nichts rumschieben, einfach die Gesetze der Perspektive beachten“). Im Film:
+	// Kranfahrt von oben (Top Shot, Crane Down mit Tilt Up) und danach Push-in. Die Kamera fährt in gleicher Höhe und
+	// mit gleichem Blickwinkel geradeaus nach vorne (Kamera und Blickziel um RAN_Z weiter), beginnt kurz vor Ende der
+	// Kranfahrt, eigener weicher Verlauf.
+	const D_RAN = 1.8, RAN_Z = 30;
+	function bahn(e: number, fEnde = F1, ran = 0) {
 		const { A1, R1 } = endWerte();
-		const a = A0 + (A1 - A0) * e, R = R0 + (R1 - R0) * e, lz = LZ1 * e;
+		const a = A0 + (A1 - A0) * e, R = R0 + (R1 - R0) * e, lz = LZ1 * e + RAN_Z * ran;
 		const Lk: [number, number] = [0, lz], C: [number, number] = [R * Math.sin(a), lz - R * Math.cos(a)];
 		return { C, Lk, F: F0 + (fEnde - F0) * e };
 	}
@@ -347,7 +353,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const halbe = breite / 2 - 70;
 				let weit = 0;
 				F1 = endWerte().F1;
-				const ende1 = bahn(1);
+				const ende1 = bahn(1, F1, 1);
 				for (const q of leuteRaum) { const p = fahrtKamera(q.wx, q.wz, ende1.C, ende1.Lk, ende1.F); weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
 				zoomEnde = Math.min(1, halbe / Math.max(1, weit));
 			};
@@ -411,7 +417,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				if (ende() === "kamera") {
 					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
 					const e = glatt(anteil(t, T_AUSWAHL, D_KAMERA));
-					const { C, Lk, F } = bahn(e, F1 * zoomEnde);
+					const ran = glatt(anteil(t, T_AUSWAHL + D_KAMERA * 0.85, D_RAN));
+					const { C, Lk, F } = bahn(e, F1 * zoomEnde, ran);
 					const punkte = form() === "punkt";
 					const lage = leute.map((q) => {
 						const pr = fahrtKamera(q.wx, q.wz, C, Lk, F);
