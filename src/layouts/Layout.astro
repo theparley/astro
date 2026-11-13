@@ -169,8 +169,8 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(location.search).get("hoehe");
 					try {
 						if (q === "oben" || q === "auge") localStorage.setItem("parley-hoehe", q);
-						return localStorage.getItem("parley-hoehe") || "oben";
-					} catch (e) { return q || "oben"; }
+						return localStorage.getItem("parley-hoehe") || "auge"; // Rasul 13.11.2026 abends: „Augenhöhe“
+					} catch (e) { return q || "auge"; }
 				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
@@ -407,8 +407,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-aufbau="kacheln"] .menu-wahl [data-aufbau-wahl="kacheln"],
 	html[data-aufbau="abschnitte"] .menu-wahl [data-aufbau-wahl="abschnitte"],
 	html[data-kopf="videobeweis"] .menu-wahl [data-kopf-wahl="videobeweis"],
-	html:not([data-hoehe="auge"]) .menu-wahl [data-hoehe-wahl="oben"],
-	html[data-hoehe="auge"] .menu-wahl [data-hoehe-wahl="auge"],
+	html[data-hoehe="oben"] .menu-wahl [data-hoehe-wahl="oben"],
+	html:not([data-hoehe="oben"]) .menu-wahl [data-hoehe-wahl="auge"],
 	html:not([data-form="punkt"]) .menu-wahl [data-form-wahl="figur"],
 	html[data-form="punkt"] .menu-wahl [data-form-wahl="punkt"],
 	html:not([data-rahmen="16"]) .menu-wahl [data-rahmen-wahl="21"],

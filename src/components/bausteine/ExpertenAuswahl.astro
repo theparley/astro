@@ -219,7 +219,8 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Variante „Augenhöhe“ (Rasul 13.11.2026 abends: „fahr doch nochmal weiter runter mit der Kamera. Bis alle auf einer
 	// Linie sind, würde mich interessieren, wie das aussieht.“), Schalter „Höhe“ (html data-hoehe = oben | auge):
 	// Kamerahöhe am Ende 49 = Kopfmitte, alle Köpfe auf einer Linie; ohne Horizontlinie. Werte gerechnet: 5,1°, 552, 300.
-	const auge = () => document.documentElement.dataset.hoehe === "auge";
+	// Entschieden (Rasul 13.11.2026 abends): „Augenhöhe“, Grundeinstellung; „oben“ bleibt im Schalter.
+	const auge = () => document.documentElement.dataset.hoehe !== "oben";
 	const endWerte = () => (auge() ? { A1: 5.1 * Math.PI / 180, R1: 552, F1: 300 } : { A1: 15 * Math.PI / 180, R1: 620, F1: 430 });
 	let F1 = endWerte().F1;
 	function bahn(e: number, fEnde = F1) {
