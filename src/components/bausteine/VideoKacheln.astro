@@ -71,6 +71,10 @@ const { titel, titelStufe, id, link, einleitung, kacheln } = Astro.props;
 	/* Titel nur so breit wie nötig, damit der Link rechts daneben auf der Grundlinie stehen kann (BBH) */
 	.videokacheln__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
 	.videokacheln__link { flex: none; }
+	/* Sprungziel aus dem Menü („Videobeweis“, 13.11.2026): Luft über der Überschrift beim Ankommen. Am Rechner steht
+	   das Menü oben links (Kachel 88 px), daher dort mehr; am Handy steht es unten. */
+	.videokacheln__titel { scroll-margin-top: 32px; }
+	@media (min-width: 1024px) { .videokacheln__titel { scroll-margin-top: 136px; } }
 	.videokacheln__einleitung { max-width: 46ch; margin: -16px 0 48px; }
 	.videokacheln__raster { display: grid; grid-template-columns: 1fr; gap: 32px 16px; }
 	@media (min-width: 1024px) { .videokacheln__raster { grid-template-columns: 1fr 1fr; } }

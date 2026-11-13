@@ -21,7 +21,12 @@ const { startseite = false } = Astro.props;
 // Wie im Zwetschke-Menü (MenuTile.astro): Home ist die Logo-Kachel, dazu Termin und Kontakt.
 // BBH-Regel: Menükacheln in zwei Reihen, Spalten = Hälfte der Links; bei ungerader Zahl kommt
 // „Home“ dazu, damit das Raster aufgeht. Kommen Studios oder Format dazu, wird es 2 × 2.
+// „Videobeweis“ (Rasul 13.11.2026 abends): Rückweg zu den Kacheln wie „Work“ bei BBH, aber als Sprung an die Stelle
+// auf der Startseite, nicht als eigene Übersichtsseite und nicht an den Anfang. Rasul: „Okay, dann machen wir den
+// Sprung. Aber ich finde es gut, dass es dann der Sprung ist, auf die Hauptseite an die Stelle und nicht die
+// Hauptseite nochmal neu startet.“ Mit drei Einträgen kommt „Home“ dazu, 2 × 2.
 const links = [
+	{ href: "/#kap-titel", text: "Videobeweis" },
 	{ href: "/termin", text: "Termin" },
 	{ href: "/kontakt", text: "Kontakt" },
 ];
