@@ -113,7 +113,16 @@ const websiteJsonLd = JSON.stringify({
 						return localStorage.getItem("parley-lage") || "links";
 					} catch (e) { return q || "links"; }
 				}
+				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a|b|c
+				function liesSatz() {
+					var q = new URLSearchParams(location.search).get("satz");
+					try {
+						if (q === "a" || q === "b" || q === "c") localStorage.setItem("parley-satz", q);
+						return localStorage.getItem("parley-satz") || "a";
+					} catch (e) { return q || "a"; }
+				}
 				function setze() {
+					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
 					var h = liesHero();
 					document.documentElement.dataset.hero = h;
@@ -137,6 +146,10 @@ const websiteJsonLd = JSON.stringify({
 				<span>Menü</span>
 				<button type="button" data-wahl="zwetschke">Zwetschke</button>
 				<button type="button" data-wahl="bbh">BBH</button>
+				<span>Satz</span>
+				<button type="button" data-satz-wahl="a">A</button>
+				<button type="button" data-satz-wahl="b">B</button>
+				<button type="button" data-satz-wahl="c">C</button>
 				<span>Lage</span>
 				<button type="button" data-lage-wahl="links">Links</button>
 				<button type="button" data-lage-wahl="unten">Unten</button>
@@ -223,6 +236,9 @@ const websiteJsonLd = JSON.stringify({
 		padding: 2px 8px;
 		cursor: pointer;
 	}
+	html[data-satz="a"] .menu-wahl [data-satz-wahl="a"],
+	html[data-satz="b"] .menu-wahl [data-satz-wahl="b"],
+	html[data-satz="c"] .menu-wahl [data-satz-wahl="c"],
 	html[data-lage="unten"] .menu-wahl [data-lage-wahl="unten"],
 	html:not([data-lage="unten"]) .menu-wahl [data-lage-wahl="links"],
 	html[data-hero="film"] .menu-wahl [data-hero-wahl="film"],
@@ -234,6 +250,13 @@ const websiteJsonLd = JSON.stringify({
 <script>
 	/* Menü-Schalter (nur lokal): Wahl speichern und sofort umschalten. */
 	document.addEventListener("click", (e) => {
+		const satz = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-satz-wahl]");
+		if (satz) {
+			const w = satz.dataset.satzWahl!;
+			try { localStorage.setItem("parley-satz", w); } catch {}
+			document.documentElement.dataset.satz = w;
+			return;
+		}
 		const lage = (e.target as HTMLElement).closest<HTMLElement>(".menu-wahl [data-lage-wahl]");
 		if (lage) {
 			try { localStorage.setItem("parley-lage", lage.dataset.lageWahl!); } catch {}
