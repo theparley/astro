@@ -153,7 +153,9 @@ const FORMATE = [
 	   Je Kachel ein Ausschnitt der Szene mit seiner Blase, stumm in Schleife; Klick öffnet groß. Nummeriert 01 bis
 	   04, damit die Reihenfolge erhalten bleibt (Rasuls Einwand „eins nach dem anderen“). Einleitung: der frühere
 	   kleine Text unter dem Statement. Kacheltitel sind Arbeitstitel. Rückweg zur Fassung mit vier Text-Bild-
-	   Abschnitten: Commit 6b72e74 im Website-Repository. */}
+	   Abschnitten: Commit 6b72e74 im Website-Repository.
+	   PROBE Plakat (Rasul 13.11.2026: „jede Kachel designen wie ein Plakat von Graphéine“, „Ja, du sollst.“):
+	   nur Kachel 01 als Plakat, 02 bis 04 als Standbild mit Blase, zum Vergleich nebeneinander. */}
 	{/* Einleitung unter dem Titel entfernt (Rasul 13.11.2026: „der Erklärtext unter dem Wort Beweisaufnahme muss
 	   weg, der muss vielleicht in die Kachel rein, aber optisch stört er“). Text zum Wiederverwenden:
 	   „Expertise beweist sich erst im echten Gespräch. Wir machen die Beweisaufnahme, filmreif und ohne
@@ -165,7 +167,8 @@ const FORMATE = [
 			id="ab2-titel"
 			titel="Beweis&shy;aufnahme"
 			kacheln={[
-				{ nr: "01", titel: "Wie am Küchentisch", zeile: "Szene Beweisaufnahme, 0:00 bis 0:04", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, blasen: [BLASEN[0]] as any },
+				{ nr: "01", titel: "Wie am Küchentisch", zeile: "Szene Beweisaufnahme, 0:00 bis 0:04", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, blasen: [BLASEN[0]] as any,
+				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
 				{ nr: "02", titel: "Ohne Kamerastress", zeile: "Szene Beweisaufnahme, 0:04 bis 0:09", src: "/lokal/szene-beweisaufnahme.mp4", von: 4.5, bis: 9, blasen: [BLASEN[1]] as any },
 				{ nr: "03", titel: "Blickkontakt mit dem Zuschauer", zeile: "Szene Beweisaufnahme, 0:09 bis 0:18", src: "/lokal/szene-beweisaufnahme.mp4", von: 9, bis: 18, blasen: [BLASEN[2]] as any },
 				{ nr: "04", titel: "Das Blickkontaktstudio", zeile: "Szene Beweisaufnahme, 0:18 bis 0:24", src: "/lokal/szene-beweisaufnahme.mp4", von: 18, bis: 24, blasen: [BLASEN[3]] as any },

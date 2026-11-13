@@ -15,8 +15,16 @@
    Titel darf ein &shy; enthalten (BEWEIS-/AUFNAHME passt in Bartle huge nur getrennt, gemessen 13.11.2026). */
 import BlasenVideo from "./BlasenVideo.astro";
 import Knopf from "./Knopf.astro";
+import LogoBiss from "../LogoBiss.astro";
 interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
-interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[] }
+/* plakat (13.11.2026, Rasul: „ob wir nicht … unsere Blasenidee nehmen … jede Kachel designen wie ein Plakat von
+   Graphéine“ und „Ja, du sollst.“): Kachel als Plakat nach Graphéines Sup-de-Com-Plakaten (Moodboard
+   branding/aktiv/Parley_Moodboard_Grapheine_Anzeigen_Referenz_2026-10.html, Bilder 17 bis 19): weißer Grund,
+   großer blauer Ball läuft oben links aus dem Format, darin der Satz weiß und fett, ein Wort in [eckigen
+   Klammern] hellblau; das Standbild als Band; weiße Blase greift über den oberen Fotorand (dort #RévèleToi,
+   bei uns marke); unten rechts das Logo klein. */
+interface Plakat { satz: string; marke: string; bild: number }
+interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat }
 interface Props { titel: string; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
 const { titel, id, link, einleitung, kacheln } = Astro.props;
 ---
@@ -29,9 +37,19 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 	<div class="videokacheln__raster">
 		{kacheln.map((k) => (
 			<button type="button" class="videokachel" data-src={k.src} data-von={k.von} data-bis={k.bis} aria-label={`${k.nr} ${k.titel}: Film groß ansehen`}>
-				<span class="videokachel__bild">
-					<BlasenVideo src={k.src} von={k.von} bis={k.bis} blasen={(k.blasen ?? []) as any} format="4/3" blasenlage="innen" stillbild />
-				</span>
+				{k.plakat ? (
+					<span class="videokachel__bild plakat">
+						<span class="plakat__foto"><video src={k.src} muted playsinline preload="metadata" data-standbild={k.plakat.bild}></video></span>
+						<span class="plakat__ball" aria-hidden="true"></span>
+						<span class="plakat__satz" set:html={k.plakat.satz.replace(/\[(.+?)\]/g, '<em>$1</em>')} />
+						<span class="plakat__marke"><span>{k.plakat.marke}</span></span>
+						<span class="plakat__logo"><LogoBiss stufe={1} titel="parley Film" /></span>
+					</span>
+				) : (
+					<span class="videokachel__bild">
+						<BlasenVideo src={k.src} von={k.von} bis={k.bis} blasen={(k.blasen ?? []) as any} format="4/3" blasenlage="innen" stillbild />
+					</span>
+				)}
 				<span class="videokachel__text">
 					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.titel}</span>
 					<span class="videokachel__zeile">{k.zeile}</span>
@@ -62,6 +80,19 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 		.videokachel:hover { opacity: 0.8; }
 		.videokachel:hover .videokachel__bild :global(.blasenvideo) { transform: scale(1.03) rotate(-0.25deg); }
 	}
+	/* Plakat */
+	.plakat { position: relative; aspect-ratio: 4 / 3; background: #fff; color: #000; container-type: inline-size; }
+	.plakat__foto { position: absolute; left: 0; right: 0; top: 46%; height: 40%; overflow: hidden; }
+	.plakat__foto video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+	.plakat__ball { position: absolute; left: -14%; top: -34%; width: 80%; aspect-ratio: 1.4; border-radius: 50%; background: #0379A6; }
+	.plakat__satz { position: absolute; left: 6%; top: 7%; width: 54%; color: #fff; font-family: var(--schrift-lesen); font-weight: 700; font-size: var(--text-md); line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; }
+	@media (min-width: 1024px) { .plakat__satz { font-size: var(--text-lg); } }
+	.plakat__satz :global(em) { font-style: normal; color: #9fdcf3; }
+	.plakat__marke { position: absolute; right: 6%; top: 39%; }
+	.plakat__marke span { position: relative; display: block; padding: 0.55em 0.9em; background: #fff; border-radius: 0.5em; font-family: var(--schrift-lesen); font-weight: 700; font-size: var(--text-base); letter-spacing: -0.02em; white-space: nowrap; }
+	.plakat__marke span::after { content: ""; position: absolute; right: 18%; bottom: -0.7em; border-left: 0.7em solid transparent; border-top: 0.8em solid #fff; }
+	.plakat__logo { position: absolute; right: 4%; bottom: 3.5%; width: 17%; color: #000; }
+	.plakat__logo :global(svg) { display: block; width: 100%; height: auto; }
 	.videokachel__text { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; font-family: var(--schrift-lesen); font-size: var(--text-base); line-height: 1.3; letter-spacing: -0.02em; }
 	.videokachel__nr { font-family: var(--schrift-mono, ui-monospace, monospace); margin-right: 4px; }
 	.videokachel__zeile { color: var(--grey, #999894); }
@@ -80,6 +111,12 @@ const { titel, id, link, einleitung, kacheln } = Astro.props;
 		const gross = document.querySelector<HTMLElement>("[data-videokacheln-gross]");
 		if (!gross) return;
 		const film = gross.querySelector("video")!;
+		// Plakat-Standbilder: auf die gewünschte Sekunde springen, nie abspielen
+		document.querySelectorAll<HTMLVideoElement>("video[data-standbild]").forEach((v) => {
+			const t = parseFloat(v.dataset.standbild || "1");
+			const hin = () => { v.currentTime = t; };
+			if (v.readyState >= 1) hin(); else v.addEventListener("loadedmetadata", hin, { once: true });
+		});
 		let bis: number | null = null, von = 0;
 		const wache = () => { if (bis !== null && film.currentTime >= bis) { film.pause(); film.currentTime = von; } };
 		film.addEventListener("timeupdate", wache);
