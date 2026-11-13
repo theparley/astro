@@ -95,13 +95,14 @@ const websiteJsonLd = JSON.stringify({
 				}
 				// Hero-Demo (Rasul 13.11.2026: „machen wir doch jetzt mal kurz eine Demo, wo wir unser Video
 				// Bildschirmflächen machen, voll machen und das Menü so drübersetzen wie BBH“): ?hero=film|text.
-				// Im Film-Modus gilt immer das BBH-Menü.
+				// Im Film-Modus gilt immer das BBH-Menü. Grundeinstellung seit 13.11.2026 „film“ (Rasul: „Also ich
+				// glaube, mit dem großen Video am Anfang ist es die beste Lösung.“).
 				function liesHero() {
 					var q = new URLSearchParams(location.search).get("hero");
 					try {
 						if (q === "film" || q === "text") localStorage.setItem("parley-hero", q);
-						return localStorage.getItem("parley-hero") || "text";
-					} catch (e) { return q || "text"; }
+						return localStorage.getItem("parley-hero") || "film";
+					} catch (e) { return q || "film"; }
 				}
 				function setze() {
 					var h = liesHero();
