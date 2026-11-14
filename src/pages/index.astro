@@ -271,16 +271,29 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					    handgezeichneten Schafen und ein bisschen Text dazu … Müssen wir nochmal Logos erfinden oder Zeichnungen, die das
 					    klar machen?“ Zeichnungen noch offen, deshalb Platzhalter mit dem Motiv. Vorher Wort-Kennzahlen zum Aufklappen
 					    (Texte der Vertiefung im Steuerdokument). */}
+					{/* Probe „3 groß + 6 klein“ (Rasul 14.11.2026: „Ja, Probe bauen“), nach der Recherche
+					    research/Viele_Vorteile_Wahrnehmung_Recherche_2026-11.md im Marketing-Ordner: die drei stärksten, klar
+					    verschiedenen Vorteile groß (Baymard: Kernvorteile mit Bild, Titel, Absatz; Shu & Carlson 2014: drei wirken
+					    am besten), darunter sechs kleine, sichtbar getrennte Kacheln für den Eindruck „viele“. Nur Vorteile, die aus
+					    dem Studio-Aufbau folgen (Rasul 14.11.2026). Kernvorteil oben links. Keine Überschrift „9 Gründe“. Vorher
+					    sechs gleich große Karten mit Zeichnung (Git-Geschichte). Texte Entwurf. */}
 					<div class="videobeweis__vorteile">
 						<p class="videobeweis__entwurf"><span class="entwurf">Entwurf</span></p>
-						<Karten rahmen={false} spalten={3} format="1/1" karten={[
-							{ titel: "Kurz", zeile: "Ihr seid nur kurz vor der Kamera.", platzhalter: "Zeichnung: Stoppuhr" },
-							{ titel: "Ohne Üben", zeile: "In die Kamera sprechen müsst ihr nicht lernen. Ihr redet miteinander.", platzhalter: "Zeichnung: zwei, die reden" },
-							{ titel: "Blickkontakt", zeile: "Ihr schaut euch in die Augen, und jeder Zuschauer schaut mit.", platzhalter: "Zeichnung: Augen, Blickachse" },
-							{ titel: "Ohne Kamerastress", zeile: "Man sieht keine Kamera, also vergisst man sie.", platzhalter: "Zeichnung: durchgestrichene Kamera" },
-							{ titel: "Live-Regie", zeile: "Wir kümmern uns um Bild und Ton. Ihr redet einfach.", platzhalter: "Zeichnung: Regiepult" },
-							{ titel: "Macht Spaß", zeile: "Es fühlt sich an wie ein gutes Gespräch, nicht wie ein Dreh.", platzhalter: "Zeichnung: Sprechblasen, lachend" },
+						<Karten rahmen={false} spalten={3} format="4/3" karten={[
+							{ titel: "Blickkontakt", zeile: "Ihr schaut euch in die Augen, und jeder Zuschauer schaut mit. Die Kamera sitzt unsichtbar mitten in eurem Blick.", platzhalter: "Zeichnung: Augen, Blickachse" },
+							{ titel: "Keine Kamera", zeile: "Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine, und ihr bleibt im Gespräch.", platzhalter: "Zeichnung: durchgestrichene Kamera" },
+							{ titel: "Echte Momente", zeile: "Die Antwort, mit der niemand gerechnet hat. Das Lachen, das den Menschen hinter der Expertise zeigt.", platzhalter: "Zeichnung: zwei, die reden" },
 						]} />
+						<div class="videobeweis__klein">
+							<Kennzahlen rahmen={false} woerter kacheln zahlen={[
+								{ wert: "Ohne Kamerastress", zeile: "Ihr vergesst, dass gefilmt wird.", mehr: "Filmreif ohne Kamerastress: Wer keine Kamera sieht, schaltet nicht in den Präsentationsmodus." },
+								{ wert: "Ohne Üben", zeile: "Präsenz habt ihr im Gespräch schon.", mehr: "Wir verändern nicht euch, wir verändern den Raum." },
+								{ wert: "Wenig Zeit", zeile: "Ihr kommt, redet und geht.", mehr: "Vorbereitung, Technik und Nachbearbeitung machen wir." },
+								{ wert: "Live-Regie", zeile: "Ihr redet, wir achten auf Bild und Ton.", mehr: "Während ihr redet, sitzt unsere Regie am Pult. Ihr denkt nur an euer Thema." },
+								{ wert: "Filmreif", zeile: "Wirkt wie geredet, sieht aus wie ein Film.", mehr: "Vorne ein entspanntes Gespräch, dahinter ein Studio mit Licht, Ton und Regie." },
+								{ wert: "Macht Spaß", zeile: "Wie ein gutes Gespräch, nicht wie ein Dreh.", mehr: "Eine Stimme nach einer Live-Aufnahme: „Das hat ja total Spaß gemacht.“" },
+							]} />
+						</div>
 					</div>
 				</Fragment>
 			</VideoKacheln>
@@ -462,5 +475,6 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.videobeweis__satz p { font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
 	.videobeweis__satz p + p { margin-top: 24px; }
 	.videobeweis__zwischentitel { font-family: var(--schrift-breit); font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; margin: 0 0 32px; }
+	.videobeweis__klein { margin-top: 48px; }
 </style>
 

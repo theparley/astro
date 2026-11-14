@@ -10,10 +10,13 @@
 /* mehr (14.11.2026, Rasul: „Und wenn man drauf klickt, klappt es auf oder was anderes, was vielleicht bei der BBH-Seite
    finden, wo dann tiefer erklärt wird. Die Kunst wird sein, den Abschnitt schnell scannbar zu haben“): Eintrag klappt
    auf wie BBHs Akkordeon (B11: Plus, Inhalt öffnet darunter), hier in der Kachel. Ohne Skript (details/summary). */
-interface Props { zahlen: { wert: string; zeile: string; mehr?: string }[]; gross?: boolean; quelle?: string; rahmen?: boolean; woerter?: boolean }
-const { zahlen, gross = false, quelle, rahmen = true, woerter = false } = Astro.props;
+/* kacheln (14.11.2026, Probe „3 groß + 6 klein“, Recherche research/Viele_Vorteile_Wahrnehmung_Recherche_2026-11.md im
+   Marketing-Ordner): kleine, sichtbar getrennte Kacheln mit Rahmen, bis zu sechs in einer Reihe; getrennte, gleichartige
+   Elemente werden auf einen Blick als „viele“ gelesen (Franconeri et al. 2009, Whitney & Yamanashi Leib 2018). */
+interface Props { zahlen: { wert: string; zeile: string; mehr?: string }[]; gross?: boolean; quelle?: string; rahmen?: boolean; woerter?: boolean; kacheln?: boolean }
+const { zahlen, gross = false, quelle, rahmen = true, woerter = false, kacheln = false } = Astro.props;
 ---
-<div class:list={["kennzahlen", rahmen && "rahmen", woerter && "kennzahlen--woerter"]} data-einblenden>
+<div class:list={["kennzahlen", rahmen && "rahmen", woerter && "kennzahlen--woerter", kacheln && "kennzahlen--kacheln"]} data-einblenden>
 	<div class:list={["kennzahlen__reihe", `kennzahlen__reihe--${Math.min(zahlen.length, 3)}`]}>
 		{zahlen.map((z) => z.mehr ? (
 			<details class="kennzahl kennzahl--mehr">
@@ -55,5 +58,14 @@ const { zahlen, gross = false, quelle, rahmen = true, woerter = false } = Astro.
 	.kennzahl--mehr[open] .kennzahl__plus::after { transform: rotate(0deg); }
 	@media (hover: hover) { .kennzahl--mehr summary:hover .kennzahl__plus { opacity: 1; } }
 	.kennzahl__mehr { margin: 16px auto 0; max-width: 36ch; font-size: var(--text-sm); line-height: 1.3; opacity: 0.8; text-wrap: pretty; }
+	/* kleine Kacheln: zwei Spalten am Handy, drei am Tablet, sechs am Rechner; jede mit Rahmen und Abstand */
+	.kennzahlen--kacheln .kennzahlen__reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+	@media (min-width: 768px) { .kennzahlen--kacheln .kennzahlen__reihe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+	@media (min-width: 1280px) { .kennzahlen--kacheln .kennzahlen__reihe { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+	.kennzahlen--kacheln .kennzahl { border: 1px solid var(--panel-rand, #333); border-radius: 4px; padding: 20px 14px; align-content: start; }
+	.kennzahlen--kacheln .t-zahl { font-family: var(--schrift-schmal); font-size: var(--text-lg); line-height: 1; }
+	.kennzahlen--kacheln .kennzahl__zeile { margin-top: 10px; font-size: var(--text-sm); line-height: 1.3; }
+	.kennzahlen--kacheln .kennzahl__plus { margin-top: 12px; }
+	.kennzahlen--kacheln .kennzahl__mehr { font-size: var(--text-sm); }
 	.kennzahlen__quelle { margin: 16px auto 0; max-width: 60ch; text-wrap: balance; }
 </style>
