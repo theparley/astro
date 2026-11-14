@@ -505,7 +505,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// sich nicht überschneidet, also am Ende ein bisschen kleiner. Dass es wirklich der Rahmen ist, in dem das Bild
 				// erscheint“): Augen bleiben auf der oberen Drittellinie, die Unterkante endet über der Innenkante des Strichs
 				// (halbe Strichdicke plus Luft), statt auf der Rahmenkante.
-				const INNEN = DICKE / 2 + 24;
+				const INNEN = DICKE / 2; // genau an der Innenkante; mit 24 Einheiten Luft blieb ein weißer Rand (Rasul 14.11.2026: „das war zu viel“)
 				const gZiel = ((2 / 3) * RH - INNEN) / ((14.5 * 64) / 19);
 				const loese = (fEnde: number) => {
 					if (!vorneP) return;

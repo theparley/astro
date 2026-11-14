@@ -370,6 +370,10 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   nur Deckkraft, 1 s, ease-in-out, kein Hochrutschen. Vorher 700 ms mit 12 px Bewegung. */
 	.anlass--band .anlass__nachsatz { margin-top: calc(0px - var(--abstand-md)); transition: opacity 1s ease-in-out; }
 	:global(.anlass--band[data-phase="warten"] .anlass__nachsatz) { opacity: 0; }
+	/* Probe (Rasul 14.11.2026: „wir probieren eins noch aus. Wenn der zweite Satz erscheint, blurr mal den ersten Satz
+	   langsam“): „Überall Experten.“ wird unscharf, sobald „Zeit für den Videobeweis“ einblendet, langsamer als dessen Blende */
+	.anlass--band .anlass__satz--eins { transition: filter 2s ease-in-out; }
+	:global(.anlass--band[data-phase="geste"] .anlass__satz--eins) { filter: blur(5px); }
 
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
