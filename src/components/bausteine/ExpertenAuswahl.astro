@@ -11,7 +11,7 @@
    Fläche zur Hälfte sichtbar ist; Klick spielt noch einmal. Bei reduzierter Bewegung sofort das Endbild.
    Endbild steht allein (Grafik-Leitfaden Abschnitt 2): drei Personen. */
 interface Props { label?: string }
-const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei bleiben übrig." } = Astro.props;
+const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Videobeweises, die Kamera fährt auf einen Experten zu, die anderen werden unscharf." } = Astro.props; // angepasst 14.11.2026 (Code-Prüfung N4)
 ---
 <figure class="experten" data-experten>
 	<canvas class="experten__bild" role="img" aria-label={label}></canvas>
@@ -24,9 +24,17 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	   in die Breite gehen, als sie vorher waren.“). Die Höhe bleibt die der 16:9-Fläche von höchstens 960 px Breite; der
 	   Rahmen der Geste steht in deren Mitte, nach dem Kippen dürfen die hinteren bis an den Rand des Bandes. */
 	.experten { --innen: min(960px, 100vw - 2 * var(--rand)); position: relative; width: 100vw; margin-left: calc(50% - 50vw); max-width: none; }
-	.experten__bild { display: block; width: 100%; height: calc(var(--innen) * 9 / 16); cursor: pointer; }
-	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2); bottom: -28px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 0; cursor: pointer; opacity: 0; transition: opacity var(--tempo) var(--kurve); }
-	.experten[data-fertig] .experten__nochmal { opacity: 1; }
+	/* Höhe schon im CSS so wie später im Skript (groesse()), damit beim Laden nichts springt (Code-Prüfung N10):
+	   Querformat 50 % der kleinen Fensterhöhe, Hochformat so hoch, wie der 16:9-Rahmen in der Breite braucht. */
+	.experten__bild { display: block; width: 100%; height: max(160px, 100vw * 0.6541); cursor: pointer; }
+	@media (orientation: landscape) { .experten__bild { height: 50svh; } }
+	/* Knopf erst bedienbar, wenn er sichtbar ist; Fokus sichtbar; Trefferfläche über 24 px (Code-Prüfung M8, 14.11.2026).
+	   Innenabstand 6 / 8 px, die Lage des Worts bleibt wie vorher (rechts und unten um den Abstand verschoben). */
+	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2 - 8px); bottom: -34px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 6px 8px; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--tempo) var(--kurve), visibility 0s linear var(--tempo); }
+	.experten[data-fertig] .experten__nochmal { opacity: 1; visibility: visible; transition: opacity var(--tempo) var(--kurve), visibility 0s; }
+	.experten__nochmal:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+	/* Bei reduzierter Bewegung steht gleich das Endbild, „Noch einmal“ hätte nichts zu zeigen (N14) */
+	@media (prefers-reduced-motion: reduce) { .experten__nochmal { display: none; } }
 </style>
 
 <script>
@@ -391,10 +399,14 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	const FILTER_GEHT = (() => {
 		// Nur zum Prüfen am Rechner: ?ohnefilter erzwingt den Safari-Weg auch in Chrome
 		if (import.meta.env.DEV && new URLSearchParams(location.search).has("ohnefilter")) return false;
+		// Erst prüfen, ob es die Funktion überhaupt gibt (Safari: nein), dann ob sie wirkt. Pixeltest mit deutlicher Schwelle
+		// an zwei Stellen, weil Safari im privaten Fenster beim Auslesen Rauschen einstreut (Code-Prüfung M6, 14.11.2026).
+		if (!("filter" in CanvasRenderingContext2D.prototype)) return false;
 		try {
 			const c = document.createElement("canvas"); c.width = 9; c.height = 9;
-			const x = c.getContext("2d", { willReadFrequently: true })!; x.filter = "blur(2px)"; x.fillRect(4, 4, 1, 1);
-			return x.getImageData(2, 4, 1, 1).data[3] > 0;
+			const x = c.getContext("2d", { willReadFrequently: true }); if (!x) return false;
+			x.filter = "blur(2px)"; x.fillRect(4, 4, 1, 1);
+			return x.getImageData(2, 4, 1, 1).data[3] > 8 && x.getImageData(6, 4, 1, 1).data[3] > 8;
 		} catch { return false; }
 	})();
 	function kastenGroessen(sigma: number) {
@@ -532,7 +544,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			let leuteFlach = personen(), leuteRaum = personenKamera();
 			let leute = leuteFlach, zoomEnde = 1, hebung = 0;
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
-			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+			// Systemeinstellung „Bewegung reduzieren“, auch wenn sie bei offener Seite umgestellt wird (Code-Prüfung N14)
+			const ruhig = matchMedia("(prefers-reduced-motion: reduce)");
+			let still = ruhig.matches;
+			const ruhigWechsel = () => { still = ruhig.matches; if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); } };
+			ruhig.addEventListener?.("change", ruhigWechsel);
 
 			let breiteGemessen = -1, hoeheGemessen = 0; // siehe groesse(): Höhe nur bei neuer Breite
 			const groesse = () => {
@@ -557,7 +573,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// blendet beim Scrollen die Adressleiste ein und aus und ändert damit die Fensterhöhe; dann wurde die Fläche
 				// neu bemessen, alle Personen neu gelegt, und das Endbild sprang (Rasul 14.11.2026: „am Ende hat die Animation
 				// auf dem iPad einen Sprung nach links gemacht, einen kleinen“; nachgestellt im iPad-Simulator, nur im Querformat).
-				if (window.innerWidth !== breiteGemessen) { breiteGemessen = window.innerWidth; hoeheGemessen = window.innerHeight; }
+				// Breite des Layouts statt innerWidth: ändert sich nicht beim Zoomen mit zwei Fingern (Code-Prüfung M9)
+				const breiteJetzt = document.documentElement.clientWidth;
+				if (breiteJetzt !== breiteGemessen) { breiteGemessen = breiteJetzt; hoeheGemessen = window.innerHeight; }
 				if (breiteGemessen >= hoeheGemessen) cv.style.height = `${(hoeheGemessen * anteilHoehe).toFixed(1)}px`;
 				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
@@ -787,10 +805,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				uhr += Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
 				if (uhr >= T_PAUSE && !freigabe) {
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
-					uhr = T_PAUSE; bild(uhr, jetzt); haelt = true; return;
+					uhr = T_PAUSE; bild(uhr, uhr); haelt = true; return;
 				}
 				if (uhr >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
-				bild(uhr, jetzt);
+				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
+				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
+				bild(uhr, uhr);
 				const schluss = ende() === "kamera" ? T_GESTE + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
 				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
@@ -830,7 +850,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			// der Fensterunterkante erreicht, genau wie BBHs Zeilen-Blende (Schwelle 0). Erst „ganz über der Linie“ (Schwelle 1)
 			// war zu spät (Rasul 14.11.2026 bei 1008 px Fensterhöhe: „Eigentlich müsste die Animation jetzt starten, oder?“;
 			// gemessen: Oberkante 664 px, Unterkante 840 px, Linie bei 806 px). Ohne Nachsatz: 90 % der Animation im Bild. Bleibt scharf, weil sie sich zurücksetzen kann.
-			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting)) spiele(); },
+			// Startlinie wie unten im Beobachter: Oberkante des Nachsatzes 20 % über der Fensterunterkante
+			const nachsatzUeberLinie = () => !nachsatz || nachsatz.getBoundingClientRect().top < window.innerHeight * 0.8;
+			const figSichtbar = () => { const r = fig.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; };
+			let zuletztRaus = "";
+			// Nur starten, wenn die Animation selbst zu sehen ist; kommt man von unten, startet der Sicht-Beobachter (M3)
+			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting) && figSichtbar()) spiele(); },
 				nachsatz ? { rootMargin: "0px 0px -20% 0px", threshold: 0 } : { threshold: 0.9 });
 			beob.observe(nachsatz ?? fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
@@ -850,14 +875,21 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				const x = e[e.length - 1];
 				if (x.isIntersecting) {
 					if (pausiert) {
-						// Leuchtspur hängt an der Uhrzeit: um die Pause verschieben, sonst wäre sie beim Weiterlaufen verglüht
-						pausiert = false; const d = performance.now() / 1000 - pauseSeit;
-						spurR = spurR.map(([a, t]) => [a, t + d]); spurL = spurL.map(([a, t]) => [a, t + d]);
-						zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+						pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+						return;
 					}
+					// Schnell über das Band gewischt (Code-Prüfung M4): Kam sie zuletzt oben heraus und tritt jetzt unten wieder
+					// ein, war sie zwischendurch unterhalb, ohne dass der Browser es gemeldet hat. Dann zurücksetzen wie sonst.
+					const vonUnten = x.boundingClientRect.top > (x.rootBounds?.height ?? window.innerHeight) / 2;
+					if (zuletztRaus === "oben" && vonUnten && gestartet && !still) zuruecksetzen();
+					zuletztRaus = "";
+					// Von unten kommend (Zurück-Taste, Scroll-Wiederherstellung): erst starten, wenn die Animation selbst im Bild
+					// ist und der Nachsatz über der Startlinie liegt (Code-Prüfung M3)
+					if (!gestartet && nachsatzUeberLinie()) spiele();
 					return;
 				}
 				const unten = window.innerHeight;
+				zuletztRaus = x.boundingClientRect.top < 0 ? "oben" : "unten";
 				if (x.boundingClientRect.top >= (x.rootBounds?.bottom ?? unten)) { if (gestartet && !still) zuruecksetzen(); return; }
 				if (gestartet && !haelt && !pausiert && fig.dataset.fertig === undefined) {
 					cancelAnimationFrame(lauf); pausiert = true; pauseSeit = performance.now() / 1000;
@@ -870,12 +902,21 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			sicht.observe(fig);
 			fig.addEventListener("click", spiele);
 			// Nur die Höhe geändert (Adressleiste in Safari): nichts neu bemessen, siehe groesse()
-			let massZuletzt = `${window.innerWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
-			window.addEventListener("resize", () => {
-				const mass = `${window.innerWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
+			const masse = () => `${document.documentElement.clientWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
+			let massZuletzt = masse();
+			const neuBemessen = () => {
+				const mass = masse();
 				if (mass === massZuletzt) return; massZuletzt = mass;
 				if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse();
-			});
+			};
+			window.addEventListener("resize", neuBemessen);
+			// Aufräumen beim Seitenwechsel ohne Neuladen (Astro ClientRouter): Bildschleife, Beobachter, Zuhörer, Speicher der
+			// Zeichenflächen (Code-Prüfung M2, 14.11.2026; Vorbild StoppuhrZaehler.astro)
+			document.addEventListener("astro:before-swap", () => {
+				cancelAnimationFrame(lauf); beob.disconnect(); sicht.disconnect();
+				window.removeEventListener("resize", neuBemessen); ruhig.removeEventListener?.("change", ruhigWechsel);
+				cv.width = cv.height = off.width = off.height = glut.width = glut.height = 0;
+			}, { once: true });
 			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)
 			document.fonts?.ready.then(() => { if (start < 0) { groesse(); bild(0, 0); } });
 		});

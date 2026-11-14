@@ -83,14 +83,21 @@ const websiteJsonLd = JSON.stringify({
 		{/* Menü-Wahl (Rasul 13.11.2026): Zwetschke-Knopf (Standard) oder BBH-Kachelmenü.
 		   Umschalten mit ?menu=bbh bzw. ?menu=zwetschke oder dem Schalter unten rechts;
 		   die Wahl bleibt im Browser gespeichert und überlebt Seitenwechsel. */}
-		<script is:inline>
+		<script is:inline define:vars={{ nurLokal: import.meta.env.DEV }}>
 			(function () {
+				// Werkstatt-Schalter (?ende=, ?raster=, …) und ihre gespeicherte Wahl gelten nur lokal; live und auf der Dev-Seite
+				// immer die Grundeinstellungen (Code-Prüfung N1, 14.11.2026: ein geteilter Prüflink hätte Fremden sonst
+				// dauerhaft Hilfslinien oder Varianten gezeigt).
+				var suche = nurLokal ? location.search : "";
+				var speicher = null;
+				try { if (nurLokal) speicher = localStorage; } catch (e) { speicher = null; }
+				if (!speicher) speicher = { getItem: function () { return null; }, setItem: function () {} };
 				var K = "parley-menu";
 				function lies() {
-					var q = new URLSearchParams(location.search).get("menu");
+					var q = new URLSearchParams(suche).get("menu");
 					try {
-						if (q === "bbh" || q === "zwetschke") localStorage.setItem(K, q);
-						return localStorage.getItem(K) || "zwetschke";
+						if (q === "bbh" || q === "zwetschke") speicher.setItem(K, q);
+						return speicher.getItem(K) || "zwetschke";
 					} catch (e) { return q || "zwetschke"; }
 				}
 				// Hero-Demo (Rasul 13.11.2026: „machen wir doch jetzt mal kurz eine Demo, wo wir unser Video
@@ -98,102 +105,102 @@ const websiteJsonLd = JSON.stringify({
 				// Im Film-Modus gilt immer das BBH-Menü. Grundeinstellung seit 13.11.2026 „film“ (Rasul: „Also ich
 				// glaube, mit dem großen Video am Anfang ist es die beste Lösung.“).
 				function liesHero() {
-					var q = new URLSearchParams(location.search).get("hero");
+					var q = new URLSearchParams(suche).get("hero");
 					try {
-						if (q === "film" || q === "text") localStorage.setItem("parley-hero", q);
-						return localStorage.getItem("parley-hero") || "film";
+						if (q === "film" || q === "text") speicher.setItem("parley-hero", q);
+						return speicher.getItem("parley-hero") || "film";
 					} catch (e) { return q || "film"; }
 				}
 				// Grundeinstellung „gemischt“ (Rasul 13.11.2026: „Ja, Gemischt“).
 				// Menülage (Rasul 13.11.2026: „wir kleben es gleich unten mittig an den Bildschirm. Und beim
 				// Scrollen fährt es dann zusammen, das gucken wir uns mal als Variante an“): ?lage=unten|links.
 				function liesLage() {
-					var q = new URLSearchParams(location.search).get("lage");
+					var q = new URLSearchParams(suche).get("lage");
 					try {
-						if (q === "unten" || q === "links" || q === "gemischt") localStorage.setItem("parley-lage", q);
-						return localStorage.getItem("parley-lage") || "gemischt";
+						if (q === "unten" || q === "links" || q === "gemischt") speicher.setItem("parley-lage", q);
+						return speicher.getItem("parley-lage") || "gemischt";
 					} catch (e) { return q || "gemischt"; }
 				}
 				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis y; Grundeinstellung y (Rasul 13.11. abends: „Ja, wir nehmen ypsilon.“; davor w, v, i)
 				function liesSatz() {
-					var q = new URLSearchParams(location.search).get("satz");
+					var q = new URLSearchParams(suche).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v" || q === "w" || q === "x" || q === "y") localStorage.setItem("parley-satz", q);
-						return localStorage.getItem("parley-satz") || "y";
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v" || q === "w" || q === "x" || q === "y") speicher.setItem("parley-satz", q);
+						return speicher.getItem("parley-satz") || "y";
 					} catch (e) { return q || "y"; }
 				}
 				function liesUmlaut() {
-					var q = new URLSearchParams(location.search).get("umlaut");
+					var q = new URLSearchParams(suche).get("umlaut");
 					try {
-						if (q === "innen" || q === "aussen" || q === "ecken") localStorage.setItem("parley-umlaut", q);
-						return localStorage.getItem("parley-umlaut") || "ecken"; // Grundeinstellung „Ecken“ seit 13.11.2026 abends
+						if (q === "innen" || q === "aussen" || q === "ecken") speicher.setItem("parley-umlaut", q);
+						return speicher.getItem("parley-umlaut") || "ecken"; // Grundeinstellung „Ecken“ seit 13.11.2026 abends
 					} catch (e) { return q || "ecken"; }
 				}
 				// Anlass vor den Kacheln (13.11.2026 abends): ?kopf=videobeweis|band|kachel; Grundeinstellung „videobeweis“.
 				// Rasul: „sollen wir nicht erst nochmal dann die Szene setzen, also jetzt den Spruch bringen? Oder gleich einsteigen?“
 				function liesKopf() {
-					var q = new URLSearchParams(location.search).get("kopf");
+					var q = new URLSearchParams(suche).get("kopf");
 					try {
-						if (q === "videobeweis" || q === "band" || q === "kachel") localStorage.setItem("parley-kopf", q);
-						return localStorage.getItem("parley-kopf") || "band"; // Grundeinstellung „band“ seit 13.11.2026 abends (Rasul: Aufbau Film, Satz, Problem, Kacheln „Beweis“)
+						if (q === "videobeweis" || q === "band" || q === "kachel") speicher.setItem("parley-kopf", q);
+						return speicher.getItem("parley-kopf") || "band"; // Grundeinstellung „band“ seit 13.11.2026 abends (Rasul: Aufbau Film, Satz, Problem, Kacheln „Beweis“)
 					} catch (e) { return q || "band"; }
 				}
 				// Ende der Animation Experten-Auswahl (13.11.2026 abends): ?ende=drei|eins|grau|unscharf; Grundeinstellung „unscharf“
 				// (Rasul 13.11.2026 abends: „Unscharf“; dazu: „Es würde unbewusst klarmachen, dass wir einen Fokus geben.“)
 				function liesEnde() {
-					var q = new URLSearchParams(location.search).get("ende");
+					var q = new URLSearchParams(suche).get("ende");
 					try {
-						if (q === "drei" || q === "eins" || q === "grau" || q === "unscharf" || q === "ebenen" || q === "kamera") localStorage.setItem("parley-ende", q);
-						return localStorage.getItem("parley-ende") || "kamera";
+						if (q === "drei" || q === "eins" || q === "grau" || q === "unscharf" || q === "ebenen" || q === "kamera") speicher.setItem("parley-ende", q);
+						return speicher.getItem("parley-ende") || "kamera";
 					} catch (e) { return q || "kamera"; }
 				}
 				// Rahmen der Experten-Auswahl (13.11.2026 abends): ?rahmen=21|16; Grundeinstellung 21 (21:9, Rasul: „Probier mal 21 zu 9“)
 				function liesRahmen() {
-					var q = new URLSearchParams(location.search).get("rahmen");
+					var q = new URLSearchParams(suche).get("rahmen");
 					try {
-						if (q === "21" || q === "16") localStorage.setItem("parley-rahmen", q);
-						return localStorage.getItem("parley-rahmen") || "16"; // seit 13.11.2026 abends wieder 16:9 (Rasul: „dass es verständlicher ist“)
+						if (q === "21" || q === "16") speicher.setItem("parley-rahmen", q);
+						return speicher.getItem("parley-rahmen") || "16"; // seit 13.11.2026 abends wieder 16:9 (Rasul: „dass es verständlicher ist“)
 					} catch (e) { return q || "16"; }
 				}
 				// Form der Personen in der Kamerafahrt (13.11.2026 abends): ?form=figur|punkt; Grundeinstellung „figur“
 				// (Rasul: „Vielleicht machen wir sogar noch als Variante, dass es wirklich Punkte sind am Anfang und am Ende zu Personen werden.“)
 				function liesForm() {
-					var q = new URLSearchParams(location.search).get("form");
+					var q = new URLSearchParams(suche).get("form");
 					try {
-						if (q === "figur" || q === "punkt") localStorage.setItem("parley-form", q);
-						return localStorage.getItem("parley-form") || "figur"; // Rasul 13.11.2026 abends: „Zurück zu Figuren“
+						if (q === "figur" || q === "punkt") speicher.setItem("parley-form", q);
+						return speicher.getItem("parley-form") || "figur"; // Rasul 13.11.2026 abends: „Zurück zu Figuren“
 					} catch (e) { return q || "figur"; }
 				}
 				// Höhe der Kamera am Ende (13.11.2026 abends): ?hoehe=oben|auge; Grundeinstellung „oben“
 				function liesHoehe() {
-					var q = new URLSearchParams(location.search).get("hoehe");
+					var q = new URLSearchParams(suche).get("hoehe");
 					try {
-						if (q === "oben" || q === "auge") localStorage.setItem("parley-hoehe", q);
-						return localStorage.getItem("parley-hoehe") || "auge"; // Rasul 13.11.2026 abends: „Augenhöhe“
+						if (q === "oben" || q === "auge") speicher.setItem("parley-hoehe", q);
+						return speicher.getItem("parley-hoehe") || "auge"; // Rasul 13.11.2026 abends: „Augenhöhe“
 					} catch (e) { return q || "auge"; }
 				}
 				// Aufstellung der Personen (13.11.2026 abends): ?aufstellung=reihen|nah; Grundeinstellung „reihen“
 				function liesAufstellung() {
-					var q = new URLSearchParams(location.search).get("aufstellung");
+					var q = new URLSearchParams(suche).get("aufstellung");
 					try {
-						if (q === "reihen" || q === "nah") localStorage.setItem("parley-aufstellung", q);
-						return localStorage.getItem("parley-aufstellung") || "reihen";
+						if (q === "reihen" || q === "nah") speicher.setItem("parley-aufstellung", q);
+						return speicher.getItem("parley-aufstellung") || "reihen";
 					} catch (e) { return q || "reihen"; }
 				}
 				// Höhe der Animation in % der Fensterhöhe und Größe der Band-Überschrift (13.11.2026 abends)
 				function liesWahl(name, werte, vorgabe) {
-					var q = new URLSearchParams(location.search).get(name);
+					var q = new URLSearchParams(suche).get(name);
 					try {
-						if (werte.indexOf(q) >= 0) localStorage.setItem("parley-" + name, q);
-						return localStorage.getItem("parley-" + name) || vorgabe;
+						if (werte.indexOf(q) >= 0) speicher.setItem("parley-" + name, q);
+						return speicher.getItem("parley-" + name) || vorgabe;
 					} catch (e) { return q || vorgabe; }
 				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
-					var q = new URLSearchParams(location.search).get("aufbau");
+					var q = new URLSearchParams(suche).get("aufbau");
 					try {
-						if (q === "abschnitte" || q === "kacheln") localStorage.setItem("parley-aufbau", q);
-						return localStorage.getItem("parley-aufbau") || "kacheln";
+						if (q === "abschnitte" || q === "kacheln") speicher.setItem("parley-aufbau", q);
+						return speicher.getItem("parley-aufbau") || "kacheln";
 					} catch (e) { return q || "kacheln"; }
 				}
 				function setze() {
