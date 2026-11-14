@@ -561,7 +561,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const nacheinander = () => document.documentElement.dataset.textfolge === "nacheinander" || document.documentElement.dataset.textfolge === "vorher";
 			// Textfolge „vorher“ (Probe 14.11.2026): Bei T_TEXT steht die Animation D_ANSAGE Sekunden still, damit unten nur die
 			// Ansage passiert (Ausblenden 0,6 s, „Zeit für den Videobeweis“ 1 s, kurz lesen); danach Geste und Fahrt wie gehabt
-			const D_ANSAGE = 2.0;
+			// Ohne Anhalten (Rasul 14.11.2026: „Die Animation stoppt kurz, es muss sie nicht, sie kann weiterlaufen, es soll nur
+			// der Text unten sich verändern. Ich finde es besser, wenn es vorher ankündigt.“): vorher 2,0 s
+			const D_ANSAGE = 0;
 			const ansage = () => document.documentElement.dataset.textfolge === "vorher";
 			let ansageRest = D_ANSAGE;
 			const zeileSetzen = (e: number) => { if (zeileUnscharf && nacheinander()) { zeileUnscharf.style.filter = ""; zeileUnscharf.style.opacity = ""; return; } if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };

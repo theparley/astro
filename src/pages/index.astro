@@ -460,8 +460,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-textfolge="nacheinander"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out 1s; }
 	/* Textfolge „vorher“ (Probe, Rasul 14.11.2026: „ob wir, bevor die Animation losgeht, den Text ausblenden und sagen, Zeit
 	   für den Videobeweis und dann sozusagen die Geste gezeichnet wird“): erst ansagen, dann zeigen. „Überall Experten.“
-	   blendet aus (0,6 s), danach „Zeit für den Videobeweis“ (1 s); die Animation steht so lange still (ExpertenAuswahl,
-	   D_ANSAGE). „auch im Business.“ kommt nach dem Stillstand der Kamera. */
+	   blendet aus (0,6 s), danach „Zeit für den Videobeweis“ (1 s), während die Geste beginnt; die Animation läuft durch
+	   (Rasul: „sie kann weiterlaufen, es soll nur der Text unten sich verändern“). „auch im Business.“ kommt nach dem
+	   Stillstand der Kamera. Grundeinstellung seit 14.11.2026. */
 	:global(html[data-textfolge="vorher"] .anlass--band:is([data-phase="geste"], [data-phase="schluss"]) .anlass__zeile1) { opacity: 1; transition: opacity 1s ease-in-out 0.6s; }
 	:global(html[data-textfolge="vorher"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out; }
 
