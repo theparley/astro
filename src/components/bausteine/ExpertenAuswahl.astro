@@ -37,9 +37,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	                                // zwischen zwei Bildern (sonst entstehen bei ausgelassenen Bildern Balken quer durch)
 	const W = 1600, H = 900;
 	// LUECKE 40 statt 8 (Rasul 14.11.2026: „mach mal die Lücke vom Ansetzen der Finger größer am Anfang und am Ende“):
-	// Abstand der beiden Finger, wo sie aufsetzen (oben Mitte) und loslassen (unten Mitte). Lokal ?luecke=alt zeigt 8.
-	const LUECKE_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("luecke") === "alt";
-	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = LUECKE_ALT ? 8 : 40;
+	// Abstand der beiden Finger, wo sie aufsetzen (oben Mitte) und loslassen (unten Mitte).
+	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 40;
 	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
 	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
 	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
@@ -69,13 +68,6 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Kürzerer Anfang probiert und verworfen (14.11.2026): 1,5 s statt 2,0 s bis zur Kamerafahrt (Geste ab 1,7 s, Text ab
 	// 1,2 s). Rasul: „Jetzt wirkt es zu hektisch. Vor der Videogeste. Es hat auch gefühlt zwei verschiedene
 	// Geschwindigkeiten. Also wir ändern erstmal nichts beim Entstehen vorher.“
-	const BERUEHRUNG = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "aus");
-	// lokal ?beruehrung=leicht: der erste Vorschlag (Kreis 12 %, Ring 18 %) zum Vergleich
-	const BERUEHRUNG_LEICHT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "leicht";
-	const WELLE_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("welle") === "alt"; // lokal: Ring wandert mit
-	const RING_ENDE = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("ring") === "nurstart");
-	const RING_MITTEL = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("ring") === "mittel";
-	const BERUEHRUNG_VOLL = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "voll";
 	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
@@ -268,11 +260,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// bewege“ und „am Ende kannst du die Geste noch ein bisschen früher enden lassen … machen wir die gleiche Zeit, dass die
 	// Kamerafahrt anfängt, bevor die Geste gezeichnet wird“). Prinzip Vorbereitung (Anticipation). VOR = Vorlauf und
 	// Nachlauf der Kamera; die Geste bleibt bei T_GESTE und dauert D_KAMERA − 2 · VOR. Vorher: Kamera und Geste ab T_GESTE,
-	// Geste nach 88 % fertig (Kandidat am selben Tag). Lokal ?kamera=alt zeigt diesen Vorgänger zum Vergleich.
-	const KAMERA_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("kamera") === "alt";
+	// Geste nach 88 % fertig (Kandidat am selben Tag).
 	// Danach (Rasul 14.11.2026): „lass die Kamera anstatt 0,4, 0,2 Sekunden vor der Geste loslaufen“. Vorlauf 0,2 s,
 	// Nachlauf bleibt 0,4 s.
-	const VOR = KAMERA_ALT ? 0 : 0.2, NACH = KAMERA_ALT ? 0.12 * D_KAMERA : 0.4;
+	const VOR = 0.2, NACH = 0.4;
 	const T_KAMERA = T_GESTE - VOR;
 	const D_GESTE_KAMERA = D_KAMERA - VOR - NACH;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
@@ -746,22 +737,18 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// am Ende auch wieder sozusagen weggehen, wenn man den Bildschirm verlässt … sodass wir sozusagen Hand anlegen“).
 				// Vorbilder: Berührungspunkte in App-Aufnahmen (halbdurchsichtiger Kreis in Fingergröße, wandert mit) und
 				// Material-Ripple (Ring läuft beim Aufsetzen nach außen, Deckkraft 12 %). Aufsetzen mit dem Einblenden der
-				// Fingerpunkte, Loslassen mit dem Ende der Geste. Lokal ?beruehrung=aus zum Vergleich.
-				if (kam && BERUEHRUNG) {
-					// Stärke: erst Kreis 12 % (Standard-Deckkraft des Material-Ripple), Ring 18 %; dann kräftiger (Rasul 14.11.2026:
-					// „mache es ruhig mal kräftiger. Also sozusagen normal“) 30 % und 35 %; dann der Mittelweg (Rasul: „Nimm mal den
-					// Mittelweg zwischen deinem ersten Vorschlag … zwischen links und rechts“): Kreis 21 %, Ring 26,5 %; dann Ring
-					// stärker (Rasul: „Ich würde den Ring stärker machen.“): 45 %.
-					// Zurücknehmen, noch offen wie (Rasul 14.11.2026: „wir müssen ein bisschen die Animation vom Auf- und Absetzen
-					// zurücknehmen. Ich weiß noch nicht, ob es die Durchsichtigkeit ist oder die Größe oder die Dauer“): lokal
-					// ?ton=blasser | kleiner | kuerzer ändert jeweils nur eine Größe, zum Vergleich nebeneinander.
-					const TON = import.meta.env.DEV ? new URLSearchParams(location.search).get("ton") : null;
-					const bl = TON === "blasser" || TON === "beides", kl = TON === "kleiner" || TON === "beides";
-					const fA = bl ? 0.55 : 1, fR = kl ? 0.75 : 1, fW = kl ? 0.55 : 1, fT = TON === "kuerzer" ? 0.6 : 1;
-					const R = DICKE * 1.15 * fR, ab = t - T_GESTE, los = t - T_GESTE - gDauer, A_KREIS = fA * (BERUEHRUNG_LEICHT ? 0.12 : BERUEHRUNG_VOLL ? 0.3 : 0.21), A_RING = fA * (BERUEHRUNG_LEICHT ? 0.18 : BERUEHRUNG_VOLL ? 0.35 : RING_MITTEL ? 0.265 : 0.45);
+				// Fingerpunkte, Loslassen mit dem Ende der Geste.
+				if (kam) {
+					// Stärke und Größe: erst Kreis 12 % / Ring 18 % (Standard des Material-Ripple), dann kräftiger 30 / 35 % (Rasul:
+					// „mache es ruhig mal kräftiger. Also sozusagen normal“), Mittelweg 21 / 26,5 %, Ring stärker 45 %; dann
+					// zurückgenommen (Rasul: „wir müssen ein bisschen die Animation vom Auf- und Absetzen zurücknehmen“), im Vergleich
+					// von blasser, kleiner und kürzer gewählt: „Ja, es ist blasser, vielleicht in Kombination mit kleiner“, „Auch
+					// kleiner ist dann besser, so nehmen wir es.“ Also 55 % der Deckkraft und 75 % der Größe, Welle läuft 55 % so weit:
+					// Kreis 11,5 %, Ring 25 %, Kreis 0,86 Fingerdicken, Welle bis 1,6-facher Kreis.
+					const R = DICKE * 0.8625, ab = t - T_GESTE, los = t - T_GESTE - gDauer, A_KREIS = 0.115, A_RING = 0.25, WEIT = 0.605;
 					let r = 0, a = 0;
-					if (los < 0) { const k = Math.min(1, ab / (0.22 * fT)); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
-					else if (los < 0.3 * fT) { const k = 1 - los / (0.3 * fT); r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
+					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
+					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
 					ctx.setTransform(sc, 0, 0, sc, ox, 0); ctx.fillStyle = "#000";
 					// Aufsetzpunkte: der Ring beim Aufsetzen bleibt dort stehen, wo der Finger gelandet ist, und läuft von da als
 					// Welle nach außen, wie beim Loslassen (Rasul 14.11.2026: „Jetzt hast du eine richtige Animation gemacht mit
@@ -770,11 +757,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					[pr, pl].forEach(([x, y], n) => {
 						if (a > 0) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
 						// ein Ring läuft beim Aufsetzen einmal nach außen und verblasst
-						const ring = (z: number, rx = x, ry = y) => { const k = z / (0.5 * fT); ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(rx, ry, R * (1 + 1.1 * fW * sanft(k)), 0, Math.PI * 2); ctx.stroke(); };
-						if (ab >= 0 && ab < 0.5 * fT) { if (WELLE_ALT) ring(ab); else ring(ab, auf[n][0], auf[n][1]); }
+						const ring = (z: number, rx = x, ry = y) => { const k = z / 0.5; ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(rx, ry, R * (1 + WEIT * sanft(k)), 0, Math.PI * 2); ctx.stroke(); };
+						if (ab >= 0 && ab < 0.5) ring(ab, auf[n][0], auf[n][1]);
 						// und noch einmal beim Loslassen (Rasul 14.11.2026: „Der Ring kommt jetzt nur am Anfang. Mach den auch mal am
 						// Ende, wenn die Finger wieder vom Bildschirm weggehen.“)
-						if (RING_ENDE && los >= 0 && los < 0.5 * fT) ring(los);
+						if (los >= 0 && los < 0.5) ring(los);
 					});
 					ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0);
 				}
