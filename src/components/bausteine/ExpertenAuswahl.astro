@@ -959,6 +959,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			}, { threshold: 0, rootMargin: "0px 0px -5% 0px" });
 			sicht.observe(fig);
 			fig.addEventListener("click", spiele);
+			// nur lokal, für die Vergleichsseite (Rasul 14.11.2026: „dass das im Loop läuft. Und pausiert und startet, wenn ich
+			// draufklicke … egal wo ich draufklicke, stoppen beide“): anhalten, weiterlaufen, neu starten von außen
+			if (import.meta.env.DEV) {
+				(fig as any).__spiele = spiele;
+				(fig as any).__halt = (h: boolean) => {
+					if (h && gestartet && !pausiert && fig.dataset.fertig === undefined) { cancelAnimationFrame(lauf); pausiert = true; }
+					else if (!h && pausiert) { pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); }
+				};
+			}
 			// Nur die Höhe geändert (Adressleiste in Safari): nichts neu bemessen, siehe groesse()
 			const masse = () => `${document.documentElement.clientWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
 			let massZuletzt = masse();
