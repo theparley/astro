@@ -594,7 +594,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass--band .anlass__text > * + * { margin-top: 24px; }
 	/* Stichpunkte im Bandtext: ohne Zeichen, mittig, eine Zeile je Punkt, eng gesetzt */
 	.anlass__liste { list-style: none; padding: 0; margin-bottom: 0; }
-	.anlass__liste li + li { margin-top: 24px; }
+	/* Befunde als ein Block ohne Abstand zwischen den Zeilen (Rasul 14.11.2026: „Ich würde trotzdem die Aufzählung als einen Block
+	   machen, nicht mit Leerzeichen zwischendrin.“); vor und nach dem Block 24 px wie die Absätze */
+	.anlass__liste li + li { margin-top: 0; }
 	/* Luft oben wie BBHs helle Blöcke (py-lg) und Überschrift 48 px über dem Inhalt (mb-12); Rasul 14.11.2026: „2 und 5 umsetzen“
 	   (Moodboard branding/werkstatt-seiten/band-bbh-abgleich.html im Marketing-Ordner). Vorher oben md, Abstand zur Animation md.
 	   Größe huge wie BBHs Abschnittstitel als Bühne (Rasul 14.11.2026: „Lös mal alles so, wie es BBH machen würde.“, Idee 1 A);
