@@ -12,7 +12,7 @@
 import Layout from "../layouts/Layout.astro";
 import { BLASEN, FORMATE } from "../daten/startseite";
 import Beweisaufnahme from "../components/abschnitte/Beweisaufnahme.astro";
-import Beweisverfahren from "../components/abschnitte/Beweisverfahren.astro";
+import Beweisfuehrung from "../components/abschnitte/Beweisfuehrung.astro";
 import Beweisstuecke from "../components/abschnitte/Beweisstuecke.astro";
 import Augenzeugen from "../components/abschnitte/Augenzeugen.astro";
 import Kapitelende from "../components/abschnitte/Kapitelende.astro";
@@ -244,7 +244,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 				kacheln={[
 				{ nr: "01", titel: "Beweisaufnahme", /* Rasul 14.11.2026: „für die erste Kachel bleiben wir mal bei dem Wording Beweisaufnahme“ (statt „Fangen“) */ zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
-				{ nr: "02", titel: "Beweisführung", /* Kandidat statt „Beweisverfahren“ (Rasul 14.11.2026: „Ich glaube, das Wort Beweisverfahren passt nicht. Prüft es nochmal und schlage mir ein alternatives Wort vor.“), Begründung im Steuerdokument */ zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
+				{ nr: "02", titel: "Beweisführung", /* statt „Beweisverfahren“ (Rasul 14.11.2026: „Ich glaube, das Wort Beweisverfahren passt nicht“, dann „Ja, Beweisführung“); Begründung im Steuerdokument */ zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisfuehrung" },
 				{ nr: "03", titel: "Beweisstücke", /* Rasul 14.11.2026: „Ja, würde ich auch zurückgehen.“ */ zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
 			]} />
 		</section>
@@ -252,7 +252,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	</div>
 	<div class="aufbau aufbau--abschnitte">
 		<Beweisaufnahme />
-		<Beweisverfahren />
+		<Beweisfuehrung />
 		<Beweisstuecke />
 		<Augenzeugen />
 	</div>

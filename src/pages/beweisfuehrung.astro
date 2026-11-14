@@ -1,14 +1,14 @@
 ---
-/* Unterseite 02 Beweisverfahren (13.11.2026, Variante Kachel-Startseite; Rasul: „Ja, mach's mal als Variante zum
-   Ausprobieren“). Inhalt ist derselbe Baustein wie auf der Startseite (src/components/abschnitte/Beweisverfahren.astro).
+/* Unterseite 02 Beweisführung, bis 14.11.2026 „Beweisverfahren“ (Rasul 14.11.2026: „Ja, Beweisführung“). Angelegt 13.11.2026 ( Variante Kachel-Startseite; Rasul: „Ja, mach's mal als Variante zum
+   Ausprobieren“). Inhalt ist derselbe Baustein wie auf der Startseite (src/components/abschnitte/Beweisfuehrung.astro).
    In der Sitemap seit 13.11.2026 (Rasul: „Kacheln“). */
 import Layout from "../layouts/Layout.astro";
-import Beweisverfahren from "../components/abschnitte/Beweisverfahren.astro";
+import Beweisfuehrung from "../components/abschnitte/Beweisfuehrung.astro";
 import Kapitelende from "../components/abschnitte/Kapitelende.astro";
 ---
-<Layout title="Beweisverfahren" description="02 Beweisverfahren: so arbeitet Parley Film.">
+<Layout title="Beweisführung" description="02 Beweisführung: so arbeitet Parley Film.">
 	<main class="kapitel">
-		<Beweisverfahren />
+		<Beweisfuehrung />
 		<Kapitelende weiter={{ href: "/beweisstuecke", nr: "03", titel: "Beweisstücke" }} />
 	</main>
 </Layout>
