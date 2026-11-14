@@ -3,10 +3,11 @@
    Themen), Unterschrift links: Titel weiß, Zeile grau. 2 oder 3 Spalten, Handy einspaltig.
    Darüberfahren: Bild 103 %, leicht gedreht, Karte 80 % Deckkraft (BBH). */
 interface Karte { titel: string; zeile?: string; href?: string; platzhalter?: string }
-interface Props { karten: Karte[]; spalten?: 2 | 3; format?: string }
-const { karten, spalten = 2, format = "4/3" } = Astro.props;
+/* rahmen={false} (14.11.2026): wenn die Karten in einem Baustein stehen, der den Rahmen schon setzt */
+interface Props { karten: Karte[]; spalten?: 2 | 3; format?: string; rahmen?: boolean }
+const { karten, spalten = 2, format = "4/3", rahmen = true } = Astro.props;
 ---
-<div class:list={["karten", "rahmen", `karten--${spalten}`]}>
+<div class:list={["karten", rahmen && "rahmen", `karten--${spalten}`]}>
 	{karten.map((k) => {
 		const Tag = k.href ? "a" : "div";
 		return (
