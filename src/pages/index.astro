@@ -318,7 +318,13 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     Studien. Dass der Vertrauensaufbau vor der ersten Anfrage entscheidend ist, wird. Videos von echten Gesprächen das beste Mittel
 					     dafür.“). War: „Wer ihnen hilft, sich vorher selbst ein Bild zu machen, kommt auf ihren Schirm. Dafür ist Video das beste
 					     Beweismittel.“ */}
-					<p class="t-lesen anlass__text">Wer im richtigen Moment auf dem Schirm von Entscheidern sein will, muss seine Expertise vor dem ersten Kontakt beweisen. Aktuelle Studien zeigen ein verändertes Kaufverhalten: Entscheider recherchieren selbst, oft mit KI, und melden sich meist erst, wenn ihre Favoriten feststehen. Dabei stehen alle Quellen, die auch KI-generiert sein könnten, unter Generalverdacht. Entscheidend ist deshalb Vertrauen, das schon vor der ersten Anfrage entsteht. Das beste Mittel dafür sind Videos von echten&nbsp;Gesprächen.</p>
+					{/* In Absätze geteilt (Rasul 14.11.2026: „der Abschnitt ist jetzt lang vom Text her. Bevor wir ihn kürzen, machen wir erstmal
+					     Abschnitte rein, dass er sich auflockert.“): These, Befund, Folgerung. */}
+					<div class="t-lesen anlass__text">
+						<p>Wer im richtigen Moment auf dem Schirm von Entscheidern sein will, muss seine Expertise vor dem ersten Kontakt beweisen.</p>
+						<p>Aktuelle Studien zeigen ein verändertes Kaufverhalten: Entscheider recherchieren selbst, oft mit KI, und melden sich meist erst, wenn ihre Favoriten feststehen. Dabei stehen alle Quellen, die auch KI-generiert sein könnten, unter Generalverdacht.</p>
+						<p>Entscheidend ist deshalb Vertrauen, das schon vor der ersten Anfrage entsteht. Das beste Mittel dafür sind Videos von echten&nbsp;Gesprächen.</p>
+					</div>
 					<p class="t-mini grau anlass__quelle">Die Studien dahinter: Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)</p>
 				</div>
 			</div>
@@ -556,6 +562,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-textfolge="vorher"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out; }
 	.anlass__schirm { display: none; }
 	.anlass__titel { display: none; }
+	/* Absätze im Bandtext: Abstand eine Zeile, wie im Lesetext sonst */
+	.anlass--band .anlass__text p { margin: 0; }
+	.anlass--band .anlass__text p + p { margin-top: 1em; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0; padding-top: var(--abstand-md); text-align: center; font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
 	:global(html[data-textfolge="vorher"] .anlass__band-innen > .experten) { grid-row: 2; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__satz--eins,
