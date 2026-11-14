@@ -15,12 +15,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 ---
 <figure class="experten" data-experten>
 	<canvas class="experten__bild" role="img" aria-label={label}></canvas>
-	<!-- Symbol statt der Wörter „Noch einmal“ (Rasul 14.11.2026: „machen wir die zwei Wörter weg noch einmal und machen dieses
-	     übliche Symbol … ein runder Pfeil“). Pfeil gegen den Uhrzeigersinn wie üblich für Wiederholen; Quelle Phosphor Icons,
-	     arrow-counter-clockwise, gefüllt, Lizenz MIT (@phosphor-icons/core 2.1.1; research/Piktogramm_SVG_Quellen_2026-11.md). -->
-	<button type="button" class="experten__nochmal" aria-label="Animation noch einmal abspielen" title="Noch einmal abspielen">
-		<svg viewBox="0 0 256 256" width="28" height="28" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L60.63,81.29l17,17A8,8,0,0,1,72,112H24a8,8,0,0,1-8-8V56A8,8,0,0,1,29.66,50.3L49.31,70,60.25,60A96,96,0,0,1,224,128Z"/></svg>
-	</button>
+	{/* Kein Wiederholen-Knopf (Rasul 14.11.2026: „Brauchen wir das Wiederholen überhaupt?“ … „Okay, dann machen wir es raus.“).
+	     Neu abspielen: Klick auf die Animation oder nach oben über das Band scrollen und zurück. Vorher „Noch einmal“, dann
+	     ein runder Pfeil (Phosphor), zuletzt mittig über der Animation; siehe website/Website_Neustart_2026-11.md. */}
 </figure>
 
 <style>
@@ -33,16 +30,6 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	   Querformat 50 % der kleinen Fensterhöhe, Hochformat so hoch, wie der 16:9-Rahmen in der Breite braucht. */
 	.experten__bild { display: block; width: 100%; height: max(160px, 100vw * 0.6541); cursor: pointer; }
 	@media (orientation: landscape) { .experten__bild { height: 50svh; } }
-	/* Knopf erst bedienbar, wenn er sichtbar ist; Fokus sichtbar; Trefferfläche über 24 px (Code-Prüfung M8, 14.11.2026).
-	   Innenabstand 6 / 8 px, die Lage des Worts bleibt wie vorher (rechts und unten um den Abstand verschoben). */
-	/* Mittig über der Animation (Rasul 14.11.2026: „Mittig darüber legen“; Einwand Claude: verdeckt die Person im Fokus und
-	   wirkt wie ein Videoplayer, Rasul entschied trotzdem so). Weiße runde Fläche, damit der Pfeil auf der schwarzen Figur
-	   lesbar ist; vorher klein unten rechts unter der Animation. */
-	.experten__nochmal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; color: var(--black); background: rgba(255, 255, 255, 0.92); border: 0; padding: 0; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--tempo) var(--kurve), visibility 0s linear var(--tempo); }
-	.experten[data-fertig] .experten__nochmal { opacity: 1; visibility: visible; transition: opacity var(--tempo) var(--kurve), visibility 0s; }
-	.experten__nochmal:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
-	/* Bei reduzierter Bewegung steht gleich das Endbild, „Noch einmal“ hätte nichts zu zeigen (N14) */
-	@media (prefers-reduced-motion: reduce) { .experten__nochmal { display: none; } }
 </style>
 
 <script>
