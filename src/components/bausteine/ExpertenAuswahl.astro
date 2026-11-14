@@ -756,7 +756,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// zurücknehmen. Ich weiß noch nicht, ob es die Durchsichtigkeit ist oder die Größe oder die Dauer“): lokal
 					// ?ton=blasser | kleiner | kuerzer ändert jeweils nur eine Größe, zum Vergleich nebeneinander.
 					const TON = import.meta.env.DEV ? new URLSearchParams(location.search).get("ton") : null;
-					const fA = TON === "blasser" ? 0.55 : 1, fR = TON === "kleiner" ? 0.75 : 1, fW = TON === "kleiner" ? 0.55 : 1, fT = TON === "kuerzer" ? 0.6 : 1;
+					const bl = TON === "blasser" || TON === "beides", kl = TON === "kleiner" || TON === "beides";
+					const fA = bl ? 0.55 : 1, fR = kl ? 0.75 : 1, fW = kl ? 0.55 : 1, fT = TON === "kuerzer" ? 0.6 : 1;
 					const R = DICKE * 1.15 * fR, ab = t - T_GESTE, los = t - T_GESTE - gDauer, A_KREIS = fA * (BERUEHRUNG_LEICHT ? 0.12 : BERUEHRUNG_VOLL ? 0.3 : 0.21), A_RING = fA * (BERUEHRUNG_LEICHT ? 0.18 : BERUEHRUNG_VOLL ? 0.35 : RING_MITTEL ? 0.265 : 0.45);
 					let r = 0, a = 0;
 					if (los < 0) { const k = Math.min(1, ab / (0.22 * fT)); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
