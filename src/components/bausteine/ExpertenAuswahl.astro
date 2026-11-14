@@ -15,7 +15,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 ---
 <figure class="experten" data-experten>
 	<canvas class="experten__bild" role="img" aria-label={label}></canvas>
-	<button type="button" class="experten__nochmal" aria-label="Animation noch einmal abspielen">Noch einmal</button>
+	{/* Kein Wiederholen-Knopf (Rasul 14.11.2026: „Brauchen wir das Wiederholen überhaupt?“ … „Okay, dann machen wir es raus.“).
+	     Neu abspielen: Klick auf die Animation oder nach oben über das Band scrollen und zurück. Vorher „Noch einmal“, dann
+	     ein runder Pfeil (Phosphor), zuletzt mittig über der Animation; siehe website/Website_Neustart_2026-11.md. */}
 </figure>
 
 <style>
@@ -28,20 +30,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	   Querformat 50 % der kleinen Fensterhöhe, Hochformat so hoch, wie der 16:9-Rahmen in der Breite braucht. */
 	.experten__bild { display: block; width: 100%; height: max(160px, 100vw * 0.6541); cursor: pointer; }
 	@media (orientation: landscape) { .experten__bild { height: 50svh; } }
-	/* Knopf erst bedienbar, wenn er sichtbar ist; Fokus sichtbar; Trefferfläche über 24 px (Code-Prüfung M8, 14.11.2026).
-	   Innenabstand 6 / 8 px, die Lage des Worts bleibt wie vorher (rechts und unten um den Abstand verschoben). */
-	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2 - 8px); bottom: -34px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 6px 8px; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--tempo) var(--kurve), visibility 0s linear var(--tempo); }
-	.experten[data-fertig] .experten__nochmal { opacity: 1; visibility: visible; transition: opacity var(--tempo) var(--kurve), visibility 0s; }
-	.experten__nochmal:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
-	/* Bei reduzierter Bewegung steht gleich das Endbild, „Noch einmal“ hätte nichts zu zeigen (N14) */
-	@media (prefers-reduced-motion: reduce) { .experten__nochmal { display: none; } }
 </style>
 
 <script>
 	type Spur = [number, number][]; // [Weg-Anteil s, Zeit]: gezeichnet wird entlang des echten Wegs, nicht als Gerade
 	                                // zwischen zwei Bildern (sonst entstehen bei ausgelassenen Bildern Balken quer durch)
 	const W = 1600, H = 900;
-	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 8; // GLIMM vorher 0,9 (Kürzung 14.11.2026, siehe T_PAUSE)
+	// LUECKE 40 statt 8 (Rasul 14.11.2026: „mach mal die Lücke vom Ansetzen der Finger größer am Anfang und am Ende“):
+	// Abstand der beiden Finger, wo sie aufsetzen (oben Mitte) und loslassen (unten Mitte).
+	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 40;
 	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
 	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
 	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
@@ -68,6 +65,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Bewegung statt 5,7 s, wirkte aber abgehackt. Im Vergleich nebeneinander lag es an den Zeiten, nicht an der neuen
 	// Bildauflösung. Rasul: „Ich habe das Gefühl, sie wirkt ein bisschen abgehackter“, dann zu alten Zeiten mit neuer
 	// Auflösung: „das können wir so nehmen. Dadurch ist nichts Abgehacktes passiert.“ Also die alten Zeiten.
+	// Kürzerer Anfang probiert und verworfen (14.11.2026): 1,5 s statt 2,0 s bis zur Kamerafahrt (Geste ab 1,7 s, Text ab
+	// 1,2 s). Rasul: „Jetzt wirkt es zu hektisch. Vor der Videogeste. Es hat auch gefühlt zwei verschiedene
+	// Geschwindigkeiten. Also wir ändern erstmal nichts beim Entstehen vorher.“
 	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
@@ -255,6 +255,21 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
 	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
 	const D_KAMERA = 2.6; // Kürzung auf 2,4 verworfen (14.11.2026, siehe T_PAUSE)
+	// Kamera fährt vor der Geste los und nach ihr allein aus, gleich lang (Rasul 14.11.2026: „schöner, wenn die Kamerafahrt
+	// vorher schon leicht anfangen würde … wie wenn ich nach links gehe, dass ich vorher nach rechts mich schon ein bisschen
+	// bewege“ und „am Ende kannst du die Geste noch ein bisschen früher enden lassen … machen wir die gleiche Zeit, dass die
+	// Kamerafahrt anfängt, bevor die Geste gezeichnet wird“). Prinzip Vorbereitung (Anticipation). VOR = Vorlauf und
+	// Nachlauf der Kamera; die Geste bleibt bei T_GESTE und dauert D_KAMERA − 2 · VOR. Vorher: Kamera und Geste ab T_GESTE,
+	// Geste nach 88 % fertig (Kandidat am selben Tag).
+	// Danach (Rasul 14.11.2026): „lass die Kamera anstatt 0,4, 0,2 Sekunden vor der Geste loslaufen“. Vorlauf 0,2 s,
+	// Nachlauf bleibt 0,4 s.
+	const VOR = 0.2, NACH = 0.4;
+	// Ruhe beim Aufsetzen (Rasul 14.11.2026: „ich sehe am Anfang nicht das Auftreffen der Punkte. Aber am Ende sehe ich sie,
+	// das ist nicht gleich“): Die Punkte setzen RUHE Sekunden vor der Bewegung auf und blenden im Stehen ein, wie sie am Ende
+	// im Stehen ausblenden. Vorher blendeten sie ein, während sie schon losliefen. Abgenommen (Rasul: „Ja, passt“).
+	const RUHE = 0.3;
+	const T_KAMERA = T_GESTE - VOR;
+	const D_GESTE_KAMERA = D_KAMERA - VOR - NACH;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
@@ -300,15 +315,19 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Hälfte ist da, wenn der Text kommt, danach werden es immer weniger bis 85 % der Fahrt. Die nahen Reihen (Ebene 2)
 	// erscheinen nur vor der Fahrt, sonst würden nah an der Kamera große Figuren aufblenden; spät kommen nur hintere Reihen.
 	// Vorher: alle bis 1,65 s, dazu drei Nachzügler bis zur Hälfte der Geste (Git-Geschichte).
-	const T_ERSCH_BIS = () => T_GESTE + 0.85 * D_KAMERA - 0.5; // letzte Einblendung (0,5 s) endet bei 85 % der Fahrt
+	const T_ERSCH_BIS = () => T_KAMERA + 0.85 * D_KAMERA - 0.5; // letzte Einblendung (0,5 s) endet bei 85 % der Fahrt
 	const verteilung = (x: number) => { const y = Math.pow(x, 0.55); return y * y * (3 - 2 * y); }; // Anteil, der bis x da ist
 	function erscheinZeit(u: number) {
 		let lo = 0, hi = 1;
 		for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (verteilung(m) < u) lo = m; else hi = m; }
 		return 0.2 + lo * (T_ERSCH_BIS() - 0.2);
 	}
+	// Ein gemeinsamer Takt für alle Personen probiert und verworfen (14.11.2026). Rasul: „Gerade gemeinsamer Takt wirkt
+	// hektischer … kommen mir am Ende zu viele Menschen rein. Ich glaube, da ist unsere andere Version besser. Weil die Kamera
+	// kommt zur Ruhe und auch die Bewegung im Bild kommt zur Ruhe.“ Also wieder drei Zeitpläne: vorne, nahe Reihen gestaucht
+	// vor der Fahrt, hintere Reihen auf der langen Kurve.
 	function uebergang(liste: Person[]): Person[] {
-		const nahBis = T_GESTE - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
+		const nahBis = T_KAMERA - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
 		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
 		liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
 		return liste;
@@ -335,7 +354,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
 			}
 		};
-		const spaetVon = T_GESTE + D_KAMERA * 0.7;
+		const spaetVon = T_KAMERA + D_KAMERA * 0.7;
 		const spaetZeit = () => spaetVon + rnd() * D_KAMERA * 0.15;
 		if (document.documentElement.dataset.aufstellung === "nah") {
 			// Variante „nah“ (Rasul 13.11.2026 abends: „Da müssen wir die Personen näher hinstellen, dann sieht es auch nicht
@@ -635,7 +654,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				}
 			};
 
-			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number) => {
+			// faktor und tLos: nur das jüngste Stück unter den Fingern (die letzten 0,3 s vor tLos) wird zusätzlich ausgeblendet
+			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number, faktor = 1, tLos = Infinity) => {
 				octx.lineCap = "round"; octx.lineJoin = "round"; octx.lineWidth = DICKE;
 				const schritt = 3 / w.ges;
 				for (let i = 1; i < s.length; i++) {
@@ -645,7 +665,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					let vorher: [number, number] | null = null;
 					for (let j = 1; j <= n; j++) {
 						const f = j / n, tt = t0 + (t1 - t0) * f;
-						const a = Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
+						const jung = Math.max(0, Math.min(1, (tt - (tLos - 0.3)) / 0.3));
+						const a = (1 - jung * (1 - faktor)) * Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
 						if (a <= 0) { vorher = null; continue; }
 						if (!vorher) vorher = punkt(w, s0 + (s1 - s0) * (j - 1) / n);
 						const jetztP = punkt(w, s0 + (s1 - s0) * f);
@@ -671,7 +692,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(q.wx, q.wz, b.C, b.Lk, b.F).g;
 			};
 			const verlauf = (t: number) => {
-				const tz = weichKubisch(anteil(t, T_GESTE, D_KAMERA));
+				const tz = weichKubisch(anteil(t, T_KAMERA, D_KAMERA));
 				if (tz <= 0 || tz >= 1) return { e: tz, s: tz };
 				const L = Math.log(Math.max(1.001, groesseVorne(1))), ziel = tz * L;
 				let lo = 0, hi = 1;
@@ -689,18 +710,32 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// der Zoomfahrt … wie die Striche entstehen, richtet sich an der Bewegungsgeschwindigkeit von der Kamera, also mit
 				// an dem Zoom-in, Zoom-out und an der Länge“): Beim Ende „kamera“ beginnen Geste und Fahrt gleichzeitig, dauern
 				// gleich lang und folgen demselben Verlauf (glatt). Vorher: Geste 1,6 s, Fahrt erst danach.
-				const kam = ende() === "kamera", gDauer = kam ? D_KAMERA : DAUER;
-				if (t >= T_GESTE && t <= T_GESTE + gDauer + GLIMM + 0.45) {
+				// Geste bremst vor der Kamera (Rasul 14.11.2026: „Wir lassen die Bewegung der Geste … ein bisschen vorher aufhören,
+				// bevor die Kamerafahrt aufhört. Wie wenn man etwas bremst und dann hat es noch so eine kleine Bewegung, bis es
+				// wirklich stoppt.“): Die Geste läuft auf derselben Kurve, aber in ANTEIL_GESTE der Fahrtdauer; die Kamera fährt
+				// danach noch sanft aus. gDauer = Dauer der Geste.
+				const kam = ende() === "kamera", gDauer = kam ? D_GESTE_KAMERA : DAUER;
+				const T_AUF = kam ? T_GESTE - RUHE : T_GESTE; // Aufsetzen der Finger
+				if (t >= T_AUF && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
-				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
-				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
+				if (t >= T_AUF && t < T_GESTE) { s = 0; deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); } // aufgesetzt, noch in Ruhe
+				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_KAMERA + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); }
+				// Nach dem Loslassen verlöschen Fingerpunkte und Spurenden schnell (Rasul 14.11.2026: „am Ende zu lang die Kreise
+				// stehen bleiben. Weil die Finger sind ja schon weg … Da müssen die Kreise früher ausblenden“). Vorher glomm das
+				// jüngste Stück der Spur unter den Fingern noch 0,9 s nach (GLIMM) und die Punkte blendeten 0,4 s aus; jetzt ist
+				// beides 0,3 s (Punkte 0,2 s) nach dem Loslassen weg, gleichzeitig mit dem Kreis der Berührung. Der Rest der Spur
+				// verglimmt weiter wie bisher (das weiche Auslaufen bleibt).
+				// Danach (Rasul 14.11.2026): „Hol sie mal zurück, aber jetzt am Anfang und am Ende“: Die Fingerpunkte blenden am
+				// Ende spiegelbildlich zum Anfang aus (0,4 s, gleiche weiche Kurve); nur das Spurstück darunter verlischt schnell.
+				else if (t >= T_GESTE + gDauer) { s = 1; deck = sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / D_FINGER)); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
-				spur(spurR, WEG_R, jetzt); spur(spurL, WEG_L, jetzt);
+				const nachLos = t > T_GESTE + gDauer ? sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.3)) : 1;
+				spur(spurR, WEG_R, jetzt, nachLos, T_GESTE + gDauer); spur(spurL, WEG_L, jetzt, nachLos, T_GESTE + gDauer);
 				if (deck > 0) {
 					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
 					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
@@ -713,6 +748,39 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
 				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
 				ctx.globalCompositeOperation = "source-over";
+				// Berührung wie zwei Finger auf einem Bildschirm (Rasul 14.11.2026: „am Anfang auch zwei größere Kreise entstehen
+				// lassen, wenn die zwei Finger … ein Display berühren und es dafür eine Rückmeldung gibt … und dann könnten die
+				// am Ende auch wieder sozusagen weggehen, wenn man den Bildschirm verlässt … sodass wir sozusagen Hand anlegen“).
+				// Vorbilder: Berührungspunkte in App-Aufnahmen (halbdurchsichtiger Kreis in Fingergröße, wandert mit) und
+				// Material-Ripple (Ring läuft beim Aufsetzen nach außen, Deckkraft 12 %). Aufsetzen mit dem Einblenden der
+				// Fingerpunkte, Loslassen mit dem Ende der Geste.
+				if (kam) {
+					// Stärke und Größe: erst Kreis 12 % / Ring 18 % (Standard des Material-Ripple), dann kräftiger 30 / 35 % (Rasul:
+					// „mache es ruhig mal kräftiger. Also sozusagen normal“), Mittelweg 21 / 26,5 %, Ring stärker 45 %; dann
+					// zurückgenommen (Rasul: „wir müssen ein bisschen die Animation vom Auf- und Absetzen zurücknehmen“), im Vergleich
+					// von blasser, kleiner und kürzer gewählt: „Ja, es ist blasser, vielleicht in Kombination mit kleiner“, „Auch
+					// kleiner ist dann besser, so nehmen wir es.“ Also 55 % der Deckkraft und 75 % der Größe, Welle läuft 55 % so weit:
+					// Kreis 11,5 %, Ring 25 %, Kreis 0,86 Fingerdicken, Welle bis 1,6-facher Kreis.
+					const R = DICKE * 0.8625, ab = t - T_AUF, los = t - T_GESTE - gDauer, A_KREIS = 0.115, A_RING = 0.25, WEIT = 0.605;
+					let r = 0, a = 0;
+					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
+					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
+					ctx.setTransform(sc, 0, 0, sc, ox, 0); ctx.fillStyle = "#000";
+					// Aufsetzpunkte: der Ring beim Aufsetzen bleibt dort stehen, wo der Finger gelandet ist, und läuft von da als
+					// Welle nach außen, wie beim Loslassen (Rasul 14.11.2026: „Jetzt hast du eine richtige Animation gemacht mit
+					// Wellen … mache das auch mal am Anfang.“). Vorher wanderte er mit dem Finger mit und wirkte nicht als Welle.
+					const auf = [punkt(WEG_R, 0), punkt(WEG_L, 0)];
+					[pr, pl].forEach(([x, y], n) => {
+						if (a > 0) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+						// ein Ring läuft beim Aufsetzen einmal nach außen und verblasst
+						const ring = (z: number, rx = x, ry = y) => { const k = z / 0.5; ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(rx, ry, R * (1 + WEIT * sanft(k)), 0, Math.PI * 2); ctx.stroke(); };
+						if (ab >= 0 && ab < 0.5) ring(ab, auf[n][0], auf[n][1]);
+						// und noch einmal beim Loslassen (Rasul 14.11.2026: „Der Ring kommt jetzt nur am Anfang. Mach den auch mal am
+						// Ende, wenn die Finger wieder vom Bildschirm weggehen.“)
+						if (los >= 0 && los < 0.5) ring(los);
+					});
+					ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0);
+				}
 				}
 				// Personen
 				ctx.setTransform(sc, 0, 0, sc, ox, 0);
@@ -812,7 +880,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
-				const schluss = ende() === "kamera" ? T_GESTE + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
+				const schluss = ende() === "kamera" ? T_KAMERA + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
 				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
 			};
@@ -902,6 +970,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			}, { threshold: 0, rootMargin: "0px 0px -5% 0px" });
 			sicht.observe(fig);
 			fig.addEventListener("click", spiele);
+			// nur lokal, für die Vergleichsseite (Rasul 14.11.2026: „dass das im Loop läuft. Und pausiert und startet, wenn ich
+			// draufklicke … egal wo ich draufklicke, stoppen beide“): anhalten, weiterlaufen, neu starten von außen
+			if (import.meta.env.DEV) {
+				(fig as any).__spiele = spiele;
+				(fig as any).__halt = (h: boolean) => {
+					if (h && gestartet && !pausiert && fig.dataset.fertig === undefined) { cancelAnimationFrame(lauf); pausiert = true; }
+					else if (!h && pausiert) { pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); }
+				};
+			}
 			// Nur die Höhe geändert (Adressleiste in Safari): nichts neu bemessen, siehe groesse()
 			const masse = () => `${document.documentElement.clientWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
 			let massZuletzt = masse();
