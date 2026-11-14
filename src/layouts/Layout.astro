@@ -78,12 +78,12 @@ const websiteJsonLd = JSON.stringify({
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalUrl} />
-		{/* Vorschaubild für LinkedIn und Co. (Qualitätscheck 14.11.2026: fehlte). Vorläufig Name und Claim in Geist,
-		   weil die Wortmarke „parley Film“ auf der offenen Forma-DJR-Lizenz steht; ersetzen, sobald ein Bild abgenommen ist. */}
+		{/* Vorschaubild für LinkedIn und Co. (Qualitätscheck 14.11.2026: fehlte). Seit 14.11. Rasuls Logo-Bild (Blase + „parley Film“),
+		   Wortmarke aus Forma DJR: vor dem Livegang Lizenz klären (WEBSITE.md Punkt 18). */}
 		<meta property="og:image" content="https://parleyfilm.com/og-parleyfilm.png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
-		<meta property="og:image:alt" content="Parley Film: Echte Gespräche. Filmreif." />
+		<meta property="og:image:alt" content="Logo von Parley Film: Sprechblase und Schriftzug parley Film" />
 		<meta name="twitter:card" content="summary_large_image" />
 		{!title && <script type="application/ld+json" set:html={websiteJsonLd} />}
 		<ClientRouter />
