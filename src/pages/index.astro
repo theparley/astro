@@ -332,10 +332,20 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     der Hidden Buyers gibt.“ Gesetzt ohne den Social-Media-Teil (nicht belegt; belegt ist nur, dass das eigene Netzwerk erste
 					     Quelle für Rat ist, LinkedIn 2025, 43 %); „Viele bleiben bis dahin unsichtbar.“ für die Hidden Buyers (Edelman und LinkedIn
 					     2025). War: „Studien zeigen: Entscheider suchen heute selbst und melden sich meist erst, wenn ihre Favoriten feststehen. Was
-					     KI-generiert sein könnte, steht dabei unter Generalverdacht.“ */}
+					     KI-generiert sein könnte, steht dabei unter Generalverdacht.“
+					     Als Liste (Rasul 14.11.2026: „Alle aktuellen Studien zeigen eine Richtung. Das Kaufverhalten hat sich verändert. Und dann die
+					     Stichpunkte einfach auflisten, vielleicht sowas.“); „Alle“ weggelassen (nicht prüfbar). Liste ohne Aufzählungszeichen, mittig,
+					     eine Zeile je Punkt. War: „Studien zeigen: Entscheider recherchieren selbst, melden sich von selbst und haben dann schon ihre
+					     Favoriten. Viele bleiben bis dahin unsichtbar. Was KI-generiert sein könnte, steht unter Generalverdacht.“ */}
 					<div class="t-lesen anlass__text">
 						<p>Wer im richtigen Moment auf dem Schirm von Entscheidern sein will, muss seine Expertise vor dem ersten Kontakt beweisen.</p>
-						<p>Studien zeigen: Entscheider recherchieren selbst, melden sich von selbst und haben dann schon ihre Favoriten. Viele bleiben bis dahin unsichtbar. Was KI-generiert sein könnte, steht unter Generalverdacht.</p>
+						<p>Aktuelle Studien zeigen in dieselbe Richtung: Das Kaufverhalten hat sich verändert.</p>
+						<ul class="anlass__liste">
+							<li>Entscheider recherchieren selbst.</li>
+							<li>Sie melden sich von selbst, mit fertigen Favoriten.</li>
+							<li>Viele bleiben bis dahin unsichtbar.</li>
+							<li>Was KI-generiert sein könnte, steht unter Generalverdacht.</li>
+						</ul>
 						<p>Vertrauen muss deshalb vor der ersten Anfrage entstehen. Das gelingt am besten mit Videos von echten&nbsp;Gesprächen.</p>
 					</div>
 					<p class="t-mini grau anlass__quelle">Die Studien dahinter: Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)</p>
@@ -578,6 +588,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	/* Absätze im Bandtext: Abstand eine Zeile, wie im Lesetext sonst */
 	.anlass--band .anlass__text p { margin: 0; }
 	.anlass--band .anlass__text p + p { margin-top: 1em; }
+	/* Stichpunkte im Bandtext: ohne Zeichen, mittig, eine Zeile je Punkt, eng gesetzt */
+	.anlass__liste { list-style: none; margin: 0.5em 0 1em; padding: 0; }
+	.anlass__liste li + li { margin-top: 0.15em; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0; padding-top: var(--abstand-md); text-align: center; font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
 	:global(html[data-textfolge="vorher"] .anlass__band-innen > .experten) { grid-row: 2; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__satz--eins,
