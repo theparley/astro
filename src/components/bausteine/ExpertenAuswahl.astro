@@ -566,7 +566,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const D_ANSAGE = 0;
 			// Ansage früher (Rasul 14.11.2026: „Ich glaube, der Text mit dem Videobeweis kann noch früher kommen.“): Wechsel unten
 			// ab 1,0 s statt 1,6 s; „Überall Experten.“ weg bei 1,6 s, die neue Zeile steht bei 2,6 s (Geste ab 2,2 s)
-			const T_ANSAGE = 1.0;
+			// Wieder 1,6 s mit „Alle behaupten. Einer beweist.“ (Rasul 14.11.2026: „Mit Alle behaupten, Einer beweist ist jetzt das
+			// Timing von der Animation wieder anders.“): „Alle behaupten.“ steht, solange die Personen auftauchen; „Einer beweist.“
+			// blendet genau mit Beginn der Geste ein (2,2 s), denn die Geste ist der Beweis. Vorher 1,0 s.
+			const T_ANSAGE = 1.6;
 			const ansage = () => document.documentElement.dataset.textfolge === "vorher";
 			let ansageRest = D_ANSAGE;
 			const zeileSetzen = (e: number) => { if (zeileUnscharf && nacheinander()) { zeileUnscharf.style.filter = ""; zeileUnscharf.style.opacity = ""; return; } if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
