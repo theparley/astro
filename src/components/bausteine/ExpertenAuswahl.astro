@@ -266,8 +266,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	const VOR = 0.2, NACH = 0.4;
 	// Ruhe beim Aufsetzen (Rasul 14.11.2026: „ich sehe am Anfang nicht das Auftreffen der Punkte. Aber am Ende sehe ich sie,
 	// das ist nicht gleich“): Die Punkte setzen RUHE Sekunden vor der Bewegung auf und blenden im Stehen ein, wie sie am Ende
-	// im Stehen ausblenden. Vorher blendeten sie ein, während sie schon losliefen. Lokal ?ruhe=0 zum Vergleich.
-	const RUHE = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("ruhe") === "0" ? 0 : 0.3;
+	// im Stehen ausblenden. Vorher blendeten sie ein, während sie schon losliefen. Abgenommen (Rasul: „Ja, passt“).
+	const RUHE = 0.3;
 	const T_KAMERA = T_GESTE - VOR;
 	const D_GESTE_KAMERA = D_KAMERA - VOR - NACH;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
