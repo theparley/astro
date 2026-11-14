@@ -41,7 +41,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	type Spur = [number, number][]; // [Weg-Anteil s, Zeit]: gezeichnet wird entlang des echten Wegs, nicht als Gerade
 	                                // zwischen zwei Bildern (sonst entstehen bei ausgelassenen Bildern Balken quer durch)
 	const W = 1600, H = 900;
-	const DAUER = 1.6, GLIMM = 0.6, DICKE = 34, LUECKE = 8; // GLIMM vorher 0,9 (Kürzung 14.11.2026, siehe T_PAUSE)
+	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 8; // GLIMM vorher 0,9 (Kürzung 14.11.2026, siehe T_PAUSE)
 	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
 	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
 	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
@@ -64,10 +64,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Jetzt: keine Wartezeit mehr vor der Geste (D_LESEN 0, Geste und Kamera ab 2,2 s); die Fingerpunkte blenden in den
 	// ersten 0,4 s der Bewegung ein, statt vorher stillzustehen; drei Personen erscheinen noch bis zur Hälfte der Geste
 	// (siehe uebergang()).
-	// Kürzung unter 5 s Bewegung (Rasul 14.11.2026: „ob wir noch mehr kürzen können erst, bevor wir einen Stopp anbieten“;
-	// WCAG 2.2.2): gemessen vorher 5,7 s. Geste 0,4 s früher (2,2 auf 1,8), Kamerafahrt 0,2 s kürzer (2,6 auf 2,4),
-	// Leuchtspur verglimmt 0,3 s schneller (0,9 auf 0,6).
-	const T_PAUSE = 1.8, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
+	// Kürzung unter 5 s probiert und verworfen (14.11.2026): Geste ab 1,8 s, Fahrt 2,4 s, Leuchtspur 0,6 s ergab 4,8 s
+	// Bewegung statt 5,7 s, wirkte aber abgehackt. Im Vergleich nebeneinander lag es an den Zeiten, nicht an der neuen
+	// Bildauflösung. Rasul: „Ich habe das Gefühl, sie wirkt ein bisschen abgehackter“, dann zu alten Zeiten mit neuer
+	// Auflösung: „das können wir so nehmen. Dadurch ist nichts Abgehacktes passiert.“ Also die alten Zeiten.
+	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
@@ -253,7 +254,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// haben, aber ohne dass sie hektisch wird“): 2,6 s statt 3,2 s, Zeitverlauf kubisch (smoothstep, Spitzentempo 1,5-fach
 	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
 	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
-	const D_KAMERA = 2.4; // vorher 2,6 (Kürzung 14.11.2026, siehe T_PAUSE)
+	const D_KAMERA = 2.6; // Kürzung auf 2,4 verworfen (14.11.2026, siehe T_PAUSE)
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
