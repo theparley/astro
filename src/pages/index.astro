@@ -9,7 +9,8 @@
 import Layout from "../layouts/Layout.astro";
 import Haltung from "../components/bausteine/Haltung.astro";
 import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
-/* Hero seit 14.11.2026: das helle Band mit der Animation „Experten-Auswahl“ aus dem Zweig `dev` (dort abgenommen, Rasul
+/* Zweites Segment seit 14.11.2026 (Rasul: „Nee, mach's nicht als Hero, mach es als zweites Segment.“; zuerst probeweise
+   als Hero gebaut): das helle Band mit der Animation „Experten-Auswahl“ aus dem Zweig `dev` (dort abgenommen, Rasul
    14.11.2026: „der ist richtig gut geworden jetzt, das Segment“). Rasul: „Wir könnten jetzt, bis wir ein Video haben, die
    Animation auch auf unsere offizielle Live-Seite hochladen. Und tatsächlich sogar als Hero.“ Der große Satz folgt
    darunter. Bausteine und Werte wie in `dev`, ohne die Test-Schalter (die Animation nimmt ohne Schalter die
@@ -17,17 +18,18 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 ---
 <Layout gateMenuBehindHero>
 	<main class="minimal">
+		<section class="minimal__satz rahmen">
+			<Haltung ebene="h1" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
+		</section>
 		<section class="anlass anlass--band">
 			<div class="rahmen anlass__band-innen">
 				<ExpertenAuswahl />
-				<h1 class="anlass__satz anlass__satz--eins">Überall Experten.</h1>
+				<p class="anlass__satz anlass__satz--eins">Überall Experten.</p>
 				<p class="anlass__satz anlass__nachsatz">Zeit für den Video&shy;beweis<br />auch im Business.</p>
 				<p class="t-lesen anlass__text">Wie soll ein Entscheider eure Expertise erkennen? Die Feeds sind voll von KI-generierten Beiträgen. Und inzwischen stehen auch die echten Beiträge unter Generalverdacht. Expertise muss man in Zukunft vor dem ersten Kontakt beweisen. Wir liefern den Videobeweis aus echten&nbsp;Gesprächen.</p>
 			</div>
 		</section>
-		<section class="minimal__satz rahmen">
-			<Haltung ebene="h2" zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
-		</section>
+
 		{/* Let’s Parley am Ende heraus (Rasul 13.11.2026 abends: „unter Let's Parley kommt kein Terminkalender, haben wir
 		   das gar nicht so gebaut. Dann machen wir Let's Parley auf der Hauptseite auch raus.“). Termin über das Menü. */}
 	</main>
