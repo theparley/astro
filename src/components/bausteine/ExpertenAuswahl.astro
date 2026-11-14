@@ -564,6 +564,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Ohne Anhalten (Rasul 14.11.2026: „Die Animation stoppt kurz, es muss sie nicht, sie kann weiterlaufen, es soll nur
 			// der Text unten sich verändern. Ich finde es besser, wenn es vorher ankündigt.“): vorher 2,0 s
 			const D_ANSAGE = 0;
+			// Ansage früher (Rasul 14.11.2026: „Ich glaube, der Text mit dem Videobeweis kann noch früher kommen.“): Wechsel unten
+			// ab 1,0 s statt 1,6 s; „Überall Experten.“ weg bei 1,6 s, die neue Zeile steht bei 2,6 s (Geste ab 2,2 s)
+			const T_ANSAGE = 1.0;
 			const ansage = () => document.documentElement.dataset.textfolge === "vorher";
 			let ansageRest = D_ANSAGE;
 			const zeileSetzen = (e: number) => { if (zeileUnscharf && nacheinander()) { zeileUnscharf.style.filter = ""; zeileUnscharf.style.opacity = ""; return; } if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
@@ -887,7 +890,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
 					uhr = T_PAUSE; bild(uhr, uhr); haelt = true; return;
 				}
-				if (uhr >= T_TEXT && fig.dataset.phase === "warten") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
+				if (uhr >= (ansage() ? T_ANSAGE : T_TEXT) && fig.dataset.phase === "warten") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
 				// Stillstand der Kamera: Phase „schluss“, dann blenden in der Textfolge „nacheinander“ die beiden Zeilen ein
 				if (uhr >= (ende() === "kamera" ? T_KAMERA + D_KAMERA : ENDE) && fig.dataset.phase === "geste") phase("schluss");
 				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
