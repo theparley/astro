@@ -789,7 +789,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				if (gestartet && !haelt && !pausiert && fig.dataset.fertig === undefined) {
 					cancelAnimationFrame(lauf); pausiert = true; pauseSeit = performance.now() / 1000;
 				}
-			}, { threshold: 0 });
+			// Untere Kante des Fensters 5 % höher gedacht (Rasul 14.11.2026: „Das Zurücksetzen der Animation funktioniert
+			// nicht … wenn ich hoch und runter scrolle“). Gemessen in der Live-Fassung: Ganz oben liegt die Animation genau an
+			// der Fensterunterkante (Oberkante 1008 px bei 1008 px Fensterhöhe), das zählt für den Browser noch als sichtbar,
+			// also wurde nie zurückgesetzt. Mit 5 % Rand gilt sie dort als „unterhalb“.
+			}, { threshold: 0, rootMargin: "0px 0px -5% 0px" });
 			sicht.observe(fig);
 			fig.addEventListener("click", spiele);
 			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
