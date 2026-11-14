@@ -523,6 +523,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
 			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+			let breiteGemessen = -1, hoeheGemessen = 0; // siehe groesse(): Höhe nur bei neuer Breite
 			const groesse = () => {
 				// Rahmen 16:9 und so breit wie die längste Zeile der Überschrift (Rasul 13.11.2026 abends: „Mach ihn so breit
 				// wie die Schrift, die oben dran ist“ und „dann machen wir doch wieder 16 zu 9, dass es verständlicher ist.
@@ -541,7 +542,12 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// Grundeinstellung 60 % (Rasul 13.11.2026 abends: „dann mach mal 60 % Viewport. Ich muss ausprobieren, ab wann es
 				// die Wirkung verliert in der Breite.“; davor 70 %)
 				const anteilHoehe = (Number(document.documentElement.dataset.animhoehe) || 50) / 100; // Grundeinstellung 50 % seit 14.11.2026 (vorher 60)
-				if (window.innerWidth >= window.innerHeight) cv.style.height = `${(window.innerHeight * anteilHoehe).toFixed(1)}px`;
+				// Fensterhöhe nur neu nehmen, wenn sich die Breite ändert (Drehen, Fenster ziehen). Safari auf iPad und iPhone
+				// blendet beim Scrollen die Adressleiste ein und aus und ändert damit die Fensterhöhe; dann wurde die Fläche
+				// neu bemessen, alle Personen neu gelegt, und das Endbild sprang (Rasul 14.11.2026: „am Ende hat die Animation
+				// auf dem iPad einen Sprung nach links gemacht, einen kleinen“; nachgestellt im iPad-Simulator, nur im Querformat).
+				if (window.innerWidth !== breiteGemessen) { breiteGemessen = window.innerWidth; hoeheGemessen = window.innerHeight; }
+				if (breiteGemessen >= hoeheGemessen) cv.style.height = `${(hoeheGemessen * anteilHoehe).toFixed(1)}px`;
 				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
 				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
@@ -852,7 +858,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			}, { threshold: 0, rootMargin: "0px 0px -5% 0px" });
 			sicht.observe(fig);
 			fig.addEventListener("click", spiele);
-			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
+			// Nur die Höhe geändert (Adressleiste in Safari): nichts neu bemessen, siehe groesse()
+			let massZuletzt = `${window.innerWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
+			window.addEventListener("resize", () => {
+				const mass = `${window.innerWidth}|${document.documentElement.dataset.animhoehe}|${window.devicePixelRatio}`;
+				if (mass === massZuletzt) return; massZuletzt = mass;
+				if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse();
+			});
 			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)
 			document.fonts?.ready.then(() => { if (start < 0) { groesse(); bild(0, 0); } });
 		});
