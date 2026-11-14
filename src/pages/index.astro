@@ -200,7 +200,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					<p class="anlass__satz anlass__satz--eins">Überall Experten.</p>
 					<!-- „auch im Business“ bleibt in der Überschrift (Rasul 14.11.2026: „Zurück in die Überschrift“, nach Probe zweizeilig
 					     mit Wiederholung am Textende): Der Schubs vom Fußball ins Geschäft kommt, während die Animation läuft -->
-					<p class="anlass__satz anlass__nachsatz">Zeit für den Video&shy;beweis<br />auch im Business.</p>
+					<p class="anlass__satz anlass__nachsatz"><span class="anlass__zeile1">Zeit für den Video&shy;beweis</span><br /><span class="anlass__zeile2">auch im Business.</span></p>
 					{/* Bandtext als Probe (Rasul 13.11.2026 abends, gesammelt: KI-Slop, „generierte und gelebte Expertise“, viele
 					     Anbieter wollen bei Entscheidern auf den Schirm, „weil es so einfach ist, jetzt eine Expertise zu behaupten,
 					     schießen die Experten natürlich auch wie Pilze aus dem Boden“, „wie soll denn der entscheiden jetzt, wer da
@@ -438,6 +438,20 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   wenn der so ein Blur und Grau kriegt wie die hinteren Reihen“): dazu heller, Deckkraft 0,35 wie die hintersten Reihen
 	   der Animation (dort 1 − 0,6 × Tiefe, also bis etwa 0,4) */
 	/* Seit 14.11.2026 an die Kamerafahrt gekoppelt: Unschärfe und Deckkraft setzt ExpertenAuswahl.astro je Bild */
+	/* Textfolge „nacheinander“ (Probe, Rasul 14.11.2026: „der Text verschwindet, also ausgeblendet wird. Und die
+	   Videobeweisanimation anfängt und fertig wird. Und dann unten drunter auf der Zeile, wo Überall Experten stand, die
+	   beiden Sätze eingeblendet werden. Und zwar einer nach dem anderen“; Grund: „es darf nur eine Sache fürs Auge passieren“).
+	   Nachsatz liegt in derselben Rasterzeile wie „Überall Experten.“; Ausblenden 0,6 s ab 1,6 s, fertig, wenn die Geste
+	   beginnt (2,2 s); Zeilen nach dem Stillstand der Kamera (Phase „schluss“), je 1 s, die zweite nach der ersten. */
+	:global(html[data-textfolge="nacheinander"]) .anlass__band-innen > :first-child { grid-row: 1; }
+	:global(html[data-textfolge="nacheinander"]) .anlass--band .anlass__satz--eins,
+	:global(html[data-textfolge="nacheinander"]) .anlass--band .anlass__nachsatz { grid-row: 2; grid-column: 1; align-self: start; }
+	:global(html[data-textfolge="nacheinander"]) .anlass--band .anlass__text { grid-row: 3; }
+	:global(html[data-textfolge="nacheinander"] .anlass--band:not([data-phase="warten"]) .anlass__satz--eins) { opacity: 0; transition: opacity 0.6s ease-in-out; }
+	:global(html[data-textfolge="nacheinander"] .anlass--band .anlass__nachsatz) { opacity: 1; transition: none; }
+	:global(html[data-textfolge="nacheinander"] .anlass--band .anlass__nachsatz span) { opacity: 0; }
+	:global(html[data-textfolge="nacheinander"] .anlass--band[data-phase="schluss"] .anlass__zeile1) { opacity: 1; transition: opacity 1s ease-in-out; }
+	:global(html[data-textfolge="nacheinander"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out 1s; }
 
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }

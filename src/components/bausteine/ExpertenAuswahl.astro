@@ -557,7 +557,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Blurring von dem Text jetzt tatsächlich auch an die Dauer der Kamerafahrt“): gleicher Fortschritt wie die Kamera,
 			// am Ende 5 px Unschärfe und Deckkraft 0,35 (wie die hintersten Reihen). Vorher eigene CSS-Blende über 2 s.
 			const zeileUnscharf = fig.closest(".anlass--band")?.querySelector<HTMLElement>(".anlass__satz--eins") ?? null;
-			const zeileSetzen = (e: number) => { if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
+			// In der Textfolge „nacheinander“ (Probe 14.11.2026) ist die Zeile während der Fahrt ausgeblendet: nicht unscharf rechnen
+			const nacheinander = () => document.documentElement.dataset.textfolge === "nacheinander";
+			const zeileSetzen = (e: number) => { if (zeileUnscharf && nacheinander()) { zeileUnscharf.style.filter = ""; zeileUnscharf.style.opacity = ""; return; } if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
 			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
 			const glut = document.createElement("canvas"), gctx = glut.getContext("2d", { willReadFrequently: !FILTER_GEHT })!;
@@ -567,7 +569,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Systemeinstellung „Bewegung reduzieren“, auch wenn sie bei offener Seite umgestellt wird (Code-Prüfung N14)
 			const ruhig = matchMedia("(prefers-reduced-motion: reduce)");
 			let still = ruhig.matches;
-			const ruhigWechsel = () => { still = ruhig.matches; if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); } };
+			const ruhigWechsel = () => { still = ruhig.matches; if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); } };
 			ruhig.addEventListener?.("change", ruhigWechsel);
 
 			let breiteGemessen = -1, hoeheGemessen = 0; // siehe groesse(): Höhe nur bei neuer Breite
@@ -876,7 +878,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
 					uhr = T_PAUSE; bild(uhr, uhr); haelt = true; return;
 				}
-				if (uhr >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
+				if (uhr >= T_TEXT && fig.dataset.phase === "warten") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
+				// Stillstand der Kamera: Phase „schluss“, dann blenden in der Textfolge „nacheinander“ die beiden Zeilen ein
+				if (uhr >= (ende() === "kamera" ? T_KAMERA + D_KAMERA : ENDE) && fig.dataset.phase === "geste") phase("schluss");
 				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
@@ -889,7 +893,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const spiele = () => {
 				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
 				spurR = []; spurL = [];
-				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); return; }
+				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); return; }
 				phase("warten");
 				start = performance.now() / 1000; uhr = 0; zuletzt = start; lauf = requestAnimationFrame(schritt);
 			};

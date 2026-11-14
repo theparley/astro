@@ -221,6 +221,10 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.aufstellung = liesAufstellung();
 					document.documentElement.dataset.animhoehe = liesWahl("animhoehe", ["100", "90", "80", "70", "60", "50"], "50"); // 50 % Grundeinstellung (Rasul 14.11.2026: „Mach mal auf 50 … Dann würde, glaube ich, alles drauf passen, die Überschrift“)
 					document.documentElement.dataset.titelgroesse = liesWahl("titelgroesse", ["huge", "2xl"], "2xl");
+					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
+					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
+					// Experten.“ blendet aus, Fahrt läuft, danach die beiden Zeilen an derselben Stelle, eine nach der anderen.
+					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander"], "zugleich");
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
