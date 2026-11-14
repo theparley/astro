@@ -753,11 +753,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
 					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
 					ctx.setTransform(sc, 0, 0, sc, ox, 0); ctx.fillStyle = "#000";
-					[pr, pl].forEach(([x, y]) => {
+					// Aufsetzpunkte: der Ring beim Aufsetzen bleibt dort stehen, wo der Finger gelandet ist, und läuft von da als
+					// Welle nach außen, wie beim Loslassen (Rasul 14.11.2026: „Jetzt hast du eine richtige Animation gemacht mit
+					// Wellen … mache das auch mal am Anfang.“). Vorher wanderte er mit dem Finger mit und wirkte nicht als Welle.
+					const auf = [punkt(WEG_R, 0), punkt(WEG_L, 0)];
+					[pr, pl].forEach(([x, y], n) => {
 						if (a > 0) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
 						// ein Ring läuft beim Aufsetzen einmal nach außen und verblasst
-						const ring = (z: number) => { const k = z / 0.5; ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(x, y, R * (1 + 1.1 * sanft(k)), 0, Math.PI * 2); ctx.stroke(); };
-						if (ab >= 0 && ab < 0.5) ring(ab);
+						const ring = (z: number, rx = x, ry = y) => { const k = z / 0.5; ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(rx, ry, R * (1 + 1.1 * sanft(k)), 0, Math.PI * 2); ctx.stroke(); };
+						if (ab >= 0 && ab < 0.5) ring(ab, auf[n][0], auf[n][1]);
 						// und noch einmal beim Loslassen (Rasul 14.11.2026: „Der Ring kommt jetzt nur am Anfang. Mach den auch mal am
 						// Ende, wenn die Finger wieder vom Bildschirm weggehen.“)
 						if (RING_ENDE && los >= 0 && los < 0.5) ring(los);
