@@ -260,6 +260,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
 	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
 	const D_KAMERA = 2.6; // Kürzung auf 2,4 verworfen (14.11.2026, siehe T_PAUSE)
+	// Anteil der Fahrt, in dem die Geste fertig ist (14.11.2026, siehe gDauer); lokal ?geste=alt zum Vergleich wie vorher (1)
+	const ANTEIL_GESTE = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("geste") === "alt" ? 1 : 0.88;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
@@ -694,14 +696,18 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// der Zoomfahrt … wie die Striche entstehen, richtet sich an der Bewegungsgeschwindigkeit von der Kamera, also mit
 				// an dem Zoom-in, Zoom-out und an der Länge“): Beim Ende „kamera“ beginnen Geste und Fahrt gleichzeitig, dauern
 				// gleich lang und folgen demselben Verlauf (glatt). Vorher: Geste 1,6 s, Fahrt erst danach.
-				const kam = ende() === "kamera", gDauer = kam ? D_KAMERA : DAUER;
+				// Geste bremst vor der Kamera (Rasul 14.11.2026: „Wir lassen die Bewegung der Geste … ein bisschen vorher aufhören,
+				// bevor die Kamerafahrt aufhört. Wie wenn man etwas bremst und dann hat es noch so eine kleine Bewegung, bis es
+				// wirklich stoppt.“): Die Geste läuft auf derselben Kurve, aber in ANTEIL_GESTE der Fahrtdauer; die Kamera fährt
+				// danach noch sanft aus. gDauer = Dauer der Geste.
+				const kam = ende() === "kamera", gDauer = kam ? ANTEIL_GESTE * D_KAMERA : DAUER;
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
-				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
+				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_GESTE + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
 				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
