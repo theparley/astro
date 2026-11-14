@@ -25,11 +25,15 @@ interface Blase { an: number; aus: number; stelle: "OL" | "OR"; text: string }
    bei uns marke); unten rechts das Logo klein. */
 interface Plakat { satz: string; marke: string; bild: number }
 /* href (13.11.2026, Kachel-Startseite): Kachel ist ein Link zu einer Unterseite wie bei BBH, kein Player. */
-interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat; href?: string }
-interface Props { titel?: string; titelStufe?: "2xl"; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[] }
-const { titel, titelStufe, id, link, einleitung, kacheln } = Astro.props;
+/* schritt und spalten (Rasul 14.11.2026, Segment „Beweis“: „Und es wäre jetzt unser Fangen veredeln verteilen … Mach mir
+   dafür mal einen Vorschlag und orientiere dich an BBH-Design.“): drei gleichrangige Schritte nebeneinander wie BBHs
+   Karten mit drei Spalten (Analyse B, R13 und R14); in der ersten Zeile Nummer und Verb (Schritt), grau darunter der Name
+   aus der Beweis-Bildwelt und die Zeile. */
+interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat; href?: string; schritt?: string }
+interface Props { titel?: string; titelStufe?: "2xl"; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[]; spalten?: 2 | 3 }
+const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.props;
 ---
-<div class="videokacheln rahmen">
+<div class:list={["videokacheln rahmen", spalten === 3 && "videokacheln--drei"]}>
 	{(titel || link) && (
 		<div class="videokacheln__kopf">
 			{titel && <h2 class:list={["t-abschnitt videokacheln__titel", titelStufe && `videokacheln__titel--${titelStufe}`]} id={id} set:html={titel} />}
@@ -54,8 +58,8 @@ const { titel, titelStufe, id, link, einleitung, kacheln } = Astro.props;
 					</span>
 				)}
 				<span class="videokachel__text">
-					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.titel}</span>
-					<span class="videokachel__zeile" set:html={k.zeile} />
+					<span class="videokachel__titel"><span class="videokachel__nr">{k.nr}</span> {k.schritt ?? k.titel}</span>
+					<span class="videokachel__zeile" set:html={k.schritt ? `${k.titel}. ${k.zeile}` : k.zeile} />
 				</span>
 			</Tag>
 		); })}
@@ -78,6 +82,10 @@ const { titel, titelStufe, id, link, einleitung, kacheln } = Astro.props;
 	.videokacheln__einleitung { max-width: 46ch; margin: -16px 0 48px; }
 	.videokacheln__raster { display: grid; grid-template-columns: 1fr; gap: 32px 16px; }
 	@media (min-width: 1024px) { .videokacheln__raster { grid-template-columns: 1fr 1fr; } }
+	/* drei Spalten ab 1024 px (BBH News und Join Us: md:grid-cols-3), am Handy eine Spalte */
+	@media (min-width: 1024px) { .videokacheln--drei .videokacheln__raster { grid-template-columns: 1fr 1fr 1fr; } }
+	/* Plakat in der schmaleren Kachel: Satz eine Stufe kleiner */
+	@media (min-width: 1024px) { .videokacheln--drei .plakat__satz { font-size: var(--text-md); } }
 	a.videokachel { text-decoration: none; }
 	.videokachel { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 50ms; }
 	.videokachel:active { transform: scale(0.99); }

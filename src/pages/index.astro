@@ -231,12 +231,18 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					<p class="t-lesen anlass__text"><span class="entwurf">Entwurf</span><br />Behaupten kann das jeder. Ob jemand wirklich etwas kann, sieht man erst im Gespräch.</p>
 				</div>
 			</div>
-			<VideoKacheln id="kap-titel" titel={`<span class="titel-videobeweis">Video&shy;beweis</span><span class="titel-beweis">Beweis</span>`} titelStufe="2xl" kacheln={[
-				{ nr: "01", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
+			{/* Segment „Beweis“ als drei Schritte Fangen · Veredeln · Verteilen (Vorschlag Claude 14.11.2026 nach BBH, auf Rasuls
+			    Auftrag: „Jetzt aber zu zum Videobeweis, zu den drei Teilen. Mach mir dafür mal einen Vorschlag und orientiere dich
+			    an BBH-Design.“). Die Augenzeugen sind nicht mehr Kachel 04, sie werden das eigene nächste Segment (Rasul: „Und
+			    die Schlussfolgerung daraus wäre dann das nächste Segment, das wäre die Augenzeugen.“). Vorher vier Kacheln in
+			    zwei Spalten (Git-Geschichte). */}
+			<VideoKacheln id="kap-titel" titel={`<span class="titel-videobeweis">Video&shy;beweis</span><span class="titel-beweis">Beweis</span>`} titelStufe="2xl" spalten={3}
+				einleitung={`<span class="entwurf">Entwurf</span><br />Ein Gespräch, drei Schritte: Wir fangen es ein, veredeln es zu Beweisstücken und verteilen sie dahin, wo Entscheider hinschauen.`}
+				kacheln={[
+				{ nr: "01", schritt: "Fangen", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
-				{ nr: "02", titel: "Beweisverfahren", zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
-				{ nr: "03", titel: "Beweisstücke", zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
-				{ nr: "04", titel: "Augenzeugen", zeile: "Entscheider haben euch auf dem Schirm, wenn sie einen Experten brauchen.", src: "/lokal/szene-beweisaufnahme.mp4", von: 25.5, bis: 28, href: "/augenzeugen" },
+				{ nr: "02", schritt: "Veredeln", titel: "Beweisverfahren", zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisverfahren" },
+				{ nr: "03", schritt: "Verteilen", titel: "Beweisstücke", zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
 			]} />
 		</section>
 		<Kapitelende />
