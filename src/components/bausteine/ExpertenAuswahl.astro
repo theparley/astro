@@ -281,13 +281,24 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// entschieden: „Zurück zu Figuren“. Grundeinstellung „figur“, „punkt“ bleibt im Schalter.
 	const form = () => (document.documentElement.dataset.form === "punkt" ? "punkt" : "figur");
 	// Aufstellung, die von oben ungeordnet wirkt und von vorne trägt: einer vorne, zwei dahinter, zwei Reihen, viele hinten
-	// Drei Personen erscheinen noch im Übergang, vom Text bis zur Hälfte der Geste (Rasul 14.11.2026, siehe oben): eine aus
-	// den mittleren Reihen, zwei von hinten; fester Zufall, damit jedes Abspielen gleich aussieht
+	// Erscheinen bis kurz vor Ende der Kamerafahrt (Rasul 14.11.2026: „wenn du es hinkriegst, noch Männchen erscheinen zu
+	// lassen, während die Kamera dreht? Weil vorhin sind die vom Himmel gefallen, das war schlecht, dann kannst du es auch noch
+	// länger machen … bis zu dem Punkt, wo die Kamera fast reingefahren ist.“). Alle entstehen an ihrem Platz (Einblenden,
+	// keine Bewegung), deshalb fällt niemand vom Himmel. Verlauf weiter Ease-in und Ease-out, aber mit langem Auslauf: gut die
+	// Hälfte ist da, wenn der Text kommt, danach werden es immer weniger bis 85 % der Fahrt. Die nahen Reihen (Ebene 2)
+	// erscheinen nur vor der Fahrt, sonst würden nah an der Kamera große Figuren aufblenden; spät kommen nur hintere Reihen.
+	// Vorher: alle bis 1,65 s, dazu drei Nachzügler bis zur Hälfte der Geste (Git-Geschichte).
+	const T_ERSCH_BIS = () => T_GESTE + 0.85 * D_KAMERA - 0.5; // letzte Einblendung (0,5 s) endet bei 85 % der Fahrt
+	const verteilung = (x: number) => { const y = Math.pow(x, 0.55); return y * y * (3 - 2 * y); }; // Anteil, der bis x da ist
+	function erscheinZeit(u: number) {
+		let lo = 0, hi = 1;
+		for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (verteilung(m) < u) lo = m; else hi = m; }
+		return 0.2 + lo * (T_ERSCH_BIS() - 0.2);
+	}
 	function uebergang(liste: Person[]): Person[] {
-		const r = zufall(41), bis = T_GESTE + D_KAMERA * 0.5 - 0.5; // Einblendung dauert 0,5 s
-		const mitte = liste.filter((q) => q.ebene === 2 && !q.spaet), hinten = liste.filter((q) => q.ebene === 3 && !q.spaet);
-		const wahl = [mitte[Math.floor(r() * mitte.length)], hinten[Math.floor(r() * hinten.length)], hinten[Math.floor(r() * hinten.length)]].filter(Boolean);
-		wahl.forEach((q, i) => { q.ein = T_TEXT + ((i + 0.3 + r() * 0.4) / wahl.length) * (bis - T_TEXT); });
+		const nahBis = T_GESTE - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
+		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
+		liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
 		return liste;
 	}
 	function personenFahrt(): Person[] {
@@ -300,7 +311,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		// langsam anfangen, steigern und wieder abflachen.“): Die Zeitpunkte folgen einem Sinus-Verlauf (Umkehrung von sanft),
 		// also erst wenige, in der Mitte die meisten, am Ende wieder wenige. Vorher gleichmäßig verteilt. Gleich viele
 		// Zufallszahlen wie vorher, die Plätze bleiben deshalb dieselben.
-		const spaeter = () => 0.2 + (T_PAUSE - 0.75) * (Math.acos(1 - 2 * rnd()) / Math.PI);
+		const spaeter = () => erscheinZeit(rnd()); // Verlauf siehe erscheinZeit (seit 14.11.2026 bis kurz vor Ende der Fahrt)
 		// Links und rechts ungleich (Rasul 13.11.2026 abends: „in der Endposition sind die Hintergrundmännchen rechts und
 		// links … ein bisschen ähnlich … mach da mal eine Seite ein bisschen größer und mehr und auf der anderen Seite ein
 		// bisschen weniger, dass es organischer aussieht“): links stehen mehr Personen und näher an der Kamera (also größer),
