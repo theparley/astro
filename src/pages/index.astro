@@ -237,7 +237,10 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			    die Schlussfolgerung daraus wäre dann das nächste Segment, das wäre die Augenzeugen.“). Vorher vier Kacheln in
 			    zwei Spalten (Git-Geschichte). */}
 			<VideoKacheln id="kap-titel" titel={`<span class="titel-videobeweis">Video&shy;beweis</span><span class="titel-beweis">Beweis</span>`} titelStufe="2xl" spalten={3}
-				einleitung={`<span class="entwurf">Entwurf</span><br />Ein Gespräch, drei Schritte: Wir fangen es ein, veredeln es zu Beweisstücken und verteilen sie dahin, wo Entscheider hinschauen.`}
+				{/* kein Einleitungssatz: unter dem Abschnittstitel kommen bei BBH gleich die Kacheln (Analyse B2, R3; Rasul 14.11.2026:
+				    „Macht BBH unter so einem markanten Titel nicht gleich die Kacheln? … Ich glaube, das habe ich bei BBH nicht
+				    gesehen.“). Verworfener Satz: „Ein Gespräch, drei Schritte: Wir fangen es ein, veredeln es zu Beweisstücken und
+				    verteilen sie dahin, wo Entscheider hinschauen.“ */}
 				kacheln={[
 				{ nr: "01", schritt: "Fangen", titel: "Beweisaufnahme", zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
 				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
