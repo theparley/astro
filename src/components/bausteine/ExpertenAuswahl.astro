@@ -456,6 +456,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		document.querySelectorAll<HTMLElement>("[data-experten]").forEach((fig) => {
 			if (fig.dataset.bereit) return; fig.dataset.bereit = "1";
 			const cv = fig.querySelector("canvas")!, ctx = cv.getContext("2d")!;
+			// „Überall Experten.“ unter der Animation wird mit der Kamerafahrt unscharf und hell (Rasul 14.11.2026: „Koppel das
+			// Blurring von dem Text jetzt tatsächlich auch an die Dauer der Kamerafahrt“): gleicher Fortschritt wie die Kamera,
+			// am Ende 5 px Unschärfe und Deckkraft 0,35 (wie die hintersten Reihen). Vorher eigene CSS-Blende über 2 s.
+			const zeileUnscharf = fig.closest(".anlass--band")?.querySelector<HTMLElement>(".anlass__satz--eins") ?? null;
+			const zeileSetzen = (e: number) => { if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
 			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
 			const glut = document.createElement("canvas"), gctx = glut.getContext("2d")!;
@@ -623,6 +628,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				if (ende() === "kamera") {
 					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
 					const e = verlauf(t).e, ran = e; // Verlauf und Gründe siehe verlauf()
+					zeileSetzen(e);
 					const { C, Lk, F } = bahn(e, F1 * zoomEnde, ran);
 					if (import.meta.env.DEV) (fig as any).__vorne = groesseVorne(e);
 					const punkte = form() === "punkt";
