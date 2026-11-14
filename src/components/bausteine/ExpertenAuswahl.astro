@@ -67,6 +67,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// 1,2 s). Rasul: „Jetzt wirkt es zu hektisch. Vor der Videogeste. Es hat auch gefühlt zwei verschiedene
 	// Geschwindigkeiten. Also wir ändern erstmal nichts beim Entstehen vorher.“
 	const BERUEHRUNG = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "aus");
+	// lokal ?beruehrung=leicht: der erste Vorschlag (Kreis 12 %, Ring 18 %) zum Vergleich
+	const BERUEHRUNG_LEICHT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "leicht";
 	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
@@ -741,7 +743,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				if (kam && BERUEHRUNG) {
 					// Kräftiger (Rasul 14.11.2026: „mache es ruhig mal kräftiger. Also sozusagen normal“): Kreis 30 % statt 12 %
 					// (12 % ist die Standard-Deckkraft des Material-Ripple), Ring 35 % statt 18 %.
-					const R = DICKE * 1.15, ab = t - T_GESTE, los = t - T_GESTE - gDauer, A_KREIS = 0.3, A_RING = 0.35;
+					const R = DICKE * 1.15, ab = t - T_GESTE, los = t - T_GESTE - gDauer, A_KREIS = BERUEHRUNG_LEICHT ? 0.12 : 0.3, A_RING = BERUEHRUNG_LEICHT ? 0.18 : 0.35;
 					let r = 0, a = 0;
 					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
 					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
