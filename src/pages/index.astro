@@ -224,7 +224,13 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     unter Generalverdacht.“). Davor Rasul (13.11.2026 abends), erster Satz mit Anrede: „Wie kann ein Entscheider euch heute noch als Experten
 					     erkennen?“ Vorher dazwischen: „Wissen lässt sich auf Knopfdruck
 					     recherchieren und sofort verteilen. Beiträge aus Text und Bild haben damit ihre Beweiskraft verloren.“ */}
-					<p class="t-lesen anlass__text">Wie soll ein Entscheider eure Expertise erkennen? Wenn er einen Experten braucht, ruft er meist die an, die er schon kennt. Doch die Feeds sind voll von KI-generierten Beiträgen. Und inzwischen stehen auch die echten Beiträge unter Generalverdacht. Expertise muss man in Zukunft vor dem ersten Kontakt beweisen. Wir liefern den Videobeweis aus echten&nbsp;Gesprächen.</p>
+					{/* Einstieg mit Studienzahl (Rasul 14.11.2026: „Und für den Text unten drunter fangen wir doch an mit so einer Zahl. Mit zum
+					     Ergebnis von der Studie. Und schau mal bei LinkedIn nach“). Kandidat Claude nach research/LinkedIn_Studien_Einstiegszahl_2026-11.md
+					     im Marketing-Ordner (LinkedIn B2B Institute und Bain & Company 2024, über 500 leitende Einkäufer, Technologiekäufe).
+					     Vorher: „Wie soll ein Entscheider eure Expertise erkennen? Wenn er einen Experten braucht, ruft er meist die an, die er
+					     schon kennt. Doch die Feeds sind voll …“ */}
+					<p class="t-lesen anlass__text">81&nbsp;Prozent der B2B-Einkäufer sagen: Gekauft haben sie, was die ganze Einkaufsgruppe schon am ersten Tag kannte. Wie soll ein Entscheider eure Expertise also vorher erkennen? Die Feeds sind voll von KI-generierten Beiträgen. Und inzwischen stehen auch die echten Beiträge unter Generalverdacht. Expertise muss man in Zukunft vor dem ersten Kontakt beweisen. Wir liefern den Videobeweis aus echten&nbsp;Gesprächen.</p>
+					<p class="t-mini grau anlass__quelle">Quelle: LinkedIn B2B Institute und Bain &amp; Company, 2024</p>
 				</div>
 			</div>
 			<div class="anlass anlass--kachel rahmen">
@@ -477,6 +483,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md). Größe (text-md) und Breite (46 Zeichen) hatten wir schon;
 	   vorher linksbündig. */
 	.anlass--band .anlass__text { text-align: center; }
+	.anlass--band .anlass__quelle { margin: calc(16px - var(--abstand-md)) auto 0; text-align: center; }
 	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
 	.videobeweis__vorteile { margin-top: var(--abstand-lg); }
 	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
