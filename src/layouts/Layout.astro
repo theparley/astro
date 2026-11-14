@@ -224,6 +224,9 @@ const websiteJsonLd = JSON.stringify({
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
 					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
 					// Experten.“ blendet aus, Fahrt läuft, danach die beiden Zeilen an derselben Stelle, eine nach der anderen.
+					// Anfang der Experten-Animation (Probe 14.11.2026): leer = Personen erscheinen ab dem ersten Bild (bisher); voll = ein
+					// Teil steht schon da (Rasul: „dass wir nicht anfangen mit einem leeren Canvas“)
+					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll"], "leer");
 					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher"], "vorher"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();

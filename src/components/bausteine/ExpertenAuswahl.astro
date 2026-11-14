@@ -326,10 +326,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// hektischer … kommen mir am Ende zu viele Menschen rein. Ich glaube, da ist unsere andere Version besser. Weil die Kamera
 	// kommt zur Ruhe und auch die Bewegung im Bild kommt zur Ruhe.“ Also wieder drei Zeitpläne: vorne, nahe Reihen gestaucht
 	// vor der Fahrt, hintere Reihen auf der langen Kurve.
+	const ANFANG_VOLL = 0.6;
 	function uebergang(liste: Person[]): Person[] {
 		const nahBis = T_KAMERA - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
 		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
 		liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
+		// Anfang „voll“ (Probe, Rasul 14.11.2026: „dass wir nicht anfangen mit einem leeren Canvas, sondern dass da schon ein paar
+		// Leute drauf sind … wenn ich scrolle, das dauert mir zu lange, bis da was passiert“): wer in den ersten ANFANG_VOLL
+		// Sekunden erscheinen würde, steht schon beim ersten Bild da; alle anderen erscheinen wie gehabt.
+		if (document.documentElement.dataset.anfang === "voll") liste.forEach((q) => { if (!q.spaet && q.ein < ANFANG_VOLL) q.ein = -1; });
 		return liste;
 	}
 	function personenFahrt(): Person[] {
