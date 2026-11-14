@@ -257,9 +257,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Nachlauf der Kamera; die Geste bleibt bei T_GESTE und dauert D_KAMERA − 2 · VOR. Vorher: Kamera und Geste ab T_GESTE,
 	// Geste nach 88 % fertig (Kandidat am selben Tag). Lokal ?kamera=alt zeigt diesen Vorgänger zum Vergleich.
 	const KAMERA_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("kamera") === "alt";
-	const VOR = KAMERA_ALT ? 0 : 0.4;
+	// Danach (Rasul 14.11.2026): „lass die Kamera anstatt 0,4, 0,2 Sekunden vor der Geste loslaufen“. Vorlauf 0,2 s,
+	// Nachlauf bleibt 0,4 s.
+	const VOR = KAMERA_ALT ? 0 : 0.2, NACH = KAMERA_ALT ? 0.12 * D_KAMERA : 0.4;
 	const T_KAMERA = T_GESTE - VOR;
-	const D_GESTE_KAMERA = KAMERA_ALT ? 0.88 * D_KAMERA : D_KAMERA - 2 * VOR;
+	const D_GESTE_KAMERA = D_KAMERA - VOR - NACH;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
