@@ -557,7 +557,25 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Blurring von dem Text jetzt tatsächlich auch an die Dauer der Kamerafahrt“): gleicher Fortschritt wie die Kamera,
 			// am Ende 5 px Unschärfe und Deckkraft 0,35 (wie die hintersten Reihen). Vorher eigene CSS-Blende über 2 s.
 			const zeileUnscharf = fig.closest(".anlass--band")?.querySelector<HTMLElement>(".anlass__satz--eins") ?? null;
-			const zeileSetzen = (e: number) => { if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
+			// In der Textfolge „nacheinander“ (Probe 14.11.2026) ist die Zeile während der Fahrt ausgeblendet: nicht unscharf rechnen
+			const nacheinander = () => document.documentElement.dataset.textfolge === "nacheinander" || document.documentElement.dataset.textfolge === "vorher";
+			// Textfolge „vorher“ (Probe 14.11.2026): Bei T_TEXT steht die Animation D_ANSAGE Sekunden still, damit unten nur die
+			// Ansage passiert (Ausblenden 0,6 s, „Zeit für den Videobeweis“ 1 s, kurz lesen); danach Geste und Fahrt wie gehabt
+			// Ohne Anhalten (Rasul 14.11.2026: „Die Animation stoppt kurz, es muss sie nicht, sie kann weiterlaufen, es soll nur
+			// der Text unten sich verändern. Ich finde es besser, wenn es vorher ankündigt.“): vorher 2,0 s
+			const D_ANSAGE = 0;
+			// Ansage früher (Rasul 14.11.2026: „Ich glaube, der Text mit dem Videobeweis kann noch früher kommen.“): Wechsel unten
+			// ab 1,0 s statt 1,6 s; „Überall Experten.“ weg bei 1,6 s, die neue Zeile steht bei 2,6 s (Geste ab 2,2 s)
+			// Wieder 1,6 s mit „Alle behaupten. Einer beweist.“ (Rasul 14.11.2026: „Mit Alle behaupten, Einer beweist ist jetzt das
+			// Timing von der Animation wieder anders.“): „Alle behaupten.“ steht, solange die Personen auftauchen; „Einer beweist.“
+			// blendet genau mit Beginn der Geste ein (2,2 s), denn die Geste ist der Beweis. Vorher 1,0 s.
+			// Später (Rasul 14.11.2026: „Jetzt kann der Wechsel später kommen, wenn die Animation schon angefangen hat von der
+			// Bewegung.“): Wechsel ab 2,6 s, also 0,4 s nach Beginn der Geste; „Alle behaupten.“ weg bei 3,2 s, „Einer beweist.“
+			// steht bei 4,2 s, wenn die Geste endet.
+			const T_ANSAGE = 2.6;
+			const ansage = () => document.documentElement.dataset.textfolge === "vorher";
+			let ansageRest = D_ANSAGE;
+			const zeileSetzen = (e: number) => { if (zeileUnscharf && nacheinander()) { zeileUnscharf.style.filter = ""; zeileUnscharf.style.opacity = ""; return; } if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
 			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
 			const glut = document.createElement("canvas"), gctx = glut.getContext("2d", { willReadFrequently: !FILTER_GEHT })!;
@@ -567,7 +585,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Systemeinstellung „Bewegung reduzieren“, auch wenn sie bei offener Seite umgestellt wird (Code-Prüfung N14)
 			const ruhig = matchMedia("(prefers-reduced-motion: reduce)");
 			let still = ruhig.matches;
-			const ruhigWechsel = () => { still = ruhig.matches; if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); } };
+			const ruhigWechsel = () => { still = ruhig.matches; if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); } };
 			ruhig.addEventListener?.("change", ruhigWechsel);
 
 			let breiteGemessen = -1, hoeheGemessen = 0; // siehe groesse(): Höhe nur bei neuer Breite
@@ -871,12 +889,16 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let uhr = 0, zuletzt = 0, freigabe = false, haelt = false;
 			const schritt = () => {
 				const jetzt = performance.now() / 1000;
-				uhr += Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
+				let dt = Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
+				if (ansage() && uhr >= T_TEXT && ansageRest > 0) { const n = Math.min(ansageRest, dt); ansageRest -= n; dt -= n; }
+				uhr += dt;
 				if (uhr >= T_PAUSE && !freigabe) {
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
 					uhr = T_PAUSE; bild(uhr, uhr); haelt = true; return;
 				}
-				if (uhr >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
+				if (uhr >= (ansage() ? T_ANSAGE : T_TEXT) && fig.dataset.phase === "warten") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
+				// Stillstand der Kamera: Phase „schluss“, dann blenden in der Textfolge „nacheinander“ die beiden Zeilen ein
+				if (uhr >= (ende() === "kamera" ? T_KAMERA + D_KAMERA : ENDE) && fig.dataset.phase === "geste") phase("schluss");
 				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
@@ -888,8 +910,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let gestartet = false, pausiert = false, pauseSeit = 0;
 			const spiele = () => {
 				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
-				spurR = []; spurL = [];
-				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); return; }
+				spurR = []; spurL = []; ansageRest = D_ANSAGE;
+				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); return; }
 				phase("warten");
 				start = performance.now() / 1000; uhr = 0; zuletzt = start; lauf = requestAnimationFrame(schritt);
 			};
@@ -938,7 +960,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
 			const zuruecksetzen = () => {
 				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
-				uhr = 0; spurR = []; spurL = []; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
+				uhr = 0; spurR = []; spurL = []; ansageRest = D_ANSAGE; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
 			};
 			const sicht = new IntersectionObserver((e) => {
 				const x = e[e.length - 1];
@@ -974,6 +996,13 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// draufklicke … egal wo ich draufklicke, stoppen beide“): anhalten, weiterlaufen, neu starten von außen
 			if (import.meta.env.DEV) {
 				(fig as any).__spiele = spiele;
+				// Standbild für Storyboards (14.11.2026): spielt bis t in Schritten von 1/60 s ohne Bildschleife ab, damit Spur und
+				// Einblendungen stimmen; läuft auch in einem Hintergrund-Tab
+				(fig as any).__bild = (t: number) => {
+					cancelAnimationFrame(lauf); groesse(); spurR = []; spurL = []; gestartet = true; pausiert = true;
+					for (let x = 0; x <= t; x += 1 / 60) bild(x, x);
+					bild(t, t); return cv.toDataURL("image/png");
+				};
 				(fig as any).__halt = (h: boolean) => {
 					if (h && gestartet && !pausiert && fig.dataset.fertig === undefined) { cancelAnimationFrame(lauf); pausiert = true; }
 					else if (!h && pausiert) { pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); }

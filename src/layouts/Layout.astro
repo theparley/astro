@@ -157,6 +157,9 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.umlaut = liesUmlaut();
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
+					// Textfolge der Experten-Animation fest „vorher“ (dev entschieden 14.11.2026): „Was alle behaupten,“ blendet während
+					// der Geste aus, „wird hier bewiesen.“ ein
+					document.documentElement.dataset.textfolge = "vorher";
 					var h = liesHero();
 					document.documentElement.dataset.hero = h;
 					document.documentElement.dataset.menu = h === "film" ? "bbh" : lies();

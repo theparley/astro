@@ -21,12 +21,21 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 		<section class="minimal__satz rahmen">
 			<Haltung ebene="h1" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
 		</section>
+		{/* Band „Videobeweis“ in der Fassung vom 14.11.2026 aus dem Zweig `dev` (Rasul 14.11.2026: „Und für unsere Live-Seite …
+		   würden wir jetzt die Animation, den Text auch tauschen gegen die neue Version, die wir heute gemacht haben.“).
+		   Ohne den Knopf „Was die Studien zeigen“: Die Belegseite gibt es live noch nicht. Begründungen und Rasuls Worte:
+		   src/pages/index.astro im Zweig `dev`. */}
 		<section class="anlass anlass--band">
 			<div class="rahmen anlass__band-innen">
+				<p class="t-abschnitt anlass__titel">Video&shy;beweis</p>
 				<ExpertenAuswahl />
-				<p class="anlass__satz anlass__satz--eins">Überall Experten.</p>
-				<p class="anlass__satz anlass__nachsatz">Zeit für den Video&shy;beweis<br />auch im Business.</p>
-				<p class="t-lesen anlass__text">Wie soll ein Entscheider eure Expertise erkennen? Die Feeds sind voll von KI-generierten Beiträgen. Und inzwischen stehen auch die echten Beiträge unter Generalverdacht. Expertise muss man in Zukunft vor dem ersten Kontakt beweisen. Wir liefern den Videobeweis aus echten&nbsp;Gesprächen.</p>
+				<p class="anlass__satz anlass__satz--eins">Was alle behaupten,</p>
+				<p class="anlass__satz anlass__nachsatz">wird hier bewiesen.</p>
+				<div class="t-lesen anlass__text">
+					<p>Wer im richtigen Moment auf dem Schirm der Entscheider sein will, muss das aktuelle Kaufverhalten berücksichtigen.</p>
+					<p>Aktuelle Studien belegen: Entscheider recherchieren zuerst selbst und zweifeln an Quellen, die KI-generiert sein könnten. Den ersten Schritt machen sie mit fertigen Favoriten.</p>
+					<p>Vertrauen in die Kompetenz einer Person muss deshalb vor dem ersten Kontakt entstehen. Das beweist man am besten mit Videos von echten&nbsp;Gesprächen.</p>
+				</div>
 			</div>
 		</section>
 
@@ -36,15 +45,20 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 </Layout>
 
 <style>
-	/* Band wie in `dev` (src/pages/index.astro dort, mit Begründungen und Rasuls Worten): weiß, Animation oben bündig,
-	   Überschrift direkt darunter, Nachsatz blendet in 1 s ein, Text 48 px darunter, mittig auf 46 Zeichen */
+	/* Band wie in `dev` (Stand 14.11.2026, Textfolge „vorher“, BBH-Abstände): weiß; Überschrift Bartle groß mit Abstand lg
+	   nach oben und 48 px zur Animation; darunter in derselben Rasterzeile „Was alle behaupten,“ (blendet während der Geste aus)
+	   und „wird hier bewiesen.“ (blendet danach ein); Lesetext linksbündig, Block mittig auf 46 Zeichen, Absätze 24 px */
 	.anlass--band { background: var(--white); color: var(--black); padding: 0 0 var(--abstand-lg); overflow-x: clip; }
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
-	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; }
-	.anlass--band .anlass__satz--eins { margin-top: calc(0px - var(--abstand-md)); }
-	.anlass--band .anlass__nachsatz { margin-top: calc(0px - var(--abstand-md)); transition: opacity 1s ease-in-out; }
-	:global(.anlass--band[data-phase="warten"] .anlass__nachsatz) { opacity: 0; }
-	.anlass__text { margin: calc(3rem - var(--abstand-md)) auto 0; max-width: 46ch; text-align: center; text-wrap: balance; }
+	.anlass__titel { grid-row: 1; margin: 0 0 calc(3rem - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; text-wrap: balance; hyphens: manual; }
+	.anlass__band-innen > :global(.experten) { grid-row: 2; }
+	.anlass__satz { grid-row: 3; grid-column: 1; align-self: start; margin: calc(0px - var(--abstand-md)) auto 0; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; }
+	:global(.anlass--band:not([data-phase="warten"])) .anlass__satz--eins { opacity: 0; transition: opacity 0.6s ease-in-out; }
+	.anlass__nachsatz { opacity: 0; }
+	:global(.anlass--band:is([data-phase="geste"], [data-phase="schluss"])) .anlass__nachsatz { opacity: 1; transition: opacity 1s ease-in-out 0.6s; }
+	.anlass__text { grid-row: 4; margin: calc(3rem - var(--abstand-md)) auto 0; max-width: 46ch; text-align: left; text-wrap: pretty; }
+	.anlass__text p { margin: 0; }
+	.anlass__text > * + * { margin-top: 24px; }
 
 	/* Der Satz füllt den ersten Bildschirm, mittig */
 	.minimal__satz {
