@@ -241,16 +241,42 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			    Aufbau (Vorschlag Claude): Titel „Videobeweis“, dann die Beweisaufnahme groß als Text-Bild-Block (BBH B6, R6) mit
 			    wenigen Sätzen und Link zur Unterseite, darunter Beweisführung und Beweisstücke als zwei Kacheln (BBH R12, zwei
 			    Spalten) zu ihren Unterseiten. Vorher: drei Kacheln, davor vier (Git-Geschichte). */}
-			<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" kacheln={[
-				{ nr: "02", titel: "Beweisführung", /* statt „Beweisverfahren“ (Rasul 14.11.2026: „Ich glaube, das Wort Beweisverfahren passt nicht“, dann „Ja, Beweisführung“); Begründung im Steuerdokument */ zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisfuehrung" },
-				{ nr: "03", titel: "Beweisstücke", zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
+			{/* Neu aufgebaut (Rasul 14.11.2026: „wir müssen damit anfangen, dass wir gleich am Anfang sagen, nicht jedes Video
+			    hat die gleiche Beweiskraft … an der Stelle müssen wir unseren Differenziator ausspielen. Und all die Vorteile
+			    nennen … Vielleicht sogar als kleine Kacheln … Und in das Segment kommen dann eben jetzt auch die Videos von Ute,
+			    von Hagen, von Katrin, von Erik.“). Muster nach BBH: Titel (R3), Text-Bild-Block mit eigener Überschrift (B6),
+			    Vorteile als Kennzahlen-Reihe mit Wörtern statt Zahlen (B18), Stimmen der Gäste als Kacheln (B7, drei Spalten),
+			    danach Beweisführung und Beweisstücke als zwei Kacheln (R12). Texte sind Entwurf. Erik fehlt, kein Clip lokal. */}
+			<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" spalten={3} kacheln={[
+				{ nr: "", titel: "Ute und Katrin", zeile: "„Es fühlt sich so natürlich an, hier zu sitzen.“", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5 },
+				{ nr: "", titel: "Hagen", zeile: "„Das ist schon state of the art.“", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17 },
+				{ nr: "", titel: "Hagen", zeile: "„Ich kann nur jedem empfehlen, sich das hier mal anzuschauen.“", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9 },
 			]}>
-				<TextBild slot="vorne" rahmen={false} medium="voll">
-					<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" blasen={[]} format="4/3" stillbild />
-					<p><span class="entwurf">Entwurf</span><br />Der Videobeweis entsteht in der Beweisaufnahme, einem echten Gespräch wie am Küchentisch. Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine.</p>
-					<p><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
-				</TextBild>
+				<Fragment slot="vorne">
+					<TextBild rahmen={false} medium="voll" titel="Nicht jedes Video hat die gleiche Beweiskraft.">
+						<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" blasen={[]} format="4/3" stillbild />
+						<p><span class="entwurf">Entwurf</span><br />Zwei Leute vor einer Kamera filmen kann jeder. Beweiskraft hat ein Video erst, wenn das Gespräch echt ist. Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. So entsteht in der Beweisaufnahme ein Gespräch wie am Küchentisch.</p>
+						<p><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
+					</TextBild>
+					<div class="videobeweis__vorteile">
+						<p class="videobeweis__entwurf"><span class="entwurf">Entwurf</span></p>
+						<Kennzahlen rahmen={false} woerter zahlen={[
+							{ wert: "Kurz", zeile: "Ihr seid nur kurz vor der Kamera." },
+							{ wert: "Ohne Üben", zeile: "In die Kamera sprechen müsst ihr nicht lernen. Ihr redet miteinander." },
+							{ wert: "Blickkontakt", zeile: "Ihr schaut euch in die Augen, und jeder Zuschauer schaut mit." },
+							{ wert: "Ohne Kamerastress", zeile: "Man sieht keine Kamera, also vergisst man sie." },
+							{ wert: "Live-Regie", zeile: "Wir kümmern uns um Bild und Ton. Ihr redet einfach." },
+							{ wert: "Macht Spaß", zeile: "Es fühlt sich an wie ein gutes Gespräch, nicht wie ein Dreh." },
+						]} />
+					</div>
+				</Fragment>
 			</VideoKacheln>
+			<div class="videobeweis__weiter">
+				<VideoKacheln kacheln={[
+					{ nr: "02", titel: "Beweisführung", /* statt „Beweisverfahren“ (Rasul 14.11.2026: „Ja, Beweisführung“) */ zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisfuehrung" },
+					{ nr: "03", titel: "Beweisstücke", zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
+				]} />
+			</div>
 		</section>
 		<Kapitelende />
 	</div>
@@ -414,5 +440,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md). Größe (text-md) und Breite (46 Zeichen) hatten wir schon;
 	   vorher linksbündig. */
 	.anlass--band .anlass__text { text-align: center; }
+	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
+	.videobeweis__vorteile { margin-top: var(--abstand-lg); }
+	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
+	.videobeweis__weiter { margin-top: var(--abstand-lg); }
 </style>
 

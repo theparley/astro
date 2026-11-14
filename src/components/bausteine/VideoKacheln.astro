@@ -90,6 +90,9 @@ const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.
 	/* Plakat in der schmaleren Kachel: Satz eine Stufe kleiner */
 	@media (min-width: 1024px) { .videokacheln--drei .plakat__satz { font-size: var(--text-md); } }
 	a.videokachel { text-decoration: none; }
+	/* Kacheln ohne Unterseite sind Knöpfe; ein Knopf zentriert seinen Inhalt senkrecht. In einer Reihe mit ungleich langen
+	   Unterschriften rutschte das Bild deshalb nach unten (gemessen 14.11.2026: 15 px). Oben ausrichten. */
+	.videokachel { align-self: start; }
 	.videokachel { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 50ms; }
 	.videokachel:active { transform: scale(0.99); }
 	.videokachel__bild { display: block; border-radius: 4px; overflow: hidden; }
