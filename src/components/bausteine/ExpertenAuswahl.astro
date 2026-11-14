@@ -650,7 +650,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				}
 			};
 
-			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number, faktor = 1) => {
+			// faktor und tLos: nur das jüngste Stück unter den Fingern (die letzten 0,3 s vor tLos) wird zusätzlich ausgeblendet
+			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number, faktor = 1, tLos = Infinity) => {
 				octx.lineCap = "round"; octx.lineJoin = "round"; octx.lineWidth = DICKE;
 				const schritt = 3 / w.ges;
 				for (let i = 1; i < s.length; i++) {
@@ -660,7 +661,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					let vorher: [number, number] | null = null;
 					for (let j = 1; j <= n; j++) {
 						const f = j / n, tt = t0 + (t1 - t0) * f;
-						const a = faktor * Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
+						const jung = Math.max(0, Math.min(1, (tt - (tLos - 0.3)) / 0.3));
+						const a = (1 - jung * (1 - faktor)) * Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
 						if (a <= 0) { vorher = null; continue; }
 						if (!vorher) vorher = punkt(w, s0 + (s1 - s0) * (j - 1) / n);
 						const jetztP = punkt(w, s0 + (s1 - s0) * f);
@@ -719,12 +721,13 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Nach dem Loslassen verlöschen Fingerpunkte und Spurenden schnell (Rasul 14.11.2026: „am Ende zu lang die Kreise
 				// stehen bleiben. Weil die Finger sind ja schon weg … Da müssen die Kreise früher ausblenden“). Vorher glomm das
 				// jüngste Stück der Spur unter den Fingern noch 0,9 s nach (GLIMM) und die Punkte blendeten 0,4 s aus; jetzt ist
-				// beides 0,3 s nach dem Loslassen weg, gleichzeitig mit dem Kreis der Berührung.
+				// beides 0,3 s (Punkte 0,2 s) nach dem Loslassen weg, gleichzeitig mit dem Kreis der Berührung. Der Rest der Spur
+				// verglimmt weiter wie bisher (das weiche Auslaufen bleibt).
 				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.2); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
 				const nachLos = t > T_GESTE + gDauer ? sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.3)) : 1;
-				spur(spurR, WEG_R, jetzt, nachLos); spur(spurL, WEG_L, jetzt, nachLos);
+				spur(spurR, WEG_R, jetzt, nachLos, T_GESTE + gDauer); spur(spurL, WEG_L, jetzt, nachLos, T_GESTE + gDauer);
 				if (deck > 0) {
 					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
 					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
