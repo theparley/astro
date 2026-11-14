@@ -83,13 +83,20 @@ const websiteJsonLd = JSON.stringify({
 		{/* Menü-Wahl (Rasul 13.11.2026): Zwetschke-Knopf (Standard) oder BBH-Kachelmenü.
 		   Umschalten mit ?menu=bbh bzw. ?menu=zwetschke oder dem Schalter unten rechts;
 		   die Wahl bleibt im Browser gespeichert und überlebt Seitenwechsel. */}
-		<script is:inline>
+		<script is:inline define:vars={{ nurLokal: import.meta.env.DEV }}>
 			(function () {
+				// Werkstatt-Schalter (?ende=, ?raster=, …) und ihre gespeicherte Wahl gelten nur lokal; live und auf der Dev-Seite
+				// immer die Grundeinstellungen (Code-Prüfung N1, 14.11.2026: ein geteilter Prüflink hätte Fremden sonst
+				// dauerhaft Hilfslinien oder Varianten gezeigt).
+				var suche = nurLokal ? location.search : "";
+				var speicher = null;
+				try { if (nurLokal) speicher = localStorage; } catch (e) { speicher = null; }
+				if (!speicher) speicher = { getItem: function () { return null; }, setItem: function () {} };
 				var K = "parley-menu";
 				function lies() {
-					var q = new URLSearchParams(location.search).get("menu");
+					var q = new URLSearchParams(suche).get("menu");
 					try {
-						if (q === "bbh" || q === "zwetschke") localStorage.setItem(K, q);
+						if (q === "bbh" || q === "zwetschke") speicher.setItem(K, q);
 						return "bbh"; // Zweig minimal: immer BBH-Menü
 					} catch (e) { return "bbh"; }
 				}
@@ -98,9 +105,9 @@ const websiteJsonLd = JSON.stringify({
 				// Im Film-Modus gilt immer das BBH-Menü. Grundeinstellung seit 13.11.2026 „film“ (Rasul: „Also ich
 				// glaube, mit dem großen Video am Anfang ist es die beste Lösung.“).
 				function liesHero() {
-					var q = new URLSearchParams(location.search).get("hero");
+					var q = new URLSearchParams(suche).get("hero");
 					try {
-						if (q === "film" || q === "text") localStorage.setItem("parley-hero", q);
+						if (q === "film" || q === "text") speicher.setItem("parley-hero", q);
 						return "text"; // Zweig minimal: kein Film-Hero
 					} catch (e) { return "text"; }
 				}
@@ -108,9 +115,9 @@ const websiteJsonLd = JSON.stringify({
 				// Menülage (Rasul 13.11.2026: „wir kleben es gleich unten mittig an den Bildschirm. Und beim
 				// Scrollen fährt es dann zusammen, das gucken wir uns mal als Variante an“): ?lage=unten|links.
 				function liesLage() {
-					var q = new URLSearchParams(location.search).get("lage");
+					var q = new URLSearchParams(suche).get("lage");
 					try {
-						if (q === "unten" || q === "links" || q === "gemischt") localStorage.setItem("parley-lage", q);
+						if (q === "unten" || q === "links" || q === "gemischt") speicher.setItem("parley-lage", q);
 						// Zweig minimal: Menü auf allen Breiten unten mittig (Rasul 13.11.2026 abends: „Oder wir machen es schon
 						// unten hin in dem Fall. Wie auf dem Handy später auch.“; links mittig überdeckte den großen Satz).
 						return "unten";
@@ -118,25 +125,25 @@ const websiteJsonLd = JSON.stringify({
 				}
 				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis y; Grundeinstellung y (Rasul 13.11. abends: „Ja, wir nehmen ypsilon.“; davor w, v, i)
 				function liesSatz() {
-					var q = new URLSearchParams(location.search).get("satz");
+					var q = new URLSearchParams(suche).get("satz");
 					try {
-						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v" || q === "w" || q === "x" || q === "y") localStorage.setItem("parley-satz", q);
-						return localStorage.getItem("parley-satz") || "y";
+						if (q === "a" || q === "b" || q === "c" || q === "d" || q === "e" || q === "f" || q === "g" || q === "h" || q === "i" || q === "j" || q === "k" || q === "l" || q === "m" || q === "n" || q === "o" || q === "p" || q === "q" || q === "r" || q === "s" || q === "t" || q === "u" || q === "v" || q === "w" || q === "x" || q === "y") speicher.setItem("parley-satz", q);
+						return speicher.getItem("parley-satz") || "y";
 					} catch (e) { return q || "y"; }
 				}
 				function liesUmlaut() {
-					var q = new URLSearchParams(location.search).get("umlaut");
+					var q = new URLSearchParams(suche).get("umlaut");
 					try {
-						if (q === "innen" || q === "aussen" || q === "ecken") localStorage.setItem("parley-umlaut", q);
-						return localStorage.getItem("parley-umlaut") || "ecken"; // Grundeinstellung „Ecken“ seit 13.11.2026 abends
+						if (q === "innen" || q === "aussen" || q === "ecken") speicher.setItem("parley-umlaut", q);
+						return speicher.getItem("parley-umlaut") || "ecken"; // Grundeinstellung „Ecken“ seit 13.11.2026 abends
 					} catch (e) { return q || "ecken"; }
 				}
 				// Aufbau der Startseite (13.11.2026): ?aufbau=abschnitte|kacheln; Grundeinstellung „kacheln“ (Rasul: „Kacheln“)
 				function liesAufbau() {
-					var q = new URLSearchParams(location.search).get("aufbau");
+					var q = new URLSearchParams(suche).get("aufbau");
 					try {
-						if (q === "abschnitte" || q === "kacheln") localStorage.setItem("parley-aufbau", q);
-						return localStorage.getItem("parley-aufbau") || "kacheln";
+						if (q === "abschnitte" || q === "kacheln") speicher.setItem("parley-aufbau", q);
+						return speicher.getItem("parley-aufbau") || "kacheln";
 					} catch (e) { return q || "kacheln"; }
 				}
 				function setze() {
