@@ -63,12 +63,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Bewegung statt 5,7 s, wirkte aber abgehackt. Im Vergleich nebeneinander lag es an den Zeiten, nicht an der neuen
 	// Bildauflösung. Rasul: „Ich habe das Gefühl, sie wirkt ein bisschen abgehackter“, dann zu alten Zeiten mit neuer
 	// Auflösung: „das können wir so nehmen. Dadurch ist nichts Abgehacktes passiert.“ Also die alten Zeiten.
-	// Anfang kürzer (Rasul 14.11.2026: „lass uns mal den Teil vor der Kamerafahrt kürzer machen, ohne dass er hektisch
-	// wirkt“): Vor der Fahrt 1,5 s statt 2,0 s; Geste, Text und Erscheinen rücken im selben Verhältnis zusammen (Faktor 0,75),
-	// Kamerafahrt und Geste selbst bleiben gleich lang. Vorher Geste ab 2,2 s, Text ab 1,6 s. Lokal ?anfang=alt zum Vergleich.
+	// Kürzerer Anfang probiert und verworfen (14.11.2026): 1,5 s statt 2,0 s bis zur Kamerafahrt (Geste ab 1,7 s, Text ab
+	// 1,2 s). Rasul: „Jetzt wirkt es zu hektisch. Vor der Videogeste. Es hat auch gefühlt zwei verschiedene
+	// Geschwindigkeiten. Also wir ändern erstmal nichts beim Entstehen vorher.“
 	const BERUEHRUNG = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "aus");
-	const ANFANG_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("anfang") === "alt";
-	const T_PAUSE = ANFANG_ALT ? 2.2 : 1.7, D_LESEN = 0, T_TEXT = ANFANG_ALT ? 1.6 : 1.2, D_FINGER = 0.4;
+	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
