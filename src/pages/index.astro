@@ -200,7 +200,10 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					<p class="anlass__satz anlass__satz--eins">Überall Experten.</p>
 					<!-- „auch im Business“ bleibt in der Überschrift (Rasul 14.11.2026: „Zurück in die Überschrift“, nach Probe zweizeilig
 					     mit Wiederholung am Textende): Der Schubs vom Fußball ins Geschäft kommt, während die Animation läuft -->
-					<p class="anlass__satz anlass__nachsatz"><span class="anlass__zeile1">Zeit für den Video&shy;beweis</span><br /><span class="anlass__zeile2">auch im Business.</span></p>
+					<p class="anlass__satz anlass__nachsatz"><span class="anlass__zeile1">Zeit für den Video&shy;beweis</span><br /><span class="anlass__zeile2 anlass__zeile2--business">auch im Business.</span><span class="anlass__zeile2 anlass__zeile2--vertrauen">Damit entscheidet ihr Vertrauen noch vor dem ersten&nbsp;Kontakt.</span></p>
+					{/* Zweite Zeile in der Textfolge „vorher“ (Rasul 14.11.2026: „Und wenn wir es so aufbauen, steht er nachher auch nicht
+					     auch im Business drunter. Sondern sinngemäß und erstmal wörtlich. Damit entscheidet ihr Vertrauen noch vor dem ersten
+					     Kontakt.“) wörtlich gesetzt; in den anderen Textfolgen bleibt „auch im Business.“ */}
 					{/* Bandtext als Probe (Rasul 13.11.2026 abends, gesammelt: KI-Slop, „generierte und gelebte Expertise“, viele
 					     Anbieter wollen bei Entscheidern auf den Schirm, „weil es so einfach ist, jetzt eine Expertise zu behaupten,
 					     schießen die Experten natürlich auch wie Pilze aus dem Boden“, „wie soll denn der entscheiden jetzt, wer da
@@ -465,6 +468,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   Stillstand der Kamera. Grundeinstellung seit 14.11.2026. */
 	:global(html[data-textfolge="vorher"] .anlass--band:is([data-phase="geste"], [data-phase="schluss"]) .anlass__zeile1) { opacity: 1; transition: opacity 1s ease-in-out 0.6s; }
 	:global(html[data-textfolge="vorher"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out; }
+	.anlass__zeile2--vertrauen { display: none; }
+	:global(html[data-textfolge="vorher"]) .anlass__zeile2--vertrauen { display: inline; }
+	:global(html[data-textfolge="vorher"]) .anlass__zeile2--business { display: none; }
 
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
