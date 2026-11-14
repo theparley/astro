@@ -4,10 +4,11 @@
    Auf dem Handy kommt das Medium immer zuerst. BBH nimmt das Bild nur 60 % seiner Hälfte
    breit (medium="klein"); ein Video mit Sprechblasen braucht die volle Hälfte (medium="voll").
    Slots: "medium" für Bild, Grafik oder Video; Standard-Slot für den Text. */
-interface Props { titel?: string; id?: string; seite?: "links" | "rechts"; medium?: "klein" | "voll"; titelZeilen?: string[] }
-const { titel, id, seite = "links", medium = "klein", titelZeilen } = Astro.props;
+/* rahmen={false} (14.11.2026): wenn der Block in einem Baustein steht, der schon den Rahmen setzt (VideoKacheln, Slot „vorne“) */
+interface Props { titel?: string; id?: string; seite?: "links" | "rechts"; medium?: "klein" | "voll"; titelZeilen?: string[]; rahmen?: boolean }
+const { titel, id, seite = "links", medium = "klein", titelZeilen, rahmen = true } = Astro.props;
 ---
-<div class:list={["textbild", "rahmen", "raster", `textbild--${seite}`]}>
+<div class:list={["textbild", rahmen && "rahmen", "raster", `textbild--${seite}`]}>
 	<div class:list={["textbild__medium", seite === "links" ? "sp-links" : "sp-rechts", `textbild__medium--${medium}`]}>
 		<slot name="medium" />
 	</div>

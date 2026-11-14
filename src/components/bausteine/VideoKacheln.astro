@@ -41,6 +41,8 @@ const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.
 		</div>
 	)}
 	{einleitung && <p class="t-lesen videokacheln__einleitung" set:html={einleitung} />}
+	{/* Slot „vorne“ (14.11.2026): ein großer Block vor den Kacheln, etwa die Beweisaufnahme als Text-Bild-Block */}
+	{Astro.slots.has("vorne") && <div class="videokacheln__vorne"><slot name="vorne" /></div>}
 	<div class="videokacheln__raster">
 		{kacheln.map((k) => { const Tag = k.href ? "a" : "button"; return (
 			<Tag href={k.href} type={k.href ? undefined : "button"} class="videokachel" data-src={k.href ? undefined : k.src} data-von={k.von} data-bis={k.bis} aria-label={k.href ? `${k.nr} ${k.titel}` : `${k.nr} ${k.titel}: Film groß ansehen`}>
@@ -80,6 +82,7 @@ const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.
 	.videokacheln__titel { scroll-margin-top: 32px; }
 	@media (min-width: 1024px) { .videokacheln__titel { scroll-margin-top: 136px; } }
 	.videokacheln__einleitung { max-width: 46ch; margin: -16px 0 48px; }
+	.videokacheln__vorne { margin-bottom: var(--abstand-lg, 96px); }
 	.videokacheln__raster { display: grid; grid-template-columns: 1fr; gap: 32px 16px; }
 	@media (min-width: 1024px) { .videokacheln__raster { grid-template-columns: 1fr 1fr; } }
 	/* drei Spalten ab 1024 px (BBH News und Join Us: md:grid-cols-3), am Handy eine Spalte */

@@ -27,6 +27,7 @@ import Textblock from "../components/bausteine/Textblock.astro";
 import BlasenVideo from "../components/bausteine/BlasenVideo.astro";
 import Platzhalter from "../components/bausteine/Platzhalter.astro";
 import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
+import Knopf from "../components/bausteine/Knopf.astro";
 import VideoKacheln from "../components/bausteine/VideoKacheln.astro";
 import Abschnittskopf from "../components/bausteine/Abschnittskopf.astro";
 import Karussell from "../components/bausteine/Karussell.astro";
@@ -231,22 +232,25 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					<p class="t-lesen anlass__text"><span class="entwurf">Entwurf</span><br />Behaupten kann das jeder. Ob jemand wirklich etwas kann, sieht man erst im Gespräch.</p>
 				</div>
 			</div>
-			{/* Segment „Beweis“ als drei Schritte Fangen · Veredeln · Verteilen (Vorschlag Claude 14.11.2026 nach BBH, auf Rasuls
-			    Auftrag: „Jetzt aber zu zum Videobeweis, zu den drei Teilen. Mach mir dafür mal einen Vorschlag und orientiere dich
-			    an BBH-Design.“). Die Augenzeugen sind nicht mehr Kachel 04, sie werden das eigene nächste Segment (Rasul: „Und
-			    die Schlussfolgerung daraus wäre dann das nächste Segment, das wäre die Augenzeugen.“). Vorher vier Kacheln in
-			    zwei Spalten (Git-Geschichte). */}
-			<VideoKacheln id="kap-titel" titel={`<span class="titel-videobeweis">Video&shy;beweis</span><span class="titel-beweis">Beweis</span>`} titelStufe="2xl" spalten={3}
-				{/* kein Einleitungssatz: unter dem Abschnittstitel kommen bei BBH gleich die Kacheln (Analyse B2, R3; Rasul 14.11.2026:
-				    „Macht BBH unter so einem markanten Titel nicht gleich die Kacheln? … Ich glaube, das habe ich bei BBH nicht
-				    gesehen.“). Verworfener Satz: „Ein Gespräch, drei Schritte: Wir fangen es ein, veredeln es zu Beweisstücken und
-				    verteilen sie dahin, wo Entscheider hinschauen.“ */}
-				kacheln={[
-				{ nr: "01", titel: "Beweisaufnahme", /* Rasul 14.11.2026: „für die erste Kachel bleiben wir mal bei dem Wording Beweisaufnahme“ (statt „Fangen“) */ zeile: "Das echte Gespräch, filmreif ohne Kamerastress.", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5, href: "/beweisaufnahme",
-				  plakat: { satz: "Es fühlt sich so [natürlich] an, hier zu sitzen.", marke: "#Beweisaufnahme", bild: 2.4 } },
+			{/* Segment „Videobeweis“ (Rasul 14.11.2026): „Vielleicht machen wir es nicht als Überschrift [Beweisaufnahme]. So,
+			    und jetzt sind wir ja wirklich beim Videobeweis. Den haben wir ja eingeführt mit der Animation. Das ist die
+			    Überschrift fürs nächste Segment. Und dass es die Beweisaufnahme ist, das machen wir in einen der ersten Sätze mit
+			    rein. Die Kacheln hatten die Funktion, dass die Startseite übersichtlich bleibt … Es ist aber auch richtig, dass
+			    die Beweisaufnahme als einzelne Kachel untergeht. Das heißt vielleicht auch, wir müssen nicht alles erklären in
+			    dem Segment … aber wir müssen die Möglichkeit schaffen, dass man sich tiefer informiert.“
+			    Aufbau (Vorschlag Claude): Titel „Videobeweis“, dann die Beweisaufnahme groß als Text-Bild-Block (BBH B6, R6) mit
+			    wenigen Sätzen und Link zur Unterseite, darunter Beweisführung und Beweisstücke als zwei Kacheln (BBH R12, zwei
+			    Spalten) zu ihren Unterseiten. Vorher: drei Kacheln, davor vier (Git-Geschichte). */}
+			<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" kacheln={[
 				{ nr: "02", titel: "Beweisführung", /* statt „Beweisverfahren“ (Rasul 14.11.2026: „Ich glaube, das Wort Beweisverfahren passt nicht“, dann „Ja, Beweisführung“); Begründung im Steuerdokument */ zeile: "Ihr habt keine Zeit für Videos? Müsst ihr auch nicht.", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17, href: "/beweisfuehrung" },
-				{ nr: "03", titel: "Beweisstücke", /* Rasul 14.11.2026: „Ja, würde ich auch zurückgehen.“ */ zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
-			]} />
+				{ nr: "03", titel: "Beweisstücke", zeile: "Aus einem Gespräch werden viele Beweisstücke.", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9, href: "/beweisstuecke" },
+			]}>
+				<TextBild slot="vorne" rahmen={false} medium="voll">
+					<BlasenVideo slot="medium" src="/lokal/szene-beweisaufnahme.mp4" blasen={[]} format="4/3" stillbild />
+					<p><span class="entwurf">Entwurf</span><br />Der Videobeweis entsteht in der Beweisaufnahme, einem echten Gespräch wie am Küchentisch. Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine.</p>
+					<p><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
+				</TextBild>
+			</VideoKacheln>
 		</section>
 		<Kapitelende />
 	</div>
