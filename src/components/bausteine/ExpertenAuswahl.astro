@@ -500,7 +500,13 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 				// Drittellinie, Unterkante der Figur auf der Unterkante des 16:9-Rahmens, also Figur von Augen bis Unterkante
 				// zwei Drittel der Rahmenhöhe. Gesucht wird der Weg RAN_Z, bei dem die vordere Person diese Größe hat.
 				const vorneP = leuteRaum.find((q) => q.ebene === 0);
-				const gZiel = ((2 / 3) * RH) / ((14.5 * 64) / 19);
+				// Innerhalb des gezeichneten Rahmens (Rasul 14.11.2026: „die Linien von der Videobeweis-Geste sitzen auf der
+				// Kamerakante und dadurch überschneiden sie das Männchen, das große am Ende unten. Mach es so, dass das Männchen
+				// sich nicht überschneidet, also am Ende ein bisschen kleiner. Dass es wirklich der Rahmen ist, in dem das Bild
+				// erscheint“): Augen bleiben auf der oberen Drittellinie, die Unterkante endet über der Innenkante des Strichs
+				// (halbe Strichdicke plus Luft), statt auf der Rahmenkante.
+				const INNEN = DICKE / 2 + 24;
+				const gZiel = ((2 / 3) * RH - INNEN) / ((14.5 * 64) / 19);
 				const loese = (fEnde: number) => {
 					if (!vorneP) return;
 					let lo = 0, hi = 600;
