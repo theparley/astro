@@ -723,7 +723,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// jüngste Stück der Spur unter den Fingern noch 0,9 s nach (GLIMM) und die Punkte blendeten 0,4 s aus; jetzt ist
 				// beides 0,3 s (Punkte 0,2 s) nach dem Loslassen weg, gleichzeitig mit dem Kreis der Berührung. Der Rest der Spur
 				// verglimmt weiter wie bisher (das weiche Auslaufen bleibt).
-				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.2); }
+				// Danach (Rasul 14.11.2026): „Hol sie mal zurück, aber jetzt am Anfang und am Ende“: Die Fingerpunkte blenden am
+				// Ende spiegelbildlich zum Anfang aus (0,4 s, gleiche weiche Kurve); nur das Spurstück darunter verlischt schnell.
+				else if (t >= T_GESTE + gDauer) { s = 1; deck = sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / D_FINGER)); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
 				const nachLos = t > T_GESTE + gDauer ? sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.3)) : 1;
