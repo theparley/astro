@@ -347,8 +347,8 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 							<li>Was KI-generiert sein könnte, steht unter Generalverdacht.</li>
 						</ul>
 						<p>Vertrauen muss deshalb vor der ersten Anfrage entstehen. Das gelingt am besten mit Videos von echten&nbsp;Gesprächen.</p>
+						<p class="t-mini grau anlass__quelle">Die Studien dahinter: Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)</p>
 					</div>
-					<p class="t-mini grau anlass__quelle">Die Studien dahinter: Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)</p>
 				</div>
 			</div>
 			<div class="anlass anlass--kachel rahmen">
@@ -630,7 +630,11 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md). Größe (text-md) und Breite (46 Zeichen) hatten wir schon;
 	   vorher linksbündig. */
 	.anlass--band .anlass__text { text-align: center; }
-	.anlass--band .anlass__quelle { margin: calc(16px - var(--abstand-md)) auto 0; text-align: center; }
+	/* Linksbündig (Rasul 14.11.2026: „Mach den Text mal linksbündig, find den so schwierig zu lesen.“), seit er Absätze und eine
+	   Liste hat; der Block bleibt mittig auf 46 Zeichen. Die Quellenzeile steht bündig darunter. */
+	.anlass--band .anlass__text { text-align: left; text-wrap: pretty; }
+	/* Quellenzeile steht im Textblock, bündig unter dem letzten Absatz (seit 14.11.2026 linksbündig) */
+	.anlass--band .anlass__text .anlass__quelle { margin: 16px 0 0; }
 	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
 	.videobeweis__vorteile { margin-top: var(--abstand-lg); }
 	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
