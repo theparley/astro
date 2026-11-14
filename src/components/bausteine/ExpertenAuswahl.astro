@@ -66,6 +66,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Anfang kürzer (Rasul 14.11.2026: „lass uns mal den Teil vor der Kamerafahrt kürzer machen, ohne dass er hektisch
 	// wirkt“): Vor der Fahrt 1,5 s statt 2,0 s; Geste, Text und Erscheinen rücken im selben Verhältnis zusammen (Faktor 0,75),
 	// Kamerafahrt und Geste selbst bleiben gleich lang. Vorher Geste ab 2,2 s, Text ab 1,6 s. Lokal ?anfang=alt zum Vergleich.
+	const BERUEHRUNG = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "aus");
 	const ANFANG_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("anfang") === "alt";
 	const T_PAUSE = ANFANG_ALT ? 2.2 : 1.7, D_LESEN = 0, T_TEXT = ANFANG_ALT ? 1.6 : 1.2, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
@@ -728,6 +729,25 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
 				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
 				ctx.globalCompositeOperation = "source-over";
+				// Berührung wie zwei Finger auf einem Bildschirm (Rasul 14.11.2026: „am Anfang auch zwei größere Kreise entstehen
+				// lassen, wenn die zwei Finger … ein Display berühren und es dafür eine Rückmeldung gibt … und dann könnten die
+				// am Ende auch wieder sozusagen weggehen, wenn man den Bildschirm verlässt … sodass wir sozusagen Hand anlegen“).
+				// Vorbilder: Berührungspunkte in App-Aufnahmen (halbdurchsichtiger Kreis in Fingergröße, wandert mit) und
+				// Material-Ripple (Ring läuft beim Aufsetzen nach außen, Deckkraft 12 %). Aufsetzen mit dem Einblenden der
+				// Fingerpunkte, Loslassen mit dem Ende der Geste. Lokal ?beruehrung=aus zum Vergleich.
+				if (kam && BERUEHRUNG) {
+					const R = DICKE * 1.15, ab = t - T_GESTE, los = t - T_GESTE - gDauer;
+					let r = 0, a = 0;
+					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = 0.12 * sanft(k); }
+					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = 0.12 * sanft(k); }
+					ctx.setTransform(sc, 0, 0, sc, ox, 0); ctx.fillStyle = "#000";
+					[pr, pl].forEach(([x, y]) => {
+						if (a > 0) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+						// ein Ring läuft beim Aufsetzen einmal nach außen und verblasst
+						if (ab >= 0 && ab < 0.5) { const k = ab / 0.5; ctx.globalAlpha = 0.18 * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(x, y, R * (1 + 1.1 * sanft(k)), 0, Math.PI * 2); ctx.stroke(); }
+					});
+					ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0);
+				}
 				}
 				// Personen
 				ctx.setTransform(sc, 0, 0, sc, ox, 0);
