@@ -436,7 +436,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		}
 		x.putImageData(bild, 0, 0);
 	}
-	const BILDER = new Map<number, { c: HTMLCanvasElement; pad: number }>();
+	const BILDER = new Map<number, { c: HTMLCanvasElement; pad: number; auf: number }>();
 	const AUF = 3; // Pixel je Einheit im vorbereiteten Bild
 	// farbe: "#000" für die Figur, "#fff" für die deckende Fläche darunter (siehe zeichneUnscharf)
 	function personBild(b: number, farbe = "#000") {
@@ -444,13 +444,19 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		const schluessel = stufe + (farbe === "#fff" ? 1000 : 0);
 		let e = BILDER.get(schluessel);
 		if (!e) {
-			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * AUF, h = (64.4 + 2 * pad) * AUF;
-			const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h);
-			const x = c.getContext("2d", { willReadFrequently: !FILTER_GEHT })!;
-			if (FILTER_GEHT) x.filter = `blur(${(stufe * AUF).toFixed(1)}px)`; x.scale(AUF, AUF); // Unschärfe in Bildpixeln
+			// Auflösung mit der Unschärfe senken: Ein stark unscharfes Bild braucht kaum Pixel. Vorher immer AUF = 3, das
+			// ergab je Durchlauf 74 Bilder mit zusammen 129 MB (gemessen 14.11.2026); iPhones begrenzen den Speicher aller
+			// Zeichenflächen (Code-Prüfung M1, research/Experten_Animation_Code_Pruefung_2026-11.md im Marketing-Ordner).
+			// Jetzt höchstens 6 Bildpixel Unschärfe je Bild, beim Zeichnen weich hochskaliert.
+			const auf = Math.min(AUF, Math.max(0.1, 6 / Math.max(0.5, stufe)));
+			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * auf, h = (64.4 + 2 * pad) * auf;
+			const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h));
+			const x = c.getContext("2d", { willReadFrequently: !FILTER_GEHT });
+			if (!x) return null; // Speichergrenze erreicht: Person scharf zeichnen statt einzufrieren
+			if (FILTER_GEHT) x.filter = `blur(${(stufe * auf).toFixed(2)}px)`; x.scale(auf, auf); // Unschärfe in Bildpixeln
 			zeichnePerson(x, 28.65 + pad, 34 + pad, 1, 1, farbe);
-			if (!FILTER_GEHT) weichzeichnen(c, stufe * AUF, 3, farbe);
-			e = { c, pad }; BILDER.set(schluessel, e);
+			if (!FILTER_GEHT) weichzeichnen(c, stufe * auf, 3, farbe);
+			e = { c, pad, auf }; BILDER.set(schluessel, e);
 		}
 		return e;
 	}
@@ -484,9 +490,11 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			zeichnePerson(ctx, x, y, g, alpha); return;
 		}
 		const setze = (farbe: string, a: number) => {
-			const { c, pad } = personBild(b, farbe);
+			const e = personBild(b, farbe);
+			if (!e) { zeichnePerson(ctx, x, y, g, a, farbe); return; }
+			const { c, pad, auf } = e;
 			ctx.globalAlpha = a;
-			ctx.drawImage(c, x - (28.65 + pad) * g, y - (34 + pad) * g, (c.width / AUF) * g, (c.height / AUF) * g);
+			ctx.drawImage(c, x - (28.65 + pad) * g, y - (34 + pad) * g, (c.width / auf) * g, (c.height / auf) * g);
 		};
 		if (deckend > 0) setze("#fff", deckend);
 		setze("#000", alpha);
