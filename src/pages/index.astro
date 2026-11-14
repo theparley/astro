@@ -449,15 +449,21 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   beiden Sätze eingeblendet werden. Und zwar einer nach dem anderen“; Grund: „es darf nur eine Sache fürs Auge passieren“).
 	   Nachsatz liegt in derselben Rasterzeile wie „Überall Experten.“; Ausblenden 0,6 s ab 1,6 s, fertig, wenn die Geste
 	   beginnt (2,2 s); Zeilen nach dem Stillstand der Kamera (Phase „schluss“), je 1 s, die zweite nach der ersten. */
-	:global(html[data-textfolge="nacheinander"]) .anlass__band-innen > :first-child { grid-row: 1; }
-	:global(html[data-textfolge="nacheinander"]) .anlass--band .anlass__satz--eins,
-	:global(html[data-textfolge="nacheinander"]) .anlass--band .anlass__nachsatz { grid-row: 2; grid-column: 1; align-self: start; }
-	:global(html[data-textfolge="nacheinander"]) .anlass--band .anlass__text { grid-row: 3; }
-	:global(html[data-textfolge="nacheinander"] .anlass--band:not([data-phase="warten"]) .anlass__satz--eins) { opacity: 0; transition: opacity 0.6s ease-in-out; }
-	:global(html[data-textfolge="nacheinander"] .anlass--band .anlass__nachsatz) { opacity: 1; transition: none; }
-	:global(html[data-textfolge="nacheinander"] .anlass--band .anlass__nachsatz span) { opacity: 0; }
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"])) .anlass__band-innen > :first-child { grid-row: 1; }
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"])) .anlass--band .anlass__satz--eins,
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"])) .anlass--band .anlass__nachsatz { grid-row: 2; grid-column: 1; align-self: start; }
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"])) .anlass--band .anlass__text { grid-row: 3; }
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"]) .anlass--band:not([data-phase="warten"]) .anlass__satz--eins) { opacity: 0; transition: opacity 0.6s ease-in-out; }
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"]) .anlass--band .anlass__nachsatz) { opacity: 1; transition: none; }
+	:global(html:is([data-textfolge="nacheinander"], [data-textfolge="vorher"]) .anlass--band .anlass__nachsatz span) { opacity: 0; }
 	:global(html[data-textfolge="nacheinander"] .anlass--band[data-phase="schluss"] .anlass__zeile1) { opacity: 1; transition: opacity 1s ease-in-out; }
 	:global(html[data-textfolge="nacheinander"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out 1s; }
+	/* Textfolge „vorher“ (Probe, Rasul 14.11.2026: „ob wir, bevor die Animation losgeht, den Text ausblenden und sagen, Zeit
+	   für den Videobeweis und dann sozusagen die Geste gezeichnet wird“): erst ansagen, dann zeigen. „Überall Experten.“
+	   blendet aus (0,6 s), danach „Zeit für den Videobeweis“ (1 s); die Animation steht so lange still (ExpertenAuswahl,
+	   D_ANSAGE). „auch im Business.“ kommt nach dem Stillstand der Kamera. */
+	:global(html[data-textfolge="vorher"] .anlass--band:is([data-phase="geste"], [data-phase="schluss"]) .anlass__zeile1) { opacity: 1; transition: opacity 1s ease-in-out 0.6s; }
+	:global(html[data-textfolge="vorher"] .anlass--band[data-phase="schluss"] .anlass__zeile2) { opacity: 1; transition: opacity 1s ease-in-out; }
 
 	/* Lesetext linksbündig, der Block mittig auf 46 Zeichen (BBH B12 „align left“; Analyse: „Linksbündig steht, was gelesen wird“) */
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }

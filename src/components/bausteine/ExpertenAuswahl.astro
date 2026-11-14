@@ -558,7 +558,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// am Ende 5 px Unschärfe und Deckkraft 0,35 (wie die hintersten Reihen). Vorher eigene CSS-Blende über 2 s.
 			const zeileUnscharf = fig.closest(".anlass--band")?.querySelector<HTMLElement>(".anlass__satz--eins") ?? null;
 			// In der Textfolge „nacheinander“ (Probe 14.11.2026) ist die Zeile während der Fahrt ausgeblendet: nicht unscharf rechnen
-			const nacheinander = () => document.documentElement.dataset.textfolge === "nacheinander";
+			const nacheinander = () => document.documentElement.dataset.textfolge === "nacheinander" || document.documentElement.dataset.textfolge === "vorher";
+			// Textfolge „vorher“ (Probe 14.11.2026): Bei T_TEXT steht die Animation D_ANSAGE Sekunden still, damit unten nur die
+			// Ansage passiert (Ausblenden 0,6 s, „Zeit für den Videobeweis“ 1 s, kurz lesen); danach Geste und Fahrt wie gehabt
+			const D_ANSAGE = 2.0;
+			const ansage = () => document.documentElement.dataset.textfolge === "vorher";
+			let ansageRest = D_ANSAGE;
 			const zeileSetzen = (e: number) => { if (zeileUnscharf && nacheinander()) { zeileUnscharf.style.filter = ""; zeileUnscharf.style.opacity = ""; return; } if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
 			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
@@ -873,7 +878,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let uhr = 0, zuletzt = 0, freigabe = false, haelt = false;
 			const schritt = () => {
 				const jetzt = performance.now() / 1000;
-				uhr += Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
+				let dt = Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
+				if (ansage() && uhr >= T_TEXT && ansageRest > 0) { const n = Math.min(ansageRest, dt); ansageRest -= n; dt -= n; }
+				uhr += dt;
 				if (uhr >= T_PAUSE && !freigabe) {
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
 					uhr = T_PAUSE; bild(uhr, uhr); haelt = true; return;
@@ -892,7 +899,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let gestartet = false, pausiert = false, pauseSeit = 0;
 			const spiele = () => {
 				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
-				spurR = []; spurL = [];
+				spurR = []; spurL = []; ansageRest = D_ANSAGE;
 				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); return; }
 				phase("warten");
 				start = performance.now() / 1000; uhr = 0; zuletzt = start; lauf = requestAnimationFrame(schritt);
@@ -942,7 +949,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
 			const zuruecksetzen = () => {
 				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
-				uhr = 0; spurR = []; spurL = []; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
+				uhr = 0; spurR = []; spurL = []; ansageRest = D_ANSAGE; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
 			};
 			const sicht = new IntersectionObserver((e) => {
 				const x = e[e.length - 1];
