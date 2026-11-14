@@ -990,6 +990,13 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// draufklicke … egal wo ich draufklicke, stoppen beide“): anhalten, weiterlaufen, neu starten von außen
 			if (import.meta.env.DEV) {
 				(fig as any).__spiele = spiele;
+				// Standbild für Storyboards (14.11.2026): spielt bis t in Schritten von 1/60 s ohne Bildschleife ab, damit Spur und
+				// Einblendungen stimmen; läuft auch in einem Hintergrund-Tab
+				(fig as any).__bild = (t: number) => {
+					cancelAnimationFrame(lauf); groesse(); spurR = []; spurL = []; gestartet = true; pausiert = true;
+					for (let x = 0; x <= t; x += 1 / 60) bild(x, x);
+					bild(t, t); return cv.toDataURL("image/png");
+				};
 				(fig as any).__halt = (h: boolean) => {
 					if (h && gestartet && !pausiert && fig.dataset.fertig === undefined) { cancelAnimationFrame(lauf); pausiert = true; }
 					else if (!h && pausiert) { pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); }
