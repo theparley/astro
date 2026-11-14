@@ -381,6 +381,58 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 	// Unscharfe Personen als vorbereitete Bilder (Messung 13.11.2026: Weichzeichnen jeder Person in jedem Bild kostete bis
 	// zu 0,5 s pro Bild und ließ die Animation ruckeln). Je Unschärfe-Stufe wird die Person einmal klein weichgezeichnet und
 	// danach nur noch skaliert gesetzt. b = Unschärfe in Personen-Einheiten (Bildschirm-Unschärfe geteilt durch Größe).
+	// Safari (iPad, iPhone, Mac) kennt ctx.filter auf der Zeichenfläche nicht und zeichnet dann alles scharf (Rasul
+	// 14.11.2026: „Auf dem iPad … dass das Blurren der Hintergrundfigur nicht funktioniert … Safari-Browser“). Darum
+	// einmal prüfen, ob die Unschärfe wirklich wirkt; wenn nicht, zeichnet weichzeichnen() selbst weich: dreimal
+	// Kastenunschärfe hintereinander, das kommt der Gaußschen Unschärfe von CSS blur() sehr nahe.
+	const FILTER_GEHT = (() => {
+		// Nur zum Prüfen am Rechner: ?ohnefilter erzwingt den Safari-Weg auch in Chrome
+		if (import.meta.env.DEV && new URLSearchParams(location.search).has("ohnefilter")) return false;
+		try {
+			const c = document.createElement("canvas"); c.width = 9; c.height = 9;
+			const x = c.getContext("2d", { willReadFrequently: true })!; x.filter = "blur(2px)"; x.fillRect(4, 4, 1, 1);
+			return x.getImageData(2, 4, 1, 1).data[3] > 0;
+		} catch { return false; }
+	})();
+	function kastenGroessen(sigma: number) {
+		const wIdeal = Math.sqrt(4 * sigma * sigma + 1); let wl = Math.floor(wIdeal); if (wl % 2 === 0) wl--;
+		const wu = wl + 2, m = Math.round((12 * sigma * sigma - 3 * wl * wl - 12 * wl - 9) / (-4 * wl - 4));
+		return [0, 1, 2].map((i) => ((i < m ? wl : wu) - 1) / 2);
+	}
+	function kasten(q: Float32Array, z: Float32Array, w: number, h: number, r: number) {
+		const f = 1 / (2 * r + 1);
+		for (let y = 0; y < h; y++) { // waagerecht
+			const o = y * w; let summe = 0;
+			for (let i = -r; i <= r; i++) summe += q[o + Math.min(w - 1, Math.max(0, i))];
+			for (let x = 0; x < w; x++) {
+				z[o + x] = summe * f;
+				summe += q[o + Math.min(w - 1, x + r + 1)] - q[o + Math.max(0, x - r)];
+			}
+		}
+		for (let x = 0; x < w; x++) { // senkrecht
+			let summe = 0;
+			for (let i = -r; i <= r; i++) summe += z[Math.min(h - 1, Math.max(0, i)) * w + x];
+			for (let y = 0; y < h; y++) {
+				q[y * w + x] = summe * f;
+				summe += z[Math.min(h - 1, y + r + 1) * w + x] - z[Math.max(0, y - r) * w + x];
+			}
+		}
+	}
+	// kanal: 3 = Deckkraft (Figuren in einer Farbe), 0 = Helligkeit (Leuchtspur, schwarz-weiß und deckend)
+	function weichzeichnen(c: HTMLCanvasElement, sigma: number, kanal: 0 | 3, farbe = "#000") {
+		if (sigma < 0.3) return;
+		const x = c.getContext("2d")!, w = c.width, h = c.height, bild = x.getImageData(0, 0, w, h), d = bild.data;
+		const q = new Float32Array(w * h), z = new Float32Array(w * h);
+		for (let i = 0; i < w * h; i++) q[i] = d[i * 4 + kanal];
+		for (const r of kastenGroessen(sigma)) if (r > 0) kasten(q, z, w, h, r);
+		const v = farbe === "#fff" ? 255 : 0;
+		for (let i = 0; i < w * h; i++) {
+			const a = Math.round(q[i]);
+			if (kanal === 3) { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = a; }
+			else { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = a; d[i * 4 + 3] = 255; }
+		}
+		x.putImageData(bild, 0, 0);
+	}
 	const BILDER = new Map<number, { c: HTMLCanvasElement; pad: number }>();
 	const AUF = 3; // Pixel je Einheit im vorbereiteten Bild
 	// farbe: "#000" für die Figur, "#fff" für die deckende Fläche darunter (siehe zeichneUnscharf)
@@ -391,8 +443,10 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 		if (!e) {
 			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * AUF, h = (64.4 + 2 * pad) * AUF;
 			const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h);
-			const x = c.getContext("2d")!; x.filter = `blur(${(stufe * AUF).toFixed(1)}px)`; x.scale(AUF, AUF); // Unschärfe in Bildpixeln
+			const x = c.getContext("2d", { willReadFrequently: !FILTER_GEHT })!;
+			if (FILTER_GEHT) x.filter = `blur(${(stufe * AUF).toFixed(1)}px)`; x.scale(AUF, AUF); // Unschärfe in Bildpixeln
 			zeichnePerson(x, 28.65 + pad, 34 + pad, 1, 1, farbe);
+			if (!FILTER_GEHT) weichzeichnen(c, stufe * AUF, 3, farbe);
 			e = { c, pad }; BILDER.set(schluessel, e);
 		}
 		return e;
@@ -463,7 +517,7 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 			const zeileSetzen = (e: number) => { if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
 			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
 			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
-			const glut = document.createElement("canvas"), gctx = glut.getContext("2d")!;
+			const glut = document.createElement("canvas"), gctx = glut.getContext("2d", { willReadFrequently: !FILTER_GEHT })!;
 			let leuteFlach = personen(), leuteRaum = personenKamera();
 			let leute = leuteFlach, zoomEnde = 1, hebung = 0;
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
@@ -616,7 +670,9 @@ const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei b
 					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
 				}
 				gctx.setTransform(1, 0, 0, 1, 0, 0); gctx.filter = "none"; gctx.clearRect(0, 0, glut.width, glut.height);
-				gctx.filter = `blur(${(DICKE * 0.7 * sc / 4).toFixed(1)}px)`; gctx.drawImage(off, 0, 0, glut.width, glut.height);
+				const glutUnsch = DICKE * 0.7 * sc / 4;
+				if (FILTER_GEHT) gctx.filter = `blur(${glutUnsch.toFixed(1)}px)`; gctx.drawImage(off, 0, 0, glut.width, glut.height);
+				if (!FILTER_GEHT) weichzeichnen(glut, glutUnsch, 0);
 				ctx.globalCompositeOperation = "difference";
 				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
 				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
