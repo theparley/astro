@@ -250,8 +250,16 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
 	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
 	const D_KAMERA = 2.6; // Kürzung auf 2,4 verworfen (14.11.2026, siehe T_PAUSE)
-	// Anteil der Fahrt, in dem die Geste fertig ist (14.11.2026, siehe gDauer); lokal ?geste=alt zum Vergleich wie vorher (1)
-	const ANTEIL_GESTE = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("geste") === "alt" ? 1 : 0.88;
+	// Kamera fährt vor der Geste los und nach ihr allein aus, gleich lang (Rasul 14.11.2026: „schöner, wenn die Kamerafahrt
+	// vorher schon leicht anfangen würde … wie wenn ich nach links gehe, dass ich vorher nach rechts mich schon ein bisschen
+	// bewege“ und „am Ende kannst du die Geste noch ein bisschen früher enden lassen … machen wir die gleiche Zeit, dass die
+	// Kamerafahrt anfängt, bevor die Geste gezeichnet wird“). Prinzip Vorbereitung (Anticipation). VOR = Vorlauf und
+	// Nachlauf der Kamera; die Geste bleibt bei T_GESTE und dauert D_KAMERA − 2 · VOR. Vorher: Kamera und Geste ab T_GESTE,
+	// Geste nach 88 % fertig (Kandidat am selben Tag). Lokal ?kamera=alt zeigt diesen Vorgänger zum Vergleich.
+	const KAMERA_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("kamera") === "alt";
+	const VOR = KAMERA_ALT ? 0 : 0.4;
+	const T_KAMERA = T_GESTE - VOR;
+	const D_GESTE_KAMERA = KAMERA_ALT ? 0.88 * D_KAMERA : D_KAMERA - 2 * VOR;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
 	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
@@ -297,7 +305,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Hälfte ist da, wenn der Text kommt, danach werden es immer weniger bis 85 % der Fahrt. Die nahen Reihen (Ebene 2)
 	// erscheinen nur vor der Fahrt, sonst würden nah an der Kamera große Figuren aufblenden; spät kommen nur hintere Reihen.
 	// Vorher: alle bis 1,65 s, dazu drei Nachzügler bis zur Hälfte der Geste (Git-Geschichte).
-	const T_ERSCH_BIS = () => T_GESTE + 0.85 * D_KAMERA - 0.5; // letzte Einblendung (0,5 s) endet bei 85 % der Fahrt
+	const T_ERSCH_BIS = () => T_KAMERA + 0.85 * D_KAMERA - 0.5; // letzte Einblendung (0,5 s) endet bei 85 % der Fahrt
 	const verteilung = (x: number) => { const y = Math.pow(x, 0.55); return y * y * (3 - 2 * y); }; // Anteil, der bis x da ist
 	function erscheinZeit(u: number) {
 		let lo = 0, hi = 1;
@@ -305,7 +313,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		return 0.2 + lo * (T_ERSCH_BIS() - 0.2);
 	}
 	function uebergang(liste: Person[]): Person[] {
-		const nahBis = T_GESTE - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
+		const nahBis = T_KAMERA - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
 		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
 		liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
 		return liste;
@@ -332,7 +340,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
 			}
 		};
-		const spaetVon = T_GESTE + D_KAMERA * 0.7;
+		const spaetVon = T_KAMERA + D_KAMERA * 0.7;
 		const spaetZeit = () => spaetVon + rnd() * D_KAMERA * 0.15;
 		if (document.documentElement.dataset.aufstellung === "nah") {
 			// Variante „nah“ (Rasul 13.11.2026 abends: „Da müssen wir die Personen näher hinstellen, dann sieht es auch nicht
@@ -668,7 +676,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(q.wx, q.wz, b.C, b.Lk, b.F).g;
 			};
 			const verlauf = (t: number) => {
-				const tz = weichKubisch(anteil(t, T_GESTE, D_KAMERA));
+				const tz = weichKubisch(anteil(t, T_KAMERA, D_KAMERA));
 				if (tz <= 0 || tz >= 1) return { e: tz, s: tz };
 				const L = Math.log(Math.max(1.001, groesseVorne(1))), ziel = tz * L;
 				let lo = 0, hi = 1;
@@ -690,14 +698,14 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// bevor die Kamerafahrt aufhört. Wie wenn man etwas bremst und dann hat es noch so eine kleine Bewegung, bis es
 				// wirklich stoppt.“): Die Geste läuft auf derselben Kurve, aber in ANTEIL_GESTE der Fahrtdauer; die Kamera fährt
 				// danach noch sanft aus. gDauer = Dauer der Geste.
-				const kam = ende() === "kamera", gDauer = kam ? ANTEIL_GESTE * D_KAMERA : DAUER;
+				const kam = ende() === "kamera", gDauer = kam ? D_GESTE_KAMERA : DAUER;
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
-				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_GESTE + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
+				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_KAMERA + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
 				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
@@ -813,7 +821,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
-				const schluss = ende() === "kamera" ? T_GESTE + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
+				const schluss = ende() === "kamera" ? T_KAMERA + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
 				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
 			};
