@@ -318,31 +318,14 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (verteilung(m) < u) lo = m; else hi = m; }
 		return 0.2 + lo * (T_ERSCH_BIS() - 0.2);
 	}
-	// Ein gemeinsamer Takt für alle Personen (Rasul 14.11.2026, nach dem verworfenen kürzeren Anfang: „Es hat auch gefühlt zwei
-	// verschiedene Geschwindigkeiten“; Vorschlag Claude, Rasul: „Ja, ausprobieren“). Vorher hatten vordere, nahe und hintere
-	// Reihen je eigene Zeitpläne, die sich am Anfang dicht überlagerten. Jetzt: alle in eine Reihenfolge (vorne zuerst, nahe
-	// Reihen eher früh, hintere gemischt, die späten zuletzt) und die Zeitpunkte nach dem Rang aus EINER Kurve (erscheinZeit:
-	// langsam, steigern, abflachen). Nahe Reihen bleiben vor der Kamerafahrt fertig (tauschen notfalls mit einer hinteren).
-	// Lokal ?takt=alt zeigt die drei Zeitpläne zum Vergleich.
-	const TAKT_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("takt") === "alt";
+	// Ein gemeinsamer Takt für alle Personen probiert und verworfen (14.11.2026). Rasul: „Gerade gemeinsamer Takt wirkt
+	// hektischer … kommen mir am Ende zu viele Menschen rein. Ich glaube, da ist unsere andere Version besser. Weil die Kamera
+	// kommt zur Ruhe und auch die Bewegung im Bild kommt zur Ruhe.“ Also wieder drei Zeitpläne: vorne, nahe Reihen gestaucht
+	// vor der Fahrt, hintere Reihen auf der langen Kurve.
 	function uebergang(liste: Person[]): Person[] {
 		const nahBis = T_KAMERA - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
-		if (TAKT_ALT) {
-			const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
-			liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
-			return liste;
-		}
-		const r = zufall(77); // eigener Zufall, die Plätze bleiben dieselben
-		const folge = liste.map((q) => ({ q, k: q.ebene <= 1 ? r() * 0.06 : q.spaet ? 1 + r() * 0.2 : q.ebene === 2 ? 0.03 + r() * 0.5 : 0.08 + r() * 0.9 }));
-		folge.sort((a, b) => a.k - b.k);
-		folge.forEach((e, i) => { e.q.ein = erscheinZeit((i + 0.5) / folge.length); });
-		// nahe Reihen, die nach nahBis kämen, tauschen mit der spätesten hinteren Person vor nahBis
-		for (const e of folge) {
-			if (e.q.ebene !== 2 || e.q.spaet || e.q.ein <= nahBis) continue;
-			const tausch = folge.filter((f) => f.q.ebene === 3 && !f.q.spaet && f.q.ein <= nahBis).sort((a, b) => b.q.ein - a.q.ein)[0];
-			if (!tausch) { e.q.ein = nahBis; continue; }
-			[e.q.ein, tausch.q.ein] = [tausch.q.ein, e.q.ein];
-		}
+		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
+		liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
 		return liste;
 	}
 	function personenFahrt(): Person[] {
