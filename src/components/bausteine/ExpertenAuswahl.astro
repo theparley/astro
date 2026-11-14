@@ -264,6 +264,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Danach (Rasul 14.11.2026): „lass die Kamera anstatt 0,4, 0,2 Sekunden vor der Geste loslaufen“. Vorlauf 0,2 s,
 	// Nachlauf bleibt 0,4 s.
 	const VOR = 0.2, NACH = 0.4;
+	// Ruhe beim Aufsetzen (Rasul 14.11.2026: „ich sehe am Anfang nicht das Auftreffen der Punkte. Aber am Ende sehe ich sie,
+	// das ist nicht gleich“): Die Punkte setzen RUHE Sekunden vor der Bewegung auf und blenden im Stehen ein, wie sie am Ende
+	// im Stehen ausblenden. Vorher blendeten sie ein, während sie schon losliefen. Lokal ?ruhe=0 zum Vergleich.
+	const RUHE = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("ruhe") === "0" ? 0 : 0.3;
 	const T_KAMERA = T_GESTE - VOR;
 	const D_GESTE_KAMERA = D_KAMERA - VOR - NACH;
 	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
@@ -711,13 +715,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// wirklich stoppt.“): Die Geste läuft auf derselben Kurve, aber in ANTEIL_GESTE der Fahrtdauer; die Kamera fährt
 				// danach noch sanft aus. gDauer = Dauer der Geste.
 				const kam = ende() === "kamera", gDauer = kam ? D_GESTE_KAMERA : DAUER;
-				if (t >= T_GESTE && t <= T_GESTE + gDauer + GLIMM + 0.45) {
+				const T_AUF = kam ? T_GESTE - RUHE : T_GESTE; // Aufsetzen der Finger
+				if (t >= T_AUF && t <= T_GESTE + gDauer + GLIMM + 0.45) {
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
 				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
-				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_KAMERA + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
+				if (t >= T_AUF && t < T_GESTE) { s = 0; deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); } // aufgesetzt, noch in Ruhe
+				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_KAMERA + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); }
 				// Nach dem Loslassen verlöschen Fingerpunkte und Spurenden schnell (Rasul 14.11.2026: „am Ende zu lang die Kreise
 				// stehen bleiben. Weil die Finger sind ja schon weg … Da müssen die Kreise früher ausblenden“). Vorher glomm das
 				// jüngste Stück der Spur unter den Fingern noch 0,9 s nach (GLIMM) und die Punkte blendeten 0,4 s aus; jetzt ist
@@ -755,7 +761,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// von blasser, kleiner und kürzer gewählt: „Ja, es ist blasser, vielleicht in Kombination mit kleiner“, „Auch
 					// kleiner ist dann besser, so nehmen wir es.“ Also 55 % der Deckkraft und 75 % der Größe, Welle läuft 55 % so weit:
 					// Kreis 11,5 %, Ring 25 %, Kreis 0,86 Fingerdicken, Welle bis 1,6-facher Kreis.
-					const R = DICKE * 0.8625, ab = t - T_GESTE, los = t - T_GESTE - gDauer, A_KREIS = 0.115, A_RING = 0.25, WEIT = 0.605;
+					const R = DICKE * 0.8625, ab = t - T_AUF, los = t - T_GESTE - gDauer, A_KREIS = 0.115, A_RING = 0.25, WEIT = 0.605;
 					let r = 0, a = 0;
 					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
 					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
