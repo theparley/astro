@@ -69,6 +69,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	const BERUEHRUNG = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "aus");
 	// lokal ?beruehrung=leicht: der erste Vorschlag (Kreis 12 %, Ring 18 %) zum Vergleich
 	const BERUEHRUNG_LEICHT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "leicht";
+	const RING_ENDE = !(import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("ring") === "nurstart");
 	const RING_MITTEL = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("ring") === "mittel";
 	const BERUEHRUNG_VOLL = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("beruehrung") === "voll";
 	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
@@ -755,7 +756,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					[pr, pl].forEach(([x, y]) => {
 						if (a > 0) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
 						// ein Ring läuft beim Aufsetzen einmal nach außen und verblasst
-						if (ab >= 0 && ab < 0.5) { const k = ab / 0.5; ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(x, y, R * (1 + 1.1 * sanft(k)), 0, Math.PI * 2); ctx.stroke(); }
+						const ring = (z: number) => { const k = z / 0.5; ctx.globalAlpha = A_RING * (1 - k); ctx.lineWidth = 2 / sc + DICKE * 0.06; ctx.strokeStyle = "#000"; ctx.beginPath(); ctx.arc(x, y, R * (1 + 1.1 * sanft(k)), 0, Math.PI * 2); ctx.stroke(); };
+						if (ab >= 0 && ab < 0.5) ring(ab);
+						// und noch einmal beim Loslassen (Rasul 14.11.2026: „Der Ring kommt jetzt nur am Anfang. Mach den auch mal am
+						// Ende, wenn die Finger wieder vom Bildschirm weggehen.“)
+						if (RING_ENDE && los >= 0 && los < 0.5) ring(los);
 					});
 					ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0);
 				}
