@@ -1,0 +1,32 @@
+---
+/* Belegseite (angelegt 14.11.2026 als Platzhalter). Rasul 14.11.2026: „wir müssten eine eigene PDF oder eine eigene Webseite
+   machen, die das genauer beschreibt. Das wäre so eine Aufgabe für dich.“ Ziel des Knopfs „Was die Studien zeigen“ im Band der
+   Startseite. Inhalt folgt (Befunde mit Studie, Stichprobe, Zitat, Link, Grafik); Quellen im Marketing-Ordner:
+   research/Auf_dem_Schirm_Hindernisse_Recherche_2026-11.md, research/LinkedIn_Studien_Einstiegszahl_2026-11.md,
+   research/KI_Generalverdacht_Evidenz_2026-06.md. Nicht in der Sitemap, solange sie Platzhalter ist. */
+import Layout from "../layouts/Layout.astro";
+const BEFUNDE = [
+	"Entscheider recherchieren selbst.",
+	"Sie melden sich von selbst, mit fertigen Favoriten.",
+	"Viele bleiben bis dahin unsichtbar.",
+	"Was KI-generiert sein könnte, steht unter Generalverdacht.",
+];
+---
+<Layout title="Belege" description="Was aktuelle Studien über das Kaufverhalten von Entscheidern zeigen.">
+	<main class="belege rahmen">
+		<h1 class="t-abschnitt belege__titel">Belege</h1>
+		<div class="t-lesen belege__text">
+			<p><span class="entwurf">Seite im Aufbau</span></p>
+			<p>Aktuelle Studien zeigen in dieselbe Richtung: Das Kaufverhalten hat sich verändert. Hier stehen bald zu jedem Befund die Studie, wer befragt wurde und was sie genau sagt.</p>
+			<ol class="belege__liste">{BEFUNDE.map((b) => <li>{b}</li>)}</ol>
+		</div>
+	</main>
+</Layout>
+<style>
+	.belege { padding-block: var(--abstand-xl); }
+	.belege__titel { margin: 0; text-align: center; }
+	.belege__text { max-width: 46ch; margin: 3rem auto 0; }
+	.belege__text p { margin: 0 0 1em; }
+	.belege__liste { margin: 0; padding-left: 1.2em; }
+	.belege__liste li + li { margin-top: 0.5em; }
+</style>

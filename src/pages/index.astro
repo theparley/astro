@@ -347,7 +347,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 							<li>Was KI-generiert sein könnte, steht unter Generalverdacht.</li>
 						</ul>
 						<p>Vertrauen muss deshalb vor der ersten Anfrage entstehen. Das gelingt am besten mit Videos von echten&nbsp;Gesprächen.</p>
-						<p class="t-mini grau anlass__quelle">Die Studien dahinter: Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)</p>
+						{/* Verweis als BBH-Knopf B21 (Rasul 14.11.2026: „2 und 5 umsetzen“). Vorher graue Quellenzeile „Die Studien dahinter:
+						     Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)“. Ziel /belege, Seite im Aufbau. */}
+						<p class="anlass__belege"><Knopf href="/belege" text="Was die Studien zeigen" /></p>
 					</div>
 				</div>
 			</div>
@@ -591,7 +593,9 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	/* Stichpunkte im Bandtext: ohne Zeichen, mittig, eine Zeile je Punkt, eng gesetzt */
 	.anlass__liste { list-style: none; margin: 0.5em 0 1em; padding: 0; }
 	.anlass__liste li + li { margin-top: 0.15em; }
-	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0; padding-top: var(--abstand-md); text-align: center; font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
+	/* Luft oben wie BBHs helle Blöcke (py-lg) und Überschrift 48 px über dem Inhalt (mb-12); Rasul 14.11.2026: „2 und 5 umsetzen“
+	   (Moodboard branding/werkstatt-seiten/band-bbh-abgleich.html im Marketing-Ordner). Vorher oben md, Abstand zur Animation md. */
+	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0 0 calc(3rem - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
 	:global(html[data-textfolge="vorher"] .anlass__band-innen > .experten) { grid-row: 2; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__satz--eins,
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__nachsatz { grid-row: 3; }
@@ -635,6 +639,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	.anlass--band .anlass__text { text-align: left; text-wrap: pretty; }
 	/* Quellenzeile steht im Textblock, bündig unter dem letzten Absatz (seit 14.11.2026 linksbündig) */
 	.anlass--band .anlass__text .anlass__quelle { margin: 16px 0 0; }
+	.anlass--band .anlass__text .anlass__belege { margin: 24px 0 0; }
 	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
 	.videobeweis__vorteile { margin-top: var(--abstand-lg); }
 	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
