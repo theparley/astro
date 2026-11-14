@@ -34,6 +34,12 @@ import Abschnittskopf from "../components/bausteine/Abschnittskopf.astro";
 import Karussell from "../components/bausteine/Karussell.astro";
 import Band from "../components/bausteine/Band.astro";
 import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
+/* Nur Segmente 1 bis 3 zeigen (Rasul 14.11.2026: „Lass uns mal Localhost 4321 jetzt nur updaten mit den Segmenten 1, 2, 3,
+   also mit dem neuen 3. Footer, Impressum, Datenschutz, das bleibt natürlich alles. Aber das wäre jetzt das Update für
+   Localhost 4321 und auch für die Dev-Seite“). 1 Film-Hero, 2 Haltungssatz, 3 Band „Videobeweis“. Alles danach (Segment
+   „Videobeweis“ mit Vorteilen und Gaststimmen, Kapitelende, Aufbau „Abschnitte“) ist Entwurf und wird nicht ausgeliefert.
+   Zum Weiterarbeiten am Entwurf: auf true setzen. */
+const ZEIGE_ENTWURF = false;
 
 
 
@@ -129,19 +135,19 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			{/* R: Rasul 13.11.2026: „Wir liefern Videobeweise für echte Experten. Probier mal den Satz.“
 			   ENTSCHIEDEN (Rasul 13.11.2026: „Ja, R nehmen“), ersetzt O. Grundeinstellung und h1. */}
 			<div class="satz satz--r"><Haltung ebene="p" aufdecken zeilen={["Wir liefern Videobeweise für echte Experten"]} /></div>
-			<!-- S: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos aus echten Gesprächen.“ Dazu: „Der Satz ist natürlich ein bisschen doppeldeutig, weil es auch ein bisschen nach Eigenlob riecht.“
-			     T: Gegenvorschlag mit „eure“, damit klar ist, wessen Expertise bewiesen wird -->
+			{/* S: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos aus echten Gesprächen.“ Dazu: „Der Satz ist natürlich ein bisschen doppeldeutig, weil es auch ein bisschen nach Eigenlob riecht.“
+			     T: Gegenvorschlag mit „eure“, damit klar ist, wessen Expertise bewiesen wird */}
 			<div class="satz satz--s"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Videos aus echten Gesprächen"]} /></div>
 			<div class="satz satz--t"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen eure Expertise mit Videos aus echten Gesprächen"]} /></div>
-			<!-- U: Rasul 13.11.2026 abends: „Die Frage ist, ob die Doppeldeutigkeit tatsächlich so schlecht ist.“ S gekürzt auf vier Zeilen, Doppeldeutigkeit bleibt -->
+			{/* U: Rasul 13.11.2026 abends: „Die Frage ist, ob die Doppeldeutigkeit tatsächlich so schlecht ist.“ S gekürzt auf vier Zeilen, Doppeldeutigkeit bleibt */}
 			<div class="satz satz--u"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit echten Gesprächen"]} /></div>
-			<!-- V: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Video aus echten Gesprächen. Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ -->
+			{/* V: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Video aus echten Gesprächen. Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ */}
 			<div class="satz satz--v"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Video aus echten Gesprächen"]} /></div>
-			<!-- W: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos echter Gespräche.“ -->
+			{/* W: Rasul 13.11.2026 abends: „Wir beweisen Expertise mit Videos echter Gespräche.“ */}
 			<div class="satz satz--w"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen Expertise mit Videos echter Gespräche"]} /></div>
-			<!-- X: W mit festen Zeilen. Rasul 13.11.2026 abends: „Machen wir mal als Versuch eine Zeile mehr draus. Und teile es so auf, dass da steht, wir beweisen in einer Zeile. Expertise in einer Zeile mit Videos in einer Zeile. Und den nächsten Teil echter Gespräche.“ -->
+			{/* X: W mit festen Zeilen. Rasul 13.11.2026 abends: „Machen wir mal als Versuch eine Zeile mehr draus. Und teile es so auf, dass da steht, wir beweisen in einer Zeile. Expertise in einer Zeile mit Videos in einer Zeile. Und den nächsten Teil echter Gespräche.“ */}
 			<div class="satz satz--x"><Haltung ebene="p" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "echter Gespräche"]} /></div>
-			<!-- Y: X mit „aus“. Rasul 13.11.2026 abends: „Wenn wir eh schon eine Zeile dazu nehmen, dann könnten wir das aus wieder reinnehmen, dann ist es leichter zu lesen.“ -->
+			{/* Y: X mit „aus“. Rasul 13.11.2026 abends: „Wenn wir eh schon eine Zeile dazu nehmen, dann könnten wir das aus wieder reinnehmen, dann ist es leichter zu lesen.“ */}
 			<div class="satz satz--y"><Haltung ebene="h1" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} /></div>
 			{/* Zeiger-Film wie BBHs Startseite (B3): über dem Statement folgt ein kleiner Film der Maus, Klick öffnet
 			   ihn groß; am Handy steht er unter dem Satz. Rasul 13.11.2026: „Ja, mach mir mal den Vorschlag“.
@@ -166,8 +172,8 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	   Überschrift „BEWEIS-/FÜHRUNG“ ist ein Vorschlag; graue Zeilen sind Entwurf. Umschalten: Schalter „Aufbau“. */}
 	<div class="aufbau aufbau--kacheln">
 		<section class="abschnitt" aria-labelledby="kap-titel">
-			<!-- Überschrift Rasul 13.11.2026 abends: „Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ (vorher „Beweisführung“);
-			     dann „Nimm mal bei Videobeweis noch den Artikel weg, also nur Videobeweis.“ -->
+			{/* Überschrift Rasul 13.11.2026 abends: „Und dann könnte der Satz über den Kachel heißen der Videobeweis.“ (vorher „Beweisführung“);
+			     dann „Nimm mal bei Videobeweis noch den Artikel weg, also nur Videobeweis.“ */}
 			{/* Zeilen der Kacheln erzählen die Geschichte in einem Zug (Rasul 13.11.2026 abends: „inhaltlich ja, finde ich gut,
 			     können wir so machen.“). Der Anlass „Überall Experten. Zeit für den Videobeweis.“ steht NICHT als Überschrift
 			     über den Kacheln (Rasul: „ich will nicht großen weißen Text, dann mehrzeilig dann nochmal weißen Text …“),
@@ -199,7 +205,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					{/* Überschrift „Videobeweis“ über der Animation (Storyboard 14.11.2026; Rasul: „wir setzen ja mit der Überschrift schon ganz
 					     klar, dass es um den Videobeweis geht“, dann: „Da fehlt die Überschrift Videobeweis.“). Nur in der Textfolge „vorher“;
 					     die gleichlautende Überschrift der Kacheln darunter ist dann nur noch Sprungziel (unsichtbar). */}
-					<p class="t-abschnitt anlass__titel" aria-hidden="true">Video&shy;beweis</p>
+					<p class="t-abschnitt anlass__titel" id={ZEIGE_ENTWURF ? undefined : "kap-titel"}>Video&shy;beweis</p>
 					<ExpertenAuswahl />
 					{/* Wortpaar entschieden (Rasul 14.11.2026, Storyboard Variante Q): „Alles Experten. Einer beweist.“ – „Das ist die beste
 					     Variante.“ Gilt in der Textfolge „vorher“; die anderen Textfolgen behalten „Überall Experten.“ (auch die Live-Fassung).
@@ -209,8 +215,8 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 					     Danach (Rasul 14.11.2026: „Es ist besser, wenn wir es gar nicht auf eine Person zuschneiden, sondern auf den Vorgang.“):
 					     Variante U „Was alle behaupten, … wird hier bewiesen.“ (Rasul: „Oder was alle behaupten? Wird hier bewiesen.“) */}
 					<p class="anlass__satz anlass__satz--eins"><span class="anlass__eins-bisher">Überall Experten.</span><span class="anlass__eins-neu">Was alle behaupten,</span></p>
-					<!-- „auch im Business“ bleibt in der Überschrift (Rasul 14.11.2026: „Zurück in die Überschrift“, nach Probe zweizeilig
-					     mit Wiederholung am Textende): Der Schubs vom Fußball ins Geschäft kommt, während die Animation läuft -->
+					{/* „auch im Business“ bleibt in der Überschrift (Rasul 14.11.2026: „Zurück in die Überschrift“, nach Probe zweizeilig
+					     mit Wiederholung am Textende): Der Schubs vom Fußball ins Geschäft kommt, während die Animation läuft */}
 					<p class="anlass__satz anlass__nachsatz"><span class="anlass__zeile1"><span class="anlass__zeit">Zeit für den Video&shy;beweis</span><span class="anlass__schirm">wird hier bewiesen.</span></span><br class="anlass__umbruch" /><span class="anlass__zeile2 anlass__zeile2--business">auch im Business.</span></p>
 					{/* Zweite Zeile in der Textfolge „vorher“ (Rasul 14.11.2026: „Und wenn wir es so aufbauen, steht er nachher auch nicht
 					     auch im Business drunter. Sondern sinngemäß und erstmal wörtlich. Damit entscheidet ihr Vertrauen noch vor dem ersten
@@ -372,7 +378,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 			    von Hagen, von Katrin, von Erik.“). Muster nach BBH: Titel (R3), Text-Bild-Block mit eigener Überschrift (B6),
 			    Vorteile als Kennzahlen-Reihe mit Wörtern statt Zahlen (B18), Stimmen der Gäste als Kacheln (B7, drei Spalten),
 			    danach Beweisführung und Beweisstücke als zwei Kacheln (R12). Texte sind Entwurf. Erik fehlt, kein Clip lokal. */}
-			<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" spalten={3} kacheln={[
+			{ZEIGE_ENTWURF && (<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" spalten={3} kacheln={[
 				{ nr: "", titel: "Ute und Katrin", zeile: "„Es fühlt sich so natürlich an, hier zu sitzen.“", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5 },
 				{ nr: "", titel: "Hagen", zeile: "„Das ist schon state of the art.“", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17 },
 				{ nr: "", titel: "Hagen", zeile: "„Ich kann nur jedem empfehlen, sich das hier mal anzuschauen.“", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9 },
@@ -420,19 +426,19 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 						</div>
 					</div>
 				</Fragment>
-			</VideoKacheln>
+			</VideoKacheln>)}
 			{/* Beweisführung und Beweisstücke vorerst aus der Ansicht (Rasul 14.11.2026: „Machen wir Beweisführungen und
 			    Beweisstücke erstmal raus aus der Ansicht, lassen nur an dem Abschnitt arbeiten.“). Rückweg: Git-Geschichte,
 			    zwei Kacheln (R12) zu /beweisfuehrung und /beweisstuecke. */}
 		</section>
-		<Kapitelende />
+		{ZEIGE_ENTWURF && <Kapitelende />}
 	</div>
-	<div class="aufbau aufbau--abschnitte">
+	{ZEIGE_ENTWURF && (<div class="aufbau aufbau--abschnitte">
 		<Beweisaufnahme />
 		<Beweisfuehrung />
 		<Beweisstuecke />
 		<Augenzeugen />
-	</div>
+	</div>)}
 </Layout>
 
 <style>
@@ -605,7 +611,7 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__nachsatz { grid-row: 3; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__text { grid-row: 4; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__quelle { grid-row: 5; }
-	:global(html[data-textfolge="vorher"] #kap-titel) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+	:global(html[data-textfolge="vorher"] #kap-titel:not(.anlass__titel)) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	.anlass__eins-neu { display: none; }
 	:global(html[data-textfolge="vorher"]) .anlass__eins-bisher { display: none; }
 	:global(html[data-textfolge="vorher"]) .anlass__eins-neu { display: inline; }
