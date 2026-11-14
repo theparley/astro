@@ -15,7 +15,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 ---
 <figure class="experten" data-experten>
 	<canvas class="experten__bild" role="img" aria-label={label}></canvas>
-	<button type="button" class="experten__nochmal" aria-label="Animation noch einmal abspielen">Noch einmal</button>
+	<!-- Symbol statt der Wörter „Noch einmal“ (Rasul 14.11.2026: „machen wir die zwei Wörter weg noch einmal und machen dieses
+	     übliche Symbol … ein runder Pfeil“). Pfeil gegen den Uhrzeigersinn wie üblich für Wiederholen; Quelle Phosphor Icons,
+	     arrow-counter-clockwise, gefüllt, Lizenz MIT (@phosphor-icons/core 2.1.1; research/Piktogramm_SVG_Quellen_2026-11.md). -->
+	<button type="button" class="experten__nochmal" aria-label="Animation noch einmal abspielen" title="Noch einmal abspielen">
+		<svg viewBox="0 0 256 256" width="24" height="24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L60.63,81.29l17,17A8,8,0,0,1,72,112H24a8,8,0,0,1-8-8V56A8,8,0,0,1,29.66,50.3L49.31,70,60.25,60A96,96,0,0,1,224,128Z"/></svg>
+	</button>
 </figure>
 
 <style>
@@ -30,7 +35,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	@media (orientation: landscape) { .experten__bild { height: 50svh; } }
 	/* Knopf erst bedienbar, wenn er sichtbar ist; Fokus sichtbar; Trefferfläche über 24 px (Code-Prüfung M8, 14.11.2026).
 	   Innenabstand 6 / 8 px, die Lage des Worts bleibt wie vorher (rechts und unten um den Abstand verschoben). */
-	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2 - 8px); bottom: -34px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 6px 8px; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--tempo) var(--kurve), visibility 0s linear var(--tempo); }
+	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2 - 6px); bottom: -42px; display: flex; color: var(--gray); background: none; border: 0; padding: 6px; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity var(--tempo) var(--kurve), visibility 0s linear var(--tempo); }
 	.experten[data-fertig] .experten__nochmal { opacity: 1; visibility: visible; transition: opacity var(--tempo) var(--kurve), visibility 0s; }
 	.experten__nochmal:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 	/* Bei reduzierter Bewegung steht gleich das Endbild, „Noch einmal“ hätte nichts zu zeigen (N14) */
