@@ -1,0 +1,801 @@
+---
+/* Experten-Auswahl: viele Personen, die Videobeweis-Geste, am Ende bleiben drei.
+   Rasul 13.11.2026 abends: „die einzigste Animation wäre unsere Videobeweisanimation, diese Bewegung in der Luft, die
+   jemand macht, und wir würden jetzt einfach unsortiert auf einer Fläche sehen ganz viele Icons von Personen. Das wären
+   unsere Experten. Dann kommt diese Bewegung. Und dann reduziert sich das auf 3. Probier es mal, ob das Sinn macht, ob
+   man sowas angucken will.“
+   Geste wie Probe 2 (Marketing-Ordner branding/aktiv/Parley_Videobeweis_Geste_2026-11.md: 16:9, Ecken wie das Logo,
+   1,6 s, Tempo wie eine Hand, Nachleuchten 0,9 s, Fingerdicke 34, Lücke 8, Glühen), hier dunkel auf hellem Grund.
+   Ablauf: Personen erscheinen verstreut (bis 1,4 s), die Finger ziehen den Rahmen (ab 1,8 s), während die Spur
+   verglimmt, verschwinden alle bis auf drei, die drei rücken in die Mitte des Rahmens. Spielt einmal, sobald die
+   Fläche zur Hälfte sichtbar ist; Klick spielt noch einmal. Bei reduzierter Bewegung sofort das Endbild.
+   Endbild steht allein (Grafik-Leitfaden Abschnitt 2): drei Personen. */
+interface Props { label?: string }
+const { label = "Viele Personen, eine Handbewegung zeichnet einen Rahmen, drei bleiben übrig." } = Astro.props;
+---
+<figure class="experten" data-experten>
+	<canvas class="experten__bild" role="img" aria-label={label}></canvas>
+	<button type="button" class="experten__nochmal" aria-label="Animation noch einmal abspielen">Noch einmal</button>
+</figure>
+
+<style>
+	/* Über die ganze Breite des Bandes (Rasul 13.11.2026 abends: „bei der Kamerafahrt werden jetzt rechts und links
+	   Personen abgeschnitten. Ich fände es für den Effekt super, wenn die nicht abgeschnitten würden und sogar noch weiter
+	   in die Breite gehen, als sie vorher waren.“). Die Höhe bleibt die der 16:9-Fläche von höchstens 960 px Breite; der
+	   Rahmen der Geste steht in deren Mitte, nach dem Kippen dürfen die hinteren bis an den Rand des Bandes. */
+	.experten { --innen: min(960px, 100vw - 2 * var(--rand)); position: relative; width: 100vw; margin-left: calc(50% - 50vw); max-width: none; }
+	.experten__bild { display: block; width: 100%; height: calc(var(--innen) * 9 / 16); cursor: pointer; }
+	.experten__nochmal { position: absolute; right: calc(50vw - var(--innen) / 2); bottom: -28px; font: inherit; font-size: var(--text-sm); color: var(--gray); background: none; border: 0; padding: 0; cursor: pointer; opacity: 0; transition: opacity var(--tempo) var(--kurve); }
+	.experten[data-fertig] .experten__nochmal { opacity: 1; }
+</style>
+
+<script>
+	type Spur = [number, number][]; // [Weg-Anteil s, Zeit]: gezeichnet wird entlang des echten Wegs, nicht als Gerade
+	                                // zwischen zwei Bildern (sonst entstehen bei ausgelassenen Bildern Balken quer durch)
+	const W = 1600, H = 900;
+	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 8;
+	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
+	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
+	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
+	// Danach in zwei Abschnitten (Rasul 13.11.2026 abends: „Vielleicht müssen wir die Animation unterteilen. In dem Moment,
+	// wo die erste Zeile erscheint, kann die Animation starten. Und sie stoppt, wenn alle Menschen erschienen sind. Und erst
+	// wenn so weitergescrollt ist, dass man die nächsten beiden Zeilen sehen könnte, erscheint auch Zeit für den Videobeweis
+	// … Dann einen Moment warten, die Zeit, die man braucht zum Lesen. Und dann geht die Animation weiter.“):
+	// T_PAUSE = alle Personen sind da, hier hält die Uhr an bis zur Freigabe; dann Nachsatz, Lesepause D_LESEN, Geste.
+	// Lesepause gestrichen (Rasul 13.11.2026 abends: „die Zeit, wo der zweite Text erscheint und die Videobeweisanimation
+	// startet, die Zeit ist noch zu lang. Mach es mal gleichzeitig, in dem Moment, wo der Text erscheint, erscheinen auch
+	// oben die ersten beiden Punkte“, korrigiert: „nicht die ersten beiden, sondern die beiden Punkte“): Mit der Freigabe blenden Nachsatz und die beiden Fingerpunkte zugleich ein (0,25 s),
+	// direkt danach beginnen Geste und Kamerafahrt. Vorher 1,6 s Lesepause.
+	// Übergang ohne Lücke (Rasul 14.11.2026: „der Übergang zwischen dem Erscheinen der Personen und dem Einblenden vom Text
+	// und dem Starten fühlt sich an wie ein kleiner Bruch“). Befund: Die letzten Personen waren meist schon vor 2,2 s fertig,
+	// dann stand das Bild kurz still, und danach kam alles neu auf einmal: Text (1 s Blende), Fingerpunkte (nur 0,25 s, wirkten
+	// wie ein Aufploppen), Bewegung. Jetzt überlappend wie im Trickfilm: Text ab 1,6 s, während die letzten Personen noch
+	// erscheinen; Fingerpunkte blenden in 0,6 s ein (D_FINGER); Geste und Kamera starten bei 2,45 s wie bisher.
+	// Danach Rasul 14.11.2026: „ich glaube, es ist der Stopp, dass die zwei Punkte erscheinen und noch nichts passiert. Und
+	// da dürfen auch noch zwei, drei Männchen erscheinen … bis der Videobeweis startet und bis er zur Hälfte durch ist.“
+	// Jetzt: keine Wartezeit mehr vor der Geste (D_LESEN 0, Geste und Kamera ab 2,2 s); die Fingerpunkte blenden in den
+	// ersten 0,4 s der Bewegung ein, statt vorher stillzustehen; drei Personen erscheinen noch bis zur Hälfte der Geste
+	// (siehe uebergang()).
+	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
+	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
+	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
+	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
+	// „Animation“ (html data-ende): drei | eins | grau | unscharf. Der Fokus folgt nach der Auswahl.
+	const T_FOKUS = T_AUSWAHL + D_AUSWAHL + 0.3, D_FOKUS = 0.9;
+	const D_KIPP = 2.6; // Kamerafahrt beim Ende „kamera“ (gleichmäßiger Verlauf, siehe sanft)
+	// Danach fährt die Kamera auf die vordere Person zu (Rasul 13.11.2026 abends: „die Kamera … kippt nicht nur, sondern
+	// fährt dann auch noch auf die Person zu. Dadurch wird es hinten auch breiter.“). Beginnt kurz vor Ende des Kippens.
+	const T_FAHRT = T_AUSWAHL + D_KIPP * 0.8, D_FAHRT = 1.8;
+	const ENDE = Math.max(T_FOKUS + D_FOKUS, T_FAHRT + D_FAHRT + 0.4, T_AUSWAHL + 3.2 + 0.4) + 0.2; // 3,2 = D_KAMERA
+	const GROSS = 2.3; // Größe der drei am Ende (vorher 1,5)
+	// Entschieden: „unscharf“ (Rasul 13.11.2026 abends). Ohne Schalter (auf der hochgeladenen Seite) gilt das.
+	// Danach Probe „ebenen“ (Rasul 13.11.2026 abends), seitdem Grundeinstellung; „unscharf“ bleibt im Schalter.
+	// Danach Probe „kamera“ (Rasul 13.11.2026 abends), seitdem Grundeinstellung; „ebenen“ bleibt im Schalter.
+	const ende = () => document.documentElement.dataset.ende || "kamera";
+
+	// fester Zufall, damit jedes Abspielen gleich aussieht
+	function zufall(saat: number) { return () => { saat = (saat * 16807) % 2147483647; return (saat - 1) / 2147483646; }; }
+	const kubisch = (x: number) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+	const weich = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3);
+	// Sinus-Verlauf: sanft an, sanft aus, ohne den starken Tempo-Sprung in der Mitte wie bei kubisch (Rasul 13.11.2026:
+	// „sie ruckelt ein bisschen, sie verändert die Geschwindigkeit“)
+	const sanft = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * x);
+	const anteil = (t: number, von: number, dauer: number) => Math.max(0, Math.min(1, (t - von) / dauer));
+
+	// Rahmen 16:9 mittig, so groß, dass alle Personen darin stehen (Rasul 13.11.2026 abends: „mach lieber den Frame
+	// größer und lass alle Personen drin sein“); Höhe 86 % der Fläche, je Finger ein halber Umlauf von oben nach unten
+	// Breite des Rahmens: 21:9 (Rasul 13.11.2026 abends: „Probier mal 21 zu 9 … Wir reden ja von Film“), Schalter
+	// „Rahmen“ (html data-rahmen = 21 | 16); höchstens so breit, wie die Fläche es erlaubt (siehe rahmen()).
+	const RH = H * 0.86, CX = W / 2, CY = H / 2, T = CY - RH / 2, B = CY + RH / 2, RAD = RH * 0.05;
+	let RW = RH * 16 / 9, L = CX - RW / 2;
+	const format = () => (document.documentElement.dataset.rahmen === "21" ? 21 / 9 : 16 / 9); // Grundeinstellung wieder 16:9
+	const G = (DICKE + LUECKE) / 2;
+	function halbweg(seite: 1 | -1) {
+		const p: [number, number][] = [];
+		const x = (v: number) => CX + seite * v;
+		const kante = RW / 2;
+		for (let v = G; v <= kante - RAD; v += 3) p.push([x(v), T]);
+		for (let a = 0; a <= 90; a += 6) { const r = a * Math.PI / 180; p.push([x(kante - RAD + Math.sin(r) * RAD), T + RAD - Math.cos(r) * RAD]); }
+		for (let y = T + RAD; y <= B - RAD; y += 3) p.push([x(kante), y]);
+		for (let a = 0; a <= 90; a += 6) { const r = a * Math.PI / 180; p.push([x(kante - RAD + Math.cos(r) * RAD), B - RAD + Math.sin(r) * RAD]); }
+		for (let v = kante - RAD; v >= G; v -= 3) p.push([x(v), B]);
+		const lang = [0];
+		for (let i = 1; i < p.length; i++) lang.push(lang[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+		return { p, lang, ges: lang[lang.length - 1] };
+	}
+	let WEG_R = halbweg(1), WEG_L = halbweg(-1);
+	// textBreite: Breite der längsten Zeile der Überschrift darüber (Rasul 13.11.2026 abends: „Mach ihn so breit wie die
+	// Schrift, die oben dran ist.“); ohne Überschrift gilt das Format aus dem Schalter.
+	function rahmen(flaecheBreite: number, textBreite?: number) {
+		RW = Math.min(textBreite ?? RH * format(), flaecheBreite - 60); L = CX - RW / 2;
+		WEG_R = halbweg(1); WEG_L = halbweg(-1);
+	}
+	function punkt(w: ReturnType<typeof halbweg>, s: number): [number, number] {
+		const ziel = s * w.ges; let lo = 1, hi = w.lang.length - 1; // binäre Suche statt Durchlaufen
+		while (lo < hi) { const mid = (lo + hi) >> 1; if (w.lang[mid] < ziel) lo = mid + 1; else hi = mid; }
+		const i = lo;
+		const a = w.lang[i - 1], b = w.lang[i], f = b > a ? (ziel - a) / (b - a) : 0;
+		return [w.p[i - 1][0] + (w.p[i][0] - w.p[i - 1][0]) * f, w.p[i - 1][1] + (w.p[i][1] - w.p[i - 1][1]) * f];
+	}
+
+	// Kamera für das Ende „kamera“ (Rasul 13.11.2026 abends: „dass wir aus der 2D-Ansicht eine 3D-Ansicht machen, weil wir
+	// sozusagen die Kamera runterkippen … wie wenn man die von oben sehen würde und dann mit der Kamera runter an die Front
+	// kippt. Und dabei bewegen sie sich natürlich auch“). Boden y = 0, Kamera kreist im Abstand KD um den Mittelpunkt und
+	// kippt von 90° (senkrecht von oben, Bild wie die Draufsicht) auf PHI_ENDE. Brennweite = Abstand, also Draufsicht 1 : 1.
+	const KD = 1000, PHI_ENDE = 12 * Math.PI / 180;
+	// zoom: Brennweite als Vielfaches von KD; während der Fahrt kurz größer, damit die Personen in der Mitte der Fahrt
+	// nicht klein zusammenrutschen (Anfang und Ende bleiben 1).
+	function kamera(X: number, Z: number, phi: number, zoom = 1, abstand = KD) {
+		const cy = abstand * Math.sin(phi), cz = -abstand * Math.cos(phi);
+		const vy = -cy, vz = Z - cz;
+		const zc = vy * -Math.sin(phi) + vz * Math.cos(phi), yc = vy * Math.cos(phi) + vz * Math.sin(phi);
+		const F = KD * zoom;
+		return { x: CX + F * X / zc, y: CY - F * yc / zc, g: F / zc, zc };
+	}
+	const KD_ENDE = 660; // die Kamera fährt beim Kippen heran (Abstand 1000 auf 660), damit vorne einer groß wird
+	const KD_FAHRT = 540; // danach fährt sie weiter auf die vordere Person zu
+
+	// Anordnung für „kamera“ (Rasul 13.11.2026 abends: „jetzt springen mir die Personen zu arg. Also das Kippen ist gut,
+	// aber die Bewegung findet vielleicht am Ende statt … dass wir die schon so anordnen, dass wenn man das kippt, der eine
+	// im Vordergrund ist und die anderen zwei im Hintergrund. Und der Rest dahinter darf sich ein bisschen bewegen, aber
+	// nicht so stark.“). Die drei stehen schon in der Draufsicht an ihrem Platz (einer unten mittig = vorne, zwei darüber
+	// links und rechts); die übrigen rücken nur etwas nach hinten.
+	function personenKamera(): Person[] {
+		const rnd = zufall(11), liste: Person[] = [];
+		const neu = (x: number, y: number, ebene: number): Person => ({ x, y, s: 1, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: ebene <= 1, rang: ebene === 0 ? 1 : 0, ebene, ex: x, ey: y, eg: 1, z: 1, wx: x - CX, wz: CY - y, tx: x - CX, tz: CY - y });
+		liste.push(neu(CX, CY + 250, 0), neu(CX - 190, CY + 120, 1), neu(CX + 190, CY + 120, 1));
+		const RAND = 80; let versuche = 0;
+		while (liste.length < 34 && versuche++ < 6000) {
+			// die übrigen nicht ganz unten: dort steht nur der eine vorne (sonst sind sie beim Kippen kurz groß im Vordergrund)
+			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (CY + 190 - T - RAND);
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 125)) liste.push(neu(x, y, 3)); // alle gleich groß
+		}
+		// Erscheinen (Rasul 13.11.2026 abends: „hörst jetzt auf, neue Personen erscheinen zu lassen, kurz bevor wir den
+		// Videobeweis machen … während der Videobeweisanimation mit den Linien dürfen innerhalb des Fensters immer noch welche
+		// entstehen … am Ende nur noch ganz dezent im Hintergrund … kurz vorher dann auch gar nicht mehr, dass es zur Ruhe
+		// kommt“; „mach sie mal alle gleich groß. Der größte Unterschied kommt jetzt über die Perspektive.“).
+		// Die drei zuerst, die übrigen verteilt bis kurz vor Ende der Geste.
+		liste.forEach((q, i) => { q.ein = i < 3 ? rnd() * 0.8 : 0.2 + rnd() * (T_GESTE + DAUER - 0.5); });
+		const rest = liste.filter((q) => q.ebene > 1).sort((a, b) => a.wz - b.wz);
+		rest.forEach((q, i) => {
+			// seitlich etwas zur Mitte, damit nach dem Kippen niemand aus dem Bild ragt
+			// Seitlich bewegt sich niemand (Rasul 13.11.2026 abends: „dass man es hinten in die Breite zieht. Das stimmt
+			// einfach vom Kameragefühl her nicht.“); die hinteren treten nur ein Stück gerade nach hinten.
+			if (i < 10) { q.ebene = 2; q.tz = Math.max(q.wz, -40) + 120; }
+			else { q.ebene = 3; q.tz = 300 + (q.wz + 307) * 0.9; }
+			q.tx = q.wx;
+		});
+		// Während der Kamerafahrt kommen nur noch wenige ganz hinten dazu, leise (Ebene 3), und ab drei Vierteln keine mehr
+		// Die späten entstehen an ihrem Platz hinten, wenn das Kippen fast fertig ist, und nicht mehr gegen Ende der Fahrt
+		// (Rasul: „es fallen jetzt welche noch vom Himmel … die würden eher einfach hintendran entstehen“)
+		for (let i = 0; i < 10; i++) {
+			const q = neu(CX, CY, 3); q.spaet = true; q.bleibt = false;
+			q.tz = 450 + rnd() * 500; q.tx = (-1 + 2 * ((i + 0.5) / 10) + (rnd() - 0.5) * 0.12) * (RW / 2 - RAND);
+			q.ein = T_AUSWAHL + D_KIPP * 0.85 + rnd() * D_FAHRT * 0.45;
+			liste.push(q);
+		}
+		return liste;
+	}
+	function kameraTiefe(Z: number, phi: number) { return kamera(0, Z, phi).zc; }
+
+	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
+	interface Person { spaet?: boolean; fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
+	function personen(): Person[] {
+		const rnd = zufall(7), liste: Person[] = [];
+		let versuche = 0;
+		const RAND = 80; // Abstand der Personen zur Spur
+		while (liste.length < 34 && versuche++ < 6000) {
+			const x = L + RAND + rnd() * (RW - 2 * RAND), y = T + RAND + rnd() * (RH - 2 * RAND);
+			if (liste.every((q) => Math.hypot(q.x - x, q.y - y) > 130)) liste.push({ x, y, s: 1, ein: rnd() * (T_PERSONEN - 0.5), zx: x, zy: y, bleibt: false, rang: -1, ebene: 3, ex: x, ey: y, eg: 1, z: 1, wx: x - CX, wz: CY - y, tx: 0, tz: 0 });
+		}
+		const nah = [...liste].sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY)).slice(0, 3).sort((a, b) => a.x - b.x);
+		nah.forEach((q, i) => { q.bleibt = true; q.rang = i; q.zx = CX + (i - 1) * 380; q.zy = CY + 10; });
+		// Ebenen für das Ende „ebenen“: die nächsten zehn zur Mitte bilden Ebene 2, alle übrigen Ebene 3
+		const rest = liste.filter((q) => !q.bleibt).sort((a, b) => Math.hypot(a.x - CX, a.y - CY) - Math.hypot(b.x - CX, b.y - CY));
+		rest.forEach((q, i) => { q.ebene = i < 10 ? 2 : 3; });
+		nah.forEach((q) => { q.ebene = q.rang === 1 ? 0 : 1; });
+		// Perspektive (Rasul 13.11.2026 abends: „lass sie nicht im Hintergrund auf der Fläche stehen, sondern setz sie auch
+		// so im Hintergrund, wie wenn die hinten dran stehen würden, wie wenn man in einen langen Flur reinguckt oder auf eine
+		// große Fläche“). Boden mit Horizont: Tiefe z teilt Abstand zum Horizont, Breite und Größe (Lochkamera).
+		const HORIZONT = 230, BODEN = 700, G0 = 2.6;
+		const setze = (q: Person, z: number, X: number) => {
+			const g = G0 / z, u = (64 * g) / 19;
+			q.z = z; q.eg = g; q.ex = CX + X / z; q.ey = HORIZONT + (BODEN - HORIZONT) / z - 9 * u;
+		};
+		const reihe = (gruppe: Person[], zVon: number, zBis: number, breite: number) => {
+			gruppe.sort((a, b) => a.x - b.x).forEach((q, i) => {
+				const z = zVon + rnd() * (zBis - zVon);
+				const X = (gruppe.length === 1 ? 0 : (i / (gruppe.length - 1) - 0.5) * breite) + (rnd() - 0.5) * (breite / gruppe.length) * 0.8;
+				setze(q, z, X);
+			});
+		};
+		nah.forEach((q) => setze(q, q.rang === 1 ? 1 : 1.45, (q.rang - 1) * 520));
+		reihe(rest.filter((q) => q.ebene === 2), 2.0, 3.0, 3000);
+		reihe(rest.filter((q) => q.ebene === 3), 3.4, 7.5, 6400);
+		// Ende „kamera“: Plätze auf dem Boden (Welt-Koordinaten), die Kamera kippt von oben nach vorne (siehe kamera())
+		const raum = (gruppe: Person[], zVon: number, zBis: number, anteil: number) => {
+			gruppe.sort((a, b) => a.x - b.x).forEach((q, i) => {
+				const Z = zVon + rnd() * (zBis - zVon), halb = anteil * kameraTiefe(Z, PHI_ENDE);
+				q.tz = Z; q.tx = (gruppe.length === 1 ? 0 : (i / (gruppe.length - 1) - 0.5) * 2 * halb) + (rnd() - 0.5) * (halb / gruppe.length);
+			});
+		};
+		nah.forEach((q) => { if (q.rang === 1) { q.tx = 0; q.tz = -600; } else { q.tx = (q.rang - 1) * 210; q.tz = -420; } });
+		raum(rest.filter((q) => q.ebene === 2), -150, 250, 0.5);
+		raum(rest.filter((q) => q.ebene === 3), 500, 2600, 0.55);
+		return liste;
+	}
+
+	// ── Kamerafahrt, Neubau (Rasul 13.11.2026 abends) ─────────────────────────────────────────────────────────────
+	// „Gefühl soll es ja nachher wirklich eine Kamerafahrt sein. Also wie wenn die Kamera mittig über diesen Köpfen schwebt
+	// … Und dann macht die Kamera anstatt den Blick von oben … von vorne nach hinten. Und bewegt sich in der Mitte über der
+	// Masse vor die vorderste Person. Das ist die Kamerabewegung. Die darf ein Ease-in und ein Ease-out haben … lass du mal
+	// das Rumschieben von Personen weg … da wo die Personen erscheinen, da bleiben die auch nachher stehen. Wir geben dem
+	// eben jetzt schon so eine Struktur, die nachher funktioniert, dass vorne einer steht und man dann noch ruhig zwei, drei
+	// Ebenen tief und dann den Rest und dann ganz viel lebend dran.“
+	// Welt: Boden y = 0, Personen fest auf (X, Z). Kamera nur in der Mittelebene (x = 0): Position C = [Höhe, Z], Blickziel
+	// Lk = [Höhe, Z], Brennweite F. Start: 1000 über der Mitte, Blick senkrecht nach unten, F = 1000 (Draufsicht 1 : 1 zur
+	// Fläche). Ende: knapp über dem Boden vor der vordersten Person, Blick nach hinten. Ein einziger weicher Verlauf.
+	// 3,2 s für die ganze Fahrt (Rasul 13.11.2026 abends: „die Kamerafahrt ist jetzt zu lang. Und vor allem zu aufgeteilt.
+	// Die Kamera fährt runter und dann ran, kann sie beides gleichzeitig … das fühlt sich so abgehackt an“): Kranfahrt und
+	// Ranfahrt sind jetzt eine Bewegung mit einem gemeinsamen Ease-in und Ease-out (vorher 3,4 s plus 1,8 s Ranfahrt).
+	// Kürzer, ohne hektisch zu werden (Rasul 14.11.2026: „ich würde die gesamte Animation gerne noch ein bisschen kürzer
+	// haben, aber ohne dass sie hektisch wird“): 2,6 s statt 3,2 s, Zeitverlauf kubisch (smoothstep, Spitzentempo 1,5-fach
+	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
+	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
+	const D_KAMERA = 2.6;
+	const weichKubisch = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+	// Bahn: Die Kamera kreist um ein Blickziel auf dem Boden, vom Winkel 90° (senkrecht darüber) auf 15° (flach von vorne),
+	// der Abstand sinkt von 1000 auf 620, das Blickziel wandert von der Mitte etwas nach hinten (Z 0 auf 150), die
+	// Brennweite von 1000 auf 430. So bleibt die vordere Person die ganze Fahrt im Bild (gerechnet 13.11.2026; eine
+	// gerade Bahn ließ sie in der Mitte der Fahrt unten aus dem Bild laufen).
+	const A0 = Math.PI / 2, R0 = 1000, LZ1 = 150, F0 = 1000;
+	// Variante „Augenhöhe“ (Rasul 13.11.2026 abends: „fahr doch nochmal weiter runter mit der Kamera. Bis alle auf einer
+	// Linie sind, würde mich interessieren, wie das aussieht.“), Schalter „Höhe“ (html data-hoehe = oben | auge):
+	// Kamerahöhe am Ende 49 = Kopfmitte, alle Köpfe auf einer Linie; ohne Horizontlinie. Werte gerechnet: 5,1°, 552, 300.
+	// Entschieden (Rasul 13.11.2026 abends): „Augenhöhe“, Grundeinstellung; „oben“ bleibt im Schalter.
+	const auge = () => document.documentElement.dataset.hoehe !== "oben";
+	const endWerte = () => (auge() ? { A1: 5.1 * Math.PI / 180, R1: 552, F1: 300 } : { A1: 15 * Math.PI / 180, R1: 620, F1: 430 });
+	let F1 = endWerte().F1;
+	// Ranfahrt am Ende (Rasul 13.11.2026 abends: „dass sie sich noch mehr auf die Person zubewegt … durch das Näherfahren
+	// wird es hinten breiter … du musst nichts rumschieben, einfach die Gesetze der Perspektive beachten“). Im Film:
+	// Kranfahrt von oben (Top Shot, Crane Down mit Tilt Up) und danach Push-in. Die Kamera fährt in gleicher Höhe und
+	// mit gleichem Blickwinkel geradeaus nach vorne (Kamera und Blickziel um RAN_Z weiter), beginnt kurz vor Ende der
+	// Kranfahrt, eigener weicher Verlauf.
+	// Weg der Ranfahrt wird in groesse() aus der Bildregel berechnet (siehe dort), Startwert 30
+	const D_RAN = 1.8;
+	let RAN_Z = 30;
+	function bahn(e: number, fEnde = F1, ran = 0) {
+		const { A1, R1 } = endWerte();
+		const a = A0 + (A1 - A0) * e, R = R0 + (R1 - R0) * e, lz = LZ1 * e + RAN_Z * ran;
+		const Lk: [number, number] = [0, lz], C: [number, number] = [R * Math.sin(a), lz - R * Math.cos(a)];
+		return { C, Lk, F: F0 + (fEnde - F0) * e };
+	}
+	const glatt = (x: number) => x <= 0 ? 0 : x >= 1 ? 1 : x * x * x * (x * (6 * x - 15) + 10); // Ease-in und Ease-out
+	function fahrtKamera(X: number, Z: number, C: [number, number], Lk: [number, number], F: number) {
+		const phi = Math.atan2(C[0] - Lk[0], Lk[1] - C[1]);
+		const vy = -C[0], vz = Z - C[1];
+		const zc = vy * -Math.sin(phi) + vz * Math.cos(phi), yc = vy * Math.cos(phi) + vz * Math.sin(phi);
+		return { x: CX + F * X / zc, y: CY - F * yc / zc, g: F / zc, zc, phi };
+	}
+	// Probe „punkt“ (Rasul 13.11.2026 abends: „ob wir mit Punkten starten können, die dann zu Männchen werden“), danach
+	// entschieden: „Zurück zu Figuren“. Grundeinstellung „figur“, „punkt“ bleibt im Schalter.
+	const form = () => (document.documentElement.dataset.form === "punkt" ? "punkt" : "figur");
+	// Aufstellung, die von oben ungeordnet wirkt und von vorne trägt: einer vorne, zwei dahinter, zwei Reihen, viele hinten
+	// Erscheinen bis kurz vor Ende der Kamerafahrt (Rasul 14.11.2026: „wenn du es hinkriegst, noch Männchen erscheinen zu
+	// lassen, während die Kamera dreht? Weil vorhin sind die vom Himmel gefallen, das war schlecht, dann kannst du es auch noch
+	// länger machen … bis zu dem Punkt, wo die Kamera fast reingefahren ist.“). Alle entstehen an ihrem Platz (Einblenden,
+	// keine Bewegung), deshalb fällt niemand vom Himmel. Verlauf weiter Ease-in und Ease-out, aber mit langem Auslauf: gut die
+	// Hälfte ist da, wenn der Text kommt, danach werden es immer weniger bis 85 % der Fahrt. Die nahen Reihen (Ebene 2)
+	// erscheinen nur vor der Fahrt, sonst würden nah an der Kamera große Figuren aufblenden; spät kommen nur hintere Reihen.
+	// Vorher: alle bis 1,65 s, dazu drei Nachzügler bis zur Hälfte der Geste (Git-Geschichte).
+	const T_ERSCH_BIS = () => T_GESTE + 0.85 * D_KAMERA - 0.5; // letzte Einblendung (0,5 s) endet bei 85 % der Fahrt
+	const verteilung = (x: number) => { const y = Math.pow(x, 0.55); return y * y * (3 - 2 * y); }; // Anteil, der bis x da ist
+	function erscheinZeit(u: number) {
+		let lo = 0, hi = 1;
+		for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (verteilung(m) < u) lo = m; else hi = m; }
+		return 0.2 + lo * (T_ERSCH_BIS() - 0.2);
+	}
+	function uebergang(liste: Person[]): Person[] {
+		const nahBis = T_GESTE - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
+		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
+		liste.forEach((q) => { if (q.ebene === 2 && !q.spaet && q.ein > 0.2) q.ein = 0.2 + (q.ein - 0.2) * k; });
+		return liste;
+	}
+	function personenFahrt(): Person[] {
+		const rnd = zufall(23), liste: Person[] = [];
+		const halb = RW / 2 - 80;
+		const neu = (X: number, Z: number, ebene: number, ein: number): Person => ({ x: CX + X, y: CY - Z, s: 1, ein, zx: 0, zy: 0, bleibt: ebene <= 1, rang: 0, ebene, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z });
+		const j = (w: number) => (rnd() - 0.5) * w;
+		// alle erscheinen im ersten Abschnitt, bis kurz vor der Pause (letzte Einblendung dauert 0,5 s)
+		// Tempo des Erscheinens (Rasul 14.11.2026: „Gib dem Erscheinen der Männchen auch mal eine Geschwindigkeit. Lass es mal
+		// langsam anfangen, steigern und wieder abflachen.“): Die Zeitpunkte folgen einem Sinus-Verlauf (Umkehrung von sanft),
+		// also erst wenige, in der Mitte die meisten, am Ende wieder wenige. Vorher gleichmäßig verteilt. Gleich viele
+		// Zufallszahlen wie vorher, die Plätze bleiben deshalb dieselben.
+		const spaeter = () => erscheinZeit(rnd()); // Verlauf siehe erscheinZeit (seit 14.11.2026 bis kurz vor Ende der Fahrt)
+		// Links und rechts ungleich (Rasul 13.11.2026 abends: „in der Endposition sind die Hintergrundmännchen rechts und
+		// links … ein bisschen ähnlich … mach da mal eine Seite ein bisschen größer und mehr und auf der anderen Seite ein
+		// bisschen weniger, dass es organischer aussieht“): links stehen mehr Personen und näher an der Kamera (also größer),
+		// rechts weniger und weiter hinten. Die Plätze gelten von Anfang an, verschoben wird niemand.
+		liste.push(neu(0, -300, 0, rnd() * 0.5), neu(-225 + j(20), -205 + j(20), 1, rnd() * 0.7), neu(175 + j(20), -110 + j(20), 1, rnd() * 0.7));
+		const reihe = (n: number, zVon: number, zBis: number, breite: number, ebene: number, ein: () => number) => {
+			for (let i = 0; i < n; i++) {
+				const X = (n === 1 ? 0 : (i / (n - 1) - 0.5) * 2 * breite) + j((2 * breite) / n * 0.6);
+				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
+			}
+		};
+		const spaetVon = T_GESTE + D_KAMERA * 0.7;
+		const spaetZeit = () => spaetVon + rnd() * D_KAMERA * 0.15;
+		if (document.documentElement.dataset.aufstellung === "nah") {
+			// Variante „nah“ (Rasul 13.11.2026 abends: „Da müssen wir die Personen näher hinstellen, dann sieht es auch nicht
+			// so ganz vorbereitet aus, vielleicht ist das eine Variante“): weniger Tiefe (also weniger Unschärfe), locker
+			// verteilt statt in Reihen, mit Mindestabstand und frei um die drei vorne.
+			const frei = (X: number, Z: number) => liste.every((q) => Math.hypot(q.wx - X, q.wz - Z) > 78);
+			let n = 0, versuche = 0;
+			while (n < 44 && versuche++ < 8000) {
+				const X = j(2 * halb), Z = -120 + rnd() * 250;
+				if (frei(X, Z)) { liste.push(neu(X, Z, Z < 30 ? 2 : 3, spaeter())); n++; }
+			}
+			let m = 0; versuche = 0;
+			while (m < 10 && versuche++ < 4000) {
+				const X = j(2 * halb), Z = 90 + rnd() * 40;
+				if (frei(X, Z)) { const q = neu(X, Z, 3, spaetZeit()); q.spaet = true; liste.push(q); m++; }
+			}
+			return uebergang(liste);
+		}
+		// Grundform: Reihen, mehr Personen vor allem hinten (Rasul 13.11.2026 abends: „setz dann mehr Personen rein, auch
+		// vor allem in den Hintergrund“)
+		// Seite: n Personen zwischen xVon und xBis (Welt), Tiefe zVon bis zBis
+		const seite = (n: number, xVon: number, xBis: number, zVon: number, zBis: number, ebene: number, ein: () => number) => {
+			for (let i = 0; i < n; i++) {
+				const X = xVon + (n === 1 ? 0.5 : i / (n - 1)) * (xBis - xVon) + j(((xBis - xVon) / n) * 0.6);
+				liste.push(neu(X, zVon + rnd() * (zBis - zVon), ebene, ein()));
+			}
+		};
+		const b1 = Math.min(500, halb);
+		seite(3, -b1, -130, -95, -25, 2, spaeter); // links: drei, nah
+		seite(1, 330, 330, 15, 45, 2, spaeter); // rechts: eine, weiter hinten
+		seite(6, -halb * 0.9, -110, 45, 140, 2, spaeter);
+		seite(3, 140, halb * 0.8, 110, 190, 2, spaeter);
+		seite(15, -halb, -40, 180, 320, 3, spaeter);
+		seite(11, 40, halb, 220, 340, 3, spaeter);
+		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
+		reihe(12, 230, 330, halb * 0.95, 3, spaetZeit);
+		liste.slice(-12).forEach((q) => { q.spaet = true; });
+		return uebergang(liste);
+	}
+
+	// Person in derselben Form wie die Augenzeugen-Animationen (Werkstatt augenzeugen-kacheln.js, personPfad):
+	// Kopf als Kreis, Schultern als Bogen, Maß in Neunzehnteln der Höhe. Rasul 13.11.2026: „gucken, dass die nachher
+	// zusammenpassen, was Formen, Geschwindigkeiten, Erzähltiefe angeht“.
+	function zeichnePerson(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, farbe = "#000") {
+		if (alpha <= 0) return;
+		const u = (64 * g) / 19;
+		ctx.globalAlpha = alpha; ctx.fillStyle = farbe; ctx.beginPath();
+		ctx.moveTo(x + 4.6 * u, y - 5.5 * u); ctx.arc(x, y - 5.5 * u, 4.6 * u, 0, Math.PI * 2);
+		ctx.moveTo(x - 8.5 * u, y + 9 * u);
+		ctx.bezierCurveTo(x - 8.5 * u, y + 2.5 * u, x - 4.5 * u, y + 0.5 * u, x, y + 0.5 * u);
+		ctx.bezierCurveTo(x + 4.5 * u, y + 0.5 * u, x + 8.5 * u, y + 2.5 * u, x + 8.5 * u, y + 9 * u);
+		ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+	}
+
+	// Unscharfe Personen als vorbereitete Bilder (Messung 13.11.2026: Weichzeichnen jeder Person in jedem Bild kostete bis
+	// zu 0,5 s pro Bild und ließ die Animation ruckeln). Je Unschärfe-Stufe wird die Person einmal klein weichgezeichnet und
+	// danach nur noch skaliert gesetzt. b = Unschärfe in Personen-Einheiten (Bildschirm-Unschärfe geteilt durch Größe).
+	const BILDER = new Map<number, { c: HTMLCanvasElement; pad: number }>();
+	const AUF = 3; // Pixel je Einheit im vorbereiteten Bild
+	// farbe: "#000" für die Figur, "#fff" für die deckende Fläche darunter (siehe zeichneUnscharf)
+	function personBild(b: number, farbe = "#000") {
+		const stufe = b < 4 ? Math.round(b * 2) / 2 : b < 12 ? Math.round(b) : Math.round(b / 2) * 2;
+		const schluessel = stufe + (farbe === "#fff" ? 1000 : 0);
+		let e = BILDER.get(schluessel);
+		if (!e) {
+			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * AUF, h = (64.4 + 2 * pad) * AUF;
+			const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h);
+			const x = c.getContext("2d")!; x.filter = `blur(${(stufe * AUF).toFixed(1)}px)`; x.scale(AUF, AUF); // Unschärfe in Bildpixeln
+			zeichnePerson(x, 28.65 + pad, 34 + pad, 1, 1, farbe);
+			e = { c, pad }; BILDER.set(schluessel, e);
+		}
+		return e;
+	}
+	// Verwandlung Punkt zu Person (Rasul 13.11.2026 abends: „ob wir mit Punkten starten können, die dann zu Männchen werden“):
+	// Der Punkt auf dem Boden wird zum Kopf und hebt sich an seinen Platz, die Schultern wachsen unter ihm heraus.
+	// p = 0 Punkt, p = 1 fertige Person. fy = Bodenpunkt, y = Mitte der fertigen Person.
+	function zeichneVerwandlung(ctx: CanvasRenderingContext2D, x: number, fy: number, y: number, g: number, alpha: number, p: number) {
+		if (alpha <= 0) return;
+		const u = (64 * g) / 19, rPunkt = 13 * g;
+		const kx = x, ky = fy + (y - 5.5 * u - fy) * p, kr = rPunkt + (4.6 * u - rPunkt) * p;
+		ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.beginPath();
+		ctx.moveTo(kx + kr, ky); ctx.arc(kx, ky, kr, 0, Math.PI * 2);
+		if (p > 0.02) {
+			// Schultern wachsen aus dem Hals: Breite und Höhe mit p
+			const hx = x, hy = ky + kr + 1.4 * u * p, b = 8.5 * u * p, h = 8.5 * u * p; // Hals unter dem Kopf, bei p = 1 genau wie die Person
+			ctx.moveTo(hx - b, hy + h);
+			ctx.bezierCurveTo(hx - b, hy + h * 0.24, hx - b * 0.53, hy, hx, hy);
+			ctx.bezierCurveTo(hx + b * 0.53, hy, hx + b, hy + h * 0.24, hx + b, hy + h);
+			ctx.closePath();
+		}
+		ctx.fill(); ctx.globalAlpha = 1;
+	}
+	// deckend (0 bis 1): Wenn gesetzt, liegt unter der Figur eine weiße, deckende Fläche gleicher Form. So verdeckt jede
+	// Person die hinter ihr, auch wenn sie selbst heller (halb durchsichtig) gezeichnet wird (Rasul 13.11.2026 abends:
+	// „dass bei der Kamerafahrt, beim Blurren die Personen kurz durchsichtig werden. Das sollte nicht sein.“).
+	function zeichneUnscharf(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, unsch: number, deckend = 0) {
+		if (alpha <= 0) return;
+		const b = unsch / Math.max(0.05, g);
+		if (b < 0.25) {
+			if (deckend > 0) zeichnePerson(ctx, x, y, g, deckend, "#fff");
+			zeichnePerson(ctx, x, y, g, alpha); return;
+		}
+		const setze = (farbe: string, a: number) => {
+			const { c, pad } = personBild(b, farbe);
+			ctx.globalAlpha = a;
+			ctx.drawImage(c, x - (28.65 + pad) * g, y - (34 + pad) * g, (c.width / AUF) * g, (c.height / AUF) * g);
+		};
+		if (deckend > 0) setze("#fff", deckend);
+		setze("#000", alpha);
+		ctx.globalAlpha = 1;
+	}
+
+	// Rasteranzeige wie im Sucher einer Kamera (Rasul 13.11.2026 abends: „wenn man einen Bildschirm horizontal in drei
+	// Teile unterteilen würde … auf der oberen Linie … müsste die Augenlinie sein … Und das Kinn würde auf der unteren
+	// Linie liegen … Zeig mir doch mal die beiden Linien ein, wie die Kamera sie sehen würde“). Nur zum Prüfen, Schalter
+	// „Raster“ (html data-raster = an). Gezeichnet: der 16:9-Rahmen und die Drittellinien in ihm, fest im Bild wie im Sucher.
+	function raster(ctx: CanvasRenderingContext2D) {
+		if (document.documentElement.dataset.raster !== "an") return;
+		ctx.save(); ctx.globalAlpha = 1; ctx.strokeStyle = "rgba(231, 76, 60, 0.85)"; ctx.lineWidth = 2;
+		ctx.strokeRect(L, T, RW, RH);
+		ctx.beginPath();
+		for (const f of [1 / 3, 2 / 3]) { ctx.moveTo(L, T + RH * f); ctx.lineTo(L + RW, T + RH * f); ctx.moveTo(L + RW * f, T); ctx.lineTo(L + RW * f, T + RH); }
+		ctx.stroke();
+		ctx.fillStyle = "rgba(231, 76, 60, 0.85)"; ctx.font = "22px system-ui, sans-serif";
+		ctx.fillText("Augenlinie", L + 12, T + RH / 3 - 8); ctx.fillText("Kinn", L + 12, T + (2 * RH) / 3 - 8);
+		ctx.restore();
+	}
+
+	function experten() {
+		document.querySelectorAll<HTMLElement>("[data-experten]").forEach((fig) => {
+			if (fig.dataset.bereit) return; fig.dataset.bereit = "1";
+			const cv = fig.querySelector("canvas")!, ctx = cv.getContext("2d")!;
+			// „Überall Experten.“ unter der Animation wird mit der Kamerafahrt unscharf und hell (Rasul 14.11.2026: „Koppel das
+			// Blurring von dem Text jetzt tatsächlich auch an die Dauer der Kamerafahrt“): gleicher Fortschritt wie die Kamera,
+			// am Ende 5 px Unschärfe und Deckkraft 0,35 (wie die hintersten Reihen). Vorher eigene CSS-Blende über 2 s.
+			const zeileUnscharf = fig.closest(".anlass--band")?.querySelector<HTMLElement>(".anlass__satz--eins") ?? null;
+			const zeileSetzen = (e: number) => { if (zeileUnscharf) { zeileUnscharf.style.filter = e > 0 ? `blur(${(5 * e).toFixed(2)}px)` : ""; zeileUnscharf.style.opacity = e > 0 ? (1 - 0.65 * e).toFixed(3) : ""; } };
+			const off = document.createElement("canvas"), octx = off.getContext("2d")!;
+			// Leuchten auf einer Viertel-Fläche weichzeichnen (statt über die volle Fläche in jedem Bild)
+			const glut = document.createElement("canvas"), gctx = glut.getContext("2d")!;
+			let leuteFlach = personen(), leuteRaum = personenKamera();
+			let leute = leuteFlach, zoomEnde = 1, hebung = 0;
+			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
+			const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+			const groesse = () => {
+				// Rahmen 16:9 und so breit wie die längste Zeile der Überschrift (Rasul 13.11.2026 abends: „Mach ihn so breit
+				// wie die Schrift, die oben dran ist“ und „dann machen wir doch wieder 16 zu 9, dass es verständlicher ist.
+				// Unseren Videobeweis.“): Die Höhe der Fläche wird dafür aus der Textbreite gerechnet (Rahmen = 86 % der Höhe).
+				// Höhe (Rasul 13.11.2026 abends: „wir dürfen richtig bold sein. Wir gehen mal ins Extrem. Mach mal die Animation
+				// über den gesamten Viewport. Den Text lässt man dann erst beim Runterscrollen.“): am Rechner (ab 1024 px) so hoch
+				// wie das Fenster; am Handy so hoch, wie der 16:9-Rahmen in der Breite braucht (sonst fast nur Weiß im Hochformat).
+				// Vorher: das ganze Band passte auf eine Seite und die Animation bekam den Rest (Git-Geschichte).
+				// Danach Rasul: „lass uns das definieren über die Viewporthöhe. Wie ist es dann aber auf dem Handy oder
+				// zwischendrin?“ Geprüft 13.11.2026: Im Hochformat (Handy 375 × 812, Tablet 768 × 1024) wird der Rahmen schmal und
+				// hoch, die Personen drängen sich oben. Regel deshalb nach der Form des Fensters statt nach einer Breite:
+				// Querformat (Breite ≥ Höhe) = Fensterhöhe; Hochformat = so hoch, wie der 16:9-Rahmen in der Breite braucht.
+				// Anteil der Fensterhöhe (Rasul 13.11.2026 abends: „wir müssen unten die Schrift sehen ein bisschen … dass wir nur
+				// 90 % oder 80 % der Viewport-Höhe verwenden für die Animation“): Schalter „Animation hoch“ (html data-animhoehe =
+				// 100 | 90 | 80), Grundeinstellung 80.
+				// Grundeinstellung 60 % (Rasul 13.11.2026 abends: „dann mach mal 60 % Viewport. Ich muss ausprobieren, ab wann es
+				// die Wirkung verliert in der Breite.“; davor 70 %)
+				const anteilHoehe = (Number(document.documentElement.dataset.animhoehe) || 50) / 100; // Grundeinstellung 50 % seit 14.11.2026 (vorher 60)
+				if (window.innerWidth >= window.innerHeight) cv.style.height = `${(window.innerHeight * anteilHoehe).toFixed(1)}px`;
+				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
+				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
+				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
+				// Rahmen und Personen passend zur Fläche neu legen
+				const breite = cv.width / (cv.height / H);
+				rahmen(breite); leuteFlach = personen(); leuteRaum = personenFahrt();
+				// Am Ende darf niemand abgeschnitten sein: falls nötig zoomt die Kamera mit der Fahrt etwas heraus (Brennweite),
+				// statt Personen seitlich zu verschieben
+				const halbe = breite / 2 - 70;
+				F1 = endWerte().F1;
+				// Ranfahrt aus der Bildregel (Rasul 13.11.2026 abends: „das Männchen muss am Ende größer sein, das heißt, die
+				// Kamera muss näher an die Person ran. Mach's mal so nah, dass der angeschnittene Körper von dem Männchen am
+				// unteren Bildrand aufsetzt.“): Augenlinie (Kopfmitte, 14,5 Teile über der Unterkante der Figur) auf der oberen
+				// Drittellinie, Unterkante der Figur auf der Unterkante des 16:9-Rahmens, also Figur von Augen bis Unterkante
+				// zwei Drittel der Rahmenhöhe. Gesucht wird der Weg RAN_Z, bei dem die vordere Person diese Größe hat.
+				const vorneP = leuteRaum.find((q) => q.ebene === 0);
+				// Innerhalb des gezeichneten Rahmens (Rasul 14.11.2026: „die Linien von der Videobeweis-Geste sitzen auf der
+				// Kamerakante und dadurch überschneiden sie das Männchen, das große am Ende unten. Mach es so, dass das Männchen
+				// sich nicht überschneidet, also am Ende ein bisschen kleiner. Dass es wirklich der Rahmen ist, in dem das Bild
+				// erscheint“): Augen bleiben auf der oberen Drittellinie, die Unterkante endet über der Innenkante des Strichs
+				// (halbe Strichdicke plus Luft), statt auf der Rahmenkante.
+				const INNEN = DICKE / 2; // genau an der Innenkante; mit 24 Einheiten Luft blieb ein weißer Rand (Rasul 14.11.2026: „das war zu viel“)
+				const gZiel = ((2 / 3) * RH - INNEN) / ((14.5 * 64) / 19);
+				const loese = (fEnde: number) => {
+					if (!vorneP) return;
+					let lo = 0, hi = 600;
+					for (let i = 0; i < 40; i++) {
+						const mid = (lo + hi) / 2; RAN_Z = mid;
+						const b = bahn(1, fEnde, 1), p = fahrtKamera(vorneP.wx, vorneP.wz, b.C, b.Lk, b.F);
+						if (p.zc > 1 && p.g < gZiel) lo = mid; else hi = mid;
+					}
+					RAN_Z = lo;
+				};
+				loese(F1);
+				// Einpassen in die Breite nur für die hinteren Reihen: Die Nahen dürfen angeschnitten sein wie bei einer Kamera
+				let weit = 0;
+				const ende0 = bahn(1, F1, 1);
+				for (const q of leuteRaum) { if (q.ebene < 2) continue; const p = fahrtKamera(q.wx, q.wz, ende0.C, ende0.Lk, ende0.F); if (p.zc > 1) weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
+				zoomEnde = Math.min(1, halbe / Math.max(1, weit));
+				if (zoomEnde < 1) loese(F1 * zoomEnde);
+				const ende1 = bahn(1, F1, 1);
+				// Bildausschnitt am Ende wie bei unseren Interviews (Rasul 13.11.2026 abends: „wenn ich Kameramann wäre und den
+				// 16:9-Frame mir vorstelle, dann habe ich das Gefühl, würde die Person zu tief im Bild sitzen … im Endeffekt
+				// setzen wir ja auch in unseren Videos die Leute in eine gewisse Position“): Der Kopf der vorderen Person liegt
+				// am Ende auf der oberen Drittellinie des 16:9-Rahmens. Umgesetzt als Verschiebung des Bildausschnitts (wie ein
+				// Shift-Objektiv), die Perspektive bleibt gleich; sie wächst mit der Fahrt.
+				{
+					const vorne = leuteRaum.find((q) => q.ebene === 0);
+					if (vorne) {
+						const p = fahrtKamera(vorne.wx, vorne.wz, ende1.C, ende1.Lk, F1 * zoomEnde);
+						const kopf = p.y - 14.5 * (64 * p.g) / 19;
+						hebung = kopf - (T + RH / 3);
+					}
+				}
+			};
+
+			const spur = (s: Spur, w: ReturnType<typeof halbweg>, jetzt: number) => {
+				octx.lineCap = "round"; octx.lineJoin = "round"; octx.lineWidth = DICKE;
+				const schritt = 3 / w.ges;
+				for (let i = 1; i < s.length; i++) {
+					const [s0, t0] = s[i - 1], [s1, t1] = s[i];
+					const n = Math.max(1, Math.ceil((s1 - s0) / schritt));
+					if (1 - (jetzt - t1) / GLIMM <= 0) continue; // dieses Stück ist ganz verglüht
+					let vorher: [number, number] | null = null;
+					for (let j = 1; j <= n; j++) {
+						const f = j / n, tt = t0 + (t1 - t0) * f;
+						const a = Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
+						if (a <= 0) { vorher = null; continue; }
+						if (!vorher) vorher = punkt(w, s0 + (s1 - s0) * (j - 1) / n);
+						const jetztP = punkt(w, s0 + (s1 - s0) * f);
+						{
+							const v = Math.round(255 * Math.pow(a, 1.6));
+							octx.strokeStyle = `rgb(${v},${v},${v})`;
+							octx.beginPath(); octx.moveTo(vorher[0], vorher[1]); octx.lineTo(jetztP[0], jetztP[1]); octx.stroke();
+						}
+						vorher = jetztP;
+					}
+				}
+			};
+
+			// Verlauf der Kamerafahrt (Rasul 13.11.2026 abends: „Am Ende ist sie zu schnell. Da fehlt ihr das Ease-in.“).
+			// Gemessen: Auf den letzten 10 % des Wegs wächst die vordere Person noch fast aufs Dreifache (Größe ~ 1/Abstand),
+			// ein gleichmäßig auslaufender Weg wirkt deshalb am Ende trotzdem schnell. Darum läuft die Fahrt überwiegend nach
+			// der sichtbaren Größe der vorderen Person: deren Größe folgt im Verhältnis (wie ein Zoom, jede Verdopplung gleich
+			// lang) dem weichen Verlauf glatt, mit 15 % Anteil des gleichmäßigen Wegs, damit das Kippen nicht zu früh fertig ist.
+			// Ergebnis: Kippen und Herunterfahren vor allem in der ersten Hälfte, die Ranfahrt läuft weich aus.
+			// s = Fortschritt der Geste: Mittel aus Weg (Kippen) und Größe (Ranfahrt), so folgt die Geste der Bewegung.
+			const groesseVorne = (e: number) => {
+				const q = leuteRaum.find((x) => x.ebene === 0); if (!q) return 1;
+				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(q.wx, q.wz, b.C, b.Lk, b.F).g;
+			};
+			const verlauf = (t: number) => {
+				const tz = weichKubisch(anteil(t, T_GESTE, D_KAMERA));
+				if (tz <= 0 || tz >= 1) return { e: tz, s: tz };
+				const L = Math.log(Math.max(1.001, groesseVorne(1))), ziel = tz * L;
+				let lo = 0, hi = 1;
+				for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (Math.log(groesseVorne(m)) < ziel) lo = m; else hi = m; }
+				const e = 0.15 * tz + 0.85 * lo;
+				return { e, s: 0.5 * (e + Math.log(groesseVorne(e)) / L) };
+			};
+			const bild = (t: number, jetzt: number) => {
+				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
+				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
+				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
+				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+				// Spur nur rechnen, solange sie zu sehen ist
+				// Geste im Takt der Kamera (Rasul 13.11.2026 abends: „Wir koordinieren das Zeichnen von dem Videobeweissymbol mit
+				// der Zoomfahrt … wie die Striche entstehen, richtet sich an der Bewegungsgeschwindigkeit von der Kamera, also mit
+				// an dem Zoom-in, Zoom-out und an der Länge“): Beim Ende „kamera“ beginnen Geste und Fahrt gleichzeitig, dauern
+				// gleich lang und folgen demselben Verlauf (glatt). Vorher: Geste 1,6 s, Fahrt erst danach.
+				const kam = ende() === "kamera", gDauer = kam ? D_KAMERA : DAUER;
+				if (t >= T_GESTE && t <= T_GESTE + gDauer + GLIMM + 0.45) {
+				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
+				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
+				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
+				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
+				let s = 0, deck = 0;
+				if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(t).s : kubisch(x); deck = sanft(Math.min(1, (t - T_GESTE) / D_FINGER)); }
+				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.4); }
+				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
+				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
+				spur(spurR, WEG_R, jetzt); spur(spurL, WEG_L, jetzt);
+				if (deck > 0) {
+					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
+					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
+				}
+				gctx.setTransform(1, 0, 0, 1, 0, 0); gctx.filter = "none"; gctx.clearRect(0, 0, glut.width, glut.height);
+				gctx.filter = `blur(${(DICKE * 0.7 * sc / 4).toFixed(1)}px)`; gctx.drawImage(off, 0, 0, glut.width, glut.height);
+				ctx.globalCompositeOperation = "difference";
+				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
+				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
+				ctx.globalCompositeOperation = "source-over";
+				}
+				// Personen
+				ctx.setTransform(sc, 0, 0, sc, ox, 0);
+				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
+				if (ende() === "kamera") {
+					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
+					const e = verlauf(t).e, ran = e; // Verlauf und Gründe siehe verlauf()
+					zeileSetzen(e);
+					const { C, Lk, F } = bahn(e, F1 * zoomEnde, ran);
+					if (import.meta.env.DEV) (fig as any).__vorne = groesseVorne(e);
+					const punkte = form() === "punkt";
+					const lage = leute.map((q) => {
+						const pr = fahrtKamera(q.wx, q.wz, C, Lk, F);
+						const kipp = 1 - pr.phi / (Math.PI / 2); // 0 = von oben, nahe 1 = von vorne
+						const u = (64 * q.s * pr.g) / 19;
+						const hoch = hebung * e; // Bildausschnitt wandert mit der Fahrt nach oben (Kopf auf die obere Drittellinie)
+						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15) - hoch, g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y - hoch };
+					}).filter((l) => l.zc > 5).sort((a, b) => b.zc - a.zc); // nichts hinter der Kamera zeichnen
+					// Rasul 13.11.2026 abends: „die sind jetzt schon im Hintergrund und werden kurz scharf und dann unscharf. Das
+					// stimmt von der Perspektivenwirkung der Kamera dann nicht mehr.“ Deshalb: Verwandlung ganz am Anfang des
+					// Kippens (Kamera fast senkrecht, alle etwa gleich weit weg) und Unschärfe aus der Entfernung:
+					// Schärfe wie bei einem Objektiv: scharfgestellt ist die vordere Person; Unschärfe und Blässe wachsen mit dem
+					// Abstand hinter ihr (Zerstreuungskreis ~ F · (1/zFokus − 1/z)). Von oben sind alle gleich weit weg, also
+					// scharf; mit dem Kippen entsteht die Tiefe und mit ihr die Unschärfe, in jedem Moment passend.
+					const fokus = lage.find((l) => l.q.ebene === 0)?.zc ?? lage[lage.length - 1].zc;
+					const F_jetzt = F;
+					for (const { q, x, y, g, kipp, fy, zc } of lage) {
+						const ein = weich((t - q.ein) / 0.5);
+						const tiefe = Math.max(0, 1 - fokus / zc); // 0 = auf der Schärfeebene
+						// sanfter abgestuft (Rasul 13.11.2026 abends: „Das ist jetzt sehr geblurrt alles im Hintergrund“): Faktor 2,5
+						// statt 8 (die Ranfahrt vergrößert das Verhältnis vorne zu hinten, deshalb so stark zurückgenommen)
+						const unsch = 2.5 * F_jetzt * Math.max(0, 1 / fokus - 1 / zc);
+						const alpha = ein * (0.85 + 0.15 * e) * (1 - 0.6 * tiefe);
+						if (punkte) {
+							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen (Kopf hebt sich, Schultern wachsen)
+							const p = sanft(anteil(kipp, 0.01, 0.17));
+							if (p < 1) zeichneVerwandlung(ctx, x, fy, y, g, alpha, p);
+							else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
+						} else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
+					}
+					raster(ctx);
+					return;
+				}
+				if (ende() === "ebenen") {
+					// Vier Ebenen statt Verschwinden (Rasul 13.11.2026 abends: „dass gar keine verschwinden, sondern dass sie alle
+					// noch weiter in den Hintergrund gehen … ein vorne, auf der nächsten Ebene diese beiden und dann vielleicht
+					// nochmal eine dritte und eine vierte Ebene“). Unschärfe wirkt als Tiefe nur zusammen mit anderen Tiefenzeichen
+					// (Held, Cooper, O'Brien, Banks 2010): je Ebene unschärfer, kleiner und heller (Luftperspektive).
+					// Ebene: [Größe, Unschärfe in Flächeneinheiten, Deckkraft]
+					// Ebene: [–, Unschärfe in Flächeneinheiten, Deckkraft]; Größe und Lage kommen aus der Perspektive (ex, ey, eg)
+					const STUFE: [number, number, number][] = [[0, 0, 1], [0, 5, 0.7], [0, 11, 0.4], [0, 18, 0.22]];
+					const f = weich((t - T_FOKUS) / D_FOKUS);
+					const sortiert = [...leute].sort((a, b) => b.z - a.z); // hinten zuerst, vorne zuletzt
+					for (const q of sortiert) {
+						const ein = weich((t - q.ein) / 0.5);
+						const [, b1, a1] = STUFE[q.ebene];
+						const m = q.ebene >= 2 ? k : q.ebene === 1 ? f : 0; // Unschärfe: Ebene 2/3 mit der Auswahl, Ebene 1 im Fokus-Schritt
+						const x = q.x + (q.ex - q.x) * k, y = q.y + (q.ey - q.y) * k;
+						const g = q.s + (q.eg - q.s) * k;
+						const alpha = ein * (q.ebene <= 1 ? (0.85 + 0.15 * k) * (1 - (1 - a1) * m) : 0.85 * (1 - (1 - a1 / 0.85) * m));
+						const unsch = b1 * m;
+						zeichneUnscharf(ctx, x, y, g, alpha, unsch);
+					}
+					return;
+				}
+				for (const q of leute) {
+					const ein = weich((t - q.ein) / 0.5);
+					if (q.bleibt) {
+						const x = q.x + (q.zx - q.x) * k, y = q.y + (q.zy - q.y) * k, g = q.s + (GROSS - q.s) * k;
+						const f = q.rang === 1 ? 0 : weich((t - T_FOKUS) / D_FOKUS), e = ende();
+						const alpha = ein * (0.85 + 0.15 * k);
+						if (e === "eins") zeichnePerson(ctx, x, y, g, alpha * (1 - f));
+						else if (e === "grau") zeichnePerson(ctx, x, y, g, alpha * (1 - 0.8 * f));
+						else if (e === "unscharf" && f > 0) {
+							zeichneUnscharf(ctx, x, y, g, alpha * (1 - 0.35 * f), 14 * f);
+						} else zeichnePerson(ctx, x, y, g, alpha);
+					} else {
+						zeichnePerson(ctx, q.x, q.y, q.s, ein * 0.85 * (1 - weich((t - T_AUSWAHL + 0.3) / 0.8)));
+					}
+				}
+			};
+
+			// Phase für den Nachsatz unter der Animation: „warten“ bis zur Geste, dann „geste“ (auch am Band, für die Stilregel)
+			const bandPhase = fig.closest<HTMLElement>(".anlass--band");
+			const phase = (w: string) => { fig.dataset.phase = w; if (bandPhase) bandPhase.dataset.phase = w; };
+			phase("warten");
+			// eigene Uhr, damit die Animation bei T_PAUSE anhalten kann
+			let uhr = 0, zuletzt = 0, freigabe = false, haelt = false;
+			const schritt = () => {
+				const jetzt = performance.now() / 1000;
+				uhr += Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
+				if (uhr >= T_PAUSE && !freigabe) {
+					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
+					uhr = T_PAUSE; bild(uhr, jetzt); haelt = true; return;
+				}
+				if (uhr >= T_TEXT && fig.dataset.phase !== "geste") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
+				bild(uhr, jetzt);
+				const schluss = ende() === "kamera" ? T_GESTE + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
+				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
+				else fig.dataset.fertig = "";
+			};
+			const weiter = () => { if (haelt) { haelt = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); } };
+			let gestartet = false, pausiert = false, pauseSeit = 0;
+			const spiele = () => {
+				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
+				spurR = []; spurL = [];
+				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("geste"); return; }
+				phase("warten");
+				start = performance.now() / 1000; uhr = 0; zuletzt = start; lauf = requestAnimationFrame(schritt);
+			};
+			groesse(); bild(0, 0);
+			// Start erst, wenn die ganze Gruppe im Bild ist (Rasul 13.11.2026 abends: „die Animation startet zu früh … ab einem
+			// gewissen Punkt soll die starten“): Der Nachsatz unter der Animation muss vollständig sichtbar sein; ohne
+			// Nachsatz 90 % der Animation.
+			// Danach (Rasul 13.11.2026 abends): „in dem Moment, wo man den Text sieht beim Scrollen, fängt die Animation an“
+			// → Auslöser ist „Überall Experten.“ unter der Animation, sobald vollständig sichtbar.
+			// Danach (Rasul 13.11.2026 abends): „Sobald der so weit reingescrollt ist, dass sich die beiden anderen Zeilen unten
+			// drunter auch lesen könnte, dann geht die Animation los. Man sieht aber die beiden Zeilen noch nicht.“ → Auslöser ist
+			// der (noch unsichtbare) Nachsatz, sobald sein Platz vollständig im Bild ist.
+			// Zwei Auslöser: Start, wenn „Überall Experten.“ erscheint (zu 60 % sichtbar); Freigabe für den zweiten Abschnitt,
+			// wenn der Platz des Nachsatzes vollständig im Bild ist. Ohne diese Zeilen: Start bei 90 % der Animation, frei.
+			const bandA = fig.closest(".anlass--band");
+			const nachsatz = bandA?.querySelector(".anlass__nachsatz");
+			// Ohne Zweiteilung (Rasul 14.11.2026: „wir machen mal die Zweiteilung weg, wir lassen es bei 50 und die Animation
+			// startet, wenn die unterste Zeile über diese 20 Prozent drüber ist, also die BBH-Regel“): Die Animation läuft ohne
+			// Halt durch (Personen, dann Nachsatz mit Fingerpunkten, Geste, Kamerafahrt). Vorher: Halt nach den Personen bis zur
+			// Freigabe durch den Nachsatz (Git-Geschichte).
+			freigabe = true;
+			// früher (Rasul 13.11.2026 abends: „jetzt kann die Animation ein bisschen früher anfangen. Also wenn unten der Text
+			// erscheint … dann könnten oben schon die Punkte erscheinen“): Start, sobald „Überall Experten.“ unten ins Bild kommt
+			// noch früher (Rasul 13.11.2026 abends: „zeig mal die Punkte in dem Moment, wo du unten auch den Text zeigst. Die
+			// geht jetzt deutlich zu spät los“): Start, sobald ein Drittel der Animation im Bild ist, nicht erst mit der Zeile
+			// Start nach der BBH-Regel: sobald die Oberkante des Nachsatzes (unterste Zeilen der Überschrift) die Linie 20 % über
+			// der Fensterunterkante erreicht, genau wie BBHs Zeilen-Blende (Schwelle 0). Erst „ganz über der Linie“ (Schwelle 1)
+			// war zu spät (Rasul 14.11.2026 bei 1008 px Fensterhöhe: „Eigentlich müsste die Animation jetzt starten, oder?“;
+			// gemessen: Oberkante 664 px, Unterkante 840 px, Linie bei 806 px). Ohne Nachsatz: 90 % der Animation im Bild. Bleibt scharf, weil sie sich zurücksetzen kann.
+			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting)) spiele(); },
+				nachsatz ? { rootMargin: "0px 0px -20% 0px", threshold: 0 } : { threshold: 0.9 });
+			beob.observe(nachsatz ?? fig);
+			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
+			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
+			// research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md 3.4 und 4.1):
+			// 1. Rausgescrollt, bevor sie fertig ist: Sie hält an und läuft beim Zurückkommen an derselben Stelle weiter
+			//    (BBH-Regel für Videos).
+			// 2. Nach unten weitergescrollt und wieder hoch: Das Schlussbild bleibt stehen (wer zurückblättert, will nachlesen).
+			// 3. Ganz nach oben zurück, über das Band hinaus (Animation liegt unterhalb des Fensters): Sie setzt sich auf den
+			//    Anfang zurück und spielt beim nächsten Herunterscrollen neu (wie BBHs Unterschrift, die sich neu schreibt).
+			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
+			const zuruecksetzen = () => {
+				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
+				uhr = 0; spurR = []; spurL = []; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
+			};
+			const sicht = new IntersectionObserver((e) => {
+				const x = e[e.length - 1];
+				if (x.isIntersecting) {
+					if (pausiert) {
+						// Leuchtspur hängt an der Uhrzeit: um die Pause verschieben, sonst wäre sie beim Weiterlaufen verglüht
+						pausiert = false; const d = performance.now() / 1000 - pauseSeit;
+						spurR = spurR.map(([a, t]) => [a, t + d]); spurL = spurL.map(([a, t]) => [a, t + d]);
+						zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+					}
+					return;
+				}
+				const unten = window.innerHeight;
+				if (x.boundingClientRect.top >= (x.rootBounds?.bottom ?? unten)) { if (gestartet && !still) zuruecksetzen(); return; }
+				if (gestartet && !haelt && !pausiert && fig.dataset.fertig === undefined) {
+					cancelAnimationFrame(lauf); pausiert = true; pauseSeit = performance.now() / 1000;
+				}
+			}, { threshold: 0 });
+			sicht.observe(fig);
+			fig.addEventListener("click", spiele);
+			window.addEventListener("resize", () => { if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse(); });
+			// nach dem Laden der Schrift neu messen (vorher hat die Überschrift eine andere Breite und Höhe)
+			document.fonts?.ready.then(() => { if (start < 0) { groesse(); bild(0, 0); } });
+		});
+	}
+	document.addEventListener("astro:page-load", experten);
+</script>

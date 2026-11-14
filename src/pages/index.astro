@@ -8,11 +8,25 @@
    Wortmarke (Forma-Umrisse, Lizenz offen). Die volle Startseite liegt im Zweig `dev`. */
 import Layout from "../layouts/Layout.astro";
 import Haltung from "../components/bausteine/Haltung.astro";
+import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
+/* Hero seit 14.11.2026: das helle Band mit der Animation „Experten-Auswahl“ aus dem Zweig `dev` (dort abgenommen, Rasul
+   14.11.2026: „der ist richtig gut geworden jetzt, das Segment“). Rasul: „Wir könnten jetzt, bis wir ein Video haben, die
+   Animation auch auf unsere offizielle Live-Seite hochladen. Und tatsächlich sogar als Hero.“ Der große Satz folgt
+   darunter. Bausteine und Werte wie in `dev`, ohne die Test-Schalter (die Animation nimmt ohne Schalter die
+   Grundeinstellungen: Kamera, Figuren, Augenhöhe, Reihen, 16:9, 50 % Höhe, kein Raster). */
 ---
 <Layout gateMenuBehindHero>
 	<main class="minimal">
+		<section class="anlass anlass--band">
+			<div class="rahmen anlass__band-innen">
+				<ExpertenAuswahl />
+				<h1 class="anlass__satz anlass__satz--eins">Überall Experten.</h1>
+				<p class="anlass__satz anlass__nachsatz">Zeit für den Video&shy;beweis<br />auch im Business.</p>
+				<p class="t-lesen anlass__text">Wie soll ein Entscheider eure Expertise erkennen? Die Feeds sind voll von KI-generierten Beiträgen. Und inzwischen stehen auch die echten Beiträge unter Generalverdacht. Expertise muss man in Zukunft vor dem ersten Kontakt beweisen. Wir liefern den Videobeweis aus echten&nbsp;Gesprächen.</p>
+			</div>
+		</section>
 		<section class="minimal__satz rahmen">
-			<Haltung ebene="h1" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
+			<Haltung ebene="h2" zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
 		</section>
 		{/* Let’s Parley am Ende heraus (Rasul 13.11.2026 abends: „unter Let's Parley kommt kein Terminkalender, haben wir
 		   das gar nicht so gebaut. Dann machen wir Let's Parley auf der Hauptseite auch raus.“). Termin über das Menü. */}
@@ -20,6 +34,16 @@ import Haltung from "../components/bausteine/Haltung.astro";
 </Layout>
 
 <style>
+	/* Band wie in `dev` (src/pages/index.astro dort, mit Begründungen und Rasuls Worten): weiß, Animation oben bündig,
+	   Überschrift direkt darunter, Nachsatz blendet in 1 s ein, Text 48 px darunter, mittig auf 46 Zeichen */
+	.anlass--band { background: var(--white); color: var(--black); padding: 0 0 var(--abstand-lg); overflow-x: clip; }
+	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
+	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; }
+	.anlass--band .anlass__satz--eins { margin-top: calc(0px - var(--abstand-md)); }
+	.anlass--band .anlass__nachsatz { margin-top: calc(0px - var(--abstand-md)); transition: opacity 1s ease-in-out; }
+	:global(.anlass--band[data-phase="warten"] .anlass__nachsatz) { opacity: 0; }
+	.anlass__text { margin: calc(3rem - var(--abstand-md)) auto 0; max-width: 46ch; text-align: center; text-wrap: balance; }
+
 	/* Der Satz füllt den ersten Bildschirm, mittig */
 	.minimal__satz {
 		min-height: 100svh;
