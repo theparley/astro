@@ -39,7 +39,6 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// LUECKE 40 statt 8 (Rasul 14.11.2026: „mach mal die Lücke vom Ansetzen der Finger größer am Anfang und am Ende“):
 	// Abstand der beiden Finger, wo sie aufsetzen (oben Mitte) und loslassen (unten Mitte).
 	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 40;
-	const LOS_ALT = import.meta.env.DEV && typeof location !== "undefined" && new URLSearchParams(location.search).get("los") === "alt"; // lokal: Ende wie vorher
 	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
 	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
 	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
@@ -724,10 +723,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// jüngste Stück der Spur unter den Fingern noch 0,9 s nach (GLIMM) und die Punkte blendeten 0,4 s aus; jetzt ist
 				// beides 0,3 s (Punkte 0,2 s) nach dem Loslassen weg, gleichzeitig mit dem Kreis der Berührung. Der Rest der Spur
 				// verglimmt weiter wie bisher (das weiche Auslaufen bleibt).
-				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / (LOS_ALT ? 0.4 : 0.2)); }
+				else if (t >= T_GESTE + gDauer) { s = 1; deck = Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.2); }
 				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
-				const nachLos = !LOS_ALT && t > T_GESTE + gDauer ? sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.3)) : 1;
+				const nachLos = t > T_GESTE + gDauer ? sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.3)) : 1;
 				spur(spurR, WEG_R, jetzt, nachLos, T_GESTE + gDauer); spur(spurL, WEG_L, jetzt, nachLos, T_GESTE + gDauer);
 				if (deck > 0) {
 					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
