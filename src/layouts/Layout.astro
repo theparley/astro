@@ -247,11 +247,6 @@ const websiteJsonLd = JSON.stringify({
 					// Satz unter der Animation: unter = die beiden Hälften untereinander (Grundeinstellung, Rasul 15.11.2026: „ja,
 					// übereinander ist besser“); zeile = beide in einer Zeile (bis 15.11.2026)
 					document.documentElement.dataset.satzform = liesWahl("satzform", ["zeile", "unter"], "unter");
-					// Probe (Rasul 15.11.2026: „ob wir aus dem letzten Satz … ein extra Abschnitt machen“), noch nicht entschieden:
-					// Schlusssatz des Bandes. zusammen = im zweiten Absatz (so steht es live); eigen = eigener Absatz in Lesegröße
-					// (Grundeinstellung auf Dev zum Ansehen); gross = eigener Absatz in der Größe des Satzpaars. ?schluss=…
-					// Der Zweig `minimal` kennt nur „zusammen“.
-					document.documentElement.dataset.schluss = liesWahl("schluss", ["zusammen", "eigen", "gross"], "eigen");
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
