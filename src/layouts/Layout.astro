@@ -235,6 +235,8 @@ const websiteJsonLd = JSON.stringify({
 					// (15.11.2026); leer = alle erscheinen nach und nach (bis 15.11.2026).
 					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll", "alle"], "alle");
 					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher", "ohne"], "ohne"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
+					// Pole Position: die ausgewählte Person schiebt sich während der Geste nach vorne (Rasul 15.11.2026)
+					document.documentElement.dataset.pole = liesWahl("pole", ["an", "aus"], "an");
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();

@@ -398,6 +398,19 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		const b1 = Math.min(500, halb);
 		seite(3, -b1, -130, -95, -25, 2, spaeter); // links: drei, nah
 		seite(1, 330, 330, 15, 45, 2, spaeter); // rechts: eine, weiter hinten
+		// Staffelung zum Ende hin (Rasul 15.11.2026: „am Ende müsste man dann auch im Hintergrund ein paar Männchen mehr sehen
+		// und näher stehen. Also da müsste man eine Staffelung haben, welche, die weniger unscharf sind, rechts und links“):
+		// fünf Personen in mittlerer Tiefe links und rechts. Sie stehen näher als die hinteren Reihen, sind deshalb größer und
+		// weniger unscharf und füllen die Lücke zwischen den drei vorne und dem Band hinten. Die Mitte bleibt frei für die
+		// Person, die nach vorne rutscht.
+		// Weiter innen, damit sie nach der Ranfahrt noch im Bild stehen (gemessen 15.11.2026: außerhalb von etwa 450 laufen
+		// sie am Ende aus dem Rahmen).
+		seite(3, -430, -230, -10, 70, 2, spaeter); // links, mittlere Tiefe
+		seite(3, 230, 430, -20, 80, 2, spaeter); // rechts, mittlere Tiefe
+		// Zweite Stufe der Staffelung: näher als die mittlere, deshalb größer und fast scharf; außen genug Abstand, damit sie
+		// die Geste in der Mitte nicht überdecken.
+		seite(2, -470, -310, -150, -70, 2, spaeter); // links, nah
+		seite(2, 310, 470, -140, -60, 2, spaeter); // rechts, nah
 		seite(6, -halb * 0.9, -110, 45, 140, 2, spaeter);
 		seite(3, 140, halb * 0.8, 110, 190, 2, spaeter);
 		seite(15, -halb, -40, 180, 320, 3, spaeter);
@@ -731,7 +744,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const e = 0.15 * tz + 0.85 * lo;
 				return { e, s: 0.5 * (e + Math.log(groesseVorne(e)) / L) };
 			};
-			const bild = (t: number, jetzt: number) => {
+			const zeichneBild = (t: number, jetzt: number) => {
 				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
 				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
 				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
@@ -892,6 +905,23 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						zeichnePerson(ctx, q.x, q.y, q.s, ein * 0.85 * (1 - weich((t - T_AUSWAHL + 0.3) / 0.8)));
 					}
 				}
+			};
+			// Pole Position (Rasul 15.11.2026: „Was wäre denn, wenn das Männchen, das wir am Ende zeigen, am Anfang nicht ganz vorne
+			// steht, sondern sich während der Animation nach vorne schiebt?“ und: „das eine ist die Kamerafahrt und das andere ist
+			// eine Fläche, auf der die Männchen stehen. Und auf dieser Fläche würdest du das Männchen einfach nur nach vorne
+			// schieben. Es ändert an der Kamerabewegung nichts.“): Die ausgewählte Person startet weiter hinten und rutscht
+			// während der Geste auf ihren Platz ganz vorne. Nur der Platz auf der Fläche ändert sich; Kamerabahn, Ranfahrt und
+			// Endwerte rechnen weiter mit dem Zielplatz, weil die Person dort ankommt.
+			const POLE_VON_X = 150, POLE_VON_Z = -40; // zwei Reihen weiter hinten und etwas seitlich
+			const pole = () => document.documentElement.dataset.pole !== "aus";
+			const bild = (t: number, jetzt: number) => {
+				const q = leuteRaum.find((p) => p.ebene === 0);
+				if (!pole() || !q || ende() !== "kamera") { zeichneBild(t, jetzt); return; }
+				const zielX = q.wx, zielZ = q.wz;
+				const u = kubisch(Math.max(0, Math.min(1, (t - T_GESTE) / (T_AUSWAHL - T_GESTE))));
+				q.wx = POLE_VON_X + (zielX - POLE_VON_X) * u;
+				q.wz = POLE_VON_Z + (zielZ - POLE_VON_Z) * u;
+				try { zeichneBild(t, jetzt); } finally { q.wx = zielX; q.wz = zielZ; }
 			};
 
 			// Phase für den Nachsatz unter der Animation: „warten“ bis zur Geste, dann „geste“ (auch am Band, für die Stilregel)
