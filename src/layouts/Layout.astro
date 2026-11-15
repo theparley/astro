@@ -247,10 +247,6 @@ const websiteJsonLd = JSON.stringify({
 					// Satz unter der Animation: unter = die beiden Hälften untereinander (Grundeinstellung, Rasul 15.11.2026: „ja,
 					// übereinander ist besser“); zeile = beide in einer Zeile (bis 15.11.2026)
 					document.documentElement.dataset.satzform = liesWahl("satzform", ["zeile", "unter"], "unter");
-					// Probe (Rasul 15.11.2026: „Landen anstatt bringen finde ich gar nicht schlecht.“), noch nicht entschieden: zweites
-					// Verb im ersten Absatz des Bandes. landen = „Mit Videobeweisen landet ihr …“ (Grundeinstellung auf Dev zum Ansehen);
-					// ?verb=bringen zeigt die jetzige Fassung, die live steht. Der Zweig `minimal` kennt nur „bringen“.
-					document.documentElement.dataset.verb = liesWahl("verb", ["bringen", "landen"], "landen");
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
