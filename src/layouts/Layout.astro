@@ -157,9 +157,18 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.umlaut = liesUmlaut();
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
-					// Textfolge der Experten-Animation fest „vorher“ (dev entschieden 14.11.2026): „Was alle behaupten,“ blendet während
-					// der Geste aus, „wird hier bewiesen.“ ein
-					document.documentElement.dataset.textfolge = "vorher";
+					// Experten-Animation mit festen Grundeinstellungen aus `dev` (Stand 15.11.2026), ohne Schalter: Satz steht von
+					// Anfang an da (ohne), ganze Gruppe ab dem ersten Bild (alle), Hälften untereinander, Pole Position und die
+					// Bewegungen der Menge an, Atmen aus
+					document.documentElement.dataset.textfolge = "ohne";
+					document.documentElement.dataset.anfang = "alle";
+					document.documentElement.dataset.satzform = "unter";
+					document.documentElement.dataset.pole = "an";
+					document.documentElement.dataset.mit = "an";
+					document.documentElement.dataset.gasse = "an";
+					document.documentElement.dataset.staffel = "an";
+					document.documentElement.dataset.weite = "an";
+					document.documentElement.dataset.atmen = "aus";
 					var h = liesHero();
 					document.documentElement.dataset.hero = h;
 					document.documentElement.dataset.menu = h === "film" ? "bbh" : lies();
