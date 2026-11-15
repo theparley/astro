@@ -195,8 +195,13 @@ const websiteJsonLd = JSON.stringify({
 					} catch (e) { return q || "reihen"; }
 				}
 				// Höhe der Animation in % der Fensterhöhe und Größe der Band-Überschrift (13.11.2026 abends)
+				// Im Rahmen (Vergleichsseite) zählt nur die Adresse: nichts merken, nichts Gemerktes lesen. Sonst setzt die
+				// Vergleichsseite die Wahl für den ganzen Browser, und das normale Fenster zeigt danach die Probe
+				// (Fehler 15.11.2026, siehe Website_Neustart_2026-11.md).
+				var imRahmen = window.top !== window.self;
 				function liesWahl(name, werte, vorgabe) {
 					var q = new URLSearchParams(suche).get(name);
+					if (imRahmen) return werte.indexOf(q) >= 0 ? q : vorgabe;
 					try {
 						if (werte.indexOf(q) >= 0) speicher.setItem("parley-" + name, q);
 						return speicher.getItem("parley-" + name) || vorgabe;
@@ -226,7 +231,7 @@ const websiteJsonLd = JSON.stringify({
 					// Experten.“ blendet aus, Fahrt läuft, danach die beiden Zeilen an derselben Stelle, eine nach der anderen.
 					// Anfang der Experten-Animation: voll = ein Teil der Personen steht ab dem ersten Bild da (Grundeinstellung,
 					// Rasul 15.11.2026: „wir nehmen die rechte Seite, wo schon Personen da sind“); leer = alle erscheinen nach und nach (bis 15.11.2026)
-					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll"], "voll");
+					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll", "alle"], "voll");
 					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher"], "vorher"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();

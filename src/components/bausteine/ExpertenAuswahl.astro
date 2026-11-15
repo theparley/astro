@@ -327,6 +327,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// kommt zur Ruhe und auch die Bewegung im Bild kommt zur Ruhe.“ Also wieder drei Zeitpläne: vorne, nahe Reihen gestaucht
 	// vor der Fahrt, hintere Reihen auf der langen Kurve.
 	const ANFANG_VOLL = 0.6;
+	// Anfang „alle“: Die Uhr beginnt dort, wo sonst die letzte Person erschienen ist (T_PERSONEN). Dadurch fällt die
+	// Wartezeit aufs Erscheinen weg und nur die Geste mit der Kamerafahrt bleibt, also rund 1,4 Sekunden kürzer.
+	const VORSPRUNG = () => (document.documentElement.dataset.anfang === "alle" ? T_PERSONEN : 0);
 	function uebergang(liste: Person[]): Person[] {
 		const nahBis = T_KAMERA - 0.5; // nahe Reihen fertig, bevor die Kamera losfährt
 		const k = (nahBis - 0.2) / (T_ERSCH_BIS() - 0.2);
@@ -335,6 +338,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		// Leute drauf sind … wenn ich scrolle, das dauert mir zu lange, bis da was passiert“): wer in den ersten ANFANG_VOLL
 		// Sekunden erscheinen würde, steht schon beim ersten Bild da; alle anderen erscheinen wie gehabt.
 		if (document.documentElement.dataset.anfang === "voll") liste.forEach((q) => { if (!q.spaet && q.ein < ANFANG_VOLL) q.ein = -1; });
+		// Anfang „alle“ (Probe, Rasul 15.11.2026: „die Anfangssequenz, dass die Personen erscheinen, ist jetzt nicht mehr Teil
+		// unserer Geschichte … Wenn wir sagen, alle behaupten, dann macht das Aufpoppen eigentlich gar keinen Sinn mehr“):
+		// Niemand poppt auf, die ganze Gruppe steht ab dem ersten Bild da; es läuft nur noch die Videobeweis-Geste mit der
+		// Kamerafahrt. Die Uhr startet dafür bei VORSPRUNG (siehe spiele), damit die Wartezeit aufs Erscheinen entfällt.
+		if (document.documentElement.dataset.anfang === "alle") liste.forEach((q) => { q.ein = -1; });
 		return liste;
 	}
 	function personenFahrt(): Person[] {
@@ -918,9 +926,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				spurR = []; spurL = []; ansageRest = D_ANSAGE;
 				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); return; }
 				phase("warten");
-				start = performance.now() / 1000; uhr = 0; zuletzt = start; lauf = requestAnimationFrame(schritt);
+				start = performance.now() / 1000; uhr = VORSPRUNG(); zuletzt = start; lauf = requestAnimationFrame(schritt);
 			};
-			groesse(); bild(0, 0);
+			groesse(); bild(VORSPRUNG(), 0);
 			// Start erst, wenn die ganze Gruppe im Bild ist (Rasul 13.11.2026 abends: „die Animation startet zu früh … ab einem
 			// gewissen Punkt soll die starten“): Der Nachsatz unter der Animation muss vollständig sichtbar sein; ohne
 			// Nachsatz 90 % der Animation.
@@ -970,7 +978,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
 			const zuruecksetzen = () => {
 				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
-				uhr = 0; spurR = []; spurL = []; ansageRest = D_ANSAGE; delete fig.dataset.fertig; phase("warten"); groesse(); bild(0, 0);
+				uhr = VORSPRUNG(); spurR = []; spurL = []; ansageRest = D_ANSAGE; delete fig.dataset.fertig; phase("warten"); groesse(); bild(uhr, 0);
 			};
 			const sicht = new IntersectionObserver((e) => {
 				const x = e[e.length - 1];
