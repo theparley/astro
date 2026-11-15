@@ -951,10 +951,17 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				if (ende() !== "kamera") { zeichneBild(t, jetzt); return; }
 				const merk: { q: Person; x: number; z: number }[] = [];
 				const halte = (q: Person) => { merk.push({ q, x: q.wx, z: q.wz }); };
-				const fenster = T_AUSWAHL - T_PERSONEN;
+				// Der Weg der Gruppe beginnt mit der Geste, nicht vorher (Rasul 15.11.2026, wörtlich: „Die Menschen bewegen sich noch
+				// am Anfang. Bevor die Animation losgeht. Das sollte nicht sein.“). Grund: Das Fenster hing an T_PERSONEN (1,4 s),
+				// die Geste beginnt aber erst bei T_GESTE (2,2 s). Solange bis dahin noch Personen erschienen, fiel das nicht auf;
+				// seit Anfang „alle“ steht die Gruppe fertig da und driftete 0,8 s ohne Anlass. Bei „leer“ und „voll“ bleibt es bei
+				// T_PERSONEN. Folge bei „alle“: Fenster 1,4 s statt 2,2 s, die Gesamtdauer bleibt. Wert bei jedem Bild aus dem
+				// Schalter gelesen, damit die Werkstatt stimmt.
+				const wegLos = document.documentElement.dataset.anfang === "alle" ? T_GESTE : T_PERSONEN;
+				const fenster = T_AUSWAHL - wegLos;
 				// Anteil der Bewegung für Person i; mit „staffel“ startet sie später und braucht anders lang
 				const anteil = (i: number) => {
-					let los = T_PERSONEN, dauer = fenster;
+					let los = wegLos, dauer = fenster;
 					if (an("staffel")) { los += streu(i) * 0.25; dauer = fenster * (0.8 + streu(i + 7) * 0.4); }
 					return kubisch(Math.max(0, Math.min(1, (t - los) / dauer)));
 				};
@@ -977,7 +984,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				}
 				// hintere Reihen weiten sich, links stärker als rechts
 				if (an("weite")) {
-					const uW = kubisch(Math.max(0, Math.min(1, (t - T_PERSONEN) / (ENDE - T_PERSONEN))));
+					const uW = kubisch(Math.max(0, Math.min(1, (t - wegLos) / (ENDE - wegLos)))); // Weitung beginnt ebenfalls erst mit dem Weg
 					leuteRaum.forEach((q) => { if (q.ebene === 3) { halte(q); q.wx += (q.wx < 0 ? -26 : 16) * uW; } });
 				}
 				// Dauerschwanken: kleine, phasenverschobene Bewegung, damit niemand erstarrt wirkt
