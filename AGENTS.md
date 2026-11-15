@@ -1,3 +1,12 @@
+## Parley: Regeln und Stand liegen im Marketing-Ordner
+
+Diese Sitzung ist „Website · Programmierung“, der Code-Stadtteil der Website. Aufträge kommen von „Website · Master“, Ergebnisse gehen dorthin zurück. Vor der Arbeit lesen, alles unter `~/Desktop/letitbeam Marketing/`:
+
+- `AGENTS.md` (Einstieg) und `kontext/Zusammenarbeit.md` (Arbeitsweise)
+- `kontext/Gestaltung.md` (Schrift, Größen-Tokens, BBH-Abgleich) und `branding/aktiv/PARLEY_DESIGN.md` (Logo, Farben, Schrift: was wo steht)
+- bei Texten `branding/aktiv/PARLEY_WORDING.md` und `kontext/Stimmprofil.md`
+- `website/WEBSITE.md` (Stand und die eine Offen-Liste)
+
 ## Development
 
 When starting the dev server, use background mode:
