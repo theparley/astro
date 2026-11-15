@@ -191,7 +191,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	function kameraTiefe(Z: number, phi: number) { return kamera(0, Z, phi).zc; }
 
 	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
-	interface Person { spaet?: boolean; fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
+	interface Person { rolle?: string; spaet?: boolean; fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
 	function personen(): Person[] {
 		const rnd = zufall(7), liste: Person[] = [];
 		let versuche = 0;
@@ -350,6 +350,22 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		const halb = RW / 2 - 80;
 		const neu = (X: number, Z: number, ebene: number, ein: number): Person => ({ x: CX + X, y: CY - Z, s: 1, ein, zx: 0, zy: 0, bleibt: ebene <= 1, rang: 0, ebene, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z });
 		const j = (w: number) => (rnd() - 0.5) * w;
+		// Regietisch (15.11.2026, Rasul: „wie wenn ich Regisseur wäre und sagen könnte, wo jeder steht und wie sich jeder
+		// bewegen soll“): Liegt im Browser eine Aufstellung aus dem Werkzeug (branding/werkstatt-seiten/regietisch.html,
+		// lokal unter localhost:4321/lab/regietisch.html), gilt sie statt der eingebauten. Nur lokal, nie auf der echten Seite.
+		if (import.meta.env.DEV) {
+			let roh: any = null;
+			try { roh = JSON.parse(localStorage.getItem("parley-regie") || "null"); } catch (e) { roh = null; }
+			if (Array.isArray(roh) && roh.length) {
+				roh.forEach((r: any, i: number) => {
+					const q = neu(Number(r.x) || 0, Number(r.z) || 0, Number(r.ebene) || 2, typeof r.ein === "number" ? r.ein : -1);
+					if (r.spaet) q.spaet = true;
+					if (r.rolle) q.rolle = String(r.rolle);
+					liste.push(q);
+				});
+				return liste;
+			}
+		}
 		// alle erscheinen im ersten Abschnitt, bis kurz vor der Pause (letzte Einblendung dauert 0,5 s)
 		// Tempo des Erscheinens (Rasul 14.11.2026: „Gib dem Erscheinen der Männchen auch mal eine Geschwindigkeit. Lass es mal
 		// langsam anfangen, steigern und wieder abflachen.“): Die Zeitpunkte folgen einem Sinus-Verlauf (Umkehrung von sanft),
@@ -1050,6 +1066,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				{ threshold: [0, START_ANTEIL] });
 			beob.observe(fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
+			// Aufstellung auslesen, damit der Regietisch sie laden kann (nur lokal)
+			if (import.meta.env.DEV) (fig as any).__aufstellung = () => leuteRaum.map((q) => ({ x: Math.round(q.wx), z: Math.round(q.wz), ebene: q.ebene, spaet: !!q.spaet, ein: q.ein, rolle: q.rolle || "" }));
 			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
 			// research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md 3.4 und 4.1):
 			// 1. Rausgescrollt, bevor sie fertig ist: Sie hält an und läuft beim Zurückkommen an derselben Stelle weiter
