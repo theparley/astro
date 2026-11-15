@@ -379,7 +379,12 @@ const ZEIGE_ENTWURF = false;
 						{/* Bleibt mit „der Anbieter“ (Rasul 15.11.2026: „Ich fand es mit den Anbietern besser. Es klang mehr nach Studie.“).
 						     Am selben Tag geprobt und verworfen: „… gewinnt, wer schon vor dem ersten Kontakt Favorit war.“ und als zweiter
 						     Satz „Mit Videobeweisen steht ihr in der ersten Reihe und erscheint auf dem Schirm von Entscheidern.“ */}
-						<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war. Videobeweise bringen euch in die erste Reihe und auf den Schirm der&nbsp;Entscheider.</p>
+						{/* Probe, noch nicht entschieden (Rasul 15.11.2026, wörtlich: „Mit Videobeweisen landet ihr in der ersten Reihe und
+						     auf dem Schirm der Entscheider. Landen anstatt bringen finde ich gar nicht schlecht.“): Beide Fassungen stehen
+						     da, der Schalter ?verb=bringen|landen (data-verb am Wurzelelement) zeigt eine davon. Auf Dev ist „landen“
+						     Grundeinstellung zum Ansehen; live steht „bringen“. Mit „landen“ beide Ziele im Dativ. Der erste Satz ist gleich. */}
+						<p class="anlass__verb-bringen">In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war. Videobeweise bringen euch in die erste Reihe und auf den Schirm der&nbsp;Entscheider.</p>
+						<p class="anlass__verb-landen">In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war. Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
 						{/* Zweiter Abschnitt: der Unterschied (Rasul 15.11.2026: „ein bisschen möchte ich das Bild malen, wenn jeder jetzt
 						     seinen Boliden tunen kann mit KI, dann wird wichtig, welcher Fahrer im Cockpit sitzt. Ich will aber nicht so jetzt
 						     direkt in die Rennsprache gehen. Wenn jeder seinen Feed, sein Erscheinungsbild, seinen Output, da fehlt mir noch das
@@ -692,6 +697,11 @@ const ZEIGE_ENTWURF = false;
 	/* Abstände wie BBH simpleText (space-y-6 = 24 px) und R5 (kurze Sätze, gleicher Abstand); Rasul 14.11.2026: „Lös mal alles so,
 	   wie es BBH machen würde.“ Vorher Absätze 1 Zeile, Befunde eng (0,15 Zeilen). */
 	.anlass--band .anlass__text > * + * { margin-top: 24px; }
+	/* Probe „verb“ (15.11.2026): nur eine der beiden Fassungen des ersten Absatzes zeigen; ohne Schalter „bringen“.
+	   Die versteckte Fassung nimmt keinen Platz, und der Abstand zum nächsten Absatz bleibt, weil er am Nachfolger hängt. */
+	.anlass--band .anlass__text .anlass__verb-landen { display: none; }
+	:global(html[data-verb="landen"]) .anlass--band .anlass__text .anlass__verb-landen { display: block; margin-top: 0; }
+	:global(html[data-verb="landen"]) .anlass--band .anlass__text .anlass__verb-bringen { display: none; }
 	/* Stichpunkte im Bandtext: ohne Zeichen, mittig, eine Zeile je Punkt, eng gesetzt */
 	.anlass__liste { list-style: none; padding: 0; margin-bottom: 0; }
 	/* Befunde als ein Block ohne Abstand zwischen den Zeilen (Rasul 14.11.2026: „Ich würde trotzdem die Aufzählung als einen Block
