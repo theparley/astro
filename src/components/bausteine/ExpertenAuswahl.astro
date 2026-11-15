@@ -411,6 +411,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		// die Geste in der Mitte nicht überdecken.
 		seite(2, -470, -310, -150, -70, 2, spaeter); // links, nah
 		seite(2, 310, 470, -140, -60, 2, spaeter); // rechts, nah
+		// Vordergrund (Rasul 15.11.2026: „Du könntest aber jetzt in den Vordergrund mehr Männchen stellen. Also wenn wir drauf
+		// gucken, weiter unten.“): je zwei links und rechts auf Höhe der vordersten Person, aber weit außen, damit sie in der
+		// Draufsicht den unteren Teil der Fläche füllen und am Ende neben der großen Person stehen statt vor ihr.
+		seite(2, -215, -120, -250, -205, 2, spaeter); // links, vorne
+		seite(2, 125, 220, -245, -200, 2, spaeter); // rechts, vorne
 		seite(6, -halb * 0.9, -110, 45, 140, 2, spaeter);
 		seite(3, 140, halb * 0.8, 110, 190, 2, spaeter);
 		seite(15, -halb, -40, 180, 320, 3, spaeter);
@@ -912,7 +917,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// schieben. Es ändert an der Kamerabewegung nichts.“): Die ausgewählte Person startet weiter hinten und rutscht
 			// während der Geste auf ihren Platz ganz vorne. Nur der Platz auf der Fläche ändert sich; Kamerabahn, Ranfahrt und
 			// Endwerte rechnen weiter mit dem Zielplatz, weil die Person dort ankommt.
-			const POLE_VON_X = 0, POLE_VON_Z = -60; // dritte Reihe, mittig (Rasul 15.11.2026: „Stell ihn doch mal in die dritte Reihe“)
+			const POLE_VON_X = 0, POLE_VON_Z = -180; // halbe Strecke, mittig (Rasul 15.11.2026: „der Weg ist immer noch ein bisschen weit, setz ihn mal auf die halbe Strecke“; vorher dritte Reihe, −60)
 			// Die beiden in der ersten und zweiten Reihe stehen am Anfang leicht versetzt vor ihm und gehen zur Seite, während er
 			// nach vorne kommt (Rasul 15.11.2026: „setz eben leicht versetzt, jeweils eine Person davor … und schieb ihn nach
 			// vorne und die anderen leicht zur Seite, dass die Piktogramme sich nicht überschneiden“). Ihre Endplätze bleiben
