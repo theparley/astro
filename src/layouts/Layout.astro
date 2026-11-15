@@ -239,9 +239,11 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.pole = liesWahl("pole", ["an", "aus"], "an");
 					// Bewegung der Menge (Rasul 15.11.2026: „Alle fünf“): Mitläufer, ungleiche Gasse, Staffelstart, Atmen, Weitung.
 					// Grundstellung an, einzeln abschaltbar mit ?mit=aus und so weiter.
-					["mit", "gasse", "staffel", "atmen", "weite"].forEach(function (n) {
+					["mit", "gasse", "staffel", "weite"].forEach(function (n) {
 						document.documentElement.dataset[n] = liesWahl(n, ["an", "aus"], "an");
 					});
+					// Atmen aus (Rasul 15.11.2026: „Nimm mal das Atmen raus“); mit ?atmen=an wieder sichtbar
+					document.documentElement.dataset.atmen = liesWahl("atmen", ["an", "aus"], "aus");
 					// Satz unter der Animation: unter = die beiden Hälften untereinander (Grundeinstellung, Rasul 15.11.2026: „ja,
 					// übereinander ist besser“); zeile = beide in einer Zeile (bis 15.11.2026)
 					document.documentElement.dataset.satzform = liesWahl("satzform", ["zeile", "unter"], "unter");
@@ -256,7 +258,7 @@ const websiteJsonLd = JSON.stringify({
 				// jede Wahl im Browser, und die gemerkte schlägt die Grundeinstellung. Wer hier früher geprobt hat, sah deshalb
 				// weiter die alte Fassung. Bei jeder neuen Entscheidung das Datum hochsetzen und den Namen in die Liste nehmen.
 				try {
-					var STAND = "2026-11-15e";
+					var STAND = "2026-11-15f";
 					if (speicher.getItem("parley-stand") !== STAND) {
 						["textfolge", "anfang", "satzform", "mit", "gasse", "staffel", "atmen", "weite"].forEach(function (n) { speicher.removeItem("parley-" + n); });
 						speicher.setItem("parley-stand", STAND);
