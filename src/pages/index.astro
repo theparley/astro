@@ -40,6 +40,11 @@ import Kennzahlen from "../components/bausteine/Kennzahlen.astro";
    „Videobeweis“ mit Vorteilen und Gaststimmen, Kapitelende, Aufbau „Abschnitte“) ist Entwurf und wird nicht ausgeliefert.
    Zum Weiterarbeiten am Entwurf: auf true setzen. */
 const ZEIGE_ENTWURF = false;
+/* Segment 4 „Beweisaufnahme“ allein, nur auf localhost (Rasul 15.11.2026: „Okay, nächstes Segment.“). Eigener Schalter nur
+   für den VideoKacheln-Block; Kapitelende und der Aufbau „Abschnitte“ hängen weiter allein an ZEIGE_ENTWURF und bleiben aus.
+   Hart an import.meta.env.DEV gebunden: Im Build (Dev-Seite und parleyfilm.com) ist der Wert immer false, das Segment
+   kann dort nicht erscheinen. Zum Ausliefern später bewusst umstellen, nicht nebenbei. */
+const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 
 
 
@@ -491,7 +496,13 @@ const ZEIGE_ENTWURF = false;
 			    von Hagen, von Katrin, von Erik.“). Muster nach BBH: Titel (R3), Text-Bild-Block mit eigener Überschrift (B6),
 			    Vorteile als Kennzahlen-Reihe mit Wörtern statt Zahlen (B18), Stimmen der Gäste als Kacheln (B7, drei Spalten),
 			    danach Beweisführung und Beweisstücke als zwei Kacheln (R12). Texte sind Entwurf. Erik fehlt, kein Clip lokal. */}
-			{ZEIGE_ENTWURF && (<VideoKacheln id="kap-titel" titel="Video&shy;beweis" titelStufe="2xl" spalten={3} kacheln={[
+			{/* Überschrift „Beweisaufnahme“ statt „Videobeweis“ (15.11.2026): „Videobeweis“ steht seit 15.11.2026 über der Animation
+			    im Band, das Wort ist vergeben. „Beweisaufnahme“ ist das abgenommene Wort für den Aufnahmetag (Rasul 14.11.2026).
+			    Stufe 2xl wie im Entwurf, die Größe beurteilt Rasul am Bildschirm. War bis 15.11.2026: titel="Video&shy;beweis"
+			    mit id="kap-titel". Eigene Kennung kap-beweisaufnahme, weil kap-titel im Band sitzt und die Regeln zu
+			    data-textfolge jede zweite Überschrift mit kap-titel unsichtbar schalten.
+			    Sichtbar über ZEIGE_BEWEISAUFNAHME (nur localhost) oder mit dem ganzen Entwurf. */}
+			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;aufnahme" titelStufe="2xl" spalten={3} kacheln={[
 				{ nr: "", titel: "Ute und Katrin", zeile: "„Es fühlt sich so natürlich an, hier zu sitzen.“", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5 },
 				{ nr: "", titel: "Hagen", zeile: "„Das ist schon state of the art.“", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17 },
 				{ nr: "", titel: "Hagen", zeile: "„Ich kann nur jedem empfehlen, sich das hier mal anzuschauen.“", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9 },
@@ -506,7 +517,10 @@ const ZEIGE_ENTWURF = false;
 					    2.12 #2 und #3) */}
 					<div class="videobeweis__satz">
 						<h3 class="videobeweis__zwischentitel">Nicht jedes Video hat die gleiche Beweiskraft.</h3>
-						<p><span class="entwurf">Entwurf</span><br />Zwei Leute vor einer Kamera filmen kann jeder. Beweiskraft hat ein Video erst, wenn das Gespräch echt ist. Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine. So entsteht in der Beweisaufnahme ein Gespräch wie am Küchentisch.</p>
+						{/* Auf vier Sätze gekürzt (15.11.2026). Weggefallen ist der fünfte Satz: „So entsteht in der Beweisaufnahme ein
+						    Gespräch wie am Küchentisch.“ Die Überschrift sagt das Wort „Beweisaufnahme“ jetzt selbst, und „wie am
+						    Küchentisch“ verspricht, was jedes Podcaststudio verspricht. */}
+						<p><span class="entwurf">Entwurf</span><br />Zwei Leute vor einer Kamera filmen kann jeder. Beweiskraft hat ein Video erst, wenn das Gespräch echt ist. Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine.</p>
 						<p><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
 					</div>
 					{/* Vorteile als Karten mit Zeichnung wie BBHs „Join the flock“ (Analyse 2.12 #4: drei Spalten, Bild 1:1, Titel und
