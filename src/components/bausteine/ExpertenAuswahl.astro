@@ -917,25 +917,63 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// schieben. Es ändert an der Kamerabewegung nichts.“): Die ausgewählte Person startet weiter hinten und rutscht
 			// während der Geste auf ihren Platz ganz vorne. Nur der Platz auf der Fläche ändert sich; Kamerabahn, Ranfahrt und
 			// Endwerte rechnen weiter mit dem Zielplatz, weil die Person dort ankommt.
-			const POLE_VON_X = 0, POLE_VON_Z = -180; // halbe Strecke, mittig (Rasul 15.11.2026: „der Weg ist immer noch ein bisschen weit, setz ihn mal auf die halbe Strecke“; vorher dritte Reihe, −60)
-			// Die beiden in der ersten und zweiten Reihe stehen am Anfang leicht versetzt vor ihm und gehen zur Seite, während er
-			// nach vorne kommt (Rasul 15.11.2026: „setz eben leicht versetzt, jeweils eine Person davor … und schieb ihn nach
-			// vorne und die anderen leicht zur Seite, dass die Piktogramme sich nicht überschneiden“). Ihre Endplätze bleiben
-			// die bisherigen, nur der Startplatz ist neu; deshalb ändert sich am Endbild nichts.
-			const POLE_DAVOR_X = [-70, 60];
+			const POLE_VON_X = 0, POLE_VON_Z = -180; // halbe Strecke, mittig (Rasul 15.11.2026: „setz ihn mal auf die halbe Strecke“)
+			const POLE_DAVOR_X = [-70, 60]; // Startplätze der beiden, die zur Seite gehen
 			const pole = () => document.documentElement.dataset.pole !== "aus";
+			// Vier Proben zur Bewegung der Menge (Rasul 15.11.2026: „Ich finde, er ist gerade ein bisschen allein, wenn er da
+			// vorkommt … die Bewegung der Menschen sollte so natürlich wie möglich wirken.“), einzeln schaltbar, Grundstellung
+			// aus. Varianten und Begründungen: research/Bewegung_der_Menge_Varianten_2026-11.md im Marketing-Ordner.
+			//   mit     = zwei laufen mit nach vorne, kommen aber nur halb so weit
+			//   gasse   = ungleich ausweichen (drei nach links, einer nach rechts) statt spiegelgleich
+			//   staffel = jede Person startet versetzt und braucht unterschiedlich lange
+			//   atmen   = winziges Dauerschwanken aller Personen, phasenverschoben
+			//   weite   = die hinteren Reihen driften langsam nach außen, links stärker als rechts
+			const an = (n: string) => document.documentElement.dataset[n] === "an";
+			// fester Pseudozufall je Person, damit jedes Abspielen gleich aussieht
+			const streu = (i: number) => { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); };
 			const bild = (t: number, jetzt: number) => {
-				const vorn = leuteRaum.filter((p) => p.ebene <= 1);
-				if (!pole() || !vorn.length || ende() !== "kamera") { zeichneBild(t, jetzt); return; }
-				// langsamer und früher als zuvor (Rasul 15.11.2026: „es ist aber zu schnell“): vom Beginn der Uhr bis zur Auswahl
-				const u = kubisch(Math.max(0, Math.min(1, (t - T_PERSONEN) / (T_AUSWAHL - T_PERSONEN))));
-				const merk = vorn.map((q) => ({ q, x: q.wx, z: q.wz }));
-				let n = 0;
-				for (const m of merk) {
-					if (m.q.ebene === 0) { m.q.wx = POLE_VON_X + (m.x - POLE_VON_X) * u; m.q.wz = POLE_VON_Z + (m.z - POLE_VON_Z) * u; }
-					else { const von = POLE_DAVOR_X[n++] ?? m.x; m.q.wx = von + (m.x - von) * u; }
+				if (ende() !== "kamera") { zeichneBild(t, jetzt); return; }
+				const merk: { q: Person; x: number; z: number }[] = [];
+				const halte = (q: Person) => { merk.push({ q, x: q.wx, z: q.wz }); };
+				const fenster = T_AUSWAHL - T_PERSONEN;
+				// Anteil der Bewegung für Person i; mit „staffel“ startet sie später und braucht anders lang
+				const anteil = (i: number) => {
+					let los = T_PERSONEN, dauer = fenster;
+					if (an("staffel")) { los += streu(i) * 0.25; dauer = fenster * (0.8 + streu(i + 7) * 0.4); }
+					return kubisch(Math.max(0, Math.min(1, (t - los) / dauer)));
+				};
+				if (pole()) {
+					const vorn = leuteRaum.filter((q) => q.ebene <= 1);
+					let n = 0;
+					vorn.forEach((q, k) => {
+						halte(q);
+						const u = anteil(k);
+						if (q.ebene === 0) { q.wx = POLE_VON_X + (q.wx - POLE_VON_X) * u; q.wz = POLE_VON_Z + (q.wz - POLE_VON_Z) * u; }
+						else { const von = POLE_DAVOR_X[n++] ?? q.wx; q.wx = von + (q.wx - von) * u; }
+					});
 				}
-				try { zeichneBild(t, jetzt); } finally { for (const m of merk) { m.q.wx = m.x; m.q.wz = m.z; } }
+				// Mitläufer und ungleiche Gasse betreffen Personen der nahen Reihen, von der Mitte aus gezählt
+				if (an("mit") || an("gasse")) {
+					const nah = leuteRaum.filter((q) => q.ebene === 2 && q.wz > -200 && q.wz < 120).sort((a, b) => Math.abs(a.wx) - Math.abs(b.wx));
+					if (an("mit")) nah.slice(0, 2).forEach((q, k) => { halte(q); q.wz -= (95 + streu(k + 3) * 35) * anteil(k + 11); });
+					// ungleich: zwei weitere gehen zur Seite, beide nach links, dazu die zwei aus „pole“ (einer links, einer rechts)
+					if (an("gasse")) nah.slice(2, 4).forEach((q, k) => { halte(q); q.wx -= (70 + streu(k + 5) * 45) * anteil(k + 17); });
+				}
+				// hintere Reihen weiten sich, links stärker als rechts
+				if (an("weite")) {
+					const uW = kubisch(Math.max(0, Math.min(1, (t - T_PERSONEN) / (ENDE - T_PERSONEN))));
+					leuteRaum.forEach((q) => { if (q.ebene === 3) { halte(q); q.wx += (q.wx < 0 ? -26 : 16) * uW; } });
+				}
+				// Dauerschwanken: kleine, phasenverschobene Bewegung, damit niemand erstarrt wirkt
+				if (an("atmen")) {
+					leuteRaum.forEach((q, k) => {
+						halte(q);
+						const ph = streu(k + 23) * Math.PI * 2, per = 2.4 + streu(k + 31) * 1.6;
+						q.wx += Math.sin((t / per) * Math.PI * 2 + ph) * 3;
+						q.wz += Math.cos((t / per) * Math.PI * 2 + ph * 1.3) * 2;
+					});
+				}
+				try { zeichneBild(t, jetzt); } finally { for (let k = merk.length - 1; k >= 0; k--) { merk[k].q.wx = merk[k].x; merk[k].q.wz = merk[k].z; } }
 			};
 
 			// Phase für den Nachsatz unter der Animation: „warten“ bis zur Geste, dann „geste“ (auch am Band, für die Stilregel)

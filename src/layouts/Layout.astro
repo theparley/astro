@@ -237,6 +237,10 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher", "ohne"], "ohne"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
 					// Pole Position: die ausgewählte Person schiebt sich während der Geste nach vorne (Rasul 15.11.2026)
 					document.documentElement.dataset.pole = liesWahl("pole", ["an", "aus"], "an");
+					// Proben zur Bewegung der Menge (15.11.2026), einzeln schaltbar, Grundstellung aus
+					["mit", "gasse", "staffel", "atmen", "weite"].forEach(function (n) {
+						document.documentElement.dataset[n] = liesWahl(n, ["an", "aus"], "aus");
+					});
 					// Satz unter der Animation: unter = die beiden Hälften untereinander (Grundeinstellung, Rasul 15.11.2026: „ja,
 					// übereinander ist besser“); zeile = beide in einer Zeile (bis 15.11.2026)
 					document.documentElement.dataset.satzform = liesWahl("satzform", ["zeile", "unter"], "unter");
