@@ -235,6 +235,16 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.hero = h;
 					document.documentElement.dataset.menu = h === "film" ? "bbh" : lies();
 				}
+				// Entschiedene Proben einmalig vergessen (Rasul 15.11.2026: „Jetzt ist immer noch die alte Version.“): liesWahl merkt
+				// jede Wahl im Browser, und die gemerkte schlägt die Grundeinstellung. Wer hier früher geprobt hat, sah deshalb
+				// weiter die alte Fassung. Bei jeder neuen Entscheidung das Datum hochsetzen und den Namen in die Liste nehmen.
+				try {
+					var STAND = "2026-11-15";
+					if (speicher.getItem("parley-stand") !== STAND) {
+						["textfolge", "anfang"].forEach(function (n) { speicher.removeItem("parley-" + n); });
+						speicher.setItem("parley-stand", STAND);
+					}
+				} catch (e) {}
 				setze();
 				if (!window.__parleyMenuWahl) {
 					window.__parleyMenuWahl = true;

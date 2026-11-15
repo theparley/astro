@@ -932,7 +932,6 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Zwei Auslöser: Start, wenn „Überall Experten.“ erscheint (zu 60 % sichtbar); Freigabe für den zweiten Abschnitt,
 			// wenn der Platz des Nachsatzes vollständig im Bild ist. Ohne diese Zeilen: Start bei 90 % der Animation, frei.
 			const bandA = fig.closest(".anlass--band");
-			const nachsatz = bandA?.querySelector(".anlass__nachsatz");
 			// Ohne Zweiteilung (Rasul 14.11.2026: „wir machen mal die Zweiteilung weg, wir lassen es bei 50 und die Animation
 			// startet, wenn die unterste Zeile über diese 20 Prozent drüber ist, also die BBH-Regel“): Die Animation läuft ohne
 			// Halt durch (Personen, dann Nachsatz mit Fingerpunkten, Geste, Kamerafahrt). Vorher: Halt nach den Personen bis zur
@@ -946,14 +945,20 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// der Fensterunterkante erreicht, genau wie BBHs Zeilen-Blende (Schwelle 0). Erst „ganz über der Linie“ (Schwelle 1)
 			// war zu spät (Rasul 14.11.2026 bei 1008 px Fensterhöhe: „Eigentlich müsste die Animation jetzt starten, oder?“;
 			// gemessen: Oberkante 664 px, Unterkante 840 px, Linie bei 806 px). Ohne Nachsatz: 90 % der Animation im Bild. Bleibt scharf, weil sie sich zurücksetzen kann.
-			// Startlinie wie unten im Beobachter: Oberkante des Nachsatzes 20 % über der Fensterunterkante
-			const nachsatzUeberLinie = () => !nachsatz || nachsatz.getBoundingClientRect().top < window.innerHeight * 0.8;
-			const figSichtbar = () => { const r = fig.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; };
+			// Start, sobald ein Fünftel der Animationsfläche im Bild ist (Rasul 15.11.2026: „wir könnten schon anfangen mit den
+			// Personen entstehen lassen, wenn die Animation zu 20 % im Bild ist“). Vorher hing der Start an der Überschrift unter
+			// der Animation (Oberkante des Nachsatzes 20 % über der Fensterunterkante, BBH-Zeilenregel); dadurch musste die ganze
+			// Fläche im Bild stehen, bevor etwas passierte. Gilt für beide Richtungen, auch wenn man von unten kommt (M3).
+			const START_ANTEIL = 0.2;
+			const animImBild = () => {
+				const r = fig.getBoundingClientRect();
+				const sichtbar = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+				return r.height > 0 && sichtbar / r.height >= START_ANTEIL;
+			};
 			let zuletztRaus = "";
-			// Nur starten, wenn die Animation selbst zu sehen ist; kommt man von unten, startet der Sicht-Beobachter (M3)
-			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.isIntersecting) && figSichtbar()) spiele(); },
-				nachsatz ? { rootMargin: "0px 0px -20% 0px", threshold: 0 } : { threshold: 0.9 });
-			beob.observe(nachsatz ?? fig);
+			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.intersectionRatio >= START_ANTEIL)) spiele(); },
+				{ threshold: [0, START_ANTEIL] });
+			beob.observe(fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
 			// research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md 3.4 und 4.1):
@@ -979,9 +984,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					const vonUnten = x.boundingClientRect.top > (x.rootBounds?.height ?? window.innerHeight) / 2;
 					if (zuletztRaus === "oben" && vonUnten && gestartet && !still) zuruecksetzen();
 					zuletztRaus = "";
-					// Von unten kommend (Zurück-Taste, Scroll-Wiederherstellung): erst starten, wenn die Animation selbst im Bild
-					// ist und der Nachsatz über der Startlinie liegt (Code-Prüfung M3)
-					if (!gestartet && nachsatzUeberLinie()) spiele();
+					// Von unten kommend (Zurück-Taste, Scroll-Wiederherstellung): erst starten, wenn ein Fünftel der Fläche im Bild ist
+					if (!gestartet && animImBild()) spiele();
 					return;
 				}
 				const unten = window.innerHeight;
