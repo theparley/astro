@@ -226,7 +226,7 @@ const ZEIGE_ENTWURF = false;
 					     Eigener Absatz, damit der Satz normal umbricht; die zwei Absätze der anderen Textfolgen sind dann ausgeblendet. */}
 					{/* Rasul 15.11.2026: „Wir könnten den Text noch ändern in: Alle behaupten. Favoriten beweisen.“ Damit hängt der Satz am
 					     Favoriten aus dem Absatz darunter (82 Prozent) und an der ersten Reihe. War: „Alle behaupten. Ihr beweist.“ */}
-					<p class="anlass__satz anlass__satz--zusammen">Alle behaupten. Favoriten beweisen.</p>
+					<p class="anlass__satz anlass__satz--zusammen"><span class="anlass__halb1">Alle behaupten.</span> <span class="anlass__halb2">Favoriten beweisen.</span></p>
 					<p class="anlass__satz anlass__nachsatz"><span class="anlass__zeile1"><span class="anlass__zeit">Zeit für den Video&shy;beweis</span><span class="anlass__schirm">wird hier bewiesen.</span></span><br class="anlass__umbruch" /><span class="anlass__zeile2 anlass__zeile2--business">auch im Business.</span></p>
 					{/* Zweite Zeile in der Textfolge „vorher“ (Rasul 14.11.2026: „Und wenn wir es so aufbauen, steht er nachher auch nicht
 					     auch im Business drunter. Sondern sinngemäß und erstmal wörtlich. Damit entscheidet ihr Vertrauen noch vor dem ersten
@@ -677,6 +677,10 @@ const ZEIGE_ENTWURF = false;
 	/* Textfolge „ohne“ (Rasul 15.11.2026): kein Wechsel mehr. Aufbau wie „vorher“ (Überschrift, Animation, Satz, Text,
 	   Quelle), nur steht der Satz von Anfang an vollständig da und blendet nicht. */
 	.anlass__satz--zusammen { display: none; }
+	/* Probe „untereinander“ (Rasul 15.11.2026: „Machen wir mal in dem Moodboard noch eine Variante, wo das untereinander
+	   steht.“): die beiden Hälften als eigene Zeilen statt in einer Zeile. Schalter ?satzform=unter */
+	:global(html[data-satzform="unter"]) .anlass__satz--zusammen .anlass__halb1,
+	:global(html[data-satzform="unter"]) .anlass__satz--zusammen .anlass__halb2 { display: block; }
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--zusammen { display: block; grid-row: 3; }
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--eins,
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__nachsatz { display: none; }
