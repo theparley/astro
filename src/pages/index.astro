@@ -443,7 +443,14 @@ const ZEIGE_ENTWURF = false;
 						     dass aktuelle Fragen.“), ohne Artikel: Es geht um die Fragen von heute, nicht um einen festen Fragenkatalog.
 						     Derselbe Wortlaut steht im LinkedIn-Entwurf F („echte Gespräche, in denen du die aktuellen Fragen deiner Kunden
 						     beantwortest“), damit stimmen Website und Beitrag überein. War: „…, das die Fragen eurer Kunden beantwortet, …“ */}
-						<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und den Menschen, der sie&nbsp;hat. Gelebte Kompetenz lässt sich nicht mit KI generieren und schlägt jede&nbsp;Behauptung.</p>
+						{/* Probe, noch nicht entschieden (Rasul 15.11.2026, wörtlich: „Ich überlege gerade, ob wir aus dem letzten Satz gelebte
+						     Kompetenz lässt sich nicht punktpunkt ein extra Abschnitt machen.“): Schalter ?schluss=zusammen|eigen|gross
+						     (data-schluss am Wurzelelement). zusammen = beide Sätze in einem Absatz, so steht es live; eigen = der
+						     Schlusssatz als eigener Absatz in Lesegröße (auf Dev Grundeinstellung zum Ansehen); gross = der Schlusssatz in
+						     der Größe des Satzpaars über dem Text. Der Wortlaut ist in allen drei Fassungen derselbe. */}
+						<p class="anlass__schluss-zusammen">Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und den Menschen, der sie&nbsp;hat. Gelebte Kompetenz lässt sich nicht mit KI generieren und schlägt jede&nbsp;Behauptung.</p>
+						<p class="anlass__schluss-davor">Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und den Menschen, der sie&nbsp;hat.</p>
+						<p class="anlass__schluss-eigen">Gelebte Kompetenz lässt sich nicht mit KI generieren und schlägt jede&nbsp;Behauptung.</p>
 						{/* Dritter Abschnitt: Überleitung, und hier steht das Skalieren (Rasul 15.11.2026: „skalieren machen wir nicht bei dem
 						     Thema KI rein, das ist Quatsch. Das machen wir rein, dass wir Video mit Video die Qualität von einem echten Gespräch
 						     skalieren können“). War: „Beweisen lässt sich Expertise am besten im Gespräch. Genau das filmen wir.“ */}
@@ -698,6 +705,15 @@ const ZEIGE_ENTWURF = false;
 	/* Abstände wie BBH simpleText (space-y-6 = 24 px) und R5 (kurze Sätze, gleicher Abstand); Rasul 14.11.2026: „Lös mal alles so,
 	   wie es BBH machen würde.“ Vorher Absätze 1 Zeile, Befunde eng (0,15 Zeilen). */
 	.anlass--band .anlass__text > * + * { margin-top: 24px; }
+	/* Probe „schluss“ (15.11.2026): ohne Schalter „zusammen“. Bei „eigen“ und „gross“ ersetzt der gekürzte Absatz samt
+	   Schlusssatz den gemeinsamen. „gross“ nimmt die Stufe des Satzpaars (--text-2xl, schmale Schrift, Versalien, mittig),
+	   keine neue Größe, mit 48 px Luft darüber. Die Quellenzeile bleibt in jeder Fassung die letzte Zeile. */
+	.anlass--band .anlass__text .anlass__schluss-davor,
+	.anlass--band .anlass__text .anlass__schluss-eigen { display: none; }
+	:global(html:is([data-schluss="eigen"], [data-schluss="gross"])) .anlass--band .anlass__text .anlass__schluss-zusammen { display: none; }
+	:global(html:is([data-schluss="eigen"], [data-schluss="gross"])) .anlass--band .anlass__text .anlass__schluss-davor,
+	:global(html:is([data-schluss="eigen"], [data-schluss="gross"])) .anlass--band .anlass__text .anlass__schluss-eigen { display: block; }
+	:global(html[data-schluss="gross"]) .anlass--band .anlass__text .anlass__schluss-eigen { margin-top: 3rem; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; }
 	/* Stichpunkte im Bandtext: ohne Zeichen, mittig, eine Zeile je Punkt, eng gesetzt */
 	.anlass__liste { list-style: none; padding: 0; margin-bottom: 0; }
 	/* Befunde als ein Block ohne Abstand zwischen den Zeilen (Rasul 14.11.2026: „Ich würde trotzdem die Aufzählung als einen Block
