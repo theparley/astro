@@ -721,14 +721,10 @@ const ZEIGE_ENTWURF = false;
 	   steht.“): die beiden Hälften als eigene Zeilen statt in einer Zeile. Schalter ?satzform=unter */
 	:global(html[data-satzform="unter"]) .anlass__satz--zusammen .anlass__halb1,
 	:global(html[data-satzform="unter"]) .anlass__satz--zusammen .anlass__halb2 { display: block; }
-	/* Mehr Luft um die Animation (Rasul 15.11.2026: „setze mal Videobeweis höher und die zwei Zeilen unten tiefer. Das wird
-	   zusammengedrückt.“): Überschrift und Satzpaar stehen je --band-luft von der Animationsfläche entfernt, 64 px am Handy
-	   bis 96 px ab etwa 1024 px Breite. Vorher 48 px oben und der Rasterabstand (--abstand-md) unten. */
-	:global(html[data-textfolge="ohne"]) .anlass--band { --band-luft: clamp(4rem, 2.5rem + 5.5vw, 6rem); }
-	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--zusammen { display: block; grid-row: 3; margin-top: calc(var(--band-luft) - var(--abstand-md)); }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--zusammen { display: block; grid-row: 3; }
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--eins,
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__nachsatz { display: none; }
-	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0 0 calc(var(--band-luft) - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; text-wrap: balance; hyphens: manual; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0 0 calc(3rem - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; text-wrap: balance; hyphens: manual; }
 	:global(html[data-textfolge="ohne"] .anlass__band-innen > .experten) { grid-row: 2; }
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__text { grid-row: 4; }
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__quelle { grid-row: 5; }

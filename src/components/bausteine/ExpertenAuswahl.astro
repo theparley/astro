@@ -39,10 +39,6 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// LUECKE 40 statt 8 (Rasul 14.11.2026: „mach mal die Lücke vom Ansetzen der Finger größer am Anfang und am Ende“):
 	// Abstand der beiden Finger, wo sie aufsetzen (oben Mitte) und loslassen (unten Mitte).
 	const DAUER = 1.6, GLIMM = 0.9, DICKE = 34, LUECKE = 40;
-	// Der Strich bleibt erst stehen und verglimmt dann (Rasul 15.11.2026: „Lass mal den Strich länger stehen, bevor er
-	// ausglimmt, also die Striche von der Videobeweisgeste.“). Vorher begann jedes Stück sofort nach dem Zeichnen zu
-	// verglimmen; jetzt hält es STEHEN Sekunden in voller Stärke und verglimmt danach wie bisher über GLIMM.
-	const STEHEN = 0.5;
 	// Ablauf seit 13.11.2026 abends (Rasul: „Wenn die ganz vielen Punkte da sind, dann kommt Zeit für den Videobeweis,
 	// auch fürs Business. Und dann kommt erst die Videobeweisanimation.“): Personen erscheinen, bei T_TEXT blendet der
 	// Nachsatz unter der Animation ein, eine Sekunde später beginnt die Geste (vorher bei 1,8 s).
@@ -730,12 +726,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				for (let i = 1; i < s.length; i++) {
 					const [s0, t0] = s[i - 1], [s1, t1] = s[i];
 					const n = Math.max(1, Math.ceil((s1 - s0) / schritt));
-					if (1 - (jetzt - t1 - STEHEN) / GLIMM <= 0) continue; // dieses Stück ist ganz verglüht
+					if (1 - (jetzt - t1) / GLIMM <= 0) continue; // dieses Stück ist ganz verglüht
 					let vorher: [number, number] | null = null;
 					for (let j = 1; j <= n; j++) {
 						const f = j / n, tt = t0 + (t1 - t0) * f;
 						const jung = Math.max(0, Math.min(1, (tt - (tLos - 0.3)) / 0.3));
-						const a = (1 - jung * (1 - faktor)) * Math.max(0, Math.min(1, 1 - (jetzt - tt - STEHEN) / GLIMM));
+						const a = (1 - jung * (1 - faktor)) * Math.max(0, Math.min(1, 1 - (jetzt - tt) / GLIMM));
 						if (a <= 0) { vorher = null; continue; }
 						if (!vorher) vorher = punkt(w, s0 + (s1 - s0) * (j - 1) / n);
 						const jetztP = punkt(w, s0 + (s1 - s0) * f);
