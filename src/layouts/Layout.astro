@@ -234,7 +234,7 @@ const websiteJsonLd = JSON.stringify({
 					// „Alle behaupten.“ nichts mehr erzählt). Im Schalter bleiben: voll = ein Teil steht da, der Rest poppt auf
 					// (15.11.2026); leer = alle erscheinen nach und nach (bis 15.11.2026).
 					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll", "alle"], "alle");
-					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher"], "vorher"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
+					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher", "ohne"], "ohne"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
 					document.documentElement.dataset.lage = liesLage();
@@ -246,7 +246,7 @@ const websiteJsonLd = JSON.stringify({
 				// jede Wahl im Browser, und die gemerkte schlägt die Grundeinstellung. Wer hier früher geprobt hat, sah deshalb
 				// weiter die alte Fassung. Bei jeder neuen Entscheidung das Datum hochsetzen und den Namen in die Liste nehmen.
 				try {
-					var STAND = "2026-11-15b";
+					var STAND = "2026-11-15c";
 					if (speicher.getItem("parley-stand") !== STAND) {
 						["textfolge", "anfang"].forEach(function (n) { speicher.removeItem("parley-" + n); });
 						speicher.setItem("parley-stand", STAND);

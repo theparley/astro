@@ -217,6 +217,10 @@ const ZEIGE_ENTWURF = false;
 					<p class="anlass__satz anlass__satz--eins"><span class="anlass__eins-bisher">Überall Experten.</span><span class="anlass__eins-neu">Was alle behaupten,</span></p>
 					{/* „auch im Business“ bleibt in der Überschrift (Rasul 14.11.2026: „Zurück in die Überschrift“, nach Probe zweizeilig
 					     mit Wiederholung am Textende): Der Schubs vom Fußball ins Geschäft kommt, während die Animation läuft */}
+					{/* Textfolge „ohne“ (Rasul 15.11.2026: „Noch was zur Animation, noch einfacher. Wir machen gar keinen Textwechsel
+					     mehr. Können wir das nebeneinander schreiben?“): beide Hälften stehen als ein Satz da, von Anfang an, ohne Blende.
+					     Eigener Absatz, damit der Satz normal umbricht; die zwei Absätze der anderen Textfolgen sind dann ausgeblendet. */}
+					<p class="anlass__satz anlass__satz--zusammen">Was alle behaupten, wird hier bewiesen.</p>
 					<p class="anlass__satz anlass__nachsatz"><span class="anlass__zeile1"><span class="anlass__zeit">Zeit für den Video&shy;beweis</span><span class="anlass__schirm">wird hier bewiesen.</span></span><br class="anlass__umbruch" /><span class="anlass__zeile2 anlass__zeile2--business">auch im Business.</span></p>
 					{/* Zweite Zeile in der Textfolge „vorher“ (Rasul 14.11.2026: „Und wenn wir es so aufbauen, steht er nachher auch nicht
 					     auch im Business drunter. Sondern sinngemäß und erstmal wörtlich. Damit entscheidet ihr Vertrauen noch vor dem ersten
@@ -624,6 +628,17 @@ const ZEIGE_ENTWURF = false;
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__text { grid-row: 4; }
 	:global(html[data-textfolge="vorher"]) .anlass--band .anlass__quelle { grid-row: 5; }
 	:global(html[data-textfolge="vorher"] #kap-titel:not(.anlass__titel)) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+	/* Textfolge „ohne“ (Rasul 15.11.2026): kein Wechsel mehr. Aufbau wie „vorher“ (Überschrift, Animation, Satz, Text,
+	   Quelle), nur steht der Satz von Anfang an vollständig da und blendet nicht. */
+	.anlass__satz--zusammen { display: none; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--zusammen { display: block; grid-row: 3; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--eins,
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__nachsatz { display: none; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0 0 calc(3rem - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; text-wrap: balance; hyphens: manual; }
+	:global(html[data-textfolge="ohne"] .anlass__band-innen > .experten) { grid-row: 2; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__text { grid-row: 4; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__quelle { grid-row: 5; }
+	:global(html[data-textfolge="ohne"] #kap-titel:not(.anlass__titel)) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 	.anlass__eins-neu { display: none; }
 	:global(html[data-textfolge="vorher"]) .anlass__eins-bisher { display: none; }
 	:global(html[data-textfolge="vorher"]) .anlass__eins-neu { display: inline; }
@@ -676,4 +691,3 @@ const ZEIGE_ENTWURF = false;
 	.videobeweis__zwischentitel { font-family: var(--schrift-breit); font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; margin: 0 0 32px; }
 	.videobeweis__klein { margin-top: 48px; }
 </style>
-
