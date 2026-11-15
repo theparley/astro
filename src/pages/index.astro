@@ -516,7 +516,9 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 					{/* Satz und Text mittig wie BBHs Join-Us-Seite (Zwischentitel Bartle 2xl mittig, Einleitung text-md mittig, Analyse
 					    2.12 #2 und #3) */}
 					<div class="videobeweis__satz">
-						<h3 class="videobeweis__zwischentitel">Nicht jedes Video hat die gleiche Beweiskraft.</h3>
+						{/* Weiches Trennzeichen in „Beweis&shy;kraft“ (15.11.2026): Bei 375 px ragte das Wort 51 px aus der Spalte und die
+						    Seite ließ sich 35 px quer schieben. Trennen statt kleinerer Stufe, wie bei Video&shy;beweis und Beweis&shy;aufnahme. */}
+						<h3 class="videobeweis__zwischentitel">Nicht jedes Video hat die gleiche Beweis&shy;kraft.</h3>
 						{/* Auf vier Sätze gekürzt (15.11.2026). Weggefallen ist der fünfte Satz: „So entsteht in der Beweisaufnahme ein
 						    Gespräch wie am Küchentisch.“ Die Überschrift sagt das Wort „Beweisaufnahme“ jetzt selbst, und „wie am
 						    Küchentisch“ verspricht, was jedes Podcaststudio verspricht. */}
