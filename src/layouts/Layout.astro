@@ -229,9 +229,11 @@ const websiteJsonLd = JSON.stringify({
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
 					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
 					// Experten.“ blendet aus, Fahrt läuft, danach die beiden Zeilen an derselben Stelle, eine nach der anderen.
-					// Anfang der Experten-Animation: voll = ein Teil der Personen steht ab dem ersten Bild da (Grundeinstellung,
-					// Rasul 15.11.2026: „wir nehmen die rechte Seite, wo schon Personen da sind“); leer = alle erscheinen nach und nach (bis 15.11.2026)
-					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll", "alle"], "voll");
+					// Anfang der Experten-Animation: alle = die ganze Gruppe steht ab dem ersten Bild da, niemand poppt auf, es läuft
+					// nur die Videobeweis-Geste (Grundeinstellung, Rasul 15.11.2026: „Ja, ohne“, nachdem das Aufpoppen seit
+					// „Alle behaupten.“ nichts mehr erzählt). Im Schalter bleiben: voll = ein Teil steht da, der Rest poppt auf
+					// (15.11.2026); leer = alle erscheinen nach und nach (bis 15.11.2026).
+					document.documentElement.dataset.anfang = liesWahl("anfang", ["leer", "voll", "alle"], "alle");
 					document.documentElement.dataset.textfolge = liesWahl("textfolge", ["zugleich", "nacheinander", "vorher"], "vorher"); // Grundeinstellung „vorher“ (Rasul 14.11.2026: „Ich finde es besser, wenn es vorher ankündigt.“)
 					document.documentElement.dataset.raster = liesWahl("raster", ["aus", "an"], "aus");
 					document.documentElement.dataset.satz = liesSatz();
@@ -244,7 +246,7 @@ const websiteJsonLd = JSON.stringify({
 				// jede Wahl im Browser, und die gemerkte schlägt die Grundeinstellung. Wer hier früher geprobt hat, sah deshalb
 				// weiter die alte Fassung. Bei jeder neuen Entscheidung das Datum hochsetzen und den Namen in die Liste nehmen.
 				try {
-					var STAND = "2026-11-15";
+					var STAND = "2026-11-15b";
 					if (speicher.getItem("parley-stand") !== STAND) {
 						["textfolge", "anfang"].forEach(function (n) { speicher.removeItem("parley-" + n); });
 						speicher.setItem("parley-stand", STAND);
