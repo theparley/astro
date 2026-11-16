@@ -17,6 +17,22 @@
    Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
 interface Props { startseite?: boolean }
 const { startseite = false } = Astro.props;
+/* Namenskachel „parley Film“ in Forma DJR, NUR auf localhost (Rasul 17.11.2026: „auf der Webseite im Menü haben wir
+   parley noch groß in dieser breiten Schrift stehen. Das machen wir jetzt auch schon mal in unserer Forma DJR, und
+   zwar kleingeschrieben. Wir müssten eigentlich schreiben, wenn wir konsequent sind, parley klein und auch das Film
+   hintendran groß. … Mach es mir einmal auf der Localhost-Seite, dann gucke ich es mir an.“).
+   Forma DJR ist eine Testdatei und darf nicht veröffentlicht werden. Deshalb hängt alles an import.meta.env.DEV:
+   Text, Klasse und der Stilblock mit @font-face weiter unten werden im Bau gar nicht erzeugt (kein Verweis, keine
+   Datei). Im Bau bleibt „parley“ in Geist. Nach dem Lizenzkauf bewusst umstellen, nicht nebenbei. */
+const NAME_FORMA = import.meta.env.DEV;
+/* Stil nur für localhost, als eigener Block im Markup (nicht im <style> unten, sonst stünde der Schriftname im Bau).
+   Breite: „parley Film“ misst in Forma 900, Größenachse 72, bei 0,9 k und Laufweite -0,02 em 4,29 k (Tinte);
+   mit demselben Rand wie bisher (3,09 k − 2,78 k = 0,31 k) ergibt das 4,60 k. Lage: margin-top siehe Messung im Bericht. */
+const NAME_FORMA_STIL = `
+@font-face { font-family: "Forma DJR"; src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+.bbh-menu .bbh-menu__name.bbh-menu__name--forma span { font-family: "Forma DJR", sans-serif; font-variation-settings: "opsz" 72, "wght" 900; }
+.bbh-menu.bbh-menu--oben .bbh-menu__name.bbh-menu__name--forma { width: calc(var(--k) * 4.6); }
+`;
 
 // Wie im Zwetschke-Menü (MenuTile.astro): Home ist die Logo-Kachel, dazu Termin und Kontakt.
 // BBH-Regel: Menükacheln in zwei Reihen, Spalten = Hälfte der Links; bei ungerader Zahl kommt
@@ -63,7 +79,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   (Rasul 13.11.2026: „Ganz am Anfang sieht man das ganze Menü und noch den Namen BBH hintendran.
 		   Da würden wir einmal den kleinen parley schreiben. Dann nehmen wir unsere Forma DJR-Schrift“).
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
-		{startseite && <a href="/" class="bbh-menu__name" tabindex="-1" aria-hidden="true"><span>parley</span></a>}
+		{NAME_FORMA && <style is:inline set:html={NAME_FORMA_STIL}></style>}
+		{startseite && <a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>{NAME_FORMA ? "parley Film" : "parley"}</span></a>}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
