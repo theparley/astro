@@ -5,3 +5,24 @@
 # Stunden lang kaputten Cache erzeugen konnte.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Suchmaschinen: Nur der Host parleyfilm.com ist offen (Rasul 16.11.2026:
+# "Dass Google irgendwelche Impressum-Seiten findet, muessen wir alles
+# ausschalten."). Jede andere Adresse, unter der dieselbe Seite erreichbar
+# ist, bekommt noindex, nofollow. Die Regeln nennen den Host ausdruecklich;
+# fuer parleyfilm.com greift keine davon, dort aendert sich nichts.
+# Bewusst ueber diese Datei und nicht ueber eine Function/Middleware: Es
+# laeuft kein Code pro Aufruf, die Live-Seite kann daran nicht haengen.
+# Bewusst KEIN "Disallow: /" in robots.txt fuer diese Hosts: Wer nicht
+# crawlen darf, sieht das noindex nicht, und die Adresse kann trotzdem
+# (ohne Inhalt) im Index landen. noindex wirkt nur, wenn gecrawlt wird.
+# Vorschau-Adressen (dev.the-parley.pages.dev) bekommen von Cloudflare
+# ohnehin schon "noindex"; die dritte Regel ergaenzt nofollow.
+https://www.parleyfilm.com/*
+  X-Robots-Tag: noindex, nofollow
+
+https://the-parley.pages.dev/*
+  X-Robots-Tag: noindex, nofollow
+
+https://:zweig.the-parley.pages.dev/*
+  X-Robots-Tag: noindex, nofollow
