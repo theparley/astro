@@ -779,6 +779,10 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	/* Labels gehören zum Film (17.11.2026): Abstand Film zu Labels wie Titel zu Film, 48 px bei jeder Breite. Vorher
 	   --abstand-lg (139 / 107 / 60 px), solange Text dazwischen stand; der große Abstand bleibt nach unten. */
 	.videobeweis__vorteile { margin-top: 48px; }
+	/* Abschluss unter den Labels mindestens 96 px (17.11.2026): Am Handy ist --abstand-lg nur 60 px, bei gestapelten
+	   Labels (32 px dazwischen) las sich das als Reihe 48 / 48 / 32 / 32 / 60 ohne Pause. Der Baustein VideoKacheln setzt
+	   darunter --abstand-lg; hier kommt nur der Rest bis 96 px dazu. Am Desktop (107 bis 138 px) ändert sich nichts. */
+	.videobeweis__vorteile { padding-bottom: max(0px, calc(96px - var(--abstand-lg))); }
 	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
 	.videobeweis__weiter { margin-top: var(--abstand-lg); text-align: center; }
 	/* Blasen innen im Bild: außen ragte Hagens lange Blase in die Überschrift (gemessen 14.11.2026) */
