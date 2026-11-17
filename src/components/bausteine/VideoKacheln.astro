@@ -30,12 +30,14 @@ interface Plakat { satz: string; marke: string; bild: number }
    Karten mit drei Spalten (Analyse B, R13 und R14); in der ersten Zeile Nummer und Verb (Schritt), grau darunter der Name
    aus der Beweis-Bildwelt und die Zeile. */
 interface Kachel { nr: string; titel: string; zeile: string; src: string; von?: number; bis?: number; blasen?: Blase[]; plakat?: Plakat; href?: string; schritt?: string }
-interface Props { titel?: string; titelStufe?: "2xl"; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[]; spalten?: 2 | 3 }
-const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.props;
+interface Props { titel?: string; titelStufe?: "2xl"; id?: string; link?: { href: string; text: string }; einleitung?: string; kacheln: Kachel[]; spalten?: 2 | 3; titelMittig?: boolean }
+/* titelMittig (17.11.2026, Segment „Beweiskraft“ der Startseite, Rasul: „Beweiskraft steht nicht mittig.“): Titel mittig,
+   wenn alles darunter mittig steht. Grundregel bleibt links wie bei BBH; nur dort setzen, wo es verlangt ist. */
+const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2, titelMittig = false } = Astro.props;
 ---
 <div class:list={["videokacheln rahmen", spalten === 3 && "videokacheln--drei"]}>
 	{(titel || link) && (
-		<div class="videokacheln__kopf">
+		<div class:list={["videokacheln__kopf", titelMittig && "videokacheln__kopf--mittig"]}>
 			{titel && <h2 class:list={["t-abschnitt videokacheln__titel", titelStufe && `videokacheln__titel--${titelStufe}`]} id={id} set:html={titel} />}
 			{link && <div class="videokacheln__link"><Knopf href={link.href} text={link.text} /></div>}
 		</div>
@@ -78,6 +80,8 @@ const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.
 	/* Titel nur so breit wie nötig, damit der Link rechts daneben auf der Grundlinie stehen kann (BBH) */
 	.videokacheln__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
 	.videokacheln__link { flex: none; }
+	.videokacheln__kopf--mittig { justify-content: center; }
+	.videokacheln__kopf--mittig .videokacheln__titel { text-align: center; }
 	/* Sprungziel aus dem Menü („Videobeweis“, 13.11.2026): Luft über der Überschrift beim Ankommen. Am Rechner steht
 	   das Menü oben links (Kachel 88 px), daher dort mehr; am Handy steht es unten. */
 	.videokacheln__titel { scroll-margin-top: 32px; }
