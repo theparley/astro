@@ -45,6 +45,12 @@ const ZEIGE_ENTWURF = false;
    Hart an import.meta.env.DEV gebunden: Im Build (Dev-Seite und parleyfilm.com) ist der Wert immer false, das Segment
    kann dort nicht erscheinen. Zum Ausliefern später bewusst umstellen, nicht nebenbei. */
 const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
+/* Abschnitt „Beweisstücke“ wieder auf der Startseite, NUR auf localhost (Rasul 17.11.2026 spät: „Erstmal nur die
+   Beweisstücke, eins nach dem anderen.“). Unverändert der Baustein vom 13.11.2026 (components/abschnitte/
+   Beweisstuecke.astro: Überschrift, laufendes Band mit sechs Formaten, Kanalzeile, Text), nichts inhaltlich angepasst.
+   Das Beweisverfahren bleibt draußen. Der Baustein ist auch die Unterseite /beweisstuecke, die im Bau liegt; auf der
+   Startseite erscheint er nur über diesen Schalter. Rückweg: auf false. */
+const ZEIGE_BEWEISSTUECKE = import.meta.env.DEV;
 
 
 
@@ -617,6 +623,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 			    Beweisstücke erstmal raus aus der Ansicht, lassen nur an dem Abschnitt arbeiten.“). Rückweg: Git-Geschichte,
 			    zwei Kacheln (R12) zu /beweisfuehrung und /beweisstuecke. */}
 		</section>
+		{ZEIGE_BEWEISSTUECKE && !ZEIGE_ENTWURF && <Beweisstuecke />}
 		{ZEIGE_ENTWURF && <Kapitelende />}
 	</div>
 	{ZEIGE_ENTWURF && (<div class="aufbau aufbau--abschnitte">
