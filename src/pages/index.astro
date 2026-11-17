@@ -555,8 +555,11 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 			    Sichtbar über ZEIGE_BEWEISAUFNAHME (nur localhost) oder mit dem ganzen Entwurf.
 			    Überschrift „Beweiskraft“ statt „Beweisaufnahme“ (Rasul 17.11.2026 abends: „Und wir überschreiben das mal mit
 			    Beweiskraft, nicht mit Beweisaufnahme“). Das Wort steht damit im Titel und im Statement darunter; das ist
-			    Absicht, der Titel setzt es, das Statement löst es ein. Die Kennung kap-beweisaufnahme bleibt. */}
-			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;kraft" titelStufe="2xl" titelMittig spalten={3} kacheln={[]}>
+			    Absicht, der Titel setzt es, das Statement löst es ein. Die Kennung kap-beweisaufnahme bleibt.
+			    Stufe huge statt 2xl (17.11.2026 spät, Rasul: „Wir haben Videobeweis in zwei Zeilen aufgeteilt … Macht es auch mal
+			    für die Beweiskraft.“): „Videobeweis“ bricht, weil das Wort in huge rund 13 % breiter ist als die Spalte; in
+			    derselben Stufe bricht „Beweiskraft“ auf dieselbe Weise, und die beiden Abschnittstitel sind gleich groß. */}
+			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;kraft" titelMittig spalten={3} kacheln={[]}>
 				<Fragment slot="vorne">
 					{/* Rasul 14.11.2026: „Das ist auch die Stelle, wo wir jetzt unser Blasenelement reinbringen, auf das wir ja unser
 					    Logo aufbauen … lass uns doch nochmal unser zentrales Video in der Mitte machen. Es geht auch um die Aufnahme.
