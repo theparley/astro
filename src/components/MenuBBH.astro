@@ -15,8 +15,35 @@
    - Hover auf Kachel: Balken in Textfarbe, 15 % Deckkraft, wischt von links, 150 ms;
      aktuelle Seite trägt den Balken dauerhaft.
    Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
+import LogoBiss from "./LogoBiss.astro";
+import { readFileSync } from "node:fs";
+import { BLASE_EIN_WORT } from "../daten/blaseEinWort";
 interface Props { startseite?: boolean }
 const { startseite = false } = Astro.props;
+/* Namenskachel „parley Film“ in Forma DJR, NUR auf localhost (Rasul 17.11.2026: „auf der Webseite im Menü haben wir
+   parley noch groß in dieser breiten Schrift stehen. Das machen wir jetzt auch schon mal in unserer Forma DJR, und
+   zwar kleingeschrieben. Wir müssten eigentlich schreiben, wenn wir konsequent sind, parley klein und auch das Film
+   hintendran groß. … Mach es mir einmal auf der Localhost-Seite, dann gucke ich es mir an.“).
+   Forma DJR ist eine Testdatei und darf nicht veröffentlicht werden. Deshalb hängt alles an import.meta.env.DEV:
+   Text, Klasse und der Stilblock mit @font-face weiter unten werden im Bau gar nicht erzeugt (kein Verweis, keine
+   Datei). Im Bau bleibt „parley“ in Geist. Nach dem Lizenzkauf bewusst umstellen, nicht nebenbei.
+   Noch am 17.11.2026 wieder ein Wort (Rasul: „Wir nehmen das Wort Film aus dem Menü raus, wir schreiben nur
+   parley.“): Forma bleibt, kleingeschrieben. „parley Film“ stand nur kurz zur Ansicht auf localhost (Kachel 4,60 k). */
+/* Sperre aufgehoben (Rasul 17.11.2026, nach dem Blick auf Dev: „Du kannst die Sperre herausnehmen. Ich bin mit dem
+   Entwickler in Kontakt. Das dürfen wir verwenden, bevor ich die gekauft habe.“). Seitdem gilt die Namenskachel in
+   Forma auch im Bau; astro.config.mjs lässt dafür fonts/FormaDJRVariable.woff2 im Bau. Forma Mono bleibt nur lokal.
+   Rückweg: NAME_FORMA wieder auf import.meta.env.DEV und die Datei zurück in die Liste NUR_LOKAL. */
+const NAME_FORMA = true;
+/* Stil nur für localhost, als eigener Block im Markup (nicht im <style> unten, sonst stünde der Schriftname im Bau).
+   Breite: „parley“ misst in Forma 900, Größenachse 72, bei 0,9 k und Laufweite -0,02 em 2,58 k (Tinte);
+   mit demselben Rand wie in Geist (3,09 k − 2,78 k = 0,31 k) ergibt das 2,89 k.
+   Lage (gemessen 17.11.2026): margin-top −0,055 em statt −0,07 em gleicht oben (l) und unten (p, y) aus; die Tinte
+   sitzt 0,027 em rechts der Mitte ihrer Laufbreite, deshalb translateX(−0,027 em). Beides gilt nur für Forma. */
+const NAME_FORMA_STIL = `
+@font-face { font-family: "Forma DJR"; src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+.bbh-menu .bbh-menu__name.bbh-menu__name--forma span { font-family: "Forma DJR", sans-serif; font-variation-settings: "opsz" 72, "wght" 900; margin-top: -0.055em; transform: translateX(-0.027em); }
+.bbh-menu.bbh-menu--oben .bbh-menu__name.bbh-menu__name--forma { width: calc(var(--k) * 2.89); }
+`;
 
 // Wie im Zwetschke-Menü (MenuTile.astro): Home ist die Logo-Kachel, dazu Termin und Kontakt.
 // BBH-Regel: Menükacheln in zwei Reihen, Spalten = Hälfte der Links; bei ungerader Zahl kommt
@@ -25,8 +52,10 @@ const { startseite = false } = Astro.props;
 // auf der Startseite, nicht als eigene Übersichtsseite und nicht an den Anfang. Rasul: „Okay, dann machen wir den
 // Sprung. Aber ich finde es gut, dass es dann der Sprung ist, auf die Hauptseite an die Stelle und nicht die
 // Hauptseite nochmal neu startet.“ Mit drei Einträgen kommt „Home“ dazu, 2 × 2.
+// „Videobeweis“ wieder heraus (Rasul 13.11.2026 abends: „Wir nehmen das Wort Videobeweis wieder raus aus dem Menü, da
+// müssen wir ein anderes Wort finden.“). Der Platz bleibt für das neue Wort, Sprungziel weiter /#kap-titel.
+// Bis dahin zwei Einträge, damit fällt „Home“ nach der Regel unten weg (wie auf der Live-Seite).
 const links = [
-	// Zweig minimal: ohne „Videobeweis“ (keine Kacheln auf der reduzierten Startseite)
 	{ href: "/termin", text: "Termin" },
 	{ href: "/kontakt", text: "Kontakt" },
 ];
@@ -36,14 +65,236 @@ if (links.length % 2 === 1) links.unshift({ href: "/", text: "Home" });
 const spalten = Math.ceil(links.length / 2);
 const pfad = Astro.url.pathname.replace(/\/$/, "") || "/";
 const aktiv = (href: string) => (href === "/" ? pfad === "/" : pfad.startsWith(href));
+/* PROBE Logokachel 16 : 9, NUR auf localhost (Rasul 17.11.2026: „Der Charme im Menü von BBH liegt ja darin, dass die
+   Breiten übereinstimmen, vom Favicon und nachher vom Menü und von den Menüpunkten. Jetzt würde ich gerne was
+   ausprobieren. Lass uns mal die erste Kachel in 16 zu 9 machen und lass uns unser Logo, das wir da drin haben, dann
+   einfach so groß machen wie die Kachel. Zeig mir das mal zuerst.“). Höhe bleibt k, Breite k × 16/9, das Zeichen
+   (viewBox 177,8 × 100, also selbst 16 : 9) füllt die Kachel randlos. Kachelgrund, Hamburger und Menükacheln
+   unverändert. An import.meta.env.DEV gebunden, im Bau bleibt die quadratische Kachel mit dem Zeichen auf 56 %.
+   Rückweg: LOGO_BREIT auf false setzen oder diesen Block samt Klasse und Stilzeile entfernen. */
+const LOGO_BREIT = false; // seit der Variante „Zipfel in der Ecke“ aus; gemerkte 16:9-Variante: Commit 3ebf834, Rückweg siehe LOGO_ECKE
+const LOGO_BREIT_STIL = `
+.bbh-menu .bbh-menu__logo.bbh-menu__logo--breit { width: calc(var(--k) * 16 / 9); }
+.bbh-menu .bbh-menu__logo.bbh-menu__logo--breit svg { width: 100%; height: 100%; }
+`;
+/* PROBE alle Kacheln 16 : 9, NUR auf localhost (Rasul 17.11.2026: „Ich befürchte, es wird zu groß, wenn wir alle auf
+   16 : 9 machen. Probier es aber mal, zeig es mal an.“). Zur Logokachel kommen Hamburger und Menükacheln (--kn) dazu:
+   Höhe k, Breite k × 16/9. Damit stimmen die Breiten wieder überein wie bei BBH. Die Namenskachel behält ihr Maß aus
+   der Wortbreite. An import.meta.env.DEV gebunden. Rückweg: ALLE_BREIT auf false. */
+const ALLE_BREIT = false; // wie LOGO_BREIT: aus, gemerkt in Commit 3ebf834
+/* VARIANTE „Zipfel in der Ecke“, NUR auf localhost (Rasul 17.11.2026: „Wir merken uns mal die Variante, jetzt machen
+   wir noch eine. Und da gehen wir wieder zurück auf das Maß, das auch BBH hat, also diese 88 Pixel. Und machen unser
+   Logo anders: Wir nehmen die 88er Pixel und hängen unseren Zipfel so in die Ecke wie jetzt. Das wäre die Idee, dass
+   unser Logo ein Zipfel ist, der in der Ecke hängt.“). Alle Kacheln wieder quadratisch (k), Namenskachel bleibt auf
+   Wortbreite. Das Zeichen in der Logokachel ist der Ausschnitt mit dem Biss, dieselbe Geometrie wie das Favicon
+   (Variante D, branding/aktiv/favicon/biss-ecke/favicon.svg im Marketing-Ordner): viewBox 77.80 0 100 100, das rechte
+   Quadrat des Rechtecks; Fläche hell, Blase samt Zipfel schwarz, randlos in der Kachel.
+   Rückweg zur gemerkten 16:9-Variante (Stand Commit 3ebf834): LOGO_ECKE auf false, LOGO_BREIT und ALLE_BREIT wieder
+   auf import.meta.env.DEV. Rückweg zum Zeichen wie im Bau: alle drei auf false. */
+/* Angenommen (Rasul 17.11.2026: „Okay, so übernehmen wir es. Das finde ich gut. Das macht man halt so auf dev und
+   auch auf die Live-Site.“). Seitdem gilt das Zeichen auch im Bau, nicht mehr nur auf localhost: reine Geometrie,
+   keine Schrift. Die Namenskachel in Forma bleibt dagegen hinter NAME_FORMA (nur localhost, Testlizenz); im Bau
+   steht „parley“ dort weiter in Geist. */
+const LOGO_ECKE = true;
+const LOGO_ECKE_STIL = `
+.bbh-menu .bbh-menu__logo.bbh-menu__logo--ecke svg { width: 100%; height: 100%; }
+`;
+const ALLE_BREIT_STIL = `
+div.bbh-menu[data-bbh-menu] { --kn: calc(var(--k) * 16 / 9); }
+div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k) * 16 / 9); }
+/* Namenskachel NICHT 16 : 9 (Rasul 17.11.2026: „Ja, zurück.“). Am selben Tag kurz geprobt: Kachel k × 16/9, Schrift
+   (k × 16/9 − 16 px) / 2,88, je 8 px Rand. Grund für den Rückweg, nachgemessen auf bartleboglehegarty.com bei 1024 px:
+   Logokachel 88 × 88, Menükacheln 88 × 44 in drei Spalten (zusammen 268), Wortmarke 322 px = 3,66 Kacheln. Die
+   Wortmarke sitzt dort nicht im Raster, ihre Breite kommt aus dem Wort (Schriftzug 272 px plus je 24 px Polster);
+   geteilt wird nur die Höhe. Unsere 2,89 k sind also die BBH-Lösung, die 16:9-Fassung war strenger als das Vorbild. */
+`;
+/* VARIANTE „Logo hinten“, NUR auf localhost (Rasul 17.11.2026: „Machen wir mal noch eine Variante für Menü. Und zwar
+   nehmen wir jetzt doch unser Logo hinten dran. Nehmen aber das gleiche Logo, das wir unten im Footer haben. Als
+   komplettes Logo. Und anstatt nur parley in die Kachel zu schreiben, setzen wir die Kachel an und parley ist dann
+   sozusagen versetzt oben drüber. Möchten wir gucken, wie das aussieht. Die erste Kachel fällt dadurch weg und das
+   Menü rückt ganz an Anfang. Machen wir das mal für die Localhost-Seite.“).
+   Die Logokachel vorn entfällt, das Menü beginnt am linken Rand. Hinten steht statt der Namenskachel das ganze
+   Zeichen aus dem Fuß (LogoBiss stufe 2, „parley Film“ in Geist 900): Das Rechteck ist die Kachel (Höhe k, Breite
+   1,778 k), die Blase mit dem Namen steht rechts oben über. Ganzes Zeichen samt Schutzraum: 2,8964 k × 1,6032 k,
+   davon 0,6032 k über der Kachelzeile. Nichts zurechtgerückt: Was oben nicht ins Fenster passt, schneidet das
+   Fenster ab. Farbe wie der Kachelgrund. Unter 520 px bleibt das Zeichen sichtbar (anders als die Namenskachel),
+   weil die Zeile ohne die erste Kachel hineinpasst.
+   Folgen, solange die Variante läuft: Eingeklappt bleibt nur der Hamburger; einen Home-Link gibt es dann nur über
+   das Zeichen hinten, also nur auf der Startseite oben. An import.meta.env.DEV gebunden, im Bau unverändert
+   (Logokachel „Zipfel in der Ecke“ vorn, Namenskachel in Forma hinten). Rückweg: LOGO_HINTEN auf false.
+   Stand dieser ersten Probe (Zeile am Rand, Zeichen nur auf der Startseite oben): Commit d51e287. */
+/* RICHTUNG 12, angenommen für Dev und live (Rasul 17.11.2026, aus dem Moodboard „Menü eingeklappt“ im
+   Marketing-Ordner, branding/werkstatt-seiten/menu-eingeklappt-moodboard.html: „Okay, 10 oder 12 sind so die
+   Favoriten. Wir probieren zuerst mal die zwölf. Setzt das mal um auch für Dev und auch für die Live-Seite. Und achte
+   darauf, dass das parley Film in unserer Forma DJR-Schrift ist.“). Seitdem gilt die Variante auch im Bau:
+   - Das Zeichen steht immer, auf jeder Seite, ausgeklappt wie eingeklappt. Eingeklappt wird nur die Menüspalte zum
+     Hamburger: Hamburger k × k, Fuge, dann das ganze Zeichen. Es ist zugleich der Home-Link.
+   - Die Zeile rückt vom oberen Fensterrand weg, damit die Blase samt Name Platz hat: Oberkante bei
+     Fuge + 0,6032 k (k 88: 55,1 px, k 72: 45,4 px) statt bei der Fuge. Das gilt in jedem Zustand, in dem die Zeile
+     oben steht (fest oben und klebend im Film-Hero), nicht nur eingeklappt. Unten mittig bleibt die Lage, dort ist
+     nach oben Platz.
+   - „parley Film“ in der Blase kommt aus LogoBiss stufe 2, seit 17.11.2026 Umrisse aus Forma DJR 900 (Generator
+     SCHRIFT_FUSS = None). Umrisse, keine Schrift zur Laufzeit: Die Schriftdatei wird dafür nicht gebraucht und
+     steht wieder in NUR_LOKAL (astro.config.mjs); der Stilblock NAME_FORMA wird nicht mehr ausgegeben.
+   - Die Einblendung des Zeichens läuft nur beim Laden der Startseite, nicht bei jedem Zurückscrollen.
+   Rückweg zum Stand davor (Logokachel „Zipfel in der Ecke“ vorn, Namenskachel in Forma hinten, Stand 9ad9520):
+   LOGO_HINTEN auf false und fonts/FormaDJRVariable.woff2 wieder aus NUR_LOKAL nehmen. */
+const LOGO_HINTEN = true;
+const LOGO_HINTEN_STIL = `
+div.bbh-menu[data-bbh-menu] { --oben: calc(var(--fuge) + var(--k) * 0.6032); }
+/* div…[data-bbh-menu] davor, damit die Breite auch gegen „.bbh-menu--oben .bbh-menu__name“ (3,09 k) gilt. */
+div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); width: calc(var(--k) * 2.8964); margin-left: 0; clip-path: inset(-61% 0 0 0); opacity: 1; pointer-events: auto; }
+.bbh-menu.bbh-menu--start .bbh-menu__name.bbh-menu__name--logo.bbh-menu__name--logo { animation: bbh-maske-logo 500ms var(--maske) 500ms both; }
+.bbh-menu .bbh-menu__name.bbh-menu__name--logo svg { position: absolute; left: 0; bottom: 0; width: calc(var(--k) * 2.8964); height: calc(var(--k) * 1.6032); display: block; }
+/* Eingeklappt hat die Menüspalte Breite null, ihre Fuge fiele sonst doppelt an (Zeichen bei 94 statt 92 px). */
+div.bbh-menu[data-bbh-menu] .bbh-menu__nav { margin-left: calc(-1 * var(--fuge)); transition-property: width, margin-left; }
+div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
+@keyframes bbh-maske-logo { from { clip-path: inset(-61% 100% 0 0); } to { clip-path: inset(-61% 0 0 0); } }
+`;
+/* PROBE „Namenskachel eingeklappt“, NUR auf localhost (Rasul 17.11.2026: „Okay, jetzt machen wir noch eine Variante,
+   mache die mal auf Localhost. Wo es beim Zusammenfahren dann einfach parley Film schwarz in einer rechteckigen
+   Kachel steht.“ Grund: „Das Problem ist sonst, wenn es am Rand ist links bei der Displayansicht, ist es beim
+   Scrollen zu breit und verdeckt Dinge.“ Und zum Maß: „Okay, du musst parley Film kleiner schreiben und die Kachel
+   muss auch in 88 Pixel breit sein wie das Menü. Das heißt, da gehen wir dann wieder zurück auf die Struktur von
+   BBH.“). Ausgeklappt bleibt Richtung 12. Eingeklappt steht statt des ganzen Zeichens eine quadratische Kachel
+   (k × k) wie der Hamburger, in der Kachelfläche mit Unschärfe, darin „parley“ über „Film“ in Schwarz. Zeile
+   eingeklappt: k + Fuge + k (178 px bei k 88). Die Umrisse werden beim Rendern aus LogoBiss.astro gelesen
+   (Stufe 2, Forma DJR 900), damit es eine Quelle bleibt.
+   Größe glatt: 0,82 der Größe im Zeichen (Versalhöhe 0,226 k, 19,9 px bei k 88), Wort 0,842 k breit, je 0,079 k
+   Luft links und rechts (7 px). Größe mit Biss: 0,45 (Versalhöhe 0,124 k, 10,9 px), weil im Quadrat neben und
+   über dem Zipfel kein Platz ist und der Name nur unten links unter die Spitze passt.
+   Umschaltbar über die Adresse (wird gemerkt, localStorage „parley-kachel“):
+   ?kachel=glatt  Namenskachel (Voreinstellung)   ?kachel=aus  Richtung 12 ohne die Probe
+   Die Fassung mit ausgespartem Biss ist wieder heraus: Im Quadrat blieb für den Name nur Platz unten links unter
+   dem Zipfel (Versalhöhe 10,9 px), das trägt nicht (Stand mit beiden Fassungen: Commit 59c103b).
+   Oben andocken (Rasul 17.11.2026: „Und bei der Version, wo wir jetzt parley Film in die Kachel schreiben, brauchen
+   wir nach oben hin zum Bildrand keinen Abstand mehr. Weil da können wir das auch oben so andocken lassen wie bei
+   BBH.“): --oben fällt in der Probe auf die Fuge zurück. Damit die Zeile beim Aufklappen nicht springen muss, gibt
+   es das ganze Zeichen mit der Blase nur noch dort, wo über der Zeile Platz ist: Das Skript unten setzt die Klasse
+   bbh-menu--eng, sobald die Oberkante der Zeile weniger als 0,6032 k vom Fensterrand entfernt ist. Dann steht die
+   Namenskachel, eingeklappt wie aufgeklappt (aufgeklappt: Menüspalte plus Namenskachel, nichts ragt über).
+   Das ganze Zeichen steht also nur aufgeklappt und mit Platz: oben auf der Startseite vor dem Scrollen (Film-Hero,
+   Zeile auf halber Höhe) und unter 1024 px unten mittig.
+   Reihenfolge wie BBH (Rasul 17.11.2026: „Jetzt versuchen wir noch was anderes. Der Wechsel von der Startseite, also
+   beim Hochscrollen, würde dann die Kachel nicht rechts vom Menü erscheinen. Sondern von links die Menü Kachel
+   weiter reinschieben und dann wären wir bei der Ausgangssituation, die auch BBH hat. Probier das mal, ob du das
+   sauber hinkriegst.“): Die Namenskachel ist ein eigenes Element VOR dem Hamburger. Sie fährt von links auf
+   (Breite 0 → k, 300 ms) und schiebt Menü oder Hamburger nach rechts; das Zeichen hinten fährt in derselben Zeit
+   zu (Breite → 0, von rechts gewischt). Endlage angedockt: Namenskachel bei der Fuge, Hamburger daneben. Der Stand
+   davor (Kachel tauscht hart an der Stelle des Zeichens): Commit 18bb2e3.
+   Fassung „fest“, Aufbau eins zu eins wie BBH (Rasul 17.11.2026: „Okay, noch eine andere Variante. Und zwar nochmal
+   ausgehend von der Anfangssituation. Was bei BBH das Scharf ist, ist bei uns von Anfang an schon ein parley Film in
+   der Kachel. Das heißt, wir schieben die jetzt nicht mehr oben rein, die ist vorher schon da, wie bei BBH, nur bei
+   uns eben nicht das Scharf, sondern parley Film da so reingeschrieben. Und was bei BBH rechts deren Logo ist mit
+   groß BBH, das ist bei uns das angebissene 16 zu 9 Eck, wo oben parley Film steht. Und dann würde beim
+   Hochscrollen einfach das verschwinden. Ich glaube, das ist die beste Lösung.“): Die Namenskachel steht immer
+   vorn, auf jeder Seite, und bewegt sich nie. Dahinter Hamburger oder Menüspalte. Das ganze Zeichen steht nur auf
+   der Startseite oben dahinter (wie BBHs Wortmarke) und geht beim Scrollen zu: Breite auf 0 (von rechts gewischt)
+   und Deckkraft, 300 ms; spätestens, wenn die Blase den Fensterrand erreichen würde (Klasse bbh-menu--eng).
+   Schalter: ?kachel=fest (Voreinstellung seit dieser Fassung), ?kachel=glatt (Kachel fährt von links ein),
+   ?kachel=aus (Richtung 12).
+   Name in der Kachel erst mit den Menüstrichen (Rasul 17.11.2026 abends, am Bildschirm: „Da stört mich jetzt, dass
+   parley Film in der Blase steht und parley Film in der Kachel. Ich weiß aber auch gerade nichts anderes zu lösen.
+   Mach mal in Localhost, lass mal das parley Film in der Kachel erstmal weg, lass aber die Kachel erscheinen. Und
+   lasse es erst oben erscheinen mit dem Erscheinen von den Menüstrichen.“): In der Fassung fest bleibt die Kachel auf
+   der Startseite oben eine leere Fläche. Der Name blendet erst ein, wenn das Menü einklappt, mit derselben
+   Verzögerung und Dauer wie der Hamburger (Klasse bbh-menu--gescrollt aus dem Skript). Gilt ab 1024 px; darunter
+   gibt es das Zeichen rechts nicht, dort bliebe sonst oben gar kein Name, also steht er dort immer in der Kachel.
+   Fassung „wort“ (Rasul 17.11.2026 spät: „Was wir noch mit dem Menü probieren könnten, erstmal auf Localhost: dass
+   wir in die Blase nur parley reinschreiben, nicht parley Film, und vorne auf die Kachel parley Film schreiben.“):
+   wie „fest“, aber die Kachel vorn trägt immer „parley Film“ (auch auf der Startseite oben), und im Zeichen rechts
+   steht in der Blase nur „parley“. Links die Wortmarke, rechts das Markenwort allein, nicht zweimal dasselbe.
+   Das Zeichen mit einem Wort ist ein eigenes SVG nur im Menü (Umriss aus src/daten/blaseEinWort.ts, erzeugt mit der
+   Funktion des Generators). LogoBiss.astro und damit der Fuß bleiben beim zweizeiligen Block.
+   Fassung „ecke“ (Rasul 17.11.2026 spät: „Mach nochmal in der Kachel nicht parley Film, sondern mach uns das
+   angebissene Quadrat oder Rechteck. Also die Form bleibt und wir beißen das sozusagen an. Wir machen bei parley
+   wieder parley Film rein in die Blase. Vielleicht erklärt sich damit ein bisschen unser Favicon.“): wie „fest“,
+   aber in der Kachel vorn steht das Motiv des Favicons (Variante D), der quadratische Ausschnitt x 77,80 bis 177,80
+   des Zeichens: Die Kachel ist die helle Fläche, die Blase samt Zipfel beißt oben rechts schwarz hinein. Rechts
+   das ganze Zeichen mit „parley Film“ aus LogoBiss. Links Zeichen ohne Wort, rechts die Wortmarke, „parley“ einmal.
+   Ecken: Die Kachel bleibt eckig wie die Menükacheln (das Zeichen hat rechts Radius 5, im Favicon auch); in der
+   Reihe aus eckigen Kacheln wäre eine einzelne runde Ecke ein Fremdkörper. Die Kachel führt weiter zur Startseite.
+   Schalter: ?kachel=ecke (Voreinstellung seit dieser Fassung), ?kachel=wort (Kachel „parley Film“, Blase „parley“),
+   ?kachel=fest (Kachel oben leer, Blase „parley Film“), ?kachel=glatt, ?kachel=aus.
+   An import.meta.env.DEV gebunden, im Bau nichts davon außer den Klassen bbh-menu--eng und bbh-menu--gescrollt, die
+   dort keine Regel treffen. Rückweg: KURZ auf false. */
+/* Seit 17.11.2026 spät gilt die Fassung „ecke“ auch im Bau (Rasul, als der Stand von localhost nach Dev sollte:
+   „Ja, erst fertig machen“). KURZ ist deshalb immer an. Im Bau gibt es aber nur „ecke“: kein Umschalten über die
+   Adresse, kein Merken, und die Zutaten der anderen Fassungen (Name in der Kachel, Zeichen mit einem Wort) werden
+   nicht ausgeliefert; sie hängen an KURZ_PROBEN und bleiben localhost. */
+const KURZ = true;
+const KURZ_PROBEN = import.meta.env.DEV;
+/* Block des Namens in den Einheiten des Zeichens (gemessen 17.11.2026): x 153,85 bis 256,53, y −26,49 bis 26,49. */
+const KURZ_MITTE = "translate(50 50) scale(0.82) translate(-205.19 0)"; // Blockmitte auf die Kachelmitte (Kachel = 100 × 100)
+let kurzPfade = "";
+if (KURZ_PROBEN) {
+	const quelle = readFileSync(`${process.cwd()}/src/components/LogoBiss.astro`, "utf8");
+	const zeile = quelle.split("\n").find((z) => z.includes("stufe === 2 &&")) ?? "";
+	kurzPfade = (zeile.match(/<path\b[^>]*\/>/g) ?? []).join("");
+}
+const KURZ_AN = 'html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu]';
+const KURZ_WANN = 'html[data-kachel="glatt"] div.bbh-menu[data-bbh-menu]:is(:not(.offen), .bbh-menu--eng)';
+const KURZ_FEST = 'html:is([data-kachel="fest"], [data-kachel="wort"], [data-kachel="ecke"]) div.bbh-menu[data-bbh-menu]';
+const KURZ_NUR_FEST = 'html[data-kachel="fest"] div.bbh-menu[data-bbh-menu]';
+const KURZ_STIL = `
+${KURZ_AN} { --oben: var(--fuge); }
+.bbh-menu .bbh-menu__kurz { order: -1; flex: none; display: flex; justify-content: flex-end; width: 0; height: var(--k); margin-right: calc(-1 * var(--fuge)); overflow: hidden; background: var(--flaeche); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-right var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
+.bbh-menu .bbh-menu__kurz svg { flex: none; display: block; width: var(--k); height: var(--k); }
+${KURZ_AN} .bbh-menu__name.bbh-menu__name--logo { transition: width var(--dauer) var(--kurve), margin-left var(--dauer) var(--kurve), opacity var(--dauer) var(--kurve), visibility 0s linear 0s; }
+/* Fassung glatt: Kachel fährt ein, Zeichen geht zu */
+${KURZ_WANN} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition-delay: 0s; }
+${KURZ_WANN} .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
+/* Fassung fest: Kachel steht immer, Zeichen nur auf der Startseite oben */
+${KURZ_FEST} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition: none; }
+${KURZ_FEST}:is(:not(.bbh-menu--oben), .bbh-menu--eng) .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
+/* Schmale Fenster (Rasul 17.11.2026 auf den Vorschlag: „Ja, weglassen“): unter 1024 px gibt es das Zeichen rechts in
+   der Fassung fest gar nicht. Dort sitzt die Zeile unten mittig; mit Zeichen wäre sie bei 375 px 357 px breit und
+   die Namenskachel rückte beim Verschwinden 105 px zur Seite. */
+@media (max-width: 1023px) { ${KURZ_FEST} .bbh-menu__name.bbh-menu__name--logo { display: none; } }
+/* Name in der Kachel erst mit den Menüstrichen: gleiche Verzögerung und Dauer wie die Breite des Hamburgers */
+${KURZ_FEST} .bbh-menu__kurz svg { transition: opacity var(--dauer) var(--kurve) var(--out-delay); }
+@media (min-width: 1024px) { ${KURZ_NUR_FEST}.bbh-menu--start:not(.bbh-menu--gescrollt) .bbh-menu__kurz svg { opacity: 0; transition-delay: 0s; } }
+/* Fassung wort: im Zeichen rechts nur „parley“ (eigenes SVG), sonst das Zeichen aus LogoBiss mit „parley Film“ */
+html[data-kachel="wort"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg:not(.bbh-menu__zeichen-wort) { display: none; }
+html:not([data-kachel="wort"]) div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-wort { display: none; }
+/* Fassung ecke: in der Kachel vorn der Ausschnitt mit dem Biss statt des Namens */
+html[data-kachel="ecke"] div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg:not(.bbh-menu__kurz-ecke) { display: none; }
+html:not([data-kachel="ecke"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.bbh-menu__kurz-ecke { display: none; }
+`;
+const KURZ_SKRIPT_LOKAL = `(function(){var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
+const KURZ_SKRIPT = KURZ_PROBEN ? KURZ_SKRIPT_LOKAL : `document.documentElement.dataset.kachel="ecke";`;
+const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
 <div class={`bbh-menu${startseite ? " bbh-menu--start offen" : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
 	<div class="bbh-menu__cluster">
-		<a href="/" class="bbh-menu__logo" aria-label="parley Film, Startseite">
+		{LOGO_BREIT && <style is:inline set:html={LOGO_BREIT_STIL}></style>}
+		{ALLE_BREIT && <style is:inline set:html={ALLE_BREIT_STIL}></style>}
+		{LOGO_ECKE && <style is:inline set:html={LOGO_ECKE_STIL}></style>}
+		{LOGO_HINTEN && <style is:inline set:html={LOGO_HINTEN_STIL}></style>}
+		{KURZ && <style is:inline set:html={KURZ_STIL}></style>}
+		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
+		{!LOGO_HINTEN && (
+		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
 			   biss_logo_website.py), hier nur auf das Rechteck zugeschnitten, damit es mittig sitzt. */}
+			{/* PROBE Farben getauscht, nur localhost (Rasul 17.11.2026: „Tausch mal im Logo die Farben, mach mal die Fläche
+			   hell und den Zipfel schwarz.“), wie in seiner Figma-Datei vom 17.11.: Rechteck hell, Blase samt Zipfel
+			   schwarz obendrauf, ohne Maske. Rechteck in der Farbe des Kachelgrunds (--flaeche). Die viewBox schneidet
+			   den Teil der Blase ab, der über das Rechteck hinausragt. Hängt an LOGO_BREIT (nur DEV); im Bau bleibt das
+			   schwarze Rechteck mit ausgebissener Blase darunter. Rückweg: diesen Zweig entfernen. */}
+			{LOGO_ECKE ? (
+			<svg viewBox="77.80 0 100 100" aria-hidden="true">
+				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="var(--flaeche)" />
+				<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+			</svg>
+			) : LOGO_BREIT ? (
+			<svg viewBox="0 0 177.8 100" aria-hidden="true">
+				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="var(--flaeche)" />
+				<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+			</svg>
+			) : (
 			<svg viewBox="0 0 177.8 100" aria-hidden="true">
 				<defs>
 					<mask id={maskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
@@ -53,7 +304,15 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 				</defs>
 				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="currentColor" mask={`url(#${maskeId})`} />
 			</svg>
+			)}
 		</a>
+		)}
+		{KURZ && (
+			<a href="/" class="bbh-menu__kurz" aria-label="parley Film, Startseite">
+				{KURZ_PROBEN && <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} /></svg>}
+				<svg class="bbh-menu__kurz-ecke" viewBox="77.80 0 100 100" aria-hidden="true"><path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" /></svg>
+			</a>
+		)}
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
 			<span></span><span></span><span></span>
 		</button>
@@ -61,11 +320,21 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   (Rasul 13.11.2026: „Ganz am Anfang sieht man das ganze Menü und noch den Namen BBH hintendran.
 		   Da würden wir einmal den kleinen parley schreiben. Dann nehmen wir unsere Forma DJR-Schrift“).
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
-		{/* Zweig minimal: Buchstaben einzeln ausgeglichen (Rasul 13.11.2026: „Jetzt kleben die Buchstaben aneinander, die
-		   haben schon ein bisschen eine Lücke.“). Bartle hat für PARLEY ungleiche Abstände (Tintenlücken P-A 0,008,
-		   A-R 0,052, R-L 0,09, L-E 0,073, E-Y 0,035 em); jedes Paar auf 0,03 em gebracht. P-A wirkt wegen der
-		   Schräge des A trotzdem weiter, P deshalb 0,19 em näher (Rasuls Wert aus der Werkstatt parley-buchstaben.html) (Rasul: „schiebt es man ein bisschen zum A hin“). BBH gemessen: rund 1 px Lücke bei 52 px hohen Buchstaben. */}
-		{startseite && <a href="/" class="bbh-menu__name" tabindex="-1" aria-hidden="true"><span>{[["P", -0.19], ["A", -0.022], ["R", -0.06], ["L", -0.043], ["E", -0.005], ["Y", 0]].map(([b, m]) => <i style={`margin-right:${m}em`}>{b}</i>)}</span></a>}
+		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
+		{LOGO_HINTEN
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{KURZ_PROBEN && (
+				<svg class="bbh-menu__zeichen-wort" viewBox="0 -60.32 289.64 160.32" role="img" aria-label="parley">
+					<defs>
+						<mask id={wortMaskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
+							<rect x="-10" y="-70" width="320" height="200" fill="#fff" />
+							<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+						</mask>
+					</defs>
+					<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="currentColor" mask={`url(#${wortMaskeId})`} />
+					<g fill="currentColor" set:html={BLASE_EIN_WORT} />
+				</svg>
+			)}</a>
+			: startseite && (<a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
@@ -86,12 +355,14 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		--dauer: 300ms;
 		--kurve: cubic-bezier(0.4, 0, 0.2, 1);
 		--maske: cubic-bezier(0.77, 0, 0.18, 1);
-		/* Menükachel so breit, dass das längste Wort passt („Videobeweis“ 5,24 em plus 16 px Polster, gemessen
-		   13.11.2026), mindestens aber eine Kachel. */
-		--kn: var(--k); /* Zweig minimal: kein langes Wort im Menü, BBH-Breite */
+		/* Menükachel wie BBH eine Kachel breit. Mit „Videobeweis“ war sie breiter (5,24 em plus 16 px Polster,
+		   gemessen 13.11.2026: --kn: max(var(--k), calc(var(--text-sm) * 5.7 + 16px))); beim neuen Wort neu messen. */
+		--kn: var(--k);
 		--nav-breite: calc(var(--spalten) * var(--kn) + (var(--spalten) - 1) * var(--fuge));
 		/* Schließen wartet, bis die Kacheln einzeln weg sind: 50 ms × Anzahl + 300 ms */
 		--out-delay: calc(50ms * var(--anzahl) + 300ms);
+		/* Oberkante der Zeile, wenn sie oben steht. Richtung 12 setzt sie tiefer (Stilblock LOGO_HINTEN_STIL). */
+		--oben: var(--fuge);
 	}
 	@media (min-width: 768px) {
 		.bbh-menu { --k: 88px; }
@@ -99,7 +370,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 
 	.bbh-menu__cluster {
 		position: fixed;
-		top: var(--fuge);
+		top: var(--oben);
 		left: var(--fuge);
 		z-index: 900;
 		display: flex;
@@ -258,33 +529,22 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	   wären breiter als der Bildschirm, das Logo ragte links hinaus (gemessen 13.11.2026 bei 375 px: −58 bis 430 px;
 	   schon vor „Videobeweis“ −37 bis 408 px). */
 	@media (max-width: 519px) { .bbh-menu__name { display: none; } }
-	/* Zweig minimal: PARLEY in Bartle ist rund 7 Kacheln breit; unter 900 px hätte das Menü samt Namen keinen Platz */
-	@media (max-width: 899px) { .bbh-menu__name { display: none; } }
 
-	.bbh-menu__name i { font-style: normal; }
 	.bbh-menu__name span {
 		white-space: nowrap;
 		/* Geist statt Forma DJR (13.11.2026 abends, Rasul „Ja, entfernen“: die neue Fassung kommt ohne Forma aus, bis
 		   die Lizenz gekauft ist). Rückweg: font-family "Forma DJR"; font-variation-settings "opsz" 72, "wght" 900. */
-		/* Zweig minimal (Rasul 13.11.2026 abends): „nicht klein. Sondern wir machen es groß und fett. Wir nehmen die
-		   gleiche Schrift, die BBH da verwendet, an der Stelle für ihren Namen im Menü.“ BBH dort: Wortmarke „BBH“ in
-		   Bartle-Form, Kachel 320 × 86 px, Buchstaben 52 px hoch (60 % der Kachel), 24 px Rand links und rechts
-		   (gemessen 13.11.2026). Hier: PARLEY in BBH-DE Bartle, Versalhöhe 0,7 em, also Schriftgröße 0,864 × Kachel;
-		   Breite „PARLEY“ 7,742 em. */
-		font-family: var(--schrift-breit);
-		font-weight: 400;
-		text-transform: uppercase;
-		font-size: calc(var(--k) * 0.864);
+		font-family: var(--schrift-lesen);
+		font-weight: 900;
+		font-size: calc(var(--k) * 0.9);
 		line-height: 1;
-		/* enger wie BBH (Rasul: „Das sieht so aus, als ob BBH die Abstände zwischen den Buchstaben verringert hat.“),
-		   aber je Buchstabenpaar (siehe Markup oben), nicht als gleichmäßige Laufweite. */
-		letter-spacing: 0;
+		letter-spacing: -0.02em;
 		/* Lage (Rasul 13.11.2026: „ein bisschen tiefer setzen, das L stößt oben mehr an als unten P und Y“):
 		   gemessen bei -0,12 em oben 8 px, unten 12 px Luft; jetzt -0,07 em, oben gut 10 px, unten knapp 10 px. */
-		margin-top: 0;   /* Bartle: Versalmitte = Boxmitte (Ober-/Unterlänge 950/−250, Versal 700) */
+		margin-top: -0.07em;
 	}
 	.bbh-menu--oben .bbh-menu__name {
-		width: calc(var(--k) * 0.864 * (7.742 - 0.32) + 48px);
+		width: calc(var(--k) * 3.09);
 		margin-left: 0;
 		clip-path: inset(0 0 0 0);
 		opacity: 1;
@@ -314,7 +574,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	}
 	:global(html[data-hero="film"]) .bbh-menu--start .bbh-menu__cluster {
 		position: sticky;
-		top: var(--fuge);
+		top: var(--oben);
 		left: auto;
 		margin-left: var(--fuge);
 		width: max-content;
@@ -379,6 +639,22 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		let gehalten = false; // per Klick/Tipp geöffnet
 		let ueber = false; // Maus über dem Cluster
 
+		// Kein Platz für die Blase über der Zeile (Oberkante näher als 0,6032 k am Fensterrand). Nutzt nur die
+		// Probe „Namenskachel“ (KURZ, localhost); im Bau trifft die Klasse keine Regel.
+		const platz = () => menu.classList.toggle("bbh-menu--eng", cluster.getBoundingClientRect().top < burger.offsetHeight * 0.6032);
+		// Nicht nur am Scroll-Ereignis: Ein Beobachter meldet, wenn die Oberkante der Zeile die Linie kreuzt, auch
+		// nach Ankersprung, wiederhergestellter Scrollposition oder Größenwechsel ohne Scroll-Ereignis.
+		let beobachter: IntersectionObserver | null = null;
+		const beobachte = () => {
+			beobachter?.disconnect();
+			beobachter = new IntersectionObserver(platz, {
+				rootMargin: `-${Math.ceil(burger.offsetHeight * 0.6032)}px 0px 0px 0px`,
+				threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 1],
+			});
+			beobachter.observe(cluster);
+		};
+		const sichtbar = () => { if (!document.hidden) setze(); };
+
 		const setze = () => {
 			// BBH: offen, bis 100 px über die Lage des Clusters hinaus gescrollt ist (im Film-Hero
 			// steht er auf halber Höhe, sonst oben)
@@ -388,8 +664,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			const schwelle = film && !unten ? menu.getBoundingClientRect().top + window.scrollY + 100 : 100;
 			const oben = startseite && window.scrollY <= schwelle;
 			menu.classList.toggle("bbh-menu--oben", oben);
+			// Gegenstück zu --oben, das es vor dem ersten Lauf noch nicht gibt (Probe „Name erst mit den Menüstrichen“, localhost)
+			menu.classList.toggle("bbh-menu--gescrollt", !oben);
 			const offen = oben || gehalten || ueber;
 			menu.classList.toggle("offen", offen);
+			platz();
 			burger.setAttribute("aria-expanded", String(offen));
 		};
 
@@ -406,6 +685,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		burger.addEventListener("click", klick);
 		schleier.addEventListener("click", zu);
 		window.addEventListener("scroll", scroll, { passive: true });
+		const groesse = () => { beobachte(); setze(); };
+		window.addEventListener("resize", groesse);
+		window.addEventListener("pageshow", scroll);
+		document.addEventListener("visibilitychange", sichtbar);
+		beobachte();
 		setze();
 
 		aufraeumen = () => {
@@ -414,6 +698,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			burger.removeEventListener("click", klick);
 			schleier.removeEventListener("click", zu);
 			window.removeEventListener("scroll", scroll);
+			window.removeEventListener("resize", groesse);
+			window.removeEventListener("pageshow", scroll);
+			document.removeEventListener("visibilitychange", sichtbar);
+			beobachter?.disconnect();
 		};
 	}
 
