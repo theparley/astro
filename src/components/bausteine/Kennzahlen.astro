@@ -13,11 +13,16 @@
 /* kacheln (14.11.2026, Probe „3 groß + 6 klein“, Recherche research/Viele_Vorteile_Wahrnehmung_Recherche_2026-11.md im
    Marketing-Ordner): kleine, sichtbar getrennte Kacheln mit Rahmen, bis zu sechs in einer Reihe; getrennte, gleichartige
    Elemente werden auf einen Blick als „viele“ gelesen (Franconeri et al. 2009, Whitney & Yamanashi Leib 2018). */
+/* stufe (17.11.2026, drei Labels im Segment Beweisaufnahme): Wörter kleiner als xl. Gemessen mit „Natürliche
+   Gesprächssituation“ (12,2 em breit): bei xl und lg laufen die langen Labels in drei Spalten über zwei Zeilen
+   (1440 px: Spalte 416 px, lg 39 px braucht 476 px). Erst md passt in eine Zeile (1440: 345 von 416 px, 1280: 327 von
+   363 px). Bei 1024 px wäre die Spalte mit 277 px auch für md zu schmal (297 px), deshalb stehen die Labels in md
+   erst ab 1280 px nebeneinander und darunter gestapelt. */
 /* zeile darf fehlen (17.11.2026, drei Labels im Segment Beweisaufnahme): dann steht nur das Wort. */
-interface Props { zahlen: { wert: string; zeile?: string; mehr?: string }[]; gross?: boolean; quelle?: string; rahmen?: boolean; woerter?: boolean; kacheln?: boolean }
-const { zahlen, gross = false, quelle, rahmen = true, woerter = false, kacheln = false } = Astro.props;
+interface Props { zahlen: { wert: string; zeile?: string; mehr?: string }[]; gross?: boolean; quelle?: string; rahmen?: boolean; woerter?: boolean; kacheln?: boolean; stufe?: "lg" | "md" }
+const { zahlen, gross = false, quelle, rahmen = true, woerter = false, kacheln = false, stufe } = Astro.props;
 ---
-<div class:list={["kennzahlen", rahmen && "rahmen", woerter && "kennzahlen--woerter", kacheln && "kennzahlen--kacheln"]} data-einblenden>
+<div class:list={["kennzahlen", rahmen && "rahmen", woerter && "kennzahlen--woerter", kacheln && "kennzahlen--kacheln", stufe && `kennzahlen--${stufe}`]} data-einblenden>
 	<div class:list={["kennzahlen__reihe", `kennzahlen__reihe--${Math.min(zahlen.length, 3)}`]}>
 		{zahlen.map((z) => z.mehr ? (
 			<details class="kennzahl kennzahl--mehr">
@@ -47,6 +52,9 @@ const { zahlen, gross = false, quelle, rahmen = true, woerter = false, kacheln =
 	.kennzahlen--woerter .kennzahlen__reihe { grid-template-columns: 1fr; }
 	@media (min-width: 1024px) { .kennzahlen--woerter .kennzahlen__reihe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 	.kennzahlen--woerter .t-zahl { font-family: var(--schrift-schmal); font-size: var(--text-xl); line-height: var(--zeile-xl); }
+	.kennzahlen--woerter.kennzahlen--lg .t-zahl { font-size: var(--text-lg); line-height: var(--zeile-lg, 1.1); }
+	.kennzahlen--woerter.kennzahlen--md .t-zahl { font-size: var(--text-md); line-height: var(--zeile-md, 1.08); }
+	@media (min-width: 1024px) and (max-width: 1279px) { .kennzahlen--woerter.kennzahlen--md .kennzahlen__reihe { grid-template-columns: 1fr; } }
 	.kennzahlen--woerter .kennzahl__zeile { font-size: var(--text-base); }
 	.kennzahlen--woerter .kennzahlen__reihe { align-items: start; }
 	.kennzahl--mehr summary { list-style: none; cursor: pointer; }

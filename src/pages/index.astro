@@ -522,7 +522,6 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 						    über. Vorher vier Sätze („Zwei Leute vor einer Kamera filmen kann jeder. …“, Stand 15.11.2026, Git-Geschichte). */}
 						<p><span class="entwurf">Entwurf</span><br />Wir schaffen eine natürliche Aufnahmesituation, in der ein echtes Gespräch entstehen kann. Je natürlicher die Aufnahme ist, desto leichter kommt man ins Gespräch. Und was im Gespräch entsteht, hat Beweiskraft.</p>
 						<p>Sie beobachtet nur. Für den Zuschauer ist sie das Gegenüber.</p>
-						<p><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
 					</div>
 					{/* Aufgeräumt (Rasul 17.11.2026: „Mach mal nochmal bei Localhost 4321 alles unterhalb des Videos mit den Blasen
 					    weg. … Und dann brauchen wir diese Labels für das, was daran besonders ist an der Aufnahmesituation. Es gibt
@@ -530,16 +529,20 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 					    Blickkontakt … das gehört eigentlich in den nächsten Abschnitt, weil da geht es um die Wirkung.“).
 					    Weg sind die drei großen Karten (Blickkontakt, Keine Kamera, Echte Momente), die sechs kleinen Kacheln mit Plus
 					    und die drei Gaststimmen-Kacheln (Stand davor: Git-Geschichte, Commit 71d86b1 und früher). Dafür drei Labels
-					    ohne Zeichnung und ohne Beschreibung; die Motive sind noch nicht entschieden. Der Blickkontakt wandert in den
+					    ohne Zeichnung und ohne Beschreibung; die Motive sind noch nicht entschieden. Stufe md statt xl: bei xl und auch
+					    bei lg liefen zwei Labels über zwei Zeilen (gemessen 17.11.2026); md passt je in eine Zeile, nebeneinander ab 1280 px. Der Blickkontakt wandert in den
 					    Abschnitt „Augenzeugen“, hier nichts dazu. Form: Kennzahlen mit Wörtern, drei nebeneinander ab 1024 px,
 					    darunter gestapelt. */}
 					<div class="videobeweis__vorteile" id="vorteile">
-						<Kennzahlen rahmen={false} woerter zahlen={[
+						<Kennzahlen rahmen={false} woerter stufe="md" zahlen={[
 							{ wert: "Keine Ablenkung durch Technik" },
-							{ wert: "Natürliche Gesprächs\u00ADsituation" },
+							{ wert: "Natürliche Gesprächssituation" },
 							{ wert: "Live-Regie" },
 						]} />
 					</div>
+					{/* Knopf unter den Labels (17.11.2026): zwischen Text und Labels wirkte er wie ein Abschluss. Bleibt, damit
+					    /beweisaufnahme nicht nur über das Menü erreichbar ist. */}
+					<p class="videobeweis__weiter"><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
 				</Fragment>
 			</VideoKacheln>)}
 			{/* Beweisführung und Beweisstücke vorerst aus der Ansicht (Rasul 14.11.2026: „Machen wir Beweisführungen und
@@ -783,7 +786,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
 	.videobeweis__vorteile { margin-top: var(--abstand-lg); }
 	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
-	.videobeweis__weiter { margin-top: var(--abstand-lg); }
+	.videobeweis__weiter { margin-top: var(--abstand-lg); text-align: center; }
 	/* Blasen innen im Bild: außen ragte Hagens lange Blase in die Überschrift (gemessen 14.11.2026) */
 	.videobeweis__film { width: 100%; margin: 0 auto; }
 	@media (min-width: 1024px) { .videobeweis__film { width: calc(100% * 8 / 12); } }
