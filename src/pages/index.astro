@@ -523,9 +523,11 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 					    Befund erstellen. Oder eine Studie zitieren. Auf alle Fälle erstmal ein Statement machen, das wir dann noch
 					    genauer beschreiben.“). Eine Setzung, kein Befund: keine Quellenzeile, kein Knopf zu Belegen (Marketing-Ordner
 					    branding/aktiv/PARLEY_WORDING.md, „Aufbau eines Abschnitts: erst das Statement, dann begeistern“). Stufe wie der
-					    frühere Zwischentitel an dieser Stelle (2xl). Weiche Trennzeichen, weil die langen Wörter am Handy sonst aus
-					    der Spalte ragen (wie bei Beweis&shy;kraft, gemessen 15.11.2026). */}
-					<h3 class="videobeweis__zwischentitel videobeweis__statement">Die Natürlich&shy;keit während der Aufnahme bestimmt die Beweis&shy;kraft beim Zu&shy;schauen.</h3>
+					    frühere Zwischentitel an dieser Stelle (2xl): das war falsch (Rasul am selben Abend: „Du hast jetzt unter dem
+					    Video mit den Blasen die falsche Schrift verwendet, die ist viel zu groß.“). Das Statement ist ein Satz, der
+					    gelesen wird: Lesetext-Schrift, Stufe lg (eine über dem Fließtext), keine Versalien. In 2xl Bartle lief er
+					    über 6 bis 11 Zeilen und wirkte wie ein zweiter Titel (Commit b4d74f3). */}
+					<p class="videobeweis__statement">Die Natürlichkeit während der Aufnahme bestimmt die Beweiskraft beim Zuschauen.</p>
 					{/* Absatz zum Statement, Entwurf (Rasul 17.11.2026 abends: „Und jetzt müssen wir dem Leser das Gefühl geben, dass
 					    er nichts tun muss, um in den Gesprächsmodus zu kommen, sondern dass es die Aufnahmesituation für ihn
 					    erledigt.“). Stufe des Fließtexts, 48 px unter dem Statement. */}
@@ -810,6 +812,6 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.videobeweis__zwischentitel { font-family: var(--schrift-breit); font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; margin: 0 0 32px; }
 	.videobeweis__klein { margin-top: 48px; }
 	/* Statement gehört zur Gruppe Titel, Film, Labels: 48 px unter dem Film, die Labels folgen mit ihren 48 px */
-	.videobeweis__statement { margin: 48px auto 0; text-align: center; hyphens: manual; }
+	.videobeweis__statement { max-width: 25em; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-size: var(--text-lg); line-height: var(--zeile-lg); text-wrap: balance; }
 	.videobeweis__absatz { max-width: 768px; margin: 48px auto 0; text-align: center; font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
 </style>
