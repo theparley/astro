@@ -813,6 +813,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.videobeweis__klein { margin-top: 48px; }
 	/* Statement gehört zur Gruppe Titel, Film, Labels: 48 px unter dem Film, die Labels folgen mit ihren 48 px */
 	/* Breite wie der Absatz darunter, höchstens 768 px */
-	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-size: var(--text-lg); line-height: var(--zeile-lg); text-wrap: balance; }
+	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-weight: 500; font-size: var(--text-lg); line-height: var(--zeile-lg); text-wrap: balance; }
+	/* Gewicht 500 (17.11.2026): Am Handy liegen Statement und Absatz nur 2,4 px auseinander; das Statement ist betont, nicht größer. */
 	.videobeweis__absatz { max-width: 768px; margin: 48px auto 0; text-align: center; font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
 </style>
