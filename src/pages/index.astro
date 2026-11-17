@@ -509,20 +509,12 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 					    Mit unseren verschiedenen Blasen.“ Film mittig auf 8 von 12 Spalten (Breite wie BBHs Akkordeon ohne Titel, B11),
 					    Blasen innen im Bild (außen ragten sie in die Überschrift). */}
 					<div class="videobeweis__film"><BlasenVideo src="/lokal/szene-beweisaufnahme.mp4" blasen={BLASEN as any} blasenlage="innen" /></div>
-					{/* Satz und Text mittig wie BBHs Join-Us-Seite (Zwischentitel Bartle 2xl mittig, Einleitung text-md mittig, Analyse
-					    2.12 #2 und #3) */}
-					<div class="videobeweis__satz">
-						{/* Weiches Trennzeichen in „Beweis&shy;kraft“ (15.11.2026): Bei 375 px ragte das Wort 51 px aus der Spalte und die
-						    Seite ließ sich 35 px quer schieben. Trennen statt kleinerer Stufe, wie bei Video&shy;beweis und Beweis&shy;aufnahme. */}
-						<h3 class="videobeweis__zwischentitel">Nicht jedes Video hat die gleiche Beweis&shy;kraft.</h3>
-						{/* Platzhalter, NICHT abgenommen (Rasul 17.11.2026, er ist mit den Sätzen noch nicht zufrieden): zwei Absätze,
-						    damit die Reihenfolge am Bildschirm zu beurteilen ist. Reihenfolge nach Rasul: „Wir schaffen eine natürliche
-						    Aufnahmesituation, in der ein echtes Gespräch entstehen kann. Und dann brauchen wir diese Labels für das, was
-						    daran besonders ist an der Aufnahmesituation.“ Der zweite Absatz leitet zum nächsten Abschnitt „Augenzeugen“
-						    über. Vorher vier Sätze („Zwei Leute vor einer Kamera filmen kann jeder. …“, Stand 15.11.2026, Git-Geschichte). */}
-						<p><span class="entwurf">Entwurf</span><br />Wir schaffen eine natürliche Aufnahmesituation, in der ein echtes Gespräch entstehen kann. Je natürlicher die Aufnahme ist, desto leichter kommt man ins Gespräch. Und was im Gespräch entsteht, hat Beweiskraft.</p>
-						<p>Sie beobachtet nur. Für den Zuschauer ist sie das Gegenüber.</p>
-					</div>
+					{/* Text unter dem Film weg (Rasul 17.11.2026 abends: „Mach mal den Text unter dem Bild mit den Blasen erstmal weg.
+					    Unsere drei Knöpfe können da stehen bleiben oder unter drei Kacheln oder zum Aufklappen, wie immer wir es
+					    nachher machen. Aber der Text, alles unter Bild, erstmal weg.“). Heraus sind der Zwischentitel „Nicht jedes
+					    Video hat die gleiche Beweiskraft.“, die zwei Platzhalter-Absätze und der Knopf „Zur Beweisaufnahme“; damit
+					    führt von hier kein Link mehr nach /beweisaufnahme (offener Punkt bei Website · Master). Stand davor:
+					    Commit ac3f133. Es bleiben Titel, Film mit Blasen und die drei Labels; deren Form ist noch offen. */}
 					{/* Aufgeräumt (Rasul 17.11.2026: „Mach mal nochmal bei Localhost 4321 alles unterhalb des Videos mit den Blasen
 					    weg. … Und dann brauchen wir diese Labels für das, was daran besonders ist an der Aufnahmesituation. Es gibt
 					    keine Ablenkung durch Technik. Es gibt eine natürliche Gesprächssituation. Und es gibt eine Live-Regie. Der
@@ -543,9 +535,6 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 							{ wert: "Live-Regie" },
 						]} />
 					</div>
-					{/* Knopf unter den Labels (17.11.2026): zwischen Text und Labels wirkte er wie ein Abschluss. Bleibt, damit
-					    /beweisaufnahme nicht nur über das Menü erreichbar ist. */}
-					<p class="videobeweis__weiter"><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
 				</Fragment>
 			</VideoKacheln>)}
 			{/* Beweisführung und Beweisstücke vorerst aus der Ansicht (Rasul 14.11.2026: „Machen wir Beweisführungen und
