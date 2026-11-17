@@ -892,5 +892,8 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	   Zeilenhöhe bleibt die von lg (1,08): --zeile-xl ist 0,85 und für Versalien gedacht, bei gemischter Schreibung
 	   stießen Unter- und Oberlängen aneinander. */
 	/* Gewicht 500 (17.11.2026): Am Handy liegen Statement und Absatz nur 2,4 px auseinander; das Statement ist betont, nicht größer. */
-	.videobeweis__absatz { max-width: 768px; margin: 48px auto 0; text-align: center; font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
+	/* Linksbündig im mittig stehenden Block (Rasul 17.11.2026 spät: „Ja, linksbündig.“): sechs Zeilen Fließtext flatterten
+	   zentriert auf beiden Seiten. Titel und Statement bleiben mittig. Umbruch „pretty“ statt „balance“: Bei linksbündigem
+	   Text füllt man die Zeilen, ausgeglichen kurze Zeilen sind dort nicht das Ziel. */
+	.videobeweis__absatz { max-width: 768px; margin: 48px auto 0; text-align: left; font-size: var(--text-md); line-height: 1.2; text-wrap: pretty; }
 </style>
