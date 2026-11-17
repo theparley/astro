@@ -2,21 +2,26 @@
 /* B2 Abschnittstitel mit Link: Bartle huge links, Link rechts auf der Grundlinie.
    BBH: „WORK“ über dem Projektraster. Ohne Link: nur der Titel links. */
 import Knopf from "./Knopf.astro";
-/* mittig (17.11.2026): Titel mittig, wenn er unter einem mittig gesetzten Titel steht (Startseite, „Beweisstücke“ unter
-   „Beweiskraft“). Grundregel bleibt links wie bei BBH. */
-interface Props { titel: string; link?: { href: string; text: string }; id?: string; mittig?: boolean }
-const { titel, link, id, mittig = false } = Astro.props;
+/* MITTIG ist die Regel für Abschnittstitel (Rasul 17.11.2026: „Alle mittig.“). Das ist eine bewusste Abweichung von
+   BBH: Dort stehen die Abschnittstitel links (Befund R3 vom 13.11.2026), und die Seite ist sonst nach BBH gebaut.
+   Rasul hat am 17.11.2026 zuerst „Beweiskraft“ mittig gestellt, weil Film, Statement und Labels in diesem Segment auf
+   der Mittelachse stehen („Beweiskraft steht nicht mittig.“), und daraus die Regel für alle gemacht. Nicht als Fehler
+   zurückdrehen. Einzige Ausnahme: Titel mit Link daneben (BBH „WORK“ mit Link rechts auf der Grundlinie) bleibt links,
+   sonst hätte der Link keinen Platz; das kommt derzeit nur auf der lokalen Bausteinseite vor. */
+interface Props { titel: string; link?: { href: string; text: string }; id?: string }
+const { titel, link, id } = Astro.props;
 ---
-<div class:list={["abschnittskopf", mittig && "abschnittskopf--mittig"]}>
+<div class:list={["abschnittskopf", link && "abschnittskopf--mit-link"]}>
 	<h2 class="t-abschnitt abschnittskopf__titel" id={id} data-einblenden set:html={titel} />
 	{link && <Knopf href={link.href} text={link.text} />}
 </div>
 <style>
-	.abschnittskopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 16px; margin-bottom: 48px; }
+	.abschnittskopf { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 8px 16px; margin-bottom: 48px; }
 	/* Titel darf &shy; enthalten (lange deutsche Wörter in Bartle, z. B. BEWEIS-/VERFAHREN; 13.11.2026) */
 	.abschnittskopf__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
-	.abschnittskopf--mittig { justify-content: center; }
-	.abschnittskopf--mittig .abschnittskopf__titel { text-align: center; }
+	.abschnittskopf__titel { text-align: center; }
+	.abschnittskopf--mit-link { justify-content: space-between; }
+	.abschnittskopf--mit-link .abschnittskopf__titel { text-align: start; }
 	/* Sehr schmale Handys (unter 420 px): eine Stufe kleiner, sonst läuft „VERFAHREN“ (11,7 em) über den Rand
 	   (Platz bei 375 px: 11,5 em; gemessen 13.11.2026). Gilt für alle großen Abschnittsköpfe gleich. */
 	@media (max-width: 419px) { .abschnittskopf__titel { font-size: var(--text-2xl); line-height: var(--zeile-2xl); } }

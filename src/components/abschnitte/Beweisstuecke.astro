@@ -6,12 +6,12 @@ import Band from "../bausteine/Band.astro";
 import KurzSaetze from "../bausteine/KurzSaetze.astro";
 import Textblock from "../bausteine/Textblock.astro";
 import { FORMATE } from "../../daten/startseite";
-/* angeglichen (17.11.2026, nur für die Startseite auf localhost): drei Angleichungen an das Segment „Beweiskraft“ direkt
-   darüber. Die Unterseite /beweisstuecke ruft den Baustein ohne die Angabe auf und bleibt, wie sie am 13.11. gebaut wurde.
-   1. Titel mittig wie „Beweiskraft“. Das ist eine Angleichung an den Nachbartitel, KEINE Entscheidung über alle
-      Abschnittstitel („Videobeweis“ im Band steht weiter links; die Grundsatzfrage liegt bei Rasul).
-   2. Textblock 768 px breit wie der Absatz im Segment darüber (statt 6 von 12 Spalten).
-   3. Abschluss nach unten wie unter den Labels: --abstand-lg, mindestens 96 px. Früher folgte hier „Augenzeugen“. */
+/* angeglichen (17.11.2026, nur für die Startseite auf localhost): zwei Angleichungen an das Segment „Beweiskraft“ direkt
+   darüber. Die Unterseite /beweisstuecke ruft den Baustein ohne die Angabe auf.
+   1. Textblock 768 px breit wie der Absatz im Segment darüber (statt 6 von 12 Spalten).
+   2. Abschluss nach unten wie unter den Labels: --abstand-lg, mindestens 96 px. Früher folgte hier „Augenzeugen“.
+   Der mittige Titel hing zuerst auch an dieser Angabe; seit „Alle mittig.“ (Rasul 17.11.2026) ist er die Regel des
+   Bausteins Abschnittskopf und gilt damit auch auf der Unterseite. */
 interface Props { angeglichen?: boolean }
 const { angeglichen = false } = Astro.props;
 ---
@@ -22,7 +22,7 @@ const { angeglichen = false } = Astro.props;
    wir auch wieder die Art von Überschrift. Da haben wir ja schon eine Animation. Ich glaube, die können wir so
    verwenden.“). Vorher stand „Die Beweisstücke.“ als Blocküberschrift unter dem Band. */}
 <section class:list={["abschnitt", angeglichen && "abschnitt--angeglichen"]} aria-labelledby="ab4-titel">
-	<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" mittig={angeglichen} /></div>
+	<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" /></div>
 	<Band formate={FORMATE} />
 	<div class="kanaele">
 		<KurzSaetze klein saetze={["LinkedIn · Website · Newsletter · Vertrieb"]} />
