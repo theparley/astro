@@ -141,7 +141,8 @@ div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k)
 const LOGO_HINTEN = true;
 const LOGO_HINTEN_STIL = `
 div.bbh-menu[data-bbh-menu] { --oben: calc(var(--fuge) + var(--k) * 0.6032); }
-.bbh-menu .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); width: calc(var(--k) * 2.8964); margin-left: 0; clip-path: inset(-61% 0 0 0); opacity: 1; pointer-events: auto; }
+/* div…[data-bbh-menu] davor, damit die Breite auch gegen „.bbh-menu--oben .bbh-menu__name“ (3,09 k) gilt. */
+div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); width: calc(var(--k) * 2.8964); margin-left: 0; clip-path: inset(-61% 0 0 0); opacity: 1; pointer-events: auto; }
 .bbh-menu.bbh-menu--start .bbh-menu__name.bbh-menu__name--logo.bbh-menu__name--logo { animation: bbh-maske-logo 500ms var(--maske) 500ms both; }
 .bbh-menu .bbh-menu__name.bbh-menu__name--logo svg { position: absolute; left: 0; bottom: 0; width: calc(var(--k) * 2.8964); height: calc(var(--k) * 1.6032); display: block; }
 /* Eingeklappt hat die Menüspalte Breite null, ihre Fuge fiele sonst doppelt an (Zeichen bei 94 statt 92 px). */
@@ -173,6 +174,13 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    Namenskachel, eingeklappt wie aufgeklappt (aufgeklappt: Menüspalte plus Namenskachel, nichts ragt über).
    Das ganze Zeichen steht also nur aufgeklappt und mit Platz: oben auf der Startseite vor dem Scrollen (Film-Hero,
    Zeile auf halber Höhe) und unter 1024 px unten mittig.
+   Reihenfolge wie BBH (Rasul 17.11.2026: „Jetzt versuchen wir noch was anderes. Der Wechsel von der Startseite, also
+   beim Hochscrollen, würde dann die Kachel nicht rechts vom Menü erscheinen. Sondern von links die Menü Kachel
+   weiter reinschieben und dann wären wir bei der Ausgangssituation, die auch BBH hat. Probier das mal, ob du das
+   sauber hinkriegst.“): Die Namenskachel ist ein eigenes Element VOR dem Hamburger. Sie fährt von links auf
+   (Breite 0 → k, 300 ms) und schiebt Menü oder Hamburger nach rechts; das Zeichen hinten fährt in derselben Zeit
+   zu (Breite → 0, von rechts gewischt). Endlage angedockt: Namenskachel bei der Fuge, Hamburger daneben. Der Stand
+   davor (Kachel tauscht hart an der Stelle des Zeichens): Commit 18bb2e3.
    An import.meta.env.DEV gebunden, im Bau nichts davon außer der Klasse bbh-menu--eng, die dort keine Regel trifft.
    Rückweg: KURZ auf false. */
 const KURZ = import.meta.env.DEV;
@@ -184,14 +192,15 @@ if (KURZ) {
 	const zeile = quelle.split("\n").find((z) => z.includes("stufe === 2 &&")) ?? "";
 	kurzPfade = (zeile.match(/<path\b[^>]*\/>/g) ?? []).join("");
 }
-const KURZ_WANN = 'html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu]:is(:not(.offen), .bbh-menu--eng) .bbh-menu__name.bbh-menu__name--logo';
+const KURZ_AN = 'html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu]';
+const KURZ_WANN = `${KURZ_AN}:is(:not(.offen), .bbh-menu--eng)`;
 const KURZ_STIL = `
-html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu] { --oben: var(--fuge); }
-.bbh-menu .bbh-menu__kurz { display: none; }
-${KURZ_WANN} { width: var(--k); }
-${KURZ_WANN} > svg { display: none; }
-${KURZ_WANN} .bbh-menu__kurz { display: block; margin: 0; width: var(--k); height: var(--k); background: var(--flaeche); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
-.bbh-menu .bbh-menu__name.bbh-menu__name--logo .bbh-menu__kurz svg { position: static; width: 100%; height: 100%; display: block; }
+${KURZ_AN} { --oben: var(--fuge); }
+.bbh-menu .bbh-menu__kurz { order: -1; flex: none; display: flex; justify-content: flex-end; width: 0; height: var(--k); margin-right: calc(-1 * var(--fuge)); overflow: hidden; background: var(--flaeche); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-right var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
+.bbh-menu .bbh-menu__kurz svg { flex: none; display: block; width: var(--k); height: var(--k); }
+${KURZ_WANN} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition-delay: 0s; }
+${KURZ_AN} .bbh-menu__name.bbh-menu__name--logo { transition: width var(--dauer) var(--kurve), margin-left var(--dauer) var(--kurve), opacity var(--dauer) var(--kurve), visibility 0s linear 0s; }
+${KURZ_WANN} .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
 `;
 const KURZ_SKRIPT = `(function(){try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="aus")localStorage.setItem("parley-kachel",q);document.documentElement.dataset.kachel=localStorage.getItem("parley-kachel")==="aus"?"aus":"glatt";}catch(e){document.documentElement.dataset.kachel="glatt";}})();`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
@@ -237,6 +246,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			)}
 		</a>
 		)}
+		{KURZ && (
+			<a href="/" class="bbh-menu__kurz" aria-label="parley Film, Startseite">
+				<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} /></svg>
+			</a>
+		)}
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
 			<span></span><span></span><span></span>
 		</button>
@@ -246,13 +260,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
 		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
 		{LOGO_HINTEN
-			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{KURZ && (
-				<span class="bbh-menu__kurz" aria-hidden="true">
-					<svg viewBox="0 0 100 100">
-						<g class="bbh-menu__kurz-mitte" fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} />
-					</svg>
-				</span>
-			)}</a>
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" /></a>
 			: startseite && (<a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
@@ -558,6 +566,22 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		let gehalten = false; // per Klick/Tipp geöffnet
 		let ueber = false; // Maus über dem Cluster
 
+		// Kein Platz für die Blase über der Zeile (Oberkante näher als 0,6032 k am Fensterrand). Nutzt nur die
+		// Probe „Namenskachel“ (KURZ, localhost); im Bau trifft die Klasse keine Regel.
+		const platz = () => menu.classList.toggle("bbh-menu--eng", cluster.getBoundingClientRect().top < burger.offsetHeight * 0.6032);
+		// Nicht nur am Scroll-Ereignis: Ein Beobachter meldet, wenn die Oberkante der Zeile die Linie kreuzt, auch
+		// nach Ankersprung, wiederhergestellter Scrollposition oder Größenwechsel ohne Scroll-Ereignis.
+		let beobachter: IntersectionObserver | null = null;
+		const beobachte = () => {
+			beobachter?.disconnect();
+			beobachter = new IntersectionObserver(platz, {
+				rootMargin: `-${Math.ceil(burger.offsetHeight * 0.6032)}px 0px 0px 0px`,
+				threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 1],
+			});
+			beobachter.observe(cluster);
+		};
+		const sichtbar = () => { if (!document.hidden) setze(); };
+
 		const setze = () => {
 			// BBH: offen, bis 100 px über die Lage des Clusters hinaus gescrollt ist (im Film-Hero
 			// steht er auf halber Höhe, sonst oben)
@@ -569,9 +593,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			menu.classList.toggle("bbh-menu--oben", oben);
 			const offen = oben || gehalten || ueber;
 			menu.classList.toggle("offen", offen);
-			// Kein Platz für die Blase über der Zeile (Oberkante näher als 0,6032 k am Fensterrand). Nutzt nur die
-			// Probe „Namenskachel“ (KURZ, localhost); im Bau trifft die Klasse keine Regel.
-			menu.classList.toggle("bbh-menu--eng", cluster.getBoundingClientRect().top < burger.offsetHeight * 0.6032);
+			platz();
 			burger.setAttribute("aria-expanded", String(offen));
 		};
 
@@ -588,7 +610,11 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		burger.addEventListener("click", klick);
 		schleier.addEventListener("click", zu);
 		window.addEventListener("scroll", scroll, { passive: true });
-		window.addEventListener("resize", scroll);
+		const groesse = () => { beobachte(); setze(); };
+		window.addEventListener("resize", groesse);
+		window.addEventListener("pageshow", scroll);
+		document.addEventListener("visibilitychange", sichtbar);
+		beobachte();
 		setze();
 
 		aufraeumen = () => {
@@ -597,7 +623,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			burger.removeEventListener("click", klick);
 			schleier.removeEventListener("click", zu);
 			window.removeEventListener("scroll", scroll);
-			window.removeEventListener("resize", scroll);
+			window.removeEventListener("resize", groesse);
+			window.removeEventListener("pageshow", scroll);
+			document.removeEventListener("visibilitychange", sichtbar);
+			beobachter?.disconnect();
 		};
 	}
 
