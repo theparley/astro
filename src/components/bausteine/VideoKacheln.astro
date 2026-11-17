@@ -43,7 +43,8 @@ const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.
 	{einleitung && <p class="t-lesen videokacheln__einleitung" set:html={einleitung} />}
 	{/* Slot „vorne“ (14.11.2026): ein großer Block vor den Kacheln, etwa die Beweisaufnahme als Text-Bild-Block */}
 	{Astro.slots.has("vorne") && <div class="videokacheln__vorne"><slot name="vorne" /></div>}
-	<div class="videokacheln__raster">
+	{/* Ohne Kacheln kein leeres Raster (17.11.2026, Segment Beweisaufnahme ohne Gaststimmen) */}
+	{kacheln.length > 0 && <div class="videokacheln__raster">
 		{kacheln.map((k) => { const Tag = k.href ? "a" : "button"; return (
 			<Tag href={k.href} type={k.href ? undefined : "button"} class="videokachel" data-src={k.href ? undefined : k.src} data-von={k.von} data-bis={k.bis} aria-label={k.href ? `${k.nr} ${k.titel}` : `${k.nr} ${k.titel}: Film groß ansehen`}>
 				{k.plakat ? (
@@ -65,7 +66,7 @@ const { titel, titelStufe, id, link, einleitung, kacheln, spalten = 2 } = Astro.
 				</span>
 			</Tag>
 		); })}
-	</div>
+	</div>}
 </div>
 <div class="videokacheln__gross" data-videokacheln-gross hidden>
 	<button type="button" class="videokacheln__zu" aria-label="Film schließen">Schließen</button>

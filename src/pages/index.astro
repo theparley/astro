@@ -502,11 +502,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 			    mit id="kap-titel". Eigene Kennung kap-beweisaufnahme, weil kap-titel im Band sitzt und die Regeln zu
 			    data-textfolge jede zweite Überschrift mit kap-titel unsichtbar schalten.
 			    Sichtbar über ZEIGE_BEWEISAUFNAHME (nur localhost) oder mit dem ganzen Entwurf. */}
-			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;aufnahme" titelStufe="2xl" spalten={3} kacheln={[
-				{ nr: "", titel: "Ute und Katrin", zeile: "„Es fühlt sich so natürlich an, hier zu sitzen.“", src: "/lokal/szene-beweisaufnahme.mp4", von: 0, bis: 4.5 },
-				{ nr: "", titel: "Hagen", zeile: "„Das ist schon state of the art.“", src: "/lokal/hagen-blickkontakt.mp4", von: 15, bis: 17 },
-				{ nr: "", titel: "Hagen", zeile: "„Ich kann nur jedem empfehlen, sich das hier mal anzuschauen.“", src: "/lokal/hagen-empfehlung.mp4", von: 7, bis: 9 },
-			]}>
+			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;aufnahme" titelStufe="2xl" spalten={3} kacheln={[]}>
 				<Fragment slot="vorne">
 					{/* Rasul 14.11.2026: „Das ist auch die Stelle, wo wir jetzt unser Blasenelement reinbringen, auf das wir ja unser
 					    Logo aufbauen … lass uns doch nochmal unser zentrales Video in der Mitte machen. Es geht auch um die Aufnahme.
@@ -519,40 +515,30 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 						{/* Weiches Trennzeichen in „Beweis&shy;kraft“ (15.11.2026): Bei 375 px ragte das Wort 51 px aus der Spalte und die
 						    Seite ließ sich 35 px quer schieben. Trennen statt kleinerer Stufe, wie bei Video&shy;beweis und Beweis&shy;aufnahme. */}
 						<h3 class="videobeweis__zwischentitel">Nicht jedes Video hat die gleiche Beweis&shy;kraft.</h3>
-						{/* Auf vier Sätze gekürzt (15.11.2026). Weggefallen ist der fünfte Satz: „So entsteht in der Beweisaufnahme ein
-						    Gespräch wie am Küchentisch.“ Die Überschrift sagt das Wort „Beweisaufnahme“ jetzt selbst, und „wie am
-						    Küchentisch“ verspricht, was jedes Podcaststudio verspricht. */}
-						<p><span class="entwurf">Entwurf</span><br />Zwei Leute vor einer Kamera filmen kann jeder. Beweiskraft hat ein Video erst, wenn das Gespräch echt ist. Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine.</p>
+						{/* Platzhalter, NICHT abgenommen (Rasul 17.11.2026, er ist mit den Sätzen noch nicht zufrieden): zwei Absätze,
+						    damit die Reihenfolge am Bildschirm zu beurteilen ist. Reihenfolge nach Rasul: „Wir schaffen eine natürliche
+						    Aufnahmesituation, in der ein echtes Gespräch entstehen kann. Und dann brauchen wir diese Labels für das, was
+						    daran besonders ist an der Aufnahmesituation.“ Der zweite Absatz leitet zum nächsten Abschnitt „Augenzeugen“
+						    über. Vorher vier Sätze („Zwei Leute vor einer Kamera filmen kann jeder. …“, Stand 15.11.2026, Git-Geschichte). */}
+						<p><span class="entwurf">Entwurf</span><br />Wir schaffen eine natürliche Aufnahmesituation, in der ein echtes Gespräch entstehen kann. Je natürlicher die Aufnahme ist, desto leichter kommt man ins Gespräch. Und was im Gespräch entsteht, hat Beweiskraft.</p>
+						<p>Sie beobachtet nur. Für den Zuschauer ist sie das Gegenüber.</p>
 						<p><Knopf href="/beweisaufnahme" text="Zur Beweisaufnahme" /></p>
 					</div>
-					{/* Vorteile als Karten mit Zeichnung wie BBHs „Join the flock“ (Analyse 2.12 #4: drei Spalten, Bild 1:1, Titel und
-					    grauer Text), Rasul 14.11.2026: „für die Funktionen können wir auf der BBH-Seite so eine Kachelstruktur mit
-					    handgezeichneten Schafen und ein bisschen Text dazu … Müssen wir nochmal Logos erfinden oder Zeichnungen, die das
-					    klar machen?“ Zeichnungen noch offen, deshalb Platzhalter mit dem Motiv. Vorher Wort-Kennzahlen zum Aufklappen
-					    (Texte der Vertiefung im Steuerdokument). */}
-					{/* Probe „3 groß + 6 klein“ (Rasul 14.11.2026: „Ja, Probe bauen“), nach der Recherche
-					    research/Viele_Vorteile_Wahrnehmung_Recherche_2026-11.md im Marketing-Ordner: die drei stärksten, klar
-					    verschiedenen Vorteile groß (Baymard: Kernvorteile mit Bild, Titel, Absatz; Shu & Carlson 2014: drei wirken
-					    am besten), darunter sechs kleine, sichtbar getrennte Kacheln für den Eindruck „viele“. Nur Vorteile, die aus
-					    dem Studio-Aufbau folgen (Rasul 14.11.2026). Kernvorteil oben links. Keine Überschrift „9 Gründe“. Vorher
-					    sechs gleich große Karten mit Zeichnung (Git-Geschichte). Texte Entwurf. */}
+					{/* Aufgeräumt (Rasul 17.11.2026: „Mach mal nochmal bei Localhost 4321 alles unterhalb des Videos mit den Blasen
+					    weg. … Und dann brauchen wir diese Labels für das, was daran besonders ist an der Aufnahmesituation. Es gibt
+					    keine Ablenkung durch Technik. Es gibt eine natürliche Gesprächssituation. Und es gibt eine Live-Regie. Der
+					    Blickkontakt … das gehört eigentlich in den nächsten Abschnitt, weil da geht es um die Wirkung.“).
+					    Weg sind die drei großen Karten (Blickkontakt, Keine Kamera, Echte Momente), die sechs kleinen Kacheln mit Plus
+					    und die drei Gaststimmen-Kacheln (Stand davor: Git-Geschichte, Commit 71d86b1 und früher). Dafür drei Labels
+					    ohne Zeichnung und ohne Beschreibung; die Motive sind noch nicht entschieden. Der Blickkontakt wandert in den
+					    Abschnitt „Augenzeugen“, hier nichts dazu. Form: Kennzahlen mit Wörtern, drei nebeneinander ab 1024 px,
+					    darunter gestapelt. */}
 					<div class="videobeweis__vorteile" id="vorteile">
-						<p class="videobeweis__entwurf"><span class="entwurf">Entwurf</span></p>
-						<Karten rahmen={false} spalten={3} format="4/3" karten={[
-							{ titel: "Blickkontakt", zeile: "Ihr schaut euch in die Augen, und jeder Zuschauer schaut mit. Die Kamera sitzt unsichtbar mitten in eurem Blick.", platzhalter: "Zeichnung: Augen, Blickachse" },
-							{ titel: "Keine Kamera", zeile: "Mit einer Kamera kann man kein Gespräch führen. Deshalb sieht man bei uns keine, und ihr bleibt im Gespräch.", platzhalter: "Zeichnung: durchgestrichene Kamera" },
-							{ titel: "Echte Momente", zeile: "Die Antwort, mit der niemand gerechnet hat. Das Lachen, das den Menschen hinter der Expertise zeigt.", platzhalter: "Zeichnung: zwei, die reden" },
+						<Kennzahlen rahmen={false} woerter zahlen={[
+							{ wert: "Keine Ablenkung durch Technik" },
+							{ wert: "Natürliche Gesprächs\u00ADsituation" },
+							{ wert: "Live-Regie" },
 						]} />
-						<div class="videobeweis__klein">
-							<Kennzahlen rahmen={false} woerter kacheln zahlen={[
-								{ wert: "Ohne Kamerastress", zeile: "Ihr vergesst, dass gefilmt wird.", mehr: "Filmreif ohne Kamerastress: Wer keine Kamera sieht, schaltet nicht in den Präsentationsmodus." },
-								{ wert: "Ohne Üben", zeile: "Präsenz habt ihr im Gespräch schon.", mehr: "Wir verändern nicht euch, wir verändern den Raum." },
-								{ wert: "Wenig Zeit", zeile: "Ihr kommt, redet und geht.", mehr: "Vorbereitung, Technik und Nachbearbeitung machen wir." },
-								{ wert: "Live-Regie", zeile: "Ihr redet, wir achten auf Bild und Ton.", mehr: "Während ihr redet, sitzt unsere Regie am Pult. Ihr denkt nur an euer Thema." },
-								{ wert: "Filmreif", zeile: "Wirkt wie geredet, sieht aus wie ein Film.", mehr: "Vorne ein entspanntes Gespräch, dahinter ein Studio mit Licht, Ton und Regie." },
-								{ wert: "Macht Spaß", zeile: "Wie ein gutes Gespräch, nicht wie ein Dreh.", mehr: "Eine Stimme nach einer Live-Aufnahme: „Das hat ja total Spaß gemacht.“" },
-							]} />
-						</div>
 					</div>
 				</Fragment>
 			</VideoKacheln>)}

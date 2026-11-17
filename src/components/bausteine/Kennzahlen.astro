@@ -13,7 +13,8 @@
 /* kacheln (14.11.2026, Probe „3 groß + 6 klein“, Recherche research/Viele_Vorteile_Wahrnehmung_Recherche_2026-11.md im
    Marketing-Ordner): kleine, sichtbar getrennte Kacheln mit Rahmen, bis zu sechs in einer Reihe; getrennte, gleichartige
    Elemente werden auf einen Blick als „viele“ gelesen (Franconeri et al. 2009, Whitney & Yamanashi Leib 2018). */
-interface Props { zahlen: { wert: string; zeile: string; mehr?: string }[]; gross?: boolean; quelle?: string; rahmen?: boolean; woerter?: boolean; kacheln?: boolean }
+/* zeile darf fehlen (17.11.2026, drei Labels im Segment Beweisaufnahme): dann steht nur das Wort. */
+interface Props { zahlen: { wert: string; zeile?: string; mehr?: string }[]; gross?: boolean; quelle?: string; rahmen?: boolean; woerter?: boolean; kacheln?: boolean }
 const { zahlen, gross = false, quelle, rahmen = true, woerter = false, kacheln = false } = Astro.props;
 ---
 <div class:list={["kennzahlen", rahmen && "rahmen", woerter && "kennzahlen--woerter", kacheln && "kennzahlen--kacheln"]} data-einblenden>
@@ -30,7 +31,7 @@ const { zahlen, gross = false, quelle, rahmen = true, woerter = false, kacheln =
 		) : (
 			<div class="kennzahl">
 				<div class:list={["t-zahl", gross && "kennzahl--gross"]}>{z.wert}</div>
-				<p class="kennzahl__zeile">{z.zeile}</p>
+				{z.zeile && <p class="kennzahl__zeile">{z.zeile}</p>}
 			</div>
 		))}
 	</div>
