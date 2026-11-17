@@ -468,7 +468,9 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 						    den Menschen, der sie anwendet.“). Auf Dev und live steht am 17.11.2026 noch „der sie hat“.
 						    Am selben Abend Plural (Rasul: „Müsste es nicht heißen, zeigt eure Expertise und die Menschen, die sie anwenden.
 						    Es ist ja ein Gespräch, wo mindestens zwei sitzen.“). */}
-						<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und die Menschen, die sie&nbsp;anwenden.</p>
+						{/* Absatz 2 und 3 zusammengelegt (Rasul 17.11.2026 spät: „Sollen wir den zweiten und dritten Abschnitt zusammenfassen
+						    zu einem?“). „Diese“ greift auf den Satz davor zurück, das gehört in einen Absatz. Das Band hat damit drei
+						    Teile: Lage mit Zahl, was die Aufnahme zeigt, Schluss. Stand mit zwei Absätzen: Commit b56e2c7. */}
 						{/* Wortlaut 17.11.2026 abends (Rasul: „Die gelebte Kompetenz eines Menschen lässt sich nicht mit KI generieren. Und
 						    schlägt jede Behauptung. Ich würde die Doppelung von Mensch hier in Kauf nehmen.“). Zwei Sätze, der zweite
 						    ohne eigenes Subjekt, das ist Absicht; nicht zusammenziehen. Vorher: „Gelebte Kompetenz lässt sich nicht mit KI
@@ -484,7 +486,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 						    Kompetenz eines Menschen ist einmalig und lässt sich nicht mit KI generieren.“ (Commit 3ba3d53).
 						    Kurz danach „Diese“ statt „Eure“ (Rasul: „Diese gelebte Kompetenz ist einmalig und lässt sich nicht mit KI
 						    generieren.“): greift auf den Satz davor zurück; die Anrede steht im Schlussabsatz. */}
-						<p>Diese gelebte Kompetenz ist einmalig und lässt sich nicht mit KI&nbsp;generieren.</p>
+						<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und die Menschen, die sie anwenden. Diese gelebte Kompetenz ist einmalig und lässt sich nicht mit KI&nbsp;generieren.</p>
 						{/* Schlusssatz als eigener Absatz (Rasul 17.11.2026 spät: „Und ich hätte noch gern einen Schlusssatz. Wenn alle
 						    behaupten, beweisen Favoriten.“ und gleich danach: „Oder sogar: Was alle behaupten, beweisen Favoriten.“;
 						    es gilt die zweite Fassung, sie liefert das Objekt). Ringschluss zum Satzpaar über der Animation („Alle behaupten. /
@@ -500,7 +502,11 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 						    zwischen „könnt“ und „ihr“.
 						    Dazu „nur“ (Rasul: „Was alle nur behaupten, könnt ihr beweisen. Vor dem ersten Kontakt.“): benennt den
 						    Unterschied in der Handlung, nicht in den Personen. */}
-						<p class="anlass__schluss">Was alle nur behaupten, könnt&nbsp;ihr&nbsp;beweisen. Vor&nbsp;dem&nbsp;ersten&nbsp;Kontakt.</p>
+						{/* Der Nachsatz steht auf jeder Breite in einer eigenen Zeile (17.11.2026 spät): Er ist ein Nachschlag und das
+						    Gegenstück zum zweizeiligen Satzpaar über der Animation. Am Rechner passte alles nur mit 13 bis 18 px Reserve
+						    in eine Zeile, je nach Browser wäre es ein- oder zweizeilig gewesen. Gebaut als Zeilenblock (span mit
+						    display block), kein br: ein Absatz, ein Satzfluss für Vorleseprogramme, der erste Satz bricht frei. */}
+						<p class="anlass__schluss">Was alle nur behaupten, könnt&nbsp;ihr&nbsp;beweisen. <span class="anlass__schlusszeile">Vor&nbsp;dem&nbsp;ersten&nbsp;Kontakt.</span></p>
 						{/* Dritter Abschnitt: Überleitung, und hier steht das Skalieren (Rasul 15.11.2026: „skalieren machen wir nicht bei dem
 						     Thema KI rein, das ist Quatsch. Das machen wir rein, dass wir Video mit Video die Qualität von einem echten Gespräch
 						     skalieren können“). War: „Beweisen lässt sich Expertise am besten im Gespräch. Genau das filmen wir.“ */}
@@ -837,6 +843,8 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	/* Schlusssatz (17.11.2026): doppelter Absatzabstand darüber setzt ihn als Schluss ab; 32 statt 16 px darunter, damit
 	   die Quellenzeile nicht an ihm hängt (sie gehört zum ersten Satz, nicht zu ihm). Kein eigenes Gewicht. */
 	.anlass--band .anlass__text p.anlass__schluss { margin-top: 48px; }
+	/* eigener Name: .anlass__nachsatz gibt es schon (alter Nachsatz unter dem Satzpaar, je nach Textfolge ausgeblendet) */
+	.anlass__schlusszeile { display: block; }
 	.anlass--band .anlass__text .anlass__schluss + .anlass__quelle { margin-top: 32px; }
 	/* Text nur für Vorleseprogramme: unsichtbar, nimmt keinen Platz, bleibt im Lesefluss */
 	.nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
