@@ -17,6 +17,7 @@
    Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
 import LogoBiss from "./LogoBiss.astro";
 import { readFileSync } from "node:fs";
+import { BLASE_EIN_WORT } from "../daten/blaseEinWort";
 interface Props { startseite?: boolean }
 const { startseite = false } = Astro.props;
 /* Namenskachel „parley Film“ in Forma DJR, NUR auf localhost (Rasul 17.11.2026: „auf der Webseite im Menü haben wir
@@ -199,6 +200,14 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    der Startseite oben eine leere Fläche. Der Name blendet erst ein, wenn das Menü einklappt, mit derselben
    Verzögerung und Dauer wie der Hamburger (Klasse bbh-menu--gescrollt aus dem Skript). Gilt ab 1024 px; darunter
    gibt es das Zeichen rechts nicht, dort bliebe sonst oben gar kein Name, also steht er dort immer in der Kachel.
+   Fassung „wort“ (Rasul 17.11.2026 spät: „Was wir noch mit dem Menü probieren könnten, erstmal auf Localhost: dass
+   wir in die Blase nur parley reinschreiben, nicht parley Film, und vorne auf die Kachel parley Film schreiben.“):
+   wie „fest“, aber die Kachel vorn trägt immer „parley Film“ (auch auf der Startseite oben), und im Zeichen rechts
+   steht in der Blase nur „parley“. Links die Wortmarke, rechts das Markenwort allein, nicht zweimal dasselbe.
+   Das Zeichen mit einem Wort ist ein eigenes SVG nur im Menü (Umriss aus src/daten/blaseEinWort.ts, erzeugt mit der
+   Funktion des Generators). LogoBiss.astro und damit der Fuß bleiben beim zweizeiligen Block.
+   Schalter: ?kachel=wort (Voreinstellung seit dieser Fassung), ?kachel=fest (Kachel oben leer, Blase „parley Film“),
+   ?kachel=glatt, ?kachel=aus.
    An import.meta.env.DEV gebunden, im Bau nichts davon außer den Klassen bbh-menu--eng und bbh-menu--gescrollt, die
    dort keine Regel treffen. Rückweg: KURZ auf false. */
 const KURZ = import.meta.env.DEV;
@@ -212,7 +221,8 @@ if (KURZ) {
 }
 const KURZ_AN = 'html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu]';
 const KURZ_WANN = 'html[data-kachel="glatt"] div.bbh-menu[data-bbh-menu]:is(:not(.offen), .bbh-menu--eng)';
-const KURZ_FEST = 'html[data-kachel="fest"] div.bbh-menu[data-bbh-menu]';
+const KURZ_FEST = 'html:is([data-kachel="fest"], [data-kachel="wort"]) div.bbh-menu[data-bbh-menu]';
+const KURZ_NUR_FEST = 'html[data-kachel="fest"] div.bbh-menu[data-bbh-menu]';
 const KURZ_STIL = `
 ${KURZ_AN} { --oben: var(--fuge); }
 .bbh-menu .bbh-menu__kurz { order: -1; flex: none; display: flex; justify-content: flex-end; width: 0; height: var(--k); margin-right: calc(-1 * var(--fuge)); overflow: hidden; background: var(--flaeche); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-right var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
@@ -230,9 +240,13 @@ ${KURZ_FEST}:is(:not(.bbh-menu--oben), .bbh-menu--eng) .bbh-menu__name.bbh-menu_
 @media (max-width: 1023px) { ${KURZ_FEST} .bbh-menu__name.bbh-menu__name--logo { display: none; } }
 /* Name in der Kachel erst mit den Menüstrichen: gleiche Verzögerung und Dauer wie die Breite des Hamburgers */
 ${KURZ_FEST} .bbh-menu__kurz svg { transition: opacity var(--dauer) var(--kurve) var(--out-delay); }
-@media (min-width: 1024px) { ${KURZ_FEST}.bbh-menu--start:not(.bbh-menu--gescrollt) .bbh-menu__kurz svg { opacity: 0; transition-delay: 0s; } }
+@media (min-width: 1024px) { ${KURZ_NUR_FEST}.bbh-menu--start:not(.bbh-menu--gescrollt) .bbh-menu__kurz svg { opacity: 0; transition-delay: 0s; } }
+/* Fassung wort: im Zeichen rechts nur „parley“ (eigenes SVG), sonst das Zeichen aus LogoBiss mit „parley Film“ */
+html[data-kachel="wort"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg:not(.bbh-menu__zeichen-wort) { display: none; }
+html:not([data-kachel="wort"]) div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-wort { display: none; }
 `;
-const KURZ_SKRIPT = `(function(){var w="fest";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
+const KURZ_SKRIPT = `(function(){var w="wort";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
+const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
@@ -290,7 +304,18 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
 		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
 		{LOGO_HINTEN
-			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" /></a>
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{KURZ && (
+				<svg class="bbh-menu__zeichen-wort" viewBox="0 -60.32 289.64 160.32" role="img" aria-label="parley">
+					<defs>
+						<mask id={wortMaskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
+							<rect x="-10" y="-70" width="320" height="200" fill="#fff" />
+							<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+						</mask>
+					</defs>
+					<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="currentColor" mask={`url(#${wortMaskeId})`} />
+					<g fill="currentColor" set:html={BLASE_EIN_WORT} />
+				</svg>
+			)}</a>
 			: startseite && (<a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
