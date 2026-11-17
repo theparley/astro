@@ -12,8 +12,9 @@ const NUR_LOKAL = [
 	'bausteine', 'kacheln', 'kopf-demo', 'stoppuhr-demo', 'studio', 'stunden-werkstatt', 'tafel',
 	'uhr-varianten', 'wand', 'wand-drei', 'werkstatt',
 	'lab', 'test', 'werkzeug', 'bausteine-demo.html',
-	// fonts/FormaDJRVariable.woff2 seit 17.11.2026 im Bau (Rasul: Verwendung mit dem Schriftentwickler abgesprochen),
-	// gebraucht für die Namenskachel im Menü (MenuBBH.astro, NAME_FORMA). Forma Mono bleibt nur lokal.
+	// Forma DJR als Schriftdatei bleibt lokal: Seit Richtung 12 (17.11.2026) steht „parley Film“ im Menü als Umriss
+	// (LogoBiss), die Datei wird im Bau nicht gebraucht. Zwischenstand mit Datei im Bau: Commit 9ad9520.
+	'fonts/FormaDJRVariable.woff2',
 	'fonts/FormaDJRMonoVariable.woff2',
 	'lokal', // Gast-Videos ohne Freigabe (Symlinks, ohnehin nicht in Git)
 ];

@@ -119,13 +119,33 @@ div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k)
    weil die Zeile ohne die erste Kachel hineinpasst.
    Folgen, solange die Variante läuft: Eingeklappt bleibt nur der Hamburger; einen Home-Link gibt es dann nur über
    das Zeichen hinten, also nur auf der Startseite oben. An import.meta.env.DEV gebunden, im Bau unverändert
-   (Logokachel „Zipfel in der Ecke“ vorn, Namenskachel in Forma hinten). Rückweg: LOGO_HINTEN auf false. */
-const LOGO_HINTEN = import.meta.env.DEV;
+   (Logokachel „Zipfel in der Ecke“ vorn, Namenskachel in Forma hinten). Rückweg: LOGO_HINTEN auf false.
+   Stand dieser ersten Probe (Zeile am Rand, Zeichen nur auf der Startseite oben): Commit d51e287. */
+/* RICHTUNG 12, angenommen für Dev und live (Rasul 17.11.2026, aus dem Moodboard „Menü eingeklappt“ im
+   Marketing-Ordner, branding/werkstatt-seiten/menu-eingeklappt-moodboard.html: „Okay, 10 oder 12 sind so die
+   Favoriten. Wir probieren zuerst mal die zwölf. Setzt das mal um auch für Dev und auch für die Live-Seite. Und achte
+   darauf, dass das parley Film in unserer Forma DJR-Schrift ist.“). Seitdem gilt die Variante auch im Bau:
+   - Das Zeichen steht immer, auf jeder Seite, ausgeklappt wie eingeklappt. Eingeklappt wird nur die Menüspalte zum
+     Hamburger: Hamburger k × k, Fuge, dann das ganze Zeichen. Es ist zugleich der Home-Link.
+   - Die Zeile rückt vom oberen Fensterrand weg, damit die Blase samt Name Platz hat: Oberkante bei
+     Fuge + 0,6032 k (k 88: 55,1 px, k 72: 45,4 px) statt bei der Fuge. Das gilt in jedem Zustand, in dem die Zeile
+     oben steht (fest oben und klebend im Film-Hero), nicht nur eingeklappt. Unten mittig bleibt die Lage, dort ist
+     nach oben Platz.
+   - „parley Film“ in der Blase kommt aus LogoBiss stufe 2, seit 17.11.2026 Umrisse aus Forma DJR 900 (Generator
+     SCHRIFT_FUSS = None). Umrisse, keine Schrift zur Laufzeit: Die Schriftdatei wird dafür nicht gebraucht und
+     steht wieder in NUR_LOKAL (astro.config.mjs); der Stilblock NAME_FORMA wird nicht mehr ausgegeben.
+   - Die Einblendung des Zeichens läuft nur beim Laden der Startseite, nicht bei jedem Zurückscrollen.
+   Rückweg zum Stand davor (Logokachel „Zipfel in der Ecke“ vorn, Namenskachel in Forma hinten, Stand 9ad9520):
+   LOGO_HINTEN auf false und fonts/FormaDJRVariable.woff2 wieder aus NUR_LOKAL nehmen. */
+const LOGO_HINTEN = true;
 const LOGO_HINTEN_STIL = `
-.bbh-menu .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); clip-path: inset(-61% 100% 0 0); }
-.bbh-menu.bbh-menu--oben .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * 2.8964); clip-path: inset(-61% 0 0 0); }
-.bbh-menu.bbh-menu--start.bbh-menu--oben .bbh-menu__name.bbh-menu__name--logo { animation-name: bbh-maske-logo; }
+div.bbh-menu[data-bbh-menu] { --oben: calc(var(--fuge) + var(--k) * 0.6032); }
+.bbh-menu .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); width: calc(var(--k) * 2.8964); margin-left: 0; clip-path: inset(-61% 0 0 0); opacity: 1; pointer-events: auto; }
+.bbh-menu.bbh-menu--start .bbh-menu__name.bbh-menu__name--logo.bbh-menu__name--logo { animation: bbh-maske-logo 500ms var(--maske) 500ms both; }
 .bbh-menu .bbh-menu__name.bbh-menu__name--logo svg { position: absolute; left: 0; bottom: 0; width: calc(var(--k) * 2.8964); height: calc(var(--k) * 1.6032); display: block; }
+/* Eingeklappt hat die Menüspalte Breite null, ihre Fuge fiele sonst doppelt an (Zeichen bei 94 statt 92 px). */
+div.bbh-menu[data-bbh-menu] .bbh-menu__nav { margin-left: calc(-1 * var(--fuge)); transition-property: width, margin-left; }
+div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
 @keyframes bbh-maske-logo { from { clip-path: inset(-61% 100% 0 0); } to { clip-path: inset(-61% 0 0 0); } }
 `;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
@@ -176,10 +196,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   (Rasul 13.11.2026: „Ganz am Anfang sieht man das ganze Menü und noch den Namen BBH hintendran.
 		   Da würden wir einmal den kleinen parley schreiben. Dann nehmen wir unsere Forma DJR-Schrift“).
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
-		{NAME_FORMA && <style is:inline set:html={NAME_FORMA_STIL}></style>}
-		{startseite && (LOGO_HINTEN
+		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
+		{LOGO_HINTEN
 			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" /></a>
-			: <a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
+			: startseite && (<a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
@@ -206,6 +226,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		--nav-breite: calc(var(--spalten) * var(--kn) + (var(--spalten) - 1) * var(--fuge));
 		/* Schließen wartet, bis die Kacheln einzeln weg sind: 50 ms × Anzahl + 300 ms */
 		--out-delay: calc(50ms * var(--anzahl) + 300ms);
+		/* Oberkante der Zeile, wenn sie oben steht. Richtung 12 setzt sie tiefer (Stilblock LOGO_HINTEN_STIL). */
+		--oben: var(--fuge);
 	}
 	@media (min-width: 768px) {
 		.bbh-menu { --k: 88px; }
@@ -213,7 +235,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 
 	.bbh-menu__cluster {
 		position: fixed;
-		top: var(--fuge);
+		top: var(--oben);
 		left: var(--fuge);
 		z-index: 900;
 		display: flex;
@@ -417,7 +439,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	}
 	:global(html[data-hero="film"]) .bbh-menu--start .bbh-menu__cluster {
 		position: sticky;
-		top: var(--fuge);
+		top: var(--oben);
 		left: auto;
 		margin-left: var(--fuge);
 		width: max-content;
