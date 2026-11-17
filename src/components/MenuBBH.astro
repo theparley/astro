@@ -15,6 +15,7 @@
    - Hover auf Kachel: Balken in Textfarbe, 15 % Deckkraft, wischt von links, 150 ms;
      aktuelle Seite trägt den Balken dauerhaft.
    Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
+import LogoBiss from "./LogoBiss.astro";
 interface Props { startseite?: boolean }
 const { startseite = false } = Astro.props;
 /* Namenskachel „parley Film“ in Forma DJR, NUR auf localhost (Rasul 17.11.2026: „auf der Webseite im Menü haben wir
@@ -105,6 +106,28 @@ div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k)
    Wortmarke sitzt dort nicht im Raster, ihre Breite kommt aus dem Wort (Schriftzug 272 px plus je 24 px Polster);
    geteilt wird nur die Höhe. Unsere 2,89 k sind also die BBH-Lösung, die 16:9-Fassung war strenger als das Vorbild. */
 `;
+/* VARIANTE „Logo hinten“, NUR auf localhost (Rasul 17.11.2026: „Machen wir mal noch eine Variante für Menü. Und zwar
+   nehmen wir jetzt doch unser Logo hinten dran. Nehmen aber das gleiche Logo, das wir unten im Footer haben. Als
+   komplettes Logo. Und anstatt nur parley in die Kachel zu schreiben, setzen wir die Kachel an und parley ist dann
+   sozusagen versetzt oben drüber. Möchten wir gucken, wie das aussieht. Die erste Kachel fällt dadurch weg und das
+   Menü rückt ganz an Anfang. Machen wir das mal für die Localhost-Seite.“).
+   Die Logokachel vorn entfällt, das Menü beginnt am linken Rand. Hinten steht statt der Namenskachel das ganze
+   Zeichen aus dem Fuß (LogoBiss stufe 2, „parley Film“ in Geist 900): Das Rechteck ist die Kachel (Höhe k, Breite
+   1,778 k), die Blase mit dem Namen steht rechts oben über. Ganzes Zeichen samt Schutzraum: 2,8964 k × 1,6032 k,
+   davon 0,6032 k über der Kachelzeile. Nichts zurechtgerückt: Was oben nicht ins Fenster passt, schneidet das
+   Fenster ab. Farbe wie der Kachelgrund. Unter 520 px bleibt das Zeichen sichtbar (anders als die Namenskachel),
+   weil die Zeile ohne die erste Kachel hineinpasst.
+   Folgen, solange die Variante läuft: Eingeklappt bleibt nur der Hamburger; einen Home-Link gibt es dann nur über
+   das Zeichen hinten, also nur auf der Startseite oben. An import.meta.env.DEV gebunden, im Bau unverändert
+   (Logokachel „Zipfel in der Ecke“ vorn, Namenskachel in Forma hinten). Rückweg: LOGO_HINTEN auf false. */
+const LOGO_HINTEN = import.meta.env.DEV;
+const LOGO_HINTEN_STIL = `
+.bbh-menu .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); clip-path: inset(-61% 100% 0 0); }
+.bbh-menu.bbh-menu--oben .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * 2.8964); clip-path: inset(-61% 0 0 0); }
+.bbh-menu.bbh-menu--start.bbh-menu--oben .bbh-menu__name.bbh-menu__name--logo { animation-name: bbh-maske-logo; }
+.bbh-menu .bbh-menu__name.bbh-menu__name--logo svg { position: absolute; left: 0; bottom: 0; width: calc(var(--k) * 2.8964); height: calc(var(--k) * 1.6032); display: block; }
+@keyframes bbh-maske-logo { from { clip-path: inset(-61% 100% 0 0); } to { clip-path: inset(-61% 0 0 0); } }
+`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
@@ -113,6 +136,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{LOGO_BREIT && <style is:inline set:html={LOGO_BREIT_STIL}></style>}
 		{ALLE_BREIT && <style is:inline set:html={ALLE_BREIT_STIL}></style>}
 		{LOGO_ECKE && <style is:inline set:html={LOGO_ECKE_STIL}></style>}
+		{LOGO_HINTEN && <style is:inline set:html={LOGO_HINTEN_STIL}></style>}
+		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
 			   biss_logo_website.py), hier nur auf das Rechteck zugeschnitten, damit es mittig sitzt. */}
@@ -143,6 +168,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			</svg>
 			)}
 		</a>
+		)}
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
 			<span></span><span></span><span></span>
 		</button>
@@ -151,7 +177,9 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   Da würden wir einmal den kleinen parley schreiben. Dann nehmen wir unsere Forma DJR-Schrift“).
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
 		{NAME_FORMA && <style is:inline set:html={NAME_FORMA_STIL}></style>}
-		{startseite && <a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>}
+		{startseite && (LOGO_HINTEN
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" /></a>
+			: <a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
