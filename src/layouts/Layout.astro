@@ -258,7 +258,7 @@ const websiteJsonLd = JSON.stringify({
 				// jede Wahl im Browser, und die gemerkte schlägt die Grundeinstellung. Wer hier früher geprobt hat, sah deshalb
 				// weiter die alte Fassung. Bei jeder neuen Entscheidung das Datum hochsetzen und den Namen in die Liste nehmen.
 				try {
-					var STAND = "2026-11-17b"; // 17.11.2026: „kachel“ dazu; Grundeinstellung der Menü-Probe erst „fest“ (a), dann „wort“ (b)
+					var STAND = "2026-11-17c"; // 17.11.2026: „kachel“ dazu; Grundeinstellung der Menü-Probe erst „fest“ (a), dann „wort“ (b), dann „ecke“ (c)
 					if (speicher.getItem("parley-stand") !== STAND) {
 						["textfolge", "anfang", "satzform", "mit", "gasse", "staffel", "atmen", "weite", "kachel"].forEach(function (n) { speicher.removeItem("parley-" + n); });
 						speicher.setItem("parley-stand", STAND);

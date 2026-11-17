@@ -206,8 +206,16 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    steht in der Blase nur „parley“. Links die Wortmarke, rechts das Markenwort allein, nicht zweimal dasselbe.
    Das Zeichen mit einem Wort ist ein eigenes SVG nur im Menü (Umriss aus src/daten/blaseEinWort.ts, erzeugt mit der
    Funktion des Generators). LogoBiss.astro und damit der Fuß bleiben beim zweizeiligen Block.
-   Schalter: ?kachel=wort (Voreinstellung seit dieser Fassung), ?kachel=fest (Kachel oben leer, Blase „parley Film“),
-   ?kachel=glatt, ?kachel=aus.
+   Fassung „ecke“ (Rasul 17.11.2026 spät: „Mach nochmal in der Kachel nicht parley Film, sondern mach uns das
+   angebissene Quadrat oder Rechteck. Also die Form bleibt und wir beißen das sozusagen an. Wir machen bei parley
+   wieder parley Film rein in die Blase. Vielleicht erklärt sich damit ein bisschen unser Favicon.“): wie „fest“,
+   aber in der Kachel vorn steht das Motiv des Favicons (Variante D), der quadratische Ausschnitt x 77,80 bis 177,80
+   des Zeichens: Die Kachel ist die helle Fläche, die Blase samt Zipfel beißt oben rechts schwarz hinein. Rechts
+   das ganze Zeichen mit „parley Film“ aus LogoBiss. Links Zeichen ohne Wort, rechts die Wortmarke, „parley“ einmal.
+   Ecken: Die Kachel bleibt eckig wie die Menükacheln (das Zeichen hat rechts Radius 5, im Favicon auch); in der
+   Reihe aus eckigen Kacheln wäre eine einzelne runde Ecke ein Fremdkörper. Die Kachel führt weiter zur Startseite.
+   Schalter: ?kachel=ecke (Voreinstellung seit dieser Fassung), ?kachel=wort (Kachel „parley Film“, Blase „parley“),
+   ?kachel=fest (Kachel oben leer, Blase „parley Film“), ?kachel=glatt, ?kachel=aus.
    An import.meta.env.DEV gebunden, im Bau nichts davon außer den Klassen bbh-menu--eng und bbh-menu--gescrollt, die
    dort keine Regel treffen. Rückweg: KURZ auf false. */
 const KURZ = import.meta.env.DEV;
@@ -221,7 +229,7 @@ if (KURZ) {
 }
 const KURZ_AN = 'html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu]';
 const KURZ_WANN = 'html[data-kachel="glatt"] div.bbh-menu[data-bbh-menu]:is(:not(.offen), .bbh-menu--eng)';
-const KURZ_FEST = 'html:is([data-kachel="fest"], [data-kachel="wort"]) div.bbh-menu[data-bbh-menu]';
+const KURZ_FEST = 'html:is([data-kachel="fest"], [data-kachel="wort"], [data-kachel="ecke"]) div.bbh-menu[data-bbh-menu]';
 const KURZ_NUR_FEST = 'html[data-kachel="fest"] div.bbh-menu[data-bbh-menu]';
 const KURZ_STIL = `
 ${KURZ_AN} { --oben: var(--fuge); }
@@ -244,8 +252,11 @@ ${KURZ_FEST} .bbh-menu__kurz svg { transition: opacity var(--dauer) var(--kurve)
 /* Fassung wort: im Zeichen rechts nur „parley“ (eigenes SVG), sonst das Zeichen aus LogoBiss mit „parley Film“ */
 html[data-kachel="wort"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg:not(.bbh-menu__zeichen-wort) { display: none; }
 html:not([data-kachel="wort"]) div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-wort { display: none; }
+/* Fassung ecke: in der Kachel vorn der Ausschnitt mit dem Biss statt des Namens */
+html[data-kachel="ecke"] div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg:not(.bbh-menu__kurz-ecke) { display: none; }
+html:not([data-kachel="ecke"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.bbh-menu__kurz-ecke { display: none; }
 `;
-const KURZ_SKRIPT = `(function(){var w="wort";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
+const KURZ_SKRIPT = `(function(){var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -293,6 +304,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{KURZ && (
 			<a href="/" class="bbh-menu__kurz" aria-label="parley Film, Startseite">
 				<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} /></svg>
+				<svg class="bbh-menu__kurz-ecke" viewBox="77.80 0 100 100" aria-hidden="true"><path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" /></svg>
 			</a>
 		)}
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
