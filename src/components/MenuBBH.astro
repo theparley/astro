@@ -68,12 +68,22 @@ const LOGO_BREIT_STIL = `
 .bbh-menu .bbh-menu__logo.bbh-menu__logo--breit { width: calc(var(--k) * 16 / 9); }
 .bbh-menu .bbh-menu__logo.bbh-menu__logo--breit svg { width: 100%; height: 100%; }
 `;
+/* PROBE alle Kacheln 16 : 9, NUR auf localhost (Rasul 17.11.2026: „Ich befürchte, es wird zu groß, wenn wir alle auf
+   16 : 9 machen. Probier es aber mal, zeig es mal an.“). Zur Logokachel kommen Hamburger und Menükacheln (--kn) dazu:
+   Höhe k, Breite k × 16/9. Damit stimmen die Breiten wieder überein wie bei BBH. Die Namenskachel behält ihr Maß aus
+   der Wortbreite. An import.meta.env.DEV gebunden. Rückweg: ALLE_BREIT auf false. */
+const ALLE_BREIT = import.meta.env.DEV;
+const ALLE_BREIT_STIL = `
+div.bbh-menu[data-bbh-menu] { --kn: calc(var(--k) * 16 / 9); }
+div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k) * 16 / 9); }
+`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
 <div class={`bbh-menu${startseite ? " bbh-menu--start offen" : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
 	<div class="bbh-menu__cluster">
 		{LOGO_BREIT && <style is:inline set:html={LOGO_BREIT_STIL}></style>}
+		{ALLE_BREIT && <style is:inline set:html={ALLE_BREIT_STIL}></style>}
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
 			   biss_logo_website.py), hier nur auf das Rechteck zugeschnitten, damit es mittig sitzt. */}
