@@ -875,8 +875,11 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.videobeweis__klein { margin-top: 48px; }
 	/* Statement gehört zur Gruppe Titel, Film, Labels: 48 px unter dem Film, die Labels folgen mit ihren 48 px */
 	/* Breite wie der Absatz darunter, höchstens 768 px */
-	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-weight: 500; font-size: var(--text-xl); line-height: var(--zeile-lg); text-wrap: balance; }
-	/* Stufe xl statt lg (Rasul 17.11.2026 spät: „Mach mal die Natürlichkeit der Aufnahme in der nächstgrößeren Schrift“).
+	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-weight: 500; font-size: var(--text-2xl); line-height: var(--zeile-lg); text-wrap: balance; }
+	/* Stufe 2xl (Rasul 17.11.2026 spät, zweimal: „Der Satz die Natürlichkeit, der braucht die nächstgrößere Schrift. So wie
+	   wir oben geschrieben haben, alle behaupten, Favoriten beweisen.“). Erst lg, dann xl (Commit 1aa8186), jetzt die
+	   Stufe des Satzpaars über der Animation. Anders als beim ersten 2xl-Versuch (Commit b4d74f3): Lesetext-Schrift
+	   statt breiter Bartle, Block 768 px statt ganzer Spalte.
 	   Zeilenhöhe bleibt die von lg (1,08): --zeile-xl ist 0,85 und für Versalien gedacht, bei gemischter Schreibung
 	   stießen Unter- und Oberlängen aneinander. */
 	/* Gewicht 500 (17.11.2026): Am Handy liegen Statement und Absatz nur 2,4 px auseinander; das Statement ist betont, nicht größer. */
