@@ -44,13 +44,17 @@ const ZEIGE_ENTWURF = false;
    für den VideoKacheln-Block; Kapitelende und der Aufbau „Abschnitte“ hängen weiter allein an ZEIGE_ENTWURF und bleiben aus.
    Hart an import.meta.env.DEV gebunden: Im Build (Dev-Seite und parleyfilm.com) ist der Wert immer false, das Segment
    kann dort nicht erscheinen. Zum Ausliefern später bewusst umstellen, nicht nebenbei. */
-const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
+/* Seit 17.11.2026 spät auch im Bau, für Dev (Rasul: „Ja, erst fertig machen“, als der Stand von localhost nach Dev sollte).
+   Der Film mit den Blasen liegt unter /lokal und wird nicht hochgeladen (Gast-Video ohne Freigabe); im Bau bleibt seine
+   Fläche leer. Nicht live nehmen, solange Text und Film nicht abgenommen sind. Rückweg: import.meta.env.DEV. */
+const ZEIGE_BEWEISAUFNAHME = true;
 /* Abschnitt „Beweisstücke“ wieder auf der Startseite, NUR auf localhost (Rasul 17.11.2026 spät: „Erstmal nur die
    Beweisstücke, eins nach dem anderen.“). Unverändert der Baustein vom 13.11.2026 (components/abschnitte/
    Beweisstuecke.astro: Überschrift, laufendes Band mit sechs Formaten, Kanalzeile, Text), nichts inhaltlich angepasst.
    Das Beweisverfahren bleibt draußen. Der Baustein ist auch die Unterseite /beweisstuecke, die im Bau liegt; auf der
    Startseite erscheint er nur über diesen Schalter. Rückweg: auf false. */
-const ZEIGE_BEWEISSTUECKE = import.meta.env.DEV;
+/* Seit 17.11.2026 spät auch im Bau, für Dev (wie ZEIGE_BEWEISAUFNAHME). Rückweg: import.meta.env.DEV. */
+const ZEIGE_BEWEISSTUECKE = true;
 
 
 

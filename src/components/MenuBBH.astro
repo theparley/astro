@@ -218,11 +218,16 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    ?kachel=fest (Kachel oben leer, Blase „parley Film“), ?kachel=glatt, ?kachel=aus.
    An import.meta.env.DEV gebunden, im Bau nichts davon außer den Klassen bbh-menu--eng und bbh-menu--gescrollt, die
    dort keine Regel treffen. Rückweg: KURZ auf false. */
-const KURZ = import.meta.env.DEV;
+/* Seit 17.11.2026 spät gilt die Fassung „ecke“ auch im Bau (Rasul, als der Stand von localhost nach Dev sollte:
+   „Ja, erst fertig machen“). KURZ ist deshalb immer an. Im Bau gibt es aber nur „ecke“: kein Umschalten über die
+   Adresse, kein Merken, und die Zutaten der anderen Fassungen (Name in der Kachel, Zeichen mit einem Wort) werden
+   nicht ausgeliefert; sie hängen an KURZ_PROBEN und bleiben localhost. */
+const KURZ = true;
+const KURZ_PROBEN = import.meta.env.DEV;
 /* Block des Namens in den Einheiten des Zeichens (gemessen 17.11.2026): x 153,85 bis 256,53, y −26,49 bis 26,49. */
 const KURZ_MITTE = "translate(50 50) scale(0.82) translate(-205.19 0)"; // Blockmitte auf die Kachelmitte (Kachel = 100 × 100)
 let kurzPfade = "";
-if (KURZ) {
+if (KURZ_PROBEN) {
 	const quelle = readFileSync(`${process.cwd()}/src/components/LogoBiss.astro`, "utf8");
 	const zeile = quelle.split("\n").find((z) => z.includes("stufe === 2 &&")) ?? "";
 	kurzPfade = (zeile.match(/<path\b[^>]*\/>/g) ?? []).join("");
@@ -256,7 +261,8 @@ html:not([data-kachel="wort"]) div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-m
 html[data-kachel="ecke"] div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg:not(.bbh-menu__kurz-ecke) { display: none; }
 html:not([data-kachel="ecke"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.bbh-menu__kurz-ecke { display: none; }
 `;
-const KURZ_SKRIPT = `(function(){var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
+const KURZ_SKRIPT_LOKAL = `(function(){var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
+const KURZ_SKRIPT = KURZ_PROBEN ? KURZ_SKRIPT_LOKAL : `document.documentElement.dataset.kachel="ecke";`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -303,7 +309,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		)}
 		{KURZ && (
 			<a href="/" class="bbh-menu__kurz" aria-label="parley Film, Startseite">
-				<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} /></svg>
+				{KURZ_PROBEN && <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} /></svg>}
 				<svg class="bbh-menu__kurz-ecke" viewBox="77.80 0 100 100" aria-hidden="true"><path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" /></svg>
 			</a>
 		)}
@@ -316,7 +322,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
 		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
 		{LOGO_HINTEN
-			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{KURZ && (
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{KURZ_PROBEN && (
 				<svg class="bbh-menu__zeichen-wort" viewBox="0 -60.32 289.64 160.32" role="img" aria-label="parley">
 					<defs>
 						<mask id={wortMaskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
