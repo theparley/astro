@@ -875,7 +875,11 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.videobeweis__klein { margin-top: 48px; }
 	/* Statement gehört zur Gruppe Titel, Film, Labels: 48 px unter dem Film, die Labels folgen mit ihren 48 px */
 	/* Breite wie der Absatz darunter, höchstens 768 px */
-	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-weight: 500; font-size: var(--text-2xl); line-height: var(--zeile-lg); text-wrap: balance; }
+	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; }
+	/* Schrift wie das Satzpaar über der Animation (.anlass__satz im Band): schmale Schrift, Versalien, Gewicht 400, Stufe
+	   2xl mit ihrer Zeilenhöhe (Rasul 17.11.2026 spät: „Das stimmt nicht, welche Schrift haben wir oben verwendet bei alle
+	   behaupten, Favoriten beweisen?“). Davor Geist 500 gemischt in lg, xl und 2xl (Commits 639298a, 1aa8186, fa54eef);
+	   gemeint war die Schrift, nicht nur die Größe. */
 	/* Stufe 2xl (Rasul 17.11.2026 spät, zweimal: „Der Satz die Natürlichkeit, der braucht die nächstgrößere Schrift. So wie
 	   wir oben geschrieben haben, alle behaupten, Favoriten beweisen.“). Erst lg, dann xl (Commit 1aa8186), jetzt die
 	   Stufe des Satzpaars über der Animation. Anders als beim ersten 2xl-Versuch (Commit b4d74f3): Lesetext-Schrift
