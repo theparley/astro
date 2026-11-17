@@ -76,6 +76,13 @@ const ALLE_BREIT = import.meta.env.DEV;
 const ALLE_BREIT_STIL = `
 div.bbh-menu[data-bbh-menu] { --kn: calc(var(--k) * 16 / 9); }
 div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k) * 16 / 9); }
+/* Namenskachel ebenfalls 16 : 9, „parley“ entsprechend kleiner (Rasul 17.11.2026: „Machen wir die Kachel von parley
+   auch 16 : 9, und parley muss man entsprechend kleiner machen.“). Seitenrand wie bei „Termin“ und „Kontakt“: 8 px je
+   Seite, damit die Kacheln als Reihe zusammengehören. Tinte von „parley“ = 2,88 × Schriftgröße (gemessen), also
+   Schriftgröße = (k × 16/9 − 16 px) / 2,88. Die Tinte sitzt 0,027 em rechts der Mitte (links mehr Vorbreite als
+   rechts), deshalb der Ausgleich nach links. Höhe: −0,055 em gleicht oben (l) und unten (p, y) aus. */
+div.bbh-menu[data-bbh-menu].bbh-menu--oben .bbh-menu__name.bbh-menu__name--forma { width: calc(var(--k) * 16 / 9); }
+div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--forma span { font-size: calc((var(--k) * 16 / 9 - 16px) / 2.88); margin-top: -0.055em; transform: translateX(-0.027em); }
 `;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
