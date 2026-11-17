@@ -181,6 +181,17 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    (Breite 0 → k, 300 ms) und schiebt Menü oder Hamburger nach rechts; das Zeichen hinten fährt in derselben Zeit
    zu (Breite → 0, von rechts gewischt). Endlage angedockt: Namenskachel bei der Fuge, Hamburger daneben. Der Stand
    davor (Kachel tauscht hart an der Stelle des Zeichens): Commit 18bb2e3.
+   Fassung „fest“, Aufbau eins zu eins wie BBH (Rasul 17.11.2026: „Okay, noch eine andere Variante. Und zwar nochmal
+   ausgehend von der Anfangssituation. Was bei BBH das Scharf ist, ist bei uns von Anfang an schon ein parley Film in
+   der Kachel. Das heißt, wir schieben die jetzt nicht mehr oben rein, die ist vorher schon da, wie bei BBH, nur bei
+   uns eben nicht das Scharf, sondern parley Film da so reingeschrieben. Und was bei BBH rechts deren Logo ist mit
+   groß BBH, das ist bei uns das angebissene 16 zu 9 Eck, wo oben parley Film steht. Und dann würde beim
+   Hochscrollen einfach das verschwinden. Ich glaube, das ist die beste Lösung.“): Die Namenskachel steht immer
+   vorn, auf jeder Seite, und bewegt sich nie. Dahinter Hamburger oder Menüspalte. Das ganze Zeichen steht nur auf
+   der Startseite oben dahinter (wie BBHs Wortmarke) und geht beim Scrollen zu: Breite auf 0 (von rechts gewischt)
+   und Deckkraft, 300 ms; spätestens, wenn die Blase den Fensterrand erreichen würde (Klasse bbh-menu--eng).
+   Schalter: ?kachel=fest (Voreinstellung seit dieser Fassung), ?kachel=glatt (Kachel fährt von links ein),
+   ?kachel=aus (Richtung 12).
    An import.meta.env.DEV gebunden, im Bau nichts davon außer der Klasse bbh-menu--eng, die dort keine Regel trifft.
    Rückweg: KURZ auf false. */
 const KURZ = import.meta.env.DEV;
@@ -193,16 +204,21 @@ if (KURZ) {
 	kurzPfade = (zeile.match(/<path\b[^>]*\/>/g) ?? []).join("");
 }
 const KURZ_AN = 'html:not([data-kachel="aus"]) div.bbh-menu[data-bbh-menu]';
-const KURZ_WANN = `${KURZ_AN}:is(:not(.offen), .bbh-menu--eng)`;
+const KURZ_WANN = 'html[data-kachel="glatt"] div.bbh-menu[data-bbh-menu]:is(:not(.offen), .bbh-menu--eng)';
+const KURZ_FEST = 'html[data-kachel="fest"] div.bbh-menu[data-bbh-menu]';
 const KURZ_STIL = `
 ${KURZ_AN} { --oben: var(--fuge); }
 .bbh-menu .bbh-menu__kurz { order: -1; flex: none; display: flex; justify-content: flex-end; width: 0; height: var(--k); margin-right: calc(-1 * var(--fuge)); overflow: hidden; background: var(--flaeche); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-right var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
 .bbh-menu .bbh-menu__kurz svg { flex: none; display: block; width: var(--k); height: var(--k); }
-${KURZ_WANN} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition-delay: 0s; }
 ${KURZ_AN} .bbh-menu__name.bbh-menu__name--logo { transition: width var(--dauer) var(--kurve), margin-left var(--dauer) var(--kurve), opacity var(--dauer) var(--kurve), visibility 0s linear 0s; }
+/* Fassung glatt: Kachel fährt ein, Zeichen geht zu */
+${KURZ_WANN} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition-delay: 0s; }
 ${KURZ_WANN} .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
+/* Fassung fest: Kachel steht immer, Zeichen nur auf der Startseite oben */
+${KURZ_FEST} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition: none; }
+${KURZ_FEST}:is(:not(.bbh-menu--oben), .bbh-menu--eng) .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
 `;
-const KURZ_SKRIPT = `(function(){try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="aus")localStorage.setItem("parley-kachel",q);document.documentElement.dataset.kachel=localStorage.getItem("parley-kachel")==="aus"?"aus":"glatt";}catch(e){document.documentElement.dataset.kachel="glatt";}})();`;
+const KURZ_SKRIPT = `(function(){var w="fest";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
