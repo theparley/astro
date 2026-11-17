@@ -77,6 +77,17 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
 			   biss_logo_website.py), hier nur auf das Rechteck zugeschnitten, damit es mittig sitzt. */}
+			{/* PROBE Farben getauscht, nur localhost (Rasul 17.11.2026: „Tausch mal im Logo die Farben, mach mal die Fläche
+			   hell und den Zipfel schwarz.“), wie in seiner Figma-Datei vom 17.11.: Rechteck hell, Blase samt Zipfel
+			   schwarz obendrauf, ohne Maske. Rechteck in der Farbe des Kachelgrunds (--flaeche). Die viewBox schneidet
+			   den Teil der Blase ab, der über das Rechteck hinausragt. Hängt an LOGO_BREIT (nur DEV); im Bau bleibt das
+			   schwarze Rechteck mit ausgebissener Blase darunter. Rückweg: diesen Zweig entfernen. */}
+			{LOGO_BREIT ? (
+			<svg viewBox="0 0 177.8 100" aria-hidden="true">
+				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="var(--flaeche)" />
+				<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+			</svg>
+			) : (
 			<svg viewBox="0 0 177.8 100" aria-hidden="true">
 				<defs>
 					<mask id={maskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
@@ -86,6 +97,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 				</defs>
 				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="currentColor" mask={`url(#${maskeId})`} />
 			</svg>
+			)}
 		</a>
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
 			<span></span><span></span><span></span>
