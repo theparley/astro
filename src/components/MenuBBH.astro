@@ -29,10 +29,12 @@ const { startseite = false } = Astro.props;
 const NAME_FORMA = import.meta.env.DEV;
 /* Stil nur für localhost, als eigener Block im Markup (nicht im <style> unten, sonst stünde der Schriftname im Bau).
    Breite: „parley“ misst in Forma 900, Größenachse 72, bei 0,9 k und Laufweite -0,02 em 2,58 k (Tinte);
-   mit demselben Rand wie in Geist (3,09 k − 2,78 k = 0,31 k) ergibt das 2,89 k. Lage: margin-top unverändert. */
+   mit demselben Rand wie in Geist (3,09 k − 2,78 k = 0,31 k) ergibt das 2,89 k.
+   Lage (gemessen 17.11.2026): margin-top −0,055 em statt −0,07 em gleicht oben (l) und unten (p, y) aus; die Tinte
+   sitzt 0,027 em rechts der Mitte ihrer Laufbreite, deshalb translateX(−0,027 em). Beides gilt nur für Forma. */
 const NAME_FORMA_STIL = `
 @font-face { font-family: "Forma DJR"; src: url("/fonts/FormaDJRVariable.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
-.bbh-menu .bbh-menu__name.bbh-menu__name--forma span { font-family: "Forma DJR", sans-serif; font-variation-settings: "opsz" 72, "wght" 900; }
+.bbh-menu .bbh-menu__name.bbh-menu__name--forma span { font-family: "Forma DJR", sans-serif; font-variation-settings: "opsz" 72, "wght" 900; margin-top: -0.055em; transform: translateX(-0.027em); }
 .bbh-menu.bbh-menu--oben .bbh-menu__name.bbh-menu__name--forma { width: calc(var(--k) * 2.89); }
 `;
 
@@ -76,13 +78,11 @@ const ALLE_BREIT = import.meta.env.DEV;
 const ALLE_BREIT_STIL = `
 div.bbh-menu[data-bbh-menu] { --kn: calc(var(--k) * 16 / 9); }
 div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k) * 16 / 9); }
-/* Namenskachel ebenfalls 16 : 9, „parley“ entsprechend kleiner (Rasul 17.11.2026: „Machen wir die Kachel von parley
-   auch 16 : 9, und parley muss man entsprechend kleiner machen.“). Seitenrand wie bei „Termin“ und „Kontakt“: 8 px je
-   Seite, damit die Kacheln als Reihe zusammengehören. Tinte von „parley“ = 2,88 × Schriftgröße (gemessen), also
-   Schriftgröße = (k × 16/9 − 16 px) / 2,88. Die Tinte sitzt 0,027 em rechts der Mitte (links mehr Vorbreite als
-   rechts), deshalb der Ausgleich nach links. Höhe: −0,055 em gleicht oben (l) und unten (p, y) aus. */
-div.bbh-menu[data-bbh-menu].bbh-menu--oben .bbh-menu__name.bbh-menu__name--forma { width: calc(var(--k) * 16 / 9); }
-div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--forma span { font-size: calc((var(--k) * 16 / 9 - 16px) / 2.88); margin-top: -0.055em; transform: translateX(-0.027em); }
+/* Namenskachel NICHT 16 : 9 (Rasul 17.11.2026: „Ja, zurück.“). Am selben Tag kurz geprobt: Kachel k × 16/9, Schrift
+   (k × 16/9 − 16 px) / 2,88, je 8 px Rand. Grund für den Rückweg, nachgemessen auf bartleboglehegarty.com bei 1024 px:
+   Logokachel 88 × 88, Menükacheln 88 × 44 in drei Spalten (zusammen 268), Wortmarke 322 px = 3,66 Kacheln. Die
+   Wortmarke sitzt dort nicht im Raster, ihre Breite kommt aus dem Wort (Schriftzug 272 px plus je 24 px Polster);
+   geteilt wird nur die Höhe. Unsere 2,89 k sind also die BBH-Lösung, die 16:9-Fassung war strenger als das Vorbild. */
 `;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
