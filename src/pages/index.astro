@@ -623,7 +623,7 @@ const ZEIGE_BEWEISSTUECKE = import.meta.env.DEV;
 			    Beweisstücke erstmal raus aus der Ansicht, lassen nur an dem Abschnitt arbeiten.“). Rückweg: Git-Geschichte,
 			    zwei Kacheln (R12) zu /beweisfuehrung und /beweisstuecke. */}
 		</section>
-		{ZEIGE_BEWEISSTUECKE && !ZEIGE_ENTWURF && <Beweisstuecke />}
+		{ZEIGE_BEWEISSTUECKE && !ZEIGE_ENTWURF && <Beweisstuecke angeglichen />}
 		{ZEIGE_ENTWURF && <Kapitelende />}
 	</div>
 	{ZEIGE_ENTWURF && (<div class="aufbau aufbau--abschnitte">

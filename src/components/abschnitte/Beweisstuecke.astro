@@ -6,6 +6,14 @@ import Band from "../bausteine/Band.astro";
 import KurzSaetze from "../bausteine/KurzSaetze.astro";
 import Textblock from "../bausteine/Textblock.astro";
 import { FORMATE } from "../../daten/startseite";
+/* angeglichen (17.11.2026, nur für die Startseite auf localhost): drei Angleichungen an das Segment „Beweiskraft“ direkt
+   darüber. Die Unterseite /beweisstuecke ruft den Baustein ohne die Angabe auf und bleibt, wie sie am 13.11. gebaut wurde.
+   1. Titel mittig wie „Beweiskraft“. Das ist eine Angleichung an den Nachbartitel, KEINE Entscheidung über alle
+      Abschnittstitel („Videobeweis“ im Band steht weiter links; die Grundsatzfrage liegt bei Rasul).
+   2. Textblock 768 px breit wie der Absatz im Segment darüber (statt 6 von 12 Spalten).
+   3. Abschluss nach unten wie unter den Labels: --abstand-lg, mindestens 96 px. Früher folgte hier „Augenzeugen“. */
+interface Props { angeglichen?: boolean }
+const { angeglichen = false } = Astro.props;
 ---
 {/* ── 4 · DIE BEWEISSTÜCKE ── Band (nach BBH-Karussell B8) über der Überschrift (Rasul 13.11.2026:
    „Ich setze die Animation für die Beweisstücke über die Beweisstücke.“). Überschrift und Text
@@ -13,8 +21,8 @@ import { FORMATE } from "../../daten/startseite";
 {/* Überschrift wie „Beweisaufnahme“ über dem Band (Rasul 13.11.2026: „den nächsten Abschnitt Beweisstücke nehmen
    wir auch wieder die Art von Überschrift. Da haben wir ja schon eine Animation. Ich glaube, die können wir so
    verwenden.“). Vorher stand „Die Beweisstücke.“ als Blocküberschrift unter dem Band. */}
-<section class="abschnitt" aria-labelledby="ab4-titel">
-	<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" /></div>
+<section class:list={["abschnitt", angeglichen && "abschnitt--angeglichen"]} aria-labelledby="ab4-titel">
+	<div class="rahmen"><Abschnittskopf id="ab4-titel" titel="Beweis&shy;stücke" mittig={angeglichen} /></div>
 	<Band formate={FORMATE} />
 	<div class="kanaele">
 		<KurzSaetze klein saetze={["LinkedIn · Website · Newsletter · Vertrieb"]} />
@@ -30,4 +38,6 @@ import { FORMATE } from "../../daten/startseite";
 <style>
 	.kanaele { margin-top: var(--abstand-md); }
 	.nach-band { margin-top: var(--abstand-lg); }
+	.abschnitt--angeglichen { padding-bottom: max(96px, var(--abstand-lg)); }
+	.abschnitt--angeglichen .nach-band :global(.sp-mitte6) { grid-column: 1 / -1; width: 100%; max-width: 768px; margin-inline: auto; }
 </style>

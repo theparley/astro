@@ -2,10 +2,12 @@
 /* B2 Abschnittstitel mit Link: Bartle huge links, Link rechts auf der Grundlinie.
    BBH: „WORK“ über dem Projektraster. Ohne Link: nur der Titel links. */
 import Knopf from "./Knopf.astro";
-interface Props { titel: string; link?: { href: string; text: string }; id?: string }
-const { titel, link, id } = Astro.props;
+/* mittig (17.11.2026): Titel mittig, wenn er unter einem mittig gesetzten Titel steht (Startseite, „Beweisstücke“ unter
+   „Beweiskraft“). Grundregel bleibt links wie bei BBH. */
+interface Props { titel: string; link?: { href: string; text: string }; id?: string; mittig?: boolean }
+const { titel, link, id, mittig = false } = Astro.props;
 ---
-<div class="abschnittskopf">
+<div class:list={["abschnittskopf", mittig && "abschnittskopf--mittig"]}>
 	<h2 class="t-abschnitt abschnittskopf__titel" id={id} data-einblenden set:html={titel} />
 	{link && <Knopf href={link.href} text={link.text} />}
 </div>
@@ -13,6 +15,8 @@ const { titel, link, id } = Astro.props;
 	.abschnittskopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 16px; margin-bottom: 48px; }
 	/* Titel darf &shy; enthalten (lange deutsche Wörter in Bartle, z. B. BEWEIS-/VERFAHREN; 13.11.2026) */
 	.abschnittskopf__titel { flex: 0 1 auto; width: min-content; max-width: 100%; hyphens: manual; }
+	.abschnittskopf--mittig { justify-content: center; }
+	.abschnittskopf--mittig .abschnittskopf__titel { text-align: center; }
 	/* Sehr schmale Handys (unter 420 px): eine Stufe kleiner, sonst läuft „VERFAHREN“ (11,7 em) über den Rand
 	   (Platz bei 375 px: 11,5 em; gemessen 13.11.2026). Gilt für alle großen Abschnittsköpfe gleich. */
 	@media (max-width: 419px) { .abschnittskopf__titel { font-size: var(--text-2xl); line-height: var(--zeile-2xl); } }
