@@ -217,6 +217,10 @@ ${KURZ_WANN} .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(
 /* Fassung fest: Kachel steht immer, Zeichen nur auf der Startseite oben */
 ${KURZ_FEST} .bbh-menu__kurz { width: var(--k); margin-right: 0; visibility: visible; transition: none; }
 ${KURZ_FEST}:is(:not(.bbh-menu--oben), .bbh-menu--eng) .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
+/* Schmale Fenster (Rasul 17.11.2026 auf den Vorschlag: „Ja, weglassen“): unter 1024 px gibt es das Zeichen rechts in
+   der Fassung fest gar nicht. Dort sitzt die Zeile unten mittig; mit Zeichen wäre sie bei 375 px 357 px breit und
+   die Namenskachel rückte beim Verschwinden 105 px zur Seite. */
+@media (max-width: 1023px) { ${KURZ_FEST} .bbh-menu__name.bbh-menu__name--logo { display: none; } }
 `;
 const KURZ_SKRIPT = `(function(){var w="fest";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
