@@ -65,7 +65,7 @@ const aktiv = (href: string) => (href === "/" ? pfad === "/" : pfad.startsWith(h
    (viewBox 177,8 × 100, also selbst 16 : 9) füllt die Kachel randlos. Kachelgrund, Hamburger und Menükacheln
    unverändert. An import.meta.env.DEV gebunden, im Bau bleibt die quadratische Kachel mit dem Zeichen auf 56 %.
    Rückweg: LOGO_BREIT auf false setzen oder diesen Block samt Klasse und Stilzeile entfernen. */
-const LOGO_BREIT = import.meta.env.DEV;
+const LOGO_BREIT = false; // seit der Variante „Zipfel in der Ecke“ aus; gemerkte 16:9-Variante: Commit 3ebf834, Rückweg siehe LOGO_ECKE
 const LOGO_BREIT_STIL = `
 .bbh-menu .bbh-menu__logo.bbh-menu__logo--breit { width: calc(var(--k) * 16 / 9); }
 .bbh-menu .bbh-menu__logo.bbh-menu__logo--breit svg { width: 100%; height: 100%; }
@@ -74,7 +74,20 @@ const LOGO_BREIT_STIL = `
    16 : 9 machen. Probier es aber mal, zeig es mal an.“). Zur Logokachel kommen Hamburger und Menükacheln (--kn) dazu:
    Höhe k, Breite k × 16/9. Damit stimmen die Breiten wieder überein wie bei BBH. Die Namenskachel behält ihr Maß aus
    der Wortbreite. An import.meta.env.DEV gebunden. Rückweg: ALLE_BREIT auf false. */
-const ALLE_BREIT = import.meta.env.DEV;
+const ALLE_BREIT = false; // wie LOGO_BREIT: aus, gemerkt in Commit 3ebf834
+/* VARIANTE „Zipfel in der Ecke“, NUR auf localhost (Rasul 17.11.2026: „Wir merken uns mal die Variante, jetzt machen
+   wir noch eine. Und da gehen wir wieder zurück auf das Maß, das auch BBH hat, also diese 88 Pixel. Und machen unser
+   Logo anders: Wir nehmen die 88er Pixel und hängen unseren Zipfel so in die Ecke wie jetzt. Das wäre die Idee, dass
+   unser Logo ein Zipfel ist, der in der Ecke hängt.“). Alle Kacheln wieder quadratisch (k), Namenskachel bleibt auf
+   Wortbreite. Das Zeichen in der Logokachel ist der Ausschnitt mit dem Biss, dieselbe Geometrie wie das Favicon
+   (Variante D, branding/aktiv/favicon/biss-ecke/favicon.svg im Marketing-Ordner): viewBox 77.80 0 100 100, das rechte
+   Quadrat des Rechtecks; Fläche hell, Blase samt Zipfel schwarz, randlos in der Kachel.
+   Rückweg zur gemerkten 16:9-Variante (Stand Commit 3ebf834): LOGO_ECKE auf false, LOGO_BREIT und ALLE_BREIT wieder
+   auf import.meta.env.DEV. Rückweg zum Zeichen wie im Bau: alle drei auf false. */
+const LOGO_ECKE = import.meta.env.DEV;
+const LOGO_ECKE_STIL = `
+.bbh-menu .bbh-menu__logo.bbh-menu__logo--ecke svg { width: 100%; height: 100%; }
+`;
 const ALLE_BREIT_STIL = `
 div.bbh-menu[data-bbh-menu] { --kn: calc(var(--k) * 16 / 9); }
 div.bbh-menu[data-bbh-menu]:not(.offen) .bbh-menu__burger { width: calc(var(--k) * 16 / 9); }
@@ -91,7 +104,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	<div class="bbh-menu__cluster">
 		{LOGO_BREIT && <style is:inline set:html={LOGO_BREIT_STIL}></style>}
 		{ALLE_BREIT && <style is:inline set:html={ALLE_BREIT_STIL}></style>}
-		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit"]} aria-label="parley Film, Startseite">
+		{LOGO_ECKE && <style is:inline set:html={LOGO_ECKE_STIL}></style>}
+		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
 			   biss_logo_website.py), hier nur auf das Rechteck zugeschnitten, damit es mittig sitzt. */}
 			{/* PROBE Farben getauscht, nur localhost (Rasul 17.11.2026: „Tausch mal im Logo die Farben, mach mal die Fläche
@@ -99,7 +113,12 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			   schwarz obendrauf, ohne Maske. Rechteck in der Farbe des Kachelgrunds (--flaeche). Die viewBox schneidet
 			   den Teil der Blase ab, der über das Rechteck hinausragt. Hängt an LOGO_BREIT (nur DEV); im Bau bleibt das
 			   schwarze Rechteck mit ausgebissener Blase darunter. Rückweg: diesen Zweig entfernen. */}
-			{LOGO_BREIT ? (
+			{LOGO_ECKE ? (
+			<svg viewBox="77.80 0 100 100" aria-hidden="true">
+				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="var(--flaeche)" />
+				<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
+			</svg>
+			) : LOGO_BREIT ? (
 			<svg viewBox="0 0 177.8 100" aria-hidden="true">
 				<path d="M5 0H172.8Q177.8 0 177.8 5V95Q177.8 100 172.8 100H5Q0 100 0 95V5Q0 0 5 0Z" fill="var(--flaeche)" />
 				<path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" />
