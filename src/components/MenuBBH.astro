@@ -26,7 +26,11 @@ const { startseite = false } = Astro.props;
    Datei). Im Bau bleibt „parley“ in Geist. Nach dem Lizenzkauf bewusst umstellen, nicht nebenbei.
    Noch am 17.11.2026 wieder ein Wort (Rasul: „Wir nehmen das Wort Film aus dem Menü raus, wir schreiben nur
    parley.“): Forma bleibt, kleingeschrieben. „parley Film“ stand nur kurz zur Ansicht auf localhost (Kachel 4,60 k). */
-const NAME_FORMA = import.meta.env.DEV;
+/* Sperre aufgehoben (Rasul 17.11.2026, nach dem Blick auf Dev: „Du kannst die Sperre herausnehmen. Ich bin mit dem
+   Entwickler in Kontakt. Das dürfen wir verwenden, bevor ich die gekauft habe.“). Seitdem gilt die Namenskachel in
+   Forma auch im Bau; astro.config.mjs lässt dafür fonts/FormaDJRVariable.woff2 im Bau. Forma Mono bleibt nur lokal.
+   Rückweg: NAME_FORMA wieder auf import.meta.env.DEV und die Datei zurück in die Liste NUR_LOKAL. */
+const NAME_FORMA = true;
 /* Stil nur für localhost, als eigener Block im Markup (nicht im <style> unten, sonst stünde der Schriftname im Bau).
    Breite: „parley“ misst in Forma 900, Größenachse 72, bei 0,9 k und Laufweite -0,02 em 2,58 k (Tinte);
    mit demselben Rand wie in Geist (3,09 k − 2,78 k = 0,31 k) ergibt das 2,89 k.

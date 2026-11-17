@@ -12,7 +12,9 @@ const NUR_LOKAL = [
 	'bausteine', 'kacheln', 'kopf-demo', 'stoppuhr-demo', 'studio', 'stunden-werkstatt', 'tafel',
 	'uhr-varianten', 'wand', 'wand-drei', 'werkstatt',
 	'lab', 'test', 'werkzeug', 'bausteine-demo.html',
-	'fonts/FormaDJRVariable.woff2', 'fonts/FormaDJRMonoVariable.woff2',
+	// fonts/FormaDJRVariable.woff2 seit 17.11.2026 im Bau (Rasul: Verwendung mit dem Schriftentwickler abgesprochen),
+	// gebraucht für die Namenskachel im Menü (MenuBBH.astro, NAME_FORMA). Forma Mono bleibt nur lokal.
+	'fonts/FormaDJRMonoVariable.woff2',
 	'lokal', // Gast-Videos ohne Freigabe (Symlinks, ohnehin nicht in Git)
 ];
 const nurLokal = {
