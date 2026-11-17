@@ -529,14 +529,17 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 					    Blickkontakt … das gehört eigentlich in den nächsten Abschnitt, weil da geht es um die Wirkung.“).
 					    Weg sind die drei großen Karten (Blickkontakt, Keine Kamera, Echte Momente), die sechs kleinen Kacheln mit Plus
 					    und die drei Gaststimmen-Kacheln (Stand davor: Git-Geschichte, Commit 71d86b1 und früher). Dafür drei Labels
-					    ohne Zeichnung und ohne Beschreibung; die Motive sind noch nicht entschieden. Stufe md statt xl: bei xl und auch
-					    bei lg liefen zwei Labels über zwei Zeilen (gemessen 17.11.2026); md passt je in eine Zeile, nebeneinander ab 1280 px. Der Blickkontakt wandert in den
+					    ohne Zeichnung und ohne Beschreibung; die Motive sind noch nicht entschieden. Wörter gekürzt (Rasul 17.11.2026:
+					    „Ja, kürzen“): „Ohne Technik“, „Echtes Gespräch“, „Live-Regie“ statt „Keine Ablenkung durch Technik“,
+					    „Natürliche Gesprächssituation“, „Live-Regie“. Damit wieder Stufe xl, je eine Zeile bei jeder Breite (gemessen
+					    1728 bis 375 px; knappste Stelle 1024 px, breitestes Label 262 von 277 px). Die langen Wörter gingen nur in md
+					    einzeilig (Commit ddb94a2). Der Blickkontakt wandert in den
 					    Abschnitt „Augenzeugen“, hier nichts dazu. Form: Kennzahlen mit Wörtern, drei nebeneinander ab 1024 px,
 					    darunter gestapelt. */}
 					<div class="videobeweis__vorteile" id="vorteile">
-						<Kennzahlen rahmen={false} woerter stufe="md" zahlen={[
-							{ wert: "Keine Ablenkung durch Technik" },
-							{ wert: "Natürliche Gesprächssituation" },
+						<Kennzahlen rahmen={false} woerter zahlen={[
+							{ wert: "Ohne Technik" },
+							{ wert: "Echtes Gespräch" },
 							{ wert: "Live-Regie" },
 						]} />
 					</div>
