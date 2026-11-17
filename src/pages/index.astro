@@ -812,6 +812,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.videobeweis__zwischentitel { font-family: var(--schrift-breit); font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; margin: 0 0 32px; }
 	.videobeweis__klein { margin-top: 48px; }
 	/* Statement gehört zur Gruppe Titel, Film, Labels: 48 px unter dem Film, die Labels folgen mit ihren 48 px */
-	.videobeweis__statement { max-width: 25em; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-size: var(--text-lg); line-height: var(--zeile-lg); text-wrap: balance; }
+	/* Breite wie der Absatz darunter, höchstens 768 px */
+	.videobeweis__statement { max-width: 768px; margin: 48px auto 0; text-align: center; font-family: var(--schrift-lesen); font-size: var(--text-lg); line-height: var(--zeile-lg); text-wrap: balance; }
 	.videobeweis__absatz { max-width: 768px; margin: 48px auto 0; text-align: center; font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
 </style>
