@@ -2,10 +2,11 @@
 /* Logo „Rechteck mit Biss“, ERZEUGT von branding/aktiv/generatoren/biss_logo_website.py im
    Marketing-Ordner (nicht von Hand bearbeiten). Entscheidung Rasul 12.11.2026: Name „parley Film“
    in der unsichtbaren Blase; Schutzraum der Blase bleibt frei (viewBox = Rechteck plus Oval).
-   stufe 1: mit Name, stufe 2: Name in der freien Schrift (Fuß), stufe 3: nur die Fläche.
+   stufe 1: mit Name, stufe 2: Name für Menü und Fuß, stufe 3: nur die Fläche.
    Farbe = currentColor.
-   Stufe 2: „parley“ über „Film“ bei q 0,75 in der Ovalmitte, Forma DJR 900. Inhaltlich wie Stufe 1, aber in
-   einer freien Schrift, weil Stufe 1 aus Forma DJR gebaut ist (Testlizenz, nicht veröffentlichen). */
+   Stufe 2: „parley“ über „Film“ bei q 0,75 in der Ovalmitte, Forma DJR 900.
+   Damit ist Stufe 2 gleich Stufe 1. Rasul 17.11.2026: Logos stehen in Forma DJR,
+   und auf die Rückfrage zum Fuß: „Ja, auch der Fuß.“ */
 interface Props { stufe?: 1 | 2 | 3; class?: string; titel?: string }
 const { stufe = 1, class: klasse = "", titel = "parley Film" } = Astro.props;
 const id = `biss-${stufe}-${Math.random().toString(36).slice(2, 8)}`;
