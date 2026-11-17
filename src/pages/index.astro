@@ -480,7 +480,9 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 						{/* Herausgenommen (Rasul 15.11.2026: „Ich glaube, den letzten Satz braucht es jetzt nicht mehr. Wir nehmen mal nur die
 						     beiden Abschnitte.“): „Mit Video skalieren wir die Qualität eines echten Gesprächs.“ Der Satz hatte das Skalieren
 						     getragen; er kann im nächsten Segment wieder aufgenommen werden. */}
-						<p class="t-mini grau anlass__quelle"><span aria-hidden="true">* </span>Quelle: 6sense, B2B Buyer Experience Report 2026</p>
+						{/* Zusatz nur für Vorleseprogramme (17.11.2026): Das Sternchen sagt Sehenden, dass die Quelle den ersten Satz meint;
+						    Hörende bekommen dasselbe als „Quelle zur Zahl 82 Prozent: …“. Sichtbar bleibt „* Quelle: …“. */}
+						<p class="t-mini grau anlass__quelle"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 						{/* Verweis als BBH-Knopf B21 (Rasul 14.11.2026: „2 und 5 umsetzen“). Vorher graue Quellenzeile „Die Studien dahinter:
 						     Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)“. Ziel /belege, Seite im Aufbau. */}
 						{/* Knopf herausgenommen (Rasul 15.11.2026: „Der Button, was die Studien zeigen, kann jetzt raus.“). War:
@@ -805,6 +807,8 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.anlass--band .anlass__text { text-align: left; text-wrap: pretty; }
 	/* Quellenzeile steht im Textblock, bündig unter dem letzten Absatz (seit 14.11.2026 linksbündig) */
 	.anlass--band .anlass__text .anlass__quelle { margin: 16px 0 0; }
+	/* Text nur für Vorleseprogramme: unsichtbar, nimmt keinen Platz, bleibt im Lesefluss */
+	.nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 	.anlass--band .anlass__text .anlass__belege { margin-top: 24px; }
 	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
 	/* Labels gehören zum Film (17.11.2026): Abstand Film zu Labels wie Titel zu Film, 48 px bei jeder Breite. Vorher
