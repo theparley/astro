@@ -501,8 +501,11 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 			    Stufe 2xl wie im Entwurf, die Größe beurteilt Rasul am Bildschirm. War bis 15.11.2026: titel="Video&shy;beweis"
 			    mit id="kap-titel". Eigene Kennung kap-beweisaufnahme, weil kap-titel im Band sitzt und die Regeln zu
 			    data-textfolge jede zweite Überschrift mit kap-titel unsichtbar schalten.
-			    Sichtbar über ZEIGE_BEWEISAUFNAHME (nur localhost) oder mit dem ganzen Entwurf. */}
-			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;aufnahme" titelStufe="2xl" spalten={3} kacheln={[]}>
+			    Sichtbar über ZEIGE_BEWEISAUFNAHME (nur localhost) oder mit dem ganzen Entwurf.
+			    Überschrift „Beweiskraft“ statt „Beweisaufnahme“ (Rasul 17.11.2026 abends: „Und wir überschreiben das mal mit
+			    Beweiskraft, nicht mit Beweisaufnahme“). Das Wort steht damit im Titel und im Statement darunter; das ist
+			    Absicht, der Titel setzt es, das Statement löst es ein. Die Kennung kap-beweisaufnahme bleibt. */}
+			{(ZEIGE_BEWEISAUFNAHME || ZEIGE_ENTWURF) && (<VideoKacheln id="kap-beweisaufnahme" titel="Beweis&shy;kraft" titelStufe="2xl" spalten={3} kacheln={[]}>
 				<Fragment slot="vorne">
 					{/* Rasul 14.11.2026: „Das ist auch die Stelle, wo wir jetzt unser Blasenelement reinbringen, auf das wir ja unser
 					    Logo aufbauen … lass uns doch nochmal unser zentrales Video in der Mitte machen. Es geht auch um die Aufnahme.
@@ -515,6 +518,18 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 					    Video hat die gleiche Beweiskraft.“, die zwei Platzhalter-Absätze und der Knopf „Zur Beweisaufnahme“; damit
 					    führt von hier kein Link mehr nach /beweisaufnahme (offener Punkt bei Website · Master). Stand davor:
 					    Commit ac3f133. Es bleiben Titel, Film mit Blasen und die drei Labels; deren Form ist noch offen. */}
+					{/* Statement zwischen Film und Labels (Rasul 17.11.2026 abends, der Satz ist von ihm: „Ich glaube tatsächlich, dass
+					    das jetzt als erster Satz gut funktioniert, genauso wie bei dem Abschnitt obendran, dass wir zuerst einen
+					    Befund erstellen. Oder eine Studie zitieren. Auf alle Fälle erstmal ein Statement machen, das wir dann noch
+					    genauer beschreiben.“). Eine Setzung, kein Befund: keine Quellenzeile, kein Knopf zu Belegen (Marketing-Ordner
+					    branding/aktiv/PARLEY_WORDING.md, „Aufbau eines Abschnitts: erst das Statement, dann begeistern“). Stufe wie der
+					    frühere Zwischentitel an dieser Stelle (2xl). Weiche Trennzeichen, weil die langen Wörter am Handy sonst aus
+					    der Spalte ragen (wie bei Beweis&shy;kraft, gemessen 15.11.2026). */}
+					<h3 class="videobeweis__zwischentitel videobeweis__statement">Die Natürlich&shy;keit während der Aufnahme bestimmt die Beweis&shy;kraft beim Zu&shy;schauen.</h3>
+					{/* Absatz zum Statement, Entwurf (Rasul 17.11.2026 abends: „Und jetzt müssen wir dem Leser das Gefühl geben, dass
+					    er nichts tun muss, um in den Gesprächsmodus zu kommen, sondern dass es die Aufnahmesituation für ihn
+					    erledigt.“). Stufe des Fließtexts, 48 px unter dem Statement. */}
+					<p class="videobeweis__absatz"><span class="entwurf">Entwurf</span><br />Dafür müsst ihr nichts üben und nichts vorbereiten. Das erledigt die Aufnahmesituation. Ihr setzt euch hin und redet.</p>
 					{/* Aufgeräumt (Rasul 17.11.2026: „Mach mal nochmal bei Localhost 4321 alles unterhalb des Videos mit den Blasen
 					    weg. … Und dann brauchen wir diese Labels für das, was daran besonders ist an der Aufnahmesituation. Es gibt
 					    keine Ablenkung durch Technik. Es gibt eine natürliche Gesprächssituation. Und es gibt eine Live-Regie. Der
@@ -794,4 +809,7 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.videobeweis__satz p + p { margin-top: 24px; }
 	.videobeweis__zwischentitel { font-family: var(--schrift-breit); font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; margin: 0 0 32px; }
 	.videobeweis__klein { margin-top: 48px; }
+	/* Statement gehört zur Gruppe Titel, Film, Labels: 48 px unter dem Film, die Labels folgen mit ihren 48 px */
+	.videobeweis__statement { margin: 48px auto 0; text-align: center; hyphens: manual; }
+	.videobeweis__absatz { max-width: 768px; margin: 48px auto 0; text-align: center; font-size: var(--text-md); line-height: 1.2; text-wrap: balance; }
 </style>
