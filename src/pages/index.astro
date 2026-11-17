@@ -776,7 +776,9 @@ const ZEIGE_BEWEISAUFNAHME = import.meta.env.DEV;
 	.anlass--band .anlass__text .anlass__quelle { margin: 16px 0 0; }
 	.anlass--band .anlass__text .anlass__belege { margin-top: 24px; }
 	/* Segment „Videobeweis“ (14.11.2026): Abstände zwischen Text-Bild-Block, Vorteilen und den Kacheln (BBH R22: lg) */
-	.videobeweis__vorteile { margin-top: var(--abstand-lg); }
+	/* Labels gehören zum Film (17.11.2026): Abstand Film zu Labels wie Titel zu Film, 48 px bei jeder Breite. Vorher
+	   --abstand-lg (139 / 107 / 60 px), solange Text dazwischen stand; der große Abstand bleibt nach unten. */
+	.videobeweis__vorteile { margin-top: 48px; }
 	.videobeweis__entwurf { text-align: center; margin: 0 0 16px; }
 	.videobeweis__weiter { margin-top: var(--abstand-lg); text-align: center; }
 	/* Blasen innen im Bild: außen ragte Hagens lange Blase in die Überschrift (gemessen 14.11.2026) */
