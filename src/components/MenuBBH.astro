@@ -192,8 +192,15 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    und Deckkraft, 300 ms; spätestens, wenn die Blase den Fensterrand erreichen würde (Klasse bbh-menu--eng).
    Schalter: ?kachel=fest (Voreinstellung seit dieser Fassung), ?kachel=glatt (Kachel fährt von links ein),
    ?kachel=aus (Richtung 12).
-   An import.meta.env.DEV gebunden, im Bau nichts davon außer der Klasse bbh-menu--eng, die dort keine Regel trifft.
-   Rückweg: KURZ auf false. */
+   Name in der Kachel erst mit den Menüstrichen (Rasul 17.11.2026 abends, am Bildschirm: „Da stört mich jetzt, dass
+   parley Film in der Blase steht und parley Film in der Kachel. Ich weiß aber auch gerade nichts anderes zu lösen.
+   Mach mal in Localhost, lass mal das parley Film in der Kachel erstmal weg, lass aber die Kachel erscheinen. Und
+   lasse es erst oben erscheinen mit dem Erscheinen von den Menüstrichen.“): In der Fassung fest bleibt die Kachel auf
+   der Startseite oben eine leere Fläche. Der Name blendet erst ein, wenn das Menü einklappt, mit derselben
+   Verzögerung und Dauer wie der Hamburger (Klasse bbh-menu--gescrollt aus dem Skript). Gilt ab 1024 px; darunter
+   gibt es das Zeichen rechts nicht, dort bliebe sonst oben gar kein Name, also steht er dort immer in der Kachel.
+   An import.meta.env.DEV gebunden, im Bau nichts davon außer den Klassen bbh-menu--eng und bbh-menu--gescrollt, die
+   dort keine Regel treffen. Rückweg: KURZ auf false. */
 const KURZ = import.meta.env.DEV;
 /* Block des Namens in den Einheiten des Zeichens (gemessen 17.11.2026): x 153,85 bis 256,53, y −26,49 bis 26,49. */
 const KURZ_MITTE = "translate(50 50) scale(0.82) translate(-205.19 0)"; // Blockmitte auf die Kachelmitte (Kachel = 100 × 100)
@@ -221,6 +228,9 @@ ${KURZ_FEST}:is(:not(.bbh-menu--oben), .bbh-menu--eng) .bbh-menu__name.bbh-menu_
    der Fassung fest gar nicht. Dort sitzt die Zeile unten mittig; mit Zeichen wäre sie bei 375 px 357 px breit und
    die Namenskachel rückte beim Verschwinden 105 px zur Seite. */
 @media (max-width: 1023px) { ${KURZ_FEST} .bbh-menu__name.bbh-menu__name--logo { display: none; } }
+/* Name in der Kachel erst mit den Menüstrichen: gleiche Verzögerung und Dauer wie die Breite des Hamburgers */
+${KURZ_FEST} .bbh-menu__kurz svg { transition: opacity var(--dauer) var(--kurve) var(--out-delay); }
+@media (min-width: 1024px) { ${KURZ_FEST}.bbh-menu--start:not(.bbh-menu--gescrollt) .bbh-menu__kurz svg { opacity: 0; transition-delay: 0s; } }
 `;
 const KURZ_SKRIPT = `(function(){var w="fest";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
@@ -611,6 +621,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			const schwelle = film && !unten ? menu.getBoundingClientRect().top + window.scrollY + 100 : 100;
 			const oben = startseite && window.scrollY <= schwelle;
 			menu.classList.toggle("bbh-menu--oben", oben);
+			// Gegenstück zu --oben, das es vor dem ersten Lauf noch nicht gibt (Probe „Name erst mit den Menüstrichen“, localhost)
+			menu.classList.toggle("bbh-menu--gescrollt", !oben);
 			const offen = oben || gehalten || ueber;
 			menu.classList.toggle("offen", offen);
 			platz();
