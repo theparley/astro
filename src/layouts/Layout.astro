@@ -226,6 +226,12 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.aufstellung = liesAufstellung();
 					document.documentElement.dataset.animhoehe = liesWahl("animhoehe", ["100", "90", "80", "70", "60", "50"], "50"); // 50 % Grundeinstellung (Rasul 14.11.2026: „Mach mal auf 50 … Dann würde, glaube ich, alles drauf passen, die Überschrift“)
 					document.documentElement.dataset.titelgroesse = liesWahl("titelgroesse", ["huge", "2xl"], "2xl");
+					// Probe „neues Zeichen“ in Menü und Fuß, nur lokal (Rasul 18.11.2026): ?zeichen=film|parley|alt, ?ausschnitt=mitte|rechts.
+					// Im Bau wird nichts gesetzt; dort gilt das bisherige Zeichen (MenuBBH.astro und SiteFooter.astro, ZEICHEN_NEU).
+					if (nurLokal) {
+						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
+						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");
+					}
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
 					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
 					// Experten.“ blendet aus, Fahrt läuft, danach die beiden Zeilen an derselben Stelle, eine nach der anderen.
@@ -289,6 +295,17 @@ const websiteJsonLd = JSON.stringify({
 					<span>Menü</span>
 					<button type="button" data-wahl="zwetschke">Zwetschke</button>
 					<button type="button" data-wahl="bbh">BBH</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Zeichen</span>
+					<button type="button" data-allg-wahl="zeichen" data-wert="film">parley Film</button>
+					<button type="button" data-allg-wahl="zeichen" data-wert="parley">parley</button>
+					<button type="button" data-allg-wahl="zeichen" data-wert="alt">bisher</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Kachel</span>
+					<button type="button" data-allg-wahl="ausschnitt" data-wert="mitte">Mitte</button>
+					<button type="button" data-allg-wahl="ausschnitt" data-wert="rechts">Rechts</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Aufbau</span>
@@ -508,6 +525,11 @@ const websiteJsonLd = JSON.stringify({
 	html[data-animhoehe="60"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="60"],
 	html[data-animhoehe="50"] .menu-wahl [data-allg-wahl="animhoehe"][data-wert="50"],
 	html[data-raster="aus"] .menu-wahl [data-allg-wahl="raster"][data-wert="aus"],
+	html[data-zeichen="film"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="film"],
+	html[data-zeichen="parley"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="parley"],
+	html[data-zeichen="alt"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="alt"],
+	html[data-ausschnitt="mitte"] .menu-wahl [data-allg-wahl="ausschnitt"][data-wert="mitte"],
+	html[data-ausschnitt="rechts"] .menu-wahl [data-allg-wahl="ausschnitt"][data-wert="rechts"],
 	html[data-raster="an"] .menu-wahl [data-allg-wahl="raster"][data-wert="an"],
 	html[data-titelgroesse="huge"] .menu-wahl [data-allg-wahl="titelgroesse"][data-wert="huge"],
 	html[data-titelgroesse="2xl"] .menu-wahl [data-allg-wahl="titelgroesse"][data-wert="2xl"],

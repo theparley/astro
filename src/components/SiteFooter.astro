@@ -1,5 +1,23 @@
 ---
 import LogoBiss from "./LogoBiss.astro";
+import ZeichenNeu from "./ZeichenNeu.astro";
+/* PROBE „neues Zeichen“ im Fuß, NUR auf localhost (Rasul 18.11.2026: „Und auf der Webseite unten der Footer, den
+   könnte man dann auch updaten, und der sollte gleichzeitig umschaltbar sein, wenn wir oben im Menü das umschalten.“).
+   Hängt an html[data-zeichen] wie das Menü (MenuBBH.astro, ZEICHEN_NEU): film, parley oder alt.
+   Seitenverhältnis samt Raum des Namens: „parley“ 209,17 : 110,18 = 1,8984, „parley Film“ 200,26 : 119,64 = 1,6739.
+   Linkzeile 12 px über der Oberkante des Rechtecks: 100 / 110,18 = 90,76 % bzw. 100 / 119,64 = 83,58 % der Höhe.
+   Im Bau wird nichts davon ausgegeben. Rückweg: ZEICHEN_NEU auf false. */
+const ZEICHEN_NEU = import.meta.env.DEV;
+const ZEICHEN_NEU_STIL = `
+html:is([data-zeichen="parley"], [data-zeichen="film"]) .site-footer__logo > svg.site-footer__wortmarke:not(.site-footer__zeichen-neu) { display: none; }
+html:not([data-zeichen="parley"]):not([data-zeichen="film"]) .site-footer__logo > svg.site-footer__zeichen-neu,
+html[data-zeichen="parley"] .site-footer__logo > svg.site-footer__zeichen-neu--film,
+html[data-zeichen="film"] .site-footer__logo > svg.site-footer__zeichen-neu--parley { display: none; }
+html[data-zeichen="parley"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 96px) * 1.8984)); }
+html[data-zeichen="film"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 96px) * 1.6739)); }
+html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc(90.76% + 12px); }
+html[data-zeichen="film"] .site-footer .site-footer__logo > nav { bottom: calc(83.58% + 12px); }
+`;
 ---
 {/* Sticky-Reveal-Footer (Fred 30.08. nachts, "bau den Footer") — exakt das
    BBH-Muster, das Maximilian auf der Nuxt-Seite 1:1 kopiert hat und das wir
@@ -52,6 +70,9 @@ import LogoBiss from "./LogoBiss.astro";
 			   Seit 17.11.2026 zeigt Stufe 2 „parley“ über „Film“ (Rasul gab das Logo als Figma-Datei: „das Logo für die
 			   Website“; im Marketing-Ordner unter branding/aktiv/markenbasis-2026-10/von-rasul/). Am 16.11. kurz „parley“ allein. */}
 			<LogoBiss class="site-footer__wortmarke" stufe={2} titel="parley Film" />
+			{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
+			{ZEICHEN_NEU && <ZeichenNeu fassung="parley" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--parley" />}
+			{ZEICHEN_NEU && <ZeichenNeu fassung="film" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--film" />}
 		</div>
 	</div>
 </footer>

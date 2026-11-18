@@ -16,6 +16,7 @@
      aktuelle Seite trägt den Balken dauerhaft.
    Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
 import LogoBiss from "./LogoBiss.astro";
+import ZeichenNeu from "./ZeichenNeu.astro";
 import { readFileSync } from "node:fs";
 import { BLASE_EIN_WORT } from "../daten/blaseEinWort";
 interface Props { startseite?: boolean }
@@ -263,6 +264,41 @@ html:not([data-kachel="ecke"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.b
 `;
 const KURZ_SKRIPT_LOKAL = `(function(){var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
 const KURZ_SKRIPT = KURZ_PROBEN ? KURZ_SKRIPT_LOKAL : `document.documentElement.dataset.kachel="ecke";`;
+/* PROBE „neues Zeichen“, NUR auf localhost (Rasul 18.11.2026, Übergabe im Marketing-Ordner
+   website/Uebergabe_Neues_Zeichen_2026-11.md: „Die erste rechteckige Kachel, die man sieht, wäre sozusagen jetzt das
+   angeschnittene Rechteck, und am Ende die Kachel mit parley oder parley Film. … Machen wir zwei Varianten, dass ich
+   das sehen kann bei Localhost, vielleicht haben wir ein Menü zum Umschalten.“).
+   Das neue Zeichen: Rechteck 16 : 9 mit einem Loch aus Play und Oval (ZeichenNeu.astro).
+   - Kachel vorn: das Zeichen ohne Text im quadratischen Ausschnitt. Die Kachel ist die helle Fläche, Oval und Play
+     stehen schwarz darin (wie bisher der Biss). Ausschnitt mittig (x 38,9 bis 138,9, Play und Bogen zu sehen) oder
+     rechts (x 77,8 bis 177,8, fast nur der Bogen): ?ausschnitt=mitte|rechts, Grundeinstellung mitte.
+   - Zeichen hinten: das ganze Zeichen mit Name. ?zeichen=film („parley Film“, Grundeinstellung), ?zeichen=parley,
+     ?zeichen=alt (bisheriges Zeichen mit Biss, wie auf Dev und live). Der Fuß hängt am selben Schalter.
+     Maße in k: „parley“ 2,0917 × 1,1018 (viewBox 209,17 × 110,18), „parley Film“ 2,0026 × 1,1964 (200,26 × 119,64);
+     der Name ragt 0,10 k bzw. 0,20 k über die Kachelzeile (bisher 0,60 k).
+   Gesetzt wird html[data-zeichen] und html[data-ausschnitt] im Kopfskript von Layout.astro (liesWahl, nur lokal),
+   umschaltbar auch im Einstellungsknopf unten rechts. Alles hängt an import.meta.env.DEV: Im Bau gibt es weder die
+   Stilzeilen noch die Bilder. Rückweg: ZEICHEN_NEU auf false. */
+const ZEICHEN_NEU = import.meta.env.DEV;
+const ZN = 'html:is([data-zeichen="parley"], [data-zeichen="film"]) div.bbh-menu[data-bbh-menu]';
+const ZN_AUS = 'html:not([data-zeichen="parley"]):not([data-zeichen="film"]) div.bbh-menu[data-bbh-menu]';
+const ZEICHEN_NEU_STIL = `
+/* Kachel vorn */
+${ZN} .bbh-menu__kurz.bbh-menu__kurz svg:not(.bbh-menu__kurz-neu) { display: none; }
+${ZN} .bbh-menu__kurz svg.bbh-menu__kurz-neu.bbh-menu__kurz-neu { display: block; }
+html[data-ausschnitt="rechts"] div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.bbh-menu__kurz-neu.bbh-menu__kurz-neu--mitte.bbh-menu__kurz-neu--mitte { display: none; }
+html:not([data-ausschnitt="rechts"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.bbh-menu__kurz-neu.bbh-menu__kurz-neu--rechts.bbh-menu__kurz-neu--rechts { display: none; }
+${ZN_AUS} .bbh-menu__kurz.bbh-menu__kurz svg.bbh-menu__kurz-neu.bbh-menu__kurz-neu { display: none; }
+/* Zeichen hinten */
+${ZN} .bbh-menu__name.bbh-menu__name--logo > svg:not(.bbh-menu__zeichen-neu) { display: none; }
+${ZN_AUS} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu { display: none; }
+html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--film,
+html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { display: none; }
+html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * 2.0917); }
+html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * 2.0026); }
+html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { width: calc(var(--k) * 2.0917); height: calc(var(--k) * 1.1018); }
+html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--film { width: calc(var(--k) * 2.0026); height: calc(var(--k) * 1.1964); }
+`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -275,6 +311,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{LOGO_HINTEN && <style is:inline set:html={LOGO_HINTEN_STIL}></style>}
 		{KURZ && <style is:inline set:html={KURZ_STIL}></style>}
 		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
+		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
 		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
@@ -311,6 +348,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			<a href="/" class="bbh-menu__kurz" aria-label="parley Film, Startseite">
 				{KURZ_PROBEN && <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#000" transform={KURZ_MITTE} set:html={kurzPfade} /></svg>}
 				<svg class="bbh-menu__kurz-ecke" viewBox="77.80 0 100 100" aria-hidden="true"><path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" /></svg>
+				{ZEICHEN_NEU && <svg class="bbh-menu__kurz-neu bbh-menu__kurz-neu--mitte" viewBox="38.9 0 100 100" aria-hidden="true"><ellipse cx="149" cy="-1.5" rx="88.9" ry="57.7" fill="#000" /><path d="M111.48 50L74.38 71.1V28.9Z" fill="#000" /></svg>}
+				{ZEICHEN_NEU && <svg class="bbh-menu__kurz-neu bbh-menu__kurz-neu--rechts" viewBox="77.8 0 100 100" aria-hidden="true"><ellipse cx="149" cy="-1.5" rx="88.9" ry="57.7" fill="#000" /><path d="M111.48 50L74.38 71.1V28.9Z" fill="#000" /></svg>}
 			</a>
 		)}
 		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
@@ -322,7 +361,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
 		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
 		{LOGO_HINTEN
-			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{KURZ_PROBEN && (
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite"><LogoBiss stufe={2} titel="parley Film" />{ZEICHEN_NEU && <ZeichenNeu fassung="parley" class="bbh-menu__zeichen-neu bbh-menu__zeichen-neu--parley" />}{ZEICHEN_NEU && <ZeichenNeu fassung="film" class="bbh-menu__zeichen-neu bbh-menu__zeichen-neu--film" />}{KURZ_PROBEN && (
 				<svg class="bbh-menu__zeichen-wort" viewBox="0 -60.32 289.64 160.32" role="img" aria-label="parley">
 					<defs>
 						<mask id={wortMaskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
