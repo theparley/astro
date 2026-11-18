@@ -235,7 +235,7 @@ const websiteJsonLd = JSON.stringify({
 						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
 						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");
 						document.documentElement.dataset.bedienung = liesWahl("bedienung", ["liste", "kacheln"], "liste"); // Probe Liste nach oben, siehe MenuBBH.astro (LISTE_PROBE)
-						document.documentElement.dataset.zeilen = liesWahl("zeilen", ["gross", "fett", "fein"], "gross"); // Probe Listenzeilen kräftig, siehe MenuBBH.astro (ZEILEN_PROBE)
+						document.documentElement.dataset.zeilen = liesWahl("zeilen", ["gross", "fett", "fein"], "fett"); // fett gilt auch im Bau; gross und fein nur als Vergleich auf localhost, siehe MenuBBH.astro (ZEILEN)
 						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Handy-Menü: 90 = neues Maß und neue Reihenfolge (gilt im Bau), 72 = Stand davor; siehe MenuBBH.astro (HANDY_MENUE)
 					}
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
