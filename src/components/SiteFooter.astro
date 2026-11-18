@@ -20,14 +20,14 @@ const znMass = (f: "parley" | "film") => { const [, , b, h] = ZEICHEN_NEU_DATEN[
 const znP = znMass("parley"), znF = znMass("film");
 const ZN_FILM = ZEICHEN_PROBEN ? 'html[data-zeichen="film"]' : "html:root";
 const ZEICHEN_NEU_STIL = `
-${ZN_FILM} .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 84px - var(--menue-raum)) * ${znF.v})); }
+${ZN_FILM} .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${znF.v})); }
 ${ZN_FILM} .site-footer .site-footer__logo > nav { bottom: calc(${znF.o}% + 12px); }
 ` + (ZEICHEN_PROBEN ? `
 html:is([data-zeichen="parley"], [data-zeichen="film"]) .site-footer__logo > svg.site-footer__wortmarke:not(.site-footer__zeichen-neu) { display: none; }
 html:not([data-zeichen="parley"]):not([data-zeichen="film"]) .site-footer__logo > svg.site-footer__zeichen-neu,
 html[data-zeichen="parley"] .site-footer__logo > svg.site-footer__zeichen-neu--film,
 html[data-zeichen="film"] .site-footer__logo > svg.site-footer__zeichen-neu--parley { display: none; }
-html[data-zeichen="parley"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 84px - var(--menue-raum)) * ${znP.v})); }
+html[data-zeichen="parley"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${znP.v})); }
 html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc(${znP.o}% + 12px); }
 ` : "");
 ---
@@ -92,9 +92,11 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
 <style>
 	.site-footer {
 		/* Platz für die Menüzeile am unteren Rand (MenuBBH.astro): Kachel 90 px unter 768 px, sonst 88 px, plus 2 px
-		   Fuge und 12 px Luft. Geht auch in den Deckel der Zeichenbreite ein (84 px = 24 px Polster oben + 60 px
-		   Linkzeile), damit Zeichen und Freiraum zusammen in ein Fenster passen. */
+		   Fuge und 12 px Luft. Geht auch in den Deckel der Zeichenbreite ein, damit Zeichen und Freiraum zusammen in ein Fenster passen. */
 		--menue-raum: 104px;
+		/* Abstand über dem Zeichen: mindestens 48 px, sonst --abstand-md (bei 1440 px rund 69 px). Geht wie
+		   --menue-raum in den Deckel der Zeichenbreite ein (dazu 60 px Linkzeile). */
+		--fuss-oben: max(48px, var(--abstand-md));
 		/* Das BBH-/Nuxt-Rezept, drei Klassen: sticky + bottom:0 + z-index:0.
 		   overflow-clip wie beim Vorbild, damit nichts aus dem Footer ragt. */
 		position: sticky;
@@ -114,7 +116,9 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
 		   der Link-Zeile — die Wortmarke darunter läuft natürlich von Kante
 		   zu Kante, ohne 100vw-Ausbrecher-Tricks (die um die Scrollbar-Breite
 		   überschießen und die Glyphen anschneiden würden). */
-		padding-top: 24px;
+		/* Luft zum Abschnitt davor (Rasul 18.11.2026: „Der Footer braucht auch nach oben hin zum nächsten Segment ein
+		   bisschen Luft, sonst dotzt die Blase so direkt ans nächste Segment an.“). Vorher 24 px. */
+		padding-top: var(--fuss-oben);
 		/* Freiraum unter dem Zeichen für das Menü, das seit 18.11.2026 überall fest unten mittig sitzt (Rasul: „Dann
 		   müssen wir unten im Footer auch ein bisschen Schwarzraum machen, dass das Menü aus dem letzten Bild, was unser
 		   großes Logo ist, auch rausfahren kann.“). Vorher 12 px; das Menü lag dann als helle Kachel auf dem weißen
@@ -174,7 +178,7 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
 		/* So breit wie das Logo (Deckel über die Fensterhöhe, siehe unten), damit die Rechtslinks sich am Logo
 		   ausrichten können. */
 		position: relative;
-		width: min(100%, calc((100dvh - 84px - var(--menue-raum)) * 1.8066));
+		width: min(100%, calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * 1.8066));
 		margin: 0 auto;
 	}
 
