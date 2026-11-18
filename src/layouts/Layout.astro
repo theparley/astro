@@ -232,7 +232,7 @@ const FAVICON_ORT = import.meta.env.DEV ? "/zeichen-neu" : "";
 					document.documentElement.dataset.animhoehe = liesWahl("animhoehe", ["100", "90", "80", "70", "60", "50"], "50"); // 50 % Grundeinstellung (Rasul 14.11.2026: „Mach mal auf 50 … Dann würde, glaube ich, alles drauf passen, die Überschrift“)
 					document.documentElement.dataset.titelgroesse = liesWahl("titelgroesse", ["huge", "2xl"], "2xl");
 					// Probe „neues Zeichen“ in Menü und Fuß, nur lokal (Rasul 18.11.2026): ?zeichen=film|parley|alt, ?ausschnitt=mitte|rechts.
-					// Im Bau wird nichts gesetzt; dort gilt das bisherige Zeichen (MenuBBH.astro und SiteFooter.astro, ZEICHEN_NEU).
+					// Im Bau wird nichts gesetzt; dort gilt fest „parley Film“ mit mittigem Ausschnitt (MenuBBH.astro und SiteFooter.astro, ZEICHEN_NEU).
 					if (nurLokal) {
 						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
 						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");

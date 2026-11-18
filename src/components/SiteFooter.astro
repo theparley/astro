@@ -9,20 +9,27 @@ import { ZEICHEN_NEU as ZEICHEN_NEU_DATEN } from "../daten/zeichenNeu";
    100 / Höhe der viewBox) werden aus src/daten/zeichenNeu.ts gerechnet. Stand 18.11.2026 nach der Korrektur der
    Namenslage: „parley“ 209,83 : 120,65 = 1,7391 und 82,88 %, „parley Film“ 200,82 : 129,40 = 1,5519 und 77,28 %
    (Zeilen enger, Grundlinienabstand 0,833 em wie im bisherigen Zeichen).
-   Im Bau wird nichts davon ausgegeben. Rückweg: ZEICHEN_NEU auf false. */
-const ZEICHEN_NEU = import.meta.env.DEV;
+   Rückweg zum bisherigen Zeichen: ZEICHEN_NEU auf false. */
+/* Angenommen (Rasul 18.11.2026 nachmittags: „Es gilt für die Webseite jetzt erstmal der Name parley Film.“). Seitdem
+   steht das neue Zeichen mit „parley Film“ auch im Bau, dort fest (Regeln an html:root, kein Skript). „parley“ allein,
+   das bisherige Zeichen und das Umschalten bleiben localhost (ZEICHEN_PROBEN). */
+const ZEICHEN_NEU = true;
+const ZEICHEN_PROBEN = import.meta.env.DEV;
+const ZEICHEN_ALT = !ZEICHEN_NEU || ZEICHEN_PROBEN;
 const znMass = (f: "parley" | "film") => { const [, , b, h] = ZEICHEN_NEU_DATEN[f].viewBox.split(/\s+/).map(Number); return { v: (b / h).toFixed(4), o: (10000 / h).toFixed(2) }; };
 const znP = znMass("parley"), znF = znMass("film");
+const ZN_FILM = ZEICHEN_PROBEN ? 'html[data-zeichen="film"]' : "html:root";
 const ZEICHEN_NEU_STIL = `
+${ZN_FILM} .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 96px) * ${znF.v})); }
+${ZN_FILM} .site-footer .site-footer__logo > nav { bottom: calc(${znF.o}% + 12px); }
+` + (ZEICHEN_PROBEN ? `
 html:is([data-zeichen="parley"], [data-zeichen="film"]) .site-footer__logo > svg.site-footer__wortmarke:not(.site-footer__zeichen-neu) { display: none; }
 html:not([data-zeichen="parley"]):not([data-zeichen="film"]) .site-footer__logo > svg.site-footer__zeichen-neu,
 html[data-zeichen="parley"] .site-footer__logo > svg.site-footer__zeichen-neu--film,
 html[data-zeichen="film"] .site-footer__logo > svg.site-footer__zeichen-neu--parley { display: none; }
 html[data-zeichen="parley"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 96px) * ${znP.v})); }
-html[data-zeichen="film"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 96px) * ${znF.v})); }
 html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc(${znP.o}% + 12px); }
-html[data-zeichen="film"] .site-footer .site-footer__logo > nav { bottom: calc(${znF.o}% + 12px); }
-`;
+` : "");
 ---
 {/* Sticky-Reveal-Footer (Fred 30.08. nachts, "bau den Footer") — exakt das
    BBH-Muster, das Maximilian auf der Nuxt-Seite 1:1 kopiert hat und das wir
@@ -74,9 +81,9 @@ html[data-zeichen="film"] .site-footer .site-footer__logo > nav { bottom: calc($
 			   stufe={3}, nur die Fläche. Rückweg: stufe={3}.
 			   Seit 17.11.2026 zeigt Stufe 2 „parley“ über „Film“ (Rasul gab das Logo als Figma-Datei: „das Logo für die
 			   Website“; im Marketing-Ordner unter branding/aktiv/markenbasis-2026-10/von-rasul/). Am 16.11. kurz „parley“ allein. */}
-			<LogoBiss class="site-footer__wortmarke" stufe={2} titel="parley Film" />
+			{ZEICHEN_ALT && <LogoBiss class="site-footer__wortmarke" stufe={2} titel="parley Film" />}
 			{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
-			{ZEICHEN_NEU && <ZeichenNeu fassung="parley" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--parley" />}
+			{ZEICHEN_NEU && ZEICHEN_PROBEN && <ZeichenNeu fassung="parley" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--parley" />}
 			{ZEICHEN_NEU && <ZeichenNeu fassung="film" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--film" />}
 		</div>
 	</div>
