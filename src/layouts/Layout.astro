@@ -53,20 +53,18 @@ const websiteJsonLd = JSON.stringify({
 	name: SITE_NAME,
 	url: SITE_URL,
 });
-const FAVICON_ORT = import.meta.env.DEV ? "/zeichen-neu" : "";
 ---
 
 <!doctype html>
 <html lang="de">
 	<head>
 		<meta charset="utf-8" />
-		{/* Favicon aus dem neuen Zeichen, NUR auf localhost (Rasul 18.11.2026; Dateien aus dem Marketing-Ordner
+		{/* Favicon aus dem neuen Zeichen (Rasul 18.11.2026; Dateien aus dem Marketing-Ordner
 		    branding/aktiv/favicon/zeichen-neu/, Generator favicon_neu.py): mittiger Ausschnitt ohne Text wie die erste
-		    Menükachel. Die Dateien liegen in public/zeichen-neu/ und stehen in NUR_LOKAL (astro.config.mjs), im Bau
-		    bleibt das bisherige Favicon. */}
-		<link rel="icon" type="image/svg+xml" href={`${FAVICON_ORT}/favicon.svg`} />
-		<link rel="alternate icon" href={`${FAVICON_ORT}/favicon.ico`} />
-		<link rel="apple-touch-icon" href={`${FAVICON_ORT}/apple-touch-icon.png`} />
+		    Menükachel. Davor das Zeichen mit Biss, Variante D (Stand in Git: 2ca1f32). */}
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="alternate icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />

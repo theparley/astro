@@ -16,9 +16,6 @@ const NUR_LOKAL = [
 	// (LogoBiss), die Datei wird im Bau nicht gebraucht. Zwischenstand mit Datei im Bau: Commit 9ad9520.
 	'fonts/FormaDJRVariable.woff2',
 	'fonts/FormaDJRMonoVariable.woff2',
-	// Favicon aus dem neuen Zeichen (Rasul 18.11.2026), Probe nur auf localhost: Layout.astro verweist nur dort darauf.
-	// Zum Hochladen: Dateien nach public/ verschieben (ersetzen favicon.svg, favicon.ico, apple-touch-icon.png) und diese Zeile entfernen.
-	'zeichen-neu',
 	'lokal', // Gast-Videos ohne Freigabe (Symlinks, ohnehin nicht in Git)
 ];
 const nurLokal = {
