@@ -225,6 +225,7 @@ div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
    Adresse, kein Merken, und die Zutaten der anderen Fassungen (Name in der Kachel, Zeichen mit einem Wort) werden
    nicht ausgeliefert; sie hängen an KURZ_PROBEN und bleiben localhost. */
 const KURZ = true;
+const ZEICHEN_SCHMAL = true; // Zeichen mit Namen auch unter 1024 px, siehe Probe im Stilblock KURZ_STIL
 const KURZ_PROBEN = import.meta.env.DEV;
 /* Block des Namens in den Einheiten des Zeichens (gemessen 17.11.2026): x 153,85 bis 256,53, y −26,49 bis 26,49. */
 const KURZ_MITTE = "translate(50 50) scale(0.82) translate(-205.19 0)"; // Blockmitte auf die Kachelmitte (Kachel = 100 × 100)
@@ -252,7 +253,11 @@ ${KURZ_FEST}:is(:not(.bbh-menu--oben), .bbh-menu--eng) .bbh-menu__name.bbh-menu_
 /* Schmale Fenster (Rasul 17.11.2026 auf den Vorschlag: „Ja, weglassen“): unter 1024 px gibt es das Zeichen rechts in
    der Fassung fest gar nicht. Dort sitzt die Zeile unten mittig; mit Zeichen wäre sie bei 375 px 357 px breit und
    die Namenskachel rückte beim Verschwinden 105 px zur Seite. */
-@media (max-width: 1023px) { ${KURZ_FEST} .bbh-menu__name.bbh-menu__name--logo { display: none; } }
+/* PROBE (Rasul 18.11.2026: „Mach doch mal am Handy auch am Startmenü das gleiche wie auf dem Desktop, die Kacheln mit
+   parley Film nebendran. Dann ist es zwar unten voll, aber ich würde das gerne mal sehen.“): Das Zeichen steht auch
+   unter 1024 px. Mit dem neuen Zeichen ist die Zeile bei 375 px rund 293 px breit. Rückweg: die Regel wieder
+   einschalten, ZEICHEN_SCHMAL auf false. */
+${ZEICHEN_SCHMAL ? "" : `@media (max-width: 1023px) { ${KURZ_FEST} .bbh-menu__name.bbh-menu__name--logo { display: none; } }`}
 /* Name in der Kachel erst mit den Menüstrichen: gleiche Verzögerung und Dauer wie die Breite des Hamburgers */
 ${KURZ_FEST} .bbh-menu__kurz svg { transition: opacity var(--dauer) var(--kurve) var(--out-delay); }
 @media (min-width: 1024px) { ${KURZ_NUR_FEST}.bbh-menu--start:not(.bbh-menu--gescrollt) .bbh-menu__kurz svg { opacity: 0; transition-delay: 0s; } }
