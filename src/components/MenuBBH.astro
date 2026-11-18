@@ -268,8 +268,14 @@ html:not([data-kachel="wort"]) div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-m
 html[data-kachel="ecke"] div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg:not(.bbh-menu__kurz-ecke) { display: none; }
 html:not([data-kachel="ecke"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kurz svg.bbh-menu__kurz-ecke { display: none; }
 `;
-const KURZ_SKRIPT_LOKAL = `(function(){var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;})();`;
-const KURZ_SKRIPT = KURZ_PROBEN ? KURZ_SKRIPT_LOKAL : `document.documentElement.dataset.kachel="ecke";`;
+/* Das Attribut html[data-kachel] muss nach jedem Seitenwechsel neu gesetzt werden: Der ClientRouter ersetzt beim
+   Wechsel die Attribute von <html> durch die der neuen Seite (dort steht data-kachel nicht im Quelltext), führt dieses
+   Inline-Skript aber nicht noch einmal aus. Folge bis 18.11.2026: Nach Termin → Startseite fehlte die erste Kachel,
+   und das Zeichen hinten blieb auf Unterseiten stehen (Rasul: „dann schneidet er mir auf der Hauptseite parley Film
+   irgendwie ab“). Deshalb hängt das Setzen zusätzlich an astro:after-swap, einmal je Fenster angemeldet. */
+const KURZ_SETZE_LOKAL = `var w="ecke";try{var q=new URLSearchParams(location.search).get("kachel");if(q==="glatt"||q==="fest"||q==="wort"||q==="ecke"||q==="aus")localStorage.setItem("parley-kachel",q);var g=localStorage.getItem("parley-kachel");if(g==="glatt"||g==="fest"||g==="wort"||g==="aus")w=g;}catch(e){}document.documentElement.dataset.kachel=w;`;
+const KURZ_SETZE = KURZ_PROBEN ? KURZ_SETZE_LOKAL : `document.documentElement.dataset.kachel="ecke";`;
+const KURZ_SKRIPT = `(function(){function setze(){${KURZ_SETZE}}setze();if(!window.__parleyKachel){window.__parleyKachel=true;document.addEventListener("astro:after-swap",setze);}})();`;
 /* PROBE „neues Zeichen“, NUR auf localhost (Rasul 18.11.2026, Übergabe im Marketing-Ordner
    website/Uebergabe_Neues_Zeichen_2026-11.md: „Die erste rechteckige Kachel, die man sieht, wäre sozusagen jetzt das
    angeschnittene Rechteck, und am Ende die Kachel mit parley oder parley Film. … Machen wir zwei Varianten, dass ich
