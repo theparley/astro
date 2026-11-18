@@ -17,6 +17,7 @@
    Welches Menü läuft, steuert html[data-menu] (Umschalter in Layout.astro). */
 import LogoBiss from "./LogoBiss.astro";
 import ZeichenNeu from "./ZeichenNeu.astro";
+import { ZEICHEN_NEU as ZEICHEN_NEU_DATEN } from "../daten/zeichenNeu";
 import { readFileSync } from "node:fs";
 import { BLASE_EIN_WORT } from "../daten/blaseEinWort";
 interface Props { startseite?: boolean }
@@ -274,12 +275,15 @@ const KURZ_SKRIPT = KURZ_PROBEN ? KURZ_SKRIPT_LOKAL : `document.documentElement.
      rechts (x 77,8 bis 177,8, fast nur der Bogen): ?ausschnitt=mitte|rechts, Grundeinstellung mitte.
    - Zeichen hinten: das ganze Zeichen mit Name. ?zeichen=film („parley Film“, Grundeinstellung), ?zeichen=parley,
      ?zeichen=alt (bisheriges Zeichen mit Biss, wie auf Dev und live). Der Fuß hängt am selben Schalter.
-     Maße in k: „parley“ 2,0917 × 1,1018 (viewBox 209,17 × 110,18), „parley Film“ 2,0026 × 1,1964 (200,26 × 119,64);
-     der Name ragt 0,10 k bzw. 0,20 k über die Kachelzeile (bisher 0,60 k).
+     Maße in k: Breite und Höhe der viewBox durch 100, gerechnet aus src/daten/zeichenNeu.ts (Stand 18.11.2026 nach
+     der Korrektur der Namenslage: „parley“ 2,0983 × 1,2065, „parley Film“ 2,0082 × 1,3136); der Name ragt damit
+     0,21 k bzw. 0,31 k über die Kachelzeile (bisher 0,60 k).
    Gesetzt wird html[data-zeichen] und html[data-ausschnitt] im Kopfskript von Layout.astro (liesWahl, nur lokal),
    umschaltbar auch im Einstellungsknopf unten rechts. Alles hängt an import.meta.env.DEV: Im Bau gibt es weder die
    Stilzeilen noch die Bilder. Rückweg: ZEICHEN_NEU auf false. */
 const ZEICHEN_NEU = import.meta.env.DEV;
+const znMass = (f: "parley" | "film") => { const [, , b, h] = ZEICHEN_NEU_DATEN[f].viewBox.split(/\s+/).map(Number); return { b: (b / 100).toFixed(4), h: (h / 100).toFixed(4) }; };
+const znP = znMass("parley"), znF = znMass("film");
 const ZN = 'html:is([data-zeichen="parley"], [data-zeichen="film"]) div.bbh-menu[data-bbh-menu]';
 const ZN_AUS = 'html:not([data-zeichen="parley"]):not([data-zeichen="film"]) div.bbh-menu[data-bbh-menu]';
 const ZEICHEN_NEU_STIL = `
@@ -294,10 +298,10 @@ ${ZN} .bbh-menu__name.bbh-menu__name--logo > svg:not(.bbh-menu__zeichen-neu) { d
 ${ZN_AUS} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu { display: none; }
 html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--film,
 html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { display: none; }
-html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * 2.0917); }
-html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * 2.0026); }
-html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { width: calc(var(--k) * 2.0917); height: calc(var(--k) * 1.1018); }
-html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--film { width: calc(var(--k) * 2.0026); height: calc(var(--k) * 1.1964); }
+html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * ${znP.b}); }
+html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * ${znF.b}); }
+html[data-zeichen="parley"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { width: calc(var(--k) * ${znP.b}); height: calc(var(--k) * ${znP.h}); }
+html[data-zeichen="film"] div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--film { width: calc(var(--k) * ${znF.b}); height: calc(var(--k) * ${znF.h}); }
 `;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
