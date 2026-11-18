@@ -146,12 +146,18 @@ const LOGO_HINTEN_STIL = `
 div.bbh-menu[data-bbh-menu] { --oben: calc(var(--fuge) + var(--k) * 0.6032); }
 /* div…[data-bbh-menu] davor, damit die Breite auch gegen „.bbh-menu--oben .bbh-menu__name“ (3,09 k) gilt. */
 div.bbh-menu[data-bbh-menu] .bbh-menu__name.bbh-menu__name--logo { display: block; position: relative; background: none; overflow: visible; color: rgba(237, 237, 237, 0.95); width: calc(var(--k) * 2.8964); margin-left: 0; clip-path: inset(-61% 0 0 0); opacity: 1; pointer-events: auto; }
-.bbh-menu.bbh-menu--start .bbh-menu__name.bbh-menu__name--logo.bbh-menu__name--logo { animation: bbh-maske-logo 500ms var(--maske) 500ms both; }
+/* Einblendung von links, am Bild selbst statt am Anker (18.11.2026): Am Anker lief sie mit negativem oberem Rand
+   (inset(-61% …), damit der Name über der Kachelzeile sichtbar bleibt). Safari auf dem iPhone schnitt danach alles
+   über der Kachelzeile ab, bis einmal gescrollt wurde (Rasul: „immer beim Neuladen der Seite. Wenn ich runter und
+   zurückscrolle, ist es in Ordnung.“; im iPhone-Simulator nachgestellt). Das Bild umfasst den Namen schon, braucht
+   also keinen negativen Rand. Der Anker selbst wird nicht mehr animiert. */
+.bbh-menu.bbh-menu--start .bbh-menu__name.bbh-menu__name--logo.bbh-menu__name--logo { animation: none; }
+.bbh-menu.bbh-menu--start .bbh-menu__name.bbh-menu__name--logo > svg { animation: bbh-maske-logo 500ms var(--maske) 500ms both; }
 .bbh-menu .bbh-menu__name.bbh-menu__name--logo svg { position: absolute; left: 0; bottom: 0; width: calc(var(--k) * 2.8964); height: calc(var(--k) * 1.6032); display: block; }
 /* Eingeklappt hat die Menüspalte Breite null, ihre Fuge fiele sonst doppelt an (Zeichen bei 94 statt 92 px). */
 div.bbh-menu[data-bbh-menu] .bbh-menu__nav { margin-left: calc(-1 * var(--fuge)); transition-property: width, margin-left; }
 div.bbh-menu[data-bbh-menu].offen .bbh-menu__nav { margin-left: 0; }
-@keyframes bbh-maske-logo { from { clip-path: inset(-61% 100% 0 0); } to { clip-path: inset(-61% 0 0 0); } }
+@keyframes bbh-maske-logo { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 `;
 /* PROBE „Namenskachel eingeklappt“, NUR auf localhost (Rasul 17.11.2026: „Okay, jetzt machen wir noch eine Variante,
    mache die mal auf Localhost. Wo es beim Zusammenfahren dann einfach parley Film schwarz in einer rechteckigen
