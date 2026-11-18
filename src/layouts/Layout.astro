@@ -234,6 +234,7 @@ const websiteJsonLd = JSON.stringify({
 					if (nurLokal) {
 						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
 						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");
+						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Probe Menükacheln am Handy 44 hoch, siehe MenuBBH.astro (KMASS_PROBE)
 					}
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
 					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
@@ -309,6 +310,11 @@ const websiteJsonLd = JSON.stringify({
 					<span>Kachel</span>
 					<button type="button" data-allg-wahl="ausschnitt" data-wert="mitte">Mitte</button>
 					<button type="button" data-allg-wahl="ausschnitt" data-wert="rechts">Rechts</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Handy</span>
+					<button type="button" data-allg-wahl="kmass" data-wert="90">Kachel 90</button>
+					<button type="button" data-allg-wahl="kmass" data-wert="72">Kachel 72</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Aufbau</span>
@@ -532,6 +538,8 @@ const websiteJsonLd = JSON.stringify({
 	html[data-zeichen="parley"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="parley"],
 	html[data-zeichen="alt"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="alt"],
 	html[data-ausschnitt="mitte"] .menu-wahl [data-allg-wahl="ausschnitt"][data-wert="mitte"],
+	html[data-kmass="90"] .menu-wahl [data-allg-wahl="kmass"][data-wert="90"],
+	html[data-kmass="72"] .menu-wahl [data-allg-wahl="kmass"][data-wert="72"],
 	html[data-ausschnitt="rechts"] .menu-wahl [data-allg-wahl="ausschnitt"][data-wert="rechts"],
 	html[data-raster="an"] .menu-wahl [data-allg-wahl="raster"][data-wert="an"],
 	html[data-titelgroesse="huge"] .menu-wahl [data-allg-wahl="titelgroesse"][data-wert="huge"],

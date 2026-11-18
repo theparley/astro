@@ -330,6 +330,15 @@ html[data-zeichen="parley"] ${M} .bbh-menu__name.bbh-menu__name--logo { width: c
 html[data-zeichen="parley"] ${M} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { width: calc(var(--k) * ${znP.b}); height: calc(var(--k) * ${znP.h}); }
 ` : "");
 const ZEICHEN_ALT = !ZEICHEN_NEU || ZEICHEN_PROBEN; // bisheriges Zeichen mit Biss: im Bau nicht mehr ausgeliefert
+/* PROBE „Menükacheln am Handy 44 hoch“, NUR auf localhost (Rasul 18.11.2026: „Okay, wir probieren mal im ersten
+   Schritt, wie das aussieht mit 44 Pixel. Auf der Handyansicht.“). Anlass: „Termin“ und „Kontakt“ sind am Handy
+   72 × 35 px, Apple nennt 44 × 44 als Mindestmaß für eine Tippfläche. Weg: Unter 768 px geht das Kachelmaß k von 72
+   auf 90; die Menükacheln sind die halbe Kachelhöhe, (90 − 2) / 2 = 44. Erste Kachel, Hamburger und Zeichen hängen an
+   k und wachsen mit. Bewusste Abweichung von BBH (dort am Handy 72 × 36).
+   Schalter: ?kmass=90 (Grundeinstellung auf localhost) oder ?kmass=72 (wie Dev und live), auch im Einstellungsknopf.
+   Im Bau wird nichts davon ausgegeben. Rückweg: KMASS_PROBE auf false. */
+const KMASS_PROBE = import.meta.env.DEV;
+const KMASS_STIL = `@media (max-width: 767px) { html[data-kmass="90"] div.bbh-menu[data-bbh-menu] { --k: 90px; } }`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -343,6 +352,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{KURZ && <style is:inline set:html={KURZ_STIL}></style>}
 		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
 		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
+		{KMASS_PROBE && <style is:inline set:html={KMASS_STIL}></style>}
 		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
