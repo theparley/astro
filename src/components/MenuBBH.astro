@@ -373,18 +373,23 @@ ${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; 
      oben auf der Startseite endet sie damit knapp vor dem Namen, der rechts über die Zeile ragt.
    - Schleier und Tipp daneben schließen. Kein Aufklappen beim Überfahren mit der Maus (Rasul 18.11.2026: „Nur beim Klick“).
    - Zeichen groß oder klein wie bisher: oben groß mit Name, nach dem Scrollen die kleine Kachel.
-   Schalter: ?bedienung=liste (Grundeinstellung auf localhost) oder ?bedienung=kacheln (wie Dev und live), auch im
-   Einstellungsknopf. Das Skript unten fragt html[data-bedienung] ab; im Bau gibt es das Attribut nicht.
-   Rückweg: LISTE_PROBE auf false. */
-const LISTE_PROBE = import.meta.env.DEV;
-const LI = 'html[data-bedienung="liste"] div.bbh-menu[data-bbh-menu]';
+   Angenommen (Rasul 18.11.2026: „Ja, setzt das Menü mal so um, auch fürs Handy und für Dev und für die Live-Seite.“).
+   Seitdem gilt die Liste auch im Bau, dort fest (Regeln an html:root). Dazu seine Korrektur: „Das große Logo wird
+   nicht nur kleiner, wenn wir scrollen. Sondern wenn das groß ist wie auf der Landingpage und man drückt auf
+   Menüpunkt, dann wird es auch kleiner.“ Solange die Liste offen ist, steht also die kleine Kachel statt des großen
+   Zeichens; damit ragt kein Name mehr neben die Liste.
+   Schalter nur auf localhost: ?bedienung=kacheln zeigt den Stand davor (Menüpunkte in der Zeile), auch im
+   Einstellungsknopf. Das Skript unten nimmt die Liste an, solange html[data-bedienung] nicht „kacheln“ ist.
+   Rückweg: LISTE auf false und im Skript „liste“ auf false. */
+const LISTE = true;
+const LI = (ZEICHEN_PROBEN ? 'html:not([data-bedienung="kacheln"])' : "html:root") + " div.bbh-menu[data-bbh-menu]";
 const LISTE_STIL = `
 ${LI} .bbh-menu__burger.bbh-menu__burger { width: var(--k); margin-left: 0; }
 ${LI} .bbh-menu__nav.bbh-menu__nav { position: absolute; left: 0; bottom: calc(100% + var(--fuge)); display: flex; flex-direction: column; gap: var(--fuge); width: calc(var(--k) * 2 + var(--fuge)); margin-left: 0; overflow: visible; animation: none; pointer-events: none; visibility: hidden; transition: visibility 0s linear calc(var(--dauer) + 50ms * var(--anzahl)); }
 ${LI}.offen .bbh-menu__nav.bbh-menu__nav { pointer-events: auto; visibility: visible; transition-delay: 0s; }
-/* Oben auf der Startseite ragt der Name rechts über die Zeile; er beginnt 0,993 k rechts vom Anfang des Zeichens.
-   Bei voller Breite berührte die Liste das „p“ (im iPhone-Simulator gesehen), deshalb dort 0,1 k schmaler. */
-${LI}.bbh-menu--oben:not(.bbh-menu--eng) .bbh-menu__nav.bbh-menu__nav { width: calc(var(--k) * 1.9 + var(--fuge)); }
+/* Offen: kleine Kachel statt großem Zeichen, auch oben auf der Startseite (dieselben Werte wie eingeklappt) */
+${LI}.offen .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-1 * var(--fuge)); opacity: 0; pointer-events: none; visibility: hidden; transition-delay: 0s, 0s, 0s, var(--dauer); }
+${LI}.offen .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; visibility: visible; transition-delay: 0s; }
 ${LI} .bbh-menu__kachel.bbh-menu__kachel { width: 100%; height: 0; opacity: 0; transition: height var(--dauer) var(--kurve) calc(50ms * var(--i)), opacity var(--dauer) var(--kurve) calc(50ms * var(--i)); }
 ${LI}.offen .bbh-menu__kachel.bbh-menu__kachel { height: var(--halb); opacity: 1; transition-delay: calc(50ms * (var(--anzahl) - 1 - var(--i))); }
 ${LI} .bbh-menu__kachel.bbh-menu__kachel span { display: flex; align-items: center; height: var(--halb); padding: 0 12px; font-size: var(--text-md); }
@@ -404,7 +409,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
 		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
 		{HANDY_MENUE && <style is:inline set:html={HANDY_MENUE_STIL}></style>}
-		{LISTE_PROBE && <style is:inline set:html={LISTE_STIL}></style>}
+		{LISTE && <style is:inline set:html={LISTE_STIL}></style>}
 		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
@@ -798,9 +803,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			menu.classList.toggle("bbh-menu--oben", oben);
 			// Gegenstück zu --oben, das es vor dem ersten Lauf noch nicht gibt (Probe „Name erst mit den Menüstrichen“, localhost)
 			menu.classList.toggle("bbh-menu--gescrollt", !oben);
-			// Probe „Liste nach oben“ (nur localhost, html[data-bedienung="liste"]): offen nur nach Tipp oder Klick,
-			// nie von selbst oben auf der Startseite und nicht beim Überfahren mit der Maus.
-			const liste = document.documentElement.dataset.bedienung === "liste";
+			// Liste nach oben (seit 18.11.2026 überall): offen nur nach Tipp oder Klick, nie von selbst oben auf der
+			// Startseite und nicht beim Überfahren mit der Maus. Nur auf localhost lässt sich mit
+			// html[data-bedienung="kacheln"] der Stand davor zeigen.
+			const liste = document.documentElement.dataset.bedienung !== "kacheln";
 			const offen = liste ? gehalten : oben || gehalten || ueber;
 			menu.classList.toggle("offen", offen);
 			platz();
