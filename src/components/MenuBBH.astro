@@ -359,6 +359,37 @@ const HM_ZU = ":is(:not(.bbh-menu--oben), .bbh-menu--eng)";
 const HANDY_MENUE_STIL = `@media (max-width: 767px) { ${HM} { --k: 90px; } }
 ${HM} .bbh-menu__kurz.bbh-menu__kurz { order: 10; justify-content: flex-start; width: 0; margin-right: 0; margin-left: calc(-1 * var(--fuge)); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-left var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
 ${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; visibility: visible; transition-delay: 0s; }`;
+/* PROBE „Liste nach oben“, NUR auf localhost (Rasul 18.11.2026 abends: „Vielleicht übernehmen wir doch die Logik von
+   Hannes Zwetschke. Und zwar in dem Sinne, dass wir nicht am Anfang Felder anzeigen lassen, die man auswählen kann.
+   Sondern nur unser Menü zur Verfügung stellen. Was wir mischen im Zusammenhang mit BBH, ist, dass wir an das Menü
+   unser Logo hängen. … dann sieht man unser großes Logo und nebendran nicht die einzelnen Punkte, sondern das ganze
+   Feld kriegt dieses Hamburger Menü. Dann ist es auch einfach zu tasten. Und danach geht, wie bei Hannes Zwetschke …
+   so eine Fläche nach oben auf, wo ich einfach das nächste auswählen kann.“ Und: „sobald man scrollt, wird einfach
+   nur unser Logo klein, das Menü bleibt.“).
+   - Die Hamburger-Kachel steht immer, auch oben auf der Startseite; die Menüpunkte stehen nie in der Zeile.
+   - Tipp oder Klick auf den Hamburger klappt die Punkte als Liste nach oben auf (wie das Zwetschke-Menü in
+     MenuTile.astro): Zeilen in der Kachelfläche, je eine halbe Kachel hoch (44 px am Handy), gestaffelt von unten
+     nach oben, beim Schließen von oben nach unten. Breite der Liste = Hamburger + Fuge + kleine Kachel (2 k + Fuge);
+     oben auf der Startseite endet sie damit knapp vor dem Namen, der rechts über die Zeile ragt.
+   - Schleier und Tipp daneben schließen. Kein Aufklappen beim Überfahren mit der Maus (offen, Rasul entscheidet).
+   - Zeichen groß oder klein wie bisher: oben groß mit Name, nach dem Scrollen die kleine Kachel.
+   Schalter: ?bedienung=liste (Grundeinstellung auf localhost) oder ?bedienung=kacheln (wie Dev und live), auch im
+   Einstellungsknopf. Das Skript unten fragt html[data-bedienung] ab; im Bau gibt es das Attribut nicht.
+   Rückweg: LISTE_PROBE auf false. */
+const LISTE_PROBE = import.meta.env.DEV;
+const LI = 'html[data-bedienung="liste"] div.bbh-menu[data-bbh-menu]';
+const LISTE_STIL = `
+${LI} .bbh-menu__burger.bbh-menu__burger { width: var(--k); margin-left: 0; }
+${LI} .bbh-menu__nav.bbh-menu__nav { position: absolute; left: 0; bottom: calc(100% + var(--fuge)); display: flex; flex-direction: column; gap: var(--fuge); width: calc(var(--k) * 2 + var(--fuge)); margin-left: 0; overflow: visible; animation: none; pointer-events: none; visibility: hidden; transition: visibility 0s linear calc(var(--dauer) + 50ms * var(--anzahl)); }
+${LI}.offen .bbh-menu__nav.bbh-menu__nav { pointer-events: auto; visibility: visible; transition-delay: 0s; }
+/* Oben auf der Startseite ragt der Name rechts über die Zeile; er beginnt 0,993 k rechts vom Anfang des Zeichens.
+   Bei voller Breite berührte die Liste das „p“ (im iPhone-Simulator gesehen), deshalb dort 0,1 k schmaler. */
+${LI}.bbh-menu--oben:not(.bbh-menu--eng) .bbh-menu__nav.bbh-menu__nav { width: calc(var(--k) * 1.9 + var(--fuge)); }
+${LI} .bbh-menu__kachel.bbh-menu__kachel { width: 100%; height: 0; opacity: 0; transition: height var(--dauer) var(--kurve) calc(50ms * var(--i)), opacity var(--dauer) var(--kurve) calc(50ms * var(--i)); }
+${LI}.offen .bbh-menu__kachel.bbh-menu__kachel { height: var(--halb); opacity: 1; transition-delay: calc(50ms * (var(--anzahl) - 1 - var(--i))); }
+${LI} .bbh-menu__kachel.bbh-menu__kachel span { display: flex; align-items: center; height: var(--halb); padding: 0 12px; font-size: var(--text-md); }
+${LI}.offen .bbh-menu__schleier { opacity: 1; pointer-events: auto; }
+`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -373,6 +404,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
 		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
 		{HANDY_MENUE && <style is:inline set:html={HANDY_MENUE_STIL}></style>}
+		{LISTE_PROBE && <style is:inline set:html={LISTE_STIL}></style>}
 		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/
@@ -766,7 +798,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			menu.classList.toggle("bbh-menu--oben", oben);
 			// Gegenstück zu --oben, das es vor dem ersten Lauf noch nicht gibt (Probe „Name erst mit den Menüstrichen“, localhost)
 			menu.classList.toggle("bbh-menu--gescrollt", !oben);
-			const offen = oben || gehalten || ueber;
+			// Probe „Liste nach oben“ (nur localhost, html[data-bedienung="liste"]): offen nur nach Tipp oder Klick,
+			// nie von selbst oben auf der Startseite und nicht beim Überfahren mit der Maus.
+			const liste = document.documentElement.dataset.bedienung === "liste";
+			const offen = liste ? gehalten : oben || gehalten || ueber;
 			menu.classList.toggle("offen", offen);
 			platz();
 			burger.setAttribute("aria-expanded", String(offen));
