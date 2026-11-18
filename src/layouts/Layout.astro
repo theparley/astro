@@ -128,8 +128,8 @@ const websiteJsonLd = JSON.stringify({
 					var q = new URLSearchParams(suche).get("lage");
 					try {
 						if (q === "unten" || q === "links" || q === "gemischt") speicher.setItem("parley-lage", q);
-						return speicher.getItem("parley-lage") || "gemischt";
-					} catch (e) { return q || "gemischt"; }
+						return speicher.getItem("parley-lage") || "unten"; // seit 18.11.2026 überall unten mittig (Rasul: „Wir lassen das Menü tatsächlich immer unten sitzen.“); davor „gemischt“
+					} catch (e) { return q || "unten"; }
 				}
 				// Satz-Vergleich unter dem Film (13.11.2026): ?satz=a bis y; Grundeinstellung y (Rasul 13.11. abends: „Ja, wir nehmen ypsilon.“; davor w, v, i)
 				function liesSatz() {
@@ -268,9 +268,9 @@ const websiteJsonLd = JSON.stringify({
 				// jede Wahl im Browser, und die gemerkte schlägt die Grundeinstellung. Wer hier früher geprobt hat, sah deshalb
 				// weiter die alte Fassung. Bei jeder neuen Entscheidung das Datum hochsetzen und den Namen in die Liste nehmen.
 				try {
-					var STAND = "2026-11-17c"; // 17.11.2026: „kachel“ dazu; Grundeinstellung der Menü-Probe erst „fest“ (a), dann „wort“ (b), dann „ecke“ (c)
+					var STAND = "2026-11-18a"; // 18.11.2026: „lage“ und „kmass“ dazu, Menü überall unten mittig; davor 2026-11-17c („kachel“)
 					if (speicher.getItem("parley-stand") !== STAND) {
-						["textfolge", "anfang", "satzform", "mit", "gasse", "staffel", "atmen", "weite", "kachel"].forEach(function (n) { speicher.removeItem("parley-" + n); });
+						["textfolge", "anfang", "satzform", "mit", "gasse", "staffel", "atmen", "weite", "kachel", "lage", "kmass"].forEach(function (n) { speicher.removeItem("parley-" + n); });
 						speicher.setItem("parley-stand", STAND);
 					}
 				} catch (e) {}

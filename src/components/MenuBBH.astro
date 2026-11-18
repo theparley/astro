@@ -348,11 +348,17 @@ const ZEICHEN_ALT = !ZEICHEN_NEU || ZEICHEN_PROBEN; // bisheriges Zeichen mit Bi
 const HANDY_MENUE = true;
 const HM = (ZEICHEN_PROBEN ? 'html:not([data-kmass="72"])' : "html:root") + " div.bbh-menu[data-bbh-menu]";
 const HM_ZU = ":is(:not(.bbh-menu--oben), .bbh-menu--eng)";
-const HANDY_MENUE_STIL = `@media (max-width: 767px) {
-${HM} { --k: 90px; }
+/* EINHEITLICH (Rasul 18.11.2026 abends: „wir machen es einheitlich … Wir lassen das Menü tatsächlich immer unten
+   sitzen. Wir haben das nicht mehr am linken Rand. Es fährt auch nicht mehr hoch. Wir lassen auch die linke Kachel …
+   weg. Wir machen es rechts davon hin. … Animation lassen wir so, den Rest stellen wir um.“): Die Reihenfolge des
+   Handy-Menüs gilt seitdem bei jeder Fensterbreite, auch am Rechner: links Menüpunkte oder Hamburger, rechts das
+   Zeichen, oben groß mit Name, eingeklappt die kleine Kachel. Nur das Kachelmaß 90 bleibt auf unter 768 px
+   beschränkt (am Rechner 88). Die Lage unten mittig kommt aus html[data-lage="unten"], seitdem Grundeinstellung
+   auch auf Dev und localhost (Layout.astro, liesLage). Der Übergang bleibt, wie er war (Zeichen wischt zu, Kachel
+   fährt auf); Rasuls Wunsch, das Zeichen an Ort und Stelle auf das Quadrat zusammenzuziehen, ist zurückgestellt. */
+const HANDY_MENUE_STIL = `@media (max-width: 767px) { ${HM} { --k: 90px; } }
 ${HM} .bbh-menu__kurz.bbh-menu__kurz { order: 10; justify-content: flex-start; width: 0; margin-right: 0; margin-left: calc(-1 * var(--fuge)); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-left var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
-${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; visibility: visible; transition-delay: 0s; }
-}`;
+${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; visibility: visible; transition-delay: 0s; }`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
