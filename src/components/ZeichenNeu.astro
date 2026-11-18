@@ -1,0 +1,25 @@
+---
+/* Das neue Zeichen (Rasul 18.11.2026, Werkbank branding/werkstatt-seiten/play-blase-frei.html im Marketing-Ordner):
+   Rechteck 177,8 × 100 mit Eckradius 5, darin ein Loch aus dem YouTube-Play und einem Oval
+   (rx 88,9 / ry 57,7, Mitte 149 / −1,5). Maße: branding/aktiv/zeichen/Staende_2026-11-18.json.
+   fassung „parley“ oder „film“ (= „parley Film“): Name rechts in der Blase, als Umriss (src/daten/zeichenNeu.ts);
+   die viewBox trägt den Raum des Namens mit und ist je Fassung verschieden.
+   Farbe = currentColor. Vorerst nur auf localhost eingebaut (MenuBBH, SiteFooter). */
+import { ZEICHEN_NEU } from "../daten/zeichenNeu";
+interface Props { fassung: "parley" | "film"; class?: string }
+const { fassung, class: klasse = "" } = Astro.props;
+const z = ZEICHEN_NEU[fassung];
+const titel = fassung === "film" ? "parley Film" : "parley";
+const id = `zeichen-${fassung}-${Math.random().toString(36).slice(2, 8)}`;
+---
+<svg class={klasse} viewBox={z.viewBox} role="img" aria-label={titel} xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<mask id={id} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">
+			<rect x="-10" y="-70" width="320" height="200" fill="#fff" />
+			<ellipse cx="149" cy="-1.5" rx="88.9" ry="57.7" fill="#000" />
+			<path d="M111.48 50L74.38 71.1V28.9Z" fill="#000" />
+		</mask>
+	</defs>
+	<path d="M5 0H172.8A5 5 0 0 1 177.8 5V95A5 5 0 0 1 172.8 100H5A5 5 0 0 1 0 95V5A5 5 0 0 1 5 0Z" fill="currentColor" mask={`url(#${id})`} />
+	<g fill="currentColor" set:html={z.name} />
+</svg>
