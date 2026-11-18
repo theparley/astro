@@ -381,6 +381,11 @@ ${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; 
    Schalter nur auf localhost: ?bedienung=kacheln zeigt den Stand davor (Menüpunkte in der Zeile), auch im
    Einstellungsknopf. Das Skript unten nimmt die Liste an, solange html[data-bedienung] nicht „kacheln“ ist.
    Rückweg: LISTE auf false und im Skript „liste“ auf false. */
+/* Mit der Liste startet die Startseite geschlossen: Die Klasse „offen“ steht nicht mehr im ausgelieferten Markup.
+   Vorher stand sie dort (bei den Kacheln in der Zeile war das Menü oben offen), das Skript nahm sie erst nach dem
+   Laden weg; die Liste samt Schleier war dadurch beim Laden kurz offen und klappte zu (gefunden 18.11.2026).
+   Dafür steht jetzt „bbh-menu--oben“ im Markup der Startseite: Ohne diese Klasse zeigte die Zeile bis zum ersten
+   Lauf des Skripts die kleine Kachel statt des großen Zeichens. Das Skript setzt beide Klassen danach wie bisher. */
 const LISTE = true;
 const LI = (ZEICHEN_PROBEN ? 'html:not([data-bedienung="kacheln"])' : "html:root") + " div.bbh-menu[data-bbh-menu]";
 const LISTE_STIL = `
@@ -399,7 +404,7 @@ const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<div class={`bbh-menu${startseite ? " bbh-menu--start offen" : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
+<div class={`bbh-menu${startseite ? " bbh-menu--start bbh-menu--oben" + (LISTE ? "" : " offen") : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
 	<div class="bbh-menu__cluster">
 		{LOGO_BREIT && <style is:inline set:html={LOGO_BREIT_STIL}></style>}
 		{ALLE_BREIT && <style is:inline set:html={ALLE_BREIT_STIL}></style>}
@@ -450,7 +455,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 				{ZEICHEN_NEU && ZEICHEN_PROBEN && <svg class="bbh-menu__kurz-neu bbh-menu__kurz-neu--rechts" viewBox="77.8 0 100 100" aria-hidden="true"><ellipse cx="149" cy="-1.5" rx="88.9" ry="57.7" fill="#000" /><path d="M111.48 50L74.38 71.1V28.9Z" fill="#000" /></svg>}
 			</a>
 		)}
-		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite ? "true" : "false"}>
+		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite && !LISTE ? "true" : "false"}>
 			<span></span><span></span><span></span>
 		</button>
 		{/* Namenskachel wie BBHs Wortmarke neben dem Menü, nur auf der Startseite, solange oben
