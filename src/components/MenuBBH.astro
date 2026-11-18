@@ -400,6 +400,20 @@ ${LI}.offen .bbh-menu__kachel.bbh-menu__kachel { height: var(--halb); opacity: 1
 ${LI} .bbh-menu__kachel.bbh-menu__kachel span { display: flex; align-items: center; height: var(--halb); padding: 0 12px; font-size: var(--text-md); }
 ${LI}.offen .bbh-menu__schleier { opacity: 1; pointer-events: auto; }
 `;
+/* PROBE „Listenzeilen kräftig“, NUR auf localhost (Rasul 18.11.2026, über Website · Master: „Meine Buttons sind mir,
+   glaube ich, zu filigran. Lass uns das mal bold probieren. Gib mal den Flächen jetzt wie Kontakt und Termin die
+   gleiche Höhe wie die Kacheln, die wir schon haben. Also doppelt so groß, wie sie jetzt sind.“).
+   Die Zeilen der Liste sind eine ganze Kachel hoch statt einer halben (90 unter 768 px, sonst 88), die Schrift 700.
+   Zwei Fassungen zum Vergleich: ?zeilen=gross (Schrift eine Stufe größer, --text-lg; Grundeinstellung auf localhost),
+   ?zeilen=fett (Schrift wie bisher --text-md), ?zeilen=fein (Stand auf Dev und live: halbe Höhe, 500).
+   Auch im Einstellungsknopf, Zeile „Zeilen“. Im Bau wird nichts davon ausgegeben. Rückweg: ZEILEN_PROBE auf false. */
+const ZEILEN_PROBE = import.meta.env.DEV;
+const ZK = 'html:is([data-zeilen="fett"], [data-zeilen="gross"]):not([data-bedienung="kacheln"]) div.bbh-menu[data-bbh-menu]';
+const ZEILEN_STIL = `
+${ZK}.offen .bbh-menu__kachel.bbh-menu__kachel.bbh-menu__kachel { height: var(--k); }
+${ZK} .bbh-menu__kachel.bbh-menu__kachel.bbh-menu__kachel span { height: var(--k); font-weight: 700; }
+html[data-zeilen="gross"]:not([data-bedienung="kacheln"]) div.bbh-menu[data-bbh-menu] .bbh-menu__kachel.bbh-menu__kachel.bbh-menu__kachel span { font-size: var(--text-lg); }
+`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -415,6 +429,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
 		{HANDY_MENUE && <style is:inline set:html={HANDY_MENUE_STIL}></style>}
 		{LISTE && <style is:inline set:html={LISTE_STIL}></style>}
+		{ZEILEN_PROBE && <style is:inline set:html={ZEILEN_STIL}></style>}
 		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/

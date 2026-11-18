@@ -235,6 +235,7 @@ const websiteJsonLd = JSON.stringify({
 						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
 						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");
 						document.documentElement.dataset.bedienung = liesWahl("bedienung", ["liste", "kacheln"], "liste"); // Probe Liste nach oben, siehe MenuBBH.astro (LISTE_PROBE)
+						document.documentElement.dataset.zeilen = liesWahl("zeilen", ["gross", "fett", "fein"], "gross"); // Probe Listenzeilen kräftig, siehe MenuBBH.astro (ZEILEN_PROBE)
 						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Handy-Menü: 90 = neues Maß und neue Reihenfolge (gilt im Bau), 72 = Stand davor; siehe MenuBBH.astro (HANDY_MENUE)
 					}
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
@@ -316,6 +317,12 @@ const websiteJsonLd = JSON.stringify({
 					<span>Bedienung</span>
 					<button type="button" data-allg-wahl="bedienung" data-wert="liste">Liste nach oben</button>
 					<button type="button" data-allg-wahl="bedienung" data-wert="kacheln">Kacheln in der Zeile</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Zeilen</span>
+					<button type="button" data-allg-wahl="zeilen" data-wert="gross">fett, größer</button>
+					<button type="button" data-allg-wahl="zeilen" data-wert="fett">fett</button>
+					<button type="button" data-allg-wahl="zeilen" data-wert="fein">wie bisher</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Handy</span>
@@ -545,6 +552,9 @@ const websiteJsonLd = JSON.stringify({
 	html[data-zeichen="alt"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="alt"],
 	html[data-ausschnitt="mitte"] .menu-wahl [data-allg-wahl="ausschnitt"][data-wert="mitte"],
 	html[data-kmass="90"] .menu-wahl [data-allg-wahl="kmass"][data-wert="90"],
+	html[data-zeilen="gross"] .menu-wahl [data-allg-wahl="zeilen"][data-wert="gross"],
+	html[data-zeilen="fett"] .menu-wahl [data-allg-wahl="zeilen"][data-wert="fett"],
+	html[data-zeilen="fein"] .menu-wahl [data-allg-wahl="zeilen"][data-wert="fein"],
 	html[data-bedienung="liste"] .menu-wahl [data-allg-wahl="bedienung"][data-wert="liste"],
 	html[data-bedienung="kacheln"] .menu-wahl [data-allg-wahl="bedienung"][data-wert="kacheln"],
 	html[data-kmass="72"] .menu-wahl [data-allg-wahl="kmass"][data-wert="72"],
