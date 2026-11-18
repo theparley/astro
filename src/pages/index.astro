@@ -31,10 +31,11 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 				<ExpertenAuswahl />
 				<p class="anlass__satz anlass__satz--zusammen"><span class="anlass__halb1">Alle behaupten.</span> <span class="anlass__halb2">Favoriten beweisen.</span></p>
 				<div class="t-lesen anlass__text">
-					<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war. Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
-					<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und den Menschen, der sie&nbsp;hat.</p>
-					<p>Gelebte Kompetenz lässt sich nicht mit KI generieren und schlägt jede&nbsp;Behauptung.</p>
-					<p class="t-mini grau anlass__quelle">Quelle: 6sense, B2B Buyer Experience Report 2026</p>
+					{/* Wortlaut vom Dev-Stand (Rasul 18.11.2026: „Mach mal das Update auf der Live-Seite“). */}
+					<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war.<span aria-hidden="true">*</span> Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
+					<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und vor allem die Menschen, die sie anwenden. Diese&nbsp;gelebte Kompetenz ist einmalig und lässt sich nicht mit KI&nbsp;generieren.</p>
+					<p class="anlass__schluss">Was alle nur behaupten, könnt&nbsp;ihr&nbsp;beweisen. <span class="anlass__schlusszeile">Vor&nbsp;dem&nbsp;ersten&nbsp;Kontakt.</span></p>
+					<p class="t-mini grau anlass__quelle"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 				</div>
 			</div>
 		</section>
@@ -57,6 +58,11 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 	.anlass__text p { margin: 0; }
 	.anlass__text > * + * { margin-top: 24px; }
 	.anlass__text .anlass__quelle { margin: 16px 0 0; }
+	/* Schlusssatz abgesetzt, Nachsatz in eigener Zeile, Quelle mit Abstand darunter (wie auf dem Dev-Stand) */
+	.anlass__text p.anlass__schluss { margin-top: 48px; }
+	.anlass__schlusszeile { display: block; }
+	.anlass__text .anlass__schluss + .anlass__quelle { margin-top: 32px; }
+	.nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 	/* Der Satz füllt den ersten Bildschirm, mittig */
 	.minimal__satz {
