@@ -330,15 +330,29 @@ html[data-zeichen="parley"] ${M} .bbh-menu__name.bbh-menu__name--logo { width: c
 html[data-zeichen="parley"] ${M} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { width: calc(var(--k) * ${znP.b}); height: calc(var(--k) * ${znP.h}); }
 ` : "");
 const ZEICHEN_ALT = !ZEICHEN_NEU || ZEICHEN_PROBEN; // bisheriges Zeichen mit Biss: im Bau nicht mehr ausgeliefert
-/* PROBE „Menükacheln am Handy 44 hoch“, NUR auf localhost (Rasul 18.11.2026: „Okay, wir probieren mal im ersten
-   Schritt, wie das aussieht mit 44 Pixel. Auf der Handyansicht.“). Anlass: „Termin“ und „Kontakt“ sind am Handy
-   72 × 35 px, Apple nennt 44 × 44 als Mindestmaß für eine Tippfläche. Weg: Unter 768 px geht das Kachelmaß k von 72
-   auf 90; die Menükacheln sind die halbe Kachelhöhe, (90 − 2) / 2 = 44. Erste Kachel, Hamburger und Zeichen hängen an
-   k und wachsen mit. Bewusste Abweichung von BBH (dort am Handy 72 × 36).
-   Schalter: ?kmass=90 (Grundeinstellung auf localhost) oder ?kmass=72 (wie Dev und live), auch im Einstellungsknopf.
-   Im Bau wird nichts davon ausgegeben. Rückweg: KMASS_PROBE auf false. */
-const KMASS_PROBE = import.meta.env.DEV;
-const KMASS_STIL = `@media (max-width: 767px) { html[data-kmass="90"] div.bbh-menu[data-bbh-menu] { --k: 90px; } }`;
+/* HANDY-MENÜ (unter 768 px), Rasul 18.11.2026, auf sein Wort gleich auf der Live-Seite: „Wir lassen mal die linke
+   Kachel, also wo nur das Rechtecklogo ist, weg erstmal. Und zeigen nur die beiden Menüpunkte an. … Und unser Logo
+   in der großen Variante rechts. Und dann beim Scrollen … würden wir wechseln, in diese Menü Hamburger Zeichen und in
+   unser kleines rechteckiges Logo. Dann würde halt unser Logo rechts stehen und das Menü links.“
+   - Kachelmaß k 90 statt 72: Die Menükacheln sind die halbe Kachelhöhe, (90 − 2) / 2 = 44. Anlass: Apple nennt 44 × 44
+     als Mindestmaß für eine Tippfläche, vorher 72 × 35. Bewusste Abweichung von BBH (dort am Handy 72 × 36).
+   - Oben auf der Startseite: Menükacheln links, rechts das ganze Zeichen mit Name. Keine Kachel davor.
+     Breite 90 + 2 + 2,0082 × 90 = 272,7 px (passt bei 360 px mit 43 px Rand je Seite).
+   - Eingeklappt und auf Unterseiten: Hamburger links, rechts die kleine Kachel mit dem Zeichen ohne Text (182 px).
+     Sie steht genau dort, wo das Rechteck des großen Zeichens begann, und fährt nach rechts auf, während das Zeichen
+     zugeht.
+   - Am Rechner bleibt es wie bei BBH: Kachel links, Menü daneben.
+   Offen, wenn das Menü wächst: Mit vier Punkten (zwei Spalten) wäre die Zeile oben wieder rund 365 px breit.
+   Schalter nur auf localhost: ?kmass=72 stellt Maß und Reihenfolge von vorher wieder her (auch im Einstellungsknopf).
+   Rückweg: HANDY_MENUE auf false. */
+const HANDY_MENUE = true;
+const HM = (ZEICHEN_PROBEN ? 'html:not([data-kmass="72"])' : "html:root") + " div.bbh-menu[data-bbh-menu]";
+const HM_ZU = ":is(:not(.bbh-menu--oben), .bbh-menu--eng)";
+const HANDY_MENUE_STIL = `@media (max-width: 767px) {
+${HM} { --k: 90px; }
+${HM} .bbh-menu__kurz.bbh-menu__kurz { order: 10; justify-content: flex-start; width: 0; margin-right: 0; margin-left: calc(-1 * var(--fuge)); visibility: hidden; transition: width var(--dauer) var(--kurve), margin-left var(--dauer) var(--kurve), visibility 0s linear var(--dauer); }
+${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; visibility: visible; transition-delay: 0s; }
+}`;
 const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
@@ -352,7 +366,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{KURZ && <style is:inline set:html={KURZ_STIL}></style>}
 		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
 		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
-		{KMASS_PROBE && <style is:inline set:html={KMASS_STIL}></style>}
+		{HANDY_MENUE && <style is:inline set:html={HANDY_MENUE_STIL}></style>}
 		{!LOGO_HINTEN && (
 		<a href="/" class:list={["bbh-menu__logo", LOGO_BREIT && "bbh-menu__logo--breit", LOGO_ECKE && "bbh-menu__logo--ecke"]} aria-label="parley Film, Startseite">
 			{/* Form „Rechteck mit Biss“ aus LogoBiss.astro (Generator branding/aktiv/generatoren/

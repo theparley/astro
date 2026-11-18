@@ -234,7 +234,7 @@ const websiteJsonLd = JSON.stringify({
 					if (nurLokal) {
 						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
 						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");
-						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Probe Menükacheln am Handy 44 hoch, siehe MenuBBH.astro (KMASS_PROBE)
+						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Handy-Menü: 90 = neues Maß und neue Reihenfolge (gilt im Bau), 72 = Stand davor; siehe MenuBBH.astro (HANDY_MENUE)
 					}
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
 					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
