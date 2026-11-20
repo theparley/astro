@@ -1047,12 +1047,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// IM BAU: DAS GANZE VIDEO MIT TON ÜBER STREAM (20.11.2026; Rasul über Website · Master: „Diskutieren macht auch
 			// Cloudflare. Das kodieren.“). Der Bau nimmt clip=ganz und quelle=hls (Layout.astro), also die Fassung mit Ton,
 			// zwei Knöpfen (Play/Pause, Ton) und Namensangabe. Das Video liegt nicht im Repository, nur der Umriss.
-			// Zwei Videos bei Stream: das ganze (Original 1920 × 1080, 98,87 s, mit Ton; Stufen 720/480/360/240, 1080p liefert
-			// Stream nicht aus) und das Probestück (17. bis 27. Sekunde, nur für ?clip=kurz auf localhost). Ein neues Video
+			// Zwei Videos bei Stream: das ganze (Original 1920 × 1080, 98,87 s, mit Ton; Stufen 1080/720/480/360/240) und das Probestück (17. bis 27. Sekunde, nur für ?clip=kurz auf localhost). Ein neues Video
 			// ist eine neue Kennung: nur STREAM_GANZ tauschen und den Umriss aus seinem ersten Bild neu freistellen
 			// (public/filme/nico-silhouette-0s.png, freigestellt aus dem Vorschaubild von Stream bei 0 s in 1080p; Prüfmaß der
 			// Animations-Sitzung: unter 0,5 Prozent abweichende Bildpunkte gegen das erste Videobild).
-			// Der Start liegt auf der jeweils höchsten Stufe des Manifests. Der MP4-Rückweg zeigt auf dieselbe Kennung.
+			// Der Start liegt auf der höchsten Stufe bis 720p (siehe FESTE STUFE). Der MP4-Rückweg zeigt auf dieselbe Kennung
+			// (25,35 MB, steht seit 20.11.2026).
 			// Vorgänger: 75a37c8b… (Arbeitsfassung 960 × 540, höchste Stufe 480p, von Website · Master gelöscht bzw. zu löschen).
 			const STREAM_GANZ = "c7d9bd22c883f31884d39844f8ddf84a", STREAM_KURZ = "9d3bdc861f82c0d5743c3f4dda696e29", HLS_VORRAT = 10;
 			const STREAM_BASIS = `https://customer-cmrkt3xxgowav3v1.cloudflarestream.com/${clipGanz() ? STREAM_GANZ : STREAM_KURZ}`;
@@ -1112,14 +1112,22 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				import("hls.js").then(({ default: Hls }) => {
 					if (!Hls.isSupported()) return selbst();
 					const h = new Hls({ autoStartLoad: false, maxBufferLength: HLS_VORRAT, maxMaxBufferLength: HLS_VORRAT * 1.5 }); // Vorrat 10 bis 15 s (Website · Master: enger, Vorgeladenes zählt als ausgeliefert; nicht darunter, sonst ruckelt es)
-					h.on(Hls.Events.MANIFEST_PARSED, () => { merk("manifest " + h.levels.map((l) => l.height).join("/")); h.startLevel = h.levels.length - 1; h.loadLevel = h.levels.length - 1; const los = () => { merk("laedt stuecke"); h.startLoad(0); }; if (hlsLos) los(); else hlsStarten = los; });
+					// FESTE STUFE HÖCHSTENS 720p (Entscheidung Website · Master 20.11.2026): Stream liefert das Original in fünf
+					// Stufen bis 1080p. In den ersten LAUF_SEKUNDEN gilt die höchste Stufe bis HLS_FEST_HOEHE, nicht die höchste
+					// überhaupt. Die Karte ist bei 2046 px Fensterbreite 685 px breit (1370 Bildpunkte), 720p wird um sieben Prozent
+					// hochgezogen; ein 1080er Stück ist rund doppelt so groß und ließe den Umriss auf langsamer Leitung länger
+					// stehen. „Die Dramaturgie braucht schnelle Schärfe, nicht höchste Schärfe.“ Nach LAUF_SEKUNDEN gibt die
+					// Automatik frei, dann kommt bei guter Leitung 1080p. Weg zurück: HLS_FEST_HOEHE auf 1080.
+					const HLS_FEST_HOEHE = 720;
+					const festStufe = () => { let i = 0; h.levels.forEach((l, n) => { if (l.height <= HLS_FEST_HOEHE && l.height >= h.levels[i].height) i = n; }); return i; };
+					h.on(Hls.Events.MANIFEST_PARSED, () => { merk("manifest " + h.levels.map((l) => l.height).join("/")); h.startLevel = festStufe(); h.loadLevel = festStufe(); const los = () => { merk("laedt stuecke"); h.startLoad(0); }; if (hlsLos) los(); else hlsStarten = los; });
 					// STUFE FEST, SOLANGE DIE KARTE WÄCHST (Website · Master 20.11.2026, nach dem Einwand von Animation ·
 					// Experten-Auswahl): In den ersten LAUF_SEKUNDEN des Clips bleibt die höchste Stufe festgenagelt, erst danach
 					// regelt hls.js selbst. „Im Zoom entscheidet die Schärfe über die Aussage des Bandes, beim langen Zusehen
 					// entscheidet das Durchlaufen.“ Auf langsamer Leitung kommt der Clip dann später und der Umriss steht länger;
 					// weich wird das Bild in dieser Zeit nicht. Nach „Von vorne“ gilt die feste Stufe wieder.
 					let fest = true;
-					v.addEventListener("timeupdate", () => { const soll = v.currentTime < LAUF_SEKUNDEN; if (soll !== fest && h.levels.length) { fest = soll; h.loadLevel = soll ? h.levels.length - 1 : -1; merk(soll ? "stufe fest" : "stufe frei"); } });
+					v.addEventListener("timeupdate", () => { const soll = v.currentTime < LAUF_SEKUNDEN; if (soll !== fest && h.levels.length) { fest = soll; h.loadLevel = soll ? festStufe() : -1; merk(soll ? "stufe fest" : "stufe frei"); } });
 					if (import.meta.env.DEV) { h.on(Hls.Events.FRAG_BUFFERED, (_e, d) => { if (d.frag.type === "main") merk("stueck " + d.frag.sn + " stufe " + d.frag.level); }); h.on(Hls.Events.LEVEL_SWITCHED, (_e, d) => merk("stufe " + d.level)); (fig as any).__hls = h; }
 					h.on(Hls.Events.ERROR, (_e, d) => { if (d.fatal) { h.destroy(); zurMp4(String(d.details)); } });
 					h.loadSource(STREAM_HLS); h.attachMedia(v);
