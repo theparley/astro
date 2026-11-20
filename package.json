@@ -12,7 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.2.9"
+    "astro": "^7.2.9",
+    "hls.js": "1.7.4"
   },
   "allowScripts": {
     "esbuild": true

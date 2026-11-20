@@ -107,6 +107,16 @@
 	--white-80: rgba(255, 255, 255, 0.8);
 	--white-20: rgba(255, 255, 255, 0.2);
 	--gray: #999894;
+	/* GRAU FÜR HELLEN GRUND (20.11.2026, Werte von Website · Master, Wahl Rasul am Vergleichsbild: „dritter Stand“, erste
+	   Zeile Grau 90, zweite Grau 118). --gray (#999894) ist für dunklen Grund entworfen (auf #0d0d0d 7,27 zu 1) und hat
+	   auf Weiß nur 2,89 zu 1. Für hellen Grund deshalb zwei eigene Werte im selben, leicht warmen Farbton:
+	   --grau-hell-laut  #5a5955, 7,01 zu 1 auf Weiß: hervorgehobener Kleintext
+	   --grau-hell-leise #767571, 4,61 zu 1 auf Weiß: grauer Text; heller geht nicht, 4,5 zu 1 ist die Grenze (WCAG AA)
+	   NUR AUF HELLEM GRUND VERWENDEN, auf Schwarz bleibt --gray. Bisher nur an der Namensangabe der Experten-Animation
+	   (ExpertenAuswahl.astro); die übrigen grauen Texte auf Hell (.t-klein, .grau, Fuß, Bildunterschriften, Rechtstexte,
+	   Kontakt) folgen in einem eigenen Schritt, Stelle für Stelle. */
+	--grau-hell-laut: #5a5955;
+	--grau-hell-leise: #767571;
 	--line: rgba(255, 255, 255, 0.2);
 	--signal-rot: #e74c3c;
 	--signal-gruen: #2ecc71;

@@ -243,7 +243,7 @@ const websiteJsonLd = JSON.stringify({
 					// Die folgenden Zeilen standen bis heute im Block „nur lokal“. Im Bau liest liesWahl weder Adresse noch Speicher
 					// und gibt immer die Vorgabe zurück: Der Bau bekommt also fest den Stand von localhost. Zwei Ausnahmen: figur ist
 					// im Bau fest „echt“ (auf localhost bleibt die Vorgabe „neu“, echt über ?figur=echt), clip ist im Bau fest
-					// „kurz“ (das ganze Video ist zu groß für Cloudflare Pages). Die älteren Kommentare „nur lokal“ und „Im Bau wird
+					// „ganz“ mit quelle „hls“ (das ganze Video kommt von Cloudflare Stream; bis Commit ce75e10 „kurz“ als Datei). Die älteren Kommentare „nur lokal“ und „Im Bau wird
 					// nichts gesetzt“ in diesem Abschnitt gelten damit nicht mehr. Weg zurück: die schließende Klammer wieder hinter
 					// die Zeile mit „spalten“ setzen.
 					{
@@ -258,7 +258,10 @@ const websiteJsonLd = JSON.stringify({
 						// Form der Figur in der Experten-Animation, nur lokal (Rasul 19.11.2026): ?figur=neu|alt. neu = Form B „Schulter“
 						// (Grundeinstellung auf localhost), alt = Form bis 19.11.2026. Im Bau wird nichts gesetzt, dort gilt die alte.
 						// Ganzes Video mit Ton oder der kurze Ausschnitt (Auftrag T, Rasul 19.11.2026 nachts): ?clip=ganz|kurz, nur mit ?figur=echt
-						document.documentElement.dataset.clip = nurLokal ? liesWahl("clip", ["ganz", "kurz"], "ganz") : "kurz";
+						// Quelle des Clips (20.11.2026): im Bau fest hls (Cloudflare Stream über hls.js). Auf localhost ?quelle=hls|mp4|datei, Vorgabe hls wie im
+						// Bau; datei = lokale Datei aus dem Marketing-Ordner zum Messen am Bild. Siehe ExpertenAuswahl.astro.
+						document.documentElement.dataset.quelle = nurLokal ? liesWahl("quelle", ["hls", "mp4", "datei"], "hls") : "hls";
+						document.documentElement.dataset.clip = nurLokal ? liesWahl("clip", ["ganz", "kurz"], "ganz") : "ganz"; // im Bau seit 20.11.2026 das ganze Video über Stream, vorher fest kurz
 						// Bauchbinde im Video (Auftrag Y, Rasul 20.11.2026): ?binde=kurz|immer, kurz = blendet nach 6 s aus
 						document.documentElement.dataset.binde = liesWahl("binde", ["kurz", "immer"], "kurz");
 						// Namensangabe als Zeile unter der Karte (Rasuls Wahl, 20.11.2026) oder als Bauchbinde im Bild (verworfen, Weg zurück): ?namensform=zeile|binde

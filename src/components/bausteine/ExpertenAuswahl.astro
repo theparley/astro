@@ -1004,16 +1004,67 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// mit dem Video und dem Reinzoomen. Alle behaupten, Favoriten beweisen. Das schieben wir auf Dev und wir schieben es
 			// auf live.“ Nicos Freigabe für den Clip und für Name, Auszeichnung und Zahl hat Rasul am 20.11.2026 bestätigt
 			// (in der Sitzung Website · Programmierung: Clip ins Repository und auf dev „Ja, beides“).
-			// Im Bau läuft immer der Ausschnitt (17. bis 27. Sekunde, 7,1 MB, stumm, ohne Knöpfe): Das ganze Video hat 56 MB,
-			// Cloudflare Pages nimmt höchstens 25 MiB je Datei. Ausschnitt und Umriss liegen versioniert in public/filme/.
-			// Das ganze Video mit Ton und Knöpfen bleibt auf localhost (/lab/clips, Marketing-Ordner, nicht im Repository).
+			// Zwischenstand auf dev bis 20.11.2026 (Commit ce75e10): im Bau der Ausschnitt (17. bis 27. Sekunde, 7,1 MB, stumm,
+			// ohne Knöpfe) als Datei in public/filme/, weil das ganze Video mit 56 MB über der Grenze von Cloudflare Pages
+			// (25 MiB je Datei) lag. Abgelöst durch Cloudflare Stream, siehe IM BAU: DAS GANZE VIDEO weiter unten; die MP4 und
+			// der 17-s-Umriss sind seitdem wieder aus public/filme heraus (in der Git-Historie bleiben sie).
 			// Namenszeile und Blatt gelten seit heute für beide Fassungen (vorher nur mit dem ganzen Video).
 			// Die Grundeinstellungen der Schalter setzt das Layout jetzt auch im Bau (Layout.astro, „EXPERTEN-ANIMATION, AUCH IM
 			// BAU“); die Stellen hier, die die Zoom-Fassung an import.meta.env.DEV banden (LANGSAM, mengeDoppelt, figurNeu,
 			// zoomFassung, TEXTFIGUREN, brennweite, startAnteil), sind gelöst. Weg zurück zur Fassung „geste“ im Bau: im
 			// Layout die Vorgabe von anim auf "geste" und von figur auf "alt".
-			const clipGanz = () => import.meta.env.DEV && document.documentElement.dataset.clip !== "kurz", LAUF_SEKUNDEN = 10;
-			const ECHT_UMRISS = clipGanz() ? "/lab/clips/nico-silhouette-0s.png" : "/filme/nico-silhouette-17s.png", ECHT_CLIP = clipGanz() ? "/lab/clips/nico-ganz.mp4" : "/filme/nico-17-27s.mp4", ECHT_BLENDE = 0.6;
+			const clipGanz = () => document.documentElement.dataset.clip !== "kurz", LAUF_SEKUNDEN = 10; // seit 20.11.2026 auch im Bau ganz, siehe IM BAU: DAS GANZE VIDEO
+			// QUELLE CLOUDFLARE STREAM, PROBE NUR AUF LOCALHOST (20.11.2026; Rasul über Website · Master: „Diskutieren macht auch
+			// Cloudflare. Das kodieren.“, Starter Bundle von ihm gebucht). ?quelle=lokal|stream, Vorgabe lokal. stream = das
+			// Probestück bei Stream (derselbe Ausschnitt 17. bis 27. Sekunde, von Stream auf 1,3 MB kodiert, 720p), als MP4 über
+			// die Download-Adresse. Das ganze Video ist dort noch nicht hochgeladen; sobald es da ist, wird nur STREAM_CLIP
+			// getauscht (und der Umriss auf den der Sekunde 0). Im Bau wirkt der Schalter nicht, dort bleibt /filme/.
+			// GEMESSEN in Chrome (20.11.2026): Mit crossOrigin="anonymous" lädt die MP4 NICHT (Fehler 4). Grund: Die
+			// Download-Adresse antwortet mit 302, und diese Weiterleitung trägt kein access-control-allow-origin (erst das Ziel
+			// trägt es). Ohne crossOrigin lädt sie in 151 ms, spielt, springt in 19 ms und lässt sich zeichnen; die Zeichenfläche
+			// ist danach aber nicht mehr auslesbar (getImageData: SecurityError). Die Animation braucht das Auslesen nicht (nur
+			// die Messhaken auf localhost, und der Umriss wird auf einer eigenen kleinen Fläche geprüft, deshalb bleibt der
+			// Umriss eine eigene Datei von der Seite selbst). Also: Stream-MP4 ohne crossOrigin. Wer am Bild messen will, misst
+			// mit ?quelle=lokal. Der Weg mit lesbarer Fläche wäre HLS über hls.js (75 bis 101 KB), siehe Website · Master.
+			// HLS ÜBER hls.js STATT MP4 (20.11.2026, Entscheidung Website · Master nach dem Einwand von Animation · Experten-Auswahl:
+			// „Ohne crossorigin verlieren wir das Messen am Bild, und daran hängt fast alles, was wir in diesem Band belegt
+			// haben.“). Mit hls.js kommt das Bild über eine blob:-Quelle der eigenen Seite, die Zeichenfläche bleibt auslesbar.
+			// Gemessen in Chrome am Probestück, außerhalb der Animation: getImageData liefert Werte; Start bis laufendes Bild
+			// 60 ms (MP4 100 ms); erstes Laden kalt 1576 ms (MP4 211 ms, aber auf schon warmer Verbindung, nicht sauber
+			// vergleichbar). Das Laden beginnt mit dem Start der Animation, der Clip wird erst 5 bis 6 s später gebraucht.
+			// ?quelle=lokal|hls|mp4 (nur localhost; ein gemerktes „stream“ aus der ersten Probe wirkt wie hls). Die MP4 bleibt
+			// als Rückweg und fängt auch einen Fehler von hls.js ab. Der Wechsel der Quelle ist STREAM_GANZ, eine Stelle.
+			// Wo hls.js nicht läuft, spielt der Browser HLS selbst (crossOrigin gesetzt, das Manifest trägt die Freigabe;
+			// in Safari NICHT GEPRÜFT), siehe echtClipLaden. hls.js kommt aus npm (feste Fassung im Lock-File, von der eigenen Adresse ausgeliefert)
+			// und wird erst nachgeladen, wenn es gebraucht wird (dynamischer Import).
+			// Volle Fassung, nicht „light“: Stream legt den Ton in eine eigene Spur (EXT-X-MEDIA TYPE=AUDIO), die leichte
+			// Fassung kann solche Spuren nicht.
+			// Stufenwahl: Start auf der höchsten Stufe (720p), weil der erste Augenblick des Clips der empfindlichste ist (aus
+			// dem Umriss wird ein Mensch) und der Vorlauf die Zeit dafür gibt; danach passt hls.js selbst an. Kein
+			// capLevelToPlayerSize: Das video-Element hängt nicht im Dokument und hat keine Größe, die Deckelung nähme die
+			// kleinste Stufe. Über 720p liefert Stream hier ohnehin nichts. Vorgeladen werden höchstens HLS_VORRAT Sekunden,
+			// weil bei Stream auch Vorgeladenes als ausgelieferte Minuten zählt (Hinweis Website · Master).
+			// IM BAU: DAS GANZE VIDEO MIT TON ÜBER STREAM (20.11.2026; Rasul über Website · Master: „Diskutieren macht auch
+			// Cloudflare. Das kodieren.“). Der Bau nimmt clip=ganz und quelle=hls (Layout.astro), also die Fassung mit Ton,
+			// zwei Knöpfen (Play/Pause, Ton) und Namensangabe. Das Video liegt nicht im Repository, nur der Umriss.
+			// Zwei Videos bei Stream: das ganze (Original 1920 × 1080, 98,87 s, mit Ton; Stufen 720/480/360/240, 1080p liefert
+			// Stream nicht aus) und das Probestück (17. bis 27. Sekunde, nur für ?clip=kurz auf localhost). Ein neues Video
+			// ist eine neue Kennung: nur STREAM_GANZ tauschen und den Umriss aus seinem ersten Bild neu freistellen
+			// (public/filme/nico-silhouette-0s.png, freigestellt aus dem Vorschaubild von Stream bei 0 s in 1080p; Prüfmaß der
+			// Animations-Sitzung: unter 0,5 Prozent abweichende Bildpunkte gegen das erste Videobild).
+			// Der Start liegt auf der jeweils höchsten Stufe des Manifests. Der MP4-Rückweg zeigt auf dieselbe Kennung.
+			// Vorgänger: 75a37c8b… (Arbeitsfassung 960 × 540, höchste Stufe 480p, von Website · Master gelöscht bzw. zu löschen).
+			const STREAM_GANZ = "c7d9bd22c883f31884d39844f8ddf84a", STREAM_KURZ = "9d3bdc861f82c0d5743c3f4dda696e29", HLS_VORRAT = 10;
+			const STREAM_BASIS = `https://customer-cmrkt3xxgowav3v1.cloudflarestream.com/${clipGanz() ? STREAM_GANZ : STREAM_KURZ}`;
+			const STREAM_HLS = `${STREAM_BASIS}/manifest/video.m3u8`, STREAM_CLIP = `${STREAM_BASIS}/downloads/default.mp4`;
+			// ?quelle=hls|mp4|datei (Adresse nur auf localhost; im Bau fest hls). datei = die lokale Datei aus dem
+			// Marketing-Ordner (/lab/clips, nicht im Bau), gleicher Ursprung, zum Messen am Bild auch mit der MP4-Kette.
+			// Alles andere, auch ein früher gemerktes „lokal“ oder „stream“, gilt als hls, damit ein alter Wert in einem
+			// Browser nicht einen Stand vorspiegelt, den es im Bau nicht gibt.
+			const quelle = (): "datei" | "hls" | "mp4" => { const q = document.documentElement.dataset.quelle; return q === "datei" ? "datei" : q === "mp4" ? "mp4" : "hls"; };
+			const quelleStream = () => quelle() !== "datei";
+			// Der Umriss bleibt immer eine Datei der Seite selbst (er wird auf einer eigenen Fläche ausgelesen, siehe umrissLaden)
+			const ECHT_UMRISS = clipGanz() ? "/filme/nico-silhouette-0s.png" : "/lab/clips/nico-silhouette-17s.png", ECHT_CLIP = quelleStream() ? STREAM_CLIP : clipGanz() ? "/lab/clips/nico-ganz.mp4" : "/lab/clips/nico-17-27s.mp4", ECHT_BLENDE = 0.6;
 			// BLENDE WÄHREND DES AUFZIEHENS (Rasul 19.11.2026 abends: „Also ich finde es saugut.“ und: „Die Feinheit wäre noch,
 			// dass der Videobeweis beim Großziehen überblendet und das Video startet, nicht erst wenn es fertig ist.“): In
 			// „kombimitte“ beginnt der Clip zu laufen und einzublenden, sobald ECHT_AB der Geste vorbei ist, und ist mit dem
@@ -1029,10 +1080,51 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// verspätet anlaufen (gemessen rund 7 s, in demselben Lauf wartete ein Abruf eines anderen Videos der Seite 15 s auf
 			// Antwort). Der Entwicklungsserver bedient nur wenige Verbindungen zugleich, die Videos der Seite stehen sich im Weg.
 			// Auf einem echten Server dürfte das nicht auftreten; BELEGT IST DAS NICHT.
-			const echtClipLaden = () => {
+			// VORBEREITEN UND ABSPIELEN GETRENNT (20.11.2026, Vorschlag Animation · Experten-Auswahl): Kommt das Band auf eine
+			// Fensterhöhe heran, werden hls.js und das Manifest schon geholt (echtClipLaden(true), Zuhörer „nah“ unten);
+			// die Videostücke selbst erst mit dem Start der Animation. Gerechnet für eine langsame Leitung (200 KB/s) brauchen
+			// Bibliothek, Manifest und erstes Stück zusammen rund 5 s, das Fenster bis zum Clip sind 5,5 s; so entsteht
+			// Reserve. Wer nie in die Nähe des Bandes kommt, lädt weiter nichts. Gilt nur für die Quelle hls.
+			// NOCH NICHT GEBAUTER HEBEL für den Fall ohne Vorlauf (Website · Master 20.11.2026; Seite neu geladen, während das
+			// Band im Bild steht): Bibliothek und Manifest hängen nicht voneinander ab. Ein fetch auf STREAM_HLS kann zugleich
+			// mit dem import() losgehen, die Antwort liegt dann im Zwischenspeicher, wenn hls.js fragt; dasselbe für die
+			// Stufenliste. Spart ein bis zwei Umläufe, gerechnet etwa 1 s auf langsamer Leitung. Erst bauen, wenn die
+			// Drosselmessung am gebauten Stand schlechter ausfällt als gerechnet (0 bis 1 s über dem Fenster, Kipppunkt
+			// etwa 3 s); es ist der erste Hebel, vor Startstufe und Ablauf. Vorher prüfen, ob der Zwischenspeicher die
+			// Antwort wirklich wiederverwendet (Cache-Kopfzeilen von Stream, gleiche Anfrageart wie hls.js).
+			let hlsLos = false, hlsStarten: (() => void) | null = null;
+			const echtClipLaden = (nurVorbereiten = false) => {
+				if (!nurVorbereiten) { hlsLos = true; if (hlsStarten) { hlsStarten(); hlsStarten = null; } }
 				if (echt.clip) return echt.clip;
-				const v = document.createElement("video"); v.muted = true; v.playsInline = true; v.preload = clipGanz() ? "metadata" : "auto"; v.src = ECHT_CLIP;
-				echt.clip = v; return v;
+				const v = document.createElement("video"); v.muted = true; v.playsInline = true; v.preload = clipGanz() ? "metadata" : "auto";
+				echt.clip = v;
+				if (quelle() !== "hls") { v.src = ECHT_CLIP; return v; }
+				// HLS: Safari unmittelbar, sonst hls.js; scheitert es, läuft die MP4 (dann ohne crossOrigin, siehe oben)
+				const merk = (was: string) => { if (import.meta.env.DEV) ((fig as any).__hlsStand ||= []).push([Math.round(performance.now()), was]); };
+				const zurMp4 = (grund: string) => { merk("mp4 " + grund); v.removeAttribute("crossorigin"); v.src = STREAM_CLIP; v.load(); };
+				v.crossOrigin = "anonymous";
+				// hls.js HAT VORRANG VOR DEM EIGENEN HLS DES BROWSERS (gemessen 20.11.2026): Chrome meldet inzwischen selbst, HLS
+				// spielen zu können, nahm im Lauf aber die kleinste Stufe (240p) und blieb dort; die Stufe lässt sich so nicht
+				// steuern. Das eigene HLS des Browsers gilt deshalb nur, wo hls.js nicht läuft (ältere iPhones ohne
+				// Media Source). Der Preis: Auch Safari lädt hls.js.
+				const selbst = () => { if (v.canPlayType("application/vnd.apple.mpegurl")) { merk("selbst"); v.src = STREAM_HLS; } else zurMp4("kein hls"); };
+				merk("import");
+				import("hls.js").then(({ default: Hls }) => {
+					if (!Hls.isSupported()) return selbst();
+					const h = new Hls({ autoStartLoad: false, maxBufferLength: HLS_VORRAT, maxMaxBufferLength: HLS_VORRAT * 1.5 }); // Vorrat 10 bis 15 s (Website · Master: enger, Vorgeladenes zählt als ausgeliefert; nicht darunter, sonst ruckelt es)
+					h.on(Hls.Events.MANIFEST_PARSED, () => { merk("manifest " + h.levels.map((l) => l.height).join("/")); h.startLevel = h.levels.length - 1; h.loadLevel = h.levels.length - 1; const los = () => { merk("laedt stuecke"); h.startLoad(0); }; if (hlsLos) los(); else hlsStarten = los; });
+					// STUFE FEST, SOLANGE DIE KARTE WÄCHST (Website · Master 20.11.2026, nach dem Einwand von Animation ·
+					// Experten-Auswahl): In den ersten LAUF_SEKUNDEN des Clips bleibt die höchste Stufe festgenagelt, erst danach
+					// regelt hls.js selbst. „Im Zoom entscheidet die Schärfe über die Aussage des Bandes, beim langen Zusehen
+					// entscheidet das Durchlaufen.“ Auf langsamer Leitung kommt der Clip dann später und der Umriss steht länger;
+					// weich wird das Bild in dieser Zeit nicht. Nach „Von vorne“ gilt die feste Stufe wieder.
+					let fest = true;
+					v.addEventListener("timeupdate", () => { const soll = v.currentTime < LAUF_SEKUNDEN; if (soll !== fest && h.levels.length) { fest = soll; h.loadLevel = soll ? h.levels.length - 1 : -1; merk(soll ? "stufe fest" : "stufe frei"); } });
+					if (import.meta.env.DEV) { h.on(Hls.Events.FRAG_BUFFERED, (_e, d) => { if (d.frag.type === "main") merk("stueck " + d.frag.sn + " stufe " + d.frag.level); }); h.on(Hls.Events.LEVEL_SWITCHED, (_e, d) => merk("stufe " + d.level)); (fig as any).__hls = h; }
+					h.on(Hls.Events.ERROR, (_e, d) => { if (d.fatal) { h.destroy(); zurMp4(String(d.details)); } });
+					h.loadSource(STREAM_HLS); h.attachMedia(v);
+				}).catch(() => zurMp4("import"));
+				return v;
 			};
 			// TON-BEDIENUNG AUF DER KARTE (Auftrag T): ein runder Knopf unten rechts, erscheint erst, wenn der Clip läuft, zwei
 			// Zustände (stumm, laut). Dunkler Grund mit hellem Zeichen und hellem Rand, damit er auf dunklem wie hellem Videobild
@@ -1086,6 +1178,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				if (knopfTon) { const laut = !echt.clip.muted; knopfTon.innerHTML = zeichen(laut ? Z_LAUT : Z_STUMM); knopfTon.setAttribute("aria-label", laut ? "Ton ausschalten" : "Ton einschalten"); knopfTon.setAttribute("aria-pressed", String(laut)); }
 				if (knopfSpiel) { const haelt = echt.clip.paused; knopfSpiel.innerHTML = zeichen(haelt ? Z_PLAY : Z_PAUSE); knopfSpiel.setAttribute("aria-label", haelt ? "Video abspielen" : "Video anhalten"); }
 			};
+			const MIT_VORNE = import.meta.env.DEV, KNOEPFE = MIT_VORNE ? 3 : 2;
 			const tonZeigen = (da: boolean) => { if (tonKnopf) { tonKnopf.hidden = !da; tonKnopf.style.display = da ? "flex" : "none"; } };
 			if (figurEcht() && clipGanz()) {
 				const reihe = document.createElement("div"); reihe.hidden = true; reihe.className = "experten__leiste"; reihe.setAttribute("role", "group"); reihe.setAttribute("aria-label", "Video steuern");
@@ -1097,7 +1190,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					reihe.appendChild(b); return b;
 				};
 				knopfSpiel = knopf("Video anhalten", () => { const v = echt.clip!; if (v.paused) { handPause = false; v.play().catch(() => {}); } else { handPause = true; v.pause(); } });
-				knopf("Video von vorne", () => {
+				// „VON VORNE“ NUR AUF LOCALHOST (20.11.2026, Entscheidung Website · Master, Rasul informiert: ein Prüfwerkzeug, auf
+				// der Startseite lädt es dazu ein, eine Dramaturgie neu zu starten, die man gerade gesehen hat). Im Bau stehen
+				// zwei Knöpfe, Play/Pause und Ton; die Höhe des Stapels rechnet mit KNOEPFE. Weg zurück: MIT_VORNE fest auf true.
+				if (MIT_VORNE) knopf("Video von vorne", () => {
 					const v = echt.clip!; handPause = false;
 					// letztes Bild festhalten, bevor das Video springt (siehe KEIN AUFBLITZEN BEIM SPRUNG)
 					if (v.readyState >= 2 && v.videoWidth) { const c = echt.stand || document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext("2d")?.drawImage(v, 0, 0); echt.stand = c; }
@@ -1212,9 +1308,14 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					z1.style.cssText = "font-size:var(--text-sm);font-weight:500;line-height:1.25;";
 					z2.style.cssText = `font-size:var(--text-sm);font-weight:500;line-height:1.25;margin-top:2px;opacity:${BINDE_LEISE};`;
 				} else {
-					b.className = "t-mini grau experten__name";
+					// FARBE DER NAMENSANGABE (20.11.2026, Rasul am Vergleichsbild, über Website · Master): erste Zeile Grau 90, zweite
+					// Grau 118, als Werte für hellen Grund (system.css, --grau-hell-laut und --grau-hell-leise). Vorher: Klasse grau
+					// (#999894, 2,89 zu 1 auf Weiß) und die zweite Zeile mit Deckkraft BINDE_LEISE 0,8 (2,26 zu 1). Die Deckkraft ist
+					// heraus: Sie rechnet sich mit dem Grund und ist nicht nachrechenbar, sobald der Grund sich ändert. Weg zurück:
+					// className "t-mini grau experten__name", die zwei color-Zeilen streichen, z2.style.opacity = String(BINDE_LEISE).
+					b.className = "t-mini experten__name";
 					b.style.cssText = "position:absolute;margin:0;opacity:0;transition:opacity 0.8s ease;pointer-events:none;z-index:1;";
-					z2.style.opacity = String(BINDE_LEISE);
+					z1.style.color = "var(--grau-hell-laut)"; z2.style.color = "var(--grau-hell-leise)";
 				}
 				b.append(z1, z2); fig.appendChild(b); nameZeile = b;
 			}
@@ -2206,7 +2307,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
 				// Fassung „echt“: Der Clip läuft am Ende der Geste an, einmal, stumm
-				if (figurEcht() && echt.clip && !echt.spielt && uhr >= echtVon()) { echt.spielt = true; if (echt.clip.currentTime > 0.05) echt.clip.currentTime = 0; echt.clip.play().catch(() => {}); tonStand(); tonZeigen(true); } // kein Sprung auf 0, wenn der Clip schon dort steht: Der Sprung ließ den Browser das erste Bild neu holen (einmal gemessen: 4,6 s Umriss statt Video)
+				if (figurEcht() && echt.clip && !echt.spielt && uhr >= echtVon()) { echt.spielt = true; if (echt.clip.currentTime > 0.05) echt.clip.currentTime = 0; echt.clip.play().catch(() => {}); tonStand(); } // kein Sprung auf 0, wenn der Clip schon dort steht: Der Sprung ließ den Browser das erste Bild neu holen (einmal gemessen: 4,6 s Umriss statt Video)
 				// Ton-Bedienung an der unteren rechten Ecke der Karte halten (die Karte wächst in den ersten Sekunden des Clips noch)
 				// Bauchbinde: unten links an der Karte, sichtbar in den ersten BINDE_SEKUNDEN der Clipzeit (oder immer)
 				// Zeile unter der Karte: erst wenn die Karte ausgewachsen ist (Rasul 20.11.2026: „blende es erst ein, wenn das Video
@@ -2252,13 +2353,20 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					}
 					nameZeigen(echt.spielt && (bindeImmer() || echt.clip.currentTime < BINDE_SEKUNDEN));
 				}
+				// KNÖPFE ERST MIT DEM ERSTEN VIDEOBILD (20.11.2026, Website · Master: „Was beschreibt, darf vorlaufen. Was bedient,
+				// wartet auf das, was es bedient.“). Die Namensangabe erscheint an der Uhr, auch wenn das Bild noch unterwegs ist;
+				// die Knöpfe erst, wenn das Video ein Bild hat. Scheitert der Clip ganz, bleibt eine Karte mit Umriss und
+				// Namensangabe stehen und kein Videospieler ohne Video. Gefunden mit einem Video, das nie lädt (?quelle=mp4 beim
+				// ganzen Video, 404): Vorher standen die Knöpfe ab dem Startsignal auf dem Umriss. Weg zurück: tonZeigen(true)
+				// wieder in die Zeile mit play() oben.
+				if (tonKnopf && tonKnopf.hidden && echt.spielt && echt.clip && echt.clip.readyState >= 2 && !echt.clip.ended) { tonStand(); tonZeigen(true); }
 				if (tonKnopf && !tonKnopf.hidden) {
 					const k = (fig as any).__karteEcht as number[] | undefined;
 					if (k) {
 						// Maß und Abstand im Verhältnis zur Kartenbreite: wächst und wandert mit der Karte
 						// Klickfläche mindestens TON_MIN px; der Rand zur Kartenkante bleibt im Verhältnis zur Karte
 						const v = flaecheVersatz, kb = k[2] / v[2], ms = Math.max(TON_MIN / TON_FLAECHE, kb / TON_BEZUG), rand = (TON_RAND * kb) / TON_BEZUG;
-						const breit = TON_FLAECHE * ms, hoch = (3 * TON_FLAECHE + 2 * TON_LUECKE) * ms; // Stapel: eine Knopfbreite, drei Knöpfe hoch
+						const breit = TON_FLAECHE * ms, hoch = (KNOEPFE * TON_FLAECHE + (KNOEPFE - 1) * TON_LUECKE) * ms; // Stapel: eine Knopfbreite, KNOEPFE Knöpfe hoch (lokal drei, im Bau zwei)
 						tonKnopf.style.transform = `translate(${(v[0] + (k[0] + k[2]) / v[2] - rand - breit).toFixed(1)}px, ${(v[1] + (k[1] + k[3]) / v[2] - rand - hoch).toFixed(1)}px) scale(${ms.toFixed(3)})`;
 					}
 					if (echt.clip && echt.clip.ended) tonZeigen(false);
@@ -2336,6 +2444,18 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let zuletztRaus = "";
 			// Schwellen in 5-%-Schritten: Der Browser meldet sich an jeder, geprüft wird dann mit animImBild (eine Regel für
 			// beide Stellen, auch wenn die Fläche höher ist als das Fenster).
+			// „Nah“: eine Fensterhöhe vor dem Band hls.js und Manifest holen, siehe VORBEREITEN UND ABSPIELEN GETRENNT. Über das
+			// Scroll-Ereignis und nicht über einen IntersectionObserver mit rootMargin: Der griff hier nicht (gemessen
+			// 20.11.2026, Band 497 px unter dem Fensterrand, Rand 977 px, trotzdem „nicht im Bild“; vermutlich beschneidet ein
+			// Vorfahre mit overflow die Fläche, dann zählt der Rand nicht). Der Zuhörer meldet sich nach dem ersten Treffer ab.
+			if (figurEcht() && quelle() === "hls") {
+				// passiv angemeldet (bremst das Scrollen nicht) und höchstens alle 200 ms gemessen (Hinweis Website · Master: nichts bei
+				// jedem Scroll-Ereignis rechnen; die Lage einmal zu merken wäre billiger, stimmt aber nicht mehr, sobald sich
+				// darüber etwas verschiebt, etwa wenn Schriften oder Bilder nachladen)
+				let zuletzt = -1e9;
+				const nah = () => { const jetzt = performance.now(); if (jetzt - zuletzt < 200) return; zuletzt = jetzt; const r = fig.getBoundingClientRect(); if (r.top < 2 * window.innerHeight && r.bottom > -window.innerHeight) { window.removeEventListener("scroll", nah); echtClipLaden(true); } };
+				window.addEventListener("scroll", nah, { passive: true }); nah();
+			}
 			const beob = new IntersectionObserver(() => { if (!gestartet && animImBild()) spiele(); },
 				{ threshold: Array.from({ length: 21 }, (_, i) => i / 20) });
 			beob.observe(fig);

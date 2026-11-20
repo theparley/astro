@@ -568,7 +568,12 @@ const ZEIGE_BEWEISSTUECKE = true;
 						     getragen; er kann im nächsten Segment wieder aufgenommen werden. */}
 						{/* Zusatz nur für Vorleseprogramme (17.11.2026): Das Sternchen sagt Sehenden, dass die Quelle den ersten Satz meint;
 						    Hörende bekommen dasselbe als „Quelle zur Zahl 82 Prozent: …“. Sichtbar bleibt „* Quelle: …“. */}
-						<p class="t-mini grau anlass__quelle"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
+						{/* Quellenzeile im Grau für hellen Grund (20.11.2026, mit der Namensangabe der Animation; Website · Master: „Wenn die
+						     Namensangabe dort dunkler wird und die Quellenzeile im alten Grau bleibt, sieht man den Unterschied im selben
+						     Bild.“). Gleiche Schriftgröße wie die Namensangabe (18,7 px bei 2046 px), vorher 153 gegen 118 daneben.
+						     --grau-hell-leise #767571, 4,61 zu 1 auf Weiß; vorher Klasse grau (#999894, 2,89 zu 1). Weg zurück:
+						     class="t-mini grau anlass__quelle" ohne style. */}
+						<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 						{/* Verweis als BBH-Knopf B21 (Rasul 14.11.2026: „2 und 5 umsetzen“). Vorher graue Quellenzeile „Die Studien dahinter:
 						     Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)“. Ziel /belege, Seite im Aufbau. */}
 						{/* Knopf herausgenommen (Rasul 15.11.2026: „Der Button, was die Studien zeigen, kann jetzt raus.“). War:
