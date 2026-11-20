@@ -397,7 +397,14 @@ ${LI}.offen .bbh-menu__name.bbh-menu__name--logo { width: 0; margin-left: calc(-
 ${LI}.offen .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; visibility: visible; transition-delay: 0s; }
 ${LI} .bbh-menu__kachel.bbh-menu__kachel { width: 100%; height: 0; opacity: 0; transition: height var(--dauer) var(--kurve) calc(50ms * var(--i)), opacity var(--dauer) var(--kurve) calc(50ms * var(--i)); }
 ${LI}.offen .bbh-menu__kachel.bbh-menu__kachel { height: var(--halb); opacity: 1; transition-delay: calc(50ms * (var(--anzahl) - 1 - var(--i))); }
-${LI} .bbh-menu__kachel.bbh-menu__kachel span { display: flex; align-items: center; height: var(--halb); padding: 0 12px; font-size: var(--text-md); }
+/* Die Zeilen beginnen an der Kante der Burger-Striche (Rasul 20.11.2026: „Wenn ich das Menü aufklappe, stehen mir die
+   Wörter, Termin und Kontakt, ein bisschen zu weit links. Kannst du die mal an der gleichen Stelle anfangen lassen, wo
+   beim Menüknopf unten drunter die Striche anfangen?“). Die Striche sind 0,36 Kachelbreiten lang und stehen mittig in
+   der Kachel, ihre linke Kante liegt also 0,32 Kachelbreiten vom Rand (28,2 px bei 88 px, 28,8 px bei 90 px am Handy).
+   Der Einzug sitzt als Innenabstand am Text (span), die Fläche der Zeile (a) bleibt, wo sie ist. Gemessen wird am
+   offenen Menü: Dort steht der Burger als ganze Kachel direkt unter den Zeilen, linke Kante auf linker Kante.
+   Vorher: padding 0 12px. Weg zurück: wieder „padding: 0 12px“. */
+${LI} .bbh-menu__kachel.bbh-menu__kachel span { display: flex; align-items: center; height: var(--halb); padding: 0 12px 0 calc(var(--k) * 0.32); font-size: var(--text-md); }
 /* Kein Schleier (Rasul 18.11.2026: „Schleier weg.“), wie bei Zwetschke: Die Seite bleibt bei offener Liste scharf
    und bedienbar, die Liste darf beim Scrollen offen bleiben. Der Schleier war zugleich die Fläche zum Schließen;
    sie entfällt ganz (display none), damit keine unsichtbare Wand über dem Inhalt liegt, die den ersten Klick

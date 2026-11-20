@@ -220,7 +220,19 @@ const ZEIGE_BEWEISSTUECKE = true;
 					{/* Überschrift „Videobeweis“ über der Animation (Storyboard 14.11.2026; Rasul: „wir setzen ja mit der Überschrift schon ganz
 					     klar, dass es um den Videobeweis geht“, dann: „Da fehlt die Überschrift Videobeweis.“). Nur in der Textfolge „vorher“;
 					     die gleichlautende Überschrift der Kacheln darunter ist dann nur noch Sprungziel (unsichtbar). */}
-					<p class="t-abschnitt anlass__titel" id={ZEIGE_ENTWURF ? undefined : "kap-titel"}>Video&shy;beweis</p>
+					{/* „DER VIDEOBEWEIS“, DREIZEILIG, VON RASUL GEWOLLT, NICHT ZURÜCKDREHEN (19.11.2026: „Mach mal die Überschriften
+					     immer dreiteilig. Wir sagen mal, der Videobeweis, machen drei Zeilen draus.“ und, als der Artikel kurz
+					     fehlte: „Bei Videobeweis ist wieder ‚der‘ weg. Wir hatten ‚Der Videobeweis‘. Warum hast du das
+					     weggemacht?“). Umbruch DER / VIDEO- / BEWEIS.
+					     Was für diesen Abschnitt außerdem gilt: Er ist die Exposition und keine Station der Reise (Rasul
+					     19.11.2026: „Der Videobeweis hat eine andere Aufgabe. Der beschreibt nicht die Reise, der setzt die
+					     Szene für die Reise. Wir geben im Endeffekt dem Leser die Rolle des Experten, der nicht auf dem Schirm
+					     der Entscheider erscheint als Favorit.“). Er bekommt deshalb keinen Ortstitel. Daraus folgt NICHT,
+					     dass der Titel zweizeilig sein müsste; dieser Schluss stand hier am 19.11.2026 kurz und war eine
+					     Fehldeutung von Website · Master (Rasuls „Videobeweis lassen.“ antwortete auf die Frage, ob der Abschnitt
+					     den Ortstitel „Vor dem ersten Kontakt“ bekommen soll, nicht auf die Frage nach dem Artikel).
+					     Stand davor, bis 19.11.2026 (zwei Zeilen VIDEO-/BEWEIS): >Video&shy;beweis</p> */}
+					<p class="t-abschnitt anlass__titel" id={ZEIGE_ENTWURF ? undefined : "kap-titel"}>Der<br />Video&shy;beweis</p>
 					<ExpertenAuswahl />
 					{/* Wortpaar entschieden (Rasul 14.11.2026, Storyboard Variante Q): „Alles Experten. Einer beweist.“ – „Das ist die beste
 					     Variante.“ Gilt in der Textfolge „vorher“; die anderen Textfolgen behalten „Überall Experten.“ (auch die Live-Fassung).
@@ -406,7 +418,12 @@ const ZEIGE_BEWEISSTUECKE = true;
 						    branding/aktiv/PARLEY_WORDING.md, „Aufbau eines Abschnitts“). Nach dem Punkt, weil es den ganzen Satz meint.
 						    Nicht hochgestellt: Das Sternchen der Geist sitzt von sich aus oben an der Versalhöhe; als <sup> würde es
 						    noch kleiner und höher. Für Vorleseprogramme stumm (aria-hidden), die Quellenzeile selbst wird vorgelesen. */}
-						<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war.<span aria-hidden="true">*</span> Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
+						{/* Zwei Absätze statt einem (Rasul 19.11.2026: „Wir machen mal aus dem Satz, mit Videobeweisen landet ihr, einen neuen
+						     Absatz.“). Wortlaut, Sternchen und geschütztes Leerzeichen unverändert. Der Befund aus der Quelle und unsere eigene
+						     Aussage stehen damit getrennt. Nur localhost, nicht hochgeladen. Weg zurück: beide Sätze wieder in ein <p>, mit
+						     einem Leerzeichen dazwischen. */}
+						<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war.<span aria-hidden="true">*</span></p>
+						<p>Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
 						{/* Zweiter Abschnitt: der Unterschied (Rasul 15.11.2026: „ein bisschen möchte ich das Bild malen, wenn jeder jetzt
 						     seinen Boliden tunen kann mit KI, dann wird wichtig, welcher Fahrer im Cockpit sitzt. Ich will aber nicht so jetzt
 						     direkt in die Rennsprache gehen. Wenn jeder seinen Feed, sein Erscheinungsbild, seinen Output, da fehlt mir noch das
@@ -500,7 +517,14 @@ const ZEIGE_BEWEISSTUECKE = true;
 						    generieren.“): greift auf den Satz davor zurück; die Anrede steht im Schlussabsatz. */}
 						<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und vor allem die Menschen, die sie&nbsp;anwenden.</p>
 						{/* Eigener Absatz (Rasul 18.11.2026: „wir machen vier Abschnitte draus“). */}
-						<p>Diese gelebte Kompetenz ist einmalig und lässt sich nicht mit KI&nbsp;generieren.</p>
+						{/* Nur lokal, noch nicht auf Dev und live (Rasul 18.11.2026 abends, über Website · Master): „Gelebte Kompetenz lässt
+						    sich nicht mit KI generieren oder von anderen kopieren. Das ist eure Beweiskraft. Vor dem ersten Kontakt.“
+						    Vorher: „Diese gelebte Kompetenz ist einmalig und lässt sich nicht mit KI generieren.“ */}
+						{/* „Genau diese“ davor, nur lokal (Rasul 18.11.2026 nachts: „Wir müssen noch was ändern an dem Text oben, und das
+						    heißt, diese gelebte Kompetenz, wir müssen nochmal klarmachen, dass wir es an dieser Stelle zusammenfassen.“).
+						    Ein Zeiger auf den Absatz davor, keine Definition; eine Definition („Beides zusammen ist …“) ist am
+						    15.11.2026 verworfen worden. */}
+						<p>Genau diese gelebte Kompetenz lässt sich nicht mit KI&nbsp;generieren oder von anderen&nbsp;kopieren.</p>
 						{/* Schlusssatz als eigener Absatz (Rasul 17.11.2026 spät: „Und ich hätte noch gern einen Schlusssatz. Wenn alle
 						    behaupten, beweisen Favoriten.“ und gleich danach: „Oder sogar: Was alle behaupten, beweisen Favoriten.“;
 						    es gilt die zweite Fassung, sie liefert das Objekt). Ringschluss zum Satzpaar über der Animation („Alle behaupten. /
@@ -520,7 +544,22 @@ const ZEIGE_BEWEISSTUECKE = true;
 						    Gegenstück zum zweizeiligen Satzpaar über der Animation. Am Rechner passte alles nur mit 13 bis 18 px Reserve
 						    in eine Zeile, je nach Browser wäre es ein- oder zweizeilig gewesen. Gebaut als Zeilenblock (span mit
 						    display block), kein br: ein Absatz, ein Satzfluss für Vorleseprogramme, der erste Satz bricht frei. */}
-						<p class="anlass__schluss">Was alle nur behaupten, könnt&nbsp;ihr&nbsp;beweisen. <span class="anlass__schlusszeile">Vor&nbsp;dem&nbsp;ersten&nbsp;Kontakt.</span></p>
+						{/* Schluss neu, nur lokal (18.11.2026 abends): „Das ist eure Beweiskraft.“ führt in den Abschnitt „Beweiskraft“.
+						    Vorher: „Was alle nur behaupten, könnt ihr beweisen.“ */}
+						{/* „Vor jedem ersten Kontakt.“, nur lokal (Rasul 18.11.2026 nachts: „Okay, dann nehmen wir vor jedem ersten
+						    Kontakt auf Localhost mit rein.“). Der Befund oben sagt „vor dem ersten Kontakt“, der Schluss „vor jedem“:
+						    eine Steigerung, so gewollt; nicht auf „dem“ angleichen. */}
+						{/* Zweite Zeile heraus, nur localhost (Rasul 19.11.2026: „Wir nehmen mal ‚vor dem ersten Kontakt‘ raus als Zeile
+						     in unserem dritten Segment.“). Seine Begründung vom selben Tag: „Jetzt ist nicht ‚vor dem ersten
+						     Kontakt‘ wichtig. Jetzt ist wichtig, dass das deine Kraft ist, um Favorit zu werden. Das muss der letzte
+						     Satz in dem Abschnitt leisten. Und der Rest hintendran macht die Reise.“
+						     Vorgeschichte: Das „jedem“ war selbst erst am 19.11.2026 nachts entschieden worden („Okay, dann nehmen
+						     wir ‚vor jedem ersten Kontakt‘ auf localhost mit rein“) und ist am selben Tag wieder herausgenommen.
+						     Der Weg zurück, im Wortlaut (zweite Zeile als Block im selben Absatz, direkt hinter „Beweiskraft. “):
+						     <span class="anlass__schlusszeile">Vor&nbsp;jedem&nbsp;ersten&nbsp;Kontakt.</span>
+						     OFFEN, NOCH NICHT GEBAUT: Als Ersatz liegt „Sie macht euch zum Favoriten.“ vor, von Rasul noch nicht
+						     entschieden. Der Platz der zweiten Zeile ist dafür frei. */}
+						<p class="anlass__schluss">Das ist eure&nbsp;Beweiskraft.</p>
 						{/* Dritter Abschnitt: Überleitung, und hier steht das Skalieren (Rasul 15.11.2026: „skalieren machen wir nicht bei dem
 						     Thema KI rein, das ist Quatsch. Das machen wir rein, dass wir Video mit Video die Qualität von einem echten Gespräch
 						     skalieren können“). War: „Beweisen lässt sich Expertise am besten im Gespräch. Genau das filmen wir.“ */}
@@ -826,6 +865,226 @@ const ZEIGE_BEWEISSTUECKE = true;
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__text { grid-row: 4; }
 	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__quelle { grid-row: 5; }
 	:global(html[data-textfolge="ohne"] #kap-titel:not(.anlass__titel)) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+	/* PROBE, KEIN BESCHLUSS: ANIMATION ZUERST, TITEL DARUNTER (Rasul 19.11.2026 abends: „Lass uns mal kurz was probieren,
+	   lass uns die Grafik, die Animation beim Videobeweis mal an erster Stelle machen und danach Titel, also Videobeweis
+	   und den zweiten Titel und den Text.“). Reihenfolge im Band jetzt: Animation, „Der Videobeweis“, „Alle behaupten.
+	   Favoriten beweisen.“, Fließtext, Quelle. Dieselbe Reihenfolge galt schon einmal am 13.11.2026 („Zurück: Animation
+	   zuerst, darunter die Überschrift dreizeilig“). Gilt für die Textfolgen „ohne“ (Grundeinstellung) und „vorher“.
+	   Abstände: Der Titel braucht oben keine Luft zum Bandrand mehr (padding-top 0, den Abstand zur Animation gibt die
+	   Lücke des Rasters); nach unten bleibt der bisherige Zuschlag zum Satz stehen.
+	   ABSTAND TITEL ZUR ANIMATION = ABSTAND OBEN (Rasul 19.11.2026 abends: „Du kannst der Videobeweis genauso nah an die
+	   Animation dran machen, wie du oben den Abstand zum anderen Segment hast.“). Gemeint ist der sichtbare Abstand,
+	   gemessen an den Köpfen, nicht an der Kante der Zeichenfläche. Maß ist das Schlussbild, weil es stehen bleibt.
+	   Gemessen 19.11.2026 im Schlussbild: Über dem obersten Kopf liegen in der Zeichnung rund 18 % der Flächenhöhe
+	   leerer Rand, unter der großen Person rund 9 % (402 px: 47 und 23 px von 263; 1440 × 780: 71 und 35 px von 390).
+	   Damit unten dieselben 18 % stehen, darf die Lücke zum Titel nur 9 % der Flächenhöhe sein. Die Flächenhöhe ist im
+	   Querformat die halbe Fensterhöhe (50vh, Grundeinstellung animhoehe 50), im Hochformat 65,41 % der Breite
+	   (ExpertenAuswahl.astro, .experten__bild); daraus die zwei Werte --luecke-titel. Der Titel bekommt einen negativen
+	   Zuschlag, der die Rasterlücke (--abstand-md) auf dieses Maß kürzt.
+	   KEIN POLSTER OBEN, IN KEINER BREITE (Website · Master 19.11.2026, nach zwei Versuchen: erst --abstand-md für
+	   alle, dann nur unter 768 px). Der Grund für die Sonderregel am Handy war ein grauer Rahmen, der an der Bandkante
+	   klebte. Den gibt es im stehenden Bild nicht: Er ist die Geste, verglimmt nach rund zwei Sekunden und reicht an
+	   beiden Breiten gleich nah an die Kante. Übrig blieb die Zahl 23 px über der Menge am Handy, und die betrifft nur
+	   das Anfangsbild. Dagegen stand etwas Dauerhaftes: Mit Polster wurde am Handy die Lücke Animation → Titel 54 px,
+	   größer als die 48 px zwischen Titel und Satz, der Titel hing dann am Satz. Ohne Polster sind es 24 px gegen
+	   48 px, der Titel gehört zur Animation wie am Schreibtisch (Bild mit Unterschrift, dann neuer Gedanke). Ein
+	   knapper Moment im Anfangsbild wiegt weniger als eine falsche Zugehörigkeit im Dauerzustand.
+	   Weg zurück zum Handy-Polster, im Wortlaut: „--polster: 0px;“ in die erste Regel hierunter, dazu
+	   „@media (max-width: 767px) { .anlass--band { --polster: var(--abstand-md); } }“, padding-top: var(--polster) am
+	   Band und „+ var(--polster)“ im margin-top des Titels.
+	   Gilt nur für die Grundeinstellung animhoehe 50; mit einer anderen Höhe aus dem Schalter stimmt der Wert im
+	   Querformat nicht mehr.
+	   Sprunganker #kap-titel bleibt am Titel (nachgesehen 19.11.2026: kein Menüpunkt und kein Link springt dorthin,
+	   der Platz im Menü ist seit 13.11.2026 leer; kommt dort wieder ein Eintrag, das Sprungziel auf den Anfang des
+	   Abschnitts legen, sonst landet man unter der Animation).
+	   DER WEG ZURÜCK: diesen Block löschen (die Regeln hierunter bis vor .anlass__eins-neu). Dann gilt wieder der Stand
+	   davor aus den Regeln weiter oben: Titel grid-row 1 mit padding-top var(--abstand-lg) und
+	   margin 0 0 calc(3rem - var(--abstand-md)), Animation grid-row 2. */
+	.anlass--band { --luecke-titel: calc(65.41vw * 0.09); }
+	@media (min-aspect-ratio: 1/1) { .anlass--band { --luecke-titel: 4.5vh; } }
+	:global(html:is([data-textfolge="ohne"], [data-textfolge="vorher"])) .anlass--band .anlass__band-innen > .anlass__titel { grid-row: 2; padding-top: 0; margin-top: calc(var(--luecke-titel) - var(--abstand-md)); }
+	:global(html:is([data-textfolge="ohne"], [data-textfolge="vorher"]) .anlass--band .anlass__band-innen > .experten) { grid-row: 1; }
+	/* PLATZ FÜR DIE NAMENSZEILE IN SCHMALEN FENSTERN (20.11.2026, Website · Programmierung, beim Prüfen des Baus bei 402 px
+	   gefunden, nicht von Rasul bestellt): Mit dem echten Clip hängt unter der Karte die zweizeilige Namenszeile. Unter
+	   1024 px steht der Titel „Der Videobeweis“ gleich unter der Animation, die Zeile lief in den Titel hinein (gemessen:
+	   Zeile endet bei 601 px, Titel beginnt davor). 48 px mehr Abstand, nur mit figur=echt und nur gestapelt. Ab 1024 px
+	   ist der Titel ausgeblendet, dort ändert sich nichts. Weg zurück: diese Regel streichen. */
+	@media (max-width: 1023px) {
+		:global(html[data-figur="echt"]:is([data-textfolge="ohne"], [data-textfolge="vorher"])) .anlass--band .anlass__band-innen > .anlass__titel { margin-top: calc(var(--luecke-titel) - var(--abstand-md) + 48px); }
+	}
+	/* PROBE, KEIN BESCHLUSS: SATZ LINKS, TEXT RECHTS (Rasul 19.11.2026 abends: „Und lass uns mal probieren, ein anderes
+	   Element von BBH zu nehmen, für unsere alle behaupten Favoriten beweisen. Lass uns mal die Variante nehmen, dass
+	   links der Text steht, der große und rechts der kleine.“). Ab 1024 px stehen „Alle behaupten. Favoriten beweisen.“
+	   und der Fließtext nebeneinander, je eine Hälfte, oben ausgerichtet; darunter gestapelt wie bisher. Nur in der
+	   Textfolge „ohne“ (Grundeinstellung), nur dort gibt es den Satz in einem Stück.
+	   Maße nach BBH (research/BBH_Website_Analyse_2026-11/B_Seitenaufbau.md): 12 Spalten ab 1024 px, je 6 Spalten
+	   links und rechts (md:col-span-6, Abschnitt 4.1); Fuge 96 px (md:gap-x-24), die BBH genau dort nimmt, wo Text
+	   neben Text steht (Work-Detail, Regel R8); oben ausgerichtet, mittig ist bei BBH die Regel für Text neben Bild (R6).
+	   Größe, Zeilenhöhe und Laufweite von Satz und Text unverändert; der Satz bricht auf halber Breite mehrzeilig.
+	   BEFUND, DEN RASUL KENNEN MUSS: Diese Nachbarschaft gibt es bei BBH als sichtbares Beispiel nicht. Belegt sind
+	   drei verwandte Fälle: Lesetext links und Faktentabelle rechts im Work-Detail (R8), Text und Bild 6/6 (R6), Titel
+	   links mit Akkordeon rechts (R10, nur im Komponenten-Code, auf keiner Seite zu sehen). Es ist also eine
+	   Übertragung des Rasters, keine Kopie eines BBH-Blocks. Das Raster selbst und die 96-px-Fuge sind belegt.
+	   Die Quelle steht im Markup im Textblock und bleibt deshalb unter dem Text in der rechten Spalte.
+	   TEILUNG NEU NACH BBH B5 „SIGNATUR-TEXT“ (Rasul 19.11.2026 abends: „Guck mal bei BBH, wie die das machen. Da ist
+	   es ziemlich hart in der Mitte geteilt und der Text ist eher linksbündig und eher zur Mitte orientiert, der kleine
+	   Text, und kann auch fast den ganzen Raum einnehmen.“ Und: „Und die Animation bleibt natürlich in der Bildmitte.“).
+	   Die Angaben an den anderen Stellen dieses Kommentars (96 px Fuge nach R8, Schwelle 1280 px) sind damit überholt: Die Fuge
+	   gehört zum Work-Detail, weil dort rechts eine Tabelle steht, kein Lesetext (Fehler in der Vorlage von Website ·
+	   Master). Richtig ist B5 von der About-Seite (B_Seitenaufbau.md, Abschnitt B5): flex flex-wrap; links
+	   w-full md:w-1/2, rechts w-full md:w-1/2 space-y-6 md:space-y-8 pt-md md:pt-xl. Daraus hier:
+	     1. Hart in der Mitte geteilt, keine Fuge; die rechte Hälfte beginnt an der Mittelachse.
+	     2. Der Text füllt seine Hälfte, linksbündig, ohne Breitengrenze (max-width none).
+	     3. Versatz des Textes nach unten: --abstand-md. Im Original steht ab 1024 px die Stufe xl (bei 1440 px rund
+	        277 px); die ist dort richtig, weil links ein klebendes Bild steht. Hier steht links Text, deshalb die
+	        kleinere Stufe.
+	     4. Absatzabstand im Text 32 px (space-y-8), vorher 24 px; der Schlusssatz geht mit, damit er weiter „wie die
+	        Absätze darüber“ steht (Rasul 18.11.2026).
+	     5. Schwelle wieder 1024 px (md bei BBH); ohne Fuge ist die Hälfte dort breit genug.
+	     6. Die Animation bleibt mittig über die ganze Breite, unverändert.
+	   Gilt für alle Stände der Probe.
+	   ZWEI STÄNDE ZUM VERGLEICHEN, nur localhost, über die Adresse (Schalter in Layout.astro, data-spalten):
+	     ?spalten=mitte      = erster Stand: Titel mittig unter der Animation, darunter Satz links, Text rechts
+	     ?spalten=titellinks = zweiter Stand (Website · Master 19.11.2026, nach dem Befund am Bild): Der Titel wandert
+	                           linksbündig in die linke Spalte über den Satz; rechts der Text über beide Zeilen.
+	     ?spalten=titelbreit = dritter Stand (Website · Master 19.11.2026): Titel in seiner Stufe über die ganze Breite,
+	                           aber linksbündig statt mittig; darunter Satz links, Text rechts wie in „mitte“.
+	                           Grund: In „titellinks“ passt der Titel in keine Hälfte (längste Zeile „BEWEIS“ 886 px
+	                           gegen 640 px Hälfte bei 1440 px, an jeder Breite rund 1,4-mal so breit), die Textspalte
+	                           wird dort 394 px schmal. Eine Stufe kleiner (2xl) ist verworfen: Das ist die Stufe des
+	                           Satzes, links stünden zwei gleich große Blöcke, der Titel wäre kein Titel mehr.
+	                           Bei BBH belegt: Abschnittstitel über einem Raster stehen in Bartle text-huge, Versalien,
+	                           links (Regel R3 in B_Seitenaufbau.md, Beispiele „Work“ und „Offices“).
+	                           WAS VERLOREN GEHT: Der Titel hängt nicht mehr auf der Mittelachse unter der Animation,
+	                           er ist dann Titel über einem Block, keine Unterschrift der Zeichnung.
+	     ?spalten=aus        = Stand davor, gestapelt
+	   Grundeinstellung der Probe: mitte. Im Bau ist data-spalten nicht gesetzt, dort greift nichts davon.
+	   Warum „titellinks“: Im ersten Stand bricht die Ausrichtung sichtbar (Titel mittig, Satz 245 px weiter links bei
+	   1440 px) und unter dem Satz bleiben links rund 450 px leer. Mit dem Titel links beginnt alles unter der Animation
+	   auf derselben Kante, die Fläche ist gefüllt, und es ist die BBH-Nachbarschaft, die es wirklich gibt: Anker links,
+	   Text rechts (R10, Titel links und Akkordeon rechts).
+	   WAS IN „titellinks“ VERLOREN GEHT: Der Titel ist dann nicht mehr die Unterschrift der Animation. Der Abstand von
+	   9 % der Flächenhöhe (Probe darüber) verliert dort seinen Sinn, weil der Titel nicht mehr mittig unter der
+	   Zeichnung hängt; er steht dort im normalen Rasterabstand. Der erste Stand behält ihn.
+	   Schwelle 1280 px statt 1024 px (Website · Master 19.11.2026): Bei 1024 px war die rechte Spalte 352 px breit, zu
+	   kurz für einen Lesetext (BBH deckelt Lesetext auf 46 Zeichen, hier lag es weit darunter). Darunter gestapelt.
+	   Die Quelle bleibt unter dem Text in der rechten Spalte: Sie belegt die 82-Prozent-Zahl, und die steht in diesem
+	   Text. Kein Markup geändert.
+	   DER WEG ZURÜCK: diesen @media-Block löschen und in Layout.astro die Zeile mit „spalten“. Stand davor: Satz und
+	   Text untereinander, mittig gesetzt, volle Breite (Satz grid-row 3, Text grid-row 4, Text höchstens 46ch breit
+	   und mittig im Band). */
+	@media (min-width: 1024px) {
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen { grid-template-columns: 1fr 1fr; column-gap: 0; align-items: start; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen > * { grid-column: 1 / -1; }
+		/* Die Animation ist ein eigener Baustein mit eigener Stilkennung; die Regel mit „> *“ erreicht sie nicht. Ohne
+		   diese Zeile stand sie nur in der linken Spalte und damit 344 px links der Bildmitte (Fehler in allen Ständen
+		   der Zweispalte vom 19.11.2026, gemessen bei 1440 px). Rasul: „Und die Animation bleibt natürlich in der
+		   Bildmitte.“ */
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"]) .anlass--band .anlass__band-innen > .experten) { grid-column: 1 / -1; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen > .anlass__satz--zusammen { grid-column: 1; grid-row: 3; margin: 0; text-align: left; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen > .anlass__text { grid-column: 2; grid-row: 3; margin: 0; max-width: none; padding-top: var(--abstand-md); }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen > .anlass__text > * + *,
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titellinks"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen > .anlass__text p.anlass__schluss { margin-top: 32px; }
+		/* Wirklich gleiche Hälften: „1fr 1fr“ gibt nach, wenn ein Inhalt breiter sein will (gemessen 19.11.2026: links
+		   720 px, rechts 656 px bei 1440 px, die Teilung lag 32 px rechts der Mitte). minmax(0, 1fr) hält die Mitte.
+		   Nicht für „titellinks“: Dort braucht der Titel mehr als die Hälfte und würde sonst in den Text ragen. */
+		:global(html[data-textfolge="ohne"]:is([data-spalten="mitte"], [data-spalten="titelbreit"])) .anlass--band .anlass__band-innen { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+		:global(html[data-textfolge="ohne"][data-spalten="titelbreit"]) .anlass--band .anlass__band-innen > .anlass__titel { text-align: left; }
+		:global(html[data-textfolge="ohne"][data-spalten="titellinks"]) .anlass--band .anlass__band-innen > .anlass__titel { grid-column: 1; margin: 0; justify-self: start; text-align: left; }
+		:global(html[data-textfolge="ohne"][data-spalten="titellinks"]) .anlass--band .anlass__band-innen > .anlass__text { grid-row: 2 / span 2; }
+		/* Die dritte Zeile nimmt die übrige Höhe des Textes auf; sonst verteilt das Raster sie auf Titel und Satz, und
+		   zwischen beiden klafft eine Lücke (gemessen 213 px bei 1440 px). */
+		:global(html[data-textfolge="ohne"][data-spalten="titellinks"]) .anlass--band .anlass__band-innen { grid-template-rows: auto auto 1fr; }
+	}
+	/* PROBE, KEIN BESCHLUSS: STAND „b6“, ANIMATION LINKS, SATZ UND TEXT RECHTS (Rasul 19.11.2026 abends: „Okay, mein
+	   Fehler, das gibt es ja tatsächlich gar nicht, was wir da bauen bei BBH. Die Aufteilung, die es dort gibt, ist mit
+	   einer Grafik auf der Seite. Dann machen wir das doch mal kleiner. Wir machen mal die Überschrift raus,
+	   Videobeweis. Wir machen mal die Animation nicht in die Mitte vom Bildschirm, sondern wir machen die links, wo wir
+	   jetzt den Text stehen haben, alle behaupten, Favoriten beweisen. Und wir nehmen die zwei kurzen Sätze über den
+	   kleinen Text auf der rechten Seite. Und es wäre entsprechend bei BBH die Nummer B6D.“).
+	   Vorlage: branding/werkstatt-seiten/bbh-abschnitte/B6D_rechner.jpg und B6D_handy.jpg im Marketing-Ordner (BBH
+	   Studios, „What we do“): links eine Zeichnung mittig in ihrer Hälfte, rechts Überschrift und Fließtext, alles
+	   senkrecht mittig.
+	   Adressen, nur localhost: ?spalten=b6 (Animation auf 60 % der linken Hälfte, wie BBHs w-3/5) und ?spalten=b6voll
+	   (Animation füllt die linke Hälfte). Die anderen Stände (mitte, titellinks, titelbreit, aus) bleiben erreichbar.
+	   ENTSCHIEDEN FÜR DIE PROBE: b6voll ist die Grundeinstellung (Rasul 19.11.2026 abends, auf die Frage nach der Größe
+	   der Animation: „Volle Hälfte.“). Wer die Seite ohne Adresszusatz öffnet, sieht diesen Stand; vorher war es
+	   „mitte“. b6 mit 60 % bleibt erreichbar, hat aber nicht gewonnen: BBHs Regel, die Grafik auf 60 % ihrer Hälfte zu
+	   setzen, gilt dort für ein einzelnes hochformatiges Objekt (das gezeichnete Schaf). Unsere Grafik ist eine Menge
+	   aus vielen kleinen Figuren und wird bei 60 % zur Punktwolke (408 × 230 px bei 1440 px; bei 1024 px nur
+	   284 × 159 px). Die Nachbarschaft von B6D ist übertragbar, diese Zahl nicht.
+	   OFFEN, NICHT GEBAUT: Der rechte Block ist höher als die Animation, über und unter ihr steht links Weiß (rund
+	   170 px bei 1440 px); bei BBH ist das Bild gleich hoch oder höher.
+	   Aufbau ab 1024 px: zwei gleiche Hälften im normalen Raster mit 16 px Spaltenabstand (site-grid, gap-x-4; keine
+	   96-px-Fuge, keine Nullfuge), senkrecht mittig (items-center), Abstand Satz zu Text 48 px (mb-12). Darunter
+	   gestapelt, Animation zuerst, wie bei B6 und wie bisher.
+	   Die Animationsfläche steht sonst randlos über die ganze Fensterbreite und nimmt ihre Höhe aus der Fensterhöhe
+	   (ExpertenAuswahl.astro). Hier bekommt sie die Breite der Spalte und die Höhe aus dem Format 16:9, für das die
+	   Zeichnung angelegt ist; das Skript bemisst die Zeichnung nach der Fläche, die es vorfindet. An
+	   ExpertenAuswahl.astro ist dafür nichts geändert.
+	   TITEL „DER VIDEOBEWEIS“ IN DIESEM STAND AUSGEBLENDET, nicht gelöscht (display: none). Er bleibt die Beschriftung
+	   des Abschnitts (aria-labelledby="kap-titel") und das Sprungziel. Weg zurück: die Regel mit .anlass__titel
+	   hierunter löschen.
+	   Polster oben im Band (--abstand-lg): Ohne Titel und ohne randlose Animation stünde der Inhalt sonst an der
+	   Oberkante; B6D hat py-lg.
+	   OFFEN, GEHÖRT ZU B6D: die dunkle Fläche (bg-off-black text-white py-lg). B6D unterscheidet sich von B6 nur darin.
+	   Rasul hat die Aufteilung beschrieben, nicht die Farbe; nicht gebaut.
+	   DER WEG ZURÜCK: diesen @media-Block löschen und in Layout.astro „b6“ und „b6voll“ aus der Liste bei „spalten“
+	   nehmen. */
+	@media (min-width: 1024px) {
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band { padding-top: var(--abstand-lg); }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; row-gap: 48px; align-items: center; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__titel { display: none; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten) { grid-column: 1; grid-row: 1 / span 2; align-self: center; justify-self: center; width: 60%; margin-left: 0; }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"] .anlass--band .anlass__band-innen > .experten) { width: 100%; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten .experten__bild) { height: auto !important; aspect-ratio: 16 / 9; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__satz--zusammen { grid-column: 2; grid-row: 1; align-self: end; margin: 0; text-align: left; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__text { grid-column: 2; grid-row: 2; align-self: start; margin: 0; max-width: none; }
+	}
+	/* PROBE: ZEICHENFLÄCHE BREITER ALS IHR PLATZ, MENGE BIS HINTER DEN TEXT (Rasul 19.11.2026 spät: „Und am Ende hätte ich
+	   gern auch noch mehr Menschen in der Breite. Das heißt, du musst schon am Anfang in der Breite auch anlegen. Dass sich
+	   das nachher mit dem Text überschneidet, ist kein Problem. Also wenn jetzt rechts die so weit rausgehen würden, dass
+	   die hinterm Text liegen.“). Nur im Stand b6voll, ab 1024 px, nur localhost (?breit=an, Grundeinstellung; ?breit=aus
+	   zeigt den Stand davor). Die Zeichenfläche ist dreimal so breit wie ihr Platz und liegt mittig darüber: Sie reicht
+	   links bis über den Bandrand (dort schneidet das Band ab) und rechts unter den Satz und den Fließtext. Die Höhe
+	   bleibt die des Platzes (16:9 der Spalte). Satz und Text liegen darüber (z-index), an ihnen ist nichts aufgehellt
+	   oder hinterlegt. Die Karte in der Mitte wächst nicht mit; das regelt ExpertenAuswahl.astro (flaecheBreit).
+	   Am Handy gibt es den Platz nicht, dort bleibt alles, wie es ist.
+	   DER WEG ZURÜCK: diesen @media-Block löschen und in Layout.astro die Zeile mit „breit“. */
+	@media (min-width: 1024px) {
+		/* KLICKBEREICH AUF DEM PLATZ, NICHT AUF DER ZEICHENFLÄCHE (Animation · Experten-Auswahl 19.11.2026): Seit die Fläche
+		   dreifach breit ist, traf ein Klick ins freie Weiß rechts neben dem Text die Fläche und startete die Animation
+		   neu. Die Zeichenfläche nimmt hier keine Klicks mehr an; der Zuhörer sitzt auf dem Platz (figure.experten, 680 px
+		   bei 1440 px Fensterbreite), dort bleibt auch der Zeiger als Hand. Am Handy ändert sich nichts, Platz und Fläche
+		   sind dort gleich breit und diese Regel greift nicht. Weg zurück: pointer-events und cursor hier streichen. */
+		/* Zeichenlast (19.11.2026): Die Fläche beginnt am linken Fensterrand und reicht rechts bis an den rechten Rand der
+		   Textspalte, statt dreifach breit und mittig zu liegen; was links über den Fensterrand ragte, war nie zu sehen.
+		   Gerechnet aus der Platzbreite (100cqw) und der Fensterbreite: Die beiden Spalten mit 16 px Abstand stehen mittig
+		   im Fenster, der Platz beginnt also bei (100vw − 200cqw − 16px) / 2. Das gilt auch in sehr breiten Fenstern, in
+		   denen der Rahmen schmaler ist als das Fenster.
+		   Zugabe unten, 90 px (Rasul 19.11.2026: „Beim Video ist der Schatten nur rechts und links, unten wirkt es
+		   abgeschnitten.“): Die Fläche ist 90 px höher als ihr Platz, damit der Schatten der Karte am Ende des Clips
+		   ausläuft; der negative Außenabstand hält den Platz und alles darunter, wo es war. Unter der Animation sind im
+		   Band rund 300 px frei, die Fläche nimmt keine Klicks an. Weg zurück: „+ 90px“ und „margin-bottom: -90px“ streichen. Ihre Höhe ist 9/16 der Platzbreite (100cqw, der Platz ist dafür ein Behälter). Stand davor,
+		   im Wortlaut: „width: 300%; max-width: none; margin-left: -100%; aspect-ratio: 48 / 9;“ ohne container-type. */
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten) { z-index: 0; cursor: pointer; container-type: inline-size; }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten .experten__bild) { pointer-events: none; }
+		/* FLÄCHE NACH OBEN HÖHER UND RECHTS BIS ZUM FENSTERRAND (Aufträge P und Q2, 19.11.2026 spät).
+		   P, Rasul: „die Männchen werden beim Drehen oben abgeschnitten. Können wir die Fläche von der Animation höher machen?
+		   Die scheint mir da begrenzt nach oben zu sein.“ Zugabe oben --zu-oben, wie unten mit negativem Außenabstand, der
+		   Platz bleibt, wo er ist; ExpertenAuswahl.astro setzt die Zeichnung um denselben Betrag nach unten (obenZu).
+		   Q2, Rasul: „ganz rechts werden die Männchen auch abgeschnitten, da geht die Animation auch nicht bis zum Bildrand.“
+		   Die Fläche ist jetzt so breit wie das Fenster (100vw) statt bis zum rechten Rand der Textspalte.
+		   Weg zurück: --zu-oben: 0px; width wieder calc(50vw + 100cqw + 8px).
+		   ZUGABE UNTEN 130 STATT 90 px (20.11.2026, mit dem gemeinsamen Blatt für Karte und Namenszeile; Rasul: „Ein Blatt“,
+		   und seine alte Meldung „unten wirkt es abgeschnitten“): Der Schatten erreichte unten nie Weiß, die Fläche endete
+		   42 px unter der Karte bei Helligkeit 240. Gemessen mit dem Blatt: Es reicht 41 bis 44 px unter den Platz, und der
+		   Schatten ist 62 px (1440 px Fensterbreite) bis 78 px (2048 px) darunter weiß. Der Maßstab der Zeichnung hängt weiter
+		   an der Höhe des Platzes, die Szene wird nicht kleiner. Weg zurück: --zu-unten: 90px. */
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten .experten__bild) { --zu-oben: 160px; --zu-unten: 130px; width: 100vw; max-width: none; margin-left: calc((200cqw + 16px - 100vw) / 2); aspect-ratio: auto; height: calc(100cqw * 9 / 16 + var(--zu-unten) + var(--zu-oben)) !important; margin-bottom: calc(-1 * var(--zu-unten)); margin-top: calc(-1 * var(--zu-oben)); }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__satz--zusammen,
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__text { position: relative; z-index: 1; }
+	}
 	.anlass__eins-neu { display: none; }
 	:global(html[data-textfolge="vorher"]) .anlass__eins-bisher { display: none; }
 	:global(html[data-textfolge="vorher"]) .anlass__eins-neu { display: inline; }
@@ -867,6 +1126,8 @@ const ZEIGE_BEWEISSTUECKE = true;
 	   die Quellenzeile nicht an ihm hängt (sie gehört zum ersten Satz, nicht zu ihm). Kein eigenes Gewicht. */
 	.anlass--band .anlass__text p.anlass__schluss { margin-top: 24px; } /* wie die Absätze darüber (Rasul 18.11.2026: „eine Zeile zu viel Abstand“); vorher 48px */
 	/* eigener Name: .anlass__nachsatz gibt es schon (alter Nachsatz unter dem Satzpaar, je nach Textfolge ausgeblendet) */
+	/* derzeit ohne Element (zweite Zeile am 19.11.2026 herausgenommen); die Regel bleibt für den Weg zurück und für
+	   den offenen Ersatzsatz stehen */
 	.anlass__schlusszeile { display: block; }
 	.anlass--band .anlass__text .anlass__schluss + .anlass__quelle { margin-top: 32px; }
 	/* Text nur für Vorleseprogramme: unsichtbar, nimmt keinen Platz, bleibt im Lesefluss */

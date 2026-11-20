@@ -68,7 +68,16 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Kürzerer Anfang probiert und verworfen (14.11.2026): 1,5 s statt 2,0 s bis zur Kamerafahrt (Geste ab 1,7 s, Text ab
 	// 1,2 s). Rasul: „Jetzt wirkt es zu hektisch. Vor der Videogeste. Es hat auch gefühlt zwei verschiedene
 	// Geschwindigkeiten. Also wir ändern erstmal nichts beim Entstehen vorher.“
-	const T_PAUSE = 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
+	// ANFANG LANGSAMER, NUR IN DEN NEUEN FASSUNGEN AUF LOCALHOST (Rasul 19.11.2026, zu Schatten und Tempo: „Ja, beides
+	// bauen“; Zahlen von Animation · Experten-Auswahl): T_PAUSE 2,8 statt 2,2 s, D_KAMERA 3,2 statt 2,6 s. Grund: Die
+	// Zeiten wurden am 14.11.2026 gegen ein dünneres Bild entschieden; jetzt erscheinen doppelt so viele Figuren in
+	// derselben Zeit und zehn statt vier weichen aus. 3,2 s ist kein neuer Wert, sondern der Stand vor der Kürzung vom
+	// 14.11. Das Spitzentempo der Fahrt sinkt von 0,58 auf 0,47 je Sekunde.
+	// LANGSAM wird einmal beim Laden gelesen (die Fassung kommt aus der Adresse, also mit einem Neuladen). Die heutige
+	// Fassung „geste“ und der Bau behalten 2,2 und 2,6 s. Weg zurück: LANGSAM fest auf false.
+	// IM BAU (20.11.2026, siehe ZOOM-FASSUNG IM BAU bei clipGanz): nicht mehr an import.meta.env.DEV gebunden.
+	const LANGSAM = ["zoom", "zoomnah", "kombi", "kombimitte"].includes(document.documentElement.dataset.anim || "");
+	const T_PAUSE = LANGSAM ? 2.8 : 2.2, D_LESEN = 0, T_TEXT = 1.6, D_FINGER = 0.4;
 	const T_PERSONEN = 1.4, T_GESTE = T_PAUSE + D_LESEN, T_AUSWAHL = T_GESTE + DAUER - 0.2, D_AUSWAHL = 1.1;
 	// Ende (Rasul 13.11.2026 abends: „die drei Personen [können] größer werden. Die Frage wäre, ob wir dann nachher nur
 	// einen zeigen. Oder ob wir einen zeigen und die anderen beiden grau machen oder blurren sogar.“). Probe mit Schalter
@@ -99,13 +108,17 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Breite des Rahmens: 21:9 (Rasul 13.11.2026 abends: „Probier mal 21 zu 9 … Wir reden ja von Film“), Schalter
 	// „Rahmen“ (html data-rahmen = 21 | 16); höchstens so breit, wie die Fläche es erlaubt (siehe rahmen()).
 	const RH = H * 0.86, CX = W / 2, CY = H / 2, T = CY - RH / 2, B = CY + RH / 2, RAD = RH * 0.05;
+	const T0 = T, B0 = B, RAD0 = RAD; // für halbweg(), das mit Versatz nach außen eigene Werte dafür bildet
 	let RW = RH * 16 / 9, L = CX - RW / 2;
 	const format = () => (document.documentElement.dataset.rahmen === "21" ? 21 / 9 : 16 / 9); // Grundeinstellung wieder 16:9
 	const G = (DICKE + LUECKE) / 2;
-	function halbweg(seite: 1 | -1) {
+	// aus = Versatz des ganzen Wegs nach außen (0 = auf dem Rahmen); Ecken laufen mit entsprechend größerem Radius mit,
+	// der Abstand zum Rahmen ist dadurch ringsum gleich
+	function halbweg(seite: 1 | -1, aus = 0) {
+		const T = T0 - aus, B = B0 + aus, RAD = RAD0 + aus;
 		const p: [number, number][] = [];
 		const x = (v: number) => CX + seite * v;
-		const kante = RW / 2;
+		const kante = RW / 2 + aus;
 		for (let v = G; v <= kante - RAD; v += 3) p.push([x(v), T]);
 		for (let a = 0; a <= 90; a += 6) { const r = a * Math.PI / 180; p.push([x(kante - RAD + Math.sin(r) * RAD), T + RAD - Math.cos(r) * RAD]); }
 		for (let y = T + RAD; y <= B - RAD; y += 3) p.push([x(kante), y]);
@@ -116,11 +129,13 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		return { p, lang, ges: lang[lang.length - 1] };
 	}
 	let WEG_R = halbweg(1), WEG_L = halbweg(-1);
+	// Weg der Striche außerhalb der Karte (siehe STRICHE AUSSERHALB DER KARTE): eine halbe Strichdicke weiter außen
+	let WEG_RA = halbweg(1, DICKE / 2), WEG_LA = halbweg(-1, DICKE / 2);
 	// textBreite: Breite der längsten Zeile der Überschrift darüber (Rasul 13.11.2026 abends: „Mach ihn so breit wie die
 	// Schrift, die oben dran ist.“); ohne Überschrift gilt das Format aus dem Schalter.
 	function rahmen(flaecheBreite: number, textBreite?: number) {
 		RW = Math.min(textBreite ?? RH * format(), flaecheBreite - 60); L = CX - RW / 2;
-		WEG_R = halbweg(1); WEG_L = halbweg(-1);
+		WEG_R = halbweg(1); WEG_L = halbweg(-1); WEG_RA = halbweg(1, DICKE / 2); WEG_LA = halbweg(-1, DICKE / 2);
 	}
 	function punkt(w: ReturnType<typeof halbweg>, s: number): [number, number] {
 		const ziel = s * w.ges; let lo = 1, hi = w.lang.length - 1; // binäre Suche statt Durchlaufen
@@ -191,7 +206,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	function kameraTiefe(Z: number, phi: number) { return kamera(0, Z, phi).zc; }
 
 	// Personen: verstreut, mit Mindestabstand; die drei der Mitte nächsten bleiben
-	interface Person { rolle?: string; spaet?: boolean; fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
+	interface Person { fuell?: boolean; weg?: boolean; fern?: boolean; breit?: boolean; weicht?: number; rolle?: string; spaet?: boolean; fx?: number; fb?: number; zcE?: number; x: number; y: number; s: number; ein: number; zx: number; zy: number; bleibt: boolean; rang: number; ebene: number; ex: number; ey: number; eg: number; z: number; wx: number; wz: number; tx: number; tz: number }
 	function personen(): Person[] {
 		const rnd = zufall(7), liste: Person[] = [];
 		let versuche = 0;
@@ -254,7 +269,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// haben, aber ohne dass sie hektisch wird“): 2,6 s statt 3,2 s, Zeitverlauf kubisch (smoothstep, Spitzentempo 1,5-fach
 	// des Mittels) statt fünfter Ordnung (smootherstep, 1,875-fach). Die schnellste Stelle bleibt damit so schnell wie
 	// vorher (1,5 / 2,6 = 0,58 gegen 1,875 / 3,2 = 0,59 je Sekunde); gekürzt wird das lange Anfahren und Auslaufen.
-	const D_KAMERA = 2.6; // Kürzung auf 2,4 verworfen (14.11.2026, siehe T_PAUSE)
+	const D_KAMERA = LANGSAM ? 3.2 : 2.6; // 3,2 s in den neuen Fassungen seit 19.11.2026, siehe LANGSAM; // Kürzung auf 2,4 verworfen (14.11.2026, siehe T_PAUSE)
 	// Kamera fährt vor der Geste los und nach ihr allein aus, gleich lang (Rasul 14.11.2026: „schöner, wenn die Kamerafahrt
 	// vorher schon leicht anfangen würde … wie wenn ich nach links gehe, dass ich vorher nach rechts mich schon ein bisschen
 	// bewege“ und „am Ende kannst du die Geste noch ein bisschen früher enden lassen … machen wir die gleiche Zeit, dass die
@@ -345,6 +360,70 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		if (document.documentElement.dataset.anfang === "alle") liste.forEach((q) => { q.ein = -1; });
 		return liste;
 	}
+	// DICHTERE, TIEFERE MENGE, NUR LOCALHOST IN DEN NEUEN FASSUNGEN (Rasul 19.11.2026 spät: „Die Anfangsanimation mit den
+	// Männchen ist ja gut, auch dass er in der Mitte so vorfährt und die anderen ausweichen. Jetzt hätte ich gern doppelt
+	// so viele Menschen. Und ich möchte, dass er ein bisschen weiter hinten ist noch und noch mehr Menschen sich auf die
+	// Seite bewegen, wenn er nach vorne kommt.“). Der Vorgang bleibt, er bewegt mehr Masse:
+	//   1. Doppelt so viele: Zu jeder Person außer den dreien vorn kommt eine zweite in ihrer Nähe (eigener Zufall, die
+	//      bisherigen Plätze bleiben genau, wo sie sind). Die Mitte vorn bleibt frei für die Fahrt und die Karte, und
+	//      niemand steht weiter außen als bisher, sonst zöge die Kamera am Ende weiter heraus.
+	//   2. Die gewählte Person startet weiter hinten (POLE_VON_Z −40 statt −180).
+	//   3. Sechs weitere stehen am Anfang in ihrem Weg und gehen zur Seite, wenn sie kommt (Feld „weicht“ = Startplatz).
+	// ?menge=einfach zeigt die Menge wie bis dahin. In „geste“ und im Bau gilt immer die einfache Menge.
+	// Weg zurück: mengeDoppelt() fest auf false.
+	// MENGE BREITER ALS IHRE FLÄCHE, BIS HINTER DEN TEXT (Rasul 19.11.2026 spät: „Und am Ende hätte ich gern auch noch mehr
+	// Menschen in der Breite. Das heißt, du musst schon am Anfang in der Breite auch anlegen. Dass sich das nachher mit dem
+	// Text überschneidet, ist kein Problem. Also wenn jetzt rechts die so weit rausgehen würden, dass die hinterm Text
+	// liegen.“). Die Zeichenfläche wird dafür per Stil breiter gemacht als ihr Platz im Layout (index.astro, ?breit=an,
+	// dreifache Breite, mittig über ihrem Platz, der Text liegt darüber). Hier:
+	//   1. flaecheBreit merkt, dass die Zeichenfläche breiter ist als ihr Platz (gesetzt in groesse()).
+	//   2. Rahmen und Kamera rechnen weiter mit der Breite des Platzes, nicht der Zeichenfläche. Die Karte in der Mitte
+	//      wächst dadurch nicht mit, nur die Menge reicht weiter.
+	//   3. Zusätzliche Personen links und rechts außerhalb der bisherigen Aufstellung (Feld „breit“), von Anfang an. Sie
+	//      zählen nicht mit, wenn die Kamera die Menge in die Breite einpasst.
+	// Am Handy und überall, wo die Fläche nicht breiter ist als ihr Platz, gibt es diese Personen nicht.
+	// Weg zurück: in index.astro den Block „ZEICHENFLÄCHE BREITER“ löschen; dann ist flaecheBreit nie wahr.
+	let flaecheBreit = false;
+	// ZEICHENLAST BEIM HINEINSCROLLEN (Animation · Experten-Auswahl 19.11.2026, gemessen mit echten Mausrad-Ereignissen in
+	// Rasuls Chrome: vier Bilder über 25 ms, längstes 38 ms; mit ?breit=aus keines über 25 ms). Die breite Fläche lag
+	// mittig über ihrem Platz, ihr linkes Drittel ragte aber über den Bandrand hinaus und war nie zu sehen. Zwei Hebel,
+	// beide ohne sichtbaren Verlust: 1. Die Fläche beginnt jetzt am Bandrand (Stil in index.astro) und ist nur noch gut
+	// doppelt so breit wie ihr Platz; die Zeichnung sitzt weiter mittig über dem Platz (mitteX statt der halben
+	// Flächenbreite). 2. Personen, die ganz außerhalb der Fläche liegen, werden nicht gezeichnet.
+	// Weg zurück: in index.astro wieder „width: 300%; margin-left: -100%; aspect-ratio: 48 / 9“; mitteX = cv.width / 2.
+	let mitteX = 0; // Mitte des Platzes auf der Zeichenfläche, in Gerätepixeln
+	// FLÄCHE NACH UNTEN HÖHER ALS IHR PLATZ (Rasul 19.11.2026, zum Schatten: „Beim Video ist der Schatten nur rechts und
+	// links, unten wirkt es abgeschnitten.“). Die Zeichenfläche bekommt per Stil unten Zugabe (index.astro), damit der
+	// Schatten auslaufen kann. Der Maßstab der Zeichnung hängt deshalb an der Höhe des PLATZES (platzHoehe), nicht mehr
+	// an der Höhe der Fläche; sonst wüchse die ganze Animation mit. Ohne Zugabe sind beide gleich, es ändert sich nichts.
+	let platzHoehe = 0; // Höhe des Platzes in Gerätepixeln
+	// FLÄCHE AUCH NACH OBEN HÖHER (Auftrag P; Rasul 19.11.2026: „die Männchen werden beim Drehen oben abgeschnitten. Können
+	// wir die Fläche von der Animation höher machen? Die scheint mir da begrenzt nach oben zu sein.“). Wie unten: Der Stil
+	// gibt der Fläche oben Zugabe (index.astro, --zu-oben), der Platz bleibt, wo er ist. obenZu = Abstand von der Oberkante
+	// der Fläche zur Oberkante des Platzes in Gerätepixeln; die Zeichnung wird um diesen Betrag nach unten gesetzt, der
+	// Maßstab hängt weiter an platzHoehe. Ohne Zugabe ist obenZu 0 und alles wie bisher. Weg zurück: in index.astro
+	// --zu-oben auf 0px.
+	let obenZu = 0;
+	// DAS GANZE BILD RÜCKT NACH LINKS (Rasul 19.11.2026 spät: „am Ende klebt mir das Video jetzt doch zu arg am Text in der
+	// Mitte. … entweder die ganze Animation ein bisschen nach links verschieben … oder wir können die Größe verändern.“).
+	// Entschieden von Animation · Experten-Auswahl: verschieben, nicht verkleinern; die Größe hat Rasul am selben Tag
+	// gegen zwei andere gewählt. Gemessen in seinem Fenster (2048 px): Lücke zum Text am Ende des Clips 85 px, links 262 px
+	// Luft; das Bild war nicht zu groß, es stand falsch. LINKS = Anteil der Platzbreite, um den die Mitte der Zeichnung
+	// nach links rückt, nur bei der breiten Fläche (dort ist links Raum bis zum Fensterrand). Weg zurück: LINKS = 0.
+	// BEGRENZT VOM SCHATTEN (Animation · Experten-Auswahl 19.11.2026): Der Schatten reicht seitlich 95 px, bis er reines
+	// Weiß ist (gemessen 190 Bildpunkte). Mit vollen 9 % blieben bei 1440 und 1024 px Fensterbreite nur 28 bis 29 px bis
+	// zum Fensterrand, der Schatten wurde dort bei rund 208 abgeschnitten, dieselbe Stufe wie zuvor unten. Die
+	// Verschiebung gilt deshalb nur, soweit links der Karte am Ende des Clips SCHATTEN_RAUM px frei bleiben. Bei 2048 px
+	// bleiben die vollen 9 %, bei 1440 und 1024 px fällt sie fast ganz weg. Weg zurück: SCHATTEN_RAUM = 0.
+	// SCHATTEN_RAUM ist ein Anteil der Kartenbreite am Ende des Clips, kein fester Wert (Animation · Experten-Auswahl
+	// 19.11.2026): Die 95 px gelten bei 685 px Karte, das sind rund 14 %. Der Schatten wird mit der Karte kleiner; ein
+	// fester Wert läse sich später als Naturkonstante und wäre in schmaleren Fenstern falsch.
+	// 0,15 statt 0,14 (Animation · Experten-Auswahl 19.11.2026): Mit 0,14 stand auf halber Kartenhöhe 253 statt 255 in
+	// der äußersten Bildspalte, der Schatten reichte gerade noch an den Fensterrand. Kein sichtbarer Fehler, aber eine
+	// Regel ohne Reserve; zwischen den gemessenen Breiten liegen viele ungemessene, und die Karte wächst im Clip weiter.
+	// Preis der Reserve: rund 1 px weniger Verschiebung.
+	const LINKS = 0.09, SCHATTEN_RAUM = 0.15;
+	const mengeDoppelt = () => ["zoom", "zoomnah", "kombi", "kombimitte"].includes(document.documentElement.dataset.anim || "") && document.documentElement.dataset.menge !== "einfach";
 	function personenFahrt(): Person[] {
 		const rnd = zufall(23), liste: Person[] = [];
 		const halb = RW / 2 - 80;
@@ -439,16 +518,97 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 		// die späten entstehen hinten an ihrem Platz, wenn die Kamera fast steht
 		reihe(12, 230, 330, halb * 0.95, 3, spaetZeit);
 		liste.slice(-12).forEach((q) => { q.spaet = true; });
+		if (mengeDoppelt()) {
+			const r2 = zufall(47), basis = liste.slice(3); // ohne die drei vorn
+			const frei = (X: number, Z: number, ab: number) => liste.every((q) => Math.hypot(q.wx - X, q.wz - Z) > ab);
+			for (const q of basis) {
+				for (let v = 0; v < 40; v++) {
+					const dx = (r2() < 0.5 ? -1 : 1) * (45 + r2() * 70), dz = (r2() - 0.5) * 90;
+					const grenze = q.ebene === 3 ? halb : 470;
+					let X = q.wx + dx; const Z = q.wz + dz;
+					if (Math.abs(X) > grenze) X = q.wx - dx;
+					if (Math.abs(X) > grenze || Z < -290) continue;
+					if (Z < -40 && Math.abs(X) < 250) continue; // Mitte vorn frei für die Fahrt und die Karte
+					if (!frei(X, Z, q.ebene === 3 ? 32 : 52)) continue;
+					const n = neu(X, Z, q.ebene, q.spaet ? q.ein + r2() * 0.2 : erscheinZeit(r2()));
+					if (q.spaet) n.spaet = true;
+					liste.push(n); break;
+				}
+			}
+			if (flaecheBreit) {
+				// außen anlegen: je Seite nahe und hintere Personen, nach außen lockerer
+				const r3 = zufall(71);
+				const lege = (n: number, xA: number, xB: number, zVon: number, zBis: number, ebene: number) => {
+					let k = 0, v = 0;
+					while (k < n && v++ < n * 40) {
+						const X = xA + r3() * (xB - xA), Z = zVon + r3() * (zBis - zVon);
+						if (!frei(X, Z, ebene === 3 ? 34 : 58)) continue;
+						const q = neu(X, Z, ebene, erscheinZeit(r3())); q.breit = true; liste.push(q); k++;
+					}
+				};
+				for (const sgn of [-1, 1]) {
+					lege(14, sgn * 640, sgn * 1250, -250, 120, 2);
+					lege(30, sgn * 620, sgn * 1400, 150, 340, 3);
+					lege(10, sgn * 1250, sgn * 1900, -200, 150, 2);
+					lege(16, sgn * 1400, sgn * 2000, 150, 340, 3);
+				}
+			}
+			// Sechs, die am Anfang im Weg stehen und zur Seite gehen: [Platz X, Tiefe Z, Startplatz X]
+			([[-275, -250, -45], [270, -235, 40], [-305, -170, -70], [295, -150, 65], [-260, -95, -35], [275, -75, 55]] as const).forEach(([X, Z, von]) => {
+				const n = neu(X + (r2() - 0.5) * 20, Z, 2, erscheinZeit(r2())); n.weicht = von; liste.push(n);
+			});
+		}
 		return uebergang(liste);
 	}
 
 	// Person in derselben Form wie die Augenzeugen-Animationen (Werkstatt augenzeugen-kacheln.js, personPfad):
 	// Kopf als Kreis, Schultern als Bogen, Maß in Neunzehnteln der Höhe. Rasul 13.11.2026: „gucken, dass die nachher
 	// zusammenpassen, was Formen, Geschwindigkeiten, Erzähltiefe angeht“.
+	// NEUE FORM DER FIGUR, Form B „Schulter“ (Rasul 19.11.2026: „Ich finde noch das Piktogramm von dem Menschen ein
+	// bisschen billig“, und auf den Vorschlag von Website · Master: „Ja, bau mal die andere Form ein.“). Maße und Gründe:
+	// research/Personen_Piktogramm_Recherche_2026-11.md im Marketing-Ordner, Abschnitt 5. Eigene Zeichnung, nichts von
+	// Apple abgepaust (die SF Symbols dürfen wir nicht verwenden, dort belegt). Drei Unterschiede zur alten Form, die sie
+	// laut Recherche billig wirken ließen: Kopf als Oval statt Kreis (Halbachsen 4,2 und 4,7, Mitte bei −5,4), Lücke zum
+	// Körper 1,6 statt 1,4, untere Ecken gerundet (Radius 1,2) statt spitz; die Schultern fallen vom Halsansatz ab,
+	// Flanke bei ±8,7. Einheiten wie bisher: Höhe 19, Ursprung in der Personenmitte, y nach unten.
+	// Gilt auf localhost in allen Fassungen, auch in „geste“. Die alte Form bleibt über ?figur=alt erreichbar (Schalter in
+	// Layout.astro) und gilt weiter im Bau, bis Rasul die neue für dev oder live freigibt.
+	// NICHT GEBAUT: der weiße Trennrand bei Überlappung (Punkt 6 der Recherche), eigene Sache.
+	// DER WEG ZURÜCK: figurNeu() fest auf false; dann zeichnen zeichnePerson und zeichneVerwandlung wie bis 19.11.2026.
+	const figurNeu = () => document.documentElement.dataset.figur !== "alt";
+	// GERADER ABSCHLUSS FÜR DIE FIGUR IN DER KARTE (Website · Master 19.11.2026, nach dem Befund am Schlussbild): Es
+	// sind nicht zwei Formen aus Laune, sondern zwei Situationen. Wer frei auf Weiß steht, hat runde Schultern und einen
+	// eigenen Umriss. Wer in einem Bildrahmen sitzt, wird vom Rahmen angeschnitten, so wie jedes Porträt unten vom
+	// Bildrand beschnitten wird; dafür nennt die Recherche Form C „Anschnitt“ (Abschnitt 5). Mit den runden Ecken blieb
+	// in der Karte links und rechts unten je ein blauer Zwickel, die Figur stand wie auf runden Füßen auf der Kante.
+	// Genommen ist nicht Form C ganz, sondern Form B mit geradem unterem Abschluss: Kopf und Schultern bleiben in Menge
+	// und Karte dieselben, beim Heranzoomen springt nichts. Verworfen: die Figur tiefer setzen (schöbe die Augen unter
+	// die Drittellinie). geradeUnten wird nur für die Person in der Karte gesetzt (neue Fassungen, siehe zeichneBild).
+	// Weg zurück: geradeUnten nie auf true setzen.
+	let geradeUnten = false;
+	// Körper der Form B: ox, oy = Oberkante Mitte des Körpers (Halsansatz), e = Länge einer Einheit
+	function koerperB(ctx: CanvasRenderingContext2D, ox: number, oy: number, e: number) {
+		const X = (v: number) => ox + v * e, Y = (v: number) => oy + (v - 0.9) * e;
+		ctx.moveTo(X(-8.7), Y(7.8));
+		ctx.bezierCurveTo(X(-8.7), Y(5.3), X(-7.9), Y(3.9), X(-6.3), Y(3));
+		ctx.bezierCurveTo(X(-4.4), Y(1.9), X(-2.4), Y(0.9), X(0), Y(0.9));
+		ctx.bezierCurveTo(X(2.4), Y(0.9), X(4.4), Y(1.9), X(6.3), Y(3));
+		ctx.bezierCurveTo(X(7.9), Y(3.9), X(8.7), Y(5.3), X(8.7), Y(7.8));
+		if (geradeUnten) { ctx.lineTo(X(8.7), Y(9)); ctx.lineTo(X(-8.7), Y(9)); ctx.closePath(); return; }
+		ctx.quadraticCurveTo(X(8.7), Y(9), X(7.5), Y(9));
+		ctx.lineTo(X(-7.5), Y(9));
+		ctx.quadraticCurveTo(X(-8.7), Y(9), X(-8.7), Y(7.8));
+		ctx.closePath();
+	}
 	function zeichnePerson(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, alpha: number, farbe = "#000") {
 		if (alpha <= 0) return;
 		const u = (64 * g) / 19;
 		ctx.globalAlpha = alpha; ctx.fillStyle = farbe; ctx.beginPath();
+		if (figurNeu()) {
+			ctx.moveTo(x + 4.2 * u, y - 5.4 * u); ctx.ellipse(x, y - 5.4 * u, 4.2 * u, 4.7 * u, 0, 0, Math.PI * 2);
+			koerperB(ctx, x, y + 0.9 * u, u);
+			ctx.fill(); ctx.globalAlpha = 1; return;
+		}
 		ctx.moveTo(x + 4.6 * u, y - 5.5 * u); ctx.arc(x, y - 5.5 * u, 4.6 * u, 0, Math.PI * 2);
 		ctx.moveTo(x - 8.5 * u, y + 9 * u);
 		ctx.bezierCurveTo(x - 8.5 * u, y + 2.5 * u, x - 4.5 * u, y + 0.5 * u, x, y + 0.5 * u);
@@ -527,6 +687,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// ergab je Durchlauf 74 Bilder mit zusammen 129 MB (gemessen 14.11.2026); iPhones begrenzen den Speicher aller
 			// Zeichenflächen (Code-Prüfung M1, research/Experten_Animation_Code_Pruefung_2026-11.md im Marketing-Ordner).
 			// Jetzt höchstens 6 Bildpixel Unschärfe je Bild, beim Zeichnen weich hochskaliert.
+			// Form B (19.11.2026) ist 17,4 statt 17 Einheiten breit, je Seite 0,67 Bildeinheiten mehr. Die Bildgröße bleibt:
+			// Diese Bilder entstehen nur ab Stufe 0,5, der Rand (pad) ist dann mindestens 3,5 Einheiten und nimmt das auf.
 			const auf = Math.min(AUF, Math.max(0.1, 6 / Math.max(0.5, stufe)));
 			const pad = stufe * 3 + 2, w = (57.3 + 2 * pad) * auf, h = (64.4 + 2 * pad) * auf;
 			const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h));
@@ -545,6 +707,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	function zeichneVerwandlung(ctx: CanvasRenderingContext2D, x: number, fy: number, y: number, g: number, alpha: number, p: number) {
 		if (alpha <= 0) return;
 		const u = (64 * g) / 19, rPunkt = 13 * g;
+		if (figurNeu()) {
+			// Form B: Der Punkt wird zum Oval (Halbachsen wachsen getrennt auf 4,2 und 4,7), der Körper wächst aus dem
+			// Halsansatz, bei p = 1 genau wie in zeichnePerson (Lücke 1,6).
+			const ky = fy + (y - 5.4 * u - fy) * p, rx = rPunkt + (4.2 * u - rPunkt) * p, ry = rPunkt + (4.7 * u - rPunkt) * p;
+			ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.beginPath();
+			ctx.moveTo(x + rx, ky); ctx.ellipse(x, ky, rx, ry, 0, 0, Math.PI * 2);
+			if (p > 0.02) koerperB(ctx, x, ky + ry + 1.6 * u * p, u * p);
+			ctx.fill(); ctx.globalAlpha = 1; return;
+		}
 		const kx = x, ky = fy + (y - 5.5 * u - fy) * p, kr = rPunkt + (4.6 * u - rPunkt) * p;
 		ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.beginPath();
 		ctx.moveTo(kx + kr, ky); ctx.arc(kx, ky, kr, 0, Math.PI * 2);
@@ -628,6 +799,484 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const glut = document.createElement("canvas"), gctx = glut.getContext("2d", { willReadFrequently: !FILTER_GEHT })!;
 			let leuteFlach = personen(), leuteRaum = personenKamera();
 			let leute = leuteFlach, zoomEnde = 1, hebung = 0;
+			// ZWEITE FASSUNG „zoom“, NUR LOCALHOST, über ?anim=zoom (Schalter in Layout.astro, html[data-anim]). Die heutige
+			// Fassung (?anim=geste) bleibt unverändert und Grundeinstellung; im Bau ist data-anim nicht gesetzt, dort läuft
+			// immer die heutige. Rasul 19.11.2026 abends: „Lass uns mal noch eine Variante von der Animation machen, ohne dass
+			// wir sie jetzt kaputt machen. Wenn der Kamerablick der Blick vom Entscheider ist, dann passiert der Videobeweis,
+			// diese Handanimation, die wir mit diesen Strichen umsetzen, eigentlich am Ende und nicht während der Bewegung. Und
+			// eigentlich muss ihm dieses eine Männchen vorher auffallen, dass er hinzoomt. Und wenn unser Mensch im Vergleich
+			// zu allen anderen einen Videobeweis hat, dann könnte er doch auf einer 16 zu 9 Fläche sitzen. Und die können wir
+			// doch mal so blau machen wie unsere Hintergründe. Dann wird die Kamerafahrt erstmal ohne die Animation von unserem
+			// Videobeweis. Wenn das Männchen reingezoomt hat, dann kommt am Ende diese Bewegung des Videobeweises. Probiert es
+			// mal als Alternative zu bauen.“
+			// Erzähllogik: Die Kamera ist der Blick des Entscheiders. Einer fällt ihm auf, WEIL er einen Videobeweis hat (blaue
+			// Fläche im Videoformat), deshalb zoomt er hin; erst wenn er angekommen ist, kommt die Geste.
+			// Was die Fassung ändert, alles an „zoomFassung()“ gebunden:
+			//   1. Die vordere Person sitzt von Anfang an vor einer blauen 16:9-Fläche (BLAU, das Blau der Sprechblasen aus
+			//      BlasenVideo.astro, keine andere Farbe). Die Fläche hängt an der Person und wächst mit ihr; im Schlussbild
+			//      deckt sie sich genau mit dem Rahmen der Geste (L, T, RW, RH), also mit dem Bildausschnitt der Kamera.
+			//   2. Die Kamerafahrt läuft ohne Geste.
+			//   3. Die Geste beginnt erst nach dem Stillstand der Kamera (T_GESTE_ZOOM), eigene Dauer DAUER wie beim Ende ohne
+			//      Kamera, auf dem Rahmen, der dann der Rand der blauen Fläche ist.
+			//   4. Die Spur wird dunkel aufgetragen (multiply) statt per „difference“: Auf Blau ergäbe difference Orange.
+			// DER WEG ZURÜCK: alle Stellen mit „zoomFassung()“ in dieser Datei und die Zeile mit „anim“ in Layout.astro
+			// löschen; an der heutigen Abfolge ist nichts verändert, jede Stelle fällt ohne den Schalter auf den alten Wert.
+			const zoomFassung = () => ["zoom", "zoomnah", "kombi", "kombimitte"].includes(document.documentElement.dataset.anim || "");
+			// ZWEITE ENDGRÖSSE „zoomnah“ (?anim=zoomnah; Website · Master 19.11.2026 nach dem Ansehen im Lauf): In „zoom“ füllt
+			// die blaue Karte am Ende 584 von 680 px der Fläche und verdeckt die Menge fast ganz; das Schlussbild liest sich
+			// wie ein Platzhalterbild, nicht mehr als „einer von allen“. Das stärkste Bild war die Mitte der Fahrt, als die
+			// Karte rund halb so breit wie die Fläche war (gemessen 330 × 185 px) und mitten in der unscharfen Menge stand.
+			// „zoomnah“ endet deshalb früher: Die Fahrt dauert gleich lang und läuft gleich weich aus, legt aber nur den Teil
+			// des Wegs zurück, an dem die Person NAH_ANTEIL ihrer Endgröße hat (eNah, gerechnet in groesse()). Die Geste
+			// zeichnet den Rand der kleineren Karte nach (Rahmen im selben Maß verkleinert und an der Person festgemacht).
+			const zoomNah = () => zoomFassung() && ["zoomnah", "kombi", "kombimitte"].includes(document.documentElement.dataset.anim || "");
+			// DRITTE FASSUNG „kombi“ (?anim=kombi; Rasul 19.11.2026 abends: „Könnt ihr mir sogar eine Kombi vorstellen, dass das
+			// nahe geht und dann die Animation vom Videobeweis es noch größer macht?“): Die Fahrt endet wie in „zoomnah“, die
+			// Karte steht in der Menge. Dann setzt die Geste an, und WÄHREND sie den Rahmen zeichnet, fährt die Kamera den Rest
+			// des Wegs, die Karte wächst auf die Größe von „zoom“. Erzählerisch: Der Videobeweis vergrößert den Experten.
+			// Rahmen und Karte kommen zusammen an: Beide hängen am selben Verlauf (kubisch über die Dauer der Geste), der
+			// Rahmen ist an der Karte festgemacht und wächst mit ihr. Das Wachsen folgt der sichtbaren Größe im Verhältnis
+			// (wie ein Zoom), nicht dem Weg, sonst würde es am Ende schlagartig schnell. Der mittige Ausschnitt von „zoomnah“
+			// geht dabei in den Ausschnitt von „zoom“ über. Weg zurück: „kombi“ aus den beiden Listen hier und aus Layout.astro.
+			const kombi = () => zoomFassung() && (document.documentElement.dataset.anim === "kombi" || document.documentElement.dataset.anim === "kombimitte");
+			// VIERTE FASSUNG „kombimitte“ (?anim=kombimitte; Website · Master 19.11.2026): wie „kombi“, aber die Geste macht
+			// das Bild nur so groß, dass die Menge nicht verschwindet. „kombi“ hat den starken Moment in der Mitte und endet
+			// im schwachen Bild von „zoom“ (Karte 585 von 680 px, Menge nur als Saum). Hier endet das Wachsen bei einer
+			// Kartenbreite von ?ziel=… px (bezogen auf 680 px Fläche, Grundeinstellung 460), der Ausschnitt bleibt mittig.
+			// Der Schalter ?ziel ist zum Suchen der Grenze da, bis zu der neben der Karte noch erkennbare Figuren stehen.
+			const kombiZiel = () => (document.documentElement.dataset.anim === "kombimitte" ? Math.min(680, Math.max(340, Number(document.documentElement.dataset.ziel) || 520)) / 584 : 1);
+			// ZIEL BIS ZUR VOLLEN FLÄCHE (Rasul 19.11.2026 abends, nachdem er die Fassung mit dem echten Clip gesehen hat: „Und in
+			// der Variante, die du mir gezeigt hast, könnte das Video noch größer werden. Das nimmt noch nicht die volle Größe
+			// ein, wie wir es eigentlich haben.“). Die 460 px kamen aus der Überlegung, dass neben der Karte noch eine erkennbare
+			// Figur stehen soll. Die gilt nicht mehr, sobald am Ende ein echtes Video läuft: Dann ist das Video der Inhalt des
+			// Schlussbilds, den Vergleich „einer von allen“ erzählt die Fahrt davor (Website · Master). ?ziel=460|520|585|640|680,
+			// Grundeinstellung 680 = volle Breite der Fläche. Über 584 px (das Ende der Kamerafahrt, der Rahmen der Geste) hinaus
+			// fährt die Kamera nicht weiter; das Bild wird dann als Ganzes um die Bildmitte vergrößert (zusatzZiel, in
+			// zeichneBild als zZoom). Karte, Schatten und Geste werden an den Rändern der Fläche abgeschnitten, das ist die
+			// Stelle, an der der nächste Schritt ansetzt (Karte ragt über den Rahmen hinaus). Nur „kombimitte“.
+			// ENTSCHIEDEN: GRUNDEINSTELLUNG 585, NICHT 680 (Rasul 19.11.2026, nach dem Vergleich: „Wenn ich jetzt den Vergleich
+			// sehe, finde ich es sogar gut, wenn es nicht so groß gezogen ist, weil dann habe ich noch die Geschichte im
+			// Hintergrund mit den Menschen.“). Der Grund trägt mehr als die Zahl: Das Schlussbild soll nicht nur das Video
+			// zeigen, sondern das Video IN der Menge. Die Menschen ringsum sind nicht Rest, sondern die Geschichte, aus der der
+			// eine herauskommt. Daran hängt auch, dass Schatten und Rahmen der Geste im Bild bleiben; bei 680 fallen beide weg.
+			// 585 ist das Ende der Kamerafahrt (Rahmen der Geste), es wird nichts zusätzlich vergrößert. Die anderen Werte
+			// bleiben über ?ziel erreichbar. Offen bei Rasul: Bei 585 bleiben links und rechts je 47 px mit Säumen der Menge,
+			// eine ganze erkennbare Figur steht erst bis 490 px daneben (mit Luft bei 460).
+			// NOCH EINE STUFE KLEINER, 520 (Rasul 19.11.2026 spät: „Okay, das ist mir jetzt fast zu groß am Ende, mach es noch
+			// ein bisschen kleiner.“). Grundeinstellung in Layout.astro und im Rückfallwert oben; 585 bleibt über ?ziel=585.
+			// WÄHREND DER CLIP LÄUFT, WÄCHST DAS BILD MINIMAL WEITER (Rasul, im selben Satz: „Und dann lassen wir, solange das
+			// Video läuft, wir werden es länger laufen lassen, vielleicht sogar den ganzen Clip. Und in der Zeit machen wir es
+			// einfach minimal größer.“): Vom Ende der Geste bis zum Ende des Clips wächst das ganze Bild gleichmäßig um
+			// LAUF_ZUWACHS (kein Nachfedern, keine Kurve), bei Ziel 520 also auf rund 564 px Kartenbreite. Es soll beim Zusehen
+			// nicht als Bewegung auffallen, am Ende aber sichtbar größer sein. Nur in „kombimitte“ mit ?figur=echt. Der Clip
+			// läuft ganz (10 s, mehr ist nicht exportiert). Weg zurück: LAUF_ZUWACHS auf 0.
+			// Weg zurück: Grundeinstellung in Layout.astro und hier wieder 460, Math.min wieder 584.
+			let zusatzZiel = 1;
+			const LAUF_ZUWACHS = 0.085;
+			// DREI ÄNDERUNGEN AN DEN NEUEN FASSUNGEN (Rasul 19.11.2026 abends), nicht in „geste“:
+			// 1. Geste länger, dabei entsteht ein Schatten: „Ich finde, jetzt könnte die Animation für die Videobeweisbewegung
+			//    länger gehen. Und währenddessen könnte auch ein Schatten entstehen. Das probieren wir mal dezent, nicht zu
+			//    viel, aber dass der sozusagen, wie wenn es aus dem Bildschirm jetzt raus poppen würde und einen kleinen
+			//    Schatten ablegt.“ DAUER_ZOOM statt DAUER (1,6 s). Der Schatten wächst mit der Geste und bleibt danach stehen;
+			//    er wird nur außerhalb der Karte gezeichnet, damit er durch das durchsichtige Blau nicht ins Bild fällt.
+			//    Maße im Verhältnis zur Karte (SCH_…), Weg zurück: SCH_DECK auf 0 und DAUER_ZOOM auf DAUER.
+			// 2. Blau etwas durchsichtig: „Und mach mal das Blau ein bisschen durchsichtig.“ Die Menge hinter der Karte
+			//    scheint durch. Deckkraft über ?deck=… (Prozent) zum Vergleichen; Weg zurück: BLAU_DECK() fest auf 1.
+			// 3. Figur dockt unten an: „Und das schwarze Männchen hat unten einen blauen Rand. Mach mal das Männchen ein
+			//    bisschen größer, dass es unten am Bildschirmrand andockt, dass unten drunter kein Blau ist.“ Die Figur endete
+			//    bisher an der Innenkante des Strichs (halbe Strichdicke über der Kartenkante, Regel vom 14.11.2026 für die
+			//    heutige Fassung, in der es keine Karte gibt). In den neuen Fassungen wird sie um ANDOCK größer gezeichnet,
+			//    um die Augenlinie herum: Die Augen bleiben auf der oberen Drittellinie, die Unterkante sitzt auf der
+			//    Kartenkante. Weg zurück: ANDOCK auf 1.
+			const DAUER_ZOOM = 2.2;
+			// Kurve des Aufziehens (Rasul 19.11.2026, siehe ÜBERGANG FAHRT ZU GESTE WEICHER): Die Geste lief auf „kubisch“,
+			// ihr höchstes Tempo lag über dem der Fahrt; nach dem Stillstand kam etwas, das schneller war als alles davor.
+			// „zug“ ist die flachere Kurve „glatt“: weiches Anlaufen und Auslaufen, niedrigere Spitze. Eine Mischung halb
+			// kubisch, halb glatt war noch schneller als die Fahrt (gemessen 7,3 gegen 6,5 je Bild).
+			// Finger, Wachsen, Schatten und Deckkraft hängen alle an dieser einen Kurve. Weg zurück: zug = kubisch.
+			const zug = (x: number) => glatt(x);
+			// SCHATTEN GRÖSSER (Rasul 19.11.2026: „Ja, beides bauen“; Zahlen von Animation · Experten-Auswahl): Weichheit 110
+			// statt 46, Versatz 44 statt 16, Deckkraft 0,22 statt 0,30. Grund: Bei Rasuls Platz von 824 px waren 46 und 16
+			// Einheiten rund 24 px Weichheit und 8 px Versatz auf einer Karte von 685 px, also 3,5 und 1,2 % der Kartenbreite;
+			// die Karte las sich wie aufgeklebt. Neu rund 58 und 23 px, 8,5 und 3,4 %. Die Deckkraft geht herunter, weil ein
+			// großer weicher Schatten bei 30 % schwer wird. Rasul hat das als Überzug über sein Schlussbild gesehen und so
+			// freigegeben. Der Schatten wird weiter nur außerhalb der Karte gezeichnet.
+			// Weg zurück: SCH_DECK = 0.3, SCH_WEICH = 46, SCH_AB = 16.
+			const SCH_DECK = 0.22, SCH_WEICH = 110, SCH_AB = 44; // Schatten: Deckkraft, Weichheit und Versatz nach unten (Einheiten der Fläche 1600 × 900, mal Kartenmaß)
+			const BLAU_DECK = () => Math.min(1, Math.max(0.3, (Number(document.documentElement.dataset.deck) || 70) / 100)); // Grundeinstellung 70 seit 19.11.2026 abends (vorher 85): Der Wert gilt nur noch vor dem Videobeweis; dort darf die Menge deutlich durchscheinen, und 30 Punkte bis 100 machen das Festwerden sichtbar, 15 waren zu wenig
+			const ANDOCK = ((2 / 3) * RH) / ((2 / 3) * RH - DICKE / 2); // 1,034: Unterkante von der Innenkante des Strichs auf die Kartenkante
+			let eZiel = 1, versatzZiel = 0; // Ende des Wachsens in „kombi“ und „kombimitte“ und der Ausschnitt dort
+			// HERVORHEBUNG OHNE FARBE (?marke=blau|invers|rahmen; Rasul 19.11.2026 abends: „Aber ich finde Blau eigentlich
+			// jetzt nicht schlecht, man wird es ja überall bei unseren Videos drin haben. Andererseits betonieren wir dann auch
+			// ein bisschen, dass die Leute meinen, sie müssen einen blauen Hintergrund machen. Überlegt mal eine andere
+			// Variante, wie wir es hervorheben können, die im Schwarz-Weiß bleibt.“). Gilt in allen neuen Fassungen:
+			//   blau   = blaue Fläche (Grundeinstellung der neuen Fassungen)
+			//   invers = schwarze Fläche, die Person darin weiß ausgespart (Vorschlag Website · Master). Die Spur der Geste
+			//            wird dort per Umkehrfarbe aufgetragen wie in der heutigen Fassung: dunkel auf Weiß, hell auf Schwarz.
+			//   rahmen = nur eine Kontur im Format 16:9, die Fläche bleibt weiß
+			// ENTSCHIEDEN: BLAU BLEIBT (Rasul 19.11.2026 abends: „Oder aber wir lassen das Blau einfach, weil wir erklären
+			// wollen. Und machen das als eine der ersten Fragen bei Q&A: Muss der Hintergrund immer blau sein?“ Und danach:
+			// „Beziehungsweise werden nach und nach noch Videos zeigen mit anderen Hintergründen. Dann wird klar, dass es nur
+			// ein Stilmittel ist.“). invers und rahmen bleiben als Rückweg erreichbar, werden aber nicht weitergebaut. Gründe:
+			//   rahmen: mit 33 % Schwärzung in der Fläche (Anfang, 57 × 32 px) zu leise für den Moment, in dem das Auge den
+			//           einen finden muss (Messung Website · Programmierung).
+			//   invers: fällt am Anfang weniger auf als Blau, obwohl die Zahl höher ist (81 % gegen 70 %). Die Menge besteht
+			//           selbst aus dunkelgrauen Figuren, ein schwarzer Block ist dort mehr vom Gleichen; Blau ist das einzige
+			//           Andere im Bild. Dazu wirkt das Schlussbild sehr schwer, ein großer schwarzer Block mit weißer Figur
+			//           (Befund Website · Master am Bild).
+			//   Inhaltlich (Rasul): Die Sorge, Blau werde als Vorschrift gelesen, löst sich, sobald auf der Seite Videos mit
+			//           anderen Hintergründen stehen. Dann ist es sichtbar ein Stilmittel.
+			// Weg zurück: die Stellen mit „marke()“ löschen, dann gilt überall Blau.
+			const marke = () => document.documentElement.dataset.marke || "blau";
+			const NAH_ANTEIL = 340 / 584; // Karte am Ende rund halb so breit wie die Fläche (340 statt 584 von 680 px)
+			let eNah = 1; // Anteil des Kamerawegs, bei dem die Fahrt in „zoomnah“ endet
+			// Ausschnitt in „zoomnah“ mittig (Website · Master 19.11.2026): Ohne das saß die Karte im Schlussbild tief (137 px
+			// Weiß darüber, 56 px darunter bei 383 px Flächenhöhe), weil der Bildausschnitt für das Ende der vollen Fahrt
+			// eingerichtet ist. versatzNah verschiebt den Ausschnitt zusätzlich, wachsend mit der Fahrt, so dass die Mitte der
+			// Karte am Ende auf der Mitte der Fläche liegt. Weg zurück: versatzNah fest auf 0 lassen.
+			let versatzNah = 0;
+			let blauJetzt: { x: number; y: number; m: number } | null = null; // Lage der blauen Fläche im letzten Bild, für die Geste
+			const BLAU = "#0379A6";
+			// BLAU DER KARTE AN DAS VIDEO ANGLEICHEN (?kartenblau=blase|ton|verlauf; der Name „kachel“ ist von der Menükachel belegt; Rasul 19.11.2026 abends: „Und du könntest das
+			// Blau, was die Kachel hat, am Anfang angleichen an das Blau, das das Video hat.“). Gemessen von Website · Master im
+			// Clip bei 17,0 s, nur die Hintergrundfläche: Mittelwert #165184, hellere Hälfte #19609B, im Lichtkegel #3477AA, in
+			// den dunklen Ecken #1A3854. Der Videogrund ist dunkler und blauer als das Blau der Sprechblasen (#0379A6).
+			//   blase   = wie bis dahin, #0379A6
+			//   ton     = ein Ton, #19609B
+			//   verlauf = Grundeinstellung: derselbe Verlauf wie im Video, rund, hell hinter dem Kopf (Mitte bei 50 % der
+			//             Breite und 45 % der Höhe) und dunkel in den Ecken. Dann geht die Karte beim Einblenden in das Video
+			//             über, statt die Farbe zu wechseln.
+			// ENTSCHIEDEN: VERLAUF (Rasul 19.11.2026 abends, auf die Frage nach dem Kartenblau: „Verlauf wie im Video.“). „ton“
+			// und „blase“ bleiben als Rückwege erreichbar. Grund aus der Messung am selben Abend: Am Übergang sind Karte und
+			// Video beim Verlauf kaum zu unterscheiden, es wechselt nichts die Farbe, nur das Gesicht erscheint. Der Preis ist
+			// der leisere Anfang; der trägt, weil alle drei gleich dunkel sind (Schwärzung 65 bis 67 % bei 57 px Kartenbreite)
+			// und die Karte in jeder Fassung sofort zu finden ist.
+			// Die Deckkraft während der Fahrt (?deck) gilt für alle drei. Weg zurück: kachel() fest auf "blase".
+			const kachel = () => document.documentElement.dataset.kartenblau || "blase";
+			const kartenFarbe = (c2: CanvasRenderingContext2D, kx: number, ky: number, w: number, h: number): string | CanvasGradient => {
+				const k = kachel();
+				if (k === "ton") return "#19609B";
+				if (k !== "verlauf") return BLAU;
+				const mx = kx + w * 0.5, my = ky + h * 0.45, r = Math.hypot(w * 0.5, h * 0.55);
+				const g = c2.createRadialGradient(mx, my, 0, mx, my, r);
+				g.addColorStop(0, "#3477AA"); g.addColorStop(0.5, "#19609B"); g.addColorStop(1, "#1A3854");
+				return g;
+			};
+			const T_GESTE_ALT = T_GESTE; // der heutige Beginn der Geste; in zeichneBild heißt der jeweils gültige Wert T_GESTE
+			const T_GESTE_ZOOM = T_KAMERA + D_KAMERA + 0.2; // kurzer Halt nach dem Ankommen, dann setzen die Finger auf
+			let zielVorne: { x: number; y: number; g: number } | null = null; // Lage der vorderen Person im Schlussbild
+			// FASSUNG „echt“, NUR LOCALHOST (?figur=echt; Rasul 19.11.2026 abends: „Wir würden ihn schwarz machen, und wenn wir
+			// mit dem Video reinzoomen, würde man ihn erkennen und das Video würde abspielen. Das können wir später mit einem
+			// Video von mir ersetzen, aber jetzt würde ich mal den Nico nehmen.“ Zum blauen Hintergrund des Clips: „Ja, als
+			// Platzhalter.“). In der Karte steht statt der gezeichneten Figur der Umriss eines echten Menschen; am Ende der
+			// Geste läuft der Clip in der Karte an, stumm, einmal, und der Umriss blendet aus: Aus dem Umriss wird das Bild.
+			// Die Menge wird weiter gezeichnet, nur die eine Person in der Karte ist ausgetauscht.
+			// KUNDENMATERIAL: Die beiden Dateien liegen im Marketing-Ordner (branding/werkstatt-seiten/clips/, dort von Git
+			// ausgeschlossen) und kommen nur über den Werkstatt-Pfad des lokalen Servers. Nicht ins Repository kopieren, nicht
+			// hochladen. Im Bau ist die Fassung nicht erreichbar.
+			// Umriss und Clip füllen beide die ganze Karte (Clip und Karte sind 16:9), deshalb sind sie deckungsgleich, wenn
+			// der Umriss aus dem ersten Bild des Clips stammt. Die Augen liegen damit dort, wo sie im Clip liegen, nicht auf
+			// der Drittellinie der gezeichneten Figur.
+			// Laden: Der Umriss (PNG, klein) beim Aufbau, der Clip (7,5 MB) erst, wenn die Animation startet. Fehlt das PNG
+			// oder ist es leer, bleibt die gezeichnete Figur. (Ein Notweg, der den Umriss aus dem ersten Bild des Clips gewann,
+			// stand am 19.11.2026 kurz, weil das PNG zuerst leer geliefert war; er lud den Clip schon beim Aufbau und ist mit
+			// der richtigen Datei wieder heraus.)
+			// Bildausschnitt: Der Clip bleibt, wie er gedreht ist, nichts verschieben, nichts beschneiden (Website · Master
+			// 19.11.2026): Die Drittellinie war die Regel für die gezeichnete Figur; ein echtes Bild bringt seinen Ausschnitt mit.
+			// Der blaue Hintergrund des Clips ist unser eigenes Studio (Rasul), die dunklen Ecken beim Einblenden sind unser Look.
+			// DER WEG ZURÜCK: alle Stellen mit „echt“ in dieser Datei und „echt“ aus der Liste bei „figur“ in Layout.astro.
+			// DAS GANZE VIDEO MIT TON (?clip=ganz|kurz, nur localhost, Grundeinstellung ganz; Auftrag T; Rasul 19.11.2026 nachts:
+			// „jetzt fehlt mir noch die Variante, wo wir das ganze Video abspielen und wo ich den Ton an- und ausschalten kann.“).
+			//   ganz: nico-ganz.mp4 (98,9 s, 960 × 540, mit Ton, 56 MB) läuft von Sekunde 0, Umriss aus seinem ersten Bild
+			//         (nico-silhouette-0s.png, freigestellt über den Blau-Schlüssel wie der bisherige).
+			//   kurz: der Zehn-Sekunden-Ausschnitt ab 17 s wie bis dahin, ohne Ton-Bedienung.
+			// Ein Video mit Ton darf nicht von allein starten: Es läuft stumm an, der Ton kommt nur durch einen Klick auf die
+			// Bedienung unten rechts auf der Karte (tonKnopf). Die Choreografie endet wie bisher, danach läuft nur das Video
+			// weiter; kein Zurücksetzen am Ende, keine Schleife. Das Weiterwachsen der Karte bleibt auf die ersten 10 s des Clips
+			// gedeckelt (LAUF_SEKUNDEN). Geladen wird mit preload „metadata“; das erste Bild kommt mit dem Start der Animation
+			// (Sprung auf 0), der Rest beim Abspielen im Strom. Beide Dateien sind Kundenmaterial im Marketing-Ordner
+			// (/lab/clips), nicht im Repository, nicht hochladen; für dev und live bleibt es beim Stand ohne Clip, die Rechte
+			// sind offen. Weg zurück: ?clip=kurz oder clipGanz() fest auf false.
+			// OFFEN, NICHT HOCHLADEN: 56 MB sind nur für localhost tragbar (die Datei kommt vom eigenen Rechner). Sie ist mit
+			// dem macOS-Bordmittel avconvert erzeugt, das nur feste Voreinstellungen kennt. Für dev oder live bräuchte es einen
+			// Encoder mit Bitratensteuerung und vorher die Freigabe des Clips (Animation · Experten-Auswahl 19.11.2026 nachts).
+			// ZOOM-FASSUNG IM BAU (20.11.2026). Rasul im Website · Master: „Die Version fürs dritte Segment, also die Animation
+			// mit dem Video und dem Reinzoomen. Alle behaupten, Favoriten beweisen. Das schieben wir auf Dev und wir schieben es
+			// auf live.“ Nicos Freigabe für den Clip und für Name, Auszeichnung und Zahl hat Rasul am 20.11.2026 bestätigt
+			// (in der Sitzung Website · Programmierung: Clip ins Repository und auf dev „Ja, beides“).
+			// Im Bau läuft immer der Ausschnitt (17. bis 27. Sekunde, 7,1 MB, stumm, ohne Knöpfe): Das ganze Video hat 56 MB,
+			// Cloudflare Pages nimmt höchstens 25 MiB je Datei. Ausschnitt und Umriss liegen versioniert in public/filme/.
+			// Das ganze Video mit Ton und Knöpfen bleibt auf localhost (/lab/clips, Marketing-Ordner, nicht im Repository).
+			// Namenszeile und Blatt gelten seit heute für beide Fassungen (vorher nur mit dem ganzen Video).
+			// Die Grundeinstellungen der Schalter setzt das Layout jetzt auch im Bau (Layout.astro, „EXPERTEN-ANIMATION, AUCH IM
+			// BAU“); die Stellen hier, die die Zoom-Fassung an import.meta.env.DEV banden (LANGSAM, mengeDoppelt, figurNeu,
+			// zoomFassung, TEXTFIGUREN, brennweite, startAnteil), sind gelöst. Weg zurück zur Fassung „geste“ im Bau: im
+			// Layout die Vorgabe von anim auf "geste" und von figur auf "alt".
+			const clipGanz = () => import.meta.env.DEV && document.documentElement.dataset.clip !== "kurz", LAUF_SEKUNDEN = 10;
+			const ECHT_UMRISS = clipGanz() ? "/lab/clips/nico-silhouette-0s.png" : "/filme/nico-silhouette-17s.png", ECHT_CLIP = clipGanz() ? "/lab/clips/nico-ganz.mp4" : "/filme/nico-17-27s.mp4", ECHT_BLENDE = 0.6;
+			// BLENDE WÄHREND DES AUFZIEHENS (Rasul 19.11.2026 abends: „Also ich finde es saugut.“ und: „Die Feinheit wäre noch,
+			// dass der Videobeweis beim Großziehen überblendet und das Video startet, nicht erst wenn es fertig ist.“): In
+			// „kombimitte“ beginnt der Clip zu laufen und einzublenden, sobald ECHT_AB der Geste vorbei ist, und ist mit dem
+			// Ende der Geste ganz da. Größe, Deckkraft, Schatten und Blende kommen zusammen an. Nicht ab dem ersten Wachsen,
+			// sonst wäre das Video da, bevor der Beweis geführt ist. In den anderen Fassungen (zoom, zoomnah, kombi) bleibt es
+			// wie zuerst gebaut: Blende ECHT_BLENDE Sekunden lang nach dem Ende der Geste.
+			const ECHT_AB = 0.35; // Anteil der Gestendauer, ab dem die Blende läuft (0,77 s nach dem Aufsetzen bei 2,2 s)
+			const echtVon = () => T_GESTE_ZOOM + (document.documentElement.dataset.anim === "kombimitte" ? ECHT_AB : 1) * DAUER_ZOOM;
+			const echtLang = () => (document.documentElement.dataset.anim === "kombimitte" ? (1 - ECHT_AB) * DAUER_ZOOM : ECHT_BLENDE);
+			const figurEcht = () => zoomFassung() && document.documentElement.dataset.figur === "echt";
+			const echt: { umriss: HTMLCanvasElement | null; clip: HTMLVideoElement | null; spielt: boolean; stand: HTMLCanvasElement | null } = { umriss: null, clip: null, spielt: false, stand: null };
+			// LOCALHOST-BEFUND, KEIN FEHLER DER SEITE (20.11.2026): Gleich nach dem Laden der Seite kann der Clip einige Sekunden
+			// verspätet anlaufen (gemessen rund 7 s, in demselben Lauf wartete ein Abruf eines anderen Videos der Seite 15 s auf
+			// Antwort). Der Entwicklungsserver bedient nur wenige Verbindungen zugleich, die Videos der Seite stehen sich im Weg.
+			// Auf einem echten Server dürfte das nicht auftreten; BELEGT IST DAS NICHT.
+			const echtClipLaden = () => {
+				if (echt.clip) return echt.clip;
+				const v = document.createElement("video"); v.muted = true; v.playsInline = true; v.preload = clipGanz() ? "metadata" : "auto"; v.src = ECHT_CLIP;
+				echt.clip = v; return v;
+			};
+			// TON-BEDIENUNG AUF DER KARTE (Auftrag T): ein runder Knopf unten rechts, erscheint erst, wenn der Clip läuft, zwei
+			// Zustände (stumm, laut). Dunkler Grund mit hellem Zeichen und hellem Rand, damit er auf dunklem wie hellem Videobild
+			// lesbar ist. Er wird hier im Skript gebaut (nur localhost, nur Fassung echt mit clip=ganz), der Bau enthält ihn nicht.
+			// Der Klick bleibt beim Knopf (stopPropagation), sonst startete der Klickbereich der Animation darunter neu.
+			// DEFEKT BEHOBEN (Auftrag U1; Rasul 20.11.2026: „bei der Variante erscheint jetzt ein Punkt am Anfang der Animation, der
+			// dann weggeht.“): Der Knopf war von Anfang an zu sehen und stand fest. Ursache: Der Stil setzte display: grid, und
+			// das schlägt das Attribut hidden; versteckt war er nur dem Namen nach, und weil er als versteckt galt, wurde er auch
+			// nicht an die Karte gesetzt. Jetzt schaltet tonZeigen display selbst (none oder grid). Geprüft war vorher nur, ob
+			// der Knopf da ist, nicht ab wann und wo.
+			// NUR WEISS UND GRÖSSER (Auftrag U2; Rasul: „die Piktogramme sollten einfach nur weiß sein. Das wirkt besser auf dem
+			// blauen Hintergrund. Und die dürfen größer sein.“): keine dunkle Scheibe mehr, Klickfläche TON_FLAECHE 56 px, Zeichen
+			// 30 px, dazu ein weicher Schatten ohne Versatz (6 px, 40 % Schwarz), damit Weiß auch über hellen Stellen lesbar
+			// bleibt. Gemessen unter dem Zeichen über das ganze Video (99 Bilder, eines je Sekunde): Helligkeit fast durchgehend
+			// 56 von 255 (das dunkle Blau), hellste Stelle bei 64 s mit im Mittel 122 und einzelnen Punkten bis 190.
+			// Größe und Abstand hängen an der Kartenbreite (TON_BEZUG 684 px = Karte am Ende bei 2048 px Fensterbreite): Der
+			// Knopf wächst mit der Karte mit. Weg zurück zum Stand davor: dunkle Scheibe 40 px mit hellem Rand (Auftrag T).
+			// DREI KNÖPFE STATT EINEM (Auftrag V; Rasul 20.11.2026: „Lass uns drei Knöpfe machen. Der eine ist der Ton, der andere
+			// ist Playpause und der dritte ist von vorne.“). Von links nach rechts: Play/Pause, Von vorne, Ton (Transport links,
+			// Lautstärke rechts, wie überall; nicht umstellen). Alle nur weiß mit weichem Schatten, in einer Reihe unten rechts in
+			// der Karte. Maß bei voller Karte (TON_BEZUG 684 px): Klickfläche 56, Zeichen 30, Abstand 8, Rand 6; die Reihe wächst
+			// mit der Karte mit, die Klickfläche wird aber nie kleiner als TON_MIN 44 px (sonst trifft man sie am Handy nicht).
+			// WAS WELCHER KNOPF TUT, leicht zu verwechseln:
+			//   Ton:        schaltet nur stumm und laut. Kein Sprung auf den Anfang.
+			//   Von vorne:  setzt NUR DAS VIDEO auf 0 und spielt weiter. NICHT die Animation; die startet weiter nur über einen
+			//               Klick auf die Fläche.
+			//   Play/Pause: hält nur das Video an. Die Animation ist dann ohnehin fertig.
+			// Ein von Hand angehaltenes Video bleibt angehalten (handPause), auch nach Wegscrollen und Zurückkommen: Das
+			// automatische Anhalten beim Verlassen des Fensters überschreibt den Handbetrieb nicht.
+			// Die Reihe erscheint erst, wenn der Clip läuft, und verschwindet am Ende des Videos. Kein Klick erreicht die
+			// Animation darunter (stopPropagation auf der Reihe). Weg zurück zum einen Ton-Knopf: Stand von Auftrag U.
+			// SENKRECHT GESTAPELT STATT IN EINER REIHE (Auftrag X, Animation · Experten-Auswahl 20.11.2026). Grund, gemessen: Im
+			// unteren Viertel des Videobildes ist nur das äußerste Achtel links und rechts dunkel (55 bis 67 von 255), dazwischen
+			// liegt der helle Pullover (102 bis 161). Die Reihe brauchte 27 % der Kartenbreite (bei 1024 px 37 %), Play/Pause
+			// stand in 98 von 99 Bildern auf Hell (168). Der Stapel braucht eine Knopfbreite, rund 8 %, und liegt ganz im dunklen
+			// rechten Streifen. Von oben nach unten: Play/Pause, Von vorne, Ton (dieselbe Reihenfolge wie vorher von links nach
+			// rechts). Er beginnt unten und wächst nach oben. Weg zurück zur Reihe: flex-direction row und in der Bildschleife
+			// Breite und Höhe der Reihe tauschen.
+			// Abstand 0 statt 8 (Animation · Experten-Auswahl 20.11.2026): Drei gleich große Zeichen in gleichem Abstand über die
+			// halbe Kartenhöhe lasen sich als Liste, wie eine Werkzeugleiste. Zusammengerückt lesen sie sich als ein Element mit
+			// drei Teilen. Der Stapel ist damit 168 statt 184 px hoch. Weg zurück: TON_LUECKE = 8.
+			const TON_FLAECHE = 56, TON_ZEICHEN = 30, TON_BEZUG = 684, TON_RAND = 6, TON_LUECKE = 0, TON_MIN = 44;
+			let tonKnopf: HTMLDivElement | null = null, flaecheVersatz: [number, number, number] = [0, 0, 1], handPause = false;
+			let knopfSpiel: HTMLButtonElement | null = null, knopfTon: HTMLButtonElement | null = null;
+			const zeichen = (innen: string) => `<svg viewBox="0 0 24 24" width="${TON_ZEICHEN}" height="${TON_ZEICHEN}" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${innen}</svg>`;
+			const Z_PLAY = '<path d="M7.5 4.5v15l12.5-7.5z" fill="#fff"/>', Z_PAUSE = '<path d="M8 5v14M16 5v14" stroke-width="3.2"/>';
+			const Z_VORNE = '<path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4 3.5v4.5h4.5"/>';
+			const Z_LAUT = '<path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4z" fill="#fff"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/>', Z_STUMM = '<path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4z" fill="#fff"/><path d="M16 9.5l5 5"/><path d="M21 9.5l-5 5"/>';
+			const tonStand = () => {
+				if (!echt.clip) return;
+				if (knopfTon) { const laut = !echt.clip.muted; knopfTon.innerHTML = zeichen(laut ? Z_LAUT : Z_STUMM); knopfTon.setAttribute("aria-label", laut ? "Ton ausschalten" : "Ton einschalten"); knopfTon.setAttribute("aria-pressed", String(laut)); }
+				if (knopfSpiel) { const haelt = echt.clip.paused; knopfSpiel.innerHTML = zeichen(haelt ? Z_PLAY : Z_PAUSE); knopfSpiel.setAttribute("aria-label", haelt ? "Video abspielen" : "Video anhalten"); }
+			};
+			const tonZeigen = (da: boolean) => { if (tonKnopf) { tonKnopf.hidden = !da; tonKnopf.style.display = da ? "flex" : "none"; } };
+			if (figurEcht() && clipGanz()) {
+				const reihe = document.createElement("div"); reihe.hidden = true; reihe.className = "experten__leiste"; reihe.setAttribute("role", "group"); reihe.setAttribute("aria-label", "Video steuern");
+				reihe.style.cssText = `position:absolute;left:0;top:0;z-index:2;display:none;flex-direction:column;gap:${TON_LUECKE}px;transform-origin:0 0;filter:drop-shadow(0 0 6px rgba(0,0,0,.4));`;
+				const knopf = (label: string, bei: () => void) => {
+					const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", label);
+					b.style.cssText = `width:${TON_FLAECHE}px;height:${TON_FLAECHE}px;padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer;`;
+					b.addEventListener("click", () => { if (echt.clip) { bei(); tonStand(); } });
+					reihe.appendChild(b); return b;
+				};
+				knopfSpiel = knopf("Video anhalten", () => { const v = echt.clip!; if (v.paused) { handPause = false; v.play().catch(() => {}); } else { handPause = true; v.pause(); } });
+				knopf("Video von vorne", () => {
+					const v = echt.clip!; handPause = false;
+					// letztes Bild festhalten, bevor das Video springt (siehe KEIN AUFBLITZEN BEIM SPRUNG)
+					if (v.readyState >= 2 && v.videoWidth) { const c = echt.stand || document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext("2d")?.drawImage(v, 0, 0); echt.stand = c; }
+					v.currentTime = 0; v.play().catch(() => {});
+				}).innerHTML = zeichen(Z_VORNE);
+				knopfTon = knopf("Ton einschalten", () => { echt.clip!.muted = !echt.clip!.muted; });
+				// kein Klick in der Reihe (auch nicht zwischen den Knöpfen) erreicht die Animation darunter
+				reihe.addEventListener("click", (ev) => ev.stopPropagation());
+				fig.appendChild(reihe); tonKnopf = reihe;
+			}
+			// BAUCHBINDE IM VIDEOBILD (Auftrag Y, zweite Fassung; Rasul 20.11.2026 will Name, Firma und Auszeichnung, dann: „Und auch
+			// einen ganz leichten Schatten geben?“ und „mach's zweizeilig. In der ersten Zeile Name und Firma, in der zweiten Zeile
+			// der Expertenstatus.“). Unten links in der Karte, weiß mit leichtem Schatten ohne Versatz. Zeile 1 in --text-base,
+			// Zeile 2 in --text-sm (vorhandene Größen des Systems, nichts Eigenes); die Schrift wird NICHT mit der Karte
+			// verkleinert, bei schmaler Karte bricht sie um. Breite höchstens BINDE_BREIT der Kartenbreite, damit sie nie unter
+			// den Stapel der Knöpfe läuft. Rand links und unten im Verhältnis zur Karte, wie bei den Knöpfen.
+			// Zeit: erscheint mit dem Clip, steht bis BINDE_SEKUNDEN der Clipzeit und blendet dann in 0,5 s aus. Sie hängt an der
+			// Zeit des Videos, nicht an einer Uhr: Bei „Von vorne“ kommt sie zurück, beim Anhalten bleibt sie, wie sie ist.
+			// Schalter ?binde=kurz|immer (nur localhost, Grundeinstellung kurz): immer = sie bleibt die ganze Zeit stehen.
+			// Wortlaut von Animation · Experten-Auswahl, aus Nicos LinkedIn-Profil nachgesehen; der englische Titel bleibt englisch,
+			// er ist seine offizielle Auszeichnung und nicht unser Text. Kein Link: Die Profiladresse
+			// (linkedin.com/in/nicokusterer) wäre der einzige Weg aus dem Band heraus, genau dort, wo der Videobeweis wirkt.
+			// ZWEI OFFENE PUNKTE, BEVOR DAS JE NACH DEV ODER LIVE GEHT:
+			//   1. Die Zahl 81 stammt aus Nicos eigenem Profil, nicht aus einer unabhängig prüfbaren Quelle. Dann ist zu klären, ob
+			//      wir die Zahl übernehmen oder nur „LinkedIn Certified Marketing Expert“ schreiben (AGENTS.md, Abschnitt 4).
+			//   2. Name und Auszeichnung brauchen Nicos Freigabe, dieselbe, die für Clip und Umriss aussteht.
+			// Verworfen (erste Fassung, selber Tag): eine graue Zeile unter der Karte auf der Höhe der Quellenangabe.
+			// Nur localhost, nur Fassung echt mit clip=ganz; der Bau enthält die Binde nicht. Weg zurück: BINDE_1 leer.
+			// REIHENFOLGE GETAUSCHT (Rasul 20.11.2026: „Vielleicht machen wir sogar den Expertenstatus in die erste Zeile und
+			// Namenfirma in die zweite, weil ich zeige Experten, wer es ist, kommt danach.“). Das Band fragt „warum dieser“, darauf
+			// antwortet die Auszeichnung; der Name ist die Person dahinter. Dazu (Animation · Experten-Auswahl): beide Zeilen in
+			// derselben Größe (--text-sm, Gewicht 500), sonst stünde ein englischer LinkedIn-Titel groß im wichtigsten Band der
+			// Startseite. Die zweite Zeile ist leiser: Deckkraft BINDE_LEISE 0,8. Vorher: Name oben in --text-base 600, Titel
+			// darunter in --text-sm 400.
+			const BINDE_1 = "LinkedIn Certified Marketing Expert (1 von 81 weltweit)", BINDE_2 = "Nico Kusterer, The One Media GmbH", BINDE_LEISE = 0.8;
+			const BINDE_SEKUNDEN = 6, BINDE_BREIT = 0.7, BINDE_RAND = 19; // Rand bei voller Karte: wie die Zeichen der Knöpfe (6 + 13)
+			const bindeImmer = () => document.documentElement.dataset.binde === "immer";
+			// ENDGÜLTIGE FORM: ZEILE DICHT UNTER DER KARTE, NICHT IM BILD (Rasul 20.11.2026, nachdem die Bauchbinde gebaut war: „Ah,
+			// ich wollte es nicht als Overlay im Video haben. Das war schon gut der Stil, den wir genau hatten wie bei der
+			// Quellangabe. Ich wollte es bloß nicht so weit unten stehen haben, sondern oben unterhalb vom Video.“). Die Bauchbinde
+			// war eine Fehldeutung von Animation · Experten-Auswahl (Rasul wollte einen Schatten, gemeint war die kurze Strecke
+			// zum Bild, nicht das andere Medium). Sie bleibt als Weg zurück: ?namensform=binde (Grundeinstellung zeile).
+			// Gemessen hätte sie getragen (20.11.2026, erste Wortfassung, 99 Bilder über das ganze Video, Helligkeit 0 bis 255 unter
+			// den Zeilen bei voller Karte): obere Zeile im Mittel 101, hellste 5 % der Fläche bis 164; untere im Mittel 127,
+			// hellste 5 % bis 173, einzelne Glanzpunkte auf dem Mikrofon bis 248. Schwächste Stelle war das Mikrofon. Bei
+			// 1024 px brach sie mit der Deckelung auf 70 % der Kartenbreite in vier Zeilen (88 px hoch, 42 % der Kartenhöhe).
+			//   Stil:   wie die Quellenangabe rechts (Klassen t-mini grau), zwei Zeilen gleich groß, die Auszeichnung oben
+			//           (Rasul: „Vielleicht machen wir sogar den Expertenstatus in die erste Zeile und Namenfirma in die zweite,
+			//           weil ich zeige Experten, wer es ist, kommt danach.“), die zweite leiser (Deckkraft BINDE_LEISE 0,8).
+			//   Wortlaut: „LinkedIn Certified Marketing Expert (1 von 81 weltweit)“, Singular, die Zahl in Ziffern in der Klammer.
+			//           Das ist der Wortlaut seines LinkedIn-Profils. Weg dorthin am 20.11.2026: zuerst diese Form, dann auf Rasuls
+			//           Wunsch die Zahl vorn („Einer von 81 …“, dann „1 von 81 LinkedIn Certified Marketing Experts weltweit“), dann
+			//           zurück. Rasul: „jetzt, wo ich es lese, ist das schwächer als die Originalversion mit der Klammer hinten
+			//           dran. Ändert es, dass es doch hinter in der Klammer steht, eins von einundachtzig mit Zahlen.“ Mit der
+			//           Klammer ist der Titel die Aussage und die Zahl der Beleg dazu.
+			//   Lage:   NAME_ABSTAND 40 px unter der Karte bei voller Karte (684 px), im Verhältnis zur Karte; so läuft der
+			//           Schatten der Karte darüber frei aus. Linke Kante = linke Kante der Karte am Ende des Clips, höchstens bis
+			//           zur Platzkante. Einmal vorab gerechnet (karteEndeCss), die Zeile steht fest und wandert nicht mit.
+			//           Gemessen am 20.11.2026, Platzkante gegen Kartenkante am Ende: 191,0 gegen 186,5 (2048 px), 32,0 gegen 84,2
+			//           (1440 px), 32,0 gegen 58,5 (1024 px). An der Platzkante hinge die Zeile bei schmalen Fenstern 26 bis 52 px
+			//           links neben der Karte.
+			//   Folge:  Die Zeile steht NICHT mehr auf einer Linie mit der Quellenangabe rechts. Die ruhige Fußzeile im Band geht
+			//           verloren, dafür gehört die Angabe sichtbar zum Video. Das ist Rasuls Abwägung, kein Versehen. (Die erste
+			//           Fassung stand auf der Höhe der Quellenangabe, 174 bis 230 px unter der Karte.)
+			//   Schatten: Rasul: „es macht die Illusion kaputt, wenn ich das Video mit Schatten habe und der Text unten drunter
+			//           keinen hat.“ und „Also die gleichen Schattentiefe und Winkel verwenden wie beim Video.“ Die Karte schwebt
+			//           über dem Papier; eine Zeile ohne Schatten läge darauf. REGEL: Versatz und Weichheit eines Schattens folgen
+			//           der Höhe über der Fläche, nicht der Größe des Objekts. Deshalb dieselben Werte wie die Karte (SCH_AB und
+			//           SCH_WEICH im Verhältnis zur Karte am Ende), nur die Deckkraft geringer (NAME_SCHATTEN), weil eine dünne
+			//           Schrift fast kein Licht abhält. Nach derselben Regel war der Schatten der Karte vor dem 20.11.2026 zu
+			//           klein (24 px Weichheit auf 685 px Karte, am Objekt bemessen statt an seiner Höhe); deshalb sah sie
+			//           aufgeklebt aus.
+			// Erscheint mit dem Clip und bleibt stehen. Kein Link, die beiden offenen Punkte oben gelten weiter.
+			//   Einzug: Rasul: „Du hast ihn jetzt linksbündig gemacht mit dem Video. Es fühlt sich an, als ob es zu weit links
+			//           steht, weil es eine Rundung gibt. Und weil man, glaube ich, generell den Text immer ein bisschen einrückt.“
+			//           REGEL: An einer gerundeten Ecke ist bündig nicht bündig. Text, der zu einem gerundeten Element gehört,
+			//           richtet sich an dessen innerer Flucht aus, nicht an seiner geometrischen Kante. Die Zeile rückt deshalb
+			//           auf die Flucht der Knopf-Zeichen ein (BINDE_RAND 19 px bei voller Karte, im Verhältnis zur Karte),
+			//           mindestens aber um den Eckradius der Karte (5 % ihrer Höhe, 19,3 px bei voller Karte), sonst begänne
+			//           der Text noch im Bogen. Der Radius ist um 0,3 px größer, es gilt also der Radius.
+			const NAME_ABSTAND = 40, NAME_SCHATTEN = 0.08, NAME_FEST: boolean = false, BLATT_BLENDE = 0.8;
+			// Blatt (siehe EIN BLATT FÜR KARTE UND NAMENSZEILE in zeichneBild): an, solange die Zeile unter der Karte steht
+			const blattAn = () => figurEcht() && !nameBinde() && !!BINDE_1 && document.documentElement.dataset.blatt === "mit"; // Blatt seit 20.11.2026 aus der Vorgabe genommen (Rasul: „ohne dass es ein eigenes Blatt wird“), siehe Layout.astro
+			let nameHoehe = 0; // Höhe der Namenszeile in Gerätepixeln, aus der Bildschleife
+			const nameBinde = () => document.documentElement.dataset.namensform === "binde";
+			let nameZeile: HTMLDivElement | null = null, nameDa = false, karteEndeCss: [number, number, number] | null = null; // Karte am Ende des Clips relativ zum Platz: [links, Breite, Unterkante]
+			const nameZeigen = (da: boolean) => {
+				if (!nameZeile || da === nameDa) return;
+				nameDa = da; nameZeile.style.transitionDuration = da ? "0.8s" : "0.5s"; nameZeile.style.opacity = da ? "1" : "0";
+			};
+			// Zeile unter der Karte legen (feste Lage); die Binde wird dagegen in der Bildschleife an die Karte gesetzt
+			const nameLegen = () => {
+				// seit dem Mitwandern setzt die Bildschleife die Lage; NAME_FEST = true wäre der Weg zurück zur festen Lage
+				if (!NAME_FEST || !nameZeile || nameBinde()) return;
+				const fr = fig.getBoundingClientRect(), k = karteEndeCss;
+				const kb = k ? k[1] : fr.width, ms = kb / TON_BEZUG, unten = k ? k[2] : fr.height;
+				const einzug = Math.max(BINDE_RAND * ms, (kb * RAD) / RW), links = Math.max(0, (k ? k[0] : 0) + einzug); // innere Flucht, mindestens der Eckradius
+				if (import.meta.env.DEV) (fig as any).__name = { einzug, radius: (kb * RAD) / RW, karteBreit: kb };
+				nameZeile.style.left = `${links.toFixed(1)}px`; nameZeile.style.top = `${(unten + NAME_ABSTAND * ms).toFixed(1)}px`;
+				nameZeile.style.width = `${Math.max(120, (k ? k[0] + k[1] : fr.width) - links).toFixed(1)}px`;
+				// Schatten wie die Karte: Versatz und Weichheit im selben Verhältnis zur Kartenbreite (SCH_AB und SCH_WEICH je RW)
+				nameZeile.style.textShadow = NAME_SCHATTEN > 0 ? `0 ${((kb * SCH_AB) / RW).toFixed(1)}px ${((kb * SCH_WEICH) / RW).toFixed(1)}px rgba(0,0,0,${NAME_SCHATTEN})` : "none";
+			};
+			if (figurEcht() && BINDE_1) {
+				const b = document.createElement("div"), z1 = document.createElement("div"), z2 = document.createElement("div");
+				// die Klammer bleibt zusammen: Bricht die Zeile, dann nach „Expert“ (oben der Titel, darunter der Beleg), „weltweit“ steht nie allein
+				{ const kl = BINDE_1.indexOf(" ("); if (kl > 0) { const sp = document.createElement("span"); sp.style.whiteSpace = "nowrap"; sp.textContent = BINDE_1.slice(kl + 1); z1.append(BINDE_1.slice(0, kl) + " ", sp); } else z1.textContent = BINDE_1; }
+				z2.textContent = BINDE_2;
+				if (nameBinde()) {
+					b.className = "experten__binde";
+					b.style.cssText = "position:absolute;left:0;top:0;z-index:2;opacity:0;transition:opacity 0.8s ease;pointer-events:none;color:#fff;font-family:var(--schrift-lesen);text-shadow:0 0 2px rgba(0,0,0,.35),0 0 10px rgba(0,0,0,.45);";
+					z1.style.cssText = "font-size:var(--text-sm);font-weight:500;line-height:1.25;";
+					z2.style.cssText = `font-size:var(--text-sm);font-weight:500;line-height:1.25;margin-top:2px;opacity:${BINDE_LEISE};`;
+				} else {
+					b.className = "t-mini grau experten__name";
+					b.style.cssText = "position:absolute;margin:0;opacity:0;transition:opacity 0.8s ease;pointer-events:none;z-index:1;";
+					z2.style.opacity = String(BINDE_LEISE);
+				}
+				b.append(z1, z2); fig.appendChild(b); nameZeile = b;
+			}
+			// Clip anhalten und weiterlaufen lassen, wenn die Animation das Fenster verlässt und wiederkommt (sonst liefe der Ton
+			// weiter, während niemand das Bild sieht). Wer von Hand angehalten hat, bleibt angehalten.
+			const echtHalt = (halt: boolean) => {
+				if (!echt.clip || !echt.spielt || echt.clip.ended) return;
+				if (halt) echt.clip.pause(); else if (!handPause) echt.clip.play().catch(() => {});
+				tonStand();
+			};
+			// Umriss laden; wird beim Aufbau gerufen und noch einmal bei jedem Start, falls er dann fehlt (20.11.2026: in zwei von
+			// neun Läufen stand die gezeichnete Figur in der Karte, während der Clip schon lief; der Umriss war nicht gesetzt.
+			// Ursache nicht gefunden, beide Male gleich nach einer Codeänderung bei laufendem Entwicklungsserver.)
+			// DIE URSACHE IST OFFEN: Das Nachladen beim Start ist die Absicherung dagegen und nicht überflüssig. Nicht entfernen,
+			// solange niemand die Ursache gefunden hat.
+			const umrissLaden = () => {
+				const merk = (was: string) => { if (import.meta.env.DEV) ((fig as any).__umrissStand ||= []).push(was); }; // nur lokal, zur Fehlersuche
+				if (!figurEcht() || echt.umriss) { merk(echt.umriss ? "schon da" : "figur nicht echt: " + document.documentElement.dataset.figur + "/" + document.documentElement.dataset.anim); return; }
+				const im = new Image(); merk("laedt " + ECHT_UMRISS);
+				im.onerror = () => merk("Fehler beim Laden");
+				im.onload = () => {
+					const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
+					const x = c.getContext("2d", { willReadFrequently: true }); if (!x) { merk("kein Kontext"); return; }
+					x.drawImage(im, 0, 0);
+					const k = document.createElement("canvas"); k.width = 64; k.height = 36; const kx = k.getContext("2d", { willReadFrequently: true })!;
+					kx.drawImage(c, 0, 0, 64, 36); const kd = kx.getImageData(0, 0, 64, 36).data; let deckt = 0; for (let i = 3; i < kd.length; i += 4) if (kd[i] > 40) deckt++;
+					// Leeres PNG (kein deckendes Pixel): kein Umriss, dann bleibt die gezeichnete Figur stehen
+					merk("geladen " + im.naturalWidth + " deckt " + deckt);
+					if (deckt > 50) { echt.umriss = c; if (!gestartet) bild(VORSPRUNG(), 0); }
+				};
+				im.src = ECHT_UMRISS;
+			};
+			umrissLaden();
+			// Umriss und Clip in die Karte zeichnen; v = Anteil des Clips (0 = nur Umriss, 1 = nur Clip)
+			const zeichneEcht = (x: number, y: number, g: number, ein: number, t: number) => {
+				if (!zielVorne || !echt.umriss) return;
+				const m = g / zielVorne.g, kx = x + (L - zielVorne.x) * m, ky = y + (T - zielVorne.y) * m, w = RW * m, h = RH * m;
+				const clipDa = !!echt.clip && echt.clip.readyState >= 2;
+				// KEIN AUFBLITZEN BEIM SPRUNG (Auftrag W; Rasul 20.11.2026: „Beim Replay drücken blitzt es kurz. Kann es sein, dass da
+				// hinten dran noch die Karte liegt mit dem Männchen?“). Von innen gemessen (fig.__karteLog): Beim Druck auf „Von
+				// vorne“ wurde ein Bild lang der Umriss statt des Clips gezeichnet, readyState 1, das Video suchte. Solange ein
+				// Video springt, liefert es kein Bild, und diese Stelle fiel dann auf den Umriss zurück (schwarze Gestalt auf der
+				// blauen Karte). Anhalten, Abspielen und Ton waren sauber, sie springen nicht. Jetzt hält der Knopf „Von vorne“
+				// vor dem Sprung das letzte Videobild fest (echt.stand), und in der Lücke steht dieses Standbild. Es wird beim
+				// Neustart der Animation verworfen. Weg zurück: standDa fest auf false.
+				const standDa = !clipDa && !!echt.stand && echt.spielt;
+				const v = clipDa || standDa ? sanft(anteil(t, echtVon(), echtLang())) : 0;
+				// NAHT AN DER KARTENKANTE (Rasul 19.11.2026: „Irgendwas mit dem Schatten ist komisch, das sieht pixelig aus,
+				// unecht.“; nach dem Befund: „Ja, schließen“). Gemessen: Auflösung in Ordnung (Faktor 2,00 bei
+				// devicePixelRatio 2), der Verlauf des Schattens sauber (Schritte von 1 bis 2 über 40 Pixel). Sichtbar war eine
+				// ein Pixel breite, blaugraue Linie rund um die Karte, in den Ecken als Treppe. Ursache: Karte und Clip hatten
+				// denselben geglätteten Rand. In den Randpixeln deckt der Clip nur zum Teil, und darunter schaute das Blau der
+				// Karte hervor. Jetzt liegen Clip und Umriss um RAND Gerätepixel über den Kartenrand hinaus, sie decken die
+				// Randpixel der Karte ganz. Weg zurück: RAND auf 0.
+				const RAND = 0.75 / (ctx.getTransform().a || 1); // Maßstab der Zeichnung in diesem Bild
+				ctx.save(); ctx.filter = "none"; ctx.beginPath(); ctx.roundRect(kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND, RAD * m + RAND); ctx.clip();
+				if (v > 0 && echt.clip) { ctx.globalAlpha = v; ctx.drawImage(standDa ? echt.stand! : echt.clip, kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND); }
+				if (v < 1) { ctx.globalAlpha = ein * (1 - v); ctx.drawImage(echt.umriss, kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND); }
+				ctx.restore(); ctx.globalAlpha = 1;
+				// Messhaken, nur lokal (Auftrag W): Wer vorher fig.__karteLog = [] setzt, bekommt je Bild, was in der Karte landet
+				if (import.meta.env.DEV && (fig as any).__karteLog) (fig as any).__karteLog.push([standDa ? "standbild" : v >= 1 ? "clip" : v > 0 ? "blende" : "umriss", echt.clip ? echt.clip.readyState : -1, echt.clip ? +echt.clip.currentTime.toFixed(2) : -1, echt.clip && echt.clip.seeking ? 1 : 0]);
+			};
 			let start = -1, spurR: Spur = [], spurL: Spur = [], lauf = 0;
 			// Systemeinstellung „Bewegung reduzieren“, auch wenn sie bei offener Seite umgestellt wird (Code-Prüfung N14)
 			const ruhig = matchMedia("(prefers-reduced-motion: reduce)");
@@ -663,11 +1312,32 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				if (breiteJetzt !== breiteGemessen) { breiteGemessen = breiteJetzt; hoeheGemessen = window.innerHeight; }
 				if (breiteGemessen >= hoeheGemessen) cv.style.height = `${(hoeheGemessen * anteilHoehe).toFixed(1)}px`;
 				else cv.style.height = `${Math.max(160, window.innerWidth / format() / 0.86).toFixed(1)}px`;
-				const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+				// d = Bildpunkte je Punkt. Nur zum Messen der Zeichenlast, nur lokal: ?dichte=1.5 oder 1 deckelt den Wert für
+				// die breite Fläche (wird nicht gemerkt, gilt nur für diesen Aufruf).
+				const dichteProbe = import.meta.env.DEV ? Number(new URLSearchParams(location.search).get("dichte")) || 0 : 0;
+				const r = cv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, dichteProbe > 0 ? dichteProbe : 99);
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
 				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
 				// Rahmen und Personen passend zur Fläche neu legen
-				const breite = cv.width / (cv.height / H);
+				// Breite des Platzes im Layout, nicht der Zeichenfläche (siehe MENGE BREITER ALS IHRE FLÄCHE). Ist die Fläche
+				// so breit wie ihr Platz, ist beides dasselbe wie bisher.
+				const platzBreite = Math.round(fig.getBoundingClientRect().width * d);
+				flaecheBreit = cv.width > platzBreite * 1.2;
+				{
+					const fr = fig.getBoundingClientRect();
+					// Verschiebung nach links, begrenzt vom Schatten (siehe LINKS): Links der Karte müssen am Ende des Clips
+					// SCHATTEN_RAUM mal Kartenbreite frei bleiben, sonst rückt das Bild entsprechend weniger, notfalls gar nicht.
+					const anteilKarte = ((document.documentElement.dataset.anim === "kombimitte" ? kombiZiel() * 584 : 584) / 680) * (1 + LAUF_ZUWACHS);
+					const freiLinks = fr.left - r.left + (fr.width * (1 - anteilKarte)) / 2;
+					const rueck = Math.max(0, Math.min(LINKS * fr.width, freiLinks - SCHATTEN_RAUM * fr.width * anteilKarte));
+					mitteX = flaecheBreit ? (fr.left + fr.width / 2 - r.left - rueck) * d : cv.width / 2;
+				}
+				// Höhe des Platzes: bei der breiten Fläche die der Figur (der Stil gibt der Fläche unten Zugabe, die der Platz
+				// nicht hat), sonst die der Fläche wie bisher
+				platzHoehe = flaecheBreit ? Math.max(1, Math.round(fig.getBoundingClientRect().height * d)) : cv.height;
+				obenZu = flaecheBreit ? Math.max(0, Math.round((fig.getBoundingClientRect().top - r.top) * d)) : 0;
+				{ const fr = fig.getBoundingClientRect(); flaecheVersatz = [r.left - fr.left, r.top - fr.top, d]; } // für die Ton-Bedienung: Lage der Fläche im Platz
+				const breite = Math.min(cv.width, flaecheBreit ? platzBreite : cv.width) / (platzHoehe / H);
 				rahmen(breite); leuteFlach = personen(); leuteRaum = personenFahrt();
 				// Am Ende darf niemand abgeschnitten sein: falls nötig zoomt die Kamera mit der Fahrt etwas heraus (Brennweite),
 				// statt Personen seitlich zu verschieben
@@ -700,7 +1370,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Einpassen in die Breite nur für die hinteren Reihen: Die Nahen dürfen angeschnitten sein wie bei einer Kamera
 				let weit = 0;
 				const ende0 = bahn(1, F1, 1);
-				for (const q of leuteRaum) { if (q.ebene < 2) continue; const p = fahrtKamera(q.wx, q.wz, ende0.C, ende0.Lk, ende0.F); if (p.zc > 1) weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
+				for (const q of leuteRaum) { if (q.ebene < 2 || q.breit) continue; const p = fahrtKamera(q.wx, q.wz, ende0.C, ende0.Lk, ende0.F); if (p.zc > 1) weit = Math.max(weit, Math.abs(p.x - CX) + 30 * p.g); }
 				zoomEnde = Math.min(1, halbe / Math.max(1, weit));
 				if (zoomEnde < 1) loese(F1 * zoomEnde);
 				const ende1 = bahn(1, F1, 1);
@@ -715,6 +1385,178 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						const p = fahrtKamera(vorne.wx, vorne.wz, ende1.C, ende1.Lk, F1 * zoomEnde);
 						const kopf = p.y - 14.5 * (64 * p.g) / 19;
 						hebung = kopf - (T + RH / 3);
+						// für die Fassung „zoom“: Lage und Größe der vorderen Person im Schlussbild (dieselbe Rechnung wie in zeichneBild)
+						const kippE = 1 - p.phi / (Math.PI / 2), uE = (64 * vorne.s * p.g) / 19;
+						zielVorne = { x: p.x, y: p.y - 9 * uE * Math.min(1, kippE * 1.15) - hebung, g: vorne.s * p.g };
+						// „zoomnah“ und „kombi“: Wegpunkt suchen, an dem die vordere Person einen Anteil ihrer Endgröße hat, und den
+						// Versatz des Ausschnitts, mit dem die Karte dort senkrecht mittig sitzt
+						{
+							const ziel = zielVorne, g1 = groesseVorne(1);
+							const loeseE = (ant: number) => { let lo = 0, hi = 1; for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (groesseVorne(m) < ant * g1) lo = m; else hi = m; } return lo; };
+							const versatzBei = (eX: number) => {
+								const bN = bahn(eX, F1 * zoomEnde, eX), pN = fahrtKamera(vorne.wx, vorne.wz, bN.C, bN.Lk, bN.F);
+								const kN = 1 - pN.phi / (Math.PI / 2), uN = (64 * vorne.s * pN.g) / 19;
+								const yN = pN.y - 9 * uN * Math.min(1, kN * 1.15) - hebung * eX, mN = (vorne.s * pN.g) / ziel.g;
+								return yN + (T - ziel.y) * mN + (RH * mN) / 2 - CY;
+							};
+							eNah = loeseE(NAH_ANTEIL); versatzNah = versatzBei(eNah);
+							const zz = kombiZiel();
+							eZiel = zz < 1 ? loeseE(zz) : 1; versatzZiel = zz < 1 ? versatzBei(eZiel) : 0; zusatzZiel = Math.max(1, zz);
+							// BAND AUFGELOCKERT (Auftrag R; Rasul 19.11.2026 nachts: „Das Einzige, was sich noch ändern würde, ist die Verteilung der
+							// Personen. Es ist immer noch so ein Strich in der Mitte. Versuche die mal ein bisschen gleichmäßiger zu verteilen.“).
+							// Der Strich sind die hinteren Reihen (Ebene 3): rund 170 Figuren in einem nur 190 Einheiten tiefen Streifen (Tiefe
+							// 150 bis 340) quer durch die ganze Breite; im gedrehten Anfangsbild liegt er als dichte Schräge im Bild. Gemessen im
+							// Raster 4 × 6 (2048 px): 36,3 und 34,5 % in den Zellen des Streifens, 2,7 bis 15 % daneben. Statt weiter aufzufüllen,
+							// wird der Streifen selbst in die Tiefe gezogen: Jede Figur der Ebene 3 behält ihren seitlichen Platz und rückt um das
+							// LOCKER-fache ihres Abstands zur Vorderkante des Streifens (Tiefe 150) nach hinten, dazu ein fester kleiner Zufall,
+							// damit keine Reihen entstehen. Der Streifen wird so zu einem breiten Feld, in das die Füllung (nächster Block) nur
+							// noch die Lücken setzt. Das geschieht erst hier, NACH dem Einpassen der Kamera (zoomEnde, Ranfahrt, Ausschnitt):
+							// Karte, Kamera und die drei vorn bleiben auf den Bildpunkt, wo sie waren. Der Hintergrund des Schlussbilds ändert
+							// sich notwendig mit: Die hinteren Reihen stehen dort gestaffelt weiter weg, also kleiner. Unberührt: die drei vorn,
+							// die sechs Ausweicher, die nahen Reihen (Ebene 2), die Mitte vorn. Nur localhost, neue Fassungen, breite Fläche.
+							// Weg zurück: LOCKER = 1.
+							const LOCKER = 2.7, LOCKER_AB = 150;
+							if (LOCKER !== 1 && flaecheBreit && mengeDoppelt()) {
+								leuteRaum.forEach((q, i) => {
+									if (q.ebene !== 3 || q.weicht !== undefined) return;
+									const zf = Math.sin(i * 91.7 + 0.3) * 43758.5453, zufallFest = zf - Math.floor(zf);
+									const Z = LOCKER_AB + Math.max(0, q.wz - LOCKER_AB) * LOCKER * (0.75 + 0.5 * zufallFest);
+									q.tz = q.wz = Z; q.y = CY - Z;
+								});
+							}
+							// LINKE FLÄCHE GEFÜLLT, ALS VERSUCH (?fuellung=an|aus, nur localhost, nur neue Fassungen mit breiter Fläche; Auftrag O3;
+							// Rasul 19.11.2026: „jetzt haben wir so eine Linie im Bild am Anfang von den Männchen, was vielleicht gar nicht schlecht
+							// ist, aber ich will es mal probieren, dass du doch die linke Fläche, die du jetzt so leer gelassen hast, dass du die
+							// füllst.“). Gemessen von Animation · Experten-Auswahl im Anfangsbild (Raster 4 × 6 über die Fläche, Anteil dunkler als
+							// 128): Die Menge liegt als schräges Band, oben links 0,4 %, unten links 9,3 und 0,5 %, Mitte links 20 bis 30 %. Der
+							// rechteckige Umriss lässt das gedrehte Anfangsbild wie einen Fehler aussehen.
+							// Gebaut: Zusätzliche Figuren werden im ANFANGSBILD gesetzt (Draufsicht, mit dem Bogen gedreht), überall links, wo
+							// im Abstand FUELL_ABSTAND noch niemand steht, und von dort auf ihren Platz im Raum zurückgerechnet. Der Umriss der
+							// Füllung ist wellig statt gerade (oben, unten und zur Mitte hin), nach links läuft sie aus dem Fenster. Es gelten
+							// die Regeln der übrigen Menge: niemand vor der gewählten Person (Tiefe nicht unter −290), die Mitte vorn bleibt frei
+							// für die Fahrt und die Karte. Die Figuren sind von Anfang an da, zählen beim Einpassen der Kamera nicht mit (breit)
+							// und stehen im Schlussbild weit hinten links. Weg zurück: ?fuellung=aus oder diesen Block löschen.
+							if (flaecheBreit && mengeDoppelt() && document.documentElement.dataset.fuellung === "an") {
+								const FUELL_ABSTAND = 62, FUELL_LOCKER = 50, RAND_OBEN = 26, RAND_UNTEN = 40, WELLE_HOCH = 30, MITTE_BIS = -150, MITTE_WELLE = 120, RECHTS_OBEN = 620;
+								const sc0 = platzHoehe / H, links = (0 - (mitteX - (W * sc0) / 2)) / sc0 - CX, oben = -obenZu / sc0, unten = (cv.height - obenZu) / sc0;
+								const wob = (v: number) => 0.6 * Math.sin(v / 170 + 1.3) + 0.4 * Math.sin(v / 71 + 4.1); // −1 bis 1, fest
+								const r4 = zufall(97), w0 = bogenWinkel(VORSPRUNG()), mx = pole() ? POLE_VON_X : 0, mz = pole() ? POLE_VON_Z : -300;
+								// Plätze der vorhandenen Menge im Anfangsbild (die sechs Ausweicher an ihrem Startplatz)
+								const da: [number, number][] = leuteRaum.map((q) => gedreht(q.weicht ?? q.wx, q.wz, mx, mz, w0));
+								for (let v = 0; v < 6000; v++) {
+									const xS = links - 30 + r4() * (RECHTS_OBEN + MITTE_WELLE - links + 30), yS = oben + r4() * (unten - oben), zS = CY - yS;
+									if (yS < oben + RAND_OBEN + WELLE_HOCH * (1 + wob(xS)) || yS > unten - RAND_UNTEN - WELLE_HOCH * (1 + wob(xS + 500))) continue;
+									// Grenze zur Mitte: unten links der Mitte (davor ist Vordergrund, der bleibt, wie er ist), nach oben hin weiter nach
+										// rechts bis RECHTS_OBEN (Auftrag R: rechts oben stand nach dem Auflockern zu wenig); dort stehen die Figuren weit hinten
+										const hoch = Math.max(0, Math.min(1, (CY + 60 - yS) / 330));
+										if (xS > MITTE_BIS + (RECHTS_OBEN - MITTE_BIS) * hoch * hoch * (3 - 2 * hoch) + MITTE_WELLE * wob(yS * 1.7)) continue;
+									// ungleich dicht wie die übrige Menge: Abstand FUELL_ABSTAND in den Trauben, bis FUELL_LOCKER mehr dazwischen
+									const ab = FUELL_ABSTAND + FUELL_LOCKER * (0.5 - 0.5 * Math.sin(xS / 90 + yS / 140) * Math.sin(yS / 110 - xS / 200 + 2));
+									if (da.some(([ax, az]) => Math.hypot(ax - xS, az - zS) < ab)) continue;
+									const [X, Z] = gedreht(xS, zS, mx, mz, -w0);
+									if (Z < -290 || (Z < -40 && Math.abs(X) < 250)) continue;
+									leuteRaum.push({ x: CX + X, y: CY - Z, s: 1, ein: -1, zx: 0, zy: 0, bleibt: false, rang: 0, ebene: Z < 150 ? 2 : 3, ex: 0, ey: 0, eg: 1, z: 1, wx: X, wz: Z, tx: X, tz: Z, breit: true, fuell: true });
+									da.push([xS, zS]);
+								}
+							}
+							// FIGUREN HINTER DEM TEXT IM SCHLUSSBILD (Aufträge O1 und O2; nur localhost, neue Fassungen, breite Fläche).
+							// O1, Rasul 19.11.2026: „wir können noch Menschen rausnehmen, die hinter dem Text erscheinen. Die nehmen wir von Anfang
+							// an schon raus … Dann nehmen wir mal drei von raus. Und zwar die, die hinter dem Wort Videobeweis stehen.“ Wer im
+							// Schlussbild (Ende des Clips) mit seinem Umriss das Wort „Videobeweisen“ im Fließtext berührt, wird ganz entfernt
+							// (Feld weg): Er wird nie gezeichnet, auch nicht im Anfangsbild. Die Liste behält ihre Reihenfolge, damit sich für
+							// FESTE LISTE STATT MESSUNG (Animation · Experten-Auswahl 19.11.2026 nachts): Zuerst wurde je Fensterbreite gemessen,
+							// wer das Wort berührt; das traf bei 2048 px vier, bei 1440 px sechs, bei 1024 px keine Figur, und jede Textänderung
+							// hätte die Menge still verändert (in derselben Nacht wurde der Absatz geteilt). Jetzt sind es fest die vier, die
+							// bei 2048 px (Rasuls Fenster, an dem er entschieden hat) hinter dem Wort standen, benannt nach ihrem Platz im Raum
+							// (O1_WEG, seitlich und Tiefe). Rasul sprach von drei, gemessen waren es vier. Sie stehen bei jeder Breite am selben
+							// Platz (geprüft bei 2048, 1440, 1024 px).
+							// niemanden sonst der feste Zufall ändert.
+							// O2, Rasul: „Und die anderen positionieren wir so, dass sie am Ende auch noch weiter wegstehen.“ Wer sonst im
+							// Schlussbild den Fließtext berührt, steht um FERN_FAKTOR weiter von der Kamera weg (Feld fern), in der Tiefe, nicht
+							// zur Seite: Abstand mal FERN_FAKTOR, der seitliche Platz im selben Verhältnis, damit die Figur im Schlussbild an
+							// derselben Stelle der Breite bleibt. Sie ist dort um 1 − 1/FERN_FAKTOR kleiner (37,5 %) und entsprechend unschärfer.
+							// Unberührt: die drei vorn und die sechs Ausweicher. Zum Messen, nicht gemerkt: ?textfiguren=alt zeigt den Stand davor.
+							// Weg zurück: TEXTFIGUREN fest auf false.
+							const TEXTFIGUREN = !import.meta.env.DEV || new URLSearchParams(location.search).get("textfiguren") !== "alt", FERN_FAKTOR = 1.6;
+							if (TEXTFIGUREN && flaecheBreit && mengeDoppelt()) {
+								const txt = fig.closest(".anlass__band-innen")?.querySelector<HTMLElement>(".anlass__text");
+								if (txt) {
+									const anim = document.documentElement.dataset.anim, eE = anim === "zoom" ? 1 : kombi() ? eZiel : eNah;
+									const zE = (kombi() ? zusatzZiel : 1) * (figurEcht() && anim === "kombimitte" ? 1 + LAUF_ZUWACHS : 1);
+									const hochE = hebung * eE + (kombi() ? versatzZiel : zoomNah() ? versatzNah : 0);
+									const sc0 = platzHoehe / H, scE = sc0 * zE, oxE = mitteX - (W * sc0) / 2 + CX * sc0 * (1 - zE), oyE = obenZu + CY * sc0 * (1 - zE);
+									const bE = bahn(eE, F1 * zoomEnde, eE), cr = cv.getBoundingClientRect(), aE = Math.atan2(bE.C[0] - bE.Lk[0], bE.Lk[1] - bE.C[1]);
+									// Umriss einer Figur im Schlussbild in Fensterpunkten: [links, oben, rechts, unten] und ihr Abstand zur Kamera
+									const kasten = (q: Person) => {
+										const pr = fahrtKamera(q.tx, q.tz, bE.C, bE.Lk, bE.F), g = q.s * pr.g, u = (64 * g) / 19, kipp = 1 - pr.phi / (Math.PI / 2);
+										const yE = pr.y - 9 * u * Math.min(1, kipp * 1.15) - hochE, fx = (v: number) => cr.left + (v * scE + oxE) / d, fy = (v: number) => cr.top + (v * scE + oyE) / d;
+										return { l: fx(pr.x - 28.65 * g), o: fy(yE - 34 * g), r: fx(pr.x + 28.65 * g), u: fy(yE + 30 * g), zc: pr.zc };
+									};
+									// Karte am Ende des Clips, linke Kante und Breite relativ zum Platz (für die Namenszeile, Auftrag Y)
+									{ const pv = fahrtKamera(vorne.tx, vorne.tz, bE.C, bE.Lk, bE.F), gv = vorne.s * pv.g, mv = gv / zielVorne!.g, fr = fig.getBoundingClientRect(); const yv = pv.y - 9 * ((64 * gv) / 19) * Math.min(1, (1 - pv.phi / (Math.PI / 2)) * 1.15) - hochE; karteEndeCss = [((pv.x + (L - zielVorne!.x) * mv) * scE + oxE) / d + cr.left - fr.left, (RW * mv * scE) / d, ((yv + (T - zielVorne!.y) * mv + RH * mv) * scE + oyE) / d + cr.top - fr.top]; }
+									const trifft = (k: { l: number; o: number; r: number; u: number; zc: number }, re: DOMRect) => k.zc > 5 && k.l < re.right && k.r > re.left && k.o < re.bottom && k.u > re.top;
+									// das Wort im Fließtext suchen
+									let wort: DOMRect | null = null;
+									const lauf = document.createTreeWalker(txt, NodeFilter.SHOW_TEXT);
+									for (let n = lauf.nextNode(); n && !wort; n = lauf.nextNode()) {
+										const i = (n.nodeValue || "").indexOf("Videobeweisen");
+										if (i >= 0) { const ber = document.createRange(); ber.setStart(n, i); ber.setEnd(n, i + 13); wort = ber.getBoundingClientRect(); }
+									}
+																let nWeg = 0, nFern = 0;
+									const O2_FERN: [number, number][] = [[751.94, -190.13], [1054.56, -207.73], [1059.83, -124.93], [1487.65, -198.66]];
+																	const O1_WEG: [number, number][] = [[1130.06, -159.59], [997.18, -169.99], [1552.95, -118.59], [1412.98, -103.21]];
+									for (const q of leuteRaum) if (q.breit && !q.fuell && O1_WEG.some(([X, Z]) => Math.abs(q.wx - X) < 0.5 && Math.abs(q.wz - Z) < 0.5)) { q.weg = true; nWeg++; }
+									for (const q of leuteRaum) {
+										if (q.ebene <= 1 || q.weicht !== undefined || q.weg) continue;
+										const k = kasten(q);
+																		// O2 ALS FESTE LISTE (Animation · Experten-Auswahl 19.11.2026 nachts), aus demselben Grund wie O1: Solange am Textblock
+																		// gemessen wurde, änderte jede Textänderung und jede Umverteilung der Menge still, wer nach hinten rückt (4 Figuren
+																		// bei 2048 px, 5 bei 1440 und 1024 px). Jetzt sind es fest die vier, die bei 2048 px (Rasuls Fenster) im Schlussbild
+																		// den Fließtext berührten, benannt nach ihrem Platz im Raum vor dem Verschieben (seitlich, Tiefe). Stand davor:
+																		// „if (!trifft(k, ganz)) continue;“
+																		if (!(q.breit && !q.fuell && O2_FERN.some(([X, Z]) => Math.abs(q.wx - X) < 0.5 && Math.abs(q.wz - Z) < 0.5))) continue;
+										// weiter weg: Abstand zur Kamera mal FERN_FAKTOR (zc = R + (Z − lz) · cos a), seitlicher Platz im selben Verhältnis
+										const dZ = ((FERN_FAKTOR - 1) * k.zc) / Math.max(0.2, Math.cos(aE));
+										if (import.meta.env.DEV) (q as any).vor = [q.wx, q.wz]; q.tx = q.wx = q.wx * FERN_FAKTOR; q.tz = q.wz = q.wz + dZ; q.x = CX + q.wx; q.y = CY - q.wz; q.fern = true; nFern++;
+									}
+									if (import.meta.env.DEV) (fig as any).__textfiguren = { weg: nWeg, fern: nFern, wort: wort ? [Math.round(wort.left), Math.round(wort.top), Math.round(wort.right), Math.round(wort.bottom)] : null };
+								}
+							}
+							// KEIN SPÄTES ERSCHEINEN MEHR (Auftrag Q1; Rasul 19.11.2026: „ich sehe, dass immer noch neue Männchen entstehen, mach das
+							// mal weg. In dem Moment, wo die Kamera fährt, gibt es keine neuen Menschen mehr.“). Der folgende Block (späte Figuren
+							// hinter dem Text) läuft nur noch mit ?textfrei=spaet; Grundeinstellung ist aus (Layout.astro). Den Ruhezustand
+							// hinter dem Text hält der Bogen. Weg zurück: ?textfrei=spaet.
+							// HINTER DEM TEXT AM ANFANG LEER (?textfrei=an|aus, nur localhost; Rasul 19.11.2026: „Also dass wir auch schon
+							// von Anfang an gar nicht hinter der Schrift Menschen haben. Da kommen zwar welche rein, aber nicht von Anfang
+							// an.“, freigegeben mit „Ja, so bauen“). Gemessen von Animation · Experten-Auswahl ist das stehende Bild vor
+							// dem Start das Problem, nicht das Schlussbild: Hinter dem ersten Absatz waren 14,8 % der Fläche dunkler als
+							// 128, hinter dem zweiten 4,2 %. Während der Fahrt ziehen Figuren hindurch, das stört nicht, und am Ende ist
+							// der Text ohnehin lesbar. Deshalb: Wer im Anfangsbild (Draufsicht, Beginn der Fahrt) hinter die Textspalte
+							// fällt, erscheint später, gestaffelt TEXT_AB bis TEXT_AB + TEXT_LANG Sekunden nach dem echten Start, also
+							// vor der Ankunft der Kamera. Niemand verschwindet. Kein harter Rand: Von RAMPE_PX links der rechten
+							// Platzkante bis zur linken Textkante steigt der Anteil der Späten weich von 0 auf 100 %.
+							// Unberührt: die drei vorn (Ebenen 0 und 1) und die sechs, die ausweichen. Weg zurück: ?textfrei=aus oder
+							// diesen Block löschen.
+							if (flaecheBreit && mengeDoppelt() && document.documentElement.dataset.textfrei === "spaet") {
+								const txt = fig.closest(".anlass__band-innen")?.querySelector<HTMLElement>(".anlass__text");
+								if (txt) {
+									const RAMPE_PX = 110, TEXT_AB = 1.0, TEXT_LANG = 2.0;
+									const cr = cv.getBoundingClientRect(), fr = fig.getBoundingClientRect(), sc0 = platzHoehe / H, ox0 = mitteX - (W * sc0) / 2;
+									const zuEinheit = (css: number) => ((css - cr.left) * d - ox0) / sc0; // Fensterpunkt in Einheiten der Zeichnung
+									const x0 = zuEinheit(fr.right - RAMPE_PX), x1 = zuEinheit(txt.getBoundingClientRect().left);
+									const los = (i: number) => { const v = Math.sin(i * 78.233 + 1.7) * 43758.5453; return v - Math.floor(v); }; // fest je Person
+									const b0 = bahn(0, F1 * zoomEnde, 0);
+									const wH = bogenWinkel(VORSPRUNG()), mH: [number, number] = pole() ? [POLE_VON_X, POLE_VON_Z] : [vorne.wx, vorne.wz];
+									leuteRaum.forEach((q, i) => {
+										if (q.ebene <= 1 || q.weicht !== undefined) return;
+										// mit Bogen steht die Aufstellung am Anfang gedreht um den Startplatz der gewählten Person
+										const [hx, hz] = wH !== 0 ? gedreht(q.wx, q.wz, mH[0], mH[1], wH) : [q.wx, q.wz];
+										const anteilSpaet = weichKubisch((fahrtKamera(hx, hz, b0.C, b0.Lk, b0.F).x - x0) / Math.max(1, x1 - x0));
+										if (anteilSpaet > 0 && los(i) < anteilSpaet) q.ein = VORSPRUNG() + TEXT_AB + TEXT_LANG * los(i + 500);
+									});
+								}
+							}
+						}
 					}
 				}
 			};
@@ -754,10 +1596,94 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// s = Fortschritt der Geste: Mittel aus Weg (Kippen) und Größe (Ranfahrt), so folgt die Geste der Bewegung.
 			const groesseVorne = (e: number) => {
 				const q = leuteRaum.find((x) => x.ebene === 0); if (!q) return 1;
-				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(q.wx, q.wz, b.C, b.Lk, b.F).g;
+				// SPRUNG AM ANFANG DER FAHRT BEHOBEN (Rasul 19.11.2026: „Das Start hat ruckartig und bewegt sich kurz vorwärts und
+				// zurück.“). Gemessen in Rasuls Chrome, Bild für Bild: 0,64 s nach dem Start sprang die Karte in einem Bild von
+				// 135 auf 113 Einheiten Breite und 113 Einheiten nach oben, 0,27 s später in einem Bild zurück. Ursache: Der
+				// Verlauf der Fahrt sucht den Wegpunkt nach der Größe der vorderen Person und nimmt an, dass sie mit dem Weg
+				// stetig wächst. Gerechnet wurde mit dem Platz, an dem die Person gerade steht. Seit sie in der dichten Menge
+				// weit hinten startet (POLE_VON_Z −40 statt −180), stimmt die Annahme am Anfang der Fahrt nicht mehr, die Suche
+				// fand kurz einen falschen Wegpunkt. In der dichten Menge rechnet der Verlauf deshalb mit ihrem Zielplatz
+				// (tx, tz), an dem sie ankommt; der hängt nicht davon ab, wo sie gerade läuft. Die heutige Fassung „geste“ und
+				// die einfache Menge rechnen weiter wie bisher. Weg zurück: wieder q.wx, q.wz in beiden Fällen.
+				const fest = mengeDoppelt();
+				const b = bahn(e, F1 * zoomEnde, e); return fahrtKamera(fest ? q.tx : q.wx, fest ? q.tz : q.wz, b.C, b.Lk, b.F).g;
 			};
+			// ÜBERGANG FAHRT ZU GESTE WEICHER, NUR IN DEN NEUEN FASSUNGEN (Rasul 19.11.2026: „mir ist der Übergang zu, dass die
+			// Karte hält und dann mit der Videobeweisgeste das wieder startet, der ist mir zu hart. Also lasst es beim
+			// Reinzoomen auch schon ein bisschen weich auslaufen und dann wieder weich anlaufen.“). Gemessen vorher, Zuwachs
+			// der Kartenbreite je Bild in Einheiten, über Fenster von 0,2 s: Die Fahrt wurde bis zuletzt schneller (8,0 ·
+			// 10,4 · 10,8) und fiel dann in zwei Fenstern auf 4,4 und 0. Grund: Die Fahrt folgt der Größe im Verhältnis (jede
+			// Verdopplung gleich lang); eine große Karte legt dabei je Bild viel mehr Breite zu als eine kleine, das Tempo
+			// in Einheiten steigt also bis kurz vor Schluss. Die Landung wird weich, wenn ein Teil des Verlaufs der Breite
+			// selbst folgt statt ihrem Verhältnis: AUSLAUF ist dieser Anteil, er läuft auf der Kurve „glatt“ aus, die am
+			// Ende viel flacher wird als die bisherige. Die Kamera kommt weiter zum Stillstand, erst danach setzt die Geste
+			// an. Weg zurück: AUSLAUF auf 0 (dann gilt wieder nur weichKubisch).
+			// FAHRT AB DEM ERSTEN BILD, KARTE BLENDET EIN (?beginn=neu|alt, nur localhost, nur neue Fassungen; Rasul 19.11.2026
+			// spät: „Wir fangen gleich mit der Kamerafahrt an. Wir haben kein Standbild am Anfang. … Weil mir geht am Anfang die
+			// Kamerafahrt ein bisschen zu schnell, das Kippen. Vielleicht können wir das damit lösen.“ Und: „Man sieht die
+			// blaue Karte nicht gleich am Anfang. … Und wir lassen dann die blaue Karte auftauchen, also einblenden.“).
+			//   Fahrt: beginnt mit dem Start der Animation statt 1,2 s danach und kommt zur selben Zeit an (4,4 s nach dem
+			//   Start). Sie hat damit 4,4 statt 3,2 s und wird entsprechend langsamer, auch das Kippen. Alles, was am Ende der
+			//   Fahrt hängt (Geste, Blende, Clip), bleibt, wo es ist.
+			//   Karte: am Anfang nicht da, blendet ab KARTE_AB über KARTE_LANG Sekunden ein (0,8 bis 1,4 s nach dem Start;
+			//   Animation · Experten-Auswahl). Früh, weil die Erzählung „einer fällt ihm auf, DESHALB zoomt die Kamera hin“
+			//   lautet: Die ersten Bilder sind ein Suchen über der Menge, das Auftauchen der Karte gibt dem Suchen sein Ziel.
+			//   Die Figur in der Karte blendet mit ein. Vorher steht dort die Person wie jede andere. Das stehende Bild vor
+			//   dem Start zeigt die Menge deshalb ohne Karte.
+			// Nicht „?anfang“: Der Name gehört schon dem Schalter für das Erscheinen der Personen (leer, voll, alle).
+			// Weg zurück: beginnNeu() fest auf false.
+			const beginnNeu = () => LANGSAM && document.documentElement.dataset.beginn !== "alt";
+			// BOGEN: DIE FAHRT SENKT SICH UND SCHWENKT ZUGLEICH SEITLICH (?bogen=an|aus, nur localhost, nur mit ?beginn=neu; Rasul
+			// 19.11.2026: „anstatt dass da plötzlich Personen aufpoppen, könnte doch die Kamera, nachdem sie runtergekippt ist, so
+			// einen Move machen, dass die Personen sich nach rechts drehen … ein halbrunder Dolly-Move nach rechts, und ein
+			// bisschen die Kamera nach rechts eindrehen.“ Und: „Vielleicht können wir sogar in einer Bewegung machen, dass die
+			// Kamera von oben nach unten kippt, aber gleichzeitig auch den Winkel verändert.“). Fachlich ein Bogen nach rechts,
+			// verschliffen mit dem Senken zu einer Bewegung, ohne Halt dazwischen (Recherche in
+			// website/Animation_Experten_Auswahl_2026-11.md im Marketing-Ordner).
+			// Gebaut als Drehung der Aufstellung um die senkrechte Achse durch die gewählte Person, entgegen der Kamera: Die
+			// Karte bleibt dadurch, wo sie ist, nur die Menge schwenkt. Der Winkel beginnt bei BOGEN_GRAD und läuft über die
+			// Dauer der Fahrt auf 0 (Kurve „glatt“); am Ende steht alles wie ohne Bogen, das Schlussbild ist unberührt.
+			// Vorzeichen: Die Figuren hinter der Person stehen am Anfang nach rechts versetzt und wandern nach links, es
+			// kommen also von rechts Figuren ins Bild (am Bild geprüft). Die Figuren sind flache Zeichen und drehen sich
+			// selbst nicht mit, nur ihre Anordnung schwenkt. Weg zurück: ?bogen=aus oder bogenAn() fest auf false.
+			const BOGEN_GRAD = 25;
+			// BOGEN_FRUEH unter 1 legt den Bogen nach vorn, zum Kippen hin. Mit 1 (Bogen gleichmäßig über die Fahrt) hatte der
+			// Weg einer Bezugsfigur auf dem Schirm zwei Höcker: den des Kippens bei 0,2 bis 0,4 s und einen zweiten des Bogens
+			// bei 1,6 bis 2,2 s nach dem Start (gemessen 2,3 · Senke 0,8 · 1,1 Einheiten je Bild).
+			const BOGEN_FRUEH = 0.55;
+			// Bezugsfigur für die Messung: eine hintere Person nahe der Mitte, die von Anfang an da ist
+			const bezugFigur = () => leuteRaum.find((q) => q.ebene === 3 && !q.breit && !q.spaet && Math.abs(q.tx) < 160);
+			const bogenAn = () => beginnNeu() && document.documentElement.dataset.bogen === "an";
+			const bogenWinkel = (t: number) => (bogenAn() ? ((BOGEN_GRAD * Math.PI) / 180) * (1 - glatt(Math.pow(anteil(t, kamAb(), kamLang()), BOGEN_FRUEH))) : 0); // Vorzeichen am Bild geprüft: mit Minus kamen die Figuren von links
+			// Aufstellung um (mx, mz) drehen; liefert den neuen Platz
+			const gedreht = (X: number, Z: number, mx: number, mz: number, w: number): [number, number] => {
+				const dx = X - mx, dz = Z - mz, c = Math.cos(w), sn = Math.sin(w);
+				return [mx + dx * c - dz * sn, mz + dx * sn + dz * c];
+			};
+			// KARTE FRÜHER (Animation · Experten-Auswahl 19.11.2026, nach dem Befund am Bild): ab 0,2 s nach dem Start über
+			// 0,6 s, voll da nach 0,8 s (zuerst 0,8 bis 1,4 s). Grund: 0,7 s nach dem Start war das Kippen schon rund 40 % weit,
+			// die Karte tauchte in der gekippten Ansicht auf. Die Erzählung verlangt, dass der Grund vor der Bewegung steht.
+			// Noch früher hieße, die Karte ist praktisch von Anfang an da, und das wollte Rasul nicht. In den ersten Bildern
+			// ist kein Blau zu sehen. Alle Zeiten hier zählen ab dem echten Start; auf der Uhr der Animation kommt
+			// VORSPRUNG() dazu (1,4 s bei anfang=alle), __bild(t) rechnet auf dieser Uhr. Weg zurück: 0.8 statt 0.2.
+			const KARTE_AB = () => VORSPRUNG() + 0.2, KARTE_LANG = 0.6;
+			const kamAb = () => (beginnNeu() ? VORSPRUNG() : T_KAMERA), kamLang = () => T_KAMERA + D_KAMERA - kamAb();
+			// REGEL FÜR DEN ÜBERGANG (Animation · Experten-Auswahl 19.11.2026, neue Fassung): letztes Fenster der Fahrt
+			// höchstens 1,0, erstes Fenster der Geste höchstens 1,2 (Zuwachs der Kartenbreite je Bild in Einheiten, Fenster
+			// von 0,2 s, gemessen mit dem Aufbau von Website · Programmierung). Die Spitzen sind frei. Das frühere Ziel
+			// „Spitze der Geste nicht über der Spitze der Fahrt“ ist aufgehoben: Es stand gegen einen harten Stopp, auf den
+			// sofort etwas Schnelleres folgt; der Stopp ist weg, die Geste läuft sanft an, und die Kamera ist ein Blick, die
+			// Geste der Zug einer Hand, die zupackender sein darf. Die Geste wird deshalb nicht gedehnt.
+			// Die Fahrt hat seit „Fahrt ab dem ersten Bild“ zwei flache Höcker mit einer Delle dazwischen (4,5 · 3,7 · 4,4);
+			// die bleiben stehen, bis Rasul sie in Bewegung beurteilt hat. Stellschraube dafür wäre AUSLAUF.
+			const AUSLAUF = LANGSAM ? 0.8 : 0; // 0,5 probiert: letztes Fenster vor dem Stillstand noch 1,7 je Bild; mit 0,8 unter 1,0
 			const verlauf = (t: number) => {
-				const tz = weichKubisch(anteil(t, T_KAMERA, D_KAMERA));
+				const xz = anteil(t, kamAb(), kamLang());
+				let tz = weichKubisch(xz);
+				if (AUSLAUF > 0 && xz > 0 && xz < 1) {
+					const R = Math.max(1.001, groesseVorne(1)); // Größe am Ende im Verhältnis zum Anfang
+					tz = (1 - AUSLAUF) * tz + AUSLAUF * Math.log(1 + (R - 1) * glatt(xz)) / Math.log(R);
+				}
 				if (tz <= 0 || tz >= 1) return { e: tz, s: tz };
 				const L = Math.log(Math.max(1.001, groesseVorne(1))), ziel = tz * L;
 				let lo = 0, hi = 1;
@@ -767,7 +1693,23 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			};
 			const zeichneBild = (t: number, jetzt: number) => {
 				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
-				const sc = cv.height / H, ox = (cv.width - W * sc) / 2; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
+				// zZoom: nur „kombimitte“ mit einem Ziel über 584 px. Hat die Kamera ihr Ende erreicht, wächst das Bild als Ganzes
+				// um die Bildmitte weiter. zielLog = angestrebte Größe der vorderen Person (Logarithmus), derselbe Verlauf wie
+				// das Wachsen über die Kamera, damit beides ohne Knick ineinander übergeht.
+				let zZoom = 1, zielLog = NaN;
+				if (kombi() && ende() === "kamera" && t > T_GESTE_ZOOM) {
+					const l0 = Math.log(groesseVorne(eNah)), lE = Math.log(groesseVorne(eZiel));
+					zielLog = l0 + zug(anteil(t, T_GESTE_ZOOM, DAUER_ZOOM)) * (lE + Math.log(zusatzZiel) - l0);
+					zZoom = Math.exp(Math.max(0, zielLog - lE));
+				}
+				// Langsames Weiterwachsen, solange der Clip läuft (nur „kombimitte“ mit echtem Clip), gleichmäßig
+				if (figurEcht() && echt.clip && document.documentElement.dataset.anim === "kombimitte" && ende() === "kamera") {
+					const ab = T_GESTE_ZOOM + DAUER_ZOOM, bis = echtVon() + Math.min(LAUF_SEKUNDEN, isFinite(echt.clip.duration) ? echt.clip.duration : 10); // gedeckelt, siehe DAS GANZE VIDEO MIT TON
+					zZoom *= 1 + LAUF_ZUWACHS * anteil(t, ab, bis - ab);
+				}
+				const sc0 = (platzHoehe || cv.height) / H; // Fläche 1600 × 900 mittig, breiter Rand links und rechts
+				const sc = sc0 * zZoom, ox = mitteX - (W * sc0) / 2 + CX * sc0 * (1 - zZoom), oy = obenZu + CY * sc0 * (1 - zZoom);
+				if (import.meta.env.DEV) (fig as any).__zoom = zZoom; // nur lokal, zum Messen
 				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
 				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
 				// Spur nur rechnen, solange sie zu sehen ist
@@ -779,16 +1721,40 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// bevor die Kamerafahrt aufhört. Wie wenn man etwas bremst und dann hat es noch so eine kleine Bewegung, bis es
 				// wirklich stoppt.“): Die Geste läuft auf derselben Kurve, aber in ANTEIL_GESTE der Fahrtdauer; die Kamera fährt
 				// danach noch sanft aus. gDauer = Dauer der Geste.
-				const kam = ende() === "kamera", gDauer = kam ? D_GESTE_KAMERA : DAUER;
+				const zf = zoomFassung() && ende() === "kamera";
+				const kam = ende() === "kamera", gDauer = zf ? DAUER_ZOOM : kam ? D_GESTE_KAMERA : DAUER;
+				const T_GESTE = zf ? T_GESTE_ZOOM : T_GESTE_ALT; // Fassung „zoom“: Geste erst nach dem Stillstand der Kamera
 				const T_AUF = kam ? T_GESTE - RUHE : T_GESTE; // Aufsetzen der Finger
-				if (t >= T_AUF && t <= T_GESTE + gDauer + GLIMM + 0.45) {
+				// Die Geste als Funktion: in der heutigen Fassung sofort gezeichnet (vor den Personen, wie bisher), in der Fassung
+				// „zoom“ erst nach den Personen, damit die blaue Fläche die innere Hälfte des Strichs nicht überdeckt.
+				const zeichneGeste = () => {
+				if (!(t >= T_AUF && t <= T_GESTE + gDauer + GLIMM + 0.45)) return;
+				// Fassung „zoom“: Rahmen der Geste im Maß der blauen Fläche und an ihr festgemacht (bei „zoom“ am Ende 1 : 1)
+				// STRICHE AUSSERHALB DER KARTE (?strich=aussen|mitte, nur localhost; Rasul 19.11.2026: „die Videobeweisbewegung
+				// liegt jetzt mittig auf dem Rand vom Video. Das sieht gar nicht so schlecht aus witzigerweise, aber mach's mal
+				// so, dass das Video innerhalb von den Strichen liegt und nicht im Mittelpunkt.“). Bei „aussen“ liegt die
+				// Innenkante des Strichs auf der Kartenkante: Die Striche laufen auf einem eigenen Weg, der ringsum eine halbe
+				// Strichdicke weiter außen liegt (WEG_RA, WEG_LA), mit entsprechend größerem Eckenradius, damit in den Ecken
+				// kein Weiß zwischen Strich und Karte bleibt. Ein erster Versuch, den Rahmen nur zu vergrößern, ließ dort eine
+				// weiße Sichel. Die Karte bleibt, wie sie ist; Fingerpunkte und Ansatzlücke sind unverändert.
+				// Herkunft, damit es nicht ein drittes Mal gebaut wird: Am 14.11.2026 wurde entschieden, dass die FIGUR an der
+				// Innenkante des Strichs endet (INNEN = DICKE / 2); eine Karte gab es da nicht, der Strich lag auf dem Rand des
+				// Bildausschnitts. Die Karte kam am 19.11.2026 dazu und wurde auf die Mittellinie des Strichs gelegt, die Figur
+				// mit ANDOCK bis an die Kartenkante vergrößert. Mittig auf dem Kartenrand lag der Strich also seit dem ersten
+				// Bau der Karte; verrutscht ist nichts. „aussen“ stellt für die Karte her, was am 14.11. für die Figur galt.
+				// Weg zurück: ?strich=mitte oder strichAussen fest auf false.
+				const strichAussen = zf && document.documentElement.dataset.strich !== "mitte";
+				const karte = (c2: CanvasRenderingContext2D) => {
+					if (zf && blauJetzt && zielVorne) { c2.translate(blauJetzt.x - zielVorne.x * blauJetzt.m, blauJetzt.y - zielVorne.y * blauJetzt.m); c2.scale(blauJetzt.m, blauJetzt.m); }
+				};
+				if (zf) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.filter = "none"; ctx.globalAlpha = 1; }
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
-				octx.setTransform(sc, 0, 0, sc, ox, 0); octx.globalCompositeOperation = "lighten";
+				octx.setTransform(sc, 0, 0, sc, ox, oy); karte(octx); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
 				if (t >= T_AUF && t < T_GESTE) { s = 0; deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); } // aufgesetzt, noch in Ruhe
-				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam ? verlauf(T_KAMERA + x * D_KAMERA).s : kubisch(x); deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); }
+				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam && !zf ? verlauf(T_KAMERA + x * D_KAMERA).s : zf ? zug(x) : kubisch(x); deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); }
 				// Nach dem Loslassen verlöschen Fingerpunkte und Spurenden schnell (Rasul 14.11.2026: „am Ende zu lang die Kreise
 				// stehen bleiben. Weil die Finger sind ja schon weg … Da müssen die Kreise früher ausblenden“). Vorher glomm das
 				// jüngste Stück der Spur unter den Fingern noch 0,9 s nach (GLIMM) und die Punkte blendeten 0,4 s aus; jetzt ist
@@ -797,10 +1763,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Danach (Rasul 14.11.2026): „Hol sie mal zurück, aber jetzt am Anfang und am Ende“: Die Fingerpunkte blenden am
 				// Ende spiegelbildlich zum Anfang aus (0,4 s, gleiche weiche Kurve); nur das Spurstück darunter verlischt schnell.
 				else if (t >= T_GESTE + gDauer) { s = 1; deck = sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / D_FINGER)); }
-				const pr = punkt(WEG_R, s), pl = punkt(WEG_L, s);
+				const wegR = strichAussen ? WEG_RA : WEG_R, wegL = strichAussen ? WEG_LA : WEG_L;
+				const pr = punkt(wegR, s), pl = punkt(wegL, s);
 				if (t >= T_GESTE && t <= T_GESTE + gDauer + 0.05) { spurR.push([s, jetzt]); spurL.push([s, jetzt]); }
 				const nachLos = t > T_GESTE + gDauer ? sanft(Math.max(0, 1 - (t - T_GESTE - gDauer) / 0.3)) : 1;
-				spur(spurR, WEG_R, jetzt, nachLos, T_GESTE + gDauer); spur(spurL, WEG_L, jetzt, nachLos, T_GESTE + gDauer);
+				spur(spurR, wegR, jetzt, nachLos, T_GESTE + gDauer); spur(spurL, wegL, jetzt, nachLos, T_GESTE + gDauer);
 				if (deck > 0) {
 					const v = Math.round(255 * deck); octx.fillStyle = `rgb(${v},${v},${v})`;
 					[pr, pl].forEach(([x, y]) => { octx.beginPath(); octx.arc(x, y, DICKE / 2, 0, Math.PI * 2); octx.fill(); });
@@ -809,7 +1776,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const glutUnsch = DICKE * 0.7 * sc / 4;
 				if (FILTER_GEHT) gctx.filter = `blur(${glutUnsch.toFixed(1)}px)`; gctx.drawImage(off, 0, 0, glut.width, glut.height);
 				if (!FILTER_GEHT) weichzeichnen(glut, glutUnsch, 0);
-				ctx.globalCompositeOperation = "difference";
+				if (zf && marke() !== "invers") {
+					// Fassung „zoom“: Spur und Glut umkehren (dunkel auf Weiß) und abdunkelnd auftragen. Auf Weiß sieht das aus
+					// wie bisher, auf der blauen Fläche bleibt die Spur dunkel statt orange.
+					for (const [c2, el] of [[gctx, glut], [octx, off]] as const) {
+						c2.setTransform(1, 0, 0, 1, 0, 0); c2.filter = "none"; c2.globalCompositeOperation = "difference";
+						c2.fillStyle = "#fff"; c2.fillRect(0, 0, el.width, el.height); c2.globalCompositeOperation = "source-over";
+					}
+					ctx.globalCompositeOperation = "multiply";
+				} else ctx.globalCompositeOperation = "difference";
 				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
 				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
 				ctx.globalCompositeOperation = "source-over";
@@ -830,11 +1805,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					let r = 0, a = 0;
 					if (los < 0) { const k = Math.min(1, ab / 0.22); r = R * (1 + 0.12 * Math.sin(Math.PI * k)) * sanft(k); a = A_KREIS * sanft(k); }
 					else if (los < 0.3) { const k = 1 - los / 0.3; r = R * (0.6 + 0.4 * sanft(k)); a = A_KREIS * sanft(k); }
-					ctx.setTransform(sc, 0, 0, sc, ox, 0); ctx.fillStyle = "#000";
+					ctx.setTransform(sc, 0, 0, sc, ox, oy); karte(ctx); ctx.fillStyle = "#000";
 					// Aufsetzpunkte: der Ring beim Aufsetzen bleibt dort stehen, wo der Finger gelandet ist, und läuft von da als
 					// Welle nach außen, wie beim Loslassen (Rasul 14.11.2026: „Jetzt hast du eine richtige Animation gemacht mit
 					// Wellen … mache das auch mal am Anfang.“). Vorher wanderte er mit dem Finger mit und wirkte nicht als Welle.
-					const auf = [punkt(WEG_R, 0), punkt(WEG_L, 0)];
+					const auf = [punkt(wegR, 0), punkt(wegL, 0)];
 					[pr, pl].forEach(([x, y], n) => {
 						if (a > 0) { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
 						// ein Ring läuft beim Aufsetzen einmal nach außen und verblasst
@@ -846,24 +1821,54 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					});
 					ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0);
 				}
-				}
+				};
+				if (!zf) zeichneGeste();
 				// Personen
-				ctx.setTransform(sc, 0, 0, sc, ox, 0);
+				ctx.setTransform(sc, 0, 0, sc, ox, oy);
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
 				if (ende() === "kamera") {
 					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
-					const e = verlauf(t).e, ran = e; // Verlauf und Gründe siehe verlauf()
+					// „zoomnah“ endet früher; „kombi“ fährt den Rest während der Geste (kWachs = Anteil dieses zweiten Stücks)
+					let e = verlauf(t).e * (zoomNah() ? eNah : 1), kWachs = 0;
+					if (kombi() && t > T_GESTE_ZOOM) {
+						kWachs = zug(anteil(t, T_GESTE_ZOOM, DAUER_ZOOM));
+						// zielLog kommt von oben (enthält bei einem Ziel über 584 px den Zusatz); die Kamera fährt höchstens bis eZiel
+						const ziel = zielLog;
+						let lo = eNah, hi = eZiel; for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (Math.log(groesseVorne(m)) < ziel) lo = m; else hi = m; }
+						e = kWachs >= 1 || ziel >= Math.log(groesseVorne(eZiel)) ? eZiel : lo;
+					}
+					const ran = e; // Verlauf und Gründe siehe verlauf()
 					zeileSetzen(e);
-					const { C, Lk, F } = bahn(e, F1 * zoomEnde, ran);
+					const bK = bahn(e, F1 * zoomEnde, ran), { C, Lk } = bK; let F = bK.F;
+					// KARTE SCHRUMPFT IN DEN ERSTEN 0,7 s: URSACHE UND PROBE (Auftrag L, Animation · Experten-Auswahl 19.11.2026: „Finde
+					// heraus, warum die Karte schrumpft … Erst die Ursache, dann die Änderung.“).
+					// Ursache, gemessen Bild für Bild (1440 px, Welle, Pop, Bogen aus): Die Größe der vorderen Person ist Brennweite durch
+					// Abstand (g = F / zc, zc = R + (Z − lz) · cos a). verlauf() sucht den Wegpunkt e so, dass die Person AN IHREM ZIELPLATZ
+					// (z −300) stetig wächst. In der dichten Menge steht sie am Anfang aber bei z −40 und läuft erst über 2,8 s nach vorn
+					// (nach 0,7 s ist sie bei z −65, also 25 von 260 Einheiten weit). Von oben spielt der Platz keine Rolle, mit dem
+					// Kippen immer mehr. Bei 0,7 s nach dem echten Start (e 0,49): Brennweite 1000 auf 591 (mal 0,591), Abstand zur
+					// Person, wo sie wirklich steht, 1000 auf 657 (mal 0,657): Größe 0,591 / 0,657 = 0,90, die Karte ist 10 % kleiner.
+					// Stünde sie am Zielplatz, wäre der Abstand 501 und die Größe 1,18. Das Schrumpfen ist also richtig gerechnete
+					// Perspektive (die Kamera zieht schneller auf, als sie der Person näher kommt), kein Rechenfehler; falsch ist nur
+					// die Annahme des Verlaufs, die Person stehe schon vorn. Blickpunkt (lz) und Brennweite hängen beide nur an e.
+					// Probe ?brennweite=groesse (nur localhost, Grundeinstellung bahn = unverändert): Die Brennweite folgt der Größe
+					// statt dem Weg, F = geplante Größe mal wirklicher Abstand. Die Person und ihre Karte haben dann in jedem Bild
+					// genau die geplante Größe und wachsen stetig. Preis: Am Anfang der Fahrt ist die Brennweite länger als bisher, die
+					// ganze Menge steht entsprechend größer im Bild; am Ende ist alles gleich, weil die Person dann an ihrem Zielplatz
+					// steht. Weg zurück: ?brennweite=bahn oder die nächsten vier Zeilen streichen.
+					if (mengeDoppelt() && zoomFassung() && document.documentElement.dataset.brennweite === "groesse") {
+						const v0 = leute.find((q) => q.ebene === 0);
+						if (v0) F = groesseVorne(e) * fahrtKamera(v0.wx, v0.wz, C, Lk, 1).zc;
+					}
 					if (import.meta.env.DEV) (fig as any).__vorne = groesseVorne(e);
 					const punkte = form() === "punkt";
 					const lage = leute.map((q) => {
 						const pr = fahrtKamera(q.wx, q.wz, C, Lk, F);
 						const kipp = 1 - pr.phi / (Math.PI / 2); // 0 = von oben, nahe 1 = von vorne
 						const u = (64 * q.s * pr.g) / 19;
-						const hoch = hebung * e; // Bildausschnitt wandert mit der Fahrt nach oben (Kopf auf die obere Drittellinie)
+						const hoch = hebung * e + (zoomNah() ? versatzNah * Math.min(1, e / eNah) * (1 - kWachs) + versatzZiel * kWachs : 0); // Bildausschnitt wandert mit der Fahrt nach oben (Kopf auf die obere Drittellinie); „zoomnah“: zusätzlich so, dass die Karte am Ende mittig sitzt
 						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15) - hoch, g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y - hoch };
-					}).filter((l) => l.zc > 5).sort((a, b) => b.zc - a.zc); // nichts hinter der Kamera zeichnen
+					}).filter((l) => l.zc > 5 && !l.q.weg).sort((a, b) => b.zc - a.zc); // nichts hinter der Kamera zeichnen; „weg“ siehe FIGUREN HINTER DEM TEXT
 					// Rasul 13.11.2026 abends: „die sind jetzt schon im Hintergrund und werden kurz scharf und dann unscharf. Das
 					// stimmt von der Perspektivenwirkung der Kamera dann nicht mehr.“ Deshalb: Verwandlung ganz am Anfang des
 					// Kippens (Kamera fast senkrecht, alle etwa gleich weit weg) und Unschärfe aus der Entfernung:
@@ -872,20 +1877,197 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// scharf; mit dem Kippen entsteht die Tiefe und mit ihr die Unschärfe, in jedem Moment passend.
 					const fokus = lage.find((l) => l.q.ebene === 0)?.zc ?? lage[lage.length - 1].zc;
 					const F_jetzt = F;
+					// Messhaken, nur lokal (Auftrag L, 19.11.2026): Wegpunkt, Brennweite, Abstand und Platz der vorderen Person
+					if (import.meta.env.DEV) { const v0 = lage.find((l) => l.q.ebene === 0); (fig as any).__kam = { e, F, zc: v0?.zc, wz: v0?.q.wz, tz: v0?.q.tz, g: v0?.g, R1: endWerte().R1, A1: endWerte().A1, RAN_Z, zoomEnde, F1 }; }
+					// WELLE BEIM AUFTAUCHEN DER KARTE, DREI FASSUNGEN ZUM VERGLEICHEN (?welle=aus|ring|druck|blick, dazu
+					// ?pop=an|aus; nur localhost, nur mit ?beginn=neu; Rasul 19.11.2026: „Dann können wir dem Aufpoppen von dem Blau
+					// sowas wie eine Schockwelle entstehen lassen. Also ganz sanft, aber dass das ist, wie wenn was aufpoppt.“).
+					// Absicht (Animation · Experten-Auswahl): Eine Welle läuft nach außen und zieht den Blick mit, weg von der
+					// Karte; ihr Zweck ist aber, dass das Auge ZUR Karte findet. Deshalb überall klein und kurz. Wirkt eine Fassung
+					// größer als ihre Zahl, nach unten gehen, nicht nach oben.
+					//   pop:      Die Karte schwingt über: in den letzten 0,25 s des Einblendens auf POP über ihre Größe, 0,25 s
+					//             danach wieder auf 100 %. Mittelpunkt ist die Karte, die Figur darin geht mit.
+					//   ring:     ein weicher Helligkeitsring läuft nach außen, Figuren hellen beim Durchlauf auf (höchstens
+					//             RING_HELL) und kommen zurück. Keine Geometrie.
+					//   druck:    Figuren werden beim Durchlauf nach außen geschoben (höchstens DRUCK_PX px) und federn zurück.
+					//   blick:    Die Figuren im Umkreis neigen sich kurz zur Karte hin (höchstens BLICK_GRAD Grad) und richten
+					//             sich wieder auf; nur die nächsten (bis BLICK_WEIT Kartenbreiten). Die einzige Fassung, die nach
+					//             innen zeigt.
+					// GESTRICHEN, ERSATZLOS (Animation · Experten-Auswahl 19.11.2026): die vierte Fassung „schaerfe“ (Figuren werden beim
+					// Durchlauf kurz scharf). Zwei Gründe: Die Bildregel wäre falsch, denn in diesem Bild bedeutet Unschärfe Entfernung,
+					// dort hieße sie plötzlich Aufmerksamkeit. Und sie war wirkungslos: 0,8 s nach dem Start steht die Kamera noch fast
+					// senkrecht, alle Figuren sind etwa gleich weit weg und kaum unscharf; gemessen höchstens 0,30 Einheiten Unschärfe,
+					// die die Welle hätte wegnehmen können. Nicht wieder einbauen.
+					// STÄRKE DER WELLE IN DREI STUFEN (?wellestaerke=1|2|3, Grundeinstellung 2; Auftrag M, Animation · Experten-Auswahl
+					// 19.11.2026). Stufe 1 ist der Stand davor. Die Stärke nimmt Reichweite und Abfall mit, nicht nur den Spitzenwert:
+					//   Stufe            1      2      3
+					//   Spitze mal       1      1,6    2,5    (ring 25 · 40 · 62,5 % heller, druck 4 · 6,4 · 10 px, blick 6 · 9,6 · 15 Grad)
+					//   Reichweite       2,5    3,5    5,0    Kartenbreiten (blick: 1,4 · 2,0 · 2,8)
+					//   Breite des Kamms 0,45   0,60   0,75   Kartenbreiten
+					//   Dauer mal        1      1,25   1,5    (0,5 · 0,625 · 0,75 s; druck 0,6 · 0,75 · 0,9 s)
+					//   Abfall hoch      1      0,7    0,5    (Exponent auf den Abfall mit Zeit und Entfernung: kleiner = trägt weiter)
+					// Weg zurück: ?wellestaerke=1 oder ST fest auf Spalte 1.
+					// Die Welle startet, wenn die Karte ganz da ist (0,8 s nach dem echten Start), läuft bis WELLE_WEIT
+					// Kartenbreiten und dauert 0,5 s (druck 0,6 s). Jede Wirkung hängt am Kamm der Welle und fällt mit der Zeit
+					// und mit der Entfernung auf null: Nach Ablauf steht jede Figur genau, wo und wie sie vorher stand.
+					// Die vordere Person und ihre Karte sind von der Welle ausgenommen. Weg zurück: ?welle=aus&pop=aus oder
+					// welleArt() fest auf "aus" und popAn() fest auf false.
+					const stufe = Math.max(0, Math.min(2, (parseInt(document.documentElement.dataset.wellestaerke || "1", 10) || 1) - 1));
+					const ST = { spitze: [1, 1.6, 2.5][stufe], weit: [2.5, 3.5, 5][stufe], kamm: [0.45, 0.6, 0.75][stufe], dauer: [1, 1.25, 1.5][stufe], abfall: [1, 0.7, 0.5][stufe], blick: [1.4, 2, 2.8][stufe] };
+					const POP = 0.04, WELLE_WEIT = ST.weit, RING_HELL = 0.25 * ST.spitze, DRUCK_PX = 4 * ST.spitze, BLICK_GRAD = 6 * ST.spitze, BLICK_WEIT = ST.blick;
+					const welleArt = () => (zoomFassung() && beginnNeu() ? document.documentElement.dataset.welle || "aus" : "aus");
+					const popAn = () => zoomFassung() && beginnNeu() && document.documentElement.dataset.pop === "an";
+					let welle: { cx: number; cy: number; kb: number; p: number; art: string } | null = null, popS = 1, popX = 0, popY = 0;
+					if (zielVorne && (welleArt() !== "aus" || popAn())) {
+						const v = lage.find((l) => l.q.ebene === 0);
+						if (v) {
+							const m0 = v.g / zielVorne.g, tDa = KARTE_AB() + KARTE_LANG;
+							popX = v.x + (L - zielVorne.x) * m0 + (RW * m0) / 2; popY = v.y + (T - zielVorne.y) * m0 + (RH * m0) / 2;
+							if (popAn()) popS = 1 + POP * (t <= tDa ? sanft(anteil(t, tDa - 0.25, 0.25)) : 1 - sanft(anteil(t, tDa, 0.25)));
+							const art = welleArt(), pw = (t - tDa) / ((art === "druck" ? 0.6 : 0.5) * ST.dauer);
+							if (art !== "aus" && pw > 0 && pw < 1) welle = { cx: popX, cy: popY, kb: RW * m0, p: pw, art };
+						}
+					}
+					if (import.meta.env.DEV) (fig as any).__pop = popS; // nur lokal, zum Messen
 					for (const { q, x, y, g, kipp, fy, zc } of lage) {
-						const ein = weich((t - q.ein) / 0.5);
+						// breite Fläche: wer ganz außerhalb liegt, wird nicht gezeichnet (Breite einer Figur 57 Einheiten mal g, mit Zugabe)
+						if (flaecheBreit && q.ebene > 1) { const px = x * sc + ox, rand = 60 * g * sc + 30; if (px < -rand || px > cv.width + rand) continue; }
+						// WEICHE OBERKANTE (Auftrag P, 19.11.2026): Mit dem Bogen steigt die Menge rechts weit über jede mögliche Zugabe
+						// hinaus (gerechnet bis rund 320 px über dem Platz, frei sind 306). Damit an der Oberkante der Fläche nie eine
+						// Figur abgeschnitten steht, blendet jede Figur der Menge aus, je näher ihr Kopf der Oberkante kommt: ab KANTE_PX
+						// darunter voll da, an der Kante unsichtbar. Die drei vorn sind ausgenommen. Weg zurück: KANTE_PX = 0.
+						// Behalten (Animation · Experten-Auswahl 19.11.2026 nachts), und keine Notlösung: Es ist die Regel, die in diesem
+						// Bild ohnehin gilt, was weiter weg ist, wird heller. Die Oberkante ist im Anfangsbild das Fernste.
+						const KANTE_PX = 56, oberkante = flaecheBreit && q.ebene > 1 && KANTE_PX > 0 ? Math.max(0, Math.min(1, ((y - 34 * g) * sc + oy) / (KANTE_PX * (cv.height / Math.max(1, cv.clientHeight))))) : 1;
+						if (oberkante <= 0) continue;
+						const ein = weich((t - q.ein) / 0.5) * oberkante * oberkante * (3 - 2 * oberkante);
+						// Messhaken, nur lokal: Lage einer festen Bezugsfigur auf dem Schirm (Einheiten), für den Weg je Bild
+						if (import.meta.env.DEV && q === bezugFigur()) (fig as any).__bezug = [x, y];
+						// Auftauchen der Karte (siehe FAHRT AB DEM ERSTEN BILD): kAuf 0 = noch nicht da, 1 = ganz da
+						const kAuf = q.ebene === 0 && zoomFassung() && beginnNeu() ? sanft(anteil(t, KARTE_AB(), KARTE_LANG)) : 1, einK = ein * kAuf;
+						// Überschwingen: Karte und Figur darin um ihren Mittelpunkt vergrößert (wird am Ende dieses Durchgangs aufgehoben)
+						const popHier = q.ebene === 0 && popS !== 1;
+						if (popHier) { ctx.save(); ctx.translate(popX, popY); ctx.scale(popS, popS); ctx.translate(-popX, -popY); }
+						if (zoomFassung() && q.ebene === 0 && zielVorne && kAuf > 0) {
+							// Blaue 16:9-Fläche hinter der vorderen Person: der Rahmen der Geste, im Verhältnis der jetzigen zur
+							// endgültigen Größe der Person verkleinert und an ihr festgemacht. Im Schlussbild deckt sie den Rahmen.
+							const m = g / zielVorne.g;
+							blauJetzt = { x, y, m };
+							const kx = x + (L - zielVorne.x) * m, ky = y + (T - zielVorne.y) * m, mk = marke();
+							if (import.meta.env.DEV) (fig as any).__karte = [kx, ky, RW * m, RH * m]; // nur lokal, zum Messen
+							// Zweiter Messhaken: die Karte, wie sie wirklich auf der Zeichenfläche liegt, in Gerätepixeln [x, y, Breite,
+							// Höhe]. __karte gibt die Lage ohne den Maßstab des Bildes (zZoom, also auch ohne das Weiterwachsen im Clip);
+							// wer davon ausgehend nach unten misst, landet am Ende noch im Videobild (Messfalle, 19.11.2026).
+							/* auch im Bau (20.11.2026): Namenszeile und Knöpfe lesen die Lage der Karte hier ab; nur lokal gesetzt, stand die Zeile im Bau links oben statt unter dem Video */ (fig as any).__karteEcht = [kx * sc + ox, ky * sc + oy, RW * m * sc, RH * m * sc];
+							// Schatten: entsteht mit der Geste und bleibt; nur außerhalb der Karte (Ausschnitt mit Loch)
+							// Ein Verlauf für alles, was die Geste bewirkt: Größe (in den Kombi-Fassungen), Schatten und Deckkraft kommen
+							// zusammen an (kubisch über die Dauer der Geste, wie das Wachsen).
+							// DECKKRAFT ALS VERLAUF (Rasul 19.11.2026 abends: „Okay, das mit dem Transparenten ist nicht schlecht. Wir
+							// machen es aber so, dass in dem Moment, wo der Videobeweis das noch weiter ranzieht, nehmen wir auch die
+							// Opacity raus, und währenddessen entsteht ja der Schatten. Den haben wir ja schon.“): Während der Fahrt ist
+							// das Blau durchsichtig (BLAU_DECK, ?deck=…), die Person gehört noch zur Menge. Die Geste macht sie fest: Das
+							// Blau wird während der Geste voll deckend, zugleich entsteht der Schatten. Am Ende steht eine deckende
+							// Karte mit Schatten. In „zoom“ und „zoomnah“ wächst dabei nichts, Deckkraft und Schatten laufen trotzdem
+							// über die Geste. Weg zurück zur festen Deckkraft: „+ (1 - BLAU_DECK()) * sch“ unten streichen.
+							const sch = zug(anteil(t, T_GESTE_ZOOM, DAUER_ZOOM));
+							// EIN BLATT FÜR KARTE UND NAMENSZEILE (Rasul 20.11.2026, auf die Wahl zwischen „Zeile liegt, Bild schwebt“ und einem
+							// gemeinsamen Blatt: „Ein Blatt“). Vorher schwebte nur die Karte, die Zeile lag darunter auf dem Papier, und der
+							// Schatten der Schrift war bei 8 % nicht zu sehen (eine dünne Schrift hält kaum Licht ab). Auf einem gemeinsamen
+							// weißen Blatt ist die Zugehörigkeit gebaut statt behauptet, wie ein Bild mit Unterschrift auf einem Karton.
+							// Das Blatt wird hier auf die Fläche gezeichnet, nach der Menge und vor der Karte: Direkt an der Kartenkante
+							// stehen Figuren (gemessen von Animation · Experten-Auswahl: dunkelster Wert 2 px neben der Karte 128 links, 110
+							// rechts); ein weißes Element dahinter würde von ihnen überdeckt, eines davor verdeckte die Karte.
+							// Maße, alle am Eckradius der Karte (r): Innenrand ringsum r, Abstand Karte zu Zeile r, Eckradius des Blattes 2 r
+							// (verschachtelte Rundungen, damit der weiße Rand in der Ecke gleich breit bleibt), Höhe = r + Karte + r +
+							// Höhe der Zeile + r. Der Schatten wandert von der Karte auf das Blatt, Werte unverändert (SCH_DECK, SCH_WEICH,
+							// SCH_AB am Maß der Karte); die Karte verliert ihren, sonst lägen zwei übereinander. Blatt und Zeile kommen mit dem
+							// Clip in BLATT_BLENDE Sekunden; im selben Zug blendet der Schatten der Karte aus und der des Blattes ein.
+							// Nur localhost, Fassung echt mit clip=ganz und der Zeile unter der Karte. Weg zurück: ?blatt=aus.
+							const bl = blattAn() ? sanft(anteil(t, echtVon(), BLATT_BLENDE)) : 0;
+							if (bl > 0) {
+								const r = RAD * m, th = nameHoehe > 0 ? nameHoehe / sc : RW * m * 0.066, bx = kx - r, by = ky - r, bw = RW * m + 2 * r, bh = RH * m + 3 * r + th;
+								if (import.meta.env.DEV) (fig as any).__blatt = [bx * sc + ox, by * sc + oy, bw * sc, bh * sc]; // nur lokal, Gerätepixel
+								if (SCH_DECK > 0) {
+									ctx.save(); ctx.beginPath(); ctx.rect(-4000, -4000, 9600, 8900); ctx.roundRect(bx, by, bw, bh, 2 * r); ctx.clip("evenodd");
+									ctx.shadowColor = `rgba(0,0,0,${(SCH_DECK * bl).toFixed(3)})`; ctx.shadowBlur = SCH_WEICH * m * sc; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = SCH_AB * m * sc;
+									ctx.fillStyle = "#000"; ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 2 * r); ctx.fill(); ctx.restore();
+								}
+								ctx.globalAlpha = bl; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 2 * r); ctx.fill(); ctx.globalAlpha = 1;
+							}
+							if (sch * (1 - bl) > 0 && SCH_DECK > 0) {
+								// Der Schatten wird nur außerhalb der Karte gezeichnet (Loch genau in Kartenform). Ein Versuch, ihn zwei
+								// Pixel unter den Kartenrand reichen zu lassen (19.11.2026), ist wieder heraus: Durch das durchsichtige Blau
+								// stand er während der Geste als dunkler Rand in der Karte. Die Naht, die „pixelig“ aussah, lag woanders,
+								// siehe zeichneEcht.
+								ctx.save(); ctx.beginPath(); ctx.rect(-4000, -4000, 9600, 8900); ctx.roundRect(kx, ky, RW * m, RH * m, RAD * m); ctx.clip("evenodd");
+								ctx.shadowColor = `rgba(0,0,0,${(SCH_DECK * sch * (1 - bl)).toFixed(3)})`; ctx.shadowBlur = SCH_WEICH * m * sc; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = SCH_AB * m * sc;
+								ctx.fillStyle = "#000"; ctx.beginPath(); ctx.roundRect(kx, ky, RW * m, RH * m, RAD * m); ctx.fill(); ctx.restore();
+							}
+							ctx.globalAlpha = mk === "blau" ? einK * (BLAU_DECK() + (1 - BLAU_DECK()) * sch) : kAuf; ctx.fillStyle = mk === "blau" ? kartenFarbe(ctx, kx, ky, RW * m, RH * m) : "#fff"; ctx.beginPath();
+							ctx.roundRect(kx, ky, RW * m, RH * m, RAD * m); ctx.fill();
+							if (mk === "rahmen") {
+								// Kontur: mindestens 6 Einheiten dick (am Anfang gut 2 px bei 680 px Fläche), am Ende 12
+								ctx.globalAlpha = einK; ctx.strokeStyle = "#000"; ctx.lineWidth = 6 + 6 * m; ctx.stroke();
+							}
+							ctx.globalAlpha = 1;
+						}
 						const tiefe = Math.max(0, 1 - fokus / zc); // 0 = auf der Schärfeebene
 						// sanfter abgestuft (Rasul 13.11.2026 abends: „Das ist jetzt sehr geblurrt alles im Hintergrund“): Faktor 2,5
 						// statt 8 (die Ranfahrt vergrößert das Verhältnis vorne zu hinten, deshalb so stark zurückgenommen)
 						const unsch = 2.5 * F_jetzt * Math.max(0, 1 / fokus - 1 / zc);
+						// Messhaken, nur lokal: Lage (Gerätepixel), Größe und Unschärfe jeder Figur im zuletzt gezeichneten Bild
+						if (import.meta.env.DEV) { const mm = ((q as any).m ||= [0, 0, 0, 0]); mm[0] = x * sc + ox; mm[1] = y * sc + oy; mm[2] = g * sc; mm[3] = unsch * sc; }
 						const alpha = ein * (0.85 + 0.15 * e) * (1 - 0.6 * tiefe);
 						if (punkte) {
 							// Variante: von oben Punkte, mit dem Kippen werden sie zu Personen (Kopf hebt sich, Schultern wachsen)
 							const p = sanft(anteil(kipp, 0.01, 0.17));
 							if (p < 1) zeichneVerwandlung(ctx, x, fy, y, g, alpha, p);
 							else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
+						} else if (figurEcht() && q.ebene === 0 && echt.umriss && zielVorne) {
+							// solange die Karte auftaucht, steht darunter noch die Person wie jede andere und blendet aus
+							if (kAuf < 1) zeichneUnscharf(ctx, x, y, g, alpha * (1 - kAuf), unsch, ein * (1 - kAuf));
+							if (kAuf > 0) zeichneEcht(x, y, g, einK, t); // Fassung „echt“: Umriss und Clip statt der gezeichneten Figur
+						} else if (zoomFassung() && q.ebene === 0) {
+							// neue Fassungen: Figur um ANDOCK größer, um die Augenlinie (5,5 Teile über dem Zeichenpunkt) herum
+							geradeUnten = true; // die Person in der Karte wird unten vom Rahmen angeschnitten
+							try { zeichneUnscharf(ctx, x, y + 5.5 * ((64 * g) / 19) * (ANDOCK - 1), g * ANDOCK, alpha, unsch, ein); } finally { geradeUnten = false; }
+						} else if (welle && q.ebene > 0) {
+							// Kamm der Welle an dieser Person: 1 genau auf der Front, fällt mit der Zeit und der Entfernung auf 0
+							const dx = x - welle.cx, dy = y - welle.cy, r = Math.hypot(dx, dy) || 1, weit = WELLE_WEIT * welle.kb;
+							const kamm = Math.exp(-Math.pow((r - weit * weich(welle.p)) / (ST.kamm * welle.kb), 2)) * Math.pow((1 - welle.p) * Math.max(0, 1 - r / weit), ST.abfall);
+							// Messhaken, nur lokal: größte Wirkung je Fassung; weit = größte Entfernung (Kartenbreiten), in der eine Figur noch
+							// mindestens ein Fünftel der Spitze von Stufe 1 abbekam; zahl = wie viele Figuren das waren
+							const mess = ((fig as any).__welle ||= { ring: 0, druck: 0, blick: 0, weit: 0, zahl: 0, wer: new Set() }) as any;
+							if (kamm * ST.spitze * (welle.art === "blick" ? Math.sin(Math.PI * welle.p) * Math.max(0, 1 - r / (BLICK_WEIT * welle.kb)) : 1) >= 0.2) { mess.weit = Math.max(mess.weit, r / welle.kb); mess.wer.add(q); mess.zahl = mess.wer.size; }
+							if (welle.art === "ring") {
+								mess.ring = Math.max(mess.ring, RING_HELL * kamm * 100);
+								zeichneUnscharf(ctx, x, y, g, alpha * (1 - RING_HELL * kamm), unsch, ein);
+							} else if (welle.art === "druck") {
+								const weg = ((DRUCK_PX * (window.devicePixelRatio || 1)) / sc) * kamm; // in Einheiten der Zeichnung
+								mess.druck = Math.max(mess.druck, DRUCK_PX * kamm);
+								zeichneUnscharf(ctx, x + (dx / r) * weg, y + (dy / r) * weg, g, alpha, unsch, ein);
+							} else if (welle.art === "blick") {
+								// Neigung zur Karte hin um den Fußpunkt (9 Teile unter dem Zeichenpunkt); zeitlich ein Bogen hin und zurück
+								const nah = Math.max(0, 1 - r / (BLICK_WEIT * welle.kb)), grad = BLICK_GRAD * Math.sin(Math.PI * welle.p) * nah;
+								mess.blick = Math.max(mess.blick, grad);
+								if (grad > 0.01) {
+									const fuss = y + 9 * ((64 * g) / 19);
+									ctx.save(); ctx.translate(x, fuss); ctx.rotate((Math.sign(welle.cx - x) * grad * Math.PI) / 180); ctx.translate(-x, -fuss);
+									zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein); ctx.restore();
+								} else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
+							} else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
 						} else zeichneUnscharf(ctx, x, y, g, alpha, unsch, ein);
+						if (zoomFassung() && q.ebene === 0 && zielVorne && marke() === "invers") {
+							// „invers“: Die Karte wurde weiß gefüllt und die Person schwarz darauf gezeichnet; jetzt die Fläche
+							// umkehren, dann steht die Person weiß auf Schwarz.
+							const m = g / zielVorne.g;
+							ctx.filter = "none"; ctx.globalAlpha = 1; ctx.globalCompositeOperation = "difference"; ctx.fillStyle = "#fff"; ctx.beginPath();
+							ctx.roundRect(x + (L - zielVorne.x) * m, y + (T - zielVorne.y) * m, RW * m, RH * m, RAD * m); ctx.fill();
+							ctx.globalCompositeOperation = "source-over";
+						}
+						if (popHier) ctx.restore();
 					}
+					if (zf) { zeichneGeste(); ctx.setTransform(sc, 0, 0, sc, ox, oy); }
 					raster(ctx);
 					return;
 				}
@@ -933,7 +2115,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// schieben. Es ändert an der Kamerabewegung nichts.“): Die ausgewählte Person startet weiter hinten und rutscht
 			// während der Geste auf ihren Platz ganz vorne. Nur der Platz auf der Fläche ändert sich; Kamerabahn, Ranfahrt und
 			// Endwerte rechnen weiter mit dem Zielplatz, weil die Person dort ankommt.
-			const POLE_VON_X = 0, POLE_VON_Z = -180; // halbe Strecke, mittig (Rasul 15.11.2026: „setz ihn mal auf die halbe Strecke“)
+			const POLE_VON_X = 0, POLE_VON_Z = mengeDoppelt() ? -40 : -180; // dichtere Menge (19.11.2026): Start weiter hinten; // halbe Strecke, mittig (Rasul 15.11.2026: „setz ihn mal auf die halbe Strecke“)
 			const POLE_DAVOR_X = [-70, 60]; // Startplätze der beiden, die zur Seite gehen
 			const pole = () => document.documentElement.dataset.pole !== "aus";
 			// Vier Proben zur Bewegung der Menge (Rasul 15.11.2026: „Ich finde, er ist gerade ein bisschen allein, wenn er da
@@ -975,6 +2157,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// ungleich: zwei weitere gehen zur Seite, beide nach links, dazu die zwei aus „pole“ (einer links, einer rechts)
 					if (an("gasse")) nah.slice(2, 4).forEach((q, k) => { halte(q); q.wx -= (70 + streu(k + 5) * 45) * anteil(k + 17); });
 				}
+				// dichtere Menge: sechs weitere stehen am Anfang im Weg und gehen zur Seite, gestaffelt wie die anderen. Erst hier, nach „mit“ und „gasse“: Die suchen ihre Personen nach dem Abstand zur Mitte aus, und der darf sich dafür nicht bewegen
+				leuteRaum.forEach((q, k) => { if (q.weicht !== undefined) { halte(q); const u = anteil(k + 41); q.wx = q.weicht + (q.wx - q.weicht) * u; } });
 				// hintere Reihen weiten sich, links stärker als rechts
 				if (an("weite")) {
 					const uW = kubisch(Math.max(0, Math.min(1, (t - T_PERSONEN) / (ENDE - T_PERSONEN))));
@@ -988,6 +2172,14 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						q.wx += Math.sin((t / per) * Math.PI * 2 + ph) * 3;
 						q.wz += Math.cos((t / per) * Math.PI * 2 + ph * 1.3) * 2;
 					});
+				}
+				// Bogen (siehe BOGEN): nach allen anderen Verschiebungen die ganze Aufstellung um die gewählte Person drehen
+				{
+					const w = bogenWinkel(t), mitte = w !== 0 ? leuteRaum.find((q) => q.ebene === 0) : undefined;
+					if (mitte) {
+						const mx = mitte.wx, mz = mitte.wz;
+						leuteRaum.forEach((q) => { if (q !== mitte) { halte(q); [q.wx, q.wz] = gedreht(q.wx, q.wz, mx, mz, w); } });
+					}
 				}
 				try { zeichneBild(t, jetzt); } finally { for (let k = merk.length - 1; k >= 0; k--) { merk[k].q.wx = merk[k].x; merk[k].q.wz = merk[k].z; } }
 			};
@@ -1013,8 +2205,72 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Leuchtspur auf der eigenen Uhr der Animation, nicht auf der Echtzeit: nach Pause oder Tabwechsel verglüht sie
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
-				const schluss = ende() === "kamera" ? T_KAMERA + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
-				if (uhr < schluss + GLIMM) lauf = requestAnimationFrame(schritt);
+				// Fassung „echt“: Der Clip läuft am Ende der Geste an, einmal, stumm
+				if (figurEcht() && echt.clip && !echt.spielt && uhr >= echtVon()) { echt.spielt = true; if (echt.clip.currentTime > 0.05) echt.clip.currentTime = 0; echt.clip.play().catch(() => {}); tonStand(); tonZeigen(true); } // kein Sprung auf 0, wenn der Clip schon dort steht: Der Sprung ließ den Browser das erste Bild neu holen (einmal gemessen: 4,6 s Umriss statt Video)
+				// Ton-Bedienung an der unteren rechten Ecke der Karte halten (die Karte wächst in den ersten Sekunden des Clips noch)
+				// Bauchbinde: unten links an der Karte, sichtbar in den ersten BINDE_SEKUNDEN der Clipzeit (oder immer)
+				// Zeile unter der Karte: erst wenn die Karte ausgewachsen ist (Rasul 20.11.2026: „blende es erst ein, wenn das Video
+				// die endgültige Größe erreicht hat.“). REGEL: Eine fest gesetzte Beschriftung unter einem wachsenden Element
+				// wartet, bis das Element steht; sonst wandert der Abstand, obwohl die Beschriftung still steht. Das Wachsen endet
+				// LAUF_SEKUNDEN nach dem Start des Clips auf der Uhr der Animation (rund 16,8 s nach dem Start der Animation; wer
+				// vorher weiterscrollt, sieht die Zeile nicht). Danach bleibt sie, auch bei „Von vorne“. Stand davor: mit dem Clip.
+				// ZURÜCKGENOMMEN UND ERSETZT (Rasul gleich danach: „jetzt kommt der Text etwas spät, als der Name vom Nico.“): Die
+				// Zeile wartet nicht mehr, sie ist nicht mehr fest. Sie hängt mit gleichbleibendem Abstand (NAME_ABSTAND im
+				// Verhältnis zur Karte) an der jeweiligen Unterkante der Karte und wandert beim Wachsen mit; so erscheint sie
+				// mit dem Clip, und der Abstand bleibt gleich. Die Regel oben stimmte, geändert war die falsche Hälfte: nicht
+				// warten, sondern nicht fest sein. Stand davor: nameZeigen(echt.spielt && uhr >= echtVon() + LAUF_SEKUNDEN)
+				// mit fester Lage aus nameLegen().
+				if (nameZeile && !nameBinde()) {
+					const k = (fig as any).__karteEcht as number[] | undefined;
+					if (k && echt.spielt) {
+						// AUF DEM BLATT BÜNDIG MIT DEM VIDEO, KEIN EINZUG (Animation · Experten-Auswahl 20.11.2026, am Bild bei 2046 px
+						// verglichen). Rasuls Grund für den Einzug war die Rundung („es fühlt sich an, als ob es zu weit links steht,
+						// weil es eine Rundung gibt“): Damals war die Karte die äußere Kante, ihre runde Ecke bildete die Silhouette, und
+						// bündige Schrift darunter sah aus, als stünde sie über. Auf dem Blatt bildet der Blattrand die Silhouette, die
+						// Schrift steht weit innerhalb; die Voraussetzung der Regel ist weg. Eingerückt überging die Zeile die starke
+						// senkrechte Kante des Videos, bündig entsteht eine Fluchtlinie durch die ganze Fassung. Den Wunsch, dass Text
+						// eingerückt steht, erfüllt jetzt der Innenrand des Blattes. Ohne Blatt (?blatt=aus) bleibt der Einzug.
+						const v = flaecheVersatz, kb = k[2] / v[2], ms = kb / TON_BEZUG, einzug = blattAn() ? 0 : Math.max(BINDE_RAND * ms, (kb * RAD) / RW);
+						nameZeile.style.left = "0"; nameZeile.style.top = "0";
+						// mit Blatt: Abstand Karte zu Zeile ein Eckradius (Innenrand des Blattes), ohne Blatt NAME_ABSTAND wie bisher
+						const blatt = blattAn(), abstand = blatt ? (kb * RAD) / RW : NAME_ABSTAND * ms;
+						nameZeile.style.transform = `translate(${(v[0] + k[0] / v[2] + einzug).toFixed(1)}px, ${(v[1] + (k[1] + k[3]) / v[2] + abstand).toFixed(1)}px)`;
+						nameHoehe = nameZeile.offsetHeight * v[2];
+						nameZeile.style.width = `${Math.max(120, kb - einzug).toFixed(0)}px`;
+						// auf dem Blatt liegt die Schrift auf Weiß und schwebt nicht selbst: kein eigener Schatten
+						nameZeile.style.textShadow = NAME_SCHATTEN > 0 && !blatt ? `0 ${((kb * SCH_AB) / RW).toFixed(1)}px ${((kb * SCH_WEICH) / RW).toFixed(1)}px rgba(0,0,0,${NAME_SCHATTEN})` : "none";
+						if (import.meta.env.DEV) (fig as any).__name = { einzug, radius: (kb * RAD) / RW, karteBreit: kb };
+					}
+					nameZeigen(echt.spielt);
+				}
+				if (nameZeile && nameBinde() && echt.clip) {
+					const k = (fig as any).__karteEcht as number[] | undefined;
+					if (k && echt.spielt) {
+						const v = flaecheVersatz, kb = k[2] / v[2], rand = (BINDE_RAND * kb) / TON_BEZUG;
+						nameZeile.style.maxWidth = `${(BINDE_BREIT * kb - rand).toFixed(0)}px`;
+						nameZeile.style.transform = `translate(${(v[0] + k[0] / v[2] + rand).toFixed(1)}px, ${(v[1] + (k[1] + k[3]) / v[2] - rand).toFixed(1)}px) translateY(-100%)`;
+					}
+					nameZeigen(echt.spielt && (bindeImmer() || echt.clip.currentTime < BINDE_SEKUNDEN));
+				}
+				if (tonKnopf && !tonKnopf.hidden) {
+					const k = (fig as any).__karteEcht as number[] | undefined;
+					if (k) {
+						// Maß und Abstand im Verhältnis zur Kartenbreite: wächst und wandert mit der Karte
+						// Klickfläche mindestens TON_MIN px; der Rand zur Kartenkante bleibt im Verhältnis zur Karte
+						const v = flaecheVersatz, kb = k[2] / v[2], ms = Math.max(TON_MIN / TON_FLAECHE, kb / TON_BEZUG), rand = (TON_RAND * kb) / TON_BEZUG;
+						const breit = TON_FLAECHE * ms, hoch = (3 * TON_FLAECHE + 2 * TON_LUECKE) * ms; // Stapel: eine Knopfbreite, drei Knöpfe hoch
+						tonKnopf.style.transform = `translate(${(v[0] + (k[0] + k[2]) / v[2] - rand - breit).toFixed(1)}px, ${(v[1] + (k[1] + k[3]) / v[2] - rand - hoch).toFixed(1)}px) scale(${ms.toFixed(3)})`;
+					}
+					if (echt.clip && echt.clip.ended) tonZeigen(false);
+				}
+				// Fassung „zoom“: Die Geste läuft erst nach dem Stillstand, die Bildschleife muss sie noch zu Ende zeichnen
+				const schluss0 = zoomFassung() && ende() === "kamera" ? T_GESTE_ZOOM + DAUER_ZOOM + 0.45 : ende() === "kamera" ? T_KAMERA + D_KAMERA + 0.6 : ENDE; // Kamera: kurz nach dem Stillstand fertig
+				// Fassung „echt“: Die Bildschleife läuft weiter, solange der Clip spielt (Blende plus Dauer des Clips)
+				const schluss = figurEcht() && echt.clip && ende() === "kamera" ? Math.max(schluss0, echtVon() + (isFinite(echt.clip.duration) ? echt.clip.duration : 10)) : schluss0;
+				// ganzes Video: Die Bildschleife zeichnet weiter, solange der Clip wirklich läuft (auch wenn er zwischendurch nachlädt)
+				// von Hand angehalten: Die Schleife läuft weiter, damit „abspielen“ und „von vorne“ sofort wieder ein Bild zeigen
+				const clipLaeuft = figurEcht() && clipGanz() && !!echt.clip && echt.spielt && !echt.clip.ended && (!echt.clip.paused || handPause);
+				if (uhr < schluss + GLIMM || clipLaeuft) lauf = requestAnimationFrame(schritt);
 				else fig.dataset.fertig = "";
 			};
 			const weiter = () => { if (haelt) { haelt = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); } };
@@ -1022,6 +2278,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const spiele = () => {
 				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
 				spurR = []; spurL = []; ansageRest = D_ANSAGE;
+				if (import.meta.env.DEV) (fig as any).__welle = null; // Messwerte der Welle je Durchlauf neu
+				// Fassung „echt“: Clip erst jetzt laden (Start der Animation) und auf Anfang stellen
+				if (figurEcht()) { nameLegen(); umrissLaden(); const v = echtClipLaden(); echt.spielt = false; echt.stand = null; handPause = false; v.muted = true; tonZeigen(false); nameZeigen(false); nameLegen(); try { v.pause(); v.currentTime = 0; } catch { /* noch nicht geladen */ } }
 				if (still) { bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); return; }
 				phase("warten");
 				start = performance.now() / 1000; uhr = VORSPRUNG(); zuletzt = start; lauf = requestAnimationFrame(schritt);
@@ -1055,19 +2314,35 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Personen entstehen lassen, wenn die Animation zu 20 % im Bild ist“). Vorher hing der Start an der Überschrift unter
 			// der Animation (Oberkante des Nachsatzes 20 % über der Fensterunterkante, BBH-Zeilenregel); dadurch musste die ganze
 			// Fläche im Bild stehen, bevor etwas passierte. Gilt für beide Richtungen, auch wenn man von unten kommt (M3).
-			const START_ANTEIL = 0.2;
+			// PROBE STARTSCHWELLE, NUR LOCALHOST (Rasul 19.11.2026: „Wenn ich scrollend die Texte lese, ist manchmal die
+			// Animation schon fertig. Wenn sie aber später anfängt, scrolle ich durch, weil ich nicht sehe, dass es eine
+			// Animation ist." und: „Lass uns mal die Schwelle ändern und dann probiere ich es aus."): Der Anteil kommt lokal
+			// aus html[data-start] (?start=20|50|80, gesetzt in Layout.astro, Grundeinstellung der Probe 50). Im Bau ist
+			// data-start nicht gesetzt, dort bleibt es bei 20 %.
+			// Absicherung gegen „startet nie": Gemessen wird am kleineren Wert aus Flächenhöhe und Fensterhöhe. Ist die Fläche
+			// höher als das Fenster, zählt der Anteil am Fenster, sonst könnten 80 % nie erreicht werden.
+			// Weg zurück (Stand bis 19.11.2026), im Wortlaut:
+			//   const START_ANTEIL = 0.2;
+			//   const animImBild = () => { … return r.height > 0 && sichtbar / r.height >= START_ANTEIL; };
+			//   const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.intersectionRatio >= START_ANTEIL)) spiele(); },
+			//     { threshold: [0, START_ANTEIL] });
+			const startAnteil = () => (Number(document.documentElement.dataset.start) || 20) / 100; // seit 20.11.2026 auch im Bau aus dem Layout (dort fest 50, der Stand auf localhost)
 			const animImBild = () => {
 				const r = fig.getBoundingClientRect();
 				const sichtbar = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
-				return r.height > 0 && sichtbar / r.height >= START_ANTEIL;
+				// kleine Toleranz (1 px), damit Rundung an der Schwelle den Start nicht verschluckt
+				return r.height > 0 && sichtbar + 1 >= Math.min(r.height, window.innerHeight) * startAnteil();
 			};
 			let zuletztRaus = "";
-			const beob = new IntersectionObserver((e) => { if (!gestartet && e.some((x) => x.intersectionRatio >= START_ANTEIL)) spiele(); },
-				{ threshold: [0, START_ANTEIL] });
+			// Schwellen in 5-%-Schritten: Der Browser meldet sich an jeder, geprüft wird dann mit animImBild (eine Regel für
+			// beide Stellen, auch wenn die Fläche höher ist als das Fenster).
+			const beob = new IntersectionObserver(() => { if (!gestartet && animImBild()) spiele(); },
+				{ threshold: Array.from({ length: 21 }, (_, i) => i / 20) });
 			beob.observe(fig);
 			if (import.meta.env.DEV) (fig as any).__freigabe = () => { freigabe = true; weiter(); }; // nur lokal, zum Prüfen
 			// Aufstellung auslesen, damit der Regietisch sie laden kann (nur lokal)
-			if (import.meta.env.DEV) (fig as any).__aufstellung = () => leuteRaum.map((q) => ({ x: Math.round(q.wx), z: Math.round(q.wz), ebene: q.ebene, spaet: !!q.spaet, ein: q.ein, rolle: q.rolle || "" }));
+			if (import.meta.env.DEV) (fig as any).__lage = () => leuteRaum.map((q, i) => ({ i, m: (q as any).m, ebene: q.ebene, breit: !!q.breit, fuell: !!q.fuell, weg: !!q.weg, fern: !!q.fern, wx: q.wx, wz: q.wz, vor: (q as any).vor }));
+		if (import.meta.env.DEV) (fig as any).__aufstellung = () => leuteRaum.map((q) => ({ x: Math.round(q.wx), z: Math.round(q.wz), ebene: q.ebene, spaet: !!q.spaet, ein: q.ein, rolle: q.rolle || "" }));
 			// Rein- und Rausscrollen (Rasul 14.11.2026: „Ja, so bauen“, Vorschlag Claude nach BBH, Analyse
 			// research/BBH_Website_Analyse_2026-11/C_Bewegung_Interaktion.md 3.4 und 4.1):
 			// 1. Rausgescrollt, bevor sie fertig ist: Sie hält an und läuft beim Zurückkommen an derselben Stelle weiter
@@ -1076,15 +2351,18 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// 3. Ganz nach oben zurück, über das Band hinaus (Animation liegt unterhalb des Fensters): Sie setzt sich auf den
 			//    Anfang zurück und spielt beim nächsten Herunterscrollen neu (wie BBHs Unterschrift, die sich neu schreibt).
 			// 4. „Noch einmal“ bleibt, für alle, die die Fahrt bewusst noch einmal sehen wollen (Abweichung von BBH).
+			const RUECK_WARTE = 0.6; let rueckUhr = 0;
 			const zuruecksetzen = () => {
 				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
+				if (echt.clip) { try { echt.clip.pause(); } catch { /* nichts */ } echt.clip.muted = true; echt.spielt = false; echt.stand = null; handPause = false; tonZeigen(false); nameZeigen(false); }
 				uhr = VORSPRUNG(); spurR = []; spurL = []; ansageRest = D_ANSAGE; delete fig.dataset.fertig; phase("warten"); groesse(); bild(uhr, 0);
 			};
 			const sicht = new IntersectionObserver((e) => {
 				const x = e[e.length - 1];
 				if (x.isIntersecting) {
+					window.clearTimeout(rueckUhr); // wieder im Bild: nicht zurücksetzen
 					if (pausiert) {
-						pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt);
+						pausiert = false; zuletzt = performance.now() / 1000; lauf = requestAnimationFrame(schritt); echtHalt(false);
 						return;
 					}
 					// Schnell über das Band gewischt (Code-Prüfung M4): Kam sie zuletzt oben heraus und tritt jetzt unten wieder
@@ -1098,9 +2376,26 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				}
 				const unten = window.innerHeight;
 				zuletztRaus = x.boundingClientRect.top < 0 ? "oben" : "unten";
-				if (x.boundingClientRect.top >= (x.rootBounds?.bottom ?? unten)) { if (gestartet && !still) zuruecksetzen(); return; }
+				// ZURÜCKSETZEN ERST NACH WIRKLICHEM VERLASSEN (Rasul 19.11.2026: „Also bei mir ruckelt es extrem, wenn ich
+				// reinscrolle in das Segment. Das Start hat ruckartig und bewegt sich kurz vorwärts und zurück.“). Gemessen von
+				// Animation · Experten-Auswahl mit echten Mausrad-Ereignissen: hinein, drei Stufen zurück, wieder hinein, und
+				// die Karte sprang von 139 auf 116 Bildpunkte, also auf den Anfang. Ursache: Regel 3 (ganz nach oben zurück =
+				// zurücksetzen) löste sofort aus, sobald die Fläche unter die Fensterunterkante geriet. Seit die Fläche höher
+				// steht und der Start erst bei 50 % kommt, genügen dafür drei Mausrad-Stufen, und ein Trackpad wippt beim
+				// Loslassen von allein nach. Die Regel bleibt, sie wartet jetzt RUECK_WARTE Sekunden: Liegt die Fläche dann
+				// immer noch unterhalb des Fensters, setzt sie sich zurück; kommt sie vorher wieder ins Bild, läuft sie an
+				// derselben Stelle weiter (Regel 1). Solange sie draußen ist, hält sie an, auch unterhalb.
+				// Weg zurück (Stand bis 19.11.2026), im Wortlaut als erste Zeile dieses Zweigs:
+				//   if (x.boundingClientRect.top >= (x.rootBounds?.bottom ?? unten)) { if (gestartet && !still) zuruecksetzen(); return; }
+				const unterhalb = x.boundingClientRect.top >= (x.rootBounds?.bottom ?? unten);
 				if (gestartet && !haelt && !pausiert && fig.dataset.fertig === undefined) {
-					cancelAnimationFrame(lauf); pausiert = true; pauseSeit = performance.now() / 1000;
+					cancelAnimationFrame(lauf); pausiert = true; pauseSeit = performance.now() / 1000; echtHalt(true);
+				}
+				if (unterhalb && gestartet && !still) {
+					window.clearTimeout(rueckUhr);
+					rueckUhr = window.setTimeout(() => {
+						if (gestartet && !still && fig.getBoundingClientRect().top >= window.innerHeight * 0.95) zuruecksetzen();
+					}, RUECK_WARTE * 1000);
 				}
 			// Untere Kante des Fensters 5 % höher gedacht (Rasul 14.11.2026: „Das Zurücksetzen der Animation funktioniert
 			// nicht … wenn ich hoch und runter scrolle“). Gemessen in der Live-Fassung: Ganz oben liegt die Animation genau an
@@ -1113,8 +2408,14 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// draufklicke … egal wo ich draufklicke, stoppen beide“): anhalten, weiterlaufen, neu starten von außen
 			if (import.meta.env.DEV) {
 				(fig as any).__spiele = spiele;
+				(fig as any).__clip = () => echt.clip; (fig as any).__echt = () => ({ umriss: !!echt.umriss, spielt: echt.spielt, figurEcht: figurEcht(), ziel: !!zielVorne }); // nur lokal, zum Prüfen (Lautstärke auf 0 setzen, Zustand lesen)
 				// Standbild für Storyboards (14.11.2026): spielt bis t in Schritten von 1/60 s ohne Bildschleife ab, damit Spur und
 				// Einblendungen stimmen; läuft auch in einem Hintergrund-Tab
+				// MESSFALLE (20.11.2026): __bild(t) setzt weder die Namenszeile noch die Knöpfe der Fassung „echt“. Deren Lage wird
+				// in schritt() gerechnet, nicht in bild(); ein Standbild zeichnet nur die Fläche neu und lässt Zeile und Knöpfe stehen,
+				// wo sie gerade stehen. __bild rechnet außerdem auf der Uhr der Animation, ohne VORSPRUNG abzuziehen. Der Weg der
+				// Zeile ist deshalb nur im echten Lauf messbar, und nur bei sichtbarer Browser-Fläche (sonst steht
+				// requestAnimationFrame still).
 				(fig as any).__bild = (t: number) => {
 					cancelAnimationFrame(lauf); groesse(); spurR = []; spurL = []; gestartet = true; pausiert = true;
 					for (let x = 0; x <= t; x += 1 / 60) bild(x, x);
@@ -1132,6 +2433,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const mass = masse();
 				if (mass === massZuletzt) return; massZuletzt = mass;
 				if (fig.dataset.fertig !== undefined) { spurR = []; spurL = []; groesse(); bild(ENDE + 5, 0); } else groesse();
+				nameLegen(); // Namenszeile der Fassung echt neu legen
 			};
 			window.addEventListener("resize", neuBemessen);
 			// Aufräumen beim Seitenwechsel ohne Neuladen (Astro ClientRouter): Bildschleife, Beobachter, Zuhörer, Speicher der

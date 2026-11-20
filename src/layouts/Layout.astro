@@ -238,6 +238,89 @@ const websiteJsonLd = JSON.stringify({
 						document.documentElement.dataset.zeilen = liesWahl("zeilen", ["gross", "fett", "fein"], "fett"); // fett gilt auch im Bau; gross und fein nur als Vergleich auf localhost, siehe MenuBBH.astro (ZEILEN)
 						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Handy-Menü: 90 = neues Maß und neue Reihenfolge (gilt im Bau), 72 = Stand davor; siehe MenuBBH.astro (HANDY_MENUE)
 					}
+					// EXPERTEN-ANIMATION, AUCH IM BAU (20.11.2026; Rasul im Website · Master: „Die Version fürs dritte Segment, also
+					// die Animation mit dem Video und dem Reinzoomen … Das schieben wir auf Dev und wir schieben es auf live.“).
+					// Die folgenden Zeilen standen bis heute im Block „nur lokal“. Im Bau liest liesWahl weder Adresse noch Speicher
+					// und gibt immer die Vorgabe zurück: Der Bau bekommt also fest den Stand von localhost. Zwei Ausnahmen: figur ist
+					// im Bau fest „echt“ (auf localhost bleibt die Vorgabe „neu“, echt über ?figur=echt), clip ist im Bau fest
+					// „kurz“ (das ganze Video ist zu groß für Cloudflare Pages). Die älteren Kommentare „nur lokal“ und „Im Bau wird
+					// nichts gesetzt“ in diesem Abschnitt gelten damit nicht mehr. Weg zurück: die schließende Klammer wieder hinter
+					// die Zeile mit „spalten“ setzen.
+					{
+						// Probe Startschwelle der Experten-Animation, nur lokal (Rasul 19.11.2026: „Lass uns mal die Schwelle ändern und
+						// dann probiere ich es aus."): ?start=20|50|80 = Anteil der Animationsfläche in Prozent, der im Fenster stehen
+						// muss, bevor sie losläuft. 20 = Stand bis 19.11.2026 und weiter der Stand im Bau; 50 = Grundeinstellung der Probe.
+						// Im Bau wird nichts gesetzt, dort gilt fest 20 (ExpertenAuswahl.astro, START_ANTEIL). Weg zurück: diese Zeile
+						// löschen und in ExpertenAuswahl.astro wieder „const START_ANTEIL = 0.2;" setzen.
+						document.documentElement.dataset.start = liesWahl("start", ["20", "50", "80"], "50");
+						// Probe Zweispalte im Videobeweis-Band, nur lokal (Rasul 19.11.2026): ?spalten=mitte|titellinks|titelbreit|b6|b6voll|aus, siehe
+						// index.astro (PROBE SATZ LINKS, TEXT RECHTS). Im Bau wird nichts gesetzt, dort bleibt es gestapelt.
+						// Form der Figur in der Experten-Animation, nur lokal (Rasul 19.11.2026): ?figur=neu|alt. neu = Form B „Schulter“
+						// (Grundeinstellung auf localhost), alt = Form bis 19.11.2026. Im Bau wird nichts gesetzt, dort gilt die alte.
+						// Ganzes Video mit Ton oder der kurze Ausschnitt (Auftrag T, Rasul 19.11.2026 nachts): ?clip=ganz|kurz, nur mit ?figur=echt
+						document.documentElement.dataset.clip = nurLokal ? liesWahl("clip", ["ganz", "kurz"], "ganz") : "kurz";
+						// Bauchbinde im Video (Auftrag Y, Rasul 20.11.2026): ?binde=kurz|immer, kurz = blendet nach 6 s aus
+						document.documentElement.dataset.binde = liesWahl("binde", ["kurz", "immer"], "kurz");
+						// Namensangabe als Zeile unter der Karte (Rasuls Wahl, 20.11.2026) oder als Bauchbinde im Bild (verworfen, Weg zurück): ?namensform=zeile|binde
+						document.documentElement.dataset.namensform = liesWahl("namensform", ["zeile", "binde"], "zeile");
+						// Karte und Namenszeile auf einem gemeinsamen schwebenden Blatt (Rasul 20.11.2026: „Ein Blatt“): ?blatt=an|aus
+						// BLATT WIEDER WEG (Rasul 20.11.2026 morgens, in Website · Programmierung: „Mach diese extra Karte weg, lasst das Video
+						// für sich stehen und macht die Beschreibung, häng die unten drunter, ohne dass es ein eigenes Blatt wird“; er hatte
+						// es am Vortag schon zurückgenommen, das war untergegangen). Vorgabe aus. Der Wert heißt „mit“ statt „an“, damit
+						// ein gemerktes „an“ nicht weiterwirkt. Weg zurück: ?blatt=mit oder Vorgabe "mit".
+						document.documentElement.dataset.blatt = liesWahl("blatt", ["mit", "aus"], "aus");
+						document.documentElement.dataset.figur = nurLokal ? liesWahl("figur", ["neu", "alt", "echt"], "neu") : "echt"; // echt = in der Karte Umriss und Clip eines echten Menschen (Platzhalter, Kundenmaterial nur lokal), nur in den neuen Fassungen der Animation
+						// Zweite Fassung der Experten-Animation, nur lokal (Rasul 19.11.2026 abends): ?anim=geste|zoom|zoomnah (zoomnah = wie zoom, die Fahrt endet früher, die blaue Karte bleibt halb so breit wie die Fläche). geste = heutige
+						// Fassung und Grundeinstellung; zoom = blaue 16:9-Fläche, Kamerafahrt ohne Geste, Geste erst am Ende. Siehe
+						// ExpertenAuswahl.astro (ZWEITE FASSUNG „zoom“). Im Bau wird nichts gesetzt, dort läuft die heutige.
+						document.documentElement.dataset.anim = liesWahl("anim", ["geste", "zoom", "zoomnah", "kombi", "kombimitte"], "kombimitte"); // Grundeinstellung auf localhost kombimitte (Rasul 19.11.2026 abends: „Auf der Localhost 4321 ist die Animation nicht so, wie wir sie vorhin gemacht haben. Da fehlt jetzt der Stopp, bevor die Videobeweisbewegung es nochmal größer zieht.“); vorher geste. Im Bau läuft weiter geste.
+						// kombimitte = wie kombi, die Karte wächst aber nur bis ?ziel=… px Breite (bezogen auf 680 px Fläche), damit die
+						// Menge daneben stehen bleibt. Die Werte sind zum Suchen der Grenze da.
+						// Deckkraft der blauen Karte in Prozent (Rasul 19.11.2026: „mach mal das Blau ein bisschen durchsichtig“), zum Vergleichen
+						document.documentElement.dataset.deck = liesWahl("deck", ["100", "92", "85", "78", "70", "60"], "70"); // Grundeinstellung 70 (Website · Master 19.11.2026): gilt nur noch während der Fahrt, am Ende ist das Blau immer deckend; mit 85 war der Wechsel zu leise. 85 bleibt über ?deck=85
+						// Blau der Karte (Rasul 19.11.2026: an das Blau des Videos angleichen): ?kartenblau=blase|ton|verlauf, siehe
+						// ExpertenAuswahl.astro. Nicht „kachel“: Der Name und html[data-kachel] gehören schon der Menükachel (MenuBBH.astro).
+						document.documentElement.dataset.kartenblau = liesWahl("kartenblau", ["blase", "ton", "verlauf"], "verlauf");
+						// Menge der Experten-Animation (Rasul 19.11.2026: doppelt so viele): ?menge=doppelt|einfach, nur in den neuen Fassungen
+						document.documentElement.dataset.menge = liesWahl("menge", ["doppelt", "einfach"], "doppelt");
+						// Zeichenfläche der Experten-Animation breiter als ihr Platz, Menge bis hinter den Text (Rasul 19.11.2026): ?breit=an|aus
+						document.documentElement.dataset.breit = liesWahl("breit", ["an", "aus"], "an");
+						// Anfang der neuen Fassungen (Rasul 19.11.2026 spät): ?beginn=neu|alt. neu = die Fahrt läuft ab dem ersten Bild,
+						// die blaue Karte blendet ein; alt = Standbild, dann Fahrt, Karte von Anfang an. Nicht „anfang“, der Name ist vergeben.
+						document.documentElement.dataset.beginn = liesWahl("beginn", ["neu", "alt"], "neu");
+						// Bereich hinter dem Text ist am Anfang leer und füllt sich während der Fahrt (Rasul 19.11.2026): ?textfrei=an|aus
+						// Seit 19.11.2026 spät aus (Auftrag Q1; Rasul: „In dem Moment, wo die Kamera fährt, gibt es keine neuen Menschen mehr.“).
+						// Der Wert heißt jetzt „spaet“ statt „an“, damit ein gemerktes „an“ nicht weiterwirkt. Weg zurück: ?textfrei=spaet
+						document.documentElement.dataset.textfrei = (function () { var w = liesWahl("textfrei", ["spaet", "aus", "an"], "aus"); return w === "spaet" ? "spaet" : "aus"; })();
+						// Linke Fläche gefüllt, als Versuch (Auftrag O3; Rasul 19.11.2026): ?fuellung=an|aus, siehe ExpertenAuswahl.astro
+						document.documentElement.dataset.fuellung = liesWahl("fuellung", ["an", "aus"], "an");
+						// Welle beim Auftauchen der Karte, drei Fassungen zum Vergleichen (Rasul 19.11.2026): ?welle=aus|ring|druck|blick (schaerfe gestrichen),
+						// dazu ?pop=an|aus für das Überschwingen der Karte. Siehe ExpertenAuswahl.astro (WELLE BEIM AUFTAUCHEN DER KARTE).
+						// WELLE UND ÜBERSCHWINGEN AUS DER GRUNDEINSTELLUNG GENOMMEN (Auftrag S, 19.11.2026 nachts). Rasul: „du hast so eine kleine
+						// Animation als Schockwelle drin, wenn ich es richtig sehe? Die sieht aber mehr aus wie ein Renderfehler, nimm die
+						// wieder raus.“ Und: „sie ist mit Sicherheit richtig gerendert, aber sie wirkt nicht wie eine Animation, sondern wie
+						// was, wenn was nicht stimmen würde.“ Eine Geschmacksentscheidung, kein Fehler im Bau. Das Überschwingen (pop) geht
+						// mit (Animation · Experten-Auswahl): Es sitzt auf einer Karte, die in diesem Moment schrumpft (siehe „KARTE SCHRUMPFT“
+						// in ExpertenAuswahl.astro; brennweite=bahn bleibt), sie wird also kleiner und macht dann einen kleinen Satz.
+						// Nichts gelöscht: Die drei Fassungen und drei Stärken bleiben im Baustein. Die Werte in der Adresse heißen jetzt
+						// ?welle=ringwelle|druckwelle|blickwelle und ?pop=mit, damit ein gemerktes „ring“ oder „an“ in einem Browser nicht
+						// weiterwirkt (derselbe Weg wie bei textfrei). Weg zurück: Vorgabe wieder "ringwelle" und "mit".
+						document.documentElement.dataset.welle = ({ ringwelle: "ring", druckwelle: "druck", blickwelle: "blick" })[liesWahl("welle", ["aus", "ringwelle", "druckwelle", "blickwelle"], "aus")] || "aus";
+						// Stärke der Welle in drei Stufen (Auftrag M, 19.11.2026): ?wellestaerke=1|2|3, 1 = Stand davor
+						document.documentElement.dataset.wellestaerke = liesWahl("wellestaerke", ["1", "2", "3"], "2");
+						// Probe zum Schrumpfen der Karte (Auftrag L, 19.11.2026): ?brennweite=bahn|groesse, bahn = unverändert
+						document.documentElement.dataset.brennweite = liesWahl("brennweite", ["bahn", "groesse"], "bahn");
+						document.documentElement.dataset.pop = liesWahl("pop", ["mit", "aus"], "aus") === "mit" ? "an" : "aus";
+						// Bogen der Kamerafahrt (Rasul 19.11.2026): ?bogen=an|aus, siehe ExpertenAuswahl.astro (BOGEN)
+						document.documentElement.dataset.bogen = liesWahl("bogen", ["an", "aus"], "an");
+						// Striche der Geste außerhalb der Karte oder mittig auf ihrem Rand (Rasul 19.11.2026): ?strich=aussen|mitte
+						document.documentElement.dataset.strich = liesWahl("strich", ["aussen", "mitte"], "aussen");
+						document.documentElement.dataset.ziel = liesWahl("ziel", ["400", "430", "460", "490", "520", "550", "585", "640", "680"], "520"); /* Grundeinstellung 520 (Rasul 19.11.2026 spät: „das ist mir jetzt fast zu groß am Ende, mach es noch ein bisschen kleiner“), davor 585, davor kurz 680: */ // Grundeinstellung 680 = volle Breite der Fläche (Rasul 19.11.2026 abends: „könnte das Video noch größer werden“); vorher 460
+						// kombi = Fahrt endet nah, die Geste macht die Karte dann groß. ?marke=blau|invers|rahmen = Hervorhebung der einen
+						// Person in den neuen Fassungen: blaue Fläche, schwarze Fläche mit weißer Figur, oder nur Kontur (Rasul 19.11.2026).
+						document.documentElement.dataset.marke = liesWahl("marke", ["blau", "invers", "rahmen"], "blau");
+						document.documentElement.dataset.spalten = liesWahl("spalten", ["mitte", "titellinks", "titelbreit", "b6", "b6voll", "aus"], "b6voll"); // Grundeinstellung b6voll (Rasul 19.11.2026 abends, zur Größe der Animation: „Volle Hälfte.“); vorher mitte
+					}
 					// Textfolge unter der Animation (Rasul 14.11.2026: „es ist mir zu viel, es passiert oben und unten was … es darf nur
 					// eine Sache fürs Auge passieren“): zugleich = Nachsatz blendet mit der Geste ein (bisher); nacheinander = „Überall
 					// Experten.“ blendet aus, Fahrt läuft, danach die beiden Zeilen an derselben Stelle, eine nach der anderen.
