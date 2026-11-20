@@ -169,6 +169,20 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.staffel = "an";
 					document.documentElement.dataset.weite = "an";
 					document.documentElement.dataset.atmen = "aus";
+					// EXPERTEN-ANIMATION MIT FILM, FASSUNG VOM 20.11.2026 AUS `dev` (Rasul im Website · Master 20.11.2026: „Die Version
+					// fürs dritte Segment, also die Animation mit dem Video und dem Reinzoomen … Das schieben wir auf Dev und wir
+					// schieben es auf live."). Feste Werte ohne Schalter, einzeln abgelesen am gebauten dev-Stand (Commit 2683caf,
+					// document.documentElement.dataset): genau das, was der Baustein ExpertenAuswahl.astro und die Regeln des Bands in
+					// index.astro dort vorfinden. Was die Werte bedeuten, steht in src/layouts/Layout.astro im Zweig `dev`.
+					// Weg zurück: diesen Block löschen und ExpertenAuswahl.astro, index.astro auf den Stand 263bea9 setzen.
+					var fest = {
+						ende: "kamera", rahmen: "16", form: "figur", hoehe: "auge", aufstellung: "reihen", animhoehe: "50", raster: "aus",
+						anim: "kombimitte", figur: "echt", clip: "ganz", quelle: "hls", start: "50", ziel: "520",
+						binde: "kurz", namensform: "zeile", blatt: "aus", deck: "70", kartenblau: "verlauf", marke: "blau", strich: "aussen",
+						menge: "doppelt", breit: "an", beginn: "neu", textfrei: "aus", fuellung: "an", bogen: "an", brennweite: "bahn",
+						welle: "aus", wellestaerke: "2", pop: "aus", spalten: "b6voll"
+					};
+					for (var k in fest) document.documentElement.dataset[k] = fest[k];
 					var h = liesHero();
 					document.documentElement.dataset.hero = h;
 					document.documentElement.dataset.menu = h === "film" ? "bbh" : lies();

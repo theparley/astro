@@ -21,23 +21,26 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 		<section class="minimal__satz rahmen">
 			<Haltung ebene="h1" aufdecken zeilen={["Wir beweisen", "Expertise", "mit Videos", "aus echten", "Gesprächen"]} />
 		</section>
-		{/* Band „Videobeweis“ in der Fassung vom 15.11.2026 aus dem Zweig `dev` (Rasul 15.11.2026: „mach das auch live auf die
-		   parleyfilm.com Seite“): Satz „Alle behaupten. Favoriten beweisen.“ steht von Anfang an, zwei Absätze, Quellenzeile.
-		   Ohne den Knopf „Was die Studien zeigen“: Die Belegseite gibt es live noch nicht. Begründungen und Rasuls Worte:
-		   src/pages/index.astro im Zweig `dev`. */}
+		{/* Band „Videobeweis“ in der Fassung vom 20.11.2026 aus dem Zweig `dev` (Rasul im Website · Master 20.11.2026: „Die
+		   Version fürs dritte Segment, also die Animation mit dem Video und dem Reinzoomen. Alle behaupten, Favoriten
+		   beweisen. Das schieben wir auf Dev und wir schieben es auf live.“): Animation mit dem Film von Nico Kusterer über
+		   Cloudflare Stream, ab 1024 px Zweispalte (Animation links, Satz und Text rechts), darunter gestapelt mit der
+		   Animation zuerst. Wortlaut, Reihenfolge und Regeln wie in `dev` (Commit 2683caf), dort stehen die Begründungen
+		   und Rasuls Worte (src/pages/index.astro). Ohne den Knopf „Was die Studien zeigen“: Die Belegseite gibt es live
+		   noch nicht. Stand davor (15.11.2026, ohne Film, gestapelt, Titel „Videobeweis“ zuerst): Commit 263bea9. */}
 		<section class="anlass anlass--band">
 			<div class="rahmen anlass__band-innen">
-				<p class="t-abschnitt anlass__titel">Video&shy;beweis</p>
+				<p class="t-abschnitt anlass__titel">Der<br />Video&shy;beweis</p>
 				<ExpertenAuswahl />
 				<p class="anlass__satz anlass__satz--zusammen"><span class="anlass__halb1">Alle behaupten.</span> <span class="anlass__halb2">Favoriten beweisen.</span></p>
 				<div class="t-lesen anlass__text">
-					{/* Wortlaut vom Dev-Stand (Rasul 18.11.2026: „Mach mal das Update auf der Live-Seite“). */}
-					<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war.<span aria-hidden="true">*</span> Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
+					<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war.<span aria-hidden="true">*</span></p>
+					<p>Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
 					<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und vor allem die Menschen, die sie&nbsp;anwenden.</p>
-					{/* Eigener Absatz (Rasul 18.11.2026: „wir machen vier Abschnitte draus“). */}
-					<p>Diese gelebte Kompetenz ist einmalig und lässt sich nicht mit KI&nbsp;generieren.</p>
-					<p class="anlass__schluss">Was alle nur behaupten, könnt&nbsp;ihr&nbsp;beweisen. <span class="anlass__schlusszeile">Vor&nbsp;dem&nbsp;ersten&nbsp;Kontakt.</span></p>
-					<p class="t-mini grau anlass__quelle"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
+					<p>Genau diese gelebte Kompetenz lässt sich nicht mit KI&nbsp;generieren oder von anderen&nbsp;kopieren.</p>
+					<p class="anlass__schluss">Das ist eure&nbsp;Beweiskraft.</p>
+					{/* Grau für hellen Grund (--grau-hell-leise, 4,61 zu 1 auf Weiß) statt der Klasse „grau“, wie in `dev`. */}
+					<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 				</div>
 			</div>
 		</section>
@@ -48,22 +51,58 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 </Layout>
 
 <style>
-	/* Band wie in `dev` (Stand 15.11.2026, Textfolge „ohne“, BBH-Abstände): weiß; Überschrift Bartle groß mit Abstand lg
-	   nach oben und 48 px zur Animation; darunter der Satz in zwei Zeilen, von Anfang an sichtbar, ohne Blenden; Lesetext linksbündig, Block mittig auf 46 Zeichen, Absätze 24 px */
+	/* Band wie in `dev` (Stand 20.11.2026, Commit 2683caf). Die Regeln hierunter sind wörtlich aus src/pages/index.astro
+	   im Zweig `dev` übernommen, mit denselben Selektoren (html[data-…]), damit sie gegen die Regeln des Bausteins
+	   ExpertenAuswahl.astro genauso gewinnen wie dort; die Werte dazu setzt Layout.astro fest. Weggelassen ist, was es
+	   live nicht gibt (andere Textfolgen, Kachel-Probe, Knopf zur Belegseite) und der Außenabstand unter dem Band (live
+	   folgt der Fuß). Begründungen, Maße und Rasuls Worte stehen in `dev` an denselben Regeln. */
 	.anlass--band { background: var(--white); color: var(--black); padding: 0 0 var(--abstand-lg); overflow-x: clip; }
 	.anlass__band-innen { display: grid; gap: var(--abstand-md); }
-	.anlass__titel { grid-row: 1; margin: 0 0 calc(3rem - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; text-wrap: balance; hyphens: manual; }
-	.anlass__band-innen > :global(.experten) { grid-row: 2; }
-	.anlass__satz { grid-row: 3; grid-column: 1; align-self: start; margin: calc(0px - var(--abstand-md)) auto 0; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-2xl); line-height: var(--zeile-2xl); text-transform: uppercase; text-wrap: balance; }
-	.anlass__halb1, .anlass__halb2 { display: block; }
-	.anlass__text { grid-row: 4; margin: calc(3rem - var(--abstand-md)) auto 0; max-width: 46ch; text-align: left; text-wrap: pretty; }
-	.anlass__text p { margin: 0; }
-	.anlass__text > * + * { margin-top: 24px; }
-	.anlass__text .anlass__quelle { margin: 16px 0 0; }
-	/* Schlusssatz abgesetzt, Nachsatz in eigener Zeile, Quelle mit Abstand darunter (wie auf dem Dev-Stand) */
-	.anlass__text p.anlass__schluss { margin-top: 24px; } /* wie die Absätze darüber (Rasul 18.11.2026: „eine Zeile zu viel Abstand“); vorher 48px */
+	:global(html[data-satzform="unter"]) .anlass__satz--zusammen .anlass__halb1,
+	:global(html[data-satzform="unter"]) .anlass__satz--zusammen .anlass__halb2 { display: block; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__satz--zusammen { display: block; grid-row: 3; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__titel { display: block; grid-row: 1; margin: 0 0 calc(3rem - var(--abstand-md)); padding-top: var(--abstand-lg); text-align: center; text-wrap: balance; hyphens: manual; }
+	:global(html[data-textfolge="ohne"] .anlass__band-innen > .experten) { grid-row: 2; }
+	:global(html[data-textfolge="ohne"]) .anlass--band .anlass__text { grid-row: 4; }
+	/* Animation zuerst, darunter der Titel; Abstand Titel zur Animation = Abstand oben (dev: „ANIMATION ZUERST“) */
+	.anlass--band { --luecke-titel: calc(65.41vw * 0.09); }
+	@media (min-aspect-ratio: 1/1) { .anlass--band { --luecke-titel: 4.5vh; } }
+	:global(html:is([data-textfolge="ohne"], [data-textfolge="vorher"])) .anlass--band .anlass__band-innen > .anlass__titel { grid-row: 2; padding-top: 0; margin-top: calc(var(--luecke-titel) - var(--abstand-md)); }
+	:global(html:is([data-textfolge="ohne"], [data-textfolge="vorher"]) .anlass--band .anlass__band-innen > .experten) { grid-row: 1; }
+	/* Platz für die Namenszeile unter der Karte in schmalen Fenstern (dev, 20.11.2026) */
+	@media (max-width: 1023px) {
+		:global(html[data-figur="echt"]:is([data-textfolge="ohne"], [data-textfolge="vorher"])) .anlass--band .anlass__band-innen > .anlass__titel { margin-top: calc(var(--luecke-titel) - var(--abstand-md) + 48px); }
+	}
+	/* Ab 1024 px Zweispalte, Animation volle Hälfte, Titel ausgeblendet (dev: Stand „b6voll“, Rasul 19.11.2026: „Volle Hälfte.“) */
+	@media (min-width: 1024px) {
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band { padding-top: var(--abstand-lg); }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; row-gap: 48px; align-items: center; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__titel { display: none; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten) { grid-column: 1; grid-row: 1 / span 2; align-self: center; justify-self: center; width: 60%; margin-left: 0; }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"] .anlass--band .anlass__band-innen > .experten) { width: 100%; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten .experten__bild) { height: auto !important; aspect-ratio: 16 / 9; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__satz--zusammen { grid-column: 2; grid-row: 1; align-self: end; margin: 0; text-align: left; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__text { grid-column: 2; grid-row: 2; align-self: start; margin: 0; max-width: none; }
+	}
+	/* Zeichenfläche breiter als ihr Platz, Menge bis hinter den Text; Klicks nimmt der Platz an (dev: „breit“) */
+	@media (min-width: 1024px) {
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten) { z-index: 0; cursor: pointer; container-type: inline-size; }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten .experten__bild) { pointer-events: none; }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten .experten__bild) { --zu-oben: 160px; --zu-unten: 130px; width: 100vw; max-width: none; margin-left: calc((200cqw + 16px - 100vw) / 2); aspect-ratio: auto; height: calc(100cqw * 9 / 16 + var(--zu-unten) + var(--zu-oben)) !important; margin-bottom: calc(-1 * var(--zu-unten)); margin-top: calc(-1 * var(--zu-oben)); }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__satz--zusammen,
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__text { position: relative; z-index: 1; }
+	}
+	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
+	:global(html:not([data-titelgroesse="huge"])) .anlass--band .anlass__satz { font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
+	.anlass__text { margin: 0 auto; max-width: 46ch; text-wrap: balance; }
+	.anlass--band .anlass__text { margin-top: calc(3rem - var(--abstand-md)); }
+	.anlass--band .anlass__text { text-align: left; text-wrap: pretty; }
+	.anlass--band .anlass__text p { margin: 0; }
+	.anlass--band .anlass__text > * + * { margin-top: 24px; }
+	.anlass--band .anlass__text .anlass__quelle { margin: 16px 0 0; }
+	.anlass--band .anlass__text p.anlass__schluss { margin-top: 24px; } /* wie die Absätze darüber (Rasul 18.11.2026: „eine Zeile zu viel Abstand“); vorher 48px */
 	.anlass__schlusszeile { display: block; }
-	.anlass__text .anlass__schluss + .anlass__quelle { margin-top: 32px; }
+	.anlass--band .anlass__text .anlass__schluss + .anlass__quelle { margin-top: 32px; }
 	.nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 	/* Der Satz füllt den ersten Bildschirm, mittig */
