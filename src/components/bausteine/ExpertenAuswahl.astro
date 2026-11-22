@@ -384,6 +384,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Am Handy und überall, wo die Fläche nicht breiter ist als ihr Platz, gibt es diese Personen nicht.
 	// Weg zurück: in index.astro den Block „ZEICHENFLÄCHE BREITER“ löschen; dann ist flaecheBreit nie wahr.
 	let flaecheBreit = false;
+	// Probe für ÜBERSCHRIFT AM ANFANG FREI (22.11.2026, siehe dort): Ist sie gesetzt, bekommt sie in zeichneBild die Lage
+	// aller Figuren und das Bild wird nicht gezeichnet (TITEL_HALT bricht ab).
+	let titelProbe: ((lage: { q: Person; x: number; y: number; g: number; zc: number }[], sc: number, ox: number, oy: number) => void) | null = null;
+	const TITEL_HALT = { halt: true };
 	// ZEICHENLAST BEIM HINEINSCROLLEN (Animation · Experten-Auswahl 19.11.2026, gemessen mit echten Mausrad-Ereignissen in
 	// Rasuls Chrome: vier Bilder über 25 ms, längstes 38 ms; mit ?breit=aus keines über 25 ms). Die breite Fläche lag
 	// mittig über ihrem Platz, ihr linkes Drittel ragte aber über den Bandrand hinaus und war nie zu sehen. Zwei Hebel,
@@ -872,7 +876,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// läuft ganz (10 s, mehr ist nicht exportiert). Weg zurück: LAUF_ZUWACHS auf 0.
 			// Weg zurück: Grundeinstellung in Layout.astro und hier wieder 460, Math.min wieder 584.
 			let zusatzZiel = 1;
-			const LAUF_ZUWACHS = 0.085;
+			// WEITERWACHSEN HERAUSGENOMMEN (Rasul 22.11.2026: „wenn die Bewegung der Videobeweisgeste vorbei ist,
+			// dann haben wir ja eine Größe und von da an haben wir angefangen, das noch ganz leicht größer werden zu lassen. Das
+			// war auch der Grund, warum die Schrift gewackelt hat unten drunter dieses Größerwerden nehmen wir raus. Die Größe
+			// des Videos ist fertig nach der Animation der Größe über die Videoanimationsgeste.“). LAUF_ZUWACHS ist 0: Nach der
+			// Geste stehen Karte, Video und Namenszeile still; die Endgröße ist die am Ende der Geste (bei Ziel 520 rund 520 px
+			// statt bis 564 px). Alle Stellen, die mit dem Zuwachs rechnen (Platz links der Karte, Schlussbild der Figuren,
+			// Lage der Namenszeile), rechnen damit von selbst ohne ihn. Mit der Karten-Variante am 22.11.2026 auf dev und live.
+			// Zum Vergleichen, nur localhost, nicht gemerkt: ?wachsen=an. Weg zurück: wieder fest 0.085.
+			const LAUF_ZUWACHS = import.meta.env.DEV && new URLSearchParams(location.search).get("wachsen") === "an" ? 0.085 : 0;
 			// DREI ÄNDERUNGEN AN DEN NEUEN FASSUNGEN (Rasul 19.11.2026 abends), nicht in „geste“:
 			// 1. Geste länger, dabei entsteht ein Schatten: „Ich finde, jetzt könnte die Animation für die Videobeweisbewegung
 			//    länger gehen. Und währenddessen könnte auch ein Schatten entstehen. Das probieren wir mal dezent, nicht zu
@@ -1046,14 +1058,14 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// weil bei Stream auch Vorgeladenes als ausgelieferte Minuten zählt (Hinweis Website · Master).
 			// IM BAU: DAS GANZE VIDEO MIT TON ÜBER STREAM (20.11.2026; Rasul über Website · Master: „Diskutieren macht auch
 			// Cloudflare. Das kodieren.“). Der Bau nimmt clip=ganz und quelle=hls (Layout.astro), also die Fassung mit Ton,
-			// zwei Knöpfen (Play/Pause, Ton) und Namensangabe. Das Video liegt nicht im Repository, nur der Umriss.
+			// drei Knöpfen (Play/Pause, Von vorne, Ton) und Namensangabe. Das Video liegt nicht im Repository, nur der Umriss.
 			// Zwei Videos bei Stream: das ganze (Original 1920 × 1080, 98,87 s, mit Ton; Stufen 1080/720/480/360/240) und das Probestück (17. bis 27. Sekunde, nur für ?clip=kurz auf localhost). Ein neues Video
 			// ist eine neue Kennung: nur STREAM_GANZ tauschen und den Umriss aus seinem ersten Bild neu freistellen
 			// (public/filme/nico-silhouette-0s.png, freigestellt aus dem Vorschaubild von Stream bei 0 s in 1080p; Prüfmaß der
 			// Animations-Sitzung: unter 0,5 Prozent abweichende Bildpunkte gegen das erste Videobild).
 			// Der Start liegt auf der höchsten Stufe bis 720p (siehe FESTE STUFE). Der MP4-Rückweg zeigt auf dieselbe Kennung
 			// (25,35 MB, steht seit 20.11.2026).
-			// Vorgänger: 75a37c8b… (Arbeitsfassung 960 × 540, höchste Stufe 480p, von Website · Master gelöscht bzw. zu löschen).
+			// Vorgänger: 75a37c8b… (Arbeitsfassung 960 × 540, höchste Stufe 480p, bei Stream gelöscht am 20.11.2026).
 			const STREAM_GANZ = "c7d9bd22c883f31884d39844f8ddf84a", STREAM_KURZ = "9d3bdc861f82c0d5743c3f4dda696e29", HLS_VORRAT = 10;
 			const STREAM_BASIS = `https://customer-cmrkt3xxgowav3v1.cloudflarestream.com/${clipGanz() ? STREAM_GANZ : STREAM_KURZ}`;
 			const STREAM_HLS = `${STREAM_BASIS}/manifest/video.m3u8`, STREAM_CLIP = `${STREAM_BASIS}/downloads/default.mp4`;
@@ -1176,6 +1188,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// drei Teilen. Der Stapel ist damit 168 statt 184 px hoch. Weg zurück: TON_LUECKE = 8.
 			const TON_FLAECHE = 56, TON_ZEICHEN = 30, TON_BEZUG = 684, TON_RAND = 6, TON_LUECKE = 0, TON_MIN = 44;
 			let tonKnopf: HTMLDivElement | null = null, flaecheVersatz: [number, number, number] = [0, 0, 1], handPause = false;
+			// Clip steht noch auf Bild 0, weil die Blende vom Umriss läuft (siehe GEISTERBILD IN DER BLENDE), nicht von Hand angehalten
+			const clipWartet = () => !!echt.clip && echt.spielt && echt.clip.paused && !handPause && !echt.clip.ended && echt.clip.currentTime < 0.05;
 			let knopfSpiel: HTMLButtonElement | null = null, knopfTon: HTMLButtonElement | null = null;
 			const zeichen = (innen: string) => `<svg viewBox="0 0 24 24" width="${TON_ZEICHEN}" height="${TON_ZEICHEN}" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${innen}</svg>`;
 			const Z_PLAY = '<path d="M7.5 4.5v15l12.5-7.5z" fill="#fff"/>', Z_PAUSE = '<path d="M8 5v14M16 5v14" stroke-width="3.2"/>';
@@ -1184,13 +1198,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const tonStand = () => {
 				if (!echt.clip) return;
 				if (knopfTon) { const laut = !echt.clip.muted; knopfTon.innerHTML = zeichen(laut ? Z_LAUT : Z_STUMM); knopfTon.setAttribute("aria-label", laut ? "Ton ausschalten" : "Ton einschalten"); knopfTon.setAttribute("aria-pressed", String(laut)); }
-				if (knopfSpiel) { const haelt = echt.clip.paused; knopfSpiel.innerHTML = zeichen(haelt ? Z_PLAY : Z_PAUSE); knopfSpiel.setAttribute("aria-label", haelt ? "Video abspielen" : "Video anhalten"); }
+				if (knopfSpiel) { const haelt = echt.clip.paused && !clipWartet(); // während der Blende steht der Clip nur kurz (GEISTERBILD IN DER BLENDE), der Knopf zeigt weiter „anhalten“
+				 knopfSpiel.innerHTML = zeichen(haelt ? Z_PLAY : Z_PAUSE); knopfSpiel.setAttribute("aria-label", haelt ? "Video abspielen" : "Video anhalten"); }
 			};
 			// „VON VORNE“ WIEDER IM BAU (20.11.2026 abends, Rasul über Website · Master: Der Clip startet stumm, wer den Ton
-			// einschaltet, hat den Anfang verpasst; Nicos erster Satz, 0,0 bis 4,1 s, trägt die Prämisse). Rasul 22.11.2026:
-			// „Und den von vorne Knopf, den auch wieder … drauf machen auf alle Fälle.“, zum Hochladen allein auf dev: „Ja, auf dev“.
-			// Sonst ist an der Animation nichts geändert. Stand davor, nur auf localhost: „const MIT_VORNE = import.meta.env.DEV“.
-			// Weg zurück: genau diese Zuweisung wieder einsetzen.
+			// einschaltet, hat den Anfang verpasst; Nicos erster Satz, 0,0 bis 4,1 s, trägt die Prämisse). Stand davor, nur
+			// auf localhost: „const MIT_VORNE = import.meta.env.DEV“. Weg zurück: genau diese Zuweisung wieder einsetzen.
 			const MIT_VORNE = true, KNOEPFE = MIT_VORNE ? 3 : 2;
 			const tonZeigen = (da: boolean) => { if (tonKnopf) { tonKnopf.hidden = !da; tonKnopf.style.display = da ? "flex" : "none"; } };
 			if (figurEcht() && clipGanz()) {
@@ -1202,10 +1215,10 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					b.addEventListener("click", () => { if (echt.clip) { bei(); tonStand(); } });
 					reihe.appendChild(b); return b;
 				};
-				knopfSpiel = knopf("Video anhalten", () => { const v = echt.clip!; if (v.paused) { handPause = false; v.play().catch(() => {}); } else { handPause = true; v.pause(); } });
-				// „VON VORNE“ NUR AUF LOCALHOST (20.11.2026, Entscheidung Website · Master, Rasul informiert: ein Prüfwerkzeug, auf
-				// der Startseite lädt es dazu ein, eine Dramaturgie neu zu starten, die man gerade gesehen hat). Im Bau stehen
-				// zwei Knöpfe, Play/Pause und Ton; die Höhe des Stapels rechnet mit KNOEPFE. Weg zurück: MIT_VORNE fest auf true.
+				knopfSpiel = knopf("Video anhalten", () => { const v = echt.clip!; if (clipWartet()) { handPause = true; tonStand(); } else if (v.paused) { handPause = false; v.play().catch(() => {}); } else { handPause = true; v.pause(); } });
+				// „Von vorne“ stand am 20.11.2026 tagsüber nur auf localhost (Entscheidung Website · Master: ein Prüfwerkzeug, auf
+				// der Startseite lade es dazu ein, eine Dramaturgie neu zu starten). Seit dem Abend wieder überall, siehe MIT_VORNE.
+				// Die Höhe des Stapels rechnet mit KNOEPFE.
 				if (MIT_VORNE) knopf("Video von vorne", () => {
 					const v = echt.clip!; handPause = false;
 					// letztes Bild festhalten, bevor das Video springt (siehe KEIN AUFBLITZEN BEIM SPRUNG)
@@ -1289,8 +1302,16 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			//           der Text noch im Bogen. Der Radius ist um 0,3 px größer, es gilt also der Radius.
 			const NAME_ABSTAND = 40, NAME_SCHATTEN = 0.08, NAME_FEST: boolean = false, BLATT_BLENDE = 0.8;
 			// Blatt (siehe EIN BLATT FÜR KARTE UND NAMENSZEILE in zeichneBild): an, solange die Zeile unter der Karte steht
-			const blattAn = () => figurEcht() && !nameBinde() && !!BINDE_1 && document.documentElement.dataset.blatt === "mit"; // Blatt seit 20.11.2026 aus der Vorgabe genommen (Rasul: „ohne dass es ein eigenes Blatt wird“), siehe Layout.astro
+			// KARTE FEST, SCHALTER WEG (Rasul 22.11.2026: „dann übernehmen wir jetzt mal die Variante mit der Karte fest in
+			// Localhost. Können wir den ganzen Schalter wieder wegmachen. Und wir laden die Variante auch auf Dev hoch und auch
+			// auf Palaycom.“ Sein Grund: Die Karte hebt die Kollision mit dem Textblock daneben auf, „Vorher hat es miteinander
+			// konkurriert ein bisschen.“). Das Blatt gilt jetzt immer, wenn die Namensangabe als Zeile unter der Karte steht;
+			// ?blatt und html[data-blatt] gibt es nicht mehr (Layout.astro). Stand davor (20.11.2026, „ohne dass es ein eigenes
+			// Blatt wird“): … && document.documentElement.dataset.blatt === "mit". Weg zurück: blattAn fest auf false.
+			const blattAn = () => figurEcht() && !nameBinde() && !!BINDE_1;
 			let nameHoehe = 0; // Höhe der Namenszeile in Gerätepixeln, aus der Bildschleife
+			// Mitwandern ohne Wackeln (22.11.2026), siehe Bildschleife „DIE ZEILE WACKELTE BEIM MITWANDERN“
+			let nameLage = "", nameSchatten = "", nameStill = 0, nameFaehrt = false; const NAME_RUHE = 12;
 			const nameBinde = () => document.documentElement.dataset.namensform === "binde";
 			let nameZeile: HTMLDivElement | null = null, nameDa = false, karteEndeCss: [number, number, number] | null = null; // Karte am Ende des Clips relativ zum Platz: [links, Breite, Unterkante]
 			const nameZeigen = (da: boolean) => {
@@ -1636,6 +1657,35 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 									if (import.meta.env.DEV) (fig as any).__textfiguren = { weg: nWeg, fern: nFern, wort: wort ? [Math.round(wort.left), Math.round(wort.top), Math.round(wort.right), Math.round(wort.bottom)] : null };
 								}
 							}
+							// ÜBERSCHRIFT AM ANFANG FREI (Rasul 22.11.2026: „Und dann werden wir nochmal die Animation ändern. Und zwar sollten
+							// auch am Anfang keine Männchen sein hinter der Überschrift. Also entweder die Männchen einfach löschen, die dran
+							// sind oder weiter nach links schieben, aber nur die Männchen nicht das Video.“). Gemessen vorher (1440 px, Chrome,
+							// Schalter wie im Bau): Im stehenden Anfangsbild und in den ersten 0,7 s der Fahrt lagen Figuren auf dem Satzpaar
+							// „Alle behaupten. Favoriten beweisen.“ (4,5 % der Fläche dunkel), danach nie wieder.
+							// Gebaut ist das Löschen, nicht das Schieben: Wer in der ersten Sekunde (TITEL_BIS, Schritte von 0,05 s) mit
+							// seinem Umriss eine der beiden Satzhälften berührt (Rand TITEL_RAND), wird nie gezeichnet (Feld weg, wie bei
+							// FIGUREN HINTER DEM TEXT). Geschoben stünden dieselben Figuren im Schlussbild an einem anderen Platz, das hätte
+							// das Ende mit verändert. Gerechnet wird mit der Zeichenfunktion selbst (titelProbe), also mit Bogen, Ausweichen
+							// und Brennweite wie im Bild, je Fensterbreite neu, weil die Überschrift je Breite woanders steht.
+							// Unberührt: die drei vorn, die sechs Ausweicher, Karte und Video. Preis: Die Gelöschten fehlen auch später.
+							// Zum Messen, nicht gemerkt: ?titelfrei=aus zeigt den Stand davor. Weg zurück: TITEL_FREI fest auf false.
+							const TITEL_FREI = !import.meta.env.DEV || new URLSearchParams(location.search).get("titelfrei") !== "aus", TITEL_BIS = 1.0, TITEL_RAND = 4;
+							if (TITEL_FREI && flaecheBreit && mengeDoppelt()) {
+								const haelften = [...(fig.closest(".anlass__band-innen")?.querySelectorAll<HTMLElement>(".anlass__satz .anlass__halb1, .anlass__satz .anlass__halb2") ?? [])].map((h) => h.getBoundingClientRect()).filter((re) => re.width > 0);
+								if (haelften.length) {
+									const cr = cv.getBoundingClientRect(); let nTitel = 0;
+									titelProbe = (lage, sc, ox, oy) => {
+										const fx = (v: number) => cr.left + (v * sc + ox) / d, fy = (v: number) => cr.top + (v * sc + oy) / d;
+										for (const l of lage) {
+											const q = l.q; if (q.ebene <= 1 || q.weicht !== undefined || q.weg) continue;
+											const li = fx(l.x - 28.65 * l.g) - TITEL_RAND, ob = fy(l.y - 34 * l.g) - TITEL_RAND, re = fx(l.x + 28.65 * l.g) + TITEL_RAND, un = fy(l.y + 30 * l.g) + TITEL_RAND;
+											if (haelften.some((h) => li < h.right && re > h.left && ob < h.bottom && un > h.top)) { q.weg = true; nTitel++; }
+										}
+									};
+									try { for (let tP = VORSPRUNG(); tP <= VORSPRUNG() + TITEL_BIS + 0.001; tP += 0.05) { try { bild(tP, 0); } catch (f) { if (f !== TITEL_HALT) throw f; } } } finally { titelProbe = null; }
+									if (import.meta.env.DEV) (fig as any).__titelfrei = { weg: nTitel };
+								}
+							}
 							// KEIN SPÄTES ERSCHEINEN MEHR (Auftrag Q1; Rasul 19.11.2026: „ich sehe, dass immer noch neue Männchen entstehen, mach das
 							// mal weg. In dem Moment, wo die Kamera fährt, gibt es keine neuen Menschen mehr.“). Der folgende Block (späte Figuren
 							// hinter dem Text) läuft nur noch mit ?textfrei=spaet; Grundeinstellung ist aus (Layout.astro). Den Ruhezustand
@@ -1825,7 +1875,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const sc = sc0 * zZoom, ox = mitteX - (W * sc0) / 2 + CX * sc0 * (1 - zZoom), oy = obenZu + CY * sc0 * (1 - zZoom);
 				if (import.meta.env.DEV) (fig as any).__zoom = zZoom; // nur lokal, zum Messen
 				ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = 1;
-				ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+				if (!titelProbe) { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); } // die Probe (ÜBERSCHRIFT AM ANFANG FREI) rechnet nur, sie darf das Bild nicht leeren
 				// Spur nur rechnen, solange sie zu sehen ist
 				// Geste im Takt der Kamera (Rasul 13.11.2026 abends: „Wir koordinieren das Zeichnen von dem Videobeweissymbol mit
 				// der Zoomfahrt … wie die Striche entstehen, richtet sich an der Bewegungsgeschwindigkeit von der Kamera, also mit
@@ -1936,7 +1986,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					ctx.globalAlpha = 1; ctx.setTransform(1, 0, 0, 1, 0, 0);
 				}
 				};
-				if (!zf) zeichneGeste();
+				if (!zf && !titelProbe) zeichneGeste();
 				// Personen
 				ctx.setTransform(sc, 0, 0, sc, ox, oy);
 				const k = weich((t - T_AUSWAHL) / D_AUSWAHL);
@@ -1952,7 +2002,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						e = kWachs >= 1 || ziel >= Math.log(groesseVorne(eZiel)) ? eZiel : lo;
 					}
 					const ran = e; // Verlauf und Gründe siehe verlauf()
-					zeileSetzen(e);
+					if (!titelProbe) zeileSetzen(e); // die Probe lässt die Überschrift, wie sie ist
 					const bK = bahn(e, F1 * zoomEnde, ran), { C, Lk } = bK; let F = bK.F;
 					// KARTE SCHRUMPFT IN DEN ERSTEN 0,7 s: URSACHE UND PROBE (Auftrag L, Animation · Experten-Auswahl 19.11.2026: „Finde
 					// heraus, warum die Karte schrumpft … Erst die Ursache, dann die Änderung.“).
@@ -1983,6 +2033,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						const hoch = hebung * e + (zoomNah() ? versatzNah * Math.min(1, e / eNah) * (1 - kWachs) + versatzZiel * kWachs : 0); // Bildausschnitt wandert mit der Fahrt nach oben (Kopf auf die obere Drittellinie); „zoomnah“: zusätzlich so, dass die Karte am Ende mittig sitzt
 						return { q, x: pr.x, y: pr.y - 9 * u * Math.min(1, kipp * 1.15) - hoch, g: q.s * pr.g, zc: pr.zc, kipp, fy: pr.y - hoch };
 					}).filter((l) => l.zc > 5 && !l.q.weg).sort((a, b) => b.zc - a.zc); // nichts hinter der Kamera zeichnen; „weg“ siehe FIGUREN HINTER DEM TEXT
+					if (titelProbe) { titelProbe(lage, sc, ox, oy); throw TITEL_HALT; } // nur rechnen, nicht zeichnen (ÜBERSCHRIFT AM ANFANG FREI)
 					// Rasul 13.11.2026 abends: „die sind jetzt schon im Hintergrund und werden kurz scharf und dann unscharf. Das
 					// stimmt von der Perspektivenwirkung der Kamera dann nicht mehr.“ Deshalb: Verwandlung ganz am Anfang des
 					// Kippens (Kamera fast senkrecht, alle etwa gleich weit weg) und Unschärfe aus der Entfernung:
@@ -2096,7 +2147,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 							// Höhe der Zeile + r. Der Schatten wandert von der Karte auf das Blatt, Werte unverändert (SCH_DECK, SCH_WEICH,
 							// SCH_AB am Maß der Karte); die Karte verliert ihren, sonst lägen zwei übereinander. Blatt und Zeile kommen mit dem
 							// Clip in BLATT_BLENDE Sekunden; im selben Zug blendet der Schatten der Karte aus und der des Blattes ein.
-							// Nur localhost, Fassung echt mit clip=ganz und der Zeile unter der Karte. Weg zurück: ?blatt=aus.
+							// Fassung echt mit clip=ganz und der Zeile unter der Karte. Seit 22.11.2026 fest, ohne Schalter (siehe KARTE FEST, SCHALTER WEG).
 							const bl = blattAn() ? sanft(anteil(t, echtVon(), BLATT_BLENDE)) : 0;
 							if (bl > 0) {
 								const r = RAD * m, th = nameHoehe > 0 ? nameHoehe / sc : RW * m * 0.066, bx = kx - r, by = ky - r, bw = RW * m + 2 * r, bh = RH * m + 3 * r + th;
@@ -2320,7 +2371,20 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// nicht schlagartig (Code-Prüfung N2, 14.11.2026)
 				bild(uhr, uhr);
 				// Fassung „echt“: Der Clip läuft am Ende der Geste an, einmal, stumm
-				if (figurEcht() && echt.clip && !echt.spielt && uhr >= echtVon()) { echt.spielt = true; if (echt.clip.currentTime > 0.05) echt.clip.currentTime = 0; echt.clip.play().catch(() => {}); tonStand(); } // kein Sprung auf 0, wenn der Clip schon dort steht: Der Sprung ließ den Browser das erste Bild neu holen (einmal gemessen: 4,6 s Umriss statt Video)
+				// GEISTERBILD IN DER BLENDE BEHOBEN: DER CLIP STEHT, BIS DER UMRISS WEG IST (Rasul 22.11.2026: „Irgendwie macht die
+				// Animation auf Localhost beim ersten Abspielen oder öfter auch immer nochmal so einen kleinen Fehler. … das zoomt so
+				// ein bisschen rein raus, das sieht aus, als ob da noch eine Version von einer alten Animation da irgendwo liegt.“,
+				// gesehen in seinem Chrome). Gemessen dort, Bild für Bild über mehrere Läufe: Kamera, Karte, Zeichenfläche und Layout
+				// laufen stetig, nichts springt. Angesehen an angehaltenen Bildern: Der Umriss ist das starre Bild 0 des Clips und
+				// blendet 1,4 s lang aus, der Clip lief in dieser Zeit schon (0 bis 1,38 s) und die Person neigt den Kopf. Bei 0,66 s
+				// stand der dunkle Umriss sichtbar neben Kopf und Schulter, wie ein zweites, älteres Bild. Mit dem Clip auf Bild 0
+				// decken sich Umriss und Bild genau (geprüft). Deshalb läuft der Clip jetzt erst am Ende der Blende los
+				// (echtVon() + echtLang()); bis dahin zeigt die Karte sein erstes Bild. Preis: Das Video läuft 1,4 s später los.
+				// Zum Vergleichen, nur localhost, nicht gemerkt: ?blende=laeuft zeigt den Stand davor. Weg zurück: CLIP_WARTET false.
+				const CLIP_WARTET = !import.meta.env.DEV || new URLSearchParams(location.search).get("blende") !== "laeuft";
+				// Namenszeile und Knöpfe kommen wie bisher mit dem Beginn der Blende (echt.spielt), nur das Abspielen wartet.
+				if (CLIP_WARTET && figurEcht() && echt.clip && echt.spielt && echt.clip.paused && !handPause && !echt.clip.ended && echt.clip.currentTime < 0.05 && uhr >= echtVon() + echtLang()) echt.clip.play().catch(() => {});
+				if (figurEcht() && echt.clip && !echt.spielt && uhr >= echtVon()) { echt.spielt = true; if (echt.clip.currentTime > 0.05) echt.clip.currentTime = 0; if (!CLIP_WARTET) echt.clip.play().catch(() => {}); tonStand(); } // kein Sprung auf 0, wenn der Clip schon dort steht: Der Sprung ließ den Browser das erste Bild neu holen (einmal gemessen: 4,6 s Umriss statt Video)
 				// Ton-Bedienung an der unteren rechten Ecke der Karte halten (die Karte wächst in den ersten Sekunden des Clips noch)
 				// Bauchbinde: unten links an der Karte, sichtbar in den ersten BINDE_SEKUNDEN der Clipzeit (oder immer)
 				// Zeile unter der Karte: erst wenn die Karte ausgewachsen ist (Rasul 20.11.2026: „blende es erst ein, wenn das Video
@@ -2343,19 +2407,44 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						// bündige Schrift darunter sah aus, als stünde sie über. Auf dem Blatt bildet der Blattrand die Silhouette, die
 						// Schrift steht weit innerhalb; die Voraussetzung der Regel ist weg. Eingerückt überging die Zeile die starke
 						// senkrechte Kante des Videos, bündig entsteht eine Fluchtlinie durch die ganze Fassung. Den Wunsch, dass Text
-						// eingerückt steht, erfüllt jetzt der Innenrand des Blattes. Ohne Blatt (?blatt=aus) bleibt der Einzug.
-						const v = flaecheVersatz, kb = k[2] / v[2], ms = kb / TON_BEZUG, einzug = blattAn() ? 0 : Math.max(BINDE_RAND * ms, (kb * RAD) / RW);
+						// eingerückt steht, erfüllt jetzt der Innenrand des Blattes. Ohne Blatt bleibt der Einzug.
+						// AUF DER KARTE WIEDER EINGERÜCKT UND SPÄTER EINGEBLENDET (Rasul 22.11.2026, zur Variante mit der Karte: „Müssen wir den
+						// Text ein bisschen weiter einrücken, der ist mir zu nah am Rand? Und er muss später eingeblendet werden. Also wenn die
+						// Videoanimation Geste ist und das Video anfängt, dann blendet erst die Schrift ein. Das ist sonst zu viel
+						// gleichzeitig.“). Einzug auf dem Blatt jetzt ein Eckradius der Karte (vorher 0, bündig mit dem Video, siehe den
+						// Absatz darüber): Die Schrift beginnt dort, wo die Rundung der Videoecke endet, zum Blattrand sind es zwei Radien.
+						// Einblenden: auf dem Blatt erst am Ende der Blende (echtVon() + echtLang()), wenn die Geste fertig ist und der Clip
+						// losläuft; das Blatt selbst kommt wie bisher mit Beginn der Blende. Ohne Blatt unverändert.
+						// Weg zurück: „blattAn() ? 0“ und „nameZeigen(echt.spielt)“.
+						const v = flaecheVersatz, kb = k[2] / v[2], ms = kb / TON_BEZUG, einzug = blattAn() ? (kb * RAD) / RW : Math.max(BINDE_RAND * ms, (kb * RAD) / RW);
 						nameZeile.style.left = "0"; nameZeile.style.top = "0";
 						// mit Blatt: Abstand Karte zu Zeile ein Eckradius (Innenrand des Blattes), ohne Blatt NAME_ABSTAND wie bisher
 						const blatt = blattAn(), abstand = blatt ? (kb * RAD) / RW : NAME_ABSTAND * ms;
-						nameZeile.style.transform = `translate(${(v[0] + k[0] / v[2] + einzug).toFixed(1)}px, ${(v[1] + (k[1] + k[3]) / v[2] + abstand).toFixed(1)}px)`;
+						// DIE ZEILE WACKELTE BEIM MITWANDERN (Rasul 22.11.2026: „Wir lassen das Video ja noch ein bisschen wachsen,
+						// während es anfängt zu laufen. Dabei wackelt der Text, der drunter steht.“). Gemessen am selben Tag in
+						// Chrome, Fenster 2048 px, Bildschirm mit doppelter Pixeldichte: Solange der Clip läuft, wandert die Zeile in
+						// rund 9 s um 24 px nach links und 17 px nach unten, also etwa 2,7 und 1,9 px je Sekunde. Der Browser setzt
+						// Schrift aber nur auf ganze Gerätepixel; bei so langsamer Fahrt springt sie deshalb alle paar Zehntelsekunden
+						// um einen halben Pixel, waagrecht und senkrecht zu verschiedenen Zeiten. Das ist das Wackeln.
+						// Abhilfe: Solange sich die Lage ändert, bekommt die Zeile „will-change: transform“. Dann rechnet der Browser
+						// sie einmal als Bild und verschiebt dieses Bild stufenlos, auch um Bruchteile eines Pixels. Steht die Lage
+						// (NAME_RUHE Bilder lang derselbe Wert), fällt die Angabe wieder weg und die Schrift wird scharf auf ganze
+						// Pixel gesetzt; sonst bliebe sie am Ende leicht weich. Die Lage wird dazu auf Hundertstel statt Zehntel
+						// gerechnet, Breite und Schatten nur noch gesetzt, wenn sich ihr Wert ändert.
+						// PREIS: Während der Fahrt ist die Schrift minimal weicher. NICHT GEPRÜFT: Safari.
+						// Weg zurück: die drei Zeilen ab „const lage“ durch den Stand davor ersetzen:
+						//   nameZeile.style.transform = `translate(${(v[0] + k[0] / v[2] + einzug).toFixed(1)}px, ${(v[1] + (k[1] + k[3]) / v[2] + abstand).toFixed(1)}px)`;
+						// und die Zuweisungen von width und textShadow wieder ohne Vergleich schreiben.
+						const lage = `translate(${(v[0] + k[0] / v[2] + einzug).toFixed(2)}px, ${(v[1] + (k[1] + k[3]) / v[2] + abstand).toFixed(2)}px)`;
+						if (lage !== nameLage) { nameLage = lage; nameStill = 0; nameZeile.style.transform = lage; if (!nameFaehrt) { nameFaehrt = true; nameZeile.style.willChange = "transform"; } }
+						else if (nameFaehrt && ++nameStill >= NAME_RUHE) { nameFaehrt = false; nameZeile.style.willChange = "auto"; }
 						nameHoehe = nameZeile.offsetHeight * v[2];
-						nameZeile.style.width = `${Math.max(120, kb - einzug).toFixed(0)}px`;
+						{ const breit = `${Math.max(120, kb - einzug).toFixed(0)}px`; if (nameZeile.style.width !== breit) nameZeile.style.width = breit; }
 						// auf dem Blatt liegt die Schrift auf Weiß und schwebt nicht selbst: kein eigener Schatten
-						nameZeile.style.textShadow = NAME_SCHATTEN > 0 && !blatt ? `0 ${((kb * SCH_AB) / RW).toFixed(1)}px ${((kb * SCH_WEICH) / RW).toFixed(1)}px rgba(0,0,0,${NAME_SCHATTEN})` : "none";
-						if (import.meta.env.DEV) (fig as any).__name = { einzug, radius: (kb * RAD) / RW, karteBreit: kb };
+						{ const schatten = NAME_SCHATTEN > 0 && !blatt ? `0 ${((kb * SCH_AB) / RW).toFixed(1)}px ${((kb * SCH_WEICH) / RW).toFixed(1)}px rgba(0,0,0,${NAME_SCHATTEN})` : "none"; if (schatten !== nameSchatten) { nameSchatten = schatten; nameZeile.style.textShadow = schatten; } }
+						if (import.meta.env.DEV) (fig as any).__name = { einzug, radius: (kb * RAD) / RW, karteBreit: kb, faehrt: nameFaehrt };
 					}
-					nameZeigen(echt.spielt);
+					nameZeigen(echt.spielt && (!blattAn() || uhr >= echtVon() + echtLang())); // auf dem Blatt später, siehe AUF DER KARTE WIEDER EINGERÜCKT
 				}
 				if (nameZeile && nameBinde() && echt.clip) {
 					const k = (fig as any).__karteEcht as number[] | undefined;
