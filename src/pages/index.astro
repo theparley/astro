@@ -34,13 +34,17 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 				<ExpertenAuswahl />
 				<p class="anlass__satz anlass__satz--zusammen"><span class="anlass__halb1">Alle behaupten.</span> <span class="anlass__halb2">Favoriten beweisen.</span></p>
 				<div class="t-lesen anlass__text">
-					<p>In 82 Prozent der B2B-Käufe gewinnt der Anbieter, der schon vor dem ersten Kontakt Favorit war.<span aria-hidden="true">*</span></p>
-					<p>Mit Videobeweisen landet ihr in der ersten Reihe und auf dem Schirm der&nbsp;Entscheider.</p>
-					<p>Die Aufnahme aus einem echten Gespräch, das aktuelle Fragen eurer Kunden beantwortet, zeigt eure Expertise und vor allem die Menschen, die sie&nbsp;anwenden.</p>
-					<p>Genau diese gelebte Kompetenz lässt sich nicht mit KI&nbsp;generieren oder von anderen&nbsp;kopieren.</p>
-					<p class="anlass__schluss">Das ist eure&nbsp;Beweiskraft.</p>
+					{/* NEUER BANDTEXT, VIER ABSÄTZE (Rasul 22.11.2026: „Als erstes nehmen wir den neuen Text, den wir jetzt haben
+					   auf der Dev-Seite … Nehmen den mal in Parli Film rein, dass wir es da sehen“, gemeint parleyfilm.com). Wortlaut wie in `dev`
+					   (Commit 60b2be5), dort stehen Entscheidungen und Messwerte. „Über 90 Prozent“ statt 82: Die 82 war die
+					   Gewinnquote; belegt ist 91,4 % „Shortlist order set before first contact“ (6sense 2026). Keine geschützten
+					   Leerzeichen mehr im Text. Weg zurück: die fünf Absätze aus Commit f30ef16. */}
+					<p>Echte Gespräche lassen sich durch nichts ersetzen, wenn es um den Beweis eurer Expertise geht.</p>
+					<p>Aber bei über 90 Prozent der B2B-Käufe stehen die Favoriten vor dem ersten Kontakt fest.<span aria-hidden="true">*</span></p>
+					<p>Damit werden Videos aus echten Gesprächen zur ersten Wahl. Sie zeigen eure gelebte Kompetenz an aktuellen Fragen.</p>
+					<p class="anlass__schluss">Entscheider werden Augenzeugen.</p>
 					{/* Grau für hellen Grund (--grau-hell-leise, 4,61 zu 1 auf Weiß) statt der Klasse „grau“, wie in `dev`. */}
-					<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Zahl 82 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
+					<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Angabe über 90 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 				</div>
 			</div>
 		</section>
