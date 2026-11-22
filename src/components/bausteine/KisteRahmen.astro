@@ -1,0 +1,98 @@
+---
+/* DIE SCHWARZE KISTE, STUFE 1 (reines CSS), NUR LOCALHOST. Angelegt 22.11.2026.
+   Rasul 22.11.2026: „Und lass uns mal auf der Localhost-Seite für den Header die Kiste probieren.“
+   Auftrag: Sitzung „Animation · Kiste“, erarbeitet an der Werkbank branding/werkstatt-seiten/video-guckloch.html
+   (Marketing-Ordner). Steuerdokument mit Befunden und Rechenwegen: website/Animation_Kiste_2026-11.md, Abschnitt
+   „Bauauftrag Hero, Stufe 1“. Das CSS unten ist von dort wörtlich übernommen („so bauen, nicht nachbessern“).
+
+   WAS DIE KISTE IST: Vier Flächen (Decke, Boden, Wand links, Wand rechts) laufen von den Rändern des Heros nach innen.
+   Ihre Diagonalen sind die Ecken des Raums. Die Öffnung in der Mitte ist die Lichtquelle: Die Flächen sind innen am
+   hellsten und fallen nach außen ins Schwarz. Der Betrachter sitzt in einer schwarzen Kiste und schaut durch eine
+   Öffnung auf die Personen im Film.
+
+   WIE IN DER WERKBANK sitzt der Film IN der Öffnung (Kasten .filmhero__oeffnung in index.astro). ERSTER STAND DES TAGES,
+   VERWORFEN: Die Flächen lagen über den Rändern des Films, der weiter die volle Fläche deckte. Rasul: „dadurch sind jetzt
+   die Köpfe abgeschnitten.“
+
+   STUFE 1 HAT KEIN SKRIPT. Die Werkbank holt die Lichtfarbe laufend aus dem Film (Regler „Farbe“) und lässt die
+   Helligkeit dem Film folgen (Regler „Puls“). Das bleibt draußen: Der Hero ist das Erste, was ein Besucher sieht, dort
+   trägt schon der Film die Bewegung, und Stufe 1 soll die Geometrie beweisen, ohne eine Bildrate kosten zu können.
+   Die Lichtfarbe ist deshalb EINMAL FEST eingesetzt: 175, 204, 255. Das ist der Mittelwert von szene-beweisaufnahme.mp4
+   (RGB 48/71/111), auf Farbe 55 aufgehellt. Stufe 2 (Farbe und Puls lebendig) kommt erst auf Rasuls Wort.
+
+   DIE WERTE: Tiefe je Seite 5 Prozent (81 Prozent der Fläche bleiben Bild; Tiefe 3 verschwindet; BBHs Hero-Karussell
+   kennt size "centred" mit w-10/12, das wäre Tiefe 8,5). Licht Decke 0,111 · Boden 0,224 · Wände 0,180 · Streuung 85 %.
+   Rechenweg der Werkbank: lDecke = l · (1 − k · 0,55), lBoden = l · (1 + k · 0,35), lWand = l, mit l = 0,18 (Regler
+   Licht 18) und k = 0,70 (Regler Kante 70). Der Boden fängt mehr Licht als die Decke; dieser Unterschied macht die
+   Ecken sichtbar.
+
+   VIER FALLEN aus der Werkbank:
+   1. Jede Fläche ist ein eigener Kasten in Flächengröße. Läge das Trapez als clip-path auf einem Element in voller
+      Herogröße, rechnete der Verlauf über die ganze Fläche und im Trapez wäre fast nichts zu sehen.
+   2. Die Ecken entstehen nur aus dem Helligkeitsunterschied zwischen Decke, Boden und Wänden. Keine gezeichnete Linie.
+      Werden die drei Werte gleich, bleibt ein Rahmen.
+   2b. STAND 1 des Tages hatte keinen schwarzen Grund und im Hochformat keine Wände; beides berichtigt, siehe Stilteil.
+   3. Lagen: Die Klickhälften des Karussells liegen auf z-index 2, die Punkte auf 3. Die Flächen liegen mit z-index 1
+      und pointer-events: none darunter.
+   4. Die Punkte des Karussells sitzen sonst im Boden der Kiste; die Seite rückt sie in die Öffnung (index.astro).
+
+   DIE ALTERNATIVE DANEBEN: --tx und --ty auf 8.5%. Dann bleiben 69 Prozent Bild, das ist BBHs Maß size "centred".
+
+   Der Vorfahr braucht position: relative (.filmhero in index.astro).
+   WEG ZURÜCK, EIN SCHRITT: die Zeile <KisteRahmen /> in index.astro löschen (dazu die Regel für die Punkte). */
+---
+<div class="kiste-rahmen" aria-hidden="true">
+	<div class="decke"></div>
+	<div class="boden"></div>
+	<div class="wandL"></div>
+	<div class="wandR"></div>
+</div>
+<style>
+	.kiste-rahmen {
+		position: absolute; inset: 0; z-index: 1; pointer-events: none;
+		/* --tx und --ty (Tiefe der Wände in Prozent der Breite, Tiefe von Decke und Boden in Prozent der Höhe) setzt der
+		   Vorfahr, im Hero .filmhero in index.astro: So erben Rahmen und Punkte des Karussells denselben Wert, und die
+		   Alternative 8,5 % ist eine Zeile. Ohne Angabe gelten hier 5 %. */
+		--streu: 85%;
+		--licht: 175, 204, 255;  /* Mittelwert des Films, Farbe 55 */
+		/* LICHT 30 STATT 18 (22.11.2026, am Bild probiert von Website · Programmierung, bestätigt von „Animation · Kiste“):
+		   0,184 / 0,300 / 0,373 = l · (1 − k · 0,55), l, l · (1 + k · 0,35) mit l = 0,30 und k = 0,70. Vorher 0,111 /
+		   0,180 / 0,224 (Licht 18): Mit schwarzem Grund war die Diagonale in den Ecken zu suchen. Bei 42 werden Wand und
+		   Boden zu hellen Platten. MERKSATZ der Kiste-Sitzung: Wird die Tiefe kleiner, muss das Licht größer werden. In der
+		   Werkbank stand Tiefe 11 mit Licht 18; der Verlauf läuft über 85 % der Flächentiefe aus, bei Tiefe 5 ist das
+		   beleuchtete Band knapp ein Drittel so breit. Bei 8,5 % Tiefe gehört das Licht wieder Richtung 22 bis 24. */
+		--lDecke: 0.184; --lBoden: 0.373; --lWand: 0.300;
+	}
+	/* SCHWARZER GRUND (22.11.2026, „Animation · Kiste“ nach dem ersten Blick): Die Flächen liegen über dem Film, der bis
+	   zum Rand weiterläuft. Ohne Grund schien er durch, die Kiste war ein milchig heller Rahmen. Nachgerechnet von
+	   „Animation · Kiste“ (Helligkeit 0 bis 255 am Rand der Öffnung): ohne Grund Decke 75,4 · Boden 75,8 · Wand 84,4, also
+	   heller als der Film darunter (59,6 · 39,5 · 58,7) und Decke und Boden praktisch gleich; die Leiter, die die Ecken
+	   macht, war eingeebnet. Mit schwarzem Grund Decke 22,4 · Wand 36,3 · Boden 45,1. Als background-color, nicht im
+	   Verlauf, damit der Verlauf unverändert bleibt.
+	   WO DIE ZEILE STEHEN MUSS: NACH den vier Flächenregeln und mit denselben Selektoren (siehe unten). Als
+	   „.kiste-rahmen > div { background-color: #000; }“ davor wirkte sie nicht: Die Kurzform „background:“ in den
+	   Flächenregeln setzt die Farbe wieder auf durchsichtig (gemessen: rgba(0, 0, 0, 0)).
+	   Weg zurück: die Regel unter den vier Flächen streichen. */
+	.kiste-rahmen > div { position: absolute; }
+	.kiste-rahmen .decke { left: 0; right: 0; top: 0; height: var(--ty, 5%);
+		clip-path: polygon(0 0, 100% 0, calc(100% - var(--tx, 5%)) 100%, var(--tx, 5%) 100%);
+		background: linear-gradient(to top, rgba(var(--licht), var(--lDecke)) 0%, rgba(var(--licht), 0) var(--streu)); }
+	.kiste-rahmen .boden { left: 0; right: 0; bottom: 0; height: var(--ty, 5%);
+		clip-path: polygon(var(--tx, 5%) 0, calc(100% - var(--tx, 5%)) 0, 100% 100%, 0 100%);
+		background: linear-gradient(to bottom, rgba(var(--licht), var(--lBoden)) 0%, rgba(var(--licht), 0) var(--streu)); }
+	.kiste-rahmen .wandL { left: 0; top: 0; bottom: 0; width: var(--tx, 5%);
+		clip-path: polygon(0 0, 100% var(--ty, 5%), 100% calc(100% - var(--ty, 5%)), 0 100%);
+		background: linear-gradient(to left, rgba(var(--licht), var(--lWand)) 0%, rgba(var(--licht), 0) var(--streu)); }
+	.kiste-rahmen .wandR { right: 0; top: 0; bottom: 0; width: var(--tx, 5%);
+		clip-path: polygon(100% 0, 100% 100%, 0 calc(100% - var(--ty, 5%)), 0 var(--ty, 5%));
+		background: linear-gradient(to right, rgba(var(--licht), var(--lWand)) 0%, rgba(var(--licht), 0) var(--streu)); }
+
+	/* Schwarzer Grund, siehe Kommentar oben: muss hier stehen, nach den Kurzformen */
+	.kiste-rahmen .decke, .kiste-rahmen .boden, .kiste-rahmen .wandL, .kiste-rahmen .wandR { background-color: #000; }
+
+	/* GESTRICHEN FÜR DEN HERO (22.11.2026, „Animation · Kiste“): „@media (max-width: 767px) { .kiste-rahmen { --tx: 0%; } }“.
+	   Die Regel stammt aus der Werkbank, wo der Film IN der Öffnung sitzt und Wände Gesicht kosten. Im Hero deckt der Film
+	   die volle Fläche und ist im Hochformat ohnehin seitlich beschnitten (390 × 520: 924 px breit gerendert, 534 px
+	   fallen weg); Wände von 5 % nehmen 40 px mehr und bringen die Diagonalen zurück. Ohne Wände blieben zwei Balken.
+	   Sie gilt weiter dort, wo der Film in der Öffnung sitzt. */
+</style>

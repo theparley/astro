@@ -27,6 +27,7 @@ import Textblock from "../components/bausteine/Textblock.astro";
 import BlasenVideo from "../components/bausteine/BlasenVideo.astro";
 import Platzhalter from "../components/bausteine/Platzhalter.astro";
 import FilmKarussell from "../components/bausteine/FilmKarussell.astro";
+import KisteRahmen from "../components/bausteine/KisteRahmen.astro";
 import Knopf from "../components/bausteine/Knopf.astro";
 import Karten from "../components/bausteine/Karten.astro";
 import VideoKacheln from "../components/bausteine/VideoKacheln.astro";
@@ -72,13 +73,37 @@ const ZEIGE_BEWEISSTUECKE = true;
 	   (Nachschlagewerk Seite 01): randlos, volle Fensterhöhe, im Hochformat 3:4, stumm, Schleife.
 	   Video nur lokal (Freigaben der Gäste fehlen). */}
 	<div class="filmhero" aria-hidden="true">
-		{/* Filme im Wechsel wie BBH (Rasul 13.11.2026). Austauschen = Liste ändern. Alle drei nur lokal
-		   (public/lokal ist nicht versioniert), Freigaben der Gäste fehlen. Welcher Film: offen. */}
-		<FilmKarussell filme={[
+		{/* Filme im Wechsel wie BBH (Rasul 13.11.2026). Austauschen = Liste ändern.
+		   EIN FILM IM BAU, DREI AUF LOCALHOST (22.11.2026). Rasul 22.11.2026: „Ja, Kiste trotzdem auf dev und nimm doch mal
+		   einen Film hoch. Nimm mal den Film, den wir auf Localhost haben, nimm den mal hoch. Wir haben dafür die Freigaben.
+		   Wir veröffentlichen es noch nicht auf com, aber wir machen es mal auf dev hoch.“ Gewählt: „Hagen Empfehlung“.
+		   Im Bau (Dev-Seite) läuft deshalb nur /filme/hagen-empfehlung.mp4 (versioniert, 10,6 MiB; Cloudflare Pages
+		   erlaubt je Datei 25 MiB, die beiden anderen Filme sind mit 30 und 48 MiB zu groß). Mit einem Film zeigt das
+		   Karussell keine Punkte und keine Klickhälften, der Film beginnt am Ende von vorn. Auf localhost bleiben die drei
+		   Filme aus public/lokal (nicht versioniert).
+		   NICHT FÜR parleyfilm.com: Live wird aus einem eigenen Zweig gebaut und bekommt das erst auf Rasuls Wort.
+		   Weg zurück: die Liste wieder ohne Weiche schreiben und public/filme/hagen-empfehlung.mp4 löschen. */}
+		{/* DER FILM SITZT IN DER ÖFFNUNG DER KISTE (22.11.2026, „Animation · Kiste“ nach Rasuls Blick: „Okay, die Kiste liegt
+		    jetzt über dem Video, das Video ist nicht kleiner geworden, dadurch sind jetzt die Köpfe abgeschnitten.“). Stand
+		    davor: Der Film deckte den ganzen Hero, die Flächen lagen über seinen Rändern und verdeckten oben den Kopf.
+		    Jetzt umschließt dieser Kasten das Karussell und ist um --ty und --tx eingerückt. Weil beide derselbe
+		    Prozentsatz sind, hat die Öffnung dasselbe Seitenverhältnis wie der Hero: object-fit: cover beschneidet wie
+		    vorher, das Bild wird nur kleiner (bei 5 % um ein Zehntel), der Ausschnitt bleibt derselbe.
+		    Der Baustein FilmKarussell ist nicht angefasst. Weg zurück: diesen Kasten (und <KisteRahmen />) entfernen. */}
+		<div class="filmhero__oeffnung">
+		<FilmKarussell filme={import.meta.env.DEV ? [
 			{ src: "/lokal/szene-beweisaufnahme.mp4", titel: "Szene Beweisaufnahme" },
 			{ src: "/lokal/hagen-blickkontakt.mp4", titel: "Hagen: Blickkontakt" },
 			{ src: "/lokal/hagen-empfehlung.mp4", titel: "Hagen: Empfehlung" },
+		] : [
+			{ src: "/filme/hagen-empfehlung.mp4", titel: "Hagen: Empfehlung" },
 		]} />
+		</div>
+		{/* DIE SCHWARZE KISTE, STUFE 1 (Rasul 22.11.2026: „Und lass uns mal auf der Localhost-Seite für den Header die Kiste
+		    probieren.“, dann: „Ja, Kiste trotzdem auf dev“; Auftrag der Sitzung „Animation · Kiste“). Vier Flächen um die
+		    Öffnung, reines CSS, kein Skript; alles Weitere steht im Baustein.
+		    WEG ZURÜCK: diese Zeile und den Kasten .filmhero__oeffnung um das Karussell löschen. */}
+		<KisteRahmen />
 	</div>
 	<header class="hero">
 		<div class="hero__buehne rahmen">
@@ -766,6 +791,13 @@ const ZEIGE_BEWEISSTUECKE = true;
 	:global(html[data-satz="c"]) .satz--c { display: block; }
 	.satz :global(.haltung) { margin: 0; padding-block: var(--abstand-md); }
 	.filmhero { display: none; }
+	/* KISTE (22.11.2026): Der Rahmen liegt absolut im Hero, der Hero ist deshalb sein Bezug.
+	   DIE TIEFE STEHT HIER, AN EINER STELLE: --tx (Wände, Prozent der Breite) und --ty (Decke und Boden, Prozent der Höhe).
+	   Alternative der Sitzung „Animation · Kiste“: beide auf 8.5% (BBHs Maß size "centred", dann bleiben 69 Prozent Bild). */
+	.filmhero { position: relative; --tx: 5%; --ty: 5%; }
+	/* KISTE: Die Öffnung, in der der Film sitzt (siehe Kommentar am Kasten). Eingerückt um die Tiefe der Kiste; das Karussell
+	   füllt sie mit seinen 100 % ganz. */
+	.filmhero__oeffnung { position: absolute; inset: var(--ty) var(--tx); overflow: hidden; }
 	:global(html[data-hero="film"]) .filmhero { display: block; height: 100dvh; background: var(--black); }
 	@media (orientation: portrait) {
 		:global(html[data-hero="film"]) .filmhero { height: 133.333vw; }
