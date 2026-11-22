@@ -50,7 +50,14 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 					     gemeint sind, und der zweite Satz ist kurz. Weg zurück: „Damit werden Videos aus echten Gesprächen zur ersten
 					     Wahl. Sie zeigen eure gelebte Kompetenz an aktuellen Fragen.“ (Commit 4bc745a) */}
 					<p>Damit werden Videos aus echten Gesprächen über aktuelle Fragen zur ersten Wahl. Sie zeigen eure gelebte Kompetenz.</p>
-					<p class="anlass__schluss">Entscheider werden Augenzeugen.</p>
+					{/* NEUER SCHLUSS (Rasul 22.11.2026, in Website · Master: „den Text, den wir jetzt bei ‚Alle behaupten, Favoriten
+					     beweisen‘ unten drunter stehen haben, den Fließtext, den nehmen wir jetzt auch auf die dev- und auf die
+					     .com-Seite.“; in Website · Programmierung bestätigt: „Ja, dev und live“). Sein Wortlaut vom selben Tag: „wir
+					     liefern den Entscheidern die Videobeweise und machen sie zu Augenzeugen eurer Expertise.“ Die zwei geschützten
+					     Leerzeichen halten „die Videobeweise“ und „zu Augenzeugen“ zusammen (Website · Master, nach Messung: ohne sie
+					     hing ein Artikel oder „zu“ am Zeilenende). Gemessen auf localhost: zwei Zeilen bei 768 und 1440 px, drei bei
+					     360 bis 402 und 1024 px. Weg zurück: <p class="anlass__schluss">Entscheider werden Augenzeugen.</p> (Commit ca08245) */}
+					<p class="anlass__schluss">Wir liefern den Entscheidern die&nbsp;Videobeweise und machen sie zu&nbsp;Augenzeugen eurer Expertise.</p>
 					{/* Grau für hellen Grund (--grau-hell-leise, 4,61 zu 1 auf Weiß) statt der Klasse „grau“, wie in `dev`. */}
 					<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Angabe über 90 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 				</div>
