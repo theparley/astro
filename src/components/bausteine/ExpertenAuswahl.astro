@@ -1186,7 +1186,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				if (knopfTon) { const laut = !echt.clip.muted; knopfTon.innerHTML = zeichen(laut ? Z_LAUT : Z_STUMM); knopfTon.setAttribute("aria-label", laut ? "Ton ausschalten" : "Ton einschalten"); knopfTon.setAttribute("aria-pressed", String(laut)); }
 				if (knopfSpiel) { const haelt = echt.clip.paused; knopfSpiel.innerHTML = zeichen(haelt ? Z_PLAY : Z_PAUSE); knopfSpiel.setAttribute("aria-label", haelt ? "Video abspielen" : "Video anhalten"); }
 			};
-			const MIT_VORNE = import.meta.env.DEV, KNOEPFE = MIT_VORNE ? 3 : 2;
+			// „VON VORNE“ WIEDER IM BAU (20.11.2026 abends, Rasul über Website · Master: Der Clip startet stumm, wer den Ton
+			// einschaltet, hat den Anfang verpasst; Nicos erster Satz, 0,0 bis 4,1 s, trägt die Prämisse). Rasul 22.11.2026:
+			// „Und den von vorne Knopf, den auch wieder … drauf machen auf alle Fälle.“, zum Hochladen allein auf dev: „Ja, auf dev“.
+			// Sonst ist an der Animation nichts geändert. Stand davor, nur auf localhost: „const MIT_VORNE = import.meta.env.DEV“.
+			// Weg zurück: genau diese Zuweisung wieder einsetzen.
+			const MIT_VORNE = true, KNOEPFE = MIT_VORNE ? 3 : 2;
 			const tonZeigen = (da: boolean) => { if (tonKnopf) { tonKnopf.hidden = !da; tonKnopf.style.display = da ? "flex" : "none"; } };
 			if (figurEcht() && clipGanz()) {
 				const reihe = document.createElement("div"); reihe.hidden = true; reihe.className = "experten__leiste"; reihe.setAttribute("role", "group"); reihe.setAttribute("aria-label", "Video steuern");
