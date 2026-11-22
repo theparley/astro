@@ -266,12 +266,8 @@ const websiteJsonLd = JSON.stringify({
 						document.documentElement.dataset.binde = liesWahl("binde", ["kurz", "immer"], "kurz");
 						// Namensangabe als Zeile unter der Karte (Rasuls Wahl, 20.11.2026) oder als Bauchbinde im Bild (verworfen, Weg zurück): ?namensform=zeile|binde
 						document.documentElement.dataset.namensform = liesWahl("namensform", ["zeile", "binde"], "zeile");
-						// Karte und Namenszeile auf einem gemeinsamen schwebenden Blatt (Rasul 20.11.2026: „Ein Blatt“): ?blatt=an|aus
-						// BLATT WIEDER WEG (Rasul 20.11.2026 morgens, in Website · Programmierung: „Mach diese extra Karte weg, lasst das Video
-						// für sich stehen und macht die Beschreibung, häng die unten drunter, ohne dass es ein eigenes Blatt wird“; er hatte
-						// es am Vortag schon zurückgenommen, das war untergegangen). Vorgabe aus. Der Wert heißt „mit“ statt „an“, damit
-						// ein gemerktes „an“ nicht weiterwirkt. Weg zurück: ?blatt=mit oder Vorgabe "mit".
-						document.documentElement.dataset.blatt = liesWahl("blatt", ["mit", "aus"], "aus");
+						// Schalter ?blatt entfernt (Rasul 22.11.2026: Karte mit Namenszeile fest, „Können wir den ganzen Schalter wieder
+						// wegmachen“). Das gemeinsame Blatt gilt jetzt immer, siehe ExpertenAuswahl.astro (KARTE FEST, SCHALTER WEG).
 						document.documentElement.dataset.figur = nurLokal ? liesWahl("figur", ["neu", "alt", "echt"], "neu") : "echt"; // echt = in der Karte Umriss und Clip eines echten Menschen (Platzhalter, Kundenmaterial nur lokal), nur in den neuen Fassungen der Animation
 						// Zweite Fassung der Experten-Animation, nur lokal (Rasul 19.11.2026 abends): ?anim=geste|zoom|zoomnah (zoomnah = wie zoom, die Fahrt endet früher, die blaue Karte bleibt halb so breit wie die Fläche). geste = heutige
 						// Fassung und Grundeinstellung; zoom = blaue 16:9-Fläche, Kamerafahrt ohne Geste, Geste erst am Ende. Siehe
