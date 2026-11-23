@@ -30,6 +30,18 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	   Querformat 50 % der kleinen Fensterhöhe, Hochformat so hoch, wie der 16:9-Rahmen in der Breite braucht. */
 	.experten__bild { display: block; width: 100%; height: max(160px, 100vw * 0.6541); cursor: pointer; }
 	@media (orientation: landscape) { .experten__bild { height: 50svh; } }
+	/* FLIESSTEXT ERST MIT DER GESTE (22.11.2026, siehe Skript „FLIESSTEXT ERST MIT DER GESTE“). Sichtbar ist der
+	   Grundzustand: Ohne die Markierung data-flusstext="versteckt" am Band gilt keine dieser Regeln. Die Markierung setzt
+	   nur die laufende Animation. Nur opacity, kein display/visibility/aria-hidden: Der Text bleibt Inhalt für
+	   Suchmaschinen und Vorleseprogramme. focus-within ist Vorsorge für spätere Links im Text.
+	   Weg zurück: diese drei Regeln löschen (und TEXT_BLENDE im Skript auf false). */
+	:global(.anlass--band[data-flusstext] :is(.anlass__text, .anlass__quellzeile)) { transition: opacity 0.5s; }
+	:global(.anlass--band[data-flusstext="versteckt"] :is(.anlass__text, .anlass__quellzeile)) { opacity: 0; }
+	:global(.anlass--band[data-flusstext="versteckt"] :is(.anlass__text, .anlass__quellzeile):focus-within) { opacity: 1; }
+	/* Seit 22.11.2026 steht die Quellenzeile als eigener Kasten .anlass__quellzeile unter dem Fließtext (index.astro); sie
+	   blendet mit ihm aus und BELEG_NACH Sekunden nach ihm ein (Skript, „DER BELEG KOMMT NACH DER AUSSAGE“; die Zeit
+	   setzt das Skript als --beleg-nach am Band, ohne sie gilt 0). */
+	:global(.anlass--band[data-flusstext="da"] .anlass__quellzeile) { transition-delay: var(--beleg-nach, 0s); }
 </style>
 
 <script>
@@ -296,7 +308,25 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// Kamerahöhe am Ende 49 = Kopfmitte, alle Köpfe auf einer Linie; ohne Horizontlinie. Werte gerechnet: 5,1°, 552, 300.
 	// Entschieden (Rasul 13.11.2026 abends): „Augenhöhe“, Grundeinstellung; „oben“ bleibt im Schalter.
 	const auge = () => document.documentElement.dataset.hoehe !== "oben";
-	const endWerte = () => (auge() ? { A1: 5.1 * Math.PI / 180, R1: 552, F1: 300 } : { A1: 15 * Math.PI / 180, R1: 620, F1: 430 });
+	// VARIANTE „DURCHGEHENDE FAHRT MIT ENDWINKEL AUF DER AUGENLINIE“ (22.11.2026, Auftrag „Animation · Videobeweis“, nur
+	// localhost, NUR MIT ?fahrt=durch; der heutige Ablauf bleibt die Grundeinstellung). Rasul 22.11.2026: „wo die ganze
+	// Kamerafahrt eine Bewegung ist bis zum Ende hin und die Geste der Videoanimation sich dem anpasst“ und „dass wir am
+	// Ende den Kamerawinkel wieder auf die Kärtchen guckt und die Menschen im Hintergrund sieht. Dass dieser Winkel sich
+	// wirklich an seiner Augenlinie orientiert. Der im Video hat.“
+	// ENDWINKEL: Die Kamera endet heute auf Kopfmitte der STEHENDEN Figuren (Höhe 49, 5,1°). Die Person im Clip SITZT; ihre
+	// Augen liegen im Median der Bilder mit offenen Augen bei 39,6 % der Kartenhöhe (von Hand an zehn Bildern gemessen),
+	// der Horizont der Menge heute bei 29,2 %. Kommt die Kamera auf ihre Augenhöhe, wachsen die Köpfe der Menge über den
+	// Horizont: Der Betrachter sitzt unter Stehenden. Die Menge ist die Masse derer, die behaupten, und sie ragt über
+	// einen auf; so fühlt sich ein Entscheider, der darin steht. DIE HOHEN KÖPFE SIND GEWOLLT, KEIN FEHLER.
+	// WINKEL_SITZ ist der Endwinkel in Grad, bei dem der Horizont auf der Augenlinie liegt; gefunden durch Messen am Bild
+	// (siehe Bericht vom 22.11.2026), nicht hergeleitet. Zum Probieren, nur localhost: ?winkel=4.2.
+	// Die durchgehende Fahrt selbst steht in zeichneBild (FAHRT_DURCH). Weg zurück: FAHRT_DURCH = false.
+	const FAHRT_DURCH = import.meta.env.DEV && new URLSearchParams(location.search).get("fahrt") === "durch";
+	// Gemessen 22.11.2026 (Horizont als Anteil der Kartenhöhe im Schlussbild): 5,1° → 29,2 % · 4,28° → 39,7 % · 4,0° → 43,2 % ·
+	// 3,0° → 55,9 %, bei 1024, 1440 und 2048 px jeweils derselbe Anteil (der Winkel hängt nicht an der Fensterbreite).
+	// 4,29° trifft 39,6 %. Die Karte bleibt dabei an ihrem Platz (Kartenmitte gegen Platzmitte 0,0 / 0,0 px).
+	const WINKEL_SITZ = (import.meta.env.DEV && Number(new URLSearchParams(location.search).get("winkel"))) || 4.29;
+	const endWerte = () => (auge() ? { A1: (FAHRT_DURCH ? WINKEL_SITZ : 5.1) * Math.PI / 180, R1: 552, F1: 300 } : { A1: 15 * Math.PI / 180, R1: 620, F1: 430 });
 	let F1 = endWerte().F1;
 	// Ranfahrt am Ende (Rasul 13.11.2026 abends: „dass sie sich noch mehr auf die Person zubewegt … durch das Näherfahren
 	// wird es hinten breiter … du musst nichts rumschieben, einfach die Gesetze der Perspektive beachten“). Im Film:
@@ -426,7 +456,13 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 	// der äußersten Bildspalte, der Schatten reichte gerade noch an den Fensterrand. Kein sichtbarer Fehler, aber eine
 	// Regel ohne Reserve; zwischen den gemessenen Breiten liegen viele ungemessene, und die Karte wächst im Clip weiter.
 	// Preis der Reserve: rund 1 px weniger Verschiebung.
-	const LINKS = 0.09, SCHATTEN_RAUM = 0.15;
+	// LINKS = 0 (22.11.2026, Auftrag „Animation · Videobeweis“, nur localhost): Seit dem Seitentausch im Band (Rasul
+	// 22.11.2026: „Tausch mal Text und Animation aus, links und rechts.“) steht die Animation in der rechten Spalte, der
+	// Text links. Dieselbe Regel rückte die Karte damit auf den Text zu statt von ihm weg; Rasul will die Karte mittig in
+	// ihrer Hälfte. Gemessen vor dem Bau (Chrome, sichtbares Fenster): Kartenmitte gegen Platzmitte −61,2 px bei 1440 px
+	// (= 9 % von 680) und −42,5 px bei 1024 px (= 9 % von 472); bei 1024 px blieben zwischen Text und Karte 29 px.
+	// SCHATTEN_RAUM bleibt stehen und wirkt mit LINKS = 0 nicht mehr. Weg zurück: LINKS = 0.09.
+	const LINKS = 0, SCHATTEN_RAUM = 0.15;
 	const mengeDoppelt = () => ["zoom", "zoomnah", "kombi", "kombimitte"].includes(document.documentElement.dataset.anim || "") && document.documentElement.dataset.menge !== "einfach";
 	function personenFahrt(): Person[] {
 		const rnd = zufall(23), liste: Person[] = [];
@@ -1086,6 +1122,26 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const ECHT_AB = 0.35; // Anteil der Gestendauer, ab dem die Blende läuft (0,77 s nach dem Aufsetzen bei 2,2 s)
 			const echtVon = () => T_GESTE_ZOOM + (document.documentElement.dataset.anim === "kombimitte" ? ECHT_AB : 1) * DAUER_ZOOM;
 			const echtLang = () => (document.documentElement.dataset.anim === "kombimitte" ? (1 - ECHT_AB) * DAUER_ZOOM : ECHT_BLENDE);
+			// DER UMRISS BLENDET SCHNELLER AUS, DER CLIP LÄUFT VON ANFANG AN (22.11.2026, Auftrag „Animation · Videobeweis“, nur
+			// localhost). Rasul 22.11.2026: „wenn die Videobeweis-Geste fertig ist und währenddessen das ja von der Silhouette
+			// überblendet zu einem richtigen Bild und dann das Video startet, da ist ein Stopp zwischendrin. … Vielleicht können
+			// wir das Video früher starten, dass das Überblenden kein statisches Bild ist, sondern ein bewegtes Bild.“
+			// Der Stopp war der Preis von CLIP_WARTET (heute früh, siehe GEISTERBILD IN DER BLENDE): Der Clip stand 1,4 s auf
+			// Bild 0, bis der Umriss weg war. CLIP_WARTET einfach abzuschalten brächte das Geisterbild zurück. Das Geisterbild
+			// ist Deckkraft des Umrisses mal Weg des Kopfes seit Bild 0. Deshalb: Der Umriss ist nach UMRISS_BLENDE Sekunden
+			// weg (statt nach echtLang(), 1,43 s), der Clip läuft ab echtVon(). Die Einblendung des Clips selbst bleibt, wie sie
+			// war (echtLang()), ebenso die Zeiten von Text und Namenszeile.
+			// Gemessen am Clip nico-ganz.mp4 (960 × 540), Kopfkanten gegen Bild 0, Mittel links/rechts in Videopunkten:
+			// 0,2 s 6/8 · 0,4 s 18/18 · 0,6 s 21/19 · 1,0 s 7/7 · 1,4 s 3/6 (größter Einzelwert 47 bei 0,6 s). Der Kopf geht
+			// also früh und schnell nach rechts und kommt zurück; auf der Karte (rund 0,5 Punkte je Videopunkt) sind das bei
+			// 0,4 s rund 9 Punkte, bei 0,6 s rund 10.
+			// Der Clip startet stumm (v.muted = true beim Start der Animation); das muss so bleiben, sonst greifen die
+			// Autoplay-Sperren der Browser und er startet gar nicht.
+			// Zum Messen, nur localhost, nicht gemerkt: ?umriss=0.2 (Sekunden). Weg zurück: UMRISS_BLENDE = Infinity (dann
+			// blendet der Umriss wieder über echtLang() aus und der Clip wartet bis zum Ende der Blende).
+			const UMRISS_BLENDE = (import.meta.env.DEV && Number(new URLSearchParams(location.search).get("umriss"))) || 0.4;
+			const umrissLang = () => Math.min(UMRISS_BLENDE, echtLang());
+			const clipWarte = () => (UMRISS_BLENDE < echtLang() ? 0 : echtLang()); // so lange steht der Clip nach echtVon() auf Bild 0
 			const figurEcht = () => zoomFassung() && document.documentElement.dataset.figur === "echt";
 			const echt: { umriss: HTMLCanvasElement | null; clip: HTMLVideoElement | null; spielt: boolean; stand: HTMLCanvasElement | null } = { umriss: null, clip: null, spielt: false, stand: null };
 			// LOCALHOST-BEFUND, KEIN FEHLER DER SEITE (20.11.2026): Gleich nach dem Laden der Seite kann der Clip einige Sekunden
@@ -1316,7 +1372,13 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let nameZeile: HTMLDivElement | null = null, nameDa = false, karteEndeCss: [number, number, number] | null = null; // Karte am Ende des Clips relativ zum Platz: [links, Breite, Unterkante]
 			const nameZeigen = (da: boolean) => {
 				if (!nameZeile || da === nameDa) return;
-				nameDa = da; nameZeile.style.transitionDuration = da ? "0.8s" : "0.5s"; nameZeile.style.opacity = da ? "1" : "0";
+				// EINBLENDEN 0,5 STATT 0,8 s (22.11.2026, „Animation · Videobeweis“): Fließtext, Quellenzeile und Namenszeile erscheinen
+				// nacheinander (siehe BILD, AUSSAGE, BELEG) und sollen gleich lang einblenden; sonst ist die letzte Stufe nicht
+				// nur später, sondern auch langsamer. Gemessen davor: Die Namenszeile bestimmte in allen Staffelungen das Ende
+				// der Kette (bei Stufe 0,2 alles nach 8,0 s, ohne ihre längere Blende 7,7 s). Die 0,8 s stammten vom gemeinsamen
+				// Blatt (BLATT_BLENDE), mit dem die Zeile früher zugleich kam; seit sie erst am Ende der Geste erscheint, steht
+				// das Blatt dann schon. Weg zurück: "0.8s".
+				nameDa = da; nameZeile.style.transitionDuration = "0.5s"; nameZeile.style.opacity = da ? "1" : "0";
 			};
 			// Zeile unter der Karte legen (feste Lage); die Binde wird dagegen in der Bildschleife an die Karte gesetzt
 			const nameLegen = () => {
@@ -1407,7 +1469,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const RAND = 0.75 / (ctx.getTransform().a || 1); // Maßstab der Zeichnung in diesem Bild
 				ctx.save(); ctx.filter = "none"; ctx.beginPath(); ctx.roundRect(kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND, RAD * m + RAND); ctx.clip();
 				if (v > 0 && echt.clip) { ctx.globalAlpha = v; ctx.drawImage(standDa ? echt.stand! : echt.clip, kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND); }
-				if (v < 1) { ctx.globalAlpha = ein * (1 - v); ctx.drawImage(echt.umriss, kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND); }
+				const vU = clipDa || standDa ? sanft(anteil(t, echtVon(), umrissLang())) : 0; // Umriss schneller weg als der Clip da ist, siehe UMRISS_BLENDE
+				if (vU < 1) { ctx.globalAlpha = ein * (1 - vU); ctx.drawImage(echt.umriss, kx - RAND, ky - RAND, w + 2 * RAND, h + 2 * RAND); }
 				ctx.restore(); ctx.globalAlpha = 1;
 				// Messhaken, nur lokal (Auftrag W): Wer vorher fig.__karteLog = [] setzt, bekommt je Bild, was in der Karte landet
 				if (import.meta.env.DEV && (fig as any).__karteLog) (fig as any).__karteLog.push([standDa ? "standbild" : v >= 1 ? "clip" : v > 0 ? "blende" : "umriss", echt.clip ? echt.clip.readyState : -1, echt.clip ? +echt.clip.currentTime.toFixed(2) : -1, echt.clip && echt.clip.seeking ? 1 : 0]);
@@ -1416,7 +1479,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			// Systemeinstellung „Bewegung reduzieren“, auch wenn sie bei offener Seite umgestellt wird (Code-Prüfung N14)
 			const ruhig = matchMedia("(prefers-reduced-motion: reduce)");
 			let still = ruhig.matches;
-			const ruhigWechsel = () => { still = ruhig.matches; if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); } };
+			const ruhigWechsel = () => { still = ruhig.matches; if (still) { blendeVoll = true; textZeigen(); } if (still && gestartet) { cancelAnimationFrame(lauf); spurR = []; spurL = []; bild(ENDE + 5, 0); fig.dataset.fertig = ""; phase("schluss"); } };
 			ruhig.addEventListener?.("change", ruhigWechsel);
 
 			let breiteGemessen = -1, hoeheGemessen = 0; // siehe groesse(): Höhe nur bei neuer Breite
@@ -1453,6 +1516,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const r = cv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, dichteProbe > 0 ? dichteProbe : 99);
 				cv.width = off.width = Math.max(1, Math.round(r.width * d)); cv.height = off.height = Math.max(1, Math.round(r.height * d));
 				glut.width = Math.max(1, Math.round(cv.width / 4)); glut.height = Math.max(1, Math.round(cv.height / 4));
+				gesteFeldNeu = true; // Ausschnitt der Geste neu bestimmen, siehe GESTE NUR IM AUSSCHNITT UM DIE KARTE
 				// Rahmen und Personen passend zur Fläche neu legen
 				// Breite des Platzes im Layout, nicht der Zeichenfläche (siehe MENGE BREITER ALS IHRE FLÄCHE). Ist die Fläche
 				// so breit wie ihr Platz, ist beides dasselbe wie bisher.
@@ -1669,7 +1733,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 							// und Brennweite wie im Bild, je Fensterbreite neu, weil die Überschrift je Breite woanders steht.
 							// Unberührt: die drei vorn, die sechs Ausweicher, Karte und Video. Preis: Die Gelöschten fehlen auch später.
 							// Zum Messen, nicht gemerkt: ?titelfrei=aus zeigt den Stand davor. Weg zurück: TITEL_FREI fest auf false.
-							const TITEL_FREI = !import.meta.env.DEV || new URLSearchParams(location.search).get("titelfrei") !== "aus", TITEL_BIS = 1.0, TITEL_RAND = 4;
+							const TITEL_FREI = !import.meta.env.DEV || new URLSearchParams(location.search).get("titelfrei") !== "aus", TITEL_BIS = (import.meta.env.DEV && Number(new URLSearchParams(location.search).get("titelbis"))) || 1.0 /* nur lokal zum Messen, nicht gemerkt: ?titelbis=0.5 (22.11.2026) */, TITEL_RAND = 4;
 							if (TITEL_FREI && flaecheBreit && mengeDoppelt()) {
 								const haelften = [...(fig.closest(".anlass__band-innen")?.querySelectorAll<HTMLElement>(".anlass__satz .anlass__halb1, .anlass__satz .anlass__halb2") ?? [])].map((h) => h.getBoundingClientRect()).filter((re) => re.width > 0);
 								if (haelften.length) {
@@ -1685,6 +1749,165 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 									try { for (let tP = VORSPRUNG(); tP <= VORSPRUNG() + TITEL_BIS + 0.001; tP += 0.05) { try { bild(tP, 0); } catch (f) { if (f !== TITEL_HALT) throw f; } } } finally { titelProbe = null; }
 									if (import.meta.env.DEV) (fig as any).__titelfrei = { weg: nTitel };
 								}
+							}
+							// DIE EINE GROSSE FIGUR HINTER DEM FLIESSTEXT (22.11.2026, Auftrag „Animation · Videobeweis“, nur localhost).
+							// Rasul 22.11.2026: „Es gibt am Ende der Animation ist ein Männchen noch recht präsent hinterm Text. Das könnten
+							// wir einfach löschen, dass es auch am Anfang gar nicht da ist.“
+							// EINE REGEL, KEINE LISTE: Im Schlussbild wird unter den Figuren, deren Kasten das Rechteck des Fließtexts
+							// (.anlass__text, ohne Quellenzeile) überschneidet, die größte entfernt (q.weg, wie TITEL_FREI), wenn sie
+							// mindestens TEXT_WEG_ANTEIL (5 %) der Fläche des Textblocks deckt. Ein Verhältnis, keine Pixelzahl.
+							// Höchstens eine Figur, nie zwei. Der Satz dahinter: Eine einzelne Figur, die ein Zwanzigstel des Textblocks
+							// deckt, ist eine Gestalt; eine, die ein Dreißigstel deckt, ist Textur.
+							// GEMESSEN am 22.11.2026, Anteil der größten Figur je Fensterbreite: 1024 px 3,4 % · 1280 px 3,1 % ·
+							// 1440 px 1,8 % · 1728 px 1,1 % · 2048 px 8,7 % · 2560 px 3,1 %. Die 5 % liegen in der Lücke zwischen 3,4 und
+							// 8,7; entfernt wird genau in dem einen Fall, um den es Rasul geht (sein Fenster, 2048 px).
+							// GEPRÜFT UND VERWORFEN (erster Stand desselben Tages): zusätzlich „mindestens doppelt so groß wie die
+							// zweitgrößte“ bei einer Schwelle von 3 %. Das Verhältnis zur zweiten Figur misst die falsche Sache, es
+							// beschreibt die Figuren untereinander, Rasuls Satz beschreibt eine Figur gegen den Text. Zwei Grenzfälle
+							// haben es gezeigt: Bei 1024 px entfernte die Regel eine Figur von nur 3,4 % (Verhältnis 2,27), bei 2560 px
+							// ließ sie eine Gestalt von rund 96 × 107 px stehen (Verhältnis 1,89).
+							// WARUM KEINE KOORDINATE: Die Füllfiguren hängen an der Fensterbreite. Gemessen am 22.11.2026: Bei 2048 px
+							// (Rasuls Fenster) steht EINE Figur hinter dem zweiten und dritten Absatz, 160 × 178 px, Fläche 28491, 3,6-mal
+							// so groß wie die nächste (7857), 8,7 % des Textblocks; sie wird entfernt. Bei 1440 px gibt es diese Figur
+							// nicht, die beiden größten sind gleich groß (4942 und 4881, Verhältnis 1,01, je 1,8 %); dort wird nichts
+							// entfernt. Eine feste Liste wie O1_WEG wäre an 2048 px gebunden und bei jeder anderen Breite wirkungslos
+							// oder falsch.
+							// ZU WISSEN: Die Figur steht am Anfang NICHT hinter dem Text; sie wandert während der Fahrt hinein (ab etwa
+							// Uhr 3) und wird beim Zufahren groß. Entfernt ist sie trotzdem von Anfang an, wie Rasul es sagt.
+							// Gerechnet mit der Zeichenfunktion selbst (titelProbe), mit denselben Kastenmaßen wie TITEL_FREI.
+							// Die Regel wirkt nie still: fig.__textweg nennt (nur lokal) die Figur, ihre Fläche, das Verhältnis zur
+							// zweiten und den Anteil am Textblock, oder dass nichts entfernt wurde.
+							// Zum Vergleichen, nur localhost, nicht gemerkt: ?textweg=aus. Weg zurück: TEXT_WEG fest auf false.
+							const TEXT_WEG = !import.meta.env.DEV || new URLSearchParams(location.search).get("textweg") !== "aus", TEXT_WEG_ANTEIL = 0.05;
+							if (import.meta.env.DEV) (fig as any).__textweg = { entfernt: false, grund: "Regel läuft nicht (aus, schmale Fläche oder kein Fließtext)" };
+							if (TEXT_WEG && flaecheBreit && mengeDoppelt()) {
+								const txtW = fig.closest(".anlass__band-innen")?.querySelector<HTMLElement>(".anlass__text")?.getBoundingClientRect();
+								if (txtW && txtW.width > 0 && txtW.height > 0) {
+									const cr = cv.getBoundingClientRect(); let funde: { q: Person; fl: number }[] = [];
+									titelProbe = (lage, sc, ox, oy) => {
+										const fx = (v: number) => cr.left + (v * sc + ox) / d, fy = (v: number) => cr.top + (v * sc + oy) / d;
+										funde = [];
+										for (const l of lage) {
+											const q = l.q; if (q.ebene <= 1 || q.weicht !== undefined || q.weg) continue;
+											const li = fx(l.x - 28.65 * l.g), ob = fy(l.y - 34 * l.g), re = fx(l.x + 28.65 * l.g), un = fy(l.y + 30 * l.g);
+											if (li < txtW.right && re > txtW.left && ob < txtW.bottom && un > txtW.top) funde.push({ q, fl: (re - li) * (un - ob) });
+										}
+									};
+									try { bild(T_GESTE_ZOOM + DAUER_ZOOM + 0.5, 0); } catch (f) { if (f !== TITEL_HALT) throw f; } finally { titelProbe = null; }
+									funde.sort((a, b) => b.fl - a.fl);
+									const erste = funde[0], zweite = funde[1], flText = txtW.width * txtW.height;
+									const mal = erste ? (zweite ? erste.fl / zweite.fl : Infinity) : 0, anteil = erste ? erste.fl / flText : 0;
+									const trifft = !!erste && anteil >= TEXT_WEG_ANTEIL; // mal (Verhältnis zur zweiten) nur noch zum Melden im Messhaken
+									if (trifft) erste.q.weg = true;
+									if (import.meta.env.DEV) (fig as any).__textweg = { entfernt: trifft, hinterText: funde.length, wx: erste?.q.wx, wz: erste?.q.wz, flaeche: erste ? Math.round(erste.fl) : 0, zweite: zweite ? Math.round(zweite.fl) : 0, mal: Math.round(mal * 100) / 100, anteil: Math.round(anteil * 1000) / 1000 };
+								}
+							}
+							// PROBE „FIGUR OBEN RECHTS“ (22.11.2026, Auftrag „Animation · Videobeweis“, nur localhost, NUR MIT ?figuroben=an;
+							// Grundeinstellung ist ohne die Figur). Rasul 22.11.2026: „Wir haben bei der Animation jetzt rechts oben mehr
+							// Luft, können wir da noch höher Männchen hinsetzen?“
+							// DIE GEOMETRIE: Alle Figuren stehen auf einem Boden, ihre Höhe im Bild hängt allein am Abstand zur Kamera.
+							// Höher heißt zwingend näher und damit größer. Eine Figur, deren Kopf die Oberkante der Karte erreicht, wird
+							// fast so groß wie die Person im Clip. Das soll Rasul am Bild sehen („Beweis allein oder Beweis mit Konkurrenz“),
+							// deshalb als Schalter und nicht als Bau.
+							// GEBAUT: genau eine Figur rechts neben der Karte, Füße auf dem Boden wie alle anderen. Ihr Abstand wird im
+							// Schlussbild so gesucht, dass die Oberkante ihres Kastens auf der Oberkante der Karte liegt; ihr Platz zur
+							// Seite so, dass ihr Kasten FIGUR_OBEN_LUFT der Kartenbreite neben der Karte beginnt. Gerechnet mit der
+							// Zeichenfunktion selbst (titelProbe). Es wird nichts verkleinert, damit sie passt: fig.__figuroben meldet,
+							// wie groß sie ist und ob sie über den Fensterrand ragt.
+							// Weg zurück: FIGUR_OBEN fest auf false.
+							// ZWEI STUFEN (22.11.2026): ?figuroben=an = Scheitel auf der Oberkante der Karte („Rahmenhöhe“, das äußerste Ende;
+							// gemessen 1,8-mal so groß wie die vordere Figur, bei 2048 px 482 Gerätepixel über den rechten Rand).
+							// ?figuroben=kopf = Scheitel auf der oberen Drittellinie der Karte, der Kopfhöhe der Person im Clip. Grund für
+							// die zweite Stufe: Die Luft über der Karte ist zum Teil die Luft über dem Kopf der Person und gehört zur
+							// Karte, nicht zum Raum; „so hoch wie die Person“ ist die ehrliche Lesart von „höher hinsetzen“.
+							// ENTSCHIEDEN, RASUL 22.11.2026: „Figur bleibt“ (auf die Frage „Soll die Figur rechts neben der Karte bleiben oder
+							// die Luft?“, nachdem er die drei Bilder gesehen hat). Lesart von „Animation · Videobeweis“, offen gelegt und
+							// widerrufbar: gemeint ist die Figur in Personengröße, nicht die 1,8-fache.
+							// SEITDEM STEHT DIE FIGUR OHNE SCHALTER DA, Stufe „passend“: Abstand je Fensterbreite so, dass die ganze Figur
+							// im Fenster steht (FIGUR_OBEN_RAND Punkte Luft zum rechten Rand), höchstens aber so groß wie die vordere Figur.
+							// DER PREIS, BEKANNT: Kleiner heißt weiter weg und damit tiefer. In schmalen Fenstern ist neben der Karte so
+							// wenig Platz, dass die Figur auf die Kopflinie der Menge sinkt; die Zahlen dazu stehen im Bericht vom
+							// 22.11.2026. Beim Messen galt „nichts kleiner machen“, damit die Geometrie nicht verschwiegen wird; die steht
+							// jetzt fest, deshalb gilt hier das Gegenteil.
+							// Schalter, nur localhost, nicht gemerkt: ?figuroben=aus (ohne Figur), =gleich (Personengröße, darf hinausragen),
+							// =an (Rahmenhöhe, 1,8-fach), =kopf (nicht möglich, siehe unten). Weg zurück zur Luft: "aus" als Vorgabe.
+							// WIEDER ZURÜCKGENOMMEN, RASUL 22.11.2026, nachdem er die Figur im Lauf gesehen hat: „Okay, jetzt habe ich so ein
+							// riesiges Männchen nebendran stehen, das machen wir natürlich weg.“ DIE GRUNDEINSTELLUNG IST WIEDER OHNE FIGUR.
+							// Alles hierunter bleibt als Probe hinter den Schaltern (nur localhost): ?figuroben=passend (die Fassung, die
+							// kurz Vorgabe war, mit der Schwelle über der Menge), =gleich, =an, =kopf. Der bleibende Ertrag der Runde ist
+							// der Befund: Höher heißt näher und größer; „Kopfhöhe“ der Person im Clip ist für eine stehende Figur nicht
+							// erreichbar (Drittellinie unter dem Horizont, die Person sitzt); eine Figur, die ins Fenster passt, sinkt
+							// unterhalb von rund 1800 px Fensterbreite auf die Kopflinie der Menge.
+							const FIGUR_OBEN_ART = import.meta.env.DEV ? new URLSearchParams(location.search).get("figuroben") || "aus" : "aus", FIGUR_OBEN_RAND = 8;
+							// BEFUND ZU „kopf“ (gemessen 22.11.2026): NICHT MÖGLICH. Die obere Drittellinie der Karte (33,3 % der Kartenhöhe)
+							// liegt UNTER dem Horizont der Menge (29,2 %, in der durchgehenden Fassung 39,6 % und damit erst recht). Die
+							// Kopfmitten aller stehenden Figuren liegen auf dem Horizont, ihre Scheitel also immer darüber; keine Figur
+							// kann ihren Scheitel auf die Drittellinie bringen, wie weit weg sie auch steht. Die Stufe meldet das und
+							// setzt keine Figur.
+							// DRITTE STUFE ?figuroben=gleich: eine Figur im selben Abstand wie die vordere Figur, also genau so groß wie
+							// die Person, die in der Karte steht (Verhältnis 1,0). Das ist die kleinste Figur, die „so hoch wie die Person“
+							// überhaupt heißen kann.
+							const FIGUR_OBEN = ["an", "kopf", "gleich", "passend"].includes(FIGUR_OBEN_ART), FIGUR_OBEN_LUFT = 0.08;
+							if (FIGUR_OBEN && flaecheBreit && mengeDoppelt()) {
+								const frO = fig.getBoundingClientRect(), crO = cv.getBoundingClientRect(), kdO = cv.width / Math.max(1, crO.width);
+								const kWO = frO.width * kdO * ((document.documentElement.dataset.anim === "kombimitte" ? kombiZiel() * 584 : 584) / 680) * (1 + LAUF_ZUWACHS), kHO = kWO * 9 / 16;
+								const kObenO = obenZu + platzHoehe / 2 - kHO / 2, kRechtsO = mitteX + kWO / 2, zielLinks = kRechtsO + FIGUR_OBEN_LUFT * kWO;
+								const zielObenO = FIGUR_OBEN_ART === "kopf" ? kObenO + kHO / 3 : kObenO; // Scheitel: obere Drittellinie oder Oberkante der Karte
+								const pO: Person = { x: CX, y: CY, s: 1, ein: -1, zx: 0, zy: 0, bleibt: false, rang: 0, ebene: 2, ex: 0, ey: 0, eg: 1, z: 1, wx: 0, wz: 0, tx: 0, tz: 0, breit: true, rolle: "oben" };
+								leuteRaum.push(pO);
+								// Kasten der Figur im Schlussbild in Gerätepixeln der Zeichenfläche: [links, oben, rechts, unten, g, g der vorderen Figur]
+								const messeO = (X: number, Z: number): number[] | null => {
+									pO.wx = pO.tx = X; pO.wz = pO.tz = Z; pO.x = CX + X; pO.y = CY - Z;
+									let k: number[] | null = null;
+									titelProbe = (lage, sc, ox, oy) => { const l = lage.find((e) => e.q === pO), v = lage.find((e) => e.q.ebene === 0); if (l) k = [(l.x - 28.65 * l.g) * sc + ox, (l.y - 34 * l.g) * sc + oy, (l.x + 28.65 * l.g) * sc + ox, (l.y + 30 * l.g) * sc + oy, l.g, v ? v.g : 0]; };
+									try { bild(T_GESTE_ZOOM + DAUER_ZOOM + 0.5, 0); } catch (f) { if (f !== TITEL_HALT) throw f; } finally { titelProbe = null; }
+									return k;
+								};
+								// zur Seite: Der Bildort hängt bei festem Abstand linear am Platz, zwei Proben genügen
+								const setzeX = (Z: number): number[] | null => {
+									const a = messeO(600, Z), b = messeO(700, Z); if (!a || !b || b[0] === a[0]) return null;
+									return messeO(600 + (zielLinks - a[0]) * 100 / (b[0] - a[0]), Z);
+								};
+								// Abstand: von hinten nach vorn abtasten, bis die Oberkante die Kartenoberkante erreicht, dann eingrenzen
+								let zHinten = -100, zVorn = NaN, kO: number[] | null = null, grundO = "keine Lage gefunden, bei der die Oberkante das Ziel erreicht";
+								if (FIGUR_OBEN_ART === "gleich") { const vO = leuteRaum.find((q) => q.ebene === 0); if (vO) kO = setzeX(vO.tz); }
+								else if (FIGUR_OBEN_ART === "passend") {
+									// so groß wie die vordere Figur, wenn das ins Fenster passt; sonst so weit nach hinten, bis die rechte Kante
+									// des Kastens FIGUR_OBEN_RAND Punkte vor dem Rand der Zeichenfläche liegt (die Fläche ist so breit wie das Fenster)
+									const vO = leuteRaum.find((q) => q.ebene === 0), grenzeR = cv.width - FIGUR_OBEN_RAND * kdO;
+									if (vO) {
+										const k0 = setzeX(vO.tz);
+										if (k0 && k0[2] <= grenzeR) kO = k0;
+										else {
+											let nah = vO.tz, fern = NaN;
+											for (let Z = vO.tz + 10; Z <= 1500; Z += 10) { const k = setzeX(Z); if (!k) break; if (k[2] <= grenzeR) { fern = Z; break; } nah = Z; }
+											if (!isNaN(fern)) { for (let i = 0; i < 14; i++) { const m = (nah + fern) / 2, k = setzeX(m); if (k && k[2] <= grenzeR) fern = m; else nah = m; } kO = setzeX(fern); }
+											else grundO = "neben der Karte ist kein Platz für eine Figur, auch nicht für eine ferne";
+										}
+									}
+								}
+								else for (let Z = -100; Z >= -520; Z -= 10) {
+									const k = setzeX(Z); if (!k) break;
+									if (k[1] <= zielObenO) { if (Z === -100) grundO = "Ziel liegt unter dem Horizont: schon die ferne Figur hat ihren Scheitel darüber (oben " + Math.round(k[1]) + ", Ziel " + Math.round(zielObenO) + ")"; else zVorn = Z; break; }
+									zHinten = Z;
+								}
+								if (FIGUR_OBEN_ART !== "gleich" && FIGUR_OBEN_ART !== "passend" && !isNaN(zVorn)) { for (let i = 0; i < 14; i++) { const m = (zHinten + zVorn) / 2, k = setzeX(m); if (k && k[1] > zielObenO) zHinten = m; else zVorn = m; } kO = setzeX(zHinten); }
+								// NUR ZEIGEN, SOLANGE SIE HÖHER STEHT ALS DIE MENGE (22.11.2026, Vorgabe Website · Master über „Animation ·
+								// Videobeweis“): Wo die angepasste Figur auf die Kopflinie der Menge sinkt, wird sie weggelassen, nicht weiter
+								// verkleinert. Eine Figur, die in der Menge versinkt, ist kein Bewohner der Luft mehr, sondern eine von
+								// fünfhundert; sie kostet Aufmerksamkeit und leistet nichts. Die Schwelle ist eine Sache, keine Zahl: Ihr
+								// Scheitel muss im Schlussbild über dem höchsten Scheitel aller sichtbaren Figuren der Menge liegen. Gleichauf
+								// oder darunter: keine Figur. Gemessen am 22.11.2026 (Scheitel der Figur / höchster der Menge, Gerätepixel):
+								// 2048 px 537 / 600 (steht), 1728 px 606 / 604, 1440 px 554 / 552, 1024 px 479 / 466 (fallen weg).
+								// Gilt nur für die Stufe „passend“; die Vergleichsstufen zeigen ihre Figur immer.
+								let hoechsteO = NaN;
+								if (kO && FIGUR_OBEN_ART === "passend") {
+									titelProbe = (lage, sc, ox, oy) => { for (const l of lage) { if (l.q === pO || l.q.ebene <= 1) continue; const li = (l.x - 28.65 * l.g) * sc + ox, re = (l.x + 28.65 * l.g) * sc + ox; if (re < 0 || li > cv.width) continue; const ob = (l.y - 34 * l.g) * sc + oy; if (isNaN(hoechsteO) || ob < hoechsteO) hoechsteO = ob; } };
+									try { bild(T_GESTE_ZOOM + DAUER_ZOOM + 0.5, 0); } catch (f) { if (f !== TITEL_HALT) throw f; } finally { titelProbe = null; }
+									if (!isNaN(hoechsteO) && kO[1] >= hoechsteO) { grundO = "sinkt auf die Kopflinie der Menge: Scheitel " + Math.round(kO[1]) + ", höchster der Menge " + Math.round(hoechsteO); (fig as any).__figurobenWeg = { scheitel: kO[1], hoechsteMenge: hoechsteO, g: kO[4], gVorn: kO[5], breit: kO[2] - kO[0] }; kO = null; }
+								}
+								if (!kO) { const i = leuteRaum.indexOf(pO); if (i >= 0) leuteRaum.splice(i, 1); }
+								(fig as any).__figuroben = kO ? { gefunden: true, wx: pO.wx, wz: pO.wz, kasten: kO.slice(0, 4), g: kO[4], gVorn: kO[5], art: FIGUR_OBEN_ART, hoechsteMenge: hoechsteO, zielOben: zielObenO, karteOben: kObenO, karteRechts: kRechtsO, flaecheBreit: cv.width, flaecheHoch: cv.height } : { gefunden: false, art: FIGUR_OBEN_ART, grund: grundO, zielOben: zielObenO, karteOben: kObenO };
 							}
 							// KEIN SPÄTES ERSCHEINEN MEHR (Auftrag Q1; Rasul 19.11.2026: „ich sehe, dass immer noch neue Männchen entstehen, mach das
 							// mal weg. In dem Moment, wo die Kamera fährt, gibt es keine neuen Menschen mehr.“). Der folgende Block (späte Figuren
@@ -1723,6 +1946,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						}
 					}
 				}
+				textMass(); // Lage des Fließtexts auf der Fläche neu messen (FLIESSTEXT ERST MIT DER GESTE)
 			};
 
 			// faktor und tLos: nur das jüngste Stück unter den Fingern (die letzten 0,3 s vor tLos) wird zusätzlich ausgeblendet
@@ -1855,13 +2079,87 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				const e = 0.15 * tz + 0.85 * lo;
 				return { e, s: 0.5 * (e + Math.log(groesseVorne(e)) / L) };
 			};
+			// ZEITMESSUNG JE ABSCHNITT (22.11.2026, Auftrag „Animation · Videobeweis“; nur localhost, nur mit ?last=an, kein
+			// Dauerbetrieb). Anlass: In der Geste fallen bei 2048 px 5 bis 12 Bilder je Sekunde aus, auch im Ablauf ohne die
+			// Änderungen vom 22.11.; Läufe mit und ohne Aufhellung streuten stärker (15 bis 30 Ausfälle), als sie sich
+			// unterschieden. Gemessen wird hier die Rechenzeit des Skripts je Abschnitt (performance.now), summiert je Sekunde
+			// der Uhr: Menge (alle Figuren außer der vorderen), Karte (vordere Figur mit Blatt und Schatten, ohne Clip), Clip
+			// (zeichneEcht), Geste, Aufhellung, Gesamt. GRENZE DER MESSUNG: Der Browser führt Zeichenbefehle zum Teil erst nach
+			// dem Skript aus (Rastern, Unschärfe-Filter, Zusammensetzen); diese Zeit steckt in keinem Abschnitt. Die Zahlen
+			// sagen, wo das Skript rechnet, nicht sicher, wo der Browser am längsten malt.
+			// Lesen: fig.__last() liefert je Sekunde die Summen in ms und die Zahl der Bilder. Weg zurück: LAST = false.
+			const LAST = import.meta.env.DEV && new URLSearchParams(location.search).get("last") === "an";
+			const lastSummen: Record<number, Record<string, number>> = {}; let lastSek = 0;
+			const lastAdd = (was: string, ms: number) => { const z = (lastSummen[lastSek] ||= {}); z[was] = (z[was] || 0) + ms; };
+			if (LAST) (fig as any).__last = () => lastSummen;
+			// GESTE NUR IM AUSSCHNITT UM DIE KARTE (22.11.2026, Auftrag „Animation · Videobeweis“, nur localhost). Befund der
+			// Zeitmessung oben: Bei 2048 px kostete die Geste 14 bis 15 ms je Bild (Menge rund 2, Clip 1, Aufhellung unter
+			// 0,05), das Bild brauchte 16 bis 19 ms bei einem Budget von 16,7; in der Geste fielen 5 bis 12 Bilder je Sekunde
+			// aus. Bei 1440 px waren es 6,6 bis 8,3 ms und 60 Bilder, der Fehler war nur im breiten Fenster zu sehen. Ursache:
+			// Seit die Zeichenfläche so breit ist wie das Fenster (19.11.2026), hatten die beiden Zeichenfelder der Geste (off
+			// und glut) deren volle Größe (4096 × 1507 Bildpunkte bei 2048 px und doppelter Dichte) und wurden je Bild zweimal
+			// gefüllt, zweimal umgekehrt, einmal verkleinert und zweimal übertragen, obwohl Spur und Leuchten nur um die Karte
+			// liegen. Gemessen: Sie reichen höchstens 78 px (2048) bzw. 65 px (1440) über die Karte am Ende hinaus.
+			// Jetzt haben die Felder die Größe der Karte am Ende der Geste plus Rand und werden an ihre Stelle gesetzt.
+			// DAS BILD BLEIBT GLEICH: Außerhalb der Spur ist off schwarz (umgekehrt weiß), und Multiplizieren mit Weiß ändert
+			// nichts. Die Unschärfe des Leuchtens (glutUnsch) hängt am Maßstab der Zeichnung und am festen Viertel von glut,
+			// nicht an der Feldgröße. Strich, Fingerpunkte und Weg sind Einheiten der Zeichnung; Ringe und Druckkreise gehen
+			// direkt auf die Zeichenfläche. Ecke und Größe des Ausschnitts sind Vielfache von 4, damit das Viertel genau aufgeht.
+			// GEGENGEPRÜFT, Bildpunkt für Bildpunkt (22.11.2026; dasselbe Bild der Uhr über __bild(t), ?geste=voll gegen
+			// zugeschnitten, ?figur=neu, ganze Fläche, größte Abweichung je Farbkanal von 255): 1440 px bei Uhr 6,5 / 7,3 / 8,7
+			// jeweils höchstens 1 (0,17 / 0,54 / 0,007 % der Bildpunkte verschieden). 2048 px: Uhr 6,5 höchstens 3 (2.122
+			// Bildpunkte über 1, das sind 0,034 % der Fläche), Uhr 7,3 höchstens 2, Uhr 8,7 höchstens 1. Die Abweichungen
+			// liegen mitten im Ausschnitt an den frisch aufgesetzten Fingerpunkten, nicht an seinem Rand.
+			// DIE ABWEICHUNG IST NICHT DER PREIS DES ZUSCHNITTS, SONDERN EINE BERICHTIGUNG DES ALTEN STANDS. Die Kette: Das alte
+			// Leuchtfeld war bei 2048 px 1024 × 377 Bildpunkte für eine Fläche von 4096 × 1507; 1507 ist nicht durch 4 teilbar,
+			// das Viertel war in der Höhe leicht gestaucht und das Leuchten lag um Bruchteile eines Bildpunkts neben der Spur.
+			// Die Abweichung ist dort am größten, wo das Leuchten am steilsten ist (frisch aufgesetzte Fingerpunkte, Uhr 6,5),
+			// und fällt im Nachglimmen auf 1. Im Ausschnitt geht das Viertel genau auf.
+			// BEWIESEN am 22.11.2026 mit der Gegenprobe: Bei 1680 px Fensterbreite ist die alte Fläche 3360 × 1480, beides durch
+			// 4 teilbar. Dort unterscheiden sich alt und neu bei Uhr 6,5 in 1 Bildpunkt und bei Uhr 7,3 in 5 Bildpunkten von
+			// knapp 5 Millionen, jeweils um 1 Stufe. (Die Höhe der Fläche hängt an der Spaltenbreite, nicht an der
+			// Fensterhöhe; bei 2048 px und breiter ist sie immer 1507, deshalb die Probe bei 1680 px.)
+			// NICHT GEPRÜFT: Safari. Dort läuft die Unschärfe über weichzeichnen() im Skript statt über den Filter; der
+			// Zuschnitt verkleinert auch dieses Feld und müsste dort am meisten bringen.
+			// Gemessen nach dem Bau (2048 px, Uhr 6 / 7 / 8): Gesamt 6,0 / 9,3 / 7,7 ms (vorher 16,2 / 18,9 / 17,2), Geste
+			// 3,4 / 5,4 / 4,6 ms (vorher 13,7 / 14,8 / 14,2), 60 Bilder in jeder Sekunde (vorher 58 / 49 / 55).
+			// RAND: DICKE (der Strich liegt außen an der Karte) plus dreimal die Unschärfe in Gerätepixeln (3 · 4 · glutUnsch),
+			// mit Reserve; bei 2048 px rund 125 px gegen gemessene 78.
+			// SICHERUNG: Passt die Karte eines Bildes samt Rand nicht in den Ausschnitt (andere Fassung, anderer Ausschnitt
+			// während der Fahrt), zeichnet dieses Bild wie früher über die volle Fläche. fig.__gesteFeld (nur lokal) zählt beide.
+			// Nur in den Zoom-Fassungen; die älteren Fassungen zeichnen die Geste vor den Figuren und bleiben, wie sie waren.
+			// Zum Vergleichen, nur localhost, nicht gemerkt: ?geste=voll. Weg zurück: GESTE_SCHNITT = false.
+			const GESTE_SCHNITT = !import.meta.env.DEV || new URLSearchParams(location.search).get("geste") !== "voll";
+			let gesteFeld: [number, number, number, number] | null = null, gesteFeldNeu = true, gesteRand = 0;
+			const gesteZahl = { schnitt: 0, voll: 0 };
+			if (import.meta.env.DEV) (fig as any).__gesteFeld = () => ({ ...gesteZahl, feld: gesteFeld, rand: gesteRand, off: [off.width, off.height] });
+			const gesteFeldSetzen = (bw: number, bh: number) => {
+				if (off.width !== bw || off.height !== bh) { off.width = bw; off.height = bh; glut.width = Math.max(1, Math.round(bw / 4)); glut.height = Math.max(1, Math.round(bh / 4)); }
+			};
+			if (LAST) (fig as any).__gesteFelder = () => ({ off, glut }); // nur zum Ausmessen, wie weit Spur und Leuchten reichen (22.11.2026)
 			const zeichneBild = (t: number, jetzt: number) => {
 				leute = ende() === "kamera" ? leuteRaum : leuteFlach;
 				// zZoom: nur „kombimitte“ mit einem Ziel über 584 px. Hat die Kamera ihr Ende erreicht, wächst das Bild als Ganzes
 				// um die Bildmitte weiter. zielLog = angestrebte Größe der vorderen Person (Logarithmus), derselbe Verlauf wie
 				// das Wachsen über die Kamera, damit beides ohne Knick ineinander übergeht.
 				let zZoom = 1, zielLog = NaN;
-				if (kombi() && ende() === "kamera" && t > T_GESTE_ZOOM) {
+				// FAHRT_DURCH (siehe oben bei endWerte): EINE Wachstumskurve vom Beginn der Fahrt bis zum Ende der Geste statt
+				// zweier mit einem Halt dazwischen. Gemessen am heutigen Ablauf (1024 px, Kartenbreite je 0,4 s): bis Uhr 5,0
+				// rund +29 px je Schritt, dann 5,4 bis 6,4 praktisch Stillstand (236 px), danach in der Geste wieder bis +42. Die
+				// Kamera fährt also schon heute in der Geste weiter (Wegpunkt 0,981 auf 0,997); der „Stopp“ ist das Auslaufen der
+				// ersten Kurve, 0,2 s Halt und das Anlaufen der zweiten. Hier läuft die Größe der vorderen Person (Logarithmus)
+				// auf einer einzigen Kurve derselben Form wie verlauf() bis zum Ende der Geste. Zeit, Dauer und Anker der Geste
+				// bleiben, ebenso alles, was an ihrem Ende hängt (Clip, Text, Beleg).
+				const durch = FAHRT_DURCH && kombi() && ende() === "kamera";
+				let tzDurch = 0;
+				if (durch) {
+					const lE = Math.log(groesseVorne(eZiel)), lGes = lE + Math.log(zusatzZiel), xz = anteil(t, kamAb(), T_GESTE_ZOOM + DAUER_ZOOM - kamAb());
+					tzDurch = weichKubisch(xz);
+					if (AUSLAUF > 0 && xz > 0 && xz < 1) { const R = Math.max(1.001, Math.exp(lGes)); tzDurch = (1 - AUSLAUF) * tzDurch + AUSLAUF * Math.log(1 + (R - 1) * glatt(xz)) / Math.log(R); }
+					zielLog = tzDurch * lGes;
+					zZoom = Math.exp(Math.max(0, zielLog - lE));
+				}
+				if (!durch && kombi() && ende() === "kamera" && t > T_GESTE_ZOOM) {
 					const l0 = Math.log(groesseVorne(eNah)), lE = Math.log(groesseVorne(eZiel));
 					zielLog = l0 + zug(anteil(t, T_GESTE_ZOOM, DAUER_ZOOM)) * (lE + Math.log(zusatzZiel) - l0);
 					zZoom = Math.exp(Math.max(0, zielLog - lE));
@@ -1913,9 +2211,26 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				};
 				if (zf) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.filter = "none"; ctx.globalAlpha = 1; }
 				// Spur auf eigener Ebene: schwarz mit weißer Leuchtspur (Maximum), dann per „difference“ auf Weiß = dunkle Spur
+				// Ausschnitt für dieses Bild (siehe GESTE NUR IM AUSSCHNITT UM DIE KARTE): fx, fy = Ecke auf der Zeichenfläche
+				let fx = 0, fy = 0, fw = cv.width, fh = cv.height;
+				if (zf && GESTE_SCHNITT) {
+					if (gesteFeldNeu) {
+						gesteFeldNeu = false;
+						const cr = cv.getBoundingClientRect(), fr = fig.getBoundingClientRect(), kd = cv.width / Math.max(1, cr.width);
+						const kW = fr.width * kd * ((document.documentElement.dataset.anim === "kombimitte" ? kombiZiel() * 584 : 584) / 680) * (1 + LAUF_ZUWACHS), kH = kW * 9 / 16;
+						gesteRand = Math.ceil(DICKE * sc0 * 3.3 + 16); // DICKE + 3 · 4 · glutUnsch (= 2,1 · DICKE · Maßstab), mit Reserve
+						const mx = mitteX, my = obenZu + (platzHoehe || cv.height) / 2;
+						const x0 = Math.max(0, Math.floor((mx - kW / 2 - gesteRand) / 4) * 4), y0 = Math.max(0, Math.floor((my - kH / 2 - gesteRand) / 4) * 4);
+						const x1 = Math.min(cv.width, Math.ceil((mx + kW / 2 + gesteRand) / 4) * 4), y1 = Math.min(cv.height, Math.ceil((my + kH / 2 + gesteRand) / 4) * 4);
+						gesteFeld = x1 - x0 > 8 && y1 - y0 > 8 ? [x0, y0, x1 - x0, y1 - y0] : null;
+					}
+					const kJ = (fig as any).__karteEcht as number[] | undefined, gf = gesteFeld, innen = gesteRand * 0.75;
+					if (gf && kJ && kJ[0] - innen >= gf[0] && kJ[1] - innen >= gf[1] && kJ[0] + kJ[2] + innen <= gf[0] + gf[2] && kJ[1] + kJ[3] + innen <= gf[1] + gf[3]) { [fx, fy, fw, fh] = gf; gesteZahl.schnitt++; } else gesteZahl.voll++;
+				}
+				gesteFeldSetzen(fw, fh);
 				octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = "source-over";
 				octx.fillStyle = "#000"; octx.fillRect(0, 0, off.width, off.height);
-				octx.setTransform(sc, 0, 0, sc, ox, oy); karte(octx); octx.globalCompositeOperation = "lighten";
+				octx.setTransform(sc, 0, 0, sc, ox - fx, oy - fy); karte(octx); octx.globalCompositeOperation = "lighten";
 				let s = 0, deck = 0;
 				if (t >= T_AUF && t < T_GESTE) { s = 0; deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); } // aufgesetzt, noch in Ruhe
 				else if (t >= T_GESTE && t < T_GESTE + gDauer) { const x = (t - T_GESTE) / gDauer; s = kam && !zf ? verlauf(T_KAMERA + x * D_KAMERA).s : zf ? zug(x) : kubisch(x); deck = sanft(Math.min(1, (t - T_AUF) / D_FINGER)); }
@@ -1949,8 +2264,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					}
 					ctx.globalCompositeOperation = "multiply";
 				} else ctx.globalCompositeOperation = "difference";
-				ctx.globalAlpha = 0.5; ctx.drawImage(glut, 0, 0, cv.width, cv.height);
-				ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0);
+				ctx.globalAlpha = 0.5; ctx.drawImage(glut, fx, fy, fw, fh);
+				ctx.globalAlpha = 1; ctx.drawImage(off, fx, fy);
 				ctx.globalCompositeOperation = "source-over";
 				// Berührung wie zwei Finger auf einem Bildschirm (Rasul 14.11.2026: „am Anfang auch zwei größere Kreise entstehen
 				// lassen, wenn die zwei Finger … ein Display berühren und es dafür eine Rückmeldung gibt … und dann könnten die
@@ -1994,7 +2309,15 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					// Kamerafahrt: Personen stehen fest, nur die Kamera bewegt sich (Position, Blickziel, Brennweite gemeinsam)
 					// „zoomnah“ endet früher; „kombi“ fährt den Rest während der Geste (kWachs = Anteil dieses zweiten Stücks)
 					let e = verlauf(t).e * (zoomNah() ? eNah : 1), kWachs = 0;
-					if (kombi() && t > T_GESTE_ZOOM) {
+					if (durch) {
+						// Wegpunkt zur Zielgröße suchen, mit derselben Beimischung wie verlauf() (15 % nach der Zeit), damit der
+						// Anfang, an dem die Größe nicht stetig mit dem Weg wächst, nicht springt
+						let lo = 0, hi = eZiel; for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (Math.log(groesseVorne(m)) < zielLog) lo = m; else hi = m; }
+						e = tzDurch >= 1 ? eZiel : tzDurch <= 0 ? 0 : 0.15 * tzDurch * eZiel + 0.85 * lo;
+						const l0 = Math.log(groesseVorne(eNah)), lGes = Math.log(groesseVorne(eZiel)) + Math.log(zusatzZiel);
+						kWachs = Math.max(0, Math.min(1, (zielLog - l0) / Math.max(1e-6, lGes - l0))); // Anteil des Stücks nach eNah, für den Ausschnitt
+					}
+					if (!durch && kombi() && t > T_GESTE_ZOOM) {
 						kWachs = zug(anteil(t, T_GESTE_ZOOM, DAUER_ZOOM));
 						// zielLog kommt von oben (enthält bei einem Ziel über 584 px den Zusatz); die Kamera fährt höchstens bis eZiel
 						const ziel = zielLog;
@@ -2094,7 +2417,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						}
 					}
 					if (import.meta.env.DEV) (fig as any).__pop = popS; // nur lokal, zum Messen
+					let lastMarke = LAST ? performance.now() : 0, lastKlasse = "vorarbeit"; // ZEITMESSUNG JE ABSCHNITT
 					for (const { q, x, y, g, kipp, fy, zc } of lage) {
+						if (LAST) { const jetztL = performance.now(); lastAdd(lastKlasse, jetztL - lastMarke); lastMarke = jetztL; lastKlasse = q.ebene === 0 ? "karte" : "menge"; }
 						// breite Fläche: wer ganz außerhalb liegt, wird nicht gezeichnet (Breite einer Figur 57 Einheiten mal g, mit Zugabe)
 						if (flaecheBreit && q.ebene > 1) { const px = x * sc + ox, rand = 60 * g * sc + 30; if (px < -rand || px > cv.width + rand) continue; }
 						// WEICHE OBERKANTE (Auftrag P, 19.11.2026): Mit dem Bogen steigt die Menge rechts weit über jede mögliche Zugabe
@@ -2191,6 +2516,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						} else if (figurEcht() && q.ebene === 0 && echt.umriss && zielVorne) {
 							// solange die Karte auftaucht, steht darunter noch die Person wie jede andere und blendet aus
 							if (kAuf < 1) zeichneUnscharf(ctx, x, y, g, alpha * (1 - kAuf), unsch, ein * (1 - kAuf));
+							if (kAuf > 0 && LAST) { const vorClip = performance.now(); zeichneEcht(x, y, g, einK, t); const dauerClip = performance.now() - vorClip; lastAdd("clip", dauerClip); lastMarke += dauerClip; } else
 							if (kAuf > 0) zeichneEcht(x, y, g, einK, t); // Fassung „echt“: Umriss und Clip statt der gezeichneten Figur
 						} else if (zoomFassung() && q.ebene === 0) {
 							// neue Fassungen: Figur um ANDOCK größer, um die Augenlinie (5,5 Teile über dem Zeichenpunkt) herum
@@ -2232,7 +2558,9 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						}
 						if (popHier) ctx.restore();
 					}
+					if (LAST) { const jetztL = performance.now(); lastAdd(lastKlasse, jetztL - lastMarke); lastMarke = jetztL; }
 					if (zf) { zeichneGeste(); ctx.setTransform(sc, 0, 0, sc, ox, oy); }
+					if (LAST) lastAdd("geste", performance.now() - lastMarke);
 					raster(ctx);
 					return;
 				}
@@ -2294,7 +2622,171 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const an = (n: string) => document.documentElement.dataset[n] === "an";
 			// fester Pseudozufall je Person, damit jedes Abspielen gleich aussieht
 			const streu = (i: number) => { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); };
+			// FLIESSTEXT ERST MIT DER GESTE, AUFHELLUNG NUR HINTER DEM TEXT (22.11.2026, Auftrag „Animation · Videobeweis“, nur
+			// localhost). Rasul 22.11.2026: „Lass uns den kleinen Text erstmal ausblenden. Und dann lass uns in dem Moment, wo
+			// wir die Bewegung machen für die Videobeweis-Geste, den Text erscheinen und die Menschen hintendran so weit
+			// aufhellen, dass man den Text gut lesen kann. Aber nur hinter dem Text die Menschen aufhellen.“ Gemeint ist
+			// .anlass__text (vier Absätze und Quellenzeile), nicht das Satzpaar darüber.
+			// SICHTBAR IST DER GRUNDZUSTAND. Versteckt wird nur, wenn die Animation bereit ist, „Bewegung reduzieren“ aus ist
+			// und das Rechteck der Zeichenfläche das Rechteck von .anlass__text wirklich überschneidet (gemessen, keine Abfrage
+			// auf b6voll oder breit). Gestapelt und am Telefon steht die Fläche über dem Text: dort verschwindet nichts.
+			// ZEITEN, gebunden an den Beginn der Geste (tGesteText): Aufhellung ab TEXT_VOR davor, voll nach
+			// TEXT_BLENDE_DAUER; Text ab dem Beginn der Geste, voll nach 0,5 s (transition im Stilteil). Die Aufhellung läuft
+			// also vor, der Text steht in keinem Bild über unaufgehellten Figuren.
+			// EINMAL DA, BLEIBT DA: Läuft die Animation von vorn, bleibt der Text und die Aufhellung steht voll (Lesbarkeit,
+			// nicht Dramaturgie). Bei „Bewegung reduzieren“: Text sichtbar, Aufhellung vom ersten Bild an voll.
+			// WECKER: Blendet die Geste nicht ein, wird der Text TEXT_WECKER Sekunden später von selbst sichtbar (20 s). ABWEICHUNG
+			// VOM AUFTRAG, entschieden von Website · Programmierung: Versteckt wird schon, sobald die Animation bereit ist
+			// (nicht erst, wenn ihre Uhr läuft), sonst stünde der Text beim Hineinscrollen da und verschwände beim Start. Der
+			// Wecker läuft deshalb nicht ab dem Verstecken (sonst wäre der Text da, bevor jemand beim Band ankommt), sondern
+			// ab dem Start der Uhr oder ab dem Moment, in dem der Text ins Fenster kommt, je nachdem, was zuerst eintritt.
+			// ZWEITER AUSLÖSER NEBEN DEM WECKER: Hält die Uhr bei T_PAUSE auf das Weiterscrollen, wird der Text sofort sichtbar
+			// und die Aufhellung voll. Wer beim Band stehen bleibt, um zu lesen, bekommt in diesem Zustand keine Geste; ein
+			// leerer Textblock, auf den jemand 12 Sekunden lang schaut, ist schlimmer als ein Text, der ohne Geste erscheint.
+			// DIE AUFHELLUNG: Weiß mit TEXT_ALPHA über dem Rechteck des Texts plus TEXT_RAND, weicher Verlauf (weichKubisch)
+			// TEXT_VERLAUF nach außen. Zur Animation hin reicht der Verlauf höchstens bis TEXT_KARTE px vor die Kante der
+			// Karte am Ende des Clips (Reserve gegen ihren Schatten); ist dort weniger Raum als TEXT_VERLAUF, wird er kürzer und
+			// der Rand entfällt. ERSTER STAND DES TAGES, VERWORFEN: Grenze war die Kante des Platzes, der Verlauf damit nur
+			// die 16 px der Spaltenfuge; stand eine Figur auf der Spaltengrenze, war der Wechsel von Grau zu Schwarz als Kante
+			// zu sehen. Gemessen bei 1440 px: Text bis 712, Karte am Ende ab 807,6, Verlauf jetzt 72 px; bei 1024 px 51 px.
+			// TEXT_ALPHA 0,585, VON RASUL FESTGELEGT („7:1 bauen“, 22.11.2026): Weiß mit 0,585 über reinem Schwarz ergibt 149
+			// von 255; schwarzer Text auf 149 hat das Kontrastverhältnis 7:1 (WCAG AAA für Lesetext). Das Maß hält damit bei
+			// jeder Aufstellung ohne Messen im Lauf. WARUM KEINE KLEINERE, GEMESSENE ZAHL: Ohne Aufhellung lag der dunkelste
+			// Punkt hinter dem Text bei 1440 px auf 98, bei 1024 px aber auf 62. Ein α, das aus einer Messung kommt, ist an die
+			// Fensterbreite gebunden, an der gemessen wurde; nur bei 1440 px gemessen, wäre bei 1024 px ein Wert unter dem Maß
+			// herausgekommen. Mit Aufhellung gemessen: 190 und 194 bei 1440 px, 175 und 179 bei 1024 px.
+			// Gezeichnet nach der Menge, am Ende des Bildes; als fertige Maske, je Größe einmal gerechnet.
+			// Zum Messen, nicht gemerkt: ?textblende=aus zeigt den Stand davor (Text immer da, keine Aufhellung).
+			// Weg zurück: TEXT_BLENDE fest auf false.
+			const TEXT_BLENDE = !import.meta.env.DEV || new URLSearchParams(location.search).get("textblende") !== "aus";
+			// DER BELEG KOMMT NACH DER AUSSAGE (22.11.2026, Auftrag „Animation · Videobeweis“, nur localhost, umschaltbar).
+			// Quellenzeile und Namenszeile am Blatt erscheinen BELEG_NACH Sekunden nach dem Fließtext. Grund (Website · Master):
+			// Die Quellenzeile ist eine Fußnote; deshalb hat sie heute räumlich eine eigene Rasterzeile bekommen und zählt
+			// für die Mitte des Bildes nicht mit. Die Namenszeile ist dasselbe, ein Belegstück. Dieselbe Aussage in der Zeit:
+			// Der Beleg kommt nicht im selben Augenblick wie die Aussage. Kleinere Schrift hilft dabei nicht, Bewegung zieht
+			// den Blick unabhängig von der Schriftgröße; wer gleichzeitig einblendet, lässt die kleine Schrift gegen die
+			// Aussage antreten. Rasul hat das nicht bestellt; es ist ein Kandidat zum Ansehen.
+			// Zum Vergleichen, nur localhost, nicht gemerkt: ?staffel=aus zeigt alles gleichzeitig. Weg zurück: BELEG_NACH = 0.
+			// STUFE 0,2 s, VON BEGINN ZU BEGINN (22.11.2026, „Animation · Videobeweis“ auf Einwand von Website · Master). Erster
+			// Stand desselben Tages: 0,4 s, jede Stufe begann, wenn die vorige voll war; vom Hineinscrollen bis alles stand,
+			// waren es 8,3 s statt 7,6. Grund für die Kürzung: Ein Schlag, der überlappt, liest als Bewegung; ein Schlag, der
+			// wartet, liest als Warteschlange, und dieses Band darf keinen Stillstand mehr enthalten (Rasul hat heute den zu
+			// späten Clip und die anhaltende Fahrt beanstandet, beides Stillstand). Mit 0,2 s überlappen die Einblendungen,
+			// die Reihenfolge Bild, Aussage, Beleg bleibt.
+			// Zum Vergleichen, nur localhost, nicht gemerkt: ?stufe=0 (alles gleichzeitig), ?stufe=0.2 (Kandidat, gilt ohne
+			// Angabe), ?stufe=0.4 (die wartende Fassung); ?staffel=aus ist dasselbe wie ?stufe=0, ?staffel=beleg staffelt nur
+			// den Beleg. Weg zurück: STUFE = 0.
+			const STUFE = (() => { if (!import.meta.env.DEV) return 0.2; const u = new URLSearchParams(location.search); if (u.get("staffel") === "aus") return 0; const z = u.get("stufe"); return z !== null && isFinite(Number(z)) ? Math.max(0, Number(z)) : 0.2; })();
+			const BELEG_NACH = STUFE;
+			// BILD, AUSSAGE, BELEG (22.11.2026, zweite Stufe der Staffel, Auftrag „Animation · Videobeweis“). Auch der Fließtext
+			// kommt nicht im selben Augenblick wie das voll gewordene Video, sondern TEXT_NACH Sekunden danach. Grund: Am
+			// Ende der Geste erschienen Video (rechts, voll) und Fließtext (links) gleichzeitig; das Auge muss sich
+			// entscheiden, und das Video gewinnt (Gesicht, Bewegung, Farbe). Die Kette ist jetzt: Video voll (Ende der
+			// Geste), TEXT_NACH später der Fließtext, BELEG_NACH später Quellenzeile und Namenszeile. Rasuls Auftrag („ich will
+			// es ändern auf das Ende der Videogesten-Bewegung“) bleibt gewahrt: Der Text kommt, wenn das Video an seinem
+			// Platz ist, nur einen Schlag später.
+			// DIE 0,4 s SIND EINE VERMUTUNG, NICHT GEMESSEN: Das Urteil, dass Video und Text konkurrieren, stammt von Website ·
+			// Programmierung an angehaltenen Bildern, nicht aus der Bewegung. Rasul sieht die Bewegung, wir nicht.
+			// Zum Vergleichen, drei Zustände (nur localhost, nicht gemerkt): ohne Angabe die ganze Kette; ?staffel=beleg nur der
+			// Beleg gestaffelt (Fließtext wieder im selben Moment wie das volle Video, Quelle und Name 0,4 s danach);
+			// ?staffel=aus alles gleichzeitig am Ende der Geste (der Stand davor). Weg zurück: TEXT_NACH = 0.
+			const TEXT_NACH = import.meta.env.DEV && new URLSearchParams(location.search).get("staffel") === "beleg" ? 0 : STUFE;
+			const TEXT_ALPHA = 0.585, TEXT_RAND = 12, TEXT_VERLAUF = 72, TEXT_VOR = 0.15, TEXT_BLENDE_DAUER = 0.5, TEXT_WECKER = 20 /* 20 statt 12 s (22.11.2026): Der reguläre Weg dauert mit dem Anker am Ende der Geste rund 7 s ab dem Hineinscrollen, ein langsames Gerät kann das verdoppeln. Der Wecker ist nur noch die Sicherung gegen einen Skriptfehler; wer ankommt und liest, wird vom Halt bei T_PAUSE bedient. */, TEXT_KARTE = 20;
+			const bandText = fig.closest<HTMLElement>(".anlass--band"), fliess = fig.closest(".anlass__band-innen")?.querySelector<HTMLElement>(".anlass__text") ?? null;
+			// ANKER IST DAS ENDE DER GESTE (22.11.2026, Rasul: „Jetzt kommt der Text am Anfang der Videogesten-Bewegung, und ich
+			// will es ändern auf das Ende der Videogesten-Bewegung.“). Vorher der Beginn (ohne „+ DAUER_ZOOM“ bzw. „+ DAUER“).
+			// Die Aufhellung läuft weiter TEXT_VOR vor dem Text an, sie hängt am selben Anker und wandert mit; sonst läge
+			// während der Geste ein heller Fleck ohne Text im Bild. Die sichtbare Reihenfolge ist damit Geste, Clip, Text
+			// (der Clip blendet ab ECHT_AB der Geste ein); gewollt. Weg zurück: die beiden Summanden streichen.
+			const tGesteText = () => (zoomFassung() ? T_GESTE_ZOOM + DAUER_ZOOM : T_GESTE_ALT + DAUER) + TEXT_NACH; // + TEXT_NACH: siehe BILD, AUSSAGE, BELEG
+			// Rechteck des Fließtexts SAMT Quellenzeile: Die Quelle steht seit 22.11.2026 als eigener Kasten darunter
+			// (.anlass__quellzeile, index.astro) und gehört für Verstecken und Aufhellung weiter dazu.
+			const quellzeile = fig.closest(".anlass__band-innen")?.querySelector<HTMLElement>(".anlass__quellzeile") ?? null;
+			const fliessRect = () => {
+				const a = fliess!.getBoundingClientRect(), q = quellzeile?.getBoundingClientRect();
+				if (!q || q.width <= 0 || q.height <= 0) return { left: a.left, right: a.right, top: a.top, bottom: a.bottom, width: a.width, height: a.height };
+				const l = Math.min(a.left, q.left), r = Math.max(a.right, q.right), o = Math.min(a.top, q.top), u = Math.max(a.bottom, q.bottom);
+				return { left: l, right: r, top: o, bottom: u, width: r - l, height: u - o };
+			};
+			let textMaske: HTMLCanvasElement | null = null, textOrt: [number, number] | null = null, textSchluessel = "", textWarVersteckt = false, blendeVoll = false, textWecker = 0, textBeob: IntersectionObserver | null = null, textBeobZahl = 0;
+			const textUeberschneidet = () => {
+				if (!fliess) return false;
+				const a = cv.getBoundingClientRect(), b = fliessRect();
+				return b.width > 0 && b.height > 0 && Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0;
+			};
+			const textMass = () => {
+				if (!TEXT_BLENDE || !fliess || !textUeberschneidet()) { textMaske = null; textOrt = null; textSchluessel = ""; return; }
+				const cr = cv.getBoundingClientRect(), b = fliessRect(), fr = fig.getBoundingClientRect(), k = cv.width / Math.max(1, cr.width);
+				const platzRechts = fr.left >= b.right - 0.5, platzLinks = fr.right <= b.left + 0.5;
+				// Grenze zur Animation hin: TEXT_KARTE px vor der Kante der Karte am Ende des Clips (dort ist sie am breitesten),
+				// nicht die Kante des Platzes. Karte am Ende: mittig um mitteX, breit wie in groesse() (anteilKarte).
+				const karteBreit = fr.width * ((document.documentElement.dataset.anim === "kombimitte" ? kombiZiel() * 584 : 584) / 680) * (1 + LAUF_ZUWACHS), karteMitte = cr.left + mitteX / k;
+				const grenzeR = karteMitte - karteBreit / 2 - TEXT_KARTE, grenzeL = karteMitte + karteBreit / 2 + TEXT_KARTE;
+				const vR = platzRechts ? Math.min(TEXT_VERLAUF, Math.max(0, grenzeR - b.right)) : TEXT_VERLAUF, vL = platzLinks ? Math.min(TEXT_VERLAUF, Math.max(0, b.left - grenzeL)) : TEXT_VERLAUF;
+				const kernR = platzRechts ? Math.min(b.right + TEXT_RAND, grenzeR - vR) : b.right + TEXT_RAND, kernL = platzLinks ? Math.max(b.left - TEXT_RAND, grenzeL + vL) : b.left - TEXT_RAND;
+				const kernO = b.top - TEXT_RAND, kernU = b.bottom + TEXT_RAND;
+				const x0 = kernL - vL, x1 = kernR + vR, y0 = kernO - TEXT_VERLAUF, y1 = kernU + TEXT_VERLAUF;
+				const X0 = Math.round((x0 - cr.left) * k), Y0 = Math.round((y0 - cr.top) * k), MW = Math.max(1, Math.round((x1 - x0) * k)), MH = Math.max(1, Math.round((y1 - y0) * k));
+				const schluessel = [X0, Y0, MW, MH, vL.toFixed(1), vR.toFixed(1)].join("|");
+				textOrt = [X0, Y0];
+				if (schluessel === textSchluessel && textMaske) return;
+				textSchluessel = schluessel;
+				const m = textMaske ?? document.createElement("canvas"); m.width = MW; m.height = MH;
+				const mx = m.getContext("2d")!, daten = mx.createImageData(MW, MH), px = daten.data;
+				const ax = new Float32Array(MW), ay = new Float32Array(MH);
+				for (let x = 0; x < MW; x++) { const c = x0 + (x + 0.5) / k; ax[x] = c < kernL ? weichKubisch((c - x0) / Math.max(0.001, vL)) : c > kernR ? weichKubisch((x1 - c) / Math.max(0.001, vR)) : 1; }
+				for (let y = 0; y < MH; y++) { const c = y0 + (y + 0.5) / k; ay[y] = c < kernO ? weichKubisch((c - y0) / TEXT_VERLAUF) : c > kernU ? weichKubisch((y1 - c) / TEXT_VERLAUF) : 1; }
+				for (let y = 0, i = 0; y < MH; y++) for (let x = 0; x < MW; x++, i += 4) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; px[i + 3] = Math.round(255 * ax[x] * ay[y]); }
+				mx.putImageData(daten, 0, 0); textMaske = m;
+				if (import.meta.env.DEV) (fig as any).__textblende = () => ({ kern: [kernL, kernR, kernO, kernU], aussen: [x0, x1, y0, y1], vL, vR, platz: [fr.left, fr.right], text: [b.left, b.right, b.top, b.bottom], versteckt: bandText?.dataset.flusstext, warVersteckt: textWarVersteckt, voll: blendeVoll, tGeste: tGesteText(), wecker: textWecker, beobachter: textBeobZahl });
+			};
+			const textBlende = (t: number) => {
+				if (!TEXT_BLENDE || !textMaske || !textOrt) return;
+				const st = blendeVoll || !textWarVersteckt ? 1 : weichKubisch((t - (tGesteText() - TEXT_VOR)) / TEXT_BLENDE_DAUER);
+				if (st <= 0) return;
+				ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.filter = "none"; ctx.globalAlpha = TEXT_ALPHA * st;
+				ctx.drawImage(textMaske, textOrt[0], textOrt[1]); ctx.restore();
+			};
+			// textWecker = 0 nach dem Abräumen (22.11.2026, gefunden von „Animation · Videobeweis“): clearTimeout lässt die
+			// Kennung stehen, und textWeckerStellen() steigt bei gesetzter Kennung aus; ohne die Null wäre der Wecker in einem
+			// späteren Lauf nicht gespannt.
+			const textZeigen = () => { window.clearTimeout(textWecker); textWecker = 0; if (bandText && bandText.dataset.flusstext === "versteckt") bandText.dataset.flusstext = "da"; };
+			const textWeckerStellen = () => {
+				if (bandText?.dataset.flusstext !== "versteckt" || textWecker) return;
+				textWecker = window.setTimeout(() => { blendeVoll = true; textZeigen(); }, TEXT_WECKER * 1000);
+			};
+			const textVerstecken = () => {
+				if (!TEXT_BLENDE || !bandText || !fliess || still || textWarVersteckt || !textUeberschneidet()) return;
+				textWarVersteckt = true; bandText.dataset.flusstext = "versteckt";
+				// höchstens ein Beobachter: der vorige wird abgemeldet, bevor ein neuer entsteht (sonst stapeln sie sich bei
+				// wiederholtem Zurücksetzen, siehe textZuruecksetzen)
+				if (textBeob) { textBeob.disconnect(); textBeobZahl--; }
+				textBeob = new IntersectionObserver((e, beob) => { if (e.some((x) => x.isIntersecting)) { textWeckerStellen(); beob.disconnect(); if (textBeob === beob) { textBeob = null; textBeobZahl--; } } });
+				textBeobZahl++; textBeob.observe(fliess);
+			};
+			// BEIM ZURÜCKSETZEN WIEDER VERSTECKEN (22.11.2026, Auftrag „Animation · Videobeweis“, nur localhost). Rasul 22.11.2026:
+			// „Okay, bei der Animation wird jetzt die Schrift nicht ausgeblendet, wenn ich hoch oder runter scrollen in ein
+			// anderes Segment gehe und wieder zurückkomme. Die Animation startet zwar, aber der Text bleibt stehen.“
+			// Gemessen davor (2048 px): Nach dem Zurücksetzen (Phase wieder „warten“) standen flusstext „da“, textWarVersteckt
+			// und blendeVoll unverändert; der zweite Lauf zeigte den Text von Anfang an, mit voller Aufhellung. Kein Mangel an
+			// Lesbarkeit, aber gegen die Absicht der Stelle (Regel 3: Die Animation setzt sich auf den Anfang zurück und spielt
+			// neu). ERSTER STAND DESSELBEN TAGES, VERWORFEN: „Einmal da, bleibt da“.
+			// Wirkt nur in zuruecksetzen() (Regel 3: ganz nach oben zurück). Nach unten weiter und wieder hoch (Regel 2) bleibt
+			// das Schlussbild samt Text stehen; ein Klick auf die Fläche („Noch einmal“) lässt den Text ebenfalls stehen.
+			// Zum Vergleichen, nur localhost, nicht gemerkt: ?zweiterlauf=steht hält den Stand davor. Weg zurück:
+			// ZWEITER_LAUF_VERSTECKT = false.
+			const ZWEITER_LAUF_VERSTECKT = !import.meta.env.DEV || new URLSearchParams(location.search).get("zweiterlauf") !== "steht";
+			const textZuruecksetzen = () => {
+				if (!ZWEITER_LAUF_VERSTECKT) return;
+				window.clearTimeout(textWecker); textWecker = 0; blendeVoll = false; textWarVersteckt = false; // erst den Haken lösen, textVerstecken() steigt sonst sofort aus
+				textVerstecken();
+			};
 			const bild = (t: number, jetzt: number) => {
+				if (!LAST || titelProbe) { bildOhneTextblende(t, jetzt); textBlende(t); return; }
+				lastSek = Math.floor(t); const z0 = performance.now(); bildOhneTextblende(t, jetzt); const z1 = performance.now(); textBlende(t); const z2 = performance.now();
+				lastAdd("gesamt", z2 - z0); lastAdd("aufhellung", z2 - z1); lastAdd("bilder", 1);
+			};
+			const bildOhneTextblende = (t: number, jetzt: number) => {
 				if (ende() !== "kamera") { zeichneBild(t, jetzt); return; }
 				const merk: { q: Person; x: number; z: number }[] = [];
 				const halte = (q: Person) => { merk.push({ q, x: q.wx, z: q.wz }); };
@@ -2360,8 +2852,11 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				let dt = Math.min(0.1, jetzt - zuletzt); zuletzt = jetzt;
 				if (ansage() && uhr >= T_TEXT && ansageRest > 0) { const n = Math.min(ansageRest, dt); ansageRest -= n; dt -= n; }
 				uhr += dt;
+				// Fließtext und Aufhellung (siehe FLIESSTEXT ERST MIT DER GESTE)
+				if (textWarVersteckt && !blendeVoll) { if (uhr >= tGesteText()) textZeigen(); if (uhr >= tGesteText() - TEXT_VOR + TEXT_BLENDE_DAUER) blendeVoll = true; }
 				if (uhr >= T_PAUSE && !freigabe) {
 					// erster Abschnitt fertig: anhalten, bis weiter gescrollt wird
+					blendeVoll = true; textZeigen(); // wer hier stehen bleibt, will lesen (FLIESSTEXT ERST MIT DER GESTE, zweiter Auslöser)
 					uhr = T_PAUSE; bild(uhr, uhr); haelt = true; return;
 				}
 				if (uhr >= (ansage() ? T_ANSAGE : T_TEXT) && fig.dataset.phase === "warten") phase("geste"); // Nachsatz einblenden, überlappend mit den letzten Personen
@@ -2383,7 +2878,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				// Zum Vergleichen, nur localhost, nicht gemerkt: ?blende=laeuft zeigt den Stand davor. Weg zurück: CLIP_WARTET false.
 				const CLIP_WARTET = !import.meta.env.DEV || new URLSearchParams(location.search).get("blende") !== "laeuft";
 				// Namenszeile und Knöpfe kommen wie bisher mit dem Beginn der Blende (echt.spielt), nur das Abspielen wartet.
-				if (CLIP_WARTET && figurEcht() && echt.clip && echt.spielt && echt.clip.paused && !handPause && !echt.clip.ended && echt.clip.currentTime < 0.05 && uhr >= echtVon() + echtLang()) echt.clip.play().catch(() => {});
+				if (CLIP_WARTET && figurEcht() && echt.clip && echt.spielt && echt.clip.paused && !handPause && !echt.clip.ended && echt.clip.currentTime < 0.05 && uhr >= echtVon() + clipWarte()) echt.clip.play().catch(() => {});
 				if (figurEcht() && echt.clip && !echt.spielt && uhr >= echtVon()) { echt.spielt = true; if (echt.clip.currentTime > 0.05) echt.clip.currentTime = 0; if (!CLIP_WARTET) echt.clip.play().catch(() => {}); tonStand(); } // kein Sprung auf 0, wenn der Clip schon dort steht: Der Sprung ließ den Browser das erste Bild neu holen (einmal gemessen: 4,6 s Umriss statt Video)
 				// Ton-Bedienung an der unteren rechten Ecke der Karte halten (die Karte wächst in den ersten Sekunden des Clips noch)
 				// Bauchbinde: unten links an der Karte, sichtbar in den ersten BINDE_SEKUNDEN der Clipzeit (oder immer)
@@ -2444,7 +2939,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 						{ const schatten = NAME_SCHATTEN > 0 && !blatt ? `0 ${((kb * SCH_AB) / RW).toFixed(1)}px ${((kb * SCH_WEICH) / RW).toFixed(1)}px rgba(0,0,0,${NAME_SCHATTEN})` : "none"; if (schatten !== nameSchatten) { nameSchatten = schatten; nameZeile.style.textShadow = schatten; } }
 						if (import.meta.env.DEV) (fig as any).__name = { einzug, radius: (kb * RAD) / RW, karteBreit: kb, faehrt: nameFaehrt };
 					}
-					nameZeigen(echt.spielt && (!blattAn() || uhr >= echtVon() + echtLang())); // auf dem Blatt später, siehe AUF DER KARTE WIEDER EINGERÜCKT
+					nameZeigen(echt.spielt && (!blattAn() || uhr >= echtVon() + echtLang() + TEXT_NACH + BELEG_NACH)); // siehe DER BELEG KOMMT NACH DER AUSSAGE und BILD, AUSSAGE, BELEG // auf dem Blatt später, siehe AUF DER KARTE WIEDER EINGERÜCKT
 				}
 				if (nameZeile && nameBinde() && echt.clip) {
 					const k = (fig as any).__karteEcht as number[] | undefined;
@@ -2487,6 +2982,12 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			let gestartet = false, pausiert = false, pauseSeit = 0;
 			const spiele = () => {
 				cancelAnimationFrame(lauf); groesse(); delete fig.dataset.fertig; haelt = false; pausiert = false; gestartet = true;
+				// spiele() heißt immer „von vorne“ (Start beim Hineinscrollen und Klick auf die Fläche); der Fließtext geht deshalb
+				// mit zurück (22.11.2026, „Animation · Videobeweis“: Ein Klick ist derselbe Widerspruch wie das Zurückscrollen,
+				// eine Animation, die neu beginnt, neben einem Text, der stehen bleibt). ?zweiterlauf=steht hält auch hier den
+				// Stand davor. Weiterlaufen nach einer Pause geht nicht über spiele().
+				textZuruecksetzen();
+				textWeckerStellen(); // die Uhr läuft: Wecker für den Fließtext (FLIESSTEXT ERST MIT DER GESTE)
 				spurR = []; spurL = []; ansageRest = D_ANSAGE;
 				if (import.meta.env.DEV) (fig as any).__welle = null; // Messwerte der Welle je Durchlauf neu
 				// Fassung „echt“: Clip erst jetzt laden (Start der Animation) und auf Anfang stellen
@@ -2495,7 +2996,8 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 				phase("warten");
 				start = performance.now() / 1000; uhr = VORSPRUNG(); zuletzt = start; lauf = requestAnimationFrame(schritt);
 			};
-			groesse(); bild(VORSPRUNG(), 0);
+			if (bandText) { delete bandText.dataset.flusstext; bandText.style.setProperty("--beleg-nach", BELEG_NACH + "s"); }
+			groesse(); textVerstecken(); bild(VORSPRUNG(), 0); // textVerstecken: siehe FLIESSTEXT ERST MIT DER GESTE
 			// Start erst, wenn die ganze Gruppe im Bild ist (Rasul 13.11.2026 abends: „die Animation startet zu früh … ab einem
 			// gewissen Punkt soll die starten“): Der Nachsatz unter der Animation muss vollständig sichtbar sein; ohne
 			// Nachsatz 90 % der Animation.
@@ -2577,6 +3079,7 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 			const zuruecksetzen = () => {
 				cancelAnimationFrame(lauf); gestartet = false; pausiert = false; haelt = false; freigabe = true;
 				if (echt.clip) { try { echt.clip.pause(); } catch { /* nichts */ } echt.clip.muted = true; echt.spielt = false; echt.stand = null; handPause = false; tonZeigen(false); nameZeigen(false); }
+				textZuruecksetzen(); // Fließtext wieder verstecken, siehe BEIM ZURÜCKSETZEN WIEDER VERSTECKEN (vor dem Bild, damit die Aufhellung mit zurückgeht)
 				uhr = VORSPRUNG(); spurR = []; spurL = []; ansageRest = D_ANSAGE; delete fig.dataset.fertig; phase("warten"); groesse(); bild(uhr, 0);
 			};
 			const sicht = new IntersectionObserver((e) => {
@@ -2642,6 +3145,16 @@ const { label = "Viele Personen. Eine Handbewegung zeichnet den Rahmen des Video
 					cancelAnimationFrame(lauf); groesse(); spurR = []; spurL = []; gestartet = true; pausiert = true;
 					for (let x = 0; x <= t; x += 1 / 60) bild(x, x);
 					bild(t, t); return cv.toDataURL("image/png");
+				};
+				// MESSHAKEN (22.11.2026, nur lokal): Kästen aller gezeichneten Figuren im Bild zur Zeit t, in Fensterpunkten, mit
+				// denselben Maßen wie TITEL_FREI (28,65 / 34 / 30 mal g). Läuft über titelProbe, zeichnet also nichts. wx und wz
+				// sind die Grundlage der Aufstellung (nach dem Bild gelesen, bild() stellt sie zurück), nicht die gedrehten Werte.
+				(fig as any).__kaesten = (t: number) => {
+					const cr = cv.getBoundingClientRect(), k = cv.width / Math.max(1, cr.width);
+					let roh: { q: Person; g: number; zc: number; kasten: number[] }[] = [];
+					titelProbe = (lage, sc, ox, oy) => { roh = lage.map((l) => ({ q: l.q, g: l.g, zc: l.zc, kasten: [cr.left + ((l.x - 28.65 * l.g) * sc + ox) / k, cr.top + ((l.y - 34 * l.g) * sc + oy) / k, cr.left + ((l.x + 28.65 * l.g) * sc + ox) / k, cr.top + ((l.y + 30 * l.g) * sc + oy) / k] })); };
+					try { bild(t, 0); } catch (f) { if (f !== TITEL_HALT) throw f; } finally { titelProbe = null; }
+					return roh.map((r) => ({ wx: r.q.wx, wz: r.q.wz, ebene: r.q.ebene, breit: !!r.q.breit, fuell: !!r.q.fuell, fern: !!r.q.fern, weg: !!r.q.weg, weicht: r.q.weicht, g: r.g, zc: r.zc, kasten: r.kasten }));
 				};
 				(fig as any).__halt = (h: boolean) => {
 					if (h && gestartet && !pausiert && fig.dataset.fertig === undefined) { cancelAnimationFrame(lauf); pausiert = true; }

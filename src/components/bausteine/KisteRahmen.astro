@@ -20,11 +20,13 @@
    Die Lichtfarbe ist deshalb EINMAL FEST eingesetzt: 175, 204, 255. Das ist der Mittelwert von szene-beweisaufnahme.mp4
    (RGB 48/71/111), auf Farbe 55 aufgehellt. Stufe 2 (Farbe und Puls lebendig) kommt erst auf Rasuls Wort.
 
-   DIE WERTE: Tiefe je Seite 5 Prozent (81 Prozent der Fläche bleiben Bild; Tiefe 3 verschwindet; BBHs Hero-Karussell
-   kennt size "centred" mit w-10/12, das wäre Tiefe 8,5). Licht Decke 0,111 · Boden 0,224 · Wände 0,180 · Streuung 85 %.
-   Rechenweg der Werkbank: lDecke = l · (1 − k · 0,55), lBoden = l · (1 + k · 0,35), lWand = l, mit l = 0,18 (Regler
-   Licht 18) und k = 0,70 (Regler Kante 70). Der Boden fängt mehr Licht als die Decke; dieser Unterschied macht die
-   Ecken sichtbar.
+   DIE WERTE, STAND 22.11.2026 ABENDS (Rasul nach dem Blick auf drei Standbilder: „8,5 mit Licht 22.“): Tiefe je Seite
+   8,5 Prozent (BBHs Hero-Karussell, size "centred" mit w-10/12; 68,9 Prozent der Fläche bleiben Bild). Licht Decke
+   0,135 · Wände 0,220 · Boden 0,274 · Streuung 85 %. Rechenweg der Werkbank: lDecke = l · (1 − k · 0,55), lWand = l,
+   lBoden = l · (1 + k · 0,35), mit l = 0,22 (Regler Licht 22) und k = 0,70 (Regler Kante 70). Der Boden fängt mehr
+   Licht als die Decke; dieser Unterschied macht die Ecken sichtbar.
+   STÄNDE DAVOR: 22.11.2026 erster Bau Tiefe 5 mit Licht 18 (0,111 / 0,180 / 0,224); am selben Tag Tiefe 5 mit Licht 30
+   (0,184 / 0,300 / 0,373), von Rasul abgenommen (81 Prozent Bild; Tiefe 3 verschwindet).
 
    VIER FALLEN aus der Werkbank:
    1. Jede Fläche ist ein eigener Kasten in Flächengröße. Läge das Trapez als clip-path auf einem Element in voller
@@ -36,7 +38,8 @@
       und pointer-events: none darunter.
    4. Die Punkte des Karussells sitzen sonst im Boden der Kiste; die Seite rückt sie in die Öffnung (index.astro).
 
-   DIE ALTERNATIVE DANEBEN: --tx und --ty auf 8.5%. Dann bleiben 69 Prozent Bild, das ist BBHs Maß size "centred".
+   DIE ALTERNATIVE DANEBEN (bis 22.11.2026 abends der gebaute Stand): --tx und --ty auf 5%, Licht 30. Dann bleiben
+   81 Prozent Bild.
 
    Der Vorfahr braucht position: relative (.filmhero in index.astro).
    WEG ZURÜCK, EIN SCHRITT: die Zeile <KisteRahmen /> in index.astro löschen (dazu die Regel für die Punkte). */
@@ -61,7 +64,13 @@
 		   Boden zu hellen Platten. MERKSATZ der Kiste-Sitzung: Wird die Tiefe kleiner, muss das Licht größer werden. In der
 		   Werkbank stand Tiefe 11 mit Licht 18; der Verlauf läuft über 85 % der Flächentiefe aus, bei Tiefe 5 ist das
 		   beleuchtete Band knapp ein Drittel so breit. Bei 8,5 % Tiefe gehört das Licht wieder Richtung 22 bis 24. */
-		--lDecke: 0.184; --lBoden: 0.373; --lWand: 0.300;
+		/* LICHT 22 BEI TIEFE 8,5 (22.11.2026 abends, „Animation · Kiste“, Rasul: „8,5 mit Licht 22.“): 0,135 / 0,220 / 0,274
+		   mit l = 0,22 und k = 0,70. Warum weniger Licht: Der Verlauf läuft über 85 % der Flächentiefe; wird die Fläche
+		   tiefer, wird das beleuchtete Band breiter (am Boden 31 px bei Tiefe 5 gegen 52 px bei 8,5, Fenster 1280 × 720).
+		   Mit Licht 30 läge die 1,7-fache Lichtmenge im Bild, mit 22 die 1,2-fache; rechnerisch gleichauf wäre 18.
+		   Wird die Tiefe größer, muss das Licht kleiner werden. Weg zurück: 0.184 / 0.373 / 0.300 (Decke / Boden / Wand)
+		   und in index.astro beide Tiefen auf 5%. */
+		--lDecke: 0.135; --lBoden: 0.274; --lWand: 0.220;
 	}
 	/* SCHWARZER GRUND (22.11.2026, „Animation · Kiste“ nach dem ersten Blick): Die Flächen liegen über dem Film, der bis
 	   zum Rand weiterläuft. Ohne Grund schien er durch, die Kiste war ein milchig heller Rahmen. Nachgerechnet von

@@ -645,12 +645,25 @@ const ZEIGE_BEWEISSTUECKE = true;
 						     Bild.“). Gleiche Schriftgröße wie die Namensangabe (18,7 px bei 2046 px), vorher 153 gegen 118 daneben.
 						     --grau-hell-leise #767571, 4,61 zu 1 auf Weiß; vorher Klasse grau (#999894, 2,89 zu 1). Weg zurück:
 						     class="t-mini grau anlass__quelle" ohne style. */}
-						<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Angabe über 90 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
+						{/* QUELLENZEILE STEHT SEIT 22.11.2026 UNTER DIESEM KASTEN, nicht mehr in ihm (siehe .anlass__quellzeile gleich nach
+						    dem schließenden div). Weg zurück: den Absatz von dort wieder hierher setzen, den Kasten .anlass__quellzeile löschen. */}
 						{/* Verweis als BBH-Knopf B21 (Rasul 14.11.2026: „2 und 5 umsetzen“). Vorher graue Quellenzeile „Die Studien dahinter:
 						     Belegseite in Arbeit (6sense, Gartner, Forrester, Edelman und LinkedIn)“. Ziel /belege, Seite im Aufbau. */}
 						{/* Knopf herausgenommen (Rasul 15.11.2026: „Der Button, was die Studien zeigen, kann jetzt raus.“). War:
 						     <Knopf href="/belege" text="Was die Studien zeigen" />. Die Seite /belege bleibt bestehen, ist von hier aber nicht
 						     mehr verlinkt. Die Quellenzeile darüber bleibt. */}
+					</div>
+					{/* QUELLENZEILE IN EIGENER RASTERZEILE (22.11.2026, Website · Master: „Zustimmung für die Quellenzeile in eine eigene
+					    Rasterzeile“; Vorschlag „Animation · Videobeweis“; nur localhost). Anlass, Rasul 22.11.2026 zur Lage des Videos:
+					    „ich hätte gern, dass es mittig steht zwischen der kleineren Überschrift und dem Fließtext. Das bildet ja eine
+					    Einheit“. Gemessen davor: Das Video stand genau mittig zu Satzpaar, Fließtext UND Quellenzeile, ohne die Quelle
+					    gerechnet 26,6 px zu tief (1440 px). Die Fußnote steht jetzt unter dem Block, nicht in ihm; das Raster zentriert
+					    das Video damit von selbst über Satzpaar und Absätzen, ohne korrigierende Zahl.
+					    Der Kasten trägt t-lesen, damit seine Breite (46ch) unter 1024 px dieselbe ist wie die des Fließtexts und die
+					    Zeile bündig unter dem Text bleibt; die Zeile selbst ist unverändert.
+					    Weg zurück: diesen Kasten löschen und den Absatz wieder als letztes Kind in .anlass__text setzen. */}
+					<div class="t-lesen anlass__quellzeile">
+						<p class="t-mini anlass__quelle" style="color: var(--grau-hell-leise);"><span aria-hidden="true">* </span>Quelle<span class="nur-vorlesen"> zur Angabe über 90 Prozent</span>: 6sense, B2B Buyer Experience Report 2026</p>
 					</div>
 				</div>
 			</div>
@@ -791,10 +804,14 @@ const ZEIGE_BEWEISSTUECKE = true;
 	:global(html[data-satz="c"]) .satz--c { display: block; }
 	.satz :global(.haltung) { margin: 0; padding-block: var(--abstand-md); }
 	.filmhero { display: none; }
-	/* KISTE (22.11.2026): Der Rahmen liegt absolut im Hero, der Hero ist deshalb sein Bezug.
+	/* KISTE (22.11.2026, nur localhost): Der Rahmen liegt absolut im Hero, der Hero ist deshalb sein Bezug.
 	   DIE TIEFE STEHT HIER, AN EINER STELLE: --tx (Wände, Prozent der Breite) und --ty (Decke und Boden, Prozent der Höhe).
-	   Alternative der Sitzung „Animation · Kiste“: beide auf 8.5% (BBHs Maß size "centred", dann bleiben 69 Prozent Bild). */
-	.filmhero { position: relative; --tx: 5%; --ty: 5%; }
+	   Der Baustein KisteRahmen und die Öffnung mit dem Film erben beide davon.
+	   TIEFE 8,5 % (Rasul 22.11.2026 abends, nach dem Blick auf drei Standbilder der Sitzung „Animation · Kiste“: „8,5 mit
+	   Licht 22.“). Das ist BBHs Maß size "centred"; es bleiben 68,9 Prozent der Fläche Bild. Das Licht dazu steht im
+	   Baustein (22 statt 30). VORHERIGER STAND, 22.11.2026 mittags bis abends: beide 5 % (81 Prozent Bild, Licht 30).
+	   Weg zurück: beide auf 5% und im Baustein die drei Lichtwerte auf .184 / .300 / .373. */
+	.filmhero { position: relative; --tx: 8.5%; --ty: 8.5%; }
 	/* KISTE: Die Öffnung, in der der Film sitzt (siehe Kommentar am Kasten). Eingerückt um die Tiefe der Kiste; das Karussell
 	   füllt sie mit seinen 100 % ganz. */
 	.filmhero__oeffnung { position: absolute; inset: var(--ty) var(--tx); overflow: hidden; }
@@ -1117,14 +1134,72 @@ const ZEIGE_BEWEISSTUECKE = true;
 	   nehmen. */
 	@media (min-width: 1024px) {
 		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band { padding-top: var(--abstand-lg); }
-		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; row-gap: 48px; align-items: center; }
-		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__titel { display: none; }
-		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten) { grid-column: 1; grid-row: 1 / span 2; align-self: center; justify-self: center; width: 60%; margin-left: 0; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; row-gap: 0; align-items: center; }
+		/* DER TITEL IST WIEDER DA (22.11.2026, Auftrag Website · Master, nur localhost). Rasul 22.11.2026 am Moodboard:
+		   „Okay, ich habe jetzt huge eingestellt bei der Schrift und md beim Abstand nach unten. Der Abstand nach oben sagst
+		   du stimmt. Und es ist linksbündig über zwei Spalten. Wenn das BBH-konform ist, machen wir das mal auf die
+		   Localhost-Seite.“ BBH-Rezept: h2 font-bartle text-huge uppercase mb-md, linksbündig.
+		   Gebaut: Titel in Zeile 1 über beide Spalten (grid-column 1 / -1), linksbündig, darunter --abstand-md. Das Raster
+		   hat 48 px Zeilenfuge, die wird vom Abstand abgezogen, damit unter dem Titel genau md steht. Animation, Satz und
+		   Text rücken je eine Rasterzeile tiefer (2 und 3 statt 1 und 2). Am Abstand nach oben nichts geändert (Polster
+		   --abstand-lg des Bandes, Regel oben). Die Schriftstufe huge kommt aus .t-abschnitt (system.css); der Schalter
+		   „Überschrift“ (data-titelgroesse) betrifft nur den Satz, nicht diesen Titel.
+		   WEG ZURÜCK: diese Regel wieder auf „{ display: none; }“ setzen, bei .experten „grid-row: 1 / span 2“, beim Satz
+		   „grid-row: 1“, beim Text „grid-row: 2“, und die Regel „LINKSBÜNDIG AUCH GESTAPELT“ unter diesem Block löschen. */
+		/* SPALTEN GETAUSCHT: TEXT LINKS, ANIMATION RECHTS (22.11.2026, Auftrag Website · Master, nur localhost). Rasul
+		   22.11.2026: „Okay, du hast jetzt die Überschrift eingefügt auf der Localhost-Seite. Jetzt wird mir das Video ein
+		   bisschen von oben gedrückt. Tausch mal Text und Animation aus, links und rechts.“
+		   Gebaut: .experten grid-column 2 (vorher 1), Satz und Text grid-column 1 (vorher 2). Der Titel bleibt über beiden
+		   Spalten. Dazu weiter unten bei der breiten Zeichenfläche (data-breit="an"): Die Fläche ist 100vw breit und muss am
+		   linken Fensterrand beginnen; ihr Platz steht jetzt eine Spalte weiter rechts, deshalb im margin-left zusätzlich
+		   „- 100cqw - 16px“ (eine Platzbreite plus die Spaltenfuge). Das Skript misst die Lage des Platzes selbst.
+		   NICHT GEÄNDERT: die senkrechte Mitte der Animation zu Satz plus Text (align-self: center).
+		   WEG ZURÜCK: .experten wieder grid-column 1, Satz und Text grid-column 2, und im margin-left der Zeichenfläche
+		   „ - 100cqw - 16px“ streichen. */
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__titel { display: block; grid-column: 1 / -1; grid-row: 1; padding-top: 0; margin: 0 0 var(--abstand-md); }
+		/* DAS VIDEO STEHT MITTIG ZUM FLIESSTEXT, NICHT MEHR ZU SATZPAAR PLUS FLIESSTEXT (22.11.2026, Auftrag „Animation ·
+		   Videobeweis“, nur localhost). Rasul 22.11.2026: „Vielleicht machen wir es in dem Fall so, dass es in der Horizontale
+		   zum Fließtext passt. Und lösen es einfach, indem wir die ganze Animation ein Stück nach unten ziehen. Der Hintergrund
+		   ist, die Anfangsanimation kommt sonst auch in die kleinere Unterschrift rein, und es sieht irgendwie schöner aus,
+		   wenn da noch diese horizontale Linie ist, der Horizont, den ich dadurch entstehen lasse, wenn der ein bisschen
+		   tiefer sitzt.“
+		   GEBAUT OHNE ZAHL FÜR DIE LAGE: .experten steht nur noch in Rasterzeile 3 (die Zeile des Fließtexts) und ist dort
+		   senkrecht mittig. Gegenüber dem Stand davor (Zeile 2 und 3) ist das die halbe Höhe des Satzpaars samt seinem
+		   Abstand nach unten, bei 1440 px 98,8 px, bei 1024 px 79,9 px; der Wert ergibt sich, er steht nirgends.
+		   margin-block: -1000px ist KEINE Lagekorrektur: Der Wert nimmt dem Kasten nur seine Höhe für die Rasterrechnung
+		   (jeder Betrag über der halben Kastenhöhe tut dasselbe, oben und unten gleich, deshalb bleibt die Mitte). Ohne ihn
+		   zöge ein Video, das höher ist als der Fließtext (sehr breite Fenster), die Zeile auseinander, und Text, Quelle und
+		   Bandende wanderten. So bleibt alles Übrige, wo es ist; das Video ragt dann oben und unten über die Zeile hinaus.
+		   GEPRÜFTE ALTERNATIVE OHNE DIESE ZAHL, NICHT GEBAUT (22.11.2026, Vorschlag Website · Master): .experten als absolut
+		   gesetztes Rasterkind; so ein Kind wird vom Raster platziert, trägt aber nichts zur Zeilenhöhe bei. Trägt in
+		   Chromium (gemessen bei 1024, 1440, 2048 px: gleiche Lage, Versatz 0,0), braucht aber AUSGESCHRIEBENE Rasterlinien
+		   („grid-row: 3 / 4; grid-column: 2 / 3“, dazu position: relative am Raster, justify-self: stretch, margin-block: 0):
+		   Mit offener Endlinie reicht die Zelle bis zur Polsterkante des Rasters, der Platz war dann 712 statt 680 px breit
+		   und stand 26,6 px zu tief. NICHT GENOMMEN, weil ungeprüft ist, ob align-self bei einem absolut gesetzten
+		   Rasterkind auch in Safari und Firefox die Lage bestimmt; trüge es dort nicht, stünde das Video am Zeilenanfang,
+		   sichtbar falsch und ohne dass es jemand als Fehler erkennt. Entscheidung Website · Master 22.11.2026: Zutat
+		   bleibt; sobald Safari einmal davor war, ist der Tausch eine Regel.
+		   WEG ZURÜCK: „grid-row: 2 / span 2“ und „margin-block: -1000px“ streichen (Stand davor: mittig zu Satzpaar und
+		   Absätzen, siehe QUELLENZEILE IN EIGENER RASTERZEILE). */
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten) { grid-column: 2; grid-row: 3; align-self: center; justify-self: center; width: 60%; margin-left: 0; margin-block: -1000px; }
 		:global(html[data-textfolge="ohne"][data-spalten="b6voll"] .anlass--band .anlass__band-innen > .experten) { width: 100%; }
 		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"]) .anlass--band .anlass__band-innen > .experten .experten__bild) { height: auto !important; aspect-ratio: 16 / 9; }
-		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__satz--zusammen { grid-column: 2; grid-row: 1; align-self: end; margin: 0; text-align: left; }
-		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__text { grid-column: 2; grid-row: 2; align-self: start; margin: 0; max-width: none; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__satz--zusammen { grid-column: 1; grid-row: 2; align-self: end; margin: 0 0 48px; text-align: left; }
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__text { grid-column: 1; grid-row: 3; align-self: start; margin: 0; max-width: none; }
+		/* QUELLENZEILE IN EIGENER RASTERZEILE 4 (22.11.2026, siehe Kommentar am Kasten im HTML). Das Video (.experten) bleibt
+		   über Zeile 2 und 3 und steht damit mittig zu Satzpaar und Absätzen. DIE ABSTÄNDE STEHEN JETZT ALS EINZELNE WERTE
+		   an den Elementen, die Zeilenfuge des Rasters ist 0 (Website · Master: „Setzt die 32 als einzigen Wert, nicht als
+		   Differenz zu 48.“): unter dem Titel --abstand-md (vorher calc(md − 48px) plus 48 Fuge), unter dem Satzpaar 48 px
+		   (vorher die Fuge), über der Quellenzeile 32 px (wie bisher im Textkasten). Sichtbar ändert sich an den Abständen
+		   nichts; nur das Video rückt um die halbe Höhe der Quelle samt Abstand nach oben.
+		   WEG ZURÜCK: row-gap wieder 48px, Titel margin 0 0 calc(var(--abstand-md) - 48px), Satzpaar margin 0, diese Regel
+		   löschen, und im HTML die Quellenzeile zurück in .anlass__text. */
+		:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__quellzeile { grid-column: 1; grid-row: 4; align-self: start; width: auto; max-width: none; margin: 32px 0 0; position: relative; z-index: 1; }
 	}
+	/* LINKSBÜNDIG AUCH GESTAPELT (22.11.2026, zum Titel oben): Unter 1024 px war der Titel schon sichtbar, mittig unter der
+	   Animation. Lage und Abstände dort unverändert, nur die Ausrichtung folgt jetzt der breiten Fassung. Weg zurück:
+	   diese Regel löschen. */
+	:global(html[data-textfolge="ohne"]:is([data-spalten="b6"], [data-spalten="b6voll"])) .anlass--band .anlass__band-innen > .anlass__titel { text-align: left; }
 	/* PROBE: ZEICHENFLÄCHE BREITER ALS IHR PLATZ, MENGE BIS HINTER DEN TEXT (Rasul 19.11.2026 spät: „Und am Ende hätte ich
 	   gern auch noch mehr Menschen in der Breite. Das heißt, du musst schon am Anfang in der Breite auch anlegen. Dass sich
 	   das nachher mit dem Text überschneidet, ist kein Problem. Also wenn jetzt rechts die so weit rausgehen würden, dass
@@ -1165,7 +1240,7 @@ const ZEIGE_BEWEISSTUECKE = true;
 		   42 px unter der Karte bei Helligkeit 240. Gemessen mit dem Blatt: Es reicht 41 bis 44 px unter den Platz, und der
 		   Schatten ist 62 px (1440 px Fensterbreite) bis 78 px (2048 px) darunter weiß. Der Maßstab der Zeichnung hängt weiter
 		   an der Höhe des Platzes, die Szene wird nicht kleiner. Weg zurück: --zu-unten: 90px. */
-		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten .experten__bild) { --zu-oben: 160px; --zu-unten: 130px; width: 100vw; max-width: none; margin-left: calc((200cqw + 16px - 100vw) / 2); aspect-ratio: auto; height: calc(100cqw * 9 / 16 + var(--zu-unten) + var(--zu-oben)) !important; margin-bottom: calc(-1 * var(--zu-unten)); margin-top: calc(-1 * var(--zu-oben)); }
+		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"] .anlass--band .anlass__band-innen > .experten .experten__bild) { --zu-oben: 160px; --zu-unten: 130px; width: 100vw; max-width: none; margin-left: calc((200cqw + 16px - 100vw) / 2 - 100cqw - 16px); aspect-ratio: auto; height: calc(100cqw * 9 / 16 + var(--zu-unten) + var(--zu-oben)) !important; margin-bottom: calc(-1 * var(--zu-unten)); margin-top: calc(-1 * var(--zu-oben)); }
 		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__satz--zusammen,
 		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__text { position: relative; z-index: 1; }
 	}
@@ -1214,6 +1289,15 @@ const ZEIGE_BEWEISSTUECKE = true;
 	   den offenen Ersatzsatz stehen */
 	.anlass__schlusszeile { display: block; }
 	.anlass--band .anlass__text .anlass__schluss + .anlass__quelle { margin-top: 32px; }
+	/* QUELLENZEILE ALS EIGENES RASTERKIND, GESTAPELT (unter 1024 px; 22.11.2026). Bündig unter dem Fließtext: gleiche
+	   Breite wie .anlass__text (46ch in der Schrift t-lesen, mittig), Zeile linksbündig. ABSTAND: Es sollen 32 px über der
+	   Zeile stehen wie bisher. Das Raster hat hier die Fuge --abstand-md (Regel .anlass__band-innen), deshalb steht der
+	   Wert als Differenz, im selben Muster wie beim Fließtext („calc(3rem - var(--abstand-md))“). ENTSCHIEDEN, Website · Master
+	   (Claude) 22.11.2026: Die Differenz bleibt gestapelt stehen. Gestapelt gibt es keine zentrierte Lage, die eine
+	   korrigierende Zahl verfälschen könnte, und die Fuge des Rasters aufzulösen hieße, alle gestapelten Regeln des Bandes
+	   anzufassen, ohne sichtbaren Gewinn. Ab 1024 px steht kein Differenzwert (Regel im Block b6/b6voll). */
+	.anlass--band .anlass__quellzeile { grid-row: 5; width: 100%; max-width: 46ch; margin: calc(32px - var(--abstand-md)) auto 0; text-align: left; }
+	.anlass--band .anlass__quellzeile .anlass__quelle { margin: 0; }
 	/* Text nur für Vorleseprogramme: unsichtbar, nimmt keinen Platz, bleibt im Lesefluss */
 	.nur-vorlesen { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 	.anlass--band .anlass__text .anlass__belege { margin-top: 24px; }
