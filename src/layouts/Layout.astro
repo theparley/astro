@@ -169,6 +169,8 @@ const websiteJsonLd = JSON.stringify({
 					document.documentElement.dataset.staffel = "an";
 					document.documentElement.dataset.weite = "an";
 					document.documentElement.dataset.atmen = "aus";
+					// Menü fest „Kacheln in der Zeile“ (Rasul 26.11.2026: Menü wie BBH am Anfang, „den Footer und das Menü können wir jetzt auf dev hochladen“ und „anschließend auch auf“ parleyfilm.com): Die Regeln der Liste in MenuBBH.astro (LI, ZK) und das Menüskript lesen diesen Wert. Zurück zur Liste: diese Zeile entfernen und LI in MenuBBH.astro wieder auf "html:root".
+					document.documentElement.dataset.bedienung = "kacheln";
 					// EXPERTEN-ANIMATION MIT FILM, FASSUNG VOM 20.11.2026 AUS `dev` (Rasul im Website · Master 20.11.2026: „Die Version
 					// fürs dritte Segment, also die Animation mit dem Video und dem Reinzoomen … Das schieben wir auf Dev und wir
 					// schieben es auf live."). Feste Werte ohne Schalter, einzeln abgelesen am gebauten dev-Stand (Commit 2683caf,
