@@ -178,6 +178,14 @@ import ExpertenAuswahl from "../components/bausteine/ExpertenAuswahl.astro";
 		:global(html[data-textfolge="ohne"][data-spalten="b6voll"][data-breit="an"]) .anlass--band .anlass__band-innen > .anlass__text { position: relative; z-index: 1; }
 	}
 	.anlass__satz { margin: 0 auto; text-align: center; font-family: var(--schrift-schmal); font-weight: 400; font-size: var(--text-huge); line-height: var(--zeile-huge); text-transform: uppercase; text-wrap: balance; }
+	/* AUCH UNTER 1024 PX LINKSBÜNDIG (Rasul 26.11.2026: „Alle behaupten, Favoriten beweisen, ist bei der Desktop-Ansicht
+	   linksbündig und in der Handyansicht mittig“, auf meine Frage: „Ja, linksbündig“). Beim Umbau am 22.11.2026 wurde
+	   der Satz nur ab 1024 px nach links gestellt; darunter stand er als einziges Stück im Band noch mittig (gemessen
+	   bei 375 px: Titel, Fließtext und Quellenzeile links). Vorher unter 1024 px: mittig aus der Grundregel oben.
+	   Weg zurück: diese Regel löschen. */
+	@media (max-width: 1023px) {
+		:global(html[data-textfolge="ohne"]) .anlass--band .anlass__band-innen > .anlass__satz--zusammen { text-align: left; margin-left: 0; margin-right: 0; }
+	}
 	:global(html:not([data-titelgroesse="huge"])) .anlass--band .anlass__satz { font-size: var(--text-2xl); line-height: var(--zeile-2xl); }
 	.anlass__text { margin: 0 auto; max-width: 46ch; text-wrap: balance; }
 	.anlass--band .anlass__text { margin-top: calc(3rem - var(--abstand-md)); }
