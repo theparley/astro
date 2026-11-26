@@ -18,6 +18,8 @@
 import LogoBiss from "./LogoBiss.astro";
 import ZeichenNeu from "./ZeichenNeu.astro";
 import { ZEICHEN_NEU as ZEICHEN_NEU_DATEN } from "../daten/zeichenNeu";
+import ParleyZeichen from "./ParleyZeichen.astro";
+import { ZEICHEN_PFAD as PZ_PFAD, ZEICHEN_B as PZ_B, ZEICHEN_H as PZ_H, parleyZeichenMass, PARLEY_PFAD, PARLEY_BOX } from "../daten/parleyZeichen";
 import { readFileSync } from "node:fs";
 import { BLASE_EIN_WORT } from "../daten/blaseEinWort";
 interface Props { startseite?: boolean }
@@ -330,6 +332,118 @@ html[data-zeichen="parley"] ${M} .bbh-menu__name.bbh-menu__name--logo { width: c
 html[data-zeichen="parley"] ${M} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__zeichen-neu--parley { width: calc(var(--k) * ${znP.b}); height: calc(var(--k) * ${znP.h}); }
 ` : "");
 const ZEICHEN_ALT = !ZEICHEN_NEU || ZEICHEN_PROBEN; // bisheriges Zeichen mit Biss: im Bau nicht mehr ausgeliefert
+/* PROBE „parley Zeichen“, NUR auf localhost (Auftrag Website · Master 26.11.2026 nach Rasuls Wort: „So, wir haben das
+   Logo ja nochmal geändert. Unter Branding, Aktiv und Parlay Zeichen solltest du die neuen Logos finden. Lasst uns
+   jetzt am Local Host ein paar Sachen ändern.“). Das parley Zeichen (branding/aktiv/parley-zeichen/ im
+   Marketing-Ordner, Stand 25.11.2026) ist nicht entschieden und nirgends live.
+   - Kachel vorn: das Zeichen ohne Text, mittig, 67,4 % der Kachelbreite (Größenblatt: unsere eigene Kachel).
+     Schwarz auf der hellen Kachel wie bisher Oval und Play.
+   - Zeichen hinten: parley Zeichen mit „parley Film“ in drei Wortlagen (ParleyZeichen.astro). Die Höhe des Zeichens
+     ist das Kachelmaß k, damit es mit den Kacheln in einer Zeile steht. Breite × Höhe in k:
+     A 4,627 × 1 · B 5,135 × 1 (p und y ragen 0,12 k unter die Zeile) · C 1,775 × 1,467 (Unterkante der Schrift auf der
+     Kachelzeile, das Zeichen steht 0,47 k darüber).
+   Schalter: ?wortlage=a|b|c|aus, auch im Einstellungsknopf (Zeile „Wortlage“); gesetzt als html[data-wortlage] im
+   Kopfskript von Layout.astro. „aus“ zeigt wieder, was der Schalter „Zeichen“ sagt (Zeichen vom 18.11. oder das mit
+   Biss). Grundeinstellung c. Der Fuß hängt am selben Schalter (SiteFooter.astro).
+   Die Regeln hier liegen über den Regeln von ZEICHEN_NEU und fassen sie nicht an; im Bau wird nichts davon
+   ausgeliefert. Rückweg: PZ auf false. */
+/* AUCH IM BAU (Rasul 26.11.2026: „Okay, das heißt, den Footer und das Menü können wir jetzt auf dev hochladen.“ und
+   gleich danach: „Und anschließend auch auf“ parleyfilm.com). Seitdem gilt im Bau fest, was auf localhost die
+   Grundeinstellung ist: Logokachel links mit dem parley Zeichen, oben Termin und Kontakt als volle Kacheln und die
+   Kachel „parley“, nach dem Scrollen Logokachel und Hamburger; im Fuß das Zeichen ohne Text über die volle Breite.
+   Im Bau hängen die Regeln an html:root statt an den Schaltern, es gibt dort kein Umschalten. Die Wortlagen A, B, C,
+   „Logofeld rechts“ und die Liste nach oben bleiben localhost (PZ_PROBEN). */
+const PZ = true;
+const PZ_PROBEN = import.meta.env.DEV;
+const PZ_LAGEN = ["a", "b", "c"] as const;
+const PZ_AN = 'html:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"]) ' + M_PZ();
+const PZ_AUS = 'html:not([data-wortlage="a"]):not([data-wortlage="b"]):not([data-wortlage="c"]) ' + M_PZ();
+/* Wortlage „ohne“ (Rasul 26.11.2026, Fuß ohne Text, siehe SiteFooter.astro): Die Logokachel zeigt auch dann das
+   parley Zeichen. Für das große Zeichen mit Name (nur bei ?logofeld=rechts) gibt es zu „ohne“ keine Fassung, dort
+   steht dann, was der Schalter „Zeichen“ sagt. */
+const PZ_K_AN = (PZ_PROBEN ? 'html:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"], [data-wortlage="ohne"]) ' : "html:root ") + M_PZ();
+const PZ_K_AUS = 'html:not(:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"], [data-wortlage="ohne"])) ' + M_PZ();
+function M_PZ() { return "div.bbh-menu[data-bbh-menu]"; }
+const PZ_SEITE = PZ_B / 0.674; // Kachelseite in Einheiten des Zeichens
+const PZ_KACHEL_BOX = `${((PZ_B - PZ_SEITE) / 2).toFixed(3)} ${((PZ_H - PZ_SEITE) / 2).toFixed(3)} ${PZ_SEITE.toFixed(3)} ${PZ_SEITE.toFixed(3)}`;
+const PZ_STIL = `
+${PZ_K_AN} .bbh-menu__kurz svg:not(.bbh-menu__kurz-pz) { display: none !important; }
+${PZ_K_AN} .bbh-menu__kurz svg.bbh-menu__kurz-pz { display: block !important; }
+` + (!PZ_PROBEN ? "" : `
+${PZ_K_AUS} .bbh-menu__kurz svg.bbh-menu__kurz-pz { display: none !important; }
+${PZ_AN} .bbh-menu__name--logo > svg:not(.bbh-menu__pz) { display: none !important; }
+${PZ_AUS} .bbh-menu__name--logo > svg.bbh-menu__pz { display: none !important; }
+` + PZ_LAGEN.map((l) => { const m = parleyZeichenMass(l); const b = (m.breite / 100).toFixed(4), h = (m.hoeheZeichen / 100).toFixed(4); const hier = `html[data-wortlage="${l}"] ${M_PZ()}`; return `
+${hier} .bbh-menu__name--logo > svg.bbh-menu__pz:not(.bbh-menu__pz--${l}) { display: none !important; }
+${hier} .bbh-menu__name--logo > svg.bbh-menu__pz--${l} { display: block !important; }
+${hier} .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * ${b}); }
+${hier} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__pz--${l} { width: calc(var(--k) * ${b}); height: calc(var(--k) * ${h}); }`; }).join("") + `
+html[data-wortlage="b"] ${M_PZ()} .bbh-menu__name.bbh-menu__name--logo { clip-path: inset(-61% 0 -13% 0); }
+`);
+/* PROBE „Logofeld links“, NUR auf localhost (Rasul 26.11.2026: „Lass uns das im Menü mal anders bauen. Lass uns da
+   nochmal zurückgehen zu der Variante von BBH, wo links von den drei Menüstrichen, von dem Hamburger Menü, nochmal
+   ein Feld ist. Bei denen ist es scharf drin und bei uns würden wir einfach das Logo reinmachen ohne Text, also ohne
+   den Namen“ parley Film).
+   - Die kleine Kachel mit dem Zeichen ohne Text steht links vom Hamburger, immer, auch oben auf der Startseite.
+     Sie fährt nicht mehr auf und zu.
+   - Rechts vom Hamburger steht nur das Wort (Rasul 26.11.2026 gleich danach: „Und wir würden rechts von dem
+     Hamburger Menü den unseren Namen machen, aber nur parley ohne film“): „parley“ als Umriss, ohne Zeichen. Es
+     steht wie bisher der Name nur oben auf der Startseite und geht beim Scrollen und bei offener Liste zu.
+     Maße, von mir gewählt, nicht von Rasul: Versalhöhe 0,5 k (wie Wortlage B), die Tinte von der Oberlänge bis
+     zur Unterlänge senkrecht mittig in der Kachelzeile, links 0,1562 k Abstand zum Hamburger (R aus dem Größenblatt).
+     Die Wortlagen A, B, C sieht man damit nur noch im Fuß.
+   - Wie BBH am Anfang (Rasul 26.11.2026, dritte Ansage: „dann machen wir es doch mal wie BBH auch nochmal das Menü
+     wie am Anfang. Da steht bei BBH alles da. Es ist links das kleine Logo, ist es das aufgeklappte Menü, also wo
+     die einzelnen Positionen drinstehen zum Anklicken und es ist eben rechts noch das Feld, wo der Name steht, wobei
+     du es jetzt mit einer hellen Schrift mit transparentem Hintergrund gemacht hast und mach es auch wie BBH, mach
+     eine normale Kachel mit schwarzer Schrift drauf“):
+     Das Wort steht jetzt in einer Kachel in der Fläche der anderen Kacheln (--flaeche), Schrift schwarz, je 0,1562 k
+     Luft links und rechts. Die Menüpunkte stehen oben wieder in der Zeile: Dafür ist die Grundeinstellung des
+     Schalters „Bedienung“ auf localhost „kacheln“ (Layout.astro), vorher „liste“. Nach dem Scrollen bleiben Logo und
+     Hamburger.
+     Unter 768 px ist die Namenskachel aus: Logo 90 + Menü + Name 221 passen nicht in 375 px. Meine Wahl, offen.
+   Das nimmt für diese Probe zurück, was seit dem 18.11.2026 abends gilt (EINHEITLICH: Kachel rechts, oben groß mit
+   Name). Schalter: ?logofeld=links|rechts, auch im Einstellungsknopf; rechts = Stand davor. Grundeinstellung links.
+   Was in der Kachel steht, sagen weiter die Schalter „Wortlage“ und „Zeichen“. Rückweg: LOGOFELD auf false. */
+const LOGOFELD = true; // auch im Bau seit 26.11.2026, siehe „AUCH IM BAU“ oben
+const LF = (PZ_PROBEN ? 'html[data-logofeld="links"] ' : "html:root ") + M_PZ();
+const LFK = (PZ_PROBEN ? 'html[data-logofeld="links"][data-bedienung="kacheln"] ' : "html:root ") + M_PZ();
+const PW = (() => { const k = 50 / 700, links = 15.6162; const tinteH = (PARLEY_BOX[3] - PARLEY_BOX[1]) * k; const grundlinie = (100 - tinteH) / 2 - PARLEY_BOX[1] * k; return { k, grundlinie, tx: links - PARLEY_BOX[0] * k, breite: 2 * links + (PARLEY_BOX[2] - PARLEY_BOX[0]) * k }; })();
+const LOGOFELD_STIL = `
+${LF} .bbh-menu__kurz { order: -1 !important; justify-content: flex-start !important; width: var(--k) !important; margin-left: 0 !important; margin-right: 0 !important; visibility: visible !important; transition: none !important; }
+${LF} .bbh-menu__name--logo > svg:not(.bbh-menu__pw) { display: none !important; }
+${LF} .bbh-menu__name--logo > svg.bbh-menu__pw { display: block !important; }
+${LF} .bbh-menu__name.bbh-menu__name--logo { width: calc(var(--k) * ${(PW.breite / 100).toFixed(4)}); clip-path: none; }
+${LF} .bbh-menu__name.bbh-menu__name--logo > svg.bbh-menu__pw { width: calc(var(--k) * ${(PW.breite / 100).toFixed(4)}); height: var(--k); }
+${PZ_PROBEN ? `html:not([data-logofeld="links"]) ${M_PZ()} .bbh-menu__name--logo > svg.bbh-menu__pw { display: none !important; }` : ""}
+${LF} .bbh-menu__name.bbh-menu__name--logo { background: var(--flaeche) !important; color: #000 !important; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); overflow: hidden; }
+@media (max-width: 767px) { ${LF} .bbh-menu__name.bbh-menu__name--logo { display: none !important; } }
+/* VOLLE KACHELN (Rasul 26.11.2026: „da machen wir jetzt eine Lösung auf halber Strecke für die Bedienbarkeit auf dem
+   Handy. Wir machen mal, dass Termin und Kontakt keine halben Kacheln sind, sondern jeweils eine Kachel. Das heißt,
+   da stehen dann zwei volle Kacheln zwischen unserem Logo und dem Wort parley am Anfang.“): Die Menüpunkte stehen
+   nebeneinander, je k × k (88 am Rechner, 90 am Handy), statt übereinander in halber Höhe (88 × 43). Eine Spalte je
+   Menüpunkt (--spalten = --anzahl; der Wert am Element kommt aus dem Markup, deshalb !important).
+   Gilt nur in dieser Probe mit Kacheln in der Zeile. Zurück: diesen Block entfernen. */
+${LFK} { --spalten: var(--anzahl) !important; }
+${LFK} .bbh-menu__nav { grid-auto-rows: var(--k) !important; }
+${LFK}.offen .bbh-menu__kachel { height: var(--k) !important; }
+/* IN EINEM ZUG (Rasul 26.11.2026: „Beim runterscrollen macht jetzt die linke Kachel eine doppelte Bewegung, die
+   rutscht nicht in einem Zug durch zur Mitte.“). Ursache: Die Zeile steht mittig, und ihre Teile gingen nacheinander
+   zu: die Namenskachel sofort (0 bis 300 ms), Menüpunkte und Hamburger erst nach der Wartezeit --out-delay (400 bis
+   700 ms; die war für die halben Kacheln gedacht, die erst in der Höhe und dann in der Breite zugehen). Die
+   Logokachel links rutschte deshalb zweimal.
+   Jetzt laufen alle Breiten zugleich, 300 ms ohne Wartezeit, auch beim Aufklappen. Die Menükacheln behalten Breite
+   und Höhe und werden vom zugehenden Menüfeld abgeschnitten (overflow hidden am Feld), sie blenden dabei aus.
+   Zurück: diesen Block entfernen. */
+${LFK} .bbh-menu__nav { transition: width var(--dauer) var(--kurve) 0s, margin-left var(--dauer) var(--kurve) 0s !important; }
+${LFK} .bbh-menu__burger { transition-delay: 0s !important; }
+${LFK} .bbh-menu__kachel { width: var(--kn) !important; height: var(--k) !important; transition: opacity var(--dauer) var(--kurve) 0s !important; }
+/* Text mittig (Rasul 26.11.2026 gleich danach: „Setz mal den Text, Termin und Kontakt mittig in die Kachel.“):
+   waagrecht und senkrecht in der Mitte der Kachel. Vorher oben links mit 6 px / 8 px Abstand wie bei BBH. Der
+   seitliche Innenabstand ist 0, damit „Kontakt“ in 88 px nicht aus der Mitte rückt. Zurück: diese Zeile wieder auf
+   „height: var(--k)“ allein. */
+${LFK} .bbh-menu__kachel span { display: flex !important; align-items: center; justify-content: center; height: var(--k) !important; padding: 0 !important; }
+`;
 /* HANDY-MENÜ (unter 768 px), Rasul 18.11.2026, auf sein Wort gleich auf der Live-Seite: „Wir lassen mal die linke
    Kachel, also wo nur das Rechtecklogo ist, weg erstmal. Und zeigen nur die beiden Menüpunkte an. … Und unser Logo
    in der großen Variante rechts. Und dann beim Scrollen … würden wir wechseln, in diese Menü Hamburger Zeichen und in
@@ -387,7 +501,13 @@ ${HM}${HM_ZU} .bbh-menu__kurz.bbh-menu__kurz { width: var(--k); margin-left: 0; 
    Dafür steht jetzt „bbh-menu--oben“ im Markup der Startseite: Ohne diese Klasse zeigte die Zeile bis zum ersten
    Lauf des Skripts die kleine Kachel statt des großen Zeichens. Das Skript setzt beide Klassen danach wie bisher. */
 const LISTE = true;
-const LI = (ZEICHEN_PROBEN ? 'html:not([data-bedienung="kacheln"])' : "html:root") + " div.bbh-menu[data-bbh-menu]";
+/* Seit 26.11.2026 gilt im Bau wieder „Kacheln in der Zeile“ (Rasul: „wie BBH … am Anfang ist sozusagen alles
+   aufgeklappt und sobald man scrollt, rutscht es zusammen auf die erste Kachel und das Hamburger Menü“; Freigabe
+   für dev und live am selben Tag). Die Regeln der Liste hängen deshalb auch im Bau am Schalter: Layout.astro setzt
+   dort fest html[data-bedienung="kacheln"], die Liste greift im Bau also nicht. Vorher im Bau: "html:root" (Liste
+   fest). Zurück zur Liste im Bau: in Layout.astro die Zeile im else-Zweig entfernen und hier wieder "html:root". */
+const LI = 'html:not([data-bedienung="kacheln"])' + " div.bbh-menu[data-bbh-menu]";
+const LISTE_ZU_BEGINN = LISTE && ZEICHEN_PROBEN; // nur auf localhost startet die Startseite geschlossen (dort kann die Liste gewählt sein)
 const LISTE_STIL = `
 ${LI} .bbh-menu__burger.bbh-menu__burger { width: var(--k); margin-left: 0; }
 ${LI} .bbh-menu__nav.bbh-menu__nav { position: absolute; left: 0; bottom: calc(100% + var(--fuge)); display: flex; flex-direction: column; gap: var(--fuge); width: calc(var(--k) * 2 + var(--fuge)); margin-left: 0; overflow: visible; animation: none; pointer-events: none; visibility: hidden; transition: visibility 0s linear calc(var(--dauer) + 50ms * var(--anzahl)); }
@@ -422,7 +542,8 @@ ${LI} .bbh-menu__schleier { display: none; }
    Kachelhöhe und 700 in der Schriftgröße --text-md auch im Bau, dort fest (Regeln an html:root). Die größere Schrift
    (?zeilen=gross) und der Stand davor (?zeilen=fein) bleiben als Vergleich auf localhost. */
 const ZEILEN = true;
-const ZK = (ZEICHEN_PROBEN ? 'html:not([data-zeilen="fein"]):not([data-bedienung="kacheln"])' : "html:root") + " div.bbh-menu[data-bbh-menu]";
+// Im Bau seit 26.11.2026 ebenfalls am Schalter (dort fest „kacheln“, siehe LI): Sonst bekämen Termin und Kontakt in der Zeile die fette Schrift der Listenzeilen. Vorher im Bau "html:root".
+const ZK = (ZEICHEN_PROBEN ? 'html:not([data-zeilen="fein"]):not([data-bedienung="kacheln"])' : 'html:not([data-bedienung="kacheln"])') + " div.bbh-menu[data-bbh-menu]";
 const ZEILEN_STIL = `
 ${ZK}.offen .bbh-menu__kachel.bbh-menu__kachel.bbh-menu__kachel { height: var(--k); }
 ${ZK} .bbh-menu__kachel.bbh-menu__kachel.bbh-menu__kachel span { height: var(--k); font-weight: 700; }
@@ -432,7 +553,7 @@ const wortMaskeId = `bbh-wort-${Math.random().toString(36).slice(2, 8)}`;
 const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<div class={`bbh-menu${startseite ? " bbh-menu--start bbh-menu--oben" + (LISTE ? "" : " offen") : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
+<div class={`bbh-menu${startseite ? " bbh-menu--start bbh-menu--oben" + (LISTE_ZU_BEGINN ? "" : " offen") : ""}`} style={`--spalten:${spalten}; --anzahl:${links.length}`} data-bbh-menu>
 	<div class="bbh-menu__cluster">
 		{LOGO_BREIT && <style is:inline set:html={LOGO_BREIT_STIL}></style>}
 		{ALLE_BREIT && <style is:inline set:html={ALLE_BREIT_STIL}></style>}
@@ -441,6 +562,8 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		{KURZ && <style is:inline set:html={KURZ_STIL}></style>}
 		{KURZ && <script is:inline set:html={KURZ_SKRIPT}></script>}
 		{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
+		{PZ && <style is:inline set:html={PZ_STIL}></style>}
+		{LOGOFELD && <style is:inline set:html={LOGOFELD_STIL}></style>}
 		{HANDY_MENUE && <style is:inline set:html={HANDY_MENUE_STIL}></style>}
 		{LISTE && <style is:inline set:html={LISTE_STIL}></style>}
 		{ZEILEN && <style is:inline set:html={ZEILEN_STIL}></style>}
@@ -482,9 +605,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 				{ZEICHEN_ALT && <svg class="bbh-menu__kurz-ecke" viewBox="77.80 0 100 100" aria-hidden="true"><path d="M129.95 27.39A84.45 60.32 0 1 1 164.25 52.76L107.44 70.00Z" fill="#000" /></svg>}
 				{ZEICHEN_NEU && <svg class="bbh-menu__kurz-neu bbh-menu__kurz-neu--mitte" viewBox="38.9 0 100 100" aria-hidden="true"><ellipse cx="149" cy="-1.5" rx="88.9" ry="57.7" fill="#000" /><path d="M111.48 50L74.38 71.1V28.9Z" fill="#000" /></svg>}
 				{ZEICHEN_NEU && ZEICHEN_PROBEN && <svg class="bbh-menu__kurz-neu bbh-menu__kurz-neu--rechts" viewBox="77.8 0 100 100" aria-hidden="true"><ellipse cx="149" cy="-1.5" rx="88.9" ry="57.7" fill="#000" /><path d="M111.48 50L74.38 71.1V28.9Z" fill="#000" /></svg>}
+				{PZ && <svg class="bbh-menu__kurz-pz" viewBox={PZ_KACHEL_BOX} aria-hidden="true"><path d={PZ_PFAD} fill="#000" /></svg>}
 			</a>
 		)}
-		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite && !LISTE ? "true" : "false"}>
+		<button type="button" class="bbh-menu__burger" aria-label="Menü öffnen" aria-expanded={startseite && !LISTE_ZU_BEGINN ? "true" : "false"}>
 			<span></span><span></span><span></span>
 		</button>
 		{/* Namenskachel wie BBHs Wortmarke neben dem Menü, nur auf der Startseite, solange oben
@@ -493,7 +617,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		   Forma Display Black: Größenachse 72, Fette 900. Lizenz für die Website wird geklärt. */}
 		{NAME_FORMA && !LOGO_HINTEN && <style is:inline set:html={NAME_FORMA_STIL}></style>}
 		{LOGO_HINTEN
-			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite">{ZEICHEN_ALT && <LogoBiss stufe={2} titel="parley Film" />}{ZEICHEN_NEU && ZEICHEN_PROBEN && <ZeichenNeu fassung="parley" class="bbh-menu__zeichen-neu bbh-menu__zeichen-neu--parley" />}{ZEICHEN_NEU && <ZeichenNeu fassung="film" class="bbh-menu__zeichen-neu bbh-menu__zeichen-neu--film" />}{KURZ_PROBEN && (
+			? <a href="/" class="bbh-menu__name bbh-menu__name--logo" aria-label="parley Film, Startseite">{ZEICHEN_ALT && <LogoBiss stufe={2} titel="parley Film" />}{ZEICHEN_NEU && ZEICHEN_PROBEN && <ZeichenNeu fassung="parley" class="bbh-menu__zeichen-neu bbh-menu__zeichen-neu--parley" />}{ZEICHEN_NEU && <ZeichenNeu fassung="film" class="bbh-menu__zeichen-neu bbh-menu__zeichen-neu--film" />}{PZ_PROBEN && PZ_LAGEN.map((l) => <ParleyZeichen lage={l} rand="zeichen" class={`bbh-menu__pz bbh-menu__pz--${l}`} />)}{LOGOFELD && <svg class="bbh-menu__pw" viewBox={`0 0 ${PW.breite.toFixed(3)} 100`} role="img" aria-label="parley"><path d={PARLEY_PFAD} fill="currentColor" transform={`translate(${PW.tx.toFixed(3)} ${PW.grundlinie.toFixed(3)}) scale(${PW.k.toFixed(6)})`} /></svg>}{KURZ_PROBEN && (
 				<svg class="bbh-menu__zeichen-wort" viewBox="0 -60.32 289.64 160.32" role="img" aria-label="parley">
 					<defs>
 						<mask id={wortMaskeId} maskUnits="userSpaceOnUse" x="-10" y="-70" width="320" height="200">

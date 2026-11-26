@@ -1,0 +1,25 @@
+---
+/* Das parley Zeichen mit dem Wort „parley Film“ (Auftrag Website · Master 26.11.2026 nach Rasuls Wort: „So, wir haben
+   das Logo ja nochmal geändert. Unter Branding, Aktiv und Parlay Zeichen solltest du die neuen Logos finden. Lasst uns
+   jetzt am Local Host ein paar Sachen ändern.“).
+   Zeichen: gerundeter 10 : 7-Rahmen, ein flacher Pfad, die Blase beißt von oben rechts hinein. Das Wort steht nicht
+   mehr in der Blase, sondern daneben oder darunter. Drei Wortlagen nach dem Größenblatt
+   (branding/aktiv/parley-zeichen/Groessenblatt.svg im Marketing-Ordner), keine ist entschieden:
+     lage "a": Wort rechts, Versalhöhe = Play-Seite, Mitte der Versalien auf der Spitzenlinie
+     lage "b": Wort rechts, Versalhöhe halbe Zeichenhöhe, Grundlinie auf der Unterkante
+     lage "c": Wort unter dem Zeichen, linke Kanten bündig
+   rand "tinte" (Fuß): die viewBox reicht bis zur Unterkante der Tinte. rand "zeichen" (Menü): bei B endet die viewBox
+   an der Unterkante des Zeichens, die Unterlängen von p und y ragen darunter heraus (overflow visible), damit das
+   Zeichen auf der Kachelzeile steht. Farbe = currentColor.
+   NUR localhost. Das bisherige Zeichen (ZeichenNeu.astro) bleibt stehen. Maße: src/daten/parleyZeichen.ts. */
+import { ZEICHEN_PFAD, WORT_PFAD, parleyZeichenMass, type Wortlage } from "../daten/parleyZeichen";
+interface Props { lage: Wortlage; rand?: "tinte" | "zeichen"; class?: string }
+const { lage, rand = "tinte", class: klasse = "" } = Astro.props;
+const m = parleyZeichenMass(lage);
+const h = rand === "zeichen" ? m.hoeheZeichen : m.hoehe;
+const n = (v: number) => v.toFixed(3);
+---
+<svg class={klasse} viewBox={`0 0 ${n(m.breite)} ${n(h)}`} role="img" aria-label="parley Film" xmlns="http://www.w3.org/2000/svg" style="overflow: visible">
+	<path d={ZEICHEN_PFAD} fill="currentColor" />
+	<path d={WORT_PFAD} fill="currentColor" transform={`translate(${n(m.tx)} ${n(m.grundlinie)}) scale(${m.k.toFixed(6)})`} />
+</svg>

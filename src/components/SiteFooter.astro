@@ -2,6 +2,8 @@
 import LogoBiss from "./LogoBiss.astro";
 import ZeichenNeu from "./ZeichenNeu.astro";
 import { ZEICHEN_NEU as ZEICHEN_NEU_DATEN } from "../daten/zeichenNeu";
+import ParleyZeichen from "./ParleyZeichen.astro";
+import { parleyZeichenMass, ZEICHEN_PFAD as PZ_PFAD, ZEICHEN_B as PZ_B, ZEICHEN_H as PZ_H } from "../daten/parleyZeichen";
 /* PROBE „neues Zeichen“ im Fuß, NUR auf localhost (Rasul 18.11.2026: „Und auf der Webseite unten der Footer, den
    könnte man dann auch updaten, und der sollte gleichzeitig umschaltbar sein, wenn wir oben im Menü das umschalten.“).
    Hängt an html[data-zeichen] wie das Menü (MenuBBH.astro, ZEICHEN_NEU): film, parley oder alt.
@@ -30,6 +32,49 @@ html[data-zeichen="film"] .site-footer__logo > svg.site-footer__zeichen-neu--par
 html[data-zeichen="parley"] .site-footer .site-footer__logo { width: min(100%, calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${znP.v})); }
 html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc(${znP.o}% + 12px); }
 ` : "");
+/* PROBE „parley Zeichen“ im Fuß, NUR auf localhost (Auftrag Website · Master 26.11.2026 nach Rasuls Wort, siehe
+   MenuBBH.astro, PZ). Hängt an html[data-wortlage] wie das Menü: a, b, c oder aus. Das Seitenverhältnis kommt aus
+   src/daten/parleyZeichen.ts (bis zur Unterkante der Tinte): A 4,627 : 1 · B 5,135 : 1,121 · C 1,775 : 1,467.
+   Die Linkzeile steht 12 px über der Oberkante des Zeichens; die liegt bei allen drei Lagen an der Oberkante der
+   Zeichnung, also 100 %.
+   Seitenrand: Das bisherige Zeichen begann an der Bildschirmkante („die Blase selbst beginnt an der Bildschirmkante“).
+   Das parley Zeichen mit Wort daneben ist bei A und B breiter als das Fenster hoch; an den Kanten säße links die
+   Rundung des Zeichens und rechts das m von „Film“ ohne Luft am Glas. Deshalb hier um den Seitenrand (--rand) je
+   Seite eingerückt, die Linkzeile bündig mit der linken Kante des Zeichens (left 0). Meine Wahl, nicht Rasuls Wort.
+   Die Regeln liegen über denen von ZEICHEN_NEU und fassen sie nicht an. Rückweg: PZ auf false. */
+/* OHNE TEXT (Rasul 26.11.2026: „Mach mal unten Parley Film erstmal raus im Footer den Text. Lass mal nur das Logo
+   über die ganze Breite.“): neuer Wert „ohne“ am Schalter Wortlage, seitdem Grundeinstellung. Nur das Zeichen
+   (142,85 : 100), ohne Einzug am Seitenrand, so breit wie das Fenster. Der Deckel über die Fensterhöhe bleibt wie
+   bei allen Fassungen davor: Der Fuß klebt am unteren Rand und muss samt Linkzeile in den Bildschirm passen. An
+   einem breiten Fenster ist das Zeichen deshalb schmaler als das Fenster und steht mittig (bei 1440 × 900: 970 px).
+   Die Linkzeile steht bündig an der linken Kante des Zeichens, mindestens aber um den Seitenrand vom Glas.
+   VOLLE BREITE (Rasul 26.11.2026, auf meine Frage, ob das Zeichen auch am Rechner die volle Breite bekommen und
+   unten angeschnitten sein soll: „Volle Breite“): Das Zeichen ist immer so breit wie das Fenster. Der Kasten des
+   Zeichens behält die Höhe des Deckels; was vom Zeichen darunter läge, ist abgeschnitten (clip-path, nach oben
+   offen, damit die Linkzeile bleibt). Die Schnittkante liegt über der Menüzeile, nicht am Bildschirmrand: Dort
+   stünde das helle Menü auf dem weißen Zeichen. Vorher am selben Tag: gedeckelt und mittig (955 px bei 1440 × 900);
+   Weg dorthin: width wieder min(100%, Deckel × 1,4285), height und clip-path weg.
+   Zurück zum Text: Wortlage a, b oder c. */
+/* AUCH IM BAU (Rasul 26.11.2026: „den Footer und das Menü können wir jetzt auf dev hochladen“, gleich danach: „Und
+   anschließend auch auf“ parleyfilm.com): Im Bau gilt fest „ohne Text, volle Breite“, die Regeln hängen dort an
+   html:root. A, B, C und „aus“ bleiben localhost (PZ_PROBEN). */
+const PZ = true;
+const PZ_PROBEN = import.meta.env.DEV;
+const PZ_LAGEN = ["a", "b", "c"] as const;
+const PZ_AN = PZ_PROBEN ? 'html:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"], [data-wortlage="ohne"])' : "html:root";
+const PZ_OHNE = PZ_PROBEN ? 'html[data-wortlage="ohne"]' : "html:root";
+const PZ_STIL = `
+${PZ_AN} .site-footer__logo > svg.site-footer__wortmarke:not(.site-footer__pz) { display: none !important; }
+${PZ_PROBEN ? `html:not(:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"], [data-wortlage="ohne"])) .site-footer__logo > svg.site-footer__pz { display: none !important; }` : ""}
+${PZ_OHNE} .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--ohne) { display: none !important; }
+${PZ_OHNE} .site-footer__logo > svg.site-footer__pz--ohne { display: block !important; }
+${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo { width: 100%; height: min(calc(100vw * ${(PZ_H / PZ_B).toFixed(5)}), calc(100dvh - 60px - var(--fuss-oben) - var(--menue-raum))); clip-path: inset(-200px 0 0 0); }
+${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo > nav { bottom: calc(100% + 12px); left: max(0px, calc(var(--rand) - (100vw - 100%) / 2)); }
+` + (!PZ_PROBEN ? "" : PZ_LAGEN.map((l) => { const m = parleyZeichenMass(l); return `
+html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--${l}) { display: none !important; }
+html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz--${l} { display: block !important; }
+html[data-wortlage="${l}"] .site-footer .site-footer__logo.site-footer__logo { width: min(calc(100% - 2 * var(--rand)), calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${(m.breite / m.hoehe).toFixed(4)})); }
+html[data-wortlage="${l}"] .site-footer .site-footer__logo.site-footer__logo > nav { bottom: calc(100% + 12px); left: 0; }`; }).join(""));
 ---
 {/* Sticky-Reveal-Footer (Fred 30.08. nachts, "bau den Footer") — exakt das
    BBH-Muster, das Maximilian auf der Nuxt-Seite 1:1 kopiert hat und das wir
@@ -85,6 +130,9 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
 			{ZEICHEN_NEU && <style is:inline set:html={ZEICHEN_NEU_STIL}></style>}
 			{ZEICHEN_NEU && ZEICHEN_PROBEN && <ZeichenNeu fassung="parley" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--parley" />}
 			{ZEICHEN_NEU && <ZeichenNeu fassung="film" class="site-footer__wortmarke site-footer__zeichen-neu site-footer__zeichen-neu--film" />}
+			{PZ && <style is:inline set:html={PZ_STIL}></style>}
+			{PZ_PROBEN && PZ_LAGEN.map((l) => <ParleyZeichen lage={l} class={`site-footer__wortmarke site-footer__pz site-footer__pz--${l}`} />)}
+			{PZ && <svg class="site-footer__wortmarke site-footer__pz site-footer__pz--ohne" viewBox={`0 0 ${PZ_B} ${PZ_H}`} role="img" aria-label="parley Film" xmlns="http://www.w3.org/2000/svg"><path d={PZ_PFAD} fill="currentColor" /></svg>}
 		</div>
 	</div>
 </footer>

@@ -234,9 +234,17 @@ const websiteJsonLd = JSON.stringify({
 					if (nurLokal) {
 						document.documentElement.dataset.zeichen = liesWahl("zeichen", ["film", "parley", "alt"], "film");
 						document.documentElement.dataset.ausschnitt = liesWahl("ausschnitt", ["mitte", "rechts"], "mitte");
-						document.documentElement.dataset.bedienung = liesWahl("bedienung", ["liste", "kacheln"], "liste"); // Probe Liste nach oben, siehe MenuBBH.astro (LISTE_PROBE)
+						// Probe „parley Zeichen“ (Stand 25.11.2026) in Menü und Fuß, nur lokal (Auftrag Website · Master 26.11.2026 nach Rasuls Wort: „Lasst uns jetzt am Local Host ein paar Sachen ändern.“): ?wortlage=a|b|c|aus. a, b, c = Wort „parley Film“ rechts mittig, rechts auf der Grundlinie, unter dem Zeichen; aus = was der Schalter „zeichen“ sagt. Grundeinstellung c. Siehe MenuBBH.astro (PZ). Im Bau wird nichts gesetzt.
+						// „ohne“ seit 26.11.2026 Grundeinstellung (Rasul: „Mach mal unten Parley Film erstmal raus im Footer den Text. Lass mal nur das Logo über die ganze Breite.“); vorher c.
+						document.documentElement.dataset.wortlage = liesWahl("wortlage", ["ohne", "a", "b", "c", "aus"], "ohne");
+						// Probe „Logofeld links“, nur lokal (Rasul 26.11.2026: „zurückgehen zu der Variante von BBH, wo links von den drei Menüstrichen … nochmal ein Feld ist … einfach das Logo reinmachen ohne Text“): ?logofeld=links|rechts. rechts = Stand seit 18.11. (Kachel rechts, oben groß mit Name). Siehe MenuBBH.astro (LOGOFELD).
+						document.documentElement.dataset.logofeld = liesWahl("logofeld", ["links", "rechts"], "links");
+						document.documentElement.dataset.bedienung = liesWahl("bedienung", ["liste", "kacheln"], "kacheln"); // Probe Liste nach oben, siehe MenuBBH.astro (LISTE_PROBE). Grundeinstellung auf localhost seit 26.11.2026 „kacheln“ (Rasul: „wie BBH auch nochmal das Menü wie am Anfang. Da steht bei BBH alles da … das aufgeklappte Menü, also wo die einzelnen Positionen drinstehen zum Anklicken“), vorher „liste“; im Bau gilt weiter fest die Liste. Zurück: Vorgabe wieder "liste".
 						document.documentElement.dataset.zeilen = liesWahl("zeilen", ["gross", "fett", "fein"], "fett"); // fett gilt auch im Bau; gross und fein nur als Vergleich auf localhost, siehe MenuBBH.astro (ZEILEN)
 						document.documentElement.dataset.kmass = liesWahl("kmass", ["90", "72"], "90"); // Handy-Menü: 90 = neues Maß und neue Reihenfolge (gilt im Bau), 72 = Stand davor; siehe MenuBBH.astro (HANDY_MENUE)
+					} else {
+						// Im Bau fest „Kacheln in der Zeile“ (Rasul 26.11.2026: Menü wie BBH am Anfang, Freigabe für dev und live am selben Tag): Die Regeln der Liste in MenuBBH.astro (LI) und das Menüskript lesen diesen Wert. Zurück zur Liste im Bau: diesen Zweig entfernen und LI in MenuBBH.astro wieder auf "html:root".
+						document.documentElement.dataset.bedienung = "kacheln";
 					}
 					// EXPERTEN-ANIMATION, AUCH IM BAU (20.11.2026; Rasul im Website · Master: „Die Version fürs dritte Segment, also
 					// die Animation mit dem Video und dem Reinzoomen … Das schieben wir auf Dev und wir schieben es auf live.“).
@@ -389,6 +397,19 @@ const websiteJsonLd = JSON.stringify({
 					<button type="button" data-allg-wahl="zeichen" data-wert="film">parley Film</button>
 					<button type="button" data-allg-wahl="zeichen" data-wert="parley">parley</button>
 					<button type="button" data-allg-wahl="zeichen" data-wert="alt">bisher</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Wortlage</span>
+					<button type="button" data-allg-wahl="wortlage" data-wert="ohne">ohne Text</button>
+					<button type="button" data-allg-wahl="wortlage" data-wert="a">A rechts mittig</button>
+					<button type="button" data-allg-wahl="wortlage" data-wert="b">B rechts unten</button>
+					<button type="button" data-allg-wahl="wortlage" data-wert="c">C darunter</button>
+					<button type="button" data-allg-wahl="wortlage" data-wert="aus">aus (18.11.)</button>
+				</div>
+				<div class="menu-wahl__zeile">
+					<span>Logofeld</span>
+					<button type="button" data-allg-wahl="logofeld" data-wert="links">links, ohne Name</button>
+					<button type="button" data-allg-wahl="logofeld" data-wert="rechts">rechts, oben mit Name</button>
 				</div>
 				<div class="menu-wahl__zeile">
 					<span>Kachel</span>
@@ -632,6 +653,13 @@ const websiteJsonLd = JSON.stringify({
 	html[data-zeichen="film"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="film"],
 	html[data-zeichen="parley"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="parley"],
 	html[data-zeichen="alt"] .menu-wahl [data-allg-wahl="zeichen"][data-wert="alt"],
+	html[data-wortlage="a"] .menu-wahl [data-allg-wahl="wortlage"][data-wert="a"],
+	html[data-wortlage="b"] .menu-wahl [data-allg-wahl="wortlage"][data-wert="b"],
+	html[data-wortlage="c"] .menu-wahl [data-allg-wahl="wortlage"][data-wert="c"],
+	html[data-wortlage="aus"] .menu-wahl [data-allg-wahl="wortlage"][data-wert="aus"],
+	html[data-wortlage="ohne"] .menu-wahl [data-allg-wahl="wortlage"][data-wert="ohne"],
+	html[data-logofeld="links"] .menu-wahl [data-allg-wahl="logofeld"][data-wert="links"],
+	html[data-logofeld="rechts"] .menu-wahl [data-allg-wahl="logofeld"][data-wert="rechts"],
 	html[data-ausschnitt="mitte"] .menu-wahl [data-allg-wahl="ausschnitt"][data-wert="mitte"],
 	html[data-kmass="90"] .menu-wahl [data-allg-wahl="kmass"][data-wert="90"],
 	html[data-zeilen="gross"] .menu-wahl [data-allg-wahl="zeilen"][data-wert="gross"],
