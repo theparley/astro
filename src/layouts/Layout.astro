@@ -86,7 +86,12 @@ const websiteJsonLd = JSON.stringify({
 		<meta property="og:image" content="https://parleyfilm.com/og-parleyfilm.png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
-		<meta property="og:image:alt" content="Logo von Parley Film: ein Filmbild, aus dem eine Sprechblase mit Play herausgebissen ist. Daneben steht parley Film." />
+		{/* Seit 26.11.2026 zeigt die Karte das parley Zeichen, Lage C auf Schwarz (Rasul zu Website · Master auf die Frage nach
+		   Favicon und Vorschaukarte: „Ja, beides nachziehen“). public/og-parleyfilm.png ist unverändert kopiert aus dem
+		   Marketing-Ordner branding/aktiv/parley-zeichen/vorschaukarte/ (Generator vorschaukarte_parley_zeichen.py). Die
+		   Beschreibung ist ein Vorschlag von Website · Master, von Rasul noch nicht gelesen. Vorher: „Logo von Parley Film:
+		   ein Filmbild, aus dem eine Sprechblase mit Play herausgebissen ist. Daneben steht parley Film.“ Rückweg: Git. */}
+		<meta property="og:image:alt" content="Das Zeichen von Parley Film: ein Winkel, aus dem eine Sprechblase mit Play herausgebissen ist. Darunter steht parley Film." />
 		<meta name="twitter:card" content="summary_large_image" />
 		{!title && <script type="application/ld+json" set:html={websiteJsonLd} />}
 		<ClientRouter />

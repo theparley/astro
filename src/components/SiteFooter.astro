@@ -55,6 +55,32 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
    stünde das helle Menü auf dem weißen Zeichen. Vorher am selben Tag: gedeckelt und mittig (955 px bei 1440 × 900);
    Weg dorthin: width wieder min(100%, Deckel × 1,4285), height und clip-path weg.
    Zurück zum Text: Wortlage a, b oder c. */
+/* GANZ ZU SEHEN (Rasul 26.11.2026 nach dem Hochladen: „Wenn ich da ganz runter scroll zum Footer, kann ich das Logo
+   gar nicht ganz sehen von uns.“): Das Zeichen bleibt so breit wie das Fenster, wird aber nicht mehr unten
+   abgeschnitten. An einem breiten Fenster ist der Fuß damit höher als der Bildschirm (bei 2048 × 1064: Zeichen
+   1434 px hoch). Deshalb klebt der Fuß dort nicht mehr mit der Unterkante am Bildschirm, sondern mit der Oberkante
+   (bottom ist dann negativ, um das Stück, das der Fuß höher ist als das Fenster): Der Vorhang legt erst den oberen
+   Teil frei, danach scrollt man durch das Zeichen bis zur Unterkante; darunter bleibt der Raum für die Menüzeile.
+   Passt der Fuß ins Fenster (Handy, schmale Fenster), ändert sich nichts. 100vw statt der echten Breite: mit
+   fester Bildlaufleiste liegt die Rechnung um rund 10 px daneben, das fällt in den schwarzen Raum über dem Zeichen.
+   Vorher (seit „Volle Breite“ am selben Tag): height min(100vw × 0,70004, 100dvh − 60px − --fuss-oben −
+   --menue-raum) und clip-path inset(-200px 0 0 0) am Logo, Fuß bottom 0. Weg zurück: diese Werte wieder setzen
+   und die Zeile mit bottom entfernen. */
+/* GERAHMT STATT RANDLOS (Rasul 26.11.2026, über Website · Master, nachdem er das Durchscrollen gesehen hatte: „Beim
+   runterscrollen sehe ich immer noch nicht das ganze Logo als Footer. Es wird immer noch in der Höhe abgeschnitten.
+   Du kannst es vielleicht mal doch nicht bis an den Bildrand machen, sondern ihn am Rand geben, wie das bei einem
+   YouTube-Logo normal ist, diese 67%“). Die Regel steht in branding/aktiv/Parley_Logo_Videogeste_2026-11.md: Das
+   Zeichen nimmt 67,4 % der Breite und 47,2 % der Höhe seines Behälters ein. Der Behälter ist hier ein Quadrat mit
+   der kürzeren Fensterseite, min(100vw, 100dvh): So bleibt in beiden Richtungen Luft, am Querformat begrenzt die
+   Höhe (2048 × 1064: Zeichen 717 × 502), am Handy die Breite (375: 253 × 177). Der Fuß ist so hoch wie dieses
+   Quadrat, das Zeichen steht darin mittig; er passt damit immer in ein Fenster und klebt wieder mit bottom 0.
+   Die Linkzeile steht bündig an der linken Kante des Zeichens.
+   Am Handy wäre das Quadrat zu knapp: Das Zeichen endete 7 px über der Menüzeile (gemessen bei 375 × 812). Der Fuß
+   ist dort deshalb mindestens Zeichenhöhe + 2 × --menue-raum + 48 px hoch (von mir gesetzt, nicht von Rasul); bei
+   375 px sind das 433 statt 375 px, zwischen Zeichen und Menüzeile liegen dann rund 36 px.
+   Damit entfallen „Volle Breite“ und „Ganz zu sehen“ (Durchscrollen) von oben; ihre Kommentare bleiben als Verlauf.
+   Weg zurück zum Durchscrollen: Logo width 100%, die Zeile für .site-footer__inner weg, dafür
+   .site-footer { bottom: min(0px, calc(100dvh - var(--fuss-oben) - var(--menue-raum) - 100vw * 0.70004)) }. */
 /* AUCH IM BAU (Rasul 26.11.2026: „den Footer und das Menü können wir jetzt auf dev hochladen“, gleich danach: „Und
    anschließend auch auf“ parleyfilm.com): Im Bau gilt fest „ohne Text, volle Breite“, die Regeln hängen dort an
    html:root. A, B, C und „aus“ bleiben localhost (PZ_PROBEN). */
@@ -68,8 +94,9 @@ ${PZ_AN} .site-footer__logo > svg.site-footer__wortmarke:not(.site-footer__pz) {
 ${PZ_PROBEN ? `html:not(:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"], [data-wortlage="ohne"])) .site-footer__logo > svg.site-footer__pz { display: none !important; }` : ""}
 ${PZ_OHNE} .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--ohne) { display: none !important; }
 ${PZ_OHNE} .site-footer__logo > svg.site-footer__pz--ohne { display: block !important; }
-${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo { width: 100%; height: min(calc(100vw * ${(PZ_H / PZ_B).toFixed(5)}), calc(100dvh - 60px - var(--fuss-oben) - var(--menue-raum))); clip-path: inset(-200px 0 0 0); }
-${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo > nav { bottom: calc(100% + 12px); left: max(0px, calc(var(--rand) - (100vw - 100%) / 2)); }
+${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo { width: calc(min(100vw, 100dvh) * 0.674); }
+${PZ_OHNE} .site-footer .site-footer__inner { height: max(min(100vw, 100dvh), calc(min(100vw, 100dvh) * ${(0.674 * PZ_H / PZ_B).toFixed(5)} + 2 * var(--menue-raum) + 48px)); padding-top: 0; padding-bottom: 0; justify-content: center; }
+${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo > nav { bottom: calc(100% + 12px); left: 0; }
 ` + (!PZ_PROBEN ? "" : PZ_LAGEN.map((l) => { const m = parleyZeichenMass(l); return `
 html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--${l}) { display: none !important; }
 html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz--${l} { display: block !important; }
