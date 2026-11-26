@@ -81,6 +81,15 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
    Damit entfallen „Volle Breite“ und „Ganz zu sehen“ (Durchscrollen) von oben; ihre Kommentare bleiben als Verlauf.
    Weg zurück zum Durchscrollen: Logo width 100%, die Zeile für .site-footer__inner weg, dafür
    .site-footer { bottom: min(0px, calc(100dvh - var(--fuss-oben) - var(--menue-raum) - 100vw * 0.70004)) }. */
+/* RAND WIE IN DER MENÜKACHEL (Rasul 26.11.2026, nachdem der gerahmte Fuß online war: „jetzt ist er aber zu klein.
+   Finde ich. Wir haben doch im Menü eine Kachel, wo wir unser Logo drin haben. Und da haben wir doch ein Verhältnis
+   zum Abstand zum Rand von der Kachel. Den gleichen Abstand hätte ich gern zum Viewportrand.“): In der Kachel ist
+   das Zeichen 67,4 % der Kachelbreite breit, links und rechts bleiben je 16,3 %. Dasselbe gilt jetzt zum Fenster:
+   Zeichen 67,4 % der Fensterbreite. Damit es am breiten Fenster nicht wieder höher wird als der Bildschirm, gilt
+   der alte Deckel über die Fensterhöhe (100dvh − 60 px Linkzeile − --fuss-oben − --menue-raum); wo er greift, ist
+   der Rand links und rechts größer als 16,3 %. Der Fuß hat wieder die Polster oben und unten statt der festen Höhe.
+   Vorher (GERAHMT, wenige Stunden online): Breite 0,674 × min(100vw, 100dvh), Fuß so hoch wie die kürzere
+   Fensterseite, Zeichen senkrecht mittig. Weg zurück: Git, Commit 326f557. */
 /* AUCH IM BAU (Rasul 26.11.2026: „den Footer und das Menü können wir jetzt auf dev hochladen“, gleich danach: „Und
    anschließend auch auf“ parleyfilm.com): Im Bau gilt fest „ohne Text, volle Breite“, die Regeln hängen dort an
    html:root. A, B, C und „aus“ bleiben localhost (PZ_PROBEN). */
@@ -94,8 +103,7 @@ ${PZ_AN} .site-footer__logo > svg.site-footer__wortmarke:not(.site-footer__pz) {
 ${PZ_PROBEN ? `html:not(:is([data-wortlage="a"], [data-wortlage="b"], [data-wortlage="c"], [data-wortlage="ohne"])) .site-footer__logo > svg.site-footer__pz { display: none !important; }` : ""}
 ${PZ_OHNE} .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--ohne) { display: none !important; }
 ${PZ_OHNE} .site-footer__logo > svg.site-footer__pz--ohne { display: block !important; }
-${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo { width: calc(min(100vw, 100dvh) * 0.674); }
-${PZ_OHNE} .site-footer .site-footer__inner { height: max(min(100vw, 100dvh), calc(min(100vw, 100dvh) * ${(0.674 * PZ_H / PZ_B).toFixed(5)} + 2 * var(--menue-raum) + 48px)); padding-top: 0; padding-bottom: 0; justify-content: center; }
+${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo { width: min(calc(100vw * 0.674), calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${(PZ_B / PZ_H).toFixed(4)})); }
 ${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo > nav { bottom: calc(100% + 12px); left: 0; }
 ` + (!PZ_PROBEN ? "" : PZ_LAGEN.map((l) => { const m = parleyZeichenMass(l); return `
 html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--${l}) { display: none !important; }
