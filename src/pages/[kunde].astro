@@ -89,17 +89,8 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 	</main>
 </Layout>
 
-{/* Merkt sich in diesem Browser, zu welcher Kundenseite der Besucher gehört (localStorage „parley-akte“). Das Menü
-   (MenuBBH.astro) zeigt daraufhin statt „Login“ die Kachel „Akte“ mit dem Weg hierher zurück. Es geht nichts an den
-   Server. Gehört mit einem Satz in die Datenschutzerklärung (offen bei Rasul). */}
-<script>
-	const merken = () => {
-		const slug = document.querySelector<HTMLElement>("main[data-akte]")?.dataset.akte;
-		if (slug) { try { localStorage.setItem("parley-akte", slug); } catch { /* gesperrter Speicher: dann ohne Kachel */ } }
-	};
-	merken();
-	document.addEventListener("astro:page-load", merken);
-</script>
+{/* Diese Seite speichert nichts im Browser (Rasul 27.11.2026: „Mach mal Rückweg 1.“). Vorher merkte sie sich den Slug
+   in localStorage „parley-akte“ für die Menükachel; Begründung in MenuBBH.astro bei „KEIN RÜCKWEG“. */}
 
 <style>
 	/* Stapel wie Impressum und Datenschutz (.recht: Titel, dann Text, oben und unten --abstand-xl). Zwischen den

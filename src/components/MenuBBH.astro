@@ -63,14 +63,16 @@ const NAME_FORMA_STIL = `
 // weil es jetzt auch für jemanden, der kein Login hat, suggeriert, dass da ein großer Service hinten dran ist. Login
 // hat nicht jede Seite.“). Dritter Eintrag, führt auf /login (src/pages/login.astro). Mit drei Einträgen kommt nach
 // der Regel unten „Home“ dazu, das Raster ist dann 2 × 2.
-// Wer schon auf seiner Kundenseite war, kommt über dieselbe Kachel mit einem Klick dorthin zurück: Die Kundenseite
-// ([kunde].astro) merkt sich den Slug im Browser (localStorage „parley-akte“), das Skript am Ende dieser Datei tauscht
-// das Ziel der Kachel. Das Wort bleibt „Login“ (Rasul 27.11.2026: „Und nennt's mal Login.“).
-// NUR LOCALHOST, bis Rasul Lage und Wort gesehen hat. Weg zurück: den Eintrag und das Skript „akte“ unten löschen.
-const links: { href: string; text: string; akte?: boolean }[] = [
+// KEIN RÜCKWEG ÜBER DIE KACHEL (Rasul 27.11.2026: „Mach mal Rückweg 1.“): „Login“ führt immer auf das Formular. Zurück
+// auf die Kundenseite kommt man über die Adresse oder ein Lesezeichen. Vorher (wenige Stunden, auch auf dev, Commit
+// fec355f): Die Kundenseite merkte sich den Slug im Browser (localStorage „parley-akte“), ein Skript am Ende dieser
+// Datei tauschte das Ziel der Kachel. Herausgenommen, weil das Merken eine Bequemlichkeit ist und nach § 25 TDDDG
+// wohl eine Einwilligung bräuchte (Einschätzung Website · Master und Programmierung, keine Rechtsberatung).
+// Weg zurück: den Eintrag löschen.
+const links = [
 	{ href: "/termin", text: "Termin" },
 	{ href: "/kontakt", text: "Kontakt" },
-	{ href: "/login", text: "Login", akte: true },
+	{ href: "/login", text: "Login" },
 ];
 // „Home“ bleibt (Rasul 13.11.2026 abends erst: „Unser Logo ist der Home Button“, kurz danach: „Mach den Home-Button
 // wieder rein.“). Zwischenstand ohne Home (Videobeweis als breite Kachel) liegt in Git, Commit 196caac.
@@ -646,7 +648,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 			: startseite && (<a href="/" class:list={["bbh-menu__name", NAME_FORMA && "bbh-menu__name--forma"]} tabindex="-1" aria-hidden="true"><span>parley</span></a>)}
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
-				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined} data-akte-kachel={l.akte ? "" : undefined}>
+				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
 					<span>{l.text}</span>
 				</a>
 			))}
@@ -1019,20 +1021,4 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	}
 
 	document.addEventListener("astro:page-load", bbhMenu);
-</script>
-
-<script>
-	// Kachel „Login“ führt direkt auf die Kundenseite, wenn dieser Browser schon dort war (siehe links oben).
-	// Das Wort bleibt „Login“ (Rasul 27.11.2026: „Und nennt's mal Login.“). Vorher wechselte es auf „Akte“.
-	const akte = () => {
-		let slug = "";
-		try { slug = localStorage.getItem("parley-akte") || ""; } catch { /* gesperrter Speicher: es bleibt bei „Login“ */ }
-		if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return;
-		document.querySelectorAll<HTMLAnchorElement>("a[data-akte-kachel]").forEach((a) => {
-			a.href = `/${slug}/`;
-			if (location.pathname.replace(/\/$/, "") === `/${slug}`) a.setAttribute("aria-current", "page");
-		});
-	};
-	akte();
-	document.addEventListener("astro:page-load", akte);
 </script>
