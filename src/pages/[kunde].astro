@@ -1,0 +1,89 @@
+---
+/* KUNDENSEITE „AKTENEINSICHT“, VORLAGE (27.11.2026). Auftrag aus der Sitzung „Rastetter“ auf Rasuls Wort vom
+   27.11.2026: „Ja, du kannst es doch selber übergeben an die Webseiteprogrammierung an das Gespräch.“ Anlass: Ein
+   Kunde darf keine Links aus E-Mails anklicken und tippt die Adresse deshalb selbst ein (parleyfilm.com/hug-ka).
+   Auftrag und Begründung im Marketing-Ordner: website/Uebergabe_Kundenseiten_2026-11.md und
+   website/Website_Kundenseiten_Konzept_2026-11.md.
+
+   EINE VORLAGE, EINE DATEI JE KUNDE: src/daten/kundenseiten/<slug>.md. Der Dateiname ist die Adresse. Was in der
+   Datei steht und wie, erklärt src/daten/kundenseiten/_vorlage.md. Dateien, die mit _ anfangen, werden keine Seite.
+
+   SCHUTZ: Diese Seite ist im Bau eine gewöhnliche Datei. Das Passwort prüft functions/_middleware.js, bevor
+   Cloudflare sie ausliefert. Die Mittelschicht erkennt eine Kundenseite am Merkmal data-akte-schutz am <main>
+   (passwort | offen). Ohne die Angabe „passwort: nein“ in der Datei ist die Seite geschlossen.
+   ACHTUNG: Auf localhost:4321 (astro dev) läuft die Mittelschicht nicht, die Seite ist dort offen.
+
+   NICHT IM INDEX: noindex über Layout (Angabe noindex) und über die Kopfzeile X-Robots-Tag der Mittelschicht. Nicht
+   in PAGES in sitemap.xml.ts eintragen.
+
+   Weg zurück: diese Datei, src/daten/kundenseiten/, src/components/bausteine/KundenVideo.astro,
+   functions/_middleware.js und den Abschnitt „kundenseiten“ in astro.config.mjs löschen; in Layout.astro die Angabe
+   noindex. */
+import Layout from "../layouts/Layout.astro";
+import Seitentitel from "../components/bausteine/Seitentitel.astro";
+import Rechtstext from "../components/bausteine/Rechtstext.astro";
+import Knopf from "../components/bausteine/Knopf.astro";
+import KundenVideo from "../components/bausteine/KundenVideo.astro";
+
+export function getStaticPaths() {
+	const dateien = import.meta.glob("../daten/kundenseiten/*.md", { eager: true }) as Record<string, any>;
+	// Eine Kundenseite darf keine bestehende Seite verdecken und umgekehrt: Der Bau bricht ab, statt still eine der
+	// beiden zu nehmen.
+	const belegt = Object.keys(import.meta.glob("./*.{astro,ts}")).map((p) => p.replace(/^\.\//, "").replace(/\.(astro|ts)$/, "").replace(/\.[a-z]+$/, ""));
+	const VERBOTEN = [...belegt, "api", "filme", "fonts", "lab", "lokal", "parley", "test", "werkzeug", "index", "404"];
+	return Object.entries(dateien)
+		.map(([pfad, datei]) => ({ slug: pfad.split("/").pop()!.replace(/\.md$/, ""), datei }))
+		.filter(({ slug }) => !slug.startsWith("_"))
+		.map(({ slug, datei }) => {
+			if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error(`Kundenseite „${slug}“: Der Dateiname darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten.`);
+			if (VERBOTEN.includes(slug)) throw new Error(`Kundenseite „${slug}“: Diese Adresse ist auf der Website schon belegt.`);
+			return { params: { kunde: slug }, props: { datei } };
+		});
+}
+
+const { datei } = Astro.props as { datei: any };
+const f = datei.frontmatter ?? {};
+const Zusammenhang = datei.Content;
+// Geschlossen, solange die Datei nicht ausdrücklich „passwort: nein“ sagt (YAML liest nein/no/false als false).
+const offen = f.passwort === false || f.passwort === "nein";
+const videos: { stream: string; titel?: string }[] = Array.isArray(f.videos) ? f.videos.filter((v: any) => v && typeof v.stream === "string" && v.stream.trim()) : [];
+const schritt: string = typeof f.naechster_schritt === "string" ? f.naechster_schritt : "";
+const knopf: string = typeof f.knopf === "string" && f.knopf ? f.knopf : "Termin finden";
+const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.knopf_ziel : "/termin";
+---
+
+<Layout title="Akteneinsicht" description="Akteneinsicht bei Parley Film." noindex>
+	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"}>
+		{/* Weiche Trennstelle wie bei Impressum und Datenschutz: Die breite Schrift passt am Handy sonst nicht in die Zeile. */}
+		<Seitentitel ebene="h1" titel="Akten&shy;einsicht" stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
+		<Rechtstext>
+			<Zusammenhang />
+		</Rechtstext>
+		{videos.length > 0 && (
+			<div class="akte__videos">
+				{videos.map((v) => <KundenVideo stream={v.stream.trim()} titel={v.titel} />)}
+			</div>
+		)}
+		{schritt && (
+			<Rechtstext>
+				<h2>Nächster Schritt</h2>
+				<p>{schritt}</p>
+				<p><Knopf href={knopfZiel} text={knopf} /></p>
+			</Rechtstext>
+		)}
+	</main>
+</Layout>
+
+<style>
+	/* Stapel wie Impressum und Datenschutz (.recht: Titel, dann Text, oben und unten --abstand-xl). Zwischen den
+	   Blöcken hier --abstand-lg statt xl: Text, Video und nächster Schritt gehören enger zusammen als Titel und Rechtstext. */
+	.akte { display: grid; gap: var(--abstand-lg); padding-block: var(--abstand-xl); }
+	.akte__videos {
+		width: 100%;
+		max-width: 1024px;
+		margin: 0 auto;
+		padding: 0 var(--rand);
+		display: grid;
+		gap: var(--abstand-md);
+	}
+</style>
