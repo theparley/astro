@@ -68,12 +68,13 @@ const knopf: string = typeof f.knopf === "string" && f.knopf ? f.knopf : "Termin
    … Je näher uns der Kunde kommt, desto weniger brauchen wir das. Und desto mehr wollen wir, dass der Kunde sich
    wohlfühlt. Bei dem Wort Akteneinsicht fühlt er sich nicht wohl. Wir schreiben da jetzt erstmal drüber
    Studiotour.“). Die Angabe titel in der Kundendatei setzt die Überschrift; fehlt sie, steht „Kundenbereich“ (Wahl
-   der Programmierung). Eine weiche Trennstelle schreibt man als &shy; in die Angabe. Vorher stand fest
+   der Programmierung). Eine weiche Trennstelle schreibt man als &shy; in die Angabe, einen festen Umbruch als -<br>. Vorher stand fest
    „Akten&shy;einsicht“ als Überschrift und „Akteneinsicht“ im Browser-Reiter. Die Namen im Code (data-akte, .akte,
    Cookie „akte“) bleiben, sie sieht kein Besucher außer dem Cookie-Namen in der Datenschutzerklärung.
    Weg zurück: titelRoh fest auf "Akten&shy;einsicht". */
 const titelRoh: string = typeof f.titel === "string" && f.titel.trim() ? f.titel.trim() : "Kunden&shy;bereich";
-const titelGlatt = titelRoh.replace(/&shy;/g, "").replace(/<[^>]*>/g, "");
+// Fester Umbruch mit Trennstrich („Studio-<br>tour“, Rasul 27.11.2026: zweizeilig) zählt im Browser-Reiter nicht mit.
+const titelGlatt = titelRoh.replace(/&shy;/g, "").replace(/-<br\s*\/?>/g, "").replace(/<[^>]*>/g, "");
 const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.knopf_ziel : "/termin";
 ---
 
