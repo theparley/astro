@@ -8,11 +8,16 @@
    EINE VORLAGE, EINE DATEI JE KUNDE: src/daten/kundenseiten/<slug>.md. Der Dateiname ist die Adresse. Was in der
    Datei steht und wie, erklärt src/daten/kundenseiten/_vorlage.md. Dateien, die mit _ anfangen, werden keine Seite.
 
-   SCHUTZ: Diese Seite ist im Bau eine gewöhnliche Datei. Das Passwort prüft functions/_middleware.js, bevor
-   Cloudflare sie ausliefert. Die Mittelschicht erkennt eine Kundenseite am Merkmal data-akte-schutz am <main>
-   (passwort | offen) und nimmt den Slug aus data-akte daneben. Ohne die Angabe „passwort: nein“ in der Datei ist
-   die Seite geschlossen.
-   ACHTUNG: Auf localhost:4321 (astro dev) läuft die Mittelschicht nicht, die Seite ist dort offen.
+   WO DIE SEITE IM BAU LIEGT (Umbau 27.11.2026, Rasul: „Ja, bau das“): nicht unter /<slug>/, sondern unter einem
+   internen Pfad /a-<40 Zeichen>/, gerechnet aus dem Wert AKTE_PFAD und dem Slug (interneAdresse unten; dieselbe
+   Rechnung steht in functions/_middleware.js, beide müssen gleich bleiben). functions/_middleware.js holt die Seite
+   von dort, prüft das Passwort und liefert sie unter /<slug>/ aus. Grund: Lag die Datei unter /<slug>/, lieferte
+   Cloudflare sie unter anders kodierten Adressen am Passwort vorbei aus (auf dev gemessen, siehe dort).
+   Die Mittelschicht liest am <main> data-akte-schutz (passwort | offen) und data-akte (der Slug). Ohne die Angabe
+   „passwort: nein“ in der Datei ist die Seite geschlossen.
+   AKTE_PFAD kommt beim Bau aus der Umgebung (Cloudflare: gewöhnliche Variable; lokal: .dev.vars, eingelesen in
+   astro.config.mjs). Fehlt der Wert im Bau, entstehen KEINE Kundenseiten, statt sie offen abzulegen.
+   AUF localhost:4321 (astro dev) liegt die Seite unter /<slug> und ist offen: Dort läuft keine Mittelschicht.
 
    NICHT IM INDEX: noindex über Layout (Angabe noindex) und über die Kopfzeile X-Robots-Tag der Mittelschicht. Nicht
    in PAGES in sitemap.xml.ts eintragen.
@@ -25,6 +30,7 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
 import Rechtstext from "../components/bausteine/Rechtstext.astro";
 import Knopf from "../components/bausteine/Knopf.astro";
 import KundenVideo from "../components/bausteine/KundenVideo.astro";
+import { createHmac } from "node:crypto";
 
 export function getStaticPaths() {
 	const dateien = import.meta.glob("../daten/kundenseiten/*.md", { eager: true }) as Record<string, any>;
@@ -38,11 +44,19 @@ export function getStaticPaths() {
 		.map(({ slug, datei }) => {
 			if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error(`Kundenseite „${slug}“: Der Dateiname darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten.`);
 			if (VERBOTEN.includes(slug)) throw new Error(`Kundenseite „${slug}“: Diese Adresse ist auf der Website schon belegt.`);
-			return { params: { kunde: slug }, props: { datei } };
+			return { slug, datei };
+		})
+		.flatMap(({ slug, datei }) => {
+			// Im Dev-Server die Kundenadresse, im Bau der interne Pfad (ohne Schrägstriche: „a-“ und 40 Zeichen).
+			if (import.meta.env.DEV) return [{ params: { kunde: slug }, props: { datei, slug } }];
+			const geheim = process.env.AKTE_PFAD || "";
+			if (!geheim) { console.warn(`Kundenseite „${slug}“ NICHT gebaut: Der Wert AKTE_PFAD fehlt.`); return []; }
+			const intern = "a-" + createHmac("sha256", geheim).update("akteneinsicht-pfad:" + slug).digest("hex").slice(0, 40);
+			return [{ params: { kunde: intern }, props: { datei, slug } }];
 		});
 }
 
-const { datei } = Astro.props as { datei: any };
+const { datei, slug } = Astro.props as { datei: any; slug: string };
 const f = datei.frontmatter ?? {};
 const Zusammenhang = datei.Content;
 // Geschlossen, solange die Datei nicht ausdrücklich „passwort: nein“ sagt (YAML liest nein/no/false als false).
@@ -54,7 +68,7 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 ---
 
 <Layout title="Akteneinsicht" description="Akteneinsicht bei Parley Film." noindex>
-	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"} data-akte={Astro.params.kunde}>
+	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"} data-akte={slug}>
 		{/* Weiche Trennstelle wie bei Impressum und Datenschutz: Die breite Schrift passt am Handy sonst nicht in die Zeile. */}
 		<Seitentitel ebene="h1" titel="Akten&shy;einsicht" stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
 		<Rechtstext>
