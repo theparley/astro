@@ -19,8 +19,6 @@
    in astro.config.mjs die zwei Einträge /login, in MenuBBH.astro die Kachel. */
 import Layout from "../layouts/Layout.astro";
 import Seitentitel from "../components/bausteine/Seitentitel.astro";
-import Rechtstext from "../components/bausteine/Rechtstext.astro";
-import Knopf from "../components/bausteine/Knopf.astro";
 ---
 
 <Layout title="Kundenbereich" description="Kundenbereich von Parley Film." noindex>
@@ -46,22 +44,24 @@ import Knopf from "../components/bausteine/Knopf.astro";
 				<p class="login__fehler" role="alert" hidden>Benutzername oder Passwort stimmt nicht.</p>
 			</form>
 		</div>
-		<Rechtstext>
-			<h2>Noch kein Zugang?</h2>
-			<p>Den Zugang gibt es nach dem ersten Gespräch.</p>
-			<p><Knopf href="/termin" text="Termin finden" /></p>
-		</Rechtstext>
+		{/* OHNE DEN BLOCK „NOCH KEIN ZUGANG?“ (Rasul 27.11.2026: „Auf der Login-Seite können die drei Sätze weg. Noch
+		   kein Zugang? Der kommt nach dem Gespräch. … zur Terminseite. Das kann alles erstmal weg von der Login-Seite.“).
+		   Vorher stand hier unter dem Formular:
+		     <Rechtstext><h2>Noch kein Zugang?</h2><p>Den Zugang gibt es nach dem ersten Gespräch.</p>
+		     <p><Knopf href="/termin" text="Termin finden" /></p></Rechtstext>
+		   mit den Importen Rechtstext und Knopf und der Stilregel
+		     .login :global(.rechtstext) { width: 100%; max-width: calc(26em + 2 * var(--rand)); }
+		   Weg zurück: das alles wieder einsetzen. */}
 	</main>
 </Layout>
 
 <style>
 	.login { display: grid; gap: var(--abstand-lg); padding-block: var(--abstand-xl); }
 	/* MITTIG UNTER DEM TITEL (Rasul 27.11.2026: „Was mir auf der Login-Seite auffällt, ist, dass das Login und die
-	   Eingabefelder nicht mittig übereinander stehen.“). Formular und der Block „Noch kein Zugang?“ sind eine schmale
-	   Spalte von 26 em in der Seitenmitte, der Text darin bleibt linksbündig. Vorher: Spalte von 1024 px wie bei
-	   Impressum, das Formular darin links. Weg zurück: margin-inline am Formular und die Regel für .rechtstext löschen. */
+	   Eingabefelder nicht mittig übereinander stehen.“). Das Formular ist eine schmale
+	   Spalte von 26 em in der Seitenmitte, die Beschriftungen darin bleiben linksbündig. Vorher: Spalte von 1024 px wie bei
+	   Impressum, das Formular darin links. Weg zurück: margin-inline am Formular löschen. */
 	.login__feld { width: 100%; padding: 0 var(--rand); }
-	.login :global(.rechtstext) { width: 100%; max-width: calc(26em + 2 * var(--rand)); }
 	.login__form { max-width: 26em; margin-inline: auto; font-family: var(--schrift-lesen); font-size: var(--text-md); letter-spacing: -0.02em; line-height: 1.4; }
 	.login__form label { display: block; margin: 1em 0 0.4em; }
 	.login__form label:first-child { margin-top: 0; }
