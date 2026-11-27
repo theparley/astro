@@ -115,7 +115,9 @@ export async function onRequest({ request, env, next }) {
 	let geschuetzt = false;
 	try {
 		const url = new URL(request.url);
-		if (!["GET", "HEAD", "POST"].includes(methode) || url.pathname.startsWith("/api/")) return next();
+		// Keine Abkürzung für /api/: Auch dort entscheidet nur, welche Datei ausgeliefert würde. Eine Ausnahme nach der
+		// Schreibweise der Adresse wäre wieder eine Stelle, an der man vorbeikäme.
+		if (!["GET", "HEAD", "POST"].includes(methode)) return next();
 
 		// Die Datei holen, die Cloudflare unter dieser Adresse ausliefern würde, ohne die Kopfzeilen des Besuchers
 		// (sonst käme bei „nicht geändert“ kein Inhalt).
