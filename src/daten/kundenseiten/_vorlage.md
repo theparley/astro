@@ -5,7 +5,8 @@
 # parleyfilm.com/hug-ka. Nur Kleinbuchstaben, Ziffern und Bindestriche. Die Adresse ist die Kurzform, die der Kunde
 # selbst benutzt (seine Domain, seine Mailadressen).
 #
-# Die Seite trägt immer die Überschrift „Akteneinsicht“. Sie steht nicht in der Sitemap und trägt noindex.
+# Die Überschrift der Seite steht in der Angabe titel (zum Beispiel titel: Studiotour). Fehlt sie, steht dort
+# „Kundenbereich“. Bis 27.11.2026 hieß jede Seite „Akteneinsicht“. Die Seite steht nicht in der Sitemap und trägt noindex.
 
 # Steht klein unter der Überschrift. Weglassen = keine Unterzeile.
 kunde: Name des Kunden
