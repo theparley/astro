@@ -130,6 +130,19 @@ ${fehler ? `<p class="fehler" role="alert">${fehler}</p>` : ""}
 	return new Response(html, { status, headers: { "Content-Type": "text/html; charset=utf-8", ...KOPF } });
 }
 
+// NIE EINE KUNDENSEITE ALS DATEI DURCHREICHEN (gemessen auf dev am 27.11.2026): Cloudflare Pages hält Dateien eines
+// früheren Baus bis zu eine Woche im Zwischenspeicher vor (Antwort mit „s-maxage=604800“, cf-cache-status HIT) und
+// liefert sie weiter aus, auch wenn der neue Bau sie nicht mehr enthält. Lag unter einer Kundenadresse je eine Datei,
+// käme sie über next() ohne Passwort zurück. Deshalb: Trägt die weitergereichte Antwort das Merkmal einer
+// Kundenseite, gibt es „nicht gefunden“ statt der Seite.
+async function weiter(next) {
+	const antwort = await next();
+	if (antwort.status !== 200 || !(antwort.headers.get("Content-Type") || "").includes("text/html")) return antwort;
+	const text = await antwort.text();
+	if (text.includes("data-akte-schutz=")) return new Response("Nicht gefunden.", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", ...KOPF } });
+	return new Response(text, { status: 200, headers: antwort.headers });
+}
+
 export async function onRequest({ request, env, next }) {
 	const methode = request.method;
 	let geschuetzt = false;
@@ -142,16 +155,16 @@ export async function onRequest({ request, env, next }) {
 		const rest = teile.slice(2).join("/");
 		if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || !(rest === "" || rest === "index.html")) return next();
 		const geheim = String(env.AKTE_PFAD || "");
-		if (!geheim) return next();
+		if (!geheim) return weiter(next);
 
 		// Die gebaute Seite vom internen Pfad holen. Gibt es sie nicht, ist das keine Kundenseite.
 		const intern = await internerPfad(geheim, slug);
 		const seite = await env.ASSETS.fetch(new Request(new URL(intern + "/", url.origin).toString(), { method: "GET" }));
 		const istHtml = seite.status === 200 && (seite.headers.get("Content-Type") || "").includes("text/html");
-		if (!istHtml) return next();
+		if (!istHtml) return weiter(next);
 		let html = await seite.text();
 		const merkmal = html.match(/data-akte-schutz="([^"]*)"/);
-		if (!merkmal || !html.includes(`data-akte="${slug}"`)) return next();
+		if (!merkmal || !html.includes(`data-akte="${slug}"`)) return weiter(next);
 		geschuetzt = merkmal[1] !== "offen";
 		const pfad = `/${slug}/`;
 		// Der interne Pfad steht in der gebauten Seite (Canonical, Open Graph). Er geht nie nach außen.
