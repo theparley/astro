@@ -23,12 +23,16 @@ interface Props {
 	// Hero-Logo (BrandLogo.astro) eingefahren ist und ihn aus der Stange
 	// "gebiert". Unterseiten haben keinen Hero und zeigen ihn sofort.
 	gateMenuBehindHero?: boolean;
+	// true = Seite gehört nicht in Suchmaschinen (27.11.2026, Kundenseiten „Akteneinsicht“, src/pages/[kunde].astro).
+	// Ohne die Angabe ändert sich nichts. Weg zurück: Angabe und die Zeile im <head> löschen.
+	noindex?: boolean;
 }
 
 const {
 	title,
 	description = "Kein Business ohne Witness. Echte Gespräche, filmreif ohne Kamerastress. Als Videopodcast, Webinar, Clip oder Kundentestimonial.",
 	gateMenuBehindHero = false,
+	noindex = false,
 } = Astro.props;
 
 // NAME IM TAB (Fred 26.10.2026, Namensregel in PARLEY_WORDING.md: Parley Film
@@ -65,6 +69,7 @@ const websiteJsonLd = JSON.stringify({
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		{/* Schriften vorladen (Neustart 13.11.2026): Lesetext und Hero-Schrift sind beim ersten Bild da,
 		   sonst springt die Seite nach dem Laden (Befund 14.06.2026). Alle frei, selbst gehostet. */}
 		<link rel="preload" href="/fonts/frei/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />

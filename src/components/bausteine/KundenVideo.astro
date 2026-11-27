@@ -1,0 +1,52 @@
+---
+/* Video auf einer Kundenseite (27.11.2026, Vorlage src/pages/[kunde].astro). Quelle ist Cloudflare Stream, keine
+   Datei im Repo. Angabe stream = die Kennung des Videos in Stream (32 Zeichen).
+   Geladen wird erst beim Abspielen: Vorgeladenes zählt bei Stream als ausgeliefert (Starter Bundle, 5.000 Minuten im
+   Monat). Vor dem Abspielen kommen nur das Standbild und das Manifest.
+   Weg wie im Band der Startseite (ExpertenAuswahl.astro): hls.js, wo es läuft, sonst das HLS des Browsers (iPhone),
+   bei einem Fehler die MP4 von Stream (nur, wenn dort „Download“ für das Video eingeschaltet ist).
+   OFFEN: Schutz der Videoadresse (erlaubte Herkunft oder signierte Adressen), siehe website/WEBSITE.md. */
+interface Props { stream: string; titel?: string }
+const { stream, titel } = Astro.props;
+const BASIS = `https://customer-cmrkt3xxgowav3v1.cloudflarestream.com/${stream}`;
+---
+<figure class="kundenvideo">
+	<video
+		controls
+		playsinline
+		preload="none"
+		poster={`${BASIS}/thumbnails/thumbnail.jpg?time=1s&height=720`}
+		data-kundenvideo
+		data-hls={`${BASIS}/manifest/video.m3u8`}
+		data-mp4={`${BASIS}/downloads/default.mp4`}
+		aria-label={titel}
+	></video>
+	{titel && <figcaption class="t-lesen">{titel}</figcaption>}
+</figure>
+
+<style>
+	.kundenvideo { margin: 0; }
+	.kundenvideo video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+	.kundenvideo figcaption { margin-top: 0.6em; }
+</style>
+
+<script>
+	const einrichten = () => {
+		document.querySelectorAll<HTMLVideoElement>("video[data-kundenvideo]:not([data-bereit])").forEach((v) => {
+			v.dataset.bereit = "1";
+			const hlsAdresse = v.dataset.hls!, mp4 = v.dataset.mp4!;
+			const zurMp4 = () => { const lief = !v.paused; v.src = mp4; v.load(); if (lief) v.play().catch(() => {}); };
+			const selbst = () => { if (v.canPlayType("application/vnd.apple.mpegurl")) v.src = hlsAdresse; else v.src = mp4; };
+			import("hls.js").then(({ default: Hls }) => {
+				if (!Hls.isSupported()) return selbst();
+				const h = new Hls({ autoStartLoad: false, maxBufferLength: 15, maxMaxBufferLength: 30 });
+				h.loadSource(hlsAdresse);
+				h.attachMedia(v);
+				v.addEventListener("play", () => h.startLoad(Math.max(0, v.currentTime)), { once: true });
+				h.on(Hls.Events.ERROR, (_e, d) => { if (d.fatal) { h.destroy(); zurMp4(); } });
+				document.addEventListener("astro:before-swap", () => h.destroy(), { once: true });
+			}).catch(selbst);
+		});
+	};
+	document.addEventListener("astro:page-load", einrichten);
+</script>
