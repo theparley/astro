@@ -90,6 +90,23 @@ html[data-zeichen="parley"] .site-footer .site-footer__logo > nav { bottom: calc
    der Rand links und rechts größer als 16,3 %. Der Fuß hat wieder die Polster oben und unten statt der festen Höhe.
    Vorher (GERAHMT, wenige Stunden online): Breite 0,674 × min(100vw, 100dvh), Fuß so hoch wie die kürzere
    Fensterseite, Zeichen senkrecht mittig. Weg zurück: Git, Commit 326f557. */
+/* LUFT ÜBER DEM ZEICHEN: LG, FEST (Rasul 26.11.2026 im Gespräch „Website · Master“: „Die mittlere (lg)“, von dort
+   als Bauanweisung weitergegeben). Über dem Zeichen steht --abstand-lg (60 bis 160 px) statt --fuss-oben, auch im
+   Bau (PZ_OHNE). Begründung: Der Fuß stand zu nah am Abschnitt davor. Das Zeichen bleibt gleich groß, der Deckel
+   rechnet weiter mit --fuss-oben. „rand“ und „bisher“ bleiben nur auf localhost als Vergleich (Schalter „Fußluft“).
+   Weg zurück: in der Regel unten --pz-oben auf var(--fuss-oben) setzen. Es folgt der Vermerk zur Probe davor. */
+/* PROBE, NUR LOCALHOST: LUFT ÜBER DEM ZEICHEN (Rasul 26.11.2026 zu Website · Master: „Der Footer braucht auch nach
+   oben ein bisschen Platz, der ist jetzt sehr nah am nächsten Element dran.“). Schalter „Fußluft“
+   (html data-fussluft = lg | rand | bisher), zwei Fassungen zum Vergleich, das Zeichen bleibt in beiden gleich groß:
+   - lg:     über dem Zeichen --abstand-lg (60 bis 160 px, bei 1440 px 138 px). Grundeinstellung auf localhost.
+   - rand:   über dem Zeichen so viel wie links und rechts davon (Vorschlag Website · Master: oben nicht weniger
+             Luft als an den Seiten), mindestens --fuss-oben.
+   - bisher: --fuss-oben (mindestens 48 px, sonst --abstand-md). Das gilt im Bau weiter, bis Rasul wählt.
+   Der Deckel der Zeichenbreite rechnet weiter mit --fuss-oben, sonst würde das Zeichen wieder kleiner (Rasul fand
+   es mittags zu klein). Der Fuß wird dadurch an breiten Fenstern höher als der Bildschirm. Er klebt dann mit der
+   Oberkante statt mit der Unterkante (bottom negativ um die Überhöhe, wie bei „Ganz zu sehen“ oben): Der Vorhang
+   legt erst die Luft und den oberen Teil frei, am Seitenende steht das Zeichen ganz im Bild über der Menüzeile und
+   der Abschnitt davor ist aus dem Bild. Weg zurück: Schalter auf „bisher“ oder diese Regeln löschen. */
 /* AUCH IM BAU (Rasul 26.11.2026: „den Footer und das Menü können wir jetzt auf dev hochladen“, gleich danach: „Und
    anschließend auch auf“ parleyfilm.com): Im Bau gilt fest „ohne Text, volle Breite“, die Regeln hängen dort an
    html:root. A, B, C und „aus“ bleiben localhost (PZ_PROBEN). */
@@ -105,6 +122,12 @@ ${PZ_OHNE} .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--ohne) 
 ${PZ_OHNE} .site-footer__logo > svg.site-footer__pz--ohne { display: block !important; }
 ${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo { width: min(calc(100vw * 0.674), calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${(PZ_B / PZ_H).toFixed(4)})); }
 ${PZ_OHNE} .site-footer .site-footer__logo.site-footer__logo > nav { bottom: calc(100% + 12px); left: 0; }
+${PZ_OHNE} .site-footer { --pz-b: min(calc(100vw * 0.674), calc((100dvh - 60px - var(--fuss-oben) - var(--menue-raum)) * ${(PZ_B / PZ_H).toFixed(4)})); --pz-oben: var(--abstand-lg); bottom: min(0px, calc(100dvh - var(--pz-oben) - var(--pz-b) * ${(PZ_H / PZ_B).toFixed(5)} - var(--menue-raum))); }
+${PZ_OHNE} .site-footer .site-footer__inner { padding-top: var(--pz-oben); }
+${!PZ_PROBEN ? "" : `
+html[data-wortlage="ohne"][data-fussluft="rand"] .site-footer { --pz-oben: max(var(--fuss-oben), calc((100vw - var(--pz-b)) / 2)); }
+html[data-wortlage="ohne"][data-fussluft="bisher"] .site-footer { --pz-oben: var(--fuss-oben); }
+`}
 ` + (!PZ_PROBEN ? "" : PZ_LAGEN.map((l) => { const m = parleyZeichenMass(l); return `
 html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz:not(.site-footer__pz--${l}) { display: none !important; }
 html[data-wortlage="${l}"] .site-footer__logo > svg.site-footer__pz--${l} { display: block !important; }
