@@ -6,13 +6,17 @@
 // danach kommt die Seite ohne neue Frage. Bewusst nicht Cloudflare Access: Das schickt dem Besucher eine Mail mit
 // Einmal-Code, und genau das können diese Kunden nicht annehmen.
 //
-// WELCHE ADRESSEN: Cloudflare ruft diese Datei nur für die Adressen auf, die im Bau in _routes.json stehen. Die
-// Liste schreibt astro.config.mjs (Abschnitt „kundenseiten“) aus src/daten/kundenseiten/. Alle anderen Seiten und
-// Dateien laufen an dieser Datei vorbei, die Website hängt nicht an ihr (Regel vom 16.11.2026 in public/_headers).
-// Fehlt _routes.json doch einmal, läuft diese Datei für jede Adresse mit und lässt alles ohne Merkmal durch.
-//
-// WORAN EINE KUNDENSEITE ERKANNT WIRD: am Merkmal data-akte-schutz="passwort" oder "offen" am <main> der gebauten
-// Seite. Jeder andere Wert gilt als geschlossen.
+// WELCHE ADRESSEN: alle Seitenaufrufe der Website, nicht nur die Kundenpfade. Ob eine Seite geschützt ist, entscheidet
+// allein ihr Inhalt: das Merkmal data-akte-schutz="passwort" oder "offen" am <main> der gebauten Seite, daneben
+// data-akte="<slug>". Jeder andere Wert als "offen" gilt als geschlossen. Seiten ohne Merkmal laufen unverändert durch.
+// WARUM SO (gemessen auf dev am 27.11.2026, mit Platzhalterseite): Die erste Fassung lief nur für /hug-ka und
+// /hug-ka/* (Liste in _routes.json). Cloudflare vergleicht diese Liste mit der Adresse, wie sie getippt wurde, liefert
+// die Datei aber auch unter anders kodierten Schreibweisen aus: /hug%2Dka/, /%68ug-ka/, /hug-ka%2F und //hug-ka/
+// brachten die Seite ohne Passwort. Deshalb hängt der Schutz jetzt am Inhalt, der ausgeliefert würde, und nicht an der
+// Schreibweise der Adresse. Der Preis: Diese Datei läuft bei jedem Seitenaufruf mit (nicht bei Dateien aus /_astro,
+// /fonts, /filme, /parley, siehe astro.config.mjs). Das weicht von der Regel vom 16.11.2026 in public/_headers ab
+// („kein Code je Aufruf“). Damit die Website nicht an dieser Datei hängt: Tritt ein Fehler auf, bevor eine Seite als
+// geschützt erkannt ist, wird sie normal ausgeliefert; danach bleibt sie zu.
 //
 // DAS PASSWORT steht als Wert bei Cloudflare (Pages, Einstellungen, Variablen und Geheimnisse), nie im Repo, lokal
 // in .dev.vars (steht in .gitignore). Name: AKTE_ und die Adresse in Großbuchstaben, Bindestrich wird Unterstrich:
@@ -107,52 +111,60 @@ ${fehler ? `<p class="fehler" role="alert">${fehler}</p>` : ""}
 }
 
 export async function onRequest({ request, env, next }) {
-	const url = new URL(request.url);
-	// Erster Teil der Adresse, entschlüsselt und klein: /hug%2Dka und /HUG-KA dürfen nicht an der Prüfung vorbeiführen.
-	let slug = "";
-	try { slug = decodeURIComponent(url.pathname.split("/")[1] || "").toLowerCase(); } catch { return next(); }
 	const methode = request.method;
-	// Alles, was keine Kundenseite sein kann, läuft unberührt weiter: Startseite, /api, Dateien, Ordner mit _.
-	if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || slug === "api" || !["GET", "HEAD", "POST"].includes(methode)) return next();
+	let geschuetzt = false;
+	try {
+		const url = new URL(request.url);
+		if (!["GET", "HEAD", "POST"].includes(methode) || url.pathname.startsWith("/api/")) return next();
 
-	// Die gebaute Seite holen, ohne die Kopfzeilen des Besuchers (sonst käme bei „nicht geändert“ kein Inhalt).
-	const seite = await env.ASSETS.fetch(new Request(url.toString(), { method: "GET" }));
-	const istHtml = seite.status === 200 && (seite.headers.get("Content-Type") || "").includes("text/html");
-	if (!istHtml) return next(); // Umleitung auf den Schrägstrich am Ende, 404, Dateien
-	const html = await seite.text();
-	const merkmal = html.match(/data-akte-schutz="([^"]*)"/);
-	if (!merkmal) return next(); // gewöhnliche Seite
+		// Die Datei holen, die Cloudflare unter dieser Adresse ausliefern würde, ohne die Kopfzeilen des Besuchers
+		// (sonst käme bei „nicht geändert“ kein Inhalt).
+		const seite = await env.ASSETS.fetch(new Request(url.toString(), { method: "GET" }));
+		const istHtml = seite.status === 200 && (seite.headers.get("Content-Type") || "").includes("text/html");
+		if (!istHtml) return next(); // Umleitungen, 404, Dateien
+		const html = await seite.text();
+		const merkmal = html.match(/data-akte-schutz="([^"]*)"/);
+		if (!merkmal) return next(); // gewöhnliche Seite
+		geschuetzt = merkmal[1] !== "offen";
 
-	const ausliefern = () => {
-		const kopf = new Headers(seite.headers);
-		for (const [name, wert] of Object.entries(KOPF)) kopf.set(name, wert);
-		kopf.delete("ETag");
-		return new Response(methode === "HEAD" ? null : html, { status: 200, headers: kopf });
-	};
-	if (merkmal[1] === "offen") return methode === "POST" ? next() : ausliefern();
+		const ausliefern = () => {
+			const kopf = new Headers(seite.headers);
+			for (const [name, wert] of Object.entries(KOPF)) kopf.set(name, wert);
+			kopf.delete("ETag");
+			return new Response(methode === "HEAD" ? null : html, { status: 200, headers: kopf });
+		};
+		if (!geschuetzt) return methode === "POST" ? next() : ausliefern();
 
-	const pfad = url.pathname;
-	const soll = glatt(env["AKTE_" + slug.toUpperCase().replace(/-/g, "_")]);
-	if (!soll) return formular(pfad, { status: 503, ohneFeld: true });
+		// Der Slug kommt aus der Seite selbst, nicht aus der Adresse: Formular, Cookie und Wert gelten für die eine
+		// richtige Schreibweise, egal wie die Adresse getippt wurde.
+		const slug = (html.match(/data-akte="([a-z0-9]+(?:-[a-z0-9]+)*)"/) || [])[1];
+		if (!slug) return formular("/", { status: 503, ohneFeld: true });
+		const pfad = `/${slug}/`;
+		const soll = glatt(env["AKTE_" + slug.toUpperCase().replace(/-/g, "_")]);
+		if (!soll) return formular(pfad, { status: 503, ohneFeld: true });
 
-	const name = "akte_" + slug.replace(/-/g, "_");
-	const summe = await pruefsumme(soll, slug);
+		const name = "akte_" + slug.replace(/-/g, "_");
+		const summe = await pruefsumme(soll, slug);
 
-	if (methode === "POST") {
-		let eingabe = "";
-		try { eingabe = glatt((await request.formData()).get("passwort")); } catch { /* leere oder kaputte Eingabe gilt als falsch */ }
-		if (eingabe && await gleich(eingabe, soll)) {
-			const sicher = url.protocol === "https:" ? "; Secure" : "";
-			return new Response(null, {
-				status: 303,
-				headers: { Location: pfad, "Set-Cookie": `${name}=${summe}; Path=/${slug}; Max-Age=${TAGE * 86400}; HttpOnly; SameSite=Lax${sicher}`, ...KOPF },
-			});
+		if (methode === "POST") {
+			let eingabe = "";
+			try { eingabe = glatt((await request.formData()).get("passwort")); } catch { /* leere oder kaputte Eingabe gilt als falsch */ }
+			if (eingabe && await gleich(eingabe, soll)) {
+				const sicher = url.protocol === "https:" ? "; Secure" : "";
+				return new Response(null, {
+					status: 303,
+					headers: { Location: pfad, "Set-Cookie": `${name}=${summe}; Path=/${slug}; Max-Age=${TAGE * 86400}; HttpOnly; SameSite=Lax${sicher}`, ...KOPF },
+				});
+			}
+			await new Promise((fertig) => setTimeout(fertig, 1000));
+			return formular(pfad, { fehler: TEXT.falsch });
 		}
-		await new Promise((fertig) => setTimeout(fertig, 1000));
-		return formular(pfad, { fehler: TEXT.falsch });
-	}
 
-	const hat = cookieWert(request, name);
-	if (hat && await gleich(hat, summe)) return ausliefern();
-	return formular(pfad);
+		const hat = cookieWert(request, name);
+		if (hat && await gleich(hat, summe)) return ausliefern();
+		return formular(pfad);
+	} catch {
+		if (geschuetzt) return formular("/", { status: 503, ohneFeld: true });
+		return next();
+	}
 }

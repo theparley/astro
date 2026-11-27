@@ -38,20 +38,21 @@ const nurLokal = {
 };
 
 // KUNDENSEITEN „AKTENEINSICHT“ (27.11.2026, src/pages/[kunde].astro): Nach dem Bau entsteht _routes.json. Die Datei
-// sagt Cloudflare Pages, für welche Adressen die Functions laufen: wie bisher /api/*, dazu je Kundenseite /<slug> und
-// /<slug>/*. So prüft functions/_middleware.js nur die Kundenseiten, alle anderen Seiten laufen an ihr vorbei. Ohne
-// diese Datei würde die Mittelschicht für jede Adresse der Website aufgerufen. Die Liste kommt aus den Dateinamen in
-// src/daten/kundenseiten/ (ohne die mit _ am Anfang), also aus derselben Quelle wie die Seiten selbst.
-// Weg zurück: diesen Abschnitt und den Eintrag in integrations löschen (dann auch functions/_middleware.js löschen).
+// sagt Cloudflare Pages, für welche Adressen die Functions laufen: für alle, außer für die Ordner und Dateien unten,
+// in denen nie eine Seite liegt. So prüft functions/_middleware.js jeden Seitenaufruf, aber nicht jede Schrift, jedes
+// Bild und jedes Skript.
+// VORHER (wenige Stunden auf dev): nur /api/* und je Kundenseite /<slug> und /<slug>/*. Auf dev gemessen: Cloudflare
+// lieferte die Seite unter anders kodierten Adressen (/hug%2Dka/, //hug-ka/) an der Mittelschicht vorbei aus. Die
+// Liste verriet außerdem die Kundenpfade im Bau. Begründung und Preis stehen in functions/_middleware.js.
+// Weg zurück: diesen Abschnitt und den Eintrag in integrations löschen (dann auch functions/_middleware.js und die
+// Kundenseiten löschen, sonst liegen sie offen).
 const kundenseiten = {
 	name: 'kundenseiten',
 	hooks: {
 		'astro:build:done': async ({ dir, logger }) => {
-			const quelle = fileURLToPath(new URL('./src/daten/kundenseiten/', import.meta.url));
-			const slugs = (await readdir(quelle).catch(() => [])).filter((d) => d.endsWith('.md') && !d.startsWith('_')).map((d) => d.slice(0, -3)).sort();
-			const include = ['/api/*', ...slugs.flatMap((s) => [`/${s}`, `/${s}/*`])];
-			await writeFile(path.join(fileURLToPath(dir), '_routes.json'), JSON.stringify({ version: 1, include, exclude: [] }, null, '\t') + '\n');
-			logger.info(`_routes.json: Functions laufen für /api/* und ${slugs.length} Kundenseite(n): ${slugs.join(', ') || 'keine'}`);
+			const exclude = ['/_astro/*', '/fonts/*', '/filme/*', '/parley/*', '/favicon.ico', '/favicon.svg', '/apple-touch-icon.png', '/og-parleyfilm.png', '/robots.txt', '/sitemap.xml'];
+			await writeFile(path.join(fileURLToPath(dir), '_routes.json'), JSON.stringify({ version: 1, include: ['/*'], exclude }, null, '\t') + '\n');
+			logger.info(`_routes.json: Functions laufen für alle Adressen außer ${exclude.length} Ausnahmen`);
 		},
 	},
 };
