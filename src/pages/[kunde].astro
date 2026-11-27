@@ -64,13 +64,23 @@ const offen = f.passwort === false || f.passwort === "nein";
 const videos: { stream: string; titel?: string }[] = Array.isArray(f.videos) ? f.videos.filter((v: any) => v && typeof v.stream === "string" && v.stream.trim()) : [];
 const schritt: string = typeof f.naechster_schritt === "string" ? f.naechster_schritt : "";
 const knopf: string = typeof f.knopf === "string" && f.knopf ? f.knopf : "Termin finden";
+/* TITEL AUS DER KUNDENDATEI, NICHT MEHR „AKTENEINSICHT“ (Rasul 27.11.2026: „wir machen das Wort Akteneinsicht weg.
+   … Je näher uns der Kunde kommt, desto weniger brauchen wir das. Und desto mehr wollen wir, dass der Kunde sich
+   wohlfühlt. Bei dem Wort Akteneinsicht fühlt er sich nicht wohl. Wir schreiben da jetzt erstmal drüber
+   Studiotour.“). Die Angabe titel in der Kundendatei setzt die Überschrift; fehlt sie, steht „Kundenbereich“ (Wahl
+   der Programmierung). Eine weiche Trennstelle schreibt man als &shy; in die Angabe. Vorher stand fest
+   „Akten&shy;einsicht“ als Überschrift und „Akteneinsicht“ im Browser-Reiter. Die Namen im Code (data-akte, .akte,
+   Cookie „akte“) bleiben, sie sieht kein Besucher außer dem Cookie-Namen in der Datenschutzerklärung.
+   Weg zurück: titelRoh fest auf "Akten&shy;einsicht". */
+const titelRoh: string = typeof f.titel === "string" && f.titel.trim() ? f.titel.trim() : "Kunden&shy;bereich";
+const titelGlatt = titelRoh.replace(/&shy;/g, "").replace(/<[^>]*>/g, "");
 const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.knopf_ziel : "/termin";
 ---
 
-<Layout title="Akteneinsicht" description="Akteneinsicht bei Parley Film." noindex>
+<Layout title={titelGlatt} description={`${titelGlatt} bei Parley Film.`} noindex>
 	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"} data-akte={slug}>
 		{/* Weiche Trennstelle wie bei Impressum und Datenschutz: Die breite Schrift passt am Handy sonst nicht in die Zeile. */}
-		<Seitentitel ebene="h1" titel="Akten&shy;einsicht" stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
+		<Seitentitel ebene="h1" titel={titelRoh} stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
 		{/* LOGOUT (Rasul 27.11.2026: „ich müsste dann auf der Kundenseite auch einen Logout anbieten und nicht unten als
 		   Knopf“, also hier auf der Seite und nicht als Kachel im Menü). Ein Formular, kein Verweis: POST /login/ mit
 		   abmelden=1, functions/_middleware.js löscht das Cookie und führt auf /login/. Nur bei Seiten mit Passwort.
