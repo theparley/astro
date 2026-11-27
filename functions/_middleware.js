@@ -65,7 +65,7 @@
 
 const TAGE = 30;
 const TEXT = {
-	titel: "Kundenbereich", // bis 27.11.2026 „Akteneinsicht“, siehe src/pages/[kunde].astro (TITEL AUS DER KUNDENDATEI)
+	titel: "Backstage", // bis 27.11.2026 abends „Kundenbereich“ (Rasuls Namenswahl), davor „Akteneinsicht“, siehe src/pages/[kunde].astro (TITEL AUS DER KUNDENDATEI)
 	hinweis: "Diese Seite ist mit einem Passwort geschützt.",
 	feld: "Passwort",
 	knopf: "Öffnen",

@@ -21,13 +21,15 @@ import Layout from "../layouts/Layout.astro";
 import Seitentitel from "../components/bausteine/Seitentitel.astro";
 ---
 
-<Layout title="Kundenbereich" description="Kundenbereich von Parley Film." noindex>
+<Layout title="Backstage" description="Backstage bei Parley Film." noindex>
 	<main class="login">
 		{/* TITEL „KUNDENBEREICH“ (27.11.2026, Rasul: „Login und Logout ist eine Funktion, auf der Seite die Kundenbereich
 		   heißt.“). Vorher „Login“ in der Stufe huge. Weiche Trennstelle und Stufe 2xl wie bei „Akteneinsicht“: Das
 		   Wort passt am Handy sonst nicht in die Zeile. Den Titel hat Rasul so nicht wörtlich bestellt, nur die Kachel;
 		   Weg zurück: titel="Login" ohne stufe. Der Titel im Browser-Reiter heißt jetzt ebenfalls Kundenbereich. */}
-		<Seitentitel ebene="h1" titel="Kunden&shy;bereich" stufe="2xl" />
+		{/* „BACKSTAGE“ (Rasul 27.11.2026 im Gespräch „Mitgliederbereich“: „Backstage finde ich gar nicht schlecht.“, dann als Entscheidung „Backstage“; hier: „kannst du die Kachel jetzt updaten, dass die Backstage heißen nicht mehr Kundenbereich?“) Vorher: titel="Kunden&shy;bereich", Layout-Titel „Kundenbereich“,
+		   Beschreibung „Kundenbereich von Parley Film.“ Die Adresse /login bleibt. */}
+		<Seitentitel ebene="h1" titel="Backstage" stufe="2xl" />
 		{/* NUR IM DEV-SERVER (27.11.2026, Rasul: „jetzt bin ich gerade auf Localhost und der Login funktioniert nicht
 		   mehr“): Auf localhost:4321 läuft keine Mittelschicht, das Formular geht dort ins Leere. Der Hinweis zeigt
 		   auf den Nachbau mit Anmeldung. Im Bau steht er nicht. Weg zurück: diesen Block löschen. */}
