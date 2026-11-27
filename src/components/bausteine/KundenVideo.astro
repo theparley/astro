@@ -81,6 +81,11 @@ const BASIS = `https://customer-cmrkt3xxgowav3v1.cloudflarestream.com/${stream}`
 				if (Fertig !== undefined) anschliessen(Fertig); else geholt.then(anschliessen);
 			};
 			v.addEventListener("play", beginnen);
+			/* NUR EIN VIDEO ZUR SELBEN ZEIT (Rasul 27.11.2026: „wenn man zwei Videos nicht gleichzeitig abspielen kann. Also
+			   sobald man ein anderes Video startet, dass das andere aufhört zu spielen“). Sobald dieses Video läuft, hält
+			   jedes andere Kundenvideo der Seite an; es bleibt an seiner Stelle stehen und läuft auf Klick dort weiter.
+			   Weg zurück: diese eine Zeile löschen. */
+			v.addEventListener("play", () => { document.querySelectorAll<HTMLVideoElement>("video[data-kundenvideo]").forEach((a) => { if (a !== v && !a.paused) a.pause(); }); });
 			v.addEventListener("click", beginnen);
 			knopf?.addEventListener("click", beginnen);
 		});

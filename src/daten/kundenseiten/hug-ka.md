@@ -25,8 +25,8 @@ videos:
 # Untertitel scharf sind: Die Weichheit steckt in der Ausgangsdatei. Der Clip hat 25 Bilder je Sekunde, die anderen 30.
 # Auf dev und live herunter am selben Abend (Rasul: „wir nehmen mal den Klimatransitionsclip runter. Also von allen
 # Seiten logalhost, dev und parleyfilm.com. Wir löschen ihn auch bei Cloudflare aus dem Stream raus“).
-# Weg zurück: die zwei Zeilen ohne # wieder einsetzen. Das geht nur, solange das Video bei Stream liegt; nach dem
-# Löschen dort muss es neu hochgeladen werden und bekommt eine neue Kennung.
+# BEI STREAM GELÖSCHT am 27.11.2026 abends (Rasul: „Ja, löschen“). Die Kennung unten gibt es nicht mehr, die zwei
+# Zeilen stehen nur als Spur da. Wieder zeigen geht erst nach einem besseren Export und einem neuen Upload (neue Kennung).
 #  - stream: 61f5a5d04c72cd36d0c88c9759fce541
 #    titel: "Fragerunde: Brauchen wir einen Klimatransitionsplan?"
   - stream: afe940c897856579527b15f3b98d54bd
