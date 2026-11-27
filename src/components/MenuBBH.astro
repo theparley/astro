@@ -69,10 +69,20 @@ const NAME_FORMA_STIL = `
 // Datei tauschte das Ziel der Kachel. Herausgenommen, weil das Merken eine Bequemlichkeit ist und nach § 25 TDDDG
 // wohl eine Einwilligung bräuchte (Einschätzung Website · Master und Programmierung, keine Rechtsberatung).
 // Weg zurück: den Eintrag löschen.
+// DIE KACHEL HEISST „KUNDENBEREICH“, ZWEIZEILIG (Rasul 27.11.2026: „Eigentlich dürfen wir den Knopf nicht Login
+// nennen. Login und Logout ist eine Funktion, auf der Seite die Kundenbereich heißt.“, dann: „Wir machen mal
+// Kundenbereich. Zweizeilig.“). Gemessen am 27.11.2026: Die Kachel ist 88 bis 90 px breit, „Kundenbereich“ braucht
+// 92 bis 118 px, passt also in keiner Breite in eine Zeile; „Kunden-“ passt. Deshalb steht das Wort in den Kacheln
+// als „Kunden-“ / „bereich“ (Angabe teile am Eintrag, Element b.bbh-menu__wort, Trennstrich und Umbruch in
+// i.bbh-menu__trenn). In der Liste (Bedienung „liste“) steht es einzeilig ohne Trennstrich. b und i statt span, weil
+// die Regeln „.bbh-menu__kachel span“ sonst auch die inneren Elemente träfen. Das Ziel bleibt /login.
+// Die Kachel führt Angemeldete jetzt direkt auf ihre Kundenseite (functions/_middleware.js, ein Anmelde-Cookie für
+// die ganze Website); der Absatz „KEIN RÜCKWEG“ oben beschreibt den Stand davor. Im Browser wird weiter nichts
+// gemerkt außer diesem Cookie. Vorher: „Login“. Weg zurück: text wieder "Login", teile löschen.
 const links = [
 	{ href: "/termin", text: "Termin" },
 	{ href: "/kontakt", text: "Kontakt" },
-	{ href: "/login", text: "Login" },
+	{ href: "/login", text: "Kundenbereich", teile: ["Kunden", "bereich"] },
 ];
 // „Home“ bleibt (Rasul 13.11.2026 abends erst: „Unser Logo ist der Home Button“, kurz danach: „Mach den Home-Button
 // wieder rein.“). Zwischenstand ohne Home (Videobeweis als breite Kachel) liegt in Git, Commit 196caac.
@@ -649,7 +659,7 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		<nav class="bbh-menu__nav" aria-label="Hauptmenü">
 			{links.map((l, i) => (
 				<a href={l.href} class="bbh-menu__kachel" style={`--i:${i}`} aria-current={aktiv(l.href) ? "page" : undefined}>
-					<span>{l.text}</span>
+					<span>{"teile" in l && l.teile ? <b class="bbh-menu__wort">{l.teile[0]}<i class="bbh-menu__trenn">-<br /></i>{l.teile[1]}</b> : l.text}</span>
 				</a>
 			))}
 		</nav>
@@ -782,6 +792,10 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 		white-space: nowrap;
 	}
 	/* Balken: Textfarbe mit 15 % Deckkraft, wischt von links auf, 150 ms */
+	/* Zweizeiliges Wort in der Kachel („Kunden-“ / „bereich“), siehe oben bei links. */
+	.bbh-menu__wort { font-weight: inherit; text-align: center; line-height: 1.1; }
+	.bbh-menu__trenn { display: none; font-style: normal; }
+	:global(html[data-bedienung="kacheln"]) .bbh-menu__trenn { display: inline; }
 	.bbh-menu__kachel::before {
 		content: "";
 		position: absolute;

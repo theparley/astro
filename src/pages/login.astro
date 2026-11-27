@@ -23,9 +23,19 @@ import Rechtstext from "../components/bausteine/Rechtstext.astro";
 import Knopf from "../components/bausteine/Knopf.astro";
 ---
 
-<Layout title="Login" description="Login für Kunden von Parley Film." noindex>
+<Layout title="Kundenbereich" description="Kundenbereich von Parley Film." noindex>
 	<main class="login">
-		<Seitentitel ebene="h1" titel="Login" />
+		{/* TITEL „KUNDENBEREICH“ (27.11.2026, Rasul: „Login und Logout ist eine Funktion, auf der Seite die Kundenbereich
+		   heißt.“). Vorher „Login“ in der Stufe huge. Weiche Trennstelle und Stufe 2xl wie bei „Akteneinsicht“: Das
+		   Wort passt am Handy sonst nicht in die Zeile. Den Titel hat Rasul so nicht wörtlich bestellt, nur die Kachel;
+		   Weg zurück: titel="Login" ohne stufe. Der Titel im Browser-Reiter heißt jetzt ebenfalls Kundenbereich. */}
+		<Seitentitel ebene="h1" titel="Kunden&shy;bereich" stufe="2xl" />
+		{/* NUR IM DEV-SERVER (27.11.2026, Rasul: „jetzt bin ich gerade auf Localhost und der Login funktioniert nicht
+		   mehr“): Auf localhost:4321 läuft keine Mittelschicht, das Formular geht dort ins Leere. Der Hinweis zeigt
+		   auf den Nachbau mit Anmeldung. Im Bau steht er nicht. Weg zurück: diesen Block löschen. */}
+		{import.meta.env.DEV && (
+			<p class="login__lokal">Nur hier auf localhost:4321: Die Anmeldung läuft auf dieser Adresse nicht. Zum Testen <a href="http://localhost:4397/login/" data-astro-reload>localhost:4397/login/</a> öffnen.</p>
+		)}
 		<div class="login__feld">
 			<form method="post" action="/login/" class="login__form" data-login data-astro-reload>
 				<label for="login-kuerzel">Benutzername</label>
@@ -46,8 +56,13 @@ import Knopf from "../components/bausteine/Knopf.astro";
 
 <style>
 	.login { display: grid; gap: var(--abstand-lg); padding-block: var(--abstand-xl); }
-	.login__feld { width: 100%; max-width: 1024px; margin: 0 auto; padding: 0 var(--rand); }
-	.login__form { max-width: 26em; font-family: var(--schrift-lesen); font-size: var(--text-md); letter-spacing: -0.02em; line-height: 1.4; }
+	/* MITTIG UNTER DEM TITEL (Rasul 27.11.2026: „Was mir auf der Login-Seite auffällt, ist, dass das Login und die
+	   Eingabefelder nicht mittig übereinander stehen.“). Formular und der Block „Noch kein Zugang?“ sind eine schmale
+	   Spalte von 26 em in der Seitenmitte, der Text darin bleibt linksbündig. Vorher: Spalte von 1024 px wie bei
+	   Impressum, das Formular darin links. Weg zurück: margin-inline am Formular und die Regel für .rechtstext löschen. */
+	.login__feld { width: 100%; padding: 0 var(--rand); }
+	.login :global(.rechtstext) { width: 100%; max-width: calc(26em + 2 * var(--rand)); }
+	.login__form { max-width: 26em; margin-inline: auto; font-family: var(--schrift-lesen); font-size: var(--text-md); letter-spacing: -0.02em; line-height: 1.4; }
 	.login__form label { display: block; margin: 1em 0 0.4em; }
 	.login__form label:first-child { margin-top: 0; }
 	/* Eckig, Linie in Textfarbe, keine Fläche: wie die Felder auf /kontakt gedacht, hier eigenständig gehalten. */
@@ -61,6 +76,8 @@ import Knopf from "../components/bausteine/Knopf.astro";
 	}
 	.login__form input:focus-visible, .login__form button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 	.login__fehler { margin-top: 1em; }
+	.login__lokal { max-width: 26em; margin: 0 auto; padding: 0.6em 0.8em; border: 1px dashed currentColor; font-family: var(--schrift-lesen); font-size: var(--text-base); line-height: 1.3; }
+	.login__lokal a { color: inherit; }
 </style>
 
 <script>

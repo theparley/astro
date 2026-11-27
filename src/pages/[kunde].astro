@@ -71,6 +71,18 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"} data-akte={slug}>
 		{/* Weiche Trennstelle wie bei Impressum und Datenschutz: Die breite Schrift passt am Handy sonst nicht in die Zeile. */}
 		<Seitentitel ebene="h1" titel="Akten&shy;einsicht" stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
+		{/* LOGOUT (Rasul 27.11.2026: „ich müsste dann auf der Kundenseite auch einen Logout anbieten und nicht unten als
+		   Knopf“, also hier auf der Seite und nicht als Kachel im Menü). Ein Formular, kein Verweis: POST /login/ mit
+		   abmelden=1, functions/_middleware.js löscht das Cookie und führt auf /login/. Nur bei Seiten mit Passwort.
+		   Platz und Form (kleine Zeile unter dem Titel, unterstrichen wie ein Verweis) sind ein Entwurf der
+		   Programmierung, nicht abgenommen. AUF localhost:4321 geht das Absenden ins Leere (keine Mittelschicht).
+		   Weg zurück: dieses Formular und die Stilregeln .akte__logout löschen, in der Mittelschicht abmelden(). */}
+		{!offen && (
+			<form method="post" action="/login/" class="akte__logout" data-astro-reload>
+				<input type="hidden" name="abmelden" value="1" />
+				<button type="submit">Logout</button>
+			</form>
+		)}
 		<Rechtstext>
 			<Zusammenhang />
 		</Rechtstext>
@@ -96,6 +108,13 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 	/* Stapel wie Impressum und Datenschutz (.recht: Titel, dann Text, oben und unten --abstand-xl). Zwischen den
 	   Blöcken hier --abstand-lg statt xl: Text, Video und nächster Schritt gehören enger zusammen als Titel und Rechtstext. */
 	.akte { display: grid; gap: var(--abstand-lg); padding-block: var(--abstand-xl); }
+	/* Sitzt dicht unter dem Titel: der Stapel hat sonst --abstand-lg zwischen den Blöcken. */
+	.akte__logout { margin-top: calc(var(--abstand-lg) * -0.6); text-align: center; }
+	.akte__logout button {
+		font-family: var(--schrift-lesen); font-size: var(--text-base); letter-spacing: -0.02em; color: inherit;
+		background: none; border: 0; padding: 0.4em 0.6em; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em;
+	}
+	.akte__logout button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 	.akte__videos {
 		width: 100%;
 		max-width: 1024px;

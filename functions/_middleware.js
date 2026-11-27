@@ -46,7 +46,16 @@
 // Passwort („zwei Wörter und eine Zahl“) nicht an der Schreibweise scheitert.
 //
 // DAS COOKIE trägt nicht das Passwort, sondern eine Prüfsumme daraus (HMAC-SHA-256 mit dem Passwort als Schlüssel).
-// Es gilt nur für die eine Kundenseite, 30 Tage. Wird das Passwort bei Cloudflare geändert, gelten alte Cookies nicht mehr.
+// 30 Tage. Wird das Passwort bei Cloudflare geändert, gelten alte Cookies nicht mehr.
+// EIN COOKIE FÜR DIE GANZE WEBSITE (27.11.2026, Rasul: „wenn ich dann auf eine andere Seite gehe und dann steht immer
+// noch beim Rückweg Login da und ich müsste mich nochmal einloggen“): Das Cookie heißt „akte“, gilt für Path=/ und
+// trägt Slug und Prüfsumme (hug-ka.<Prüfsumme>). Wer angemeldet ist und auf die Kachel Login geht (GET /login/ ohne
+// ?k und ohne ?fehler), wird hier geprüft und gleich auf seine Kundenseite geleitet. Es bleibt das eine
+// Anmelde-Cookie; im Browser wird sonst nichts gemerkt (kein localStorage, siehe MenuBBH.astro „KEIN RÜCKWEG“).
+// Die Kachel heißt weiter „Login“: Die gebauten Seiten wissen nichts von der Anmeldung, das Cookie ist HttpOnly.
+// Folge: je Browser eine Kundenseite zur selben Zeit. Vorher: Cookie akte_<slug> mit Path=/<slug>, die Kachel Login
+// zeigte immer das Formular. Weg zurück: cookieZeile und die zwei Stellen mit angemeldet() auf den Stand von
+// Commit 82a0320 setzen.
 //
 // GRENZEN: Es gibt keinen Zähler für Fehlversuche (bräuchte einen Speicher, also einen neuen Dienst). Nach einem
 // falschen Passwort wartet die Antwort eine Sekunde. Das Passwort schützt die Seite, nicht die Adressen der Videos
@@ -164,33 +173,60 @@ async function kundenseite(env, origin, slug) {
 	return { html: roh.split(intern).join("/" + slug), offen: merkmal[1] === "offen", kopf: seite.headers };
 }
 
-const cookieName = (slug) => "akte_" + slug.replace(/-/g, "_");
+const COOKIE = "akte";
+// LOGOUT (27.11.2026, Rasul: „ich müsste dann auf der Kundenseite auch einen Logout anbieten“): Die Kundenseite
+// schickt ein Formular an POST /login/ mit dem Feld abmelden=1. Die Antwort löscht das Anmelde-Cookie und führt auf
+// /login/. Bewusst POST und kein Verweis: Einen Verweis könnte der Browser vorab laden und damit abmelden.
+// Ein lesbares Merkzeichen für das Menü („Version A“, akte_da) gab es am 27.11.2026 kurz auf localhost; es ist
+// wieder heraus, die Antwort hier löscht ein übrig gebliebenes mit.
+const loeschZeile = (name, url) => `${name}=; Path=/; Max-Age=0; SameSite=Lax${url.protocol === "https:" ? "; Secure" : ""}`;
+function abmelden(url) {
+	const kopf = new Headers(KOPF);
+	kopf.set("Location", "/login/");
+	kopf.append("Set-Cookie", loeschZeile(COOKIE, url) + "; HttpOnly");
+	kopf.append("Set-Cookie", loeschZeile("akte_da", url));
+	return new Response(null, { status: 303, headers: kopf });
+}
+
 const sollPasswort = (env, slug) => glatt(env["AKTE_" + slug.toUpperCase().replace(/-/g, "_")]);
-const cookieZeile = (slug, summe, url) => `${cookieName(slug)}=${summe}; Path=/${slug}; Max-Age=${TAGE * 86400}; HttpOnly; SameSite=Lax${url.protocol === "https:" ? "; Secure" : ""}`;
+const cookieZeile = (slug, summe, url) => `${COOKIE}=${slug}.${summe}; Path=/; Max-Age=${TAGE * 86400}; HttpOnly; SameSite=Lax${url.protocol === "https:" ? "; Secure" : ""}`;
+
+// Slug aus dem Cookie, wenn es eines gibt; geprüft ist damit noch nichts.
+function cookieSlug(request) {
+	const wert = cookieWert(request, COOKIE), i = wert.indexOf(".");
+	const slug = i > 0 ? wert.slice(0, i) : "";
+	return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) ? { slug, summe: wert.slice(i + 1) } : null;
+}
+// Stimmt das Cookie für diesen Slug? soll = das geglättete Passwort der Seite.
+async function angemeldet(request, soll, slug) {
+	const c = cookieSlug(request);
+	return !!(c && soll && c.slug === slug && c.summe && await gleich(c.summe, await pruefsumme(soll, slug)));
+}
 
 // POST /login/: Kürzel und Passwort prüfen. Jeder Fehler sieht gleich aus und dauert gleich lang.
 async function anmelden(request, env, url) {
 	let kuerzel = "", eingabe = "";
 	try {
 		const felder = await request.formData();
+		if (felder.get("abmelden")) return abmelden(url);
 		kuerzel = String(felder.get("kuerzel") ?? "").trim().toLowerCase().replace(/\s+/g, "-");
 		eingabe = glatt(felder.get("passwort"));
 	} catch { /* leere oder kaputte Eingabe gilt als falsch */ }
 	const start = Date.now();
 	let ziel = "";
 	const seite = await kundenseite(env, url.origin, kuerzel);
-	let kopf = {};
+	const kopf = new Headers(KOPF);
 	if (seite) {
 		if (seite.offen) ziel = `/${kuerzel}/`;
 		else {
 			const soll = sollPasswort(env, kuerzel);
 			if (soll && eingabe && await gleich(eingabe, soll)) {
 				ziel = `/${kuerzel}/`;
-				kopf = { "Set-Cookie": cookieZeile(kuerzel, await pruefsumme(soll, kuerzel), url) };
+				kopf.append("Set-Cookie", cookieZeile(kuerzel, await pruefsumme(soll, kuerzel), url));
 			}
 		}
 	}
-	if (ziel) return new Response(null, { status: 303, headers: { Location: ziel, ...kopf, ...KOPF } });
+	if (ziel) { kopf.set("Location", ziel); return new Response(null, { status: 303, headers: kopf }); }
 	await new Promise((fertig) => setTimeout(fertig, Math.max(0, 1000 - (Date.now() - start))));
 	const k = /^[a-z0-9-]{1,60}$/.test(kuerzel) ? "&k=" + kuerzel : "";
 	return new Response(null, { status: 303, headers: { Location: "/login/?fehler=1" + k, ...KOPF } });
@@ -208,7 +244,17 @@ export async function onRequest({ request, env, next }) {
 		const rest = teile.slice(2).join("/");
 		if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || !(rest === "" || rest === "index.html")) return next();
 		// Login: Die Seite selbst ist eine gewöhnliche Datei, nur das Absenden wird hier geprüft.
-		if (slug === "login") return methode === "POST" ? anmelden(request, env, url) : next();
+		if (slug === "login") {
+			if (methode === "POST") return anmelden(request, env, url);
+			// Schon angemeldet: von der Kachel Login direkt auf die eigene Kundenseite. Mit ?k oder ?fehler bleibt das
+			// Formular stehen (so kommt man auch an eine andere Kundenseite).
+			const c = cookieSlug(request);
+			if (c && !url.searchParams.has("k") && !url.searchParams.has("fehler")) {
+				const eigene = await kundenseite(env, url.origin, c.slug);
+				if (eigene && !eigene.offen && await angemeldet(request, sollPasswort(env, c.slug), c.slug)) return new Response(null, { status: 303, headers: { Location: `/${c.slug}/`, ...KOPF } });
+			}
+			return next();
+		}
 
 		const seite = await kundenseite(env, url.origin, slug);
 		if (!seite) return weiter(next);
@@ -228,8 +274,7 @@ export async function onRequest({ request, env, next }) {
 
 		const soll = sollPasswort(env, slug);
 		if (!soll) return formular(pfad, { status: 503, ohneFeld: true });
-		const hat = cookieWert(request, cookieName(slug));
-		if (hat && await gleich(hat, await pruefsumme(soll, slug))) return ausliefern();
+		if (await angemeldet(request, soll, slug)) return ausliefern();
 		// Ohne gültiges Cookie zum Login, das Kürzel steht dort schon im Feld.
 		return new Response(null, { status: 303, headers: { Location: "/login/?k=" + slug, ...KOPF } });
 	} catch {
