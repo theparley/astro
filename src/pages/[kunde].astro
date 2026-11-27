@@ -10,7 +10,8 @@
 
    SCHUTZ: Diese Seite ist im Bau eine gewöhnliche Datei. Das Passwort prüft functions/_middleware.js, bevor
    Cloudflare sie ausliefert. Die Mittelschicht erkennt eine Kundenseite am Merkmal data-akte-schutz am <main>
-   (passwort | offen). Ohne die Angabe „passwort: nein“ in der Datei ist die Seite geschlossen.
+   (passwort | offen) und nimmt den Slug aus data-akte daneben. Ohne die Angabe „passwort: nein“ in der Datei ist
+   die Seite geschlossen.
    ACHTUNG: Auf localhost:4321 (astro dev) läuft die Mittelschicht nicht, die Seite ist dort offen.
 
    NICHT IM INDEX: noindex über Layout (Angabe noindex) und über die Kopfzeile X-Robots-Tag der Mittelschicht. Nicht
@@ -53,7 +54,7 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 ---
 
 <Layout title="Akteneinsicht" description="Akteneinsicht bei Parley Film." noindex>
-	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"}>
+	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"} data-akte={Astro.params.kunde}>
 		{/* Weiche Trennstelle wie bei Impressum und Datenschutz: Die breite Schrift passt am Handy sonst nicht in die Zeile. */}
 		<Seitentitel ebene="h1" titel="Akten&shy;einsicht" stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
 		<Rechtstext>
