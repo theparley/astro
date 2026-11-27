@@ -11,7 +11,8 @@
 # DREI CLIPS (Rasul 27.11.2026: „Ja, alle drei“, von ihm zu Cloudflare Stream hochgeladen; Freigaben laut Rasul: „wir
 # haben die Freigaben von den Kunden, von den Videos, die dürfen wir zeigen“). Titel: Vorschlag der Programmierung
 # nach dem Ton der Clips, von Rasul angenommen („Ja, eintragen“).
-titel: Studiotour
+# ZWEIZEILIG (Rasul 27.11.2026: „Schreibt die Studiotour mal zweizeilig?“): fester Umbruch nach „Studio-“. Vorher: titel: Studiotour
+titel: "Studio-<br>tour"
 kunde: Haus & Grund Karlsruhe
 passwort: ja
 videos:
