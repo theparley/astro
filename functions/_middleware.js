@@ -6,17 +6,31 @@
 // danach kommt die Seite ohne neue Frage. Bewusst nicht Cloudflare Access: Das schickt dem Besucher eine Mail mit
 // Einmal-Code, und genau das können diese Kunden nicht annehmen.
 //
-// WELCHE ADRESSEN: alle Seitenaufrufe der Website, nicht nur die Kundenpfade. Ob eine Seite geschützt ist, entscheidet
-// allein ihr Inhalt: das Merkmal data-akte-schutz="passwort" oder "offen" am <main> der gebauten Seite, daneben
-// data-akte="<slug>". Jeder andere Wert als "offen" gilt als geschlossen. Seiten ohne Merkmal laufen unverändert durch.
-// WARUM SO (gemessen auf dev am 27.11.2026, mit Platzhalterseite): Die erste Fassung lief nur für /hug-ka und
-// /hug-ka/* (Liste in _routes.json). Cloudflare vergleicht diese Liste mit der Adresse, wie sie getippt wurde, liefert
-// die Datei aber auch unter anders kodierten Schreibweisen aus: /hug%2Dka/, /%68ug-ka/, /hug-ka%2F und //hug-ka/
-// brachten die Seite ohne Passwort. Deshalb hängt der Schutz jetzt am Inhalt, der ausgeliefert würde, und nicht an der
-// Schreibweise der Adresse. Der Preis: Diese Datei läuft bei jedem Seitenaufruf mit (nicht bei Dateien aus /_astro,
-// /fonts, /filme, /parley, siehe astro.config.mjs). Das weicht von der Regel vom 16.11.2026 in public/_headers ab
-// („kein Code je Aufruf“). Damit die Website nicht an dieser Datei hängt: Tritt ein Fehler auf, bevor eine Seite als
-// geschützt erkannt ist, wird sie normal ausgeliefert; danach bleibt sie zu.
+// WO DIE SEITE LIEGT (Umbau 27.11.2026, Rasul: „Ja, bau das“): Unter /hug-ka liegt im Bau KEINE Datei. Astro baut die
+// Kundenseite unter einem internen Pfad, den niemand erraten kann: /a-<40 Zeichen>/, gerechnet als HMAC-SHA-256 aus
+// dem Wert AKTE_PFAD und dem Slug (dieselbe Rechnung in src/pages/[kunde].astro). Diese Datei holt die Seite von dort
+// und liefert sie unter /<slug>/ aus. Den internen Pfad ersetzt sie dabei im Quelltext durch die Kundenadresse, damit
+// er nirgends zu lesen ist.
+// WARUM SO (gemessen auf dev am 27.11.2026, mit Platzhalterseite): Lag die Seite als Datei unter /hug-ka/, lieferte
+// Cloudflare sie auch unter /hug%2Dka/, /%68ug-ka/, /hug-ka%2F und //hug-ka/ aus, an dieser Datei vorbei: Die Liste
+// in _routes.json wird mit der getippten Schreibweise verglichen, ausgeliefert wird nach dem Entschlüsseln. Eine
+// endliche Liste aller Schreibweisen gibt es nicht. Jetzt endet jede andere Schreibweise bei „nicht gefunden“.
+// Zwischenstand davor (wenige Stunden auf dev, Commits a28c08b und 1371f43): Datei unter /hug-ka/, diese Datei lief
+// bei jedem Seitenaufruf der Website und prüfte den Inhalt. Verworfen, weil die ganze Website dann an dieser Datei
+// hing (Regel vom 16.11.2026 in public/_headers: kein Code je Aufruf).
+//
+// WELCHE ADRESSEN: Cloudflare ruft diese Datei nur für /api/* und je Kundenseite für /<slug> und /<slug>/* auf. Die
+// Liste schreibt astro.config.mjs (Abschnitt „kundenseiten“) aus den Dateinamen in src/daten/kundenseiten/. Alle
+// anderen Seiten laufen an dieser Datei vorbei. Fehlt _routes.json doch einmal, läuft sie überall mit und reicht
+// alles weiter, was keine Kundenseite ist.
+//
+// DER WERT AKTE_PFAD ist eine gewöhnliche Variable bei Cloudflare (kein Geheimwert): Er wird beim Bau UND hier
+// gebraucht, und nur für gewöhnliche Variablen sagt Cloudflare beides zu. Er schützt nichts, er versteckt nur eine
+// Adresse. Wird er bekannt: Wert ändern, neu bauen. Fehlt er beim Bau, entstehen keine Kundenseiten; fehlt er hier,
+// findet diese Datei keine.
+//
+// OB EINE SEITE EIN PASSWORT BRAUCHT, steht in der gebauten Seite: data-akte-schutz="passwort" oder "offen" am <main>,
+// daneben data-akte="<slug>". Jeder andere Wert als "offen" gilt als geschlossen.
 //
 // DAS PASSWORT steht als Wert bei Cloudflare (Pages, Einstellungen, Variablen und Geheimnisse), nie im Repo, lokal
 // in .dev.vars (steht in .gitignore). Name: AKTE_ und die Adresse in Großbuchstaben, Bindestrich wird Unterstrich:
@@ -46,6 +60,12 @@ const TEXT = {
 const kodierer = new TextEncoder();
 const glatt = (wert) => String(wert ?? "").toLowerCase().replace(/[\s\-_.]+/g, "");
 const hex = (puffer) => [...new Uint8Array(puffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+// Interner Pfad einer Kundenseite. Dieselbe Rechnung steht in src/pages/[kunde].astro, beide müssen gleich bleiben.
+async function internerPfad(geheim, slug) {
+	const schluessel = await crypto.subtle.importKey("raw", kodierer.encode(geheim), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+	return "/a-" + hex(await crypto.subtle.sign("HMAC", schluessel, kodierer.encode("akteneinsicht-pfad:" + slug))).slice(0, 40);
+}
 
 async function pruefsumme(passwort, slug) {
 	const schluessel = await crypto.subtle.importKey("raw", kodierer.encode(passwort), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -114,34 +134,39 @@ export async function onRequest({ request, env, next }) {
 	const methode = request.method;
 	let geschuetzt = false;
 	try {
-		const url = new URL(request.url);
-		// Keine Abkürzung für /api/: Auch dort entscheidet nur, welche Datei ausgeliefert würde. Eine Ausnahme nach der
-		// Schreibweise der Adresse wäre wieder eine Stelle, an der man vorbeikäme.
 		if (!["GET", "HEAD", "POST"].includes(methode)) return next();
+		const url = new URL(request.url);
+		const teile = url.pathname.split("/"); // "", slug, rest
+		let slug = "";
+		try { slug = decodeURIComponent(teile[1] || ""); } catch { return next(); }
+		const rest = teile.slice(2).join("/");
+		if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || !(rest === "" || rest === "index.html")) return next();
+		const geheim = String(env.AKTE_PFAD || "");
+		if (!geheim) return next();
 
-		// Die Datei holen, die Cloudflare unter dieser Adresse ausliefern würde, ohne die Kopfzeilen des Besuchers
-		// (sonst käme bei „nicht geändert“ kein Inhalt).
-		const seite = await env.ASSETS.fetch(new Request(url.toString(), { method: "GET" }));
+		// Die gebaute Seite vom internen Pfad holen. Gibt es sie nicht, ist das keine Kundenseite.
+		const intern = await internerPfad(geheim, slug);
+		const seite = await env.ASSETS.fetch(new Request(new URL(intern + "/", url.origin).toString(), { method: "GET" }));
 		const istHtml = seite.status === 200 && (seite.headers.get("Content-Type") || "").includes("text/html");
-		if (!istHtml) return next(); // Umleitungen, 404, Dateien
-		const html = await seite.text();
+		if (!istHtml) return next();
+		let html = await seite.text();
 		const merkmal = html.match(/data-akte-schutz="([^"]*)"/);
-		if (!merkmal) return next(); // gewöhnliche Seite
+		if (!merkmal || !html.includes(`data-akte="${slug}"`)) return next();
 		geschuetzt = merkmal[1] !== "offen";
+		const pfad = `/${slug}/`;
+		// Der interne Pfad steht in der gebauten Seite (Canonical, Open Graph). Er geht nie nach außen.
+		html = html.split(intern).join("/" + slug);
 
 		const ausliefern = () => {
+			// Eine Adresse je Seite, wie überall auf der Website: mit Schrägstrich am Ende.
+			if (url.pathname !== pfad) return new Response(null, { status: 308, headers: { Location: pfad, ...KOPF } });
 			const kopf = new Headers(seite.headers);
 			for (const [name, wert] of Object.entries(KOPF)) kopf.set(name, wert);
 			kopf.delete("ETag");
 			return new Response(methode === "HEAD" ? null : html, { status: 200, headers: kopf });
 		};
-		if (!geschuetzt) return methode === "POST" ? next() : ausliefern();
+		if (!geschuetzt) return methode === "POST" ? new Response(null, { status: 405, headers: KOPF }) : ausliefern();
 
-		// Der Slug kommt aus der Seite selbst, nicht aus der Adresse: Formular, Cookie und Wert gelten für die eine
-		// richtige Schreibweise, egal wie die Adresse getippt wurde.
-		const slug = (html.match(/data-akte="([a-z0-9]+(?:-[a-z0-9]+)*)"/) || [])[1];
-		if (!slug) return formular("/", { status: 503, ohneFeld: true });
-		const pfad = `/${slug}/`;
 		const soll = glatt(env["AKTE_" + slug.toUpperCase().replace(/-/g, "_")]);
 		if (!soll) return formular(pfad, { status: 503, ohneFeld: true });
 

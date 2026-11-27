@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import { rm, readdir, writeFile } from 'node:fs/promises';
+import { rm, readdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -34,22 +34,30 @@ const nurLokal = {
 	},
 };
 
-// KUNDENSEITEN „AKTENEINSICHT“ (27.11.2026, src/pages/[kunde].astro): Nach dem Bau entsteht _routes.json. Die Datei
-// sagt Cloudflare Pages, für welche Adressen die Functions laufen: für alle, außer für die Ordner und Dateien unten,
-// in denen nie eine Seite liegt. So prüft functions/_middleware.js jeden Seitenaufruf, aber nicht jede Schrift, jedes
-// Bild und jedes Skript.
-// VORHER (wenige Stunden auf dev): nur /api/* und je Kundenseite /<slug> und /<slug>/*. Auf dev gemessen: Cloudflare
-// lieferte die Seite unter anders kodierten Adressen (/hug%2Dka/, //hug-ka/) an der Mittelschicht vorbei aus. Die
-// Liste verriet außerdem die Kundenpfade im Bau. Begründung und Preis stehen in functions/_middleware.js.
-// Weg zurück: diesen Abschnitt und den Eintrag in integrations löschen (dann auch functions/_middleware.js und die
-// Kundenseiten löschen, sonst liegen sie offen).
+// KUNDENSEITEN „AKTENEINSICHT“ (27.11.2026, src/pages/[kunde].astro, functions/_middleware.js).
+// 1. Der Wert AKTE_PFAD, aus dem der interne Pfad der Kundenseiten entsteht: Bei Cloudflare kommt er aus der
+//    Umgebung des Baus. Lokal steht er in .dev.vars (nicht in Git) und wird hier eingelesen, wenn er nicht gesetzt ist.
+// 2. Nach dem Bau entsteht _routes.json. Die Datei sagt Cloudflare Pages, für welche Adressen die Functions laufen:
+//    wie bisher /api/*, dazu je Kundenseite /<slug> und /<slug>/*. Alle anderen Seiten laufen an der Mittelschicht
+//    vorbei (Regel vom 16.11.2026 in public/_headers: kein Code je Aufruf). Die Liste kommt aus den Dateinamen in
+//    src/daten/kundenseiten/ (ohne die mit _ am Anfang). Der interne Pfad steht NICHT darin.
+//    Zwischenstand davor (wenige Stunden auf dev): Functions für alle Adressen, siehe functions/_middleware.js.
+// Weg zurück: diesen Abschnitt und den Eintrag in integrations löschen, dazu functions/_middleware.js und die Vorlage.
+if (!process.env.AKTE_PFAD) {
+	const lokal = await readFile(new URL('./.dev.vars', import.meta.url), 'utf8').catch(() => '');
+	const treffer = lokal.match(/^AKTE_PFAD="?([^"\n]+)"?$/m);
+	if (treffer) process.env.AKTE_PFAD = treffer[1];
+}
 const kundenseiten = {
 	name: 'kundenseiten',
 	hooks: {
 		'astro:build:done': async ({ dir, logger }) => {
-			const exclude = ['/_astro/*', '/fonts/*', '/filme/*', '/parley/*', '/favicon.ico', '/favicon.svg', '/apple-touch-icon.png', '/og-parleyfilm.png', '/robots.txt', '/sitemap.xml'];
-			await writeFile(path.join(fileURLToPath(dir), '_routes.json'), JSON.stringify({ version: 1, include: ['/*'], exclude }, null, '\t') + '\n');
-			logger.info(`_routes.json: Functions laufen für alle Adressen außer ${exclude.length} Ausnahmen`);
+			const quelle = fileURLToPath(new URL('./src/daten/kundenseiten/', import.meta.url));
+			const slugs = (await readdir(quelle).catch(() => [])).filter((d) => d.endsWith('.md') && !d.startsWith('_')).map((d) => d.slice(0, -3)).sort();
+			const include = ['/api/*', ...slugs.flatMap((s) => [`/${s}`, `/${s}/*`])];
+			await writeFile(path.join(fileURLToPath(dir), '_routes.json'), JSON.stringify({ version: 1, include, exclude: [] }, null, '\t') + '\n');
+			logger.info(`_routes.json: Functions laufen für /api/* und ${slugs.length} Kundenseite(n): ${slugs.join(', ') || 'keine'}`);
+			if (slugs.length && !process.env.AKTE_PFAD) logger.warn('AKTE_PFAD fehlt: Es wurden KEINE Kundenseiten gebaut.');
 		},
 	},
 };
