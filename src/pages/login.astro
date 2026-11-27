@@ -1,0 +1,79 @@
+---
+/* LOGIN FÜR KUNDENSEITEN (27.11.2026). Rasul in der Sitzung „Website · Programmierung“: „Ich finde Login eigentlich
+   spannend, weil es jetzt auch für jemanden, der kein Login hat, suggeriert, dass da ein großer Service hinten dran
+   ist. Login hat nicht jede Seite.“ und: „es wäre auch tatsächlich nochmal für den Kunden, finde ich, einfacher, wenn
+   ich sage, geh doch auf meine Webseite unter Login“.
+
+   Das erste Feld heißt „Benutzername“ (Rasul 27.11.2026: „Kürzel finde ich jetzt nicht so gut.“, dann: „Okay, dann
+   machen wir mal Benutzername.“). Im Code heißt es weiter kuerzel. Vorher stand „Kürzel“ am Feld und im Fehlersatz.
+   Zwei Felder: Benutzername (die Adresse der Kundenseite, zum Beispiel hug-ka) und Passwort. Das Formular schickt an
+   /login/, dort prüft functions/_middleware.js und leitet auf die Kundenseite weiter. Diese Seite selbst ist eine
+   gewöhnliche gebaute Seite ohne Geheimnis; die Gestaltung bleibt damit in Astro.
+   Bei einem Fehler kommt man mit ?fehler=1 hierher zurück. Der Satz ist immer derselbe, egal ob Kürzel oder Passwort
+   falsch war: Die Seite verrät nicht, welche Kürzel es gibt.
+   Wer von einer Kundenadresse ohne Anmeldung hierher geleitet wird, hat das Kürzel schon im Feld (?k=hug-ka).
+   AUF localhost:4321 (astro dev) läuft keine Function, das Absenden geht dort ins Leere. Mit Function: der Nachbau
+   auf localhost:4397.
+   Die Texte sind ein Entwurf der Programmierung, nicht abgenommen.
+   Nicht in der Sitemap, noindex. Weg zurück: diese Datei löschen, in functions/_middleware.js den Abschnitt „Login“,
+   in astro.config.mjs die zwei Einträge /login, in MenuBBH.astro die Kachel. */
+import Layout from "../layouts/Layout.astro";
+import Seitentitel from "../components/bausteine/Seitentitel.astro";
+import Rechtstext from "../components/bausteine/Rechtstext.astro";
+import Knopf from "../components/bausteine/Knopf.astro";
+---
+
+<Layout title="Login" description="Login für Kunden von Parley Film." noindex>
+	<main class="login">
+		<Seitentitel ebene="h1" titel="Login" />
+		<div class="login__feld">
+			<form method="post" action="/login/" class="login__form" data-login data-astro-reload>
+				<label for="login-kuerzel">Benutzername</label>
+				<input id="login-kuerzel" name="kuerzel" type="text" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" />
+				<label for="login-passwort">Passwort</label>
+				<input id="login-passwort" name="passwort" type="password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" />
+				<button type="submit">Öffnen</button>
+				<p class="login__fehler" role="alert" hidden>Benutzername oder Passwort stimmt nicht.</p>
+			</form>
+		</div>
+		<Rechtstext>
+			<h2>Noch kein Zugang?</h2>
+			<p>Den Zugang gibt es nach dem ersten Gespräch.</p>
+			<p><Knopf href="/termin" text="Termin finden" /></p>
+		</Rechtstext>
+	</main>
+</Layout>
+
+<style>
+	.login { display: grid; gap: var(--abstand-lg); padding-block: var(--abstand-xl); }
+	.login__feld { width: 100%; max-width: 1024px; margin: 0 auto; padding: 0 var(--rand); }
+	.login__form { max-width: 26em; font-family: var(--schrift-lesen); font-size: var(--text-md); letter-spacing: -0.02em; line-height: 1.4; }
+	.login__form label { display: block; margin: 1em 0 0.4em; }
+	.login__form label:first-child { margin-top: 0; }
+	/* Eckig, Linie in Textfarbe, keine Fläche: wie die Felder auf /kontakt gedacht, hier eigenständig gehalten. */
+	.login__form input {
+		display: block; width: 100%; font: inherit; color: inherit; background: transparent;
+		border: 1px solid currentColor; border-radius: 0; padding: 0.6em 0.7em;
+	}
+	.login__form button {
+		display: block; width: 100%; margin-top: 1.2em; font: inherit; font-weight: 600; cursor: pointer;
+		color: var(--black); background: var(--white); border: 1px solid var(--white); border-radius: 0; padding: 0.6em 0.7em;
+	}
+	.login__form input:focus-visible, .login__form button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+	.login__fehler { margin-top: 1em; }
+</style>
+
+<script>
+	const einrichten = () => {
+		const form = document.querySelector<HTMLFormElement>("form[data-login]");
+		if (!form) return;
+		const p = new URLSearchParams(location.search);
+		const k = p.get("k");
+		if (k && /^[a-z0-9-]{1,60}$/.test(k)) {
+			(form.elements.namedItem("kuerzel") as HTMLInputElement).value = k;
+			(form.elements.namedItem("passwort") as HTMLInputElement).focus();
+		}
+		if (p.get("fehler")) form.querySelector<HTMLElement>(".login__fehler")!.hidden = false;
+	};
+	document.addEventListener("astro:page-load", einrichten);
+</script>

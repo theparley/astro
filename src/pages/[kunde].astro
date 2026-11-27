@@ -37,7 +37,7 @@ export function getStaticPaths() {
 	// Eine Kundenseite darf keine bestehende Seite verdecken und umgekehrt: Der Bau bricht ab, statt still eine der
 	// beiden zu nehmen.
 	const belegt = Object.keys(import.meta.glob("./*.{astro,ts}")).map((p) => p.replace(/^\.\//, "").replace(/\.(astro|ts)$/, "").replace(/\.[a-z]+$/, ""));
-	const VERBOTEN = [...belegt, "api", "filme", "fonts", "lab", "lokal", "parley", "test", "werkzeug", "index", "404"];
+	const VERBOTEN = [...belegt, "login", "api", "filme", "fonts", "lab", "lokal", "parley", "test", "werkzeug", "index", "404"];
 	return Object.entries(dateien)
 		.map(([pfad, datei]) => ({ slug: pfad.split("/").pop()!.replace(/\.md$/, ""), datei }))
 		.filter(({ slug }) => !slug.startsWith("_"))
@@ -88,6 +88,18 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 		)}
 	</main>
 </Layout>
+
+{/* Merkt sich in diesem Browser, zu welcher Kundenseite der Besucher gehört (localStorage „parley-akte“). Das Menü
+   (MenuBBH.astro) zeigt daraufhin statt „Login“ die Kachel „Akte“ mit dem Weg hierher zurück. Es geht nichts an den
+   Server. Gehört mit einem Satz in die Datenschutzerklärung (offen bei Rasul). */}
+<script>
+	const merken = () => {
+		const slug = document.querySelector<HTMLElement>("main[data-akte]")?.dataset.akte;
+		if (slug) { try { localStorage.setItem("parley-akte", slug); } catch { /* gesperrter Speicher: dann ohne Kachel */ } }
+	};
+	merken();
+	document.addEventListener("astro:page-load", merken);
+</script>
 
 <style>
 	/* Stapel wie Impressum und Datenschutz (.recht: Titel, dann Text, oben und unten --abstand-xl). Zwischen den
