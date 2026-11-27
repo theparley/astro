@@ -803,6 +803,29 @@ const maskeId = `bbh-biss-${Math.random().toString(36).slice(2, 8)}`;
 	@media (hover: hover) {
 		.bbh-menu__kachel:hover::before { transform: scaleX(1); transition-delay: 0ms; }
 	}
+	/* LOGOKACHEL ZEIGT, DASS SIE KLICKBAR IST (Rasul 27.11.2026, nachdem „Home“ aus dem Menü kam: „vielleicht sollten wir
+	   im Menü noch auch unser Logo animieren, wenn man mit der Maus drüber geht, dass man versteht, dass es klickbar
+	   ist, dann versteht man auch, dass es der Home-Button ist.“). Derselbe Balken wie bei den Menükacheln: Textfarbe
+	   mit 15 % Deckkraft, wischt von links auf, 150 ms. Er liegt hier über dem Zeichen statt darunter, weil das Zeichen
+	   die Kachel füllt. Gilt für die Logokachel links und für die kleine Logokachel nach dem Scrollen (__kurz).
+	   Auf dev und live seit 27.11.2026 abends (Rasul: „auf der Parleyfilmseite bitte die Kachel mit dem Logo drauf auch
+	   animieren, wenn die Maus drüber fährt. So wie die anderen Kacheln.“). Weg zurück: diesen Block löschen. */
+	.bbh-menu__logo, .bbh-menu__kurz { position: relative; }
+	.bbh-menu__logo::after, .bbh-menu__kurz::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: #000;
+		opacity: 0.15;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 150ms ease-in-out;
+		pointer-events: none;
+	}
+	@media (hover: hover) {
+		.bbh-menu__logo:hover::after, .bbh-menu__kurz:hover::after { transform: scaleX(1); }
+	}
+	.bbh-menu__logo:focus-visible::after, .bbh-menu__kurz:focus-visible::after { transform: scaleX(1); }
 
 	.bbh-menu__schleier {
 		position: fixed;
