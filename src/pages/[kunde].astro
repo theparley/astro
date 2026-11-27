@@ -72,7 +72,8 @@ const knopf: string = typeof f.knopf === "string" && f.knopf ? f.knopf : "Termin
    „Akten&shy;einsicht“ als Überschrift und „Akteneinsicht“ im Browser-Reiter. Die Namen im Code (data-akte, .akte,
    Cookie „akte“) bleiben, sie sieht kein Besucher außer dem Cookie-Namen in der Datenschutzerklärung.
    Weg zurück: titelRoh fest auf "Akten&shy;einsicht". */
-const titelRoh: string = typeof f.titel === "string" && f.titel.trim() ? f.titel.trim() : "Kunden&shy;bereich";
+// Ersatz-Überschrift „Backstage“ seit 27.11.2026 abends (Rasuls Namenswahl für den Bereich), vorher "Kunden&shy;bereich".
+const titelRoh: string = typeof f.titel === "string" && f.titel.trim() ? f.titel.trim() : "Backstage";
 // Fester Umbruch mit Trennstrich („Studio-<br>tour“, Rasul 27.11.2026: zweizeilig) zählt im Browser-Reiter nicht mit.
 const titelGlatt = titelRoh.replace(/&shy;/g, "").replace(/-<br\s*\/?>/g, "").replace(/<[^>]*>/g, "");
 const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.knopf_ziel : "/termin";
