@@ -40,6 +40,18 @@ import Knopf from "../components/bausteine/Knopf.astro";
 			erforderlich ist. Rechtsgrundlage ist unser berechtigtes Interesse an einer stabilen und sicheren
 			Bereitstellung des Angebots (Art. 6 Abs. 1 lit. f DSGVO).
 		</p>
+		{/* ABSATZ ZU CLOUDFLARE STREAM (27.11.2026): Entwurf der Sitzung „Website · Programmierung“. Rasul 27.11.2026: „du
+		   kannst dann auch noch Cloudflare Stream in den Datenschutzerklärungen nennen, wenn du es für nötig hältst.“
+		   Für nötig gehalten, weil die Videos von einer anderen Adresse kommen als die Seite. „Keine Cookies“ ist am
+		   27.11.2026 gemessen (Standbild, Manifest, Unterliste, Videostücke: keine Set-Cookie-Kopfzeile). Keine
+		   Rechtsberatung. Weg zurück: diesen Absatz löschen. */}
+		<p>
+			Die Videos auf dieser Website liefert Cloudflare Stream aus, ein Dienst desselben Anbieters. Sie werden
+			von einer eigenen Adresse geladen (cloudflarestream.com). Dabei fallen dieselben technischen Daten an wie
+			beim Aufruf der Seite, insbesondere Ihre IP-Adresse. Cookies werden dabei nicht gesetzt. Rechtsgrundlage
+			ist auch hier unser berechtigtes Interesse an einer stabilen Bereitstellung des Angebots
+			(Art. 6 Abs. 1 lit. f DSGVO).
+		</p>
 
 		<h2>4. Reichweitenmessung (Cloudflare Web Analytics)</h2>
 		<!-- ENTWURF Claude 03.11.2026: Fakten nach developers.cloudflare.com/web-analytics (FAQ, Data metrics) und cloudflare.com/web-analytics; von Fred prüfen lassen -->
@@ -91,6 +103,19 @@ import Knopf from "../components/bausteine/Knopf.astro";
 			Hosting-Infrastruktur (Cloudflare); der Zugangsschlüssel zu MailerLite verlässt zu keinem Zeitpunkt
 			unsere Server in Richtung Ihres Browsers. Ihre Daten werden nicht für Werbezwecke verwendet und nicht
 			ohne Ihre Einwilligung in einen Newsletter-Verteiler aufgenommen.
+		</p>
+
+		<h2>8. Kundenbereich</h2>
+		{/* ABSCHNITT 8 (27.11.2026): Entwurf der Sitzung „Website · Programmierung“ zum Anmelde-Cookie des Kundenbereichs
+		   (Rasul 27.11.2026: „Zu zwei, ja, schreibt es einen Entwurf.“). Was das Cookie tut, steht in
+		   functions/_middleware.js. Keine Rechtsberatung. Weg zurück: Überschrift und Absatz löschen. */}
+		<p>
+			Kunden erhalten von uns einen Benutzernamen und ein Passwort für eine eigene Seite im Kundenbereich.
+			Wenn Sie sich dort anmelden, setzen wir ein Cookie mit dem Namen „akte“. Es enthält die Adresse Ihrer
+			Kundenseite und eine Prüfsumme, aber weder Ihr Passwort noch Angaben zu Ihrer Person. Das Cookie ist
+			technisch erforderlich, damit Sie angemeldet bleiben und das Passwort nicht bei jedem Seitenaufruf
+			neu eingeben müssen (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. b DSGVO). Es wird nach 30 Tagen
+			gelöscht, früher, wenn Sie sich über „Logout“ abmelden. Ohne Anmeldung setzen wir dieses Cookie nicht.
 		</p>
 
 		<p class="zurueck"><Knopf href="/" text="Zur Startseite" /></p>
