@@ -29,6 +29,13 @@
 // Adresse. Wird er bekannt: Wert ändern, neu bauen. Fehlt er beim Bau, entstehen keine Kundenseiten; fehlt er hier,
 // findet diese Datei keine.
 //
+// LOGIN (27.11.2026, Rasul: „geh doch auf meine Webseite unter Login“): Die Seite /login/ (src/pages/login.astro) ist
+// eine gewöhnliche gebaute Seite mit zwei Feldern, Kürzel und Passwort. Sie schickt hierher (POST /login/). Stimmt
+// beides, gibt es das Cookie und die Weiterleitung auf die Kundenseite. Stimmt etwas nicht, geht es mit ?fehler=1
+// zurück, immer mit demselben Satz: Die Antwort verrät nicht, ob es das Kürzel gibt.
+// Wer eine geschützte Kundenadresse ohne Cookie aufruft, wird auf /login/?k=<slug> geleitet. Das eigene Formular
+// dieser Datei (formular unten) zeigt nur noch die Meldung „noch nicht eingerichtet“.
+//
 // OB EINE SEITE EIN PASSWORT BRAUCHT, steht in der gebauten Seite: data-akte-schutz="passwort" oder "offen" am <main>,
 // daneben data-akte="<slug>". Jeder andere Wert als "offen" gilt als geschlossen.
 //
@@ -143,6 +150,52 @@ async function weiter(next) {
 	return new Response(text, { status: 200, headers: antwort.headers });
 }
 
+// Holt die gebaute Kundenseite vom internen Pfad. null = keine Kundenseite unter diesem Slug.
+async function kundenseite(env, origin, slug) {
+	const geheim = String(env.AKTE_PFAD || "");
+	if (!geheim || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return null;
+	const intern = await internerPfad(geheim, slug);
+	const seite = await env.ASSETS.fetch(new Request(new URL(intern + "/", origin).toString(), { method: "GET" }));
+	if (seite.status !== 200 || !(seite.headers.get("Content-Type") || "").includes("text/html")) return null;
+	const roh = await seite.text();
+	const merkmal = roh.match(/data-akte-schutz="([^"]*)"/);
+	if (!merkmal || !roh.includes(`data-akte="${slug}"`)) return null;
+	// Der interne Pfad steht in der gebauten Seite (Canonical, Open Graph). Er geht nie nach außen.
+	return { html: roh.split(intern).join("/" + slug), offen: merkmal[1] === "offen", kopf: seite.headers };
+}
+
+const cookieName = (slug) => "akte_" + slug.replace(/-/g, "_");
+const sollPasswort = (env, slug) => glatt(env["AKTE_" + slug.toUpperCase().replace(/-/g, "_")]);
+const cookieZeile = (slug, summe, url) => `${cookieName(slug)}=${summe}; Path=/${slug}; Max-Age=${TAGE * 86400}; HttpOnly; SameSite=Lax${url.protocol === "https:" ? "; Secure" : ""}`;
+
+// POST /login/: Kürzel und Passwort prüfen. Jeder Fehler sieht gleich aus und dauert gleich lang.
+async function anmelden(request, env, url) {
+	let kuerzel = "", eingabe = "";
+	try {
+		const felder = await request.formData();
+		kuerzel = String(felder.get("kuerzel") ?? "").trim().toLowerCase().replace(/\s+/g, "-");
+		eingabe = glatt(felder.get("passwort"));
+	} catch { /* leere oder kaputte Eingabe gilt als falsch */ }
+	const start = Date.now();
+	let ziel = "";
+	const seite = await kundenseite(env, url.origin, kuerzel);
+	let kopf = {};
+	if (seite) {
+		if (seite.offen) ziel = `/${kuerzel}/`;
+		else {
+			const soll = sollPasswort(env, kuerzel);
+			if (soll && eingabe && await gleich(eingabe, soll)) {
+				ziel = `/${kuerzel}/`;
+				kopf = { "Set-Cookie": cookieZeile(kuerzel, await pruefsumme(soll, kuerzel), url) };
+			}
+		}
+	}
+	if (ziel) return new Response(null, { status: 303, headers: { Location: ziel, ...kopf, ...KOPF } });
+	await new Promise((fertig) => setTimeout(fertig, Math.max(0, 1000 - (Date.now() - start))));
+	const k = /^[a-z0-9-]{1,60}$/.test(kuerzel) ? "&k=" + kuerzel : "";
+	return new Response(null, { status: 303, headers: { Location: "/login/?fehler=1" + k, ...KOPF } });
+}
+
 export async function onRequest({ request, env, next }) {
 	const methode = request.method;
 	let geschuetzt = false;
@@ -154,55 +207,31 @@ export async function onRequest({ request, env, next }) {
 		try { slug = decodeURIComponent(teile[1] || ""); } catch { return next(); }
 		const rest = teile.slice(2).join("/");
 		if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || !(rest === "" || rest === "index.html")) return next();
-		const geheim = String(env.AKTE_PFAD || "");
-		if (!geheim) return weiter(next);
+		// Login: Die Seite selbst ist eine gewöhnliche Datei, nur das Absenden wird hier geprüft.
+		if (slug === "login") return methode === "POST" ? anmelden(request, env, url) : next();
 
-		// Die gebaute Seite vom internen Pfad holen. Gibt es sie nicht, ist das keine Kundenseite.
-		const intern = await internerPfad(geheim, slug);
-		const seite = await env.ASSETS.fetch(new Request(new URL(intern + "/", url.origin).toString(), { method: "GET" }));
-		const istHtml = seite.status === 200 && (seite.headers.get("Content-Type") || "").includes("text/html");
-		if (!istHtml) return weiter(next);
-		let html = await seite.text();
-		const merkmal = html.match(/data-akte-schutz="([^"]*)"/);
-		if (!merkmal || !html.includes(`data-akte="${slug}"`)) return weiter(next);
-		geschuetzt = merkmal[1] !== "offen";
+		const seite = await kundenseite(env, url.origin, slug);
+		if (!seite) return weiter(next);
+		geschuetzt = !seite.offen;
 		const pfad = `/${slug}/`;
-		// Der interne Pfad steht in der gebauten Seite (Canonical, Open Graph). Er geht nie nach außen.
-		html = html.split(intern).join("/" + slug);
 
 		const ausliefern = () => {
 			// Eine Adresse je Seite, wie überall auf der Website: mit Schrägstrich am Ende.
 			if (url.pathname !== pfad) return new Response(null, { status: 308, headers: { Location: pfad, ...KOPF } });
-			const kopf = new Headers(seite.headers);
+			const kopf = new Headers(seite.kopf);
 			for (const [name, wert] of Object.entries(KOPF)) kopf.set(name, wert);
 			kopf.delete("ETag");
-			return new Response(methode === "HEAD" ? null : html, { status: 200, headers: kopf });
+			return new Response(methode === "HEAD" ? null : seite.html, { status: 200, headers: kopf });
 		};
-		if (!geschuetzt) return methode === "POST" ? new Response(null, { status: 405, headers: KOPF }) : ausliefern();
+		if (methode === "POST") return new Response(null, { status: 405, headers: KOPF });
+		if (!geschuetzt) return ausliefern();
 
-		const soll = glatt(env["AKTE_" + slug.toUpperCase().replace(/-/g, "_")]);
+		const soll = sollPasswort(env, slug);
 		if (!soll) return formular(pfad, { status: 503, ohneFeld: true });
-
-		const name = "akte_" + slug.replace(/-/g, "_");
-		const summe = await pruefsumme(soll, slug);
-
-		if (methode === "POST") {
-			let eingabe = "";
-			try { eingabe = glatt((await request.formData()).get("passwort")); } catch { /* leere oder kaputte Eingabe gilt als falsch */ }
-			if (eingabe && await gleich(eingabe, soll)) {
-				const sicher = url.protocol === "https:" ? "; Secure" : "";
-				return new Response(null, {
-					status: 303,
-					headers: { Location: pfad, "Set-Cookie": `${name}=${summe}; Path=/${slug}; Max-Age=${TAGE * 86400}; HttpOnly; SameSite=Lax${sicher}`, ...KOPF },
-				});
-			}
-			await new Promise((fertig) => setTimeout(fertig, 1000));
-			return formular(pfad, { fehler: TEXT.falsch });
-		}
-
-		const hat = cookieWert(request, name);
-		if (hat && await gleich(hat, summe)) return ausliefern();
-		return formular(pfad);
+		const hat = cookieWert(request, cookieName(slug));
+		if (hat && await gleich(hat, await pruefsumme(soll, slug))) return ausliefern();
+		// Ohne gültiges Cookie zum Login, das Kürzel steht dort schon im Feld.
+		return new Response(null, { status: 303, headers: { Location: "/login/?k=" + slug, ...KOPF } });
 	} catch {
 		if (geschuetzt) return formular("/", { status: 503, ohneFeld: true });
 		return next();
