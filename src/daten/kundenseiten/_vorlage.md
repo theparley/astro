@@ -1,6 +1,10 @@
 ---
 # VORLAGE FÜR EINE KUNDENSEITE. Diese Datei wird keine Seite (Dateien mit _ am Anfang zählen nicht).
 #
+# WER ANLEGT: nur die Sitzung „Website · Programmierung“ (Rasul am 27.11.2026 in der Sitzung „Tobias Neubauer“, von dort
+# weitergegeben: „Wart mal noch mit der Seite anlegen, das darf nur die Programmierung machen.“). Kundensitzungen liefern
+# Adresse, Name, Titel, Clips und Text. Der kurze Weg: npm run kundenseite -- neu <adresse> "<Name>" (scripts/kundenseite.mjs).
+#
 # Neue Kundenseite: diese Datei kopieren und nach der Adresse benennen, zum Beispiel hug-ka.md für
 # parleyfilm.com/hug-ka. Nur Kleinbuchstaben, Ziffern und Bindestriche. Die Adresse ist die Kurzform, die der Kunde
 # selbst benutzt (seine Domain, seine Mailadressen).
