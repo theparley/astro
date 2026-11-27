@@ -58,7 +58,8 @@ const kundenseiten = {
 			const quelle = fileURLToPath(new URL('./src/daten/kundenseiten/', import.meta.url));
 			const slugs = (await readdir(quelle).catch(() => [])).filter((d) => d.endsWith('.md') && !d.startsWith('_')).map((d) => d.slice(0, -3)).sort();
 			// /login: Dort prüft die Mittelschicht das Absenden des Login-Formulars (src/pages/login.astro).
-			const include = ['/api/*', '/login', '/login/*', ...slugs.flatMap((s) => [`/${s}`, `/${s}/*`])];
+			// BACKSTAGE, STUFE B (27.11.2026, nur lokal begonnen): alles unter /backstage/ läuft durch functions/backstage/.
+			const include = ['/api/*', '/login', '/login/*', '/backstage', '/backstage/*', ...slugs.flatMap((s) => [`/${s}`, `/${s}/*`])];
 			await writeFile(path.join(fileURLToPath(dir), '_routes.json'), JSON.stringify({ version: 1, include, exclude: [] }, null, '\t') + '\n');
 			logger.info(`_routes.json: Functions laufen für /api/* und ${slugs.length} Kundenseite(n): ${slugs.join(', ') || 'keine'}`);
 			if (slugs.length && !process.env.AKTE_PFAD) logger.warn('AKTE_PFAD fehlt: Es wurden KEINE Kundenseiten gebaut.');

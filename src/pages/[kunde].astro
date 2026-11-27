@@ -37,8 +37,8 @@ export function getStaticPaths() {
 	// Eine Kundenseite darf keine bestehende Seite verdecken und umgekehrt: Der Bau bricht ab, statt still eine der
 	// beiden zu nehmen.
 	const belegt = Object.keys(import.meta.glob("./*.{astro,ts}")).map((p) => p.replace(/^\.\//, "").replace(/\.(astro|ts)$/, "").replace(/\.[a-z]+$/, ""));
-	const VERBOTEN = [...belegt, "login", "api", "filme", "fonts", "lab", "lokal", "parley", "test", "werkzeug", "index", "404"];
-	return Object.entries(dateien)
+	const VERBOTEN = [...belegt, "backstage", "backstage-huelle", "login", "api", "filme", "fonts", "lab", "lokal", "parley", "test", "werkzeug", "index", "404"];
+	const seiten = Object.entries(dateien)
 		.map(([pfad, datei]) => ({ slug: pfad.split("/").pop()!.replace(/\.md$/, ""), datei }))
 		.filter(({ slug }) => !slug.startsWith("_"))
 		.map(({ slug, datei }) => {
@@ -54,10 +54,22 @@ export function getStaticPaths() {
 			const intern = "a-" + createHmac("sha256", geheim).update("akteneinsicht-pfad:" + slug).digest("hex").slice(0, 40);
 			return [{ params: { kunde: intern }, props: { datei, slug } }];
 		});
+	/* BACKSTAGE-HÜLLE, STUFE B (begonnen 27.11.2026, nur lokal; Rasul: „Erst B, Code später“, „Ja, lokal anfangen“).
+	   Bereiche aus der Datenbank haben keine eigene gebaute Seite. Astro baut EINE leere Hülle mit Platzhaltern
+	   ([[bs:…]] und <!--bs:…-->), functions/backstage/[[pfad]].js füllt sie je Aufruf aus der Datenbank. So bleibt die
+	   Gestaltung an dieser einen Stelle. Die Hülle liegt wie die Kundenseiten unter einem internen Pfad; sie enthält
+	   keinen Kundeninhalt. Im Dev-Server zum Ansehen unter /backstage-huelle/. Dieselbe Rechnung für den Pfad steht
+	   in functions/_lib/backstage.js (huellenPfad). Weg zurück: diesen Block und alle Stellen mit istHuelle löschen. */
+	const hGeheim = process.env.AKTE_PFAD || "";
+	const hProps = { datei: { frontmatter: {} }, slug: "backstage-huelle", huelle: true };
+	const huelle = import.meta.env.DEV ? [{ params: { kunde: "backstage-huelle" }, props: hProps }]
+		: hGeheim ? [{ params: { kunde: "a-" + createHmac("sha256", hGeheim).update("akteneinsicht-pfad:backstage-huelle").digest("hex").slice(0, 40) }, props: hProps }] : [];
+	return [...seiten, ...huelle];
 }
 
-const { datei, slug } = Astro.props as { datei: any; slug: string };
-const f = datei.frontmatter ?? {};
+const { datei, slug, huelle: istHuelle = false } = Astro.props as { datei: any; slug: string; huelle?: boolean };
+// Für die Backstage-Hülle stehen überall Platzhalter, die functions/_lib/backstage.js (fuellen) ersetzt.
+const f = istHuelle ? { titel: "[[bs:titel]]", kunde: "[[bs:name]]", videos: [{ stream: "bsclipkennungbsclipkennungbsclipk", titel: "[[bs:cliptitel]]" }], naechster_schritt: "[[bs:schritt]]", knopf: "[[bs:knopf]]", knopf_ziel: "/bs-knopfziel" } : (datei.frontmatter ?? {});
 const Zusammenhang = datei.Content;
 // Geschlossen, solange die Datei nicht ausdrücklich „passwort: nein“ sagt (YAML liest nein/no/false als false).
 const offen = f.passwort === false || f.passwort === "nein";
@@ -75,12 +87,12 @@ const knopf: string = typeof f.knopf === "string" && f.knopf ? f.knopf : "Termin
 // Ersatz-Überschrift „Backstage“ seit 27.11.2026 abends (Rasuls Namenswahl für den Bereich), vorher "Kunden&shy;bereich".
 const titelRoh: string = typeof f.titel === "string" && f.titel.trim() ? f.titel.trim() : "Backstage";
 // Fester Umbruch mit Trennstrich („Studio-<br>tour“, Rasul 27.11.2026: zweizeilig) zählt im Browser-Reiter nicht mit.
-const titelGlatt = titelRoh.replace(/&shy;/g, "").replace(/-<br\s*\/?>/g, "").replace(/<[^>]*>/g, "");
+const titelGlatt = istHuelle ? "[[bs:titelglatt]]" : titelRoh.replace(/&shy;/g, "").replace(/-<br\s*\/?>/g, "").replace(/<[^>]*>/g, "");
 const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.knopf_ziel : "/termin";
 ---
 
 <Layout title={titelGlatt} description={`${titelGlatt} bei Parley Film.`} noindex>
-	<main class="akte" data-akte-schutz={offen ? "offen" : "passwort"} data-akte={slug}>
+	<main class="akte" {...(istHuelle ? { "data-backstage": "[[bs:adresse]]" } : { "data-akte-schutz": offen ? "offen" : "passwort", "data-akte": slug })}>
 		{/* Weiche Trennstelle wie bei Impressum und Datenschutz: Die breite Schrift passt am Handy sonst nicht in die Zeile. */}
 		<Seitentitel ebene="h1" titel={titelRoh} stufe="2xl" unter={typeof f.kunde === "string" ? f.kunde : undefined} />
 		{/* LOGOUT (Rasul 27.11.2026: „ich müsste dann auf der Kundenseite auch einen Logout anbieten und nicht unten als
@@ -96,13 +108,16 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 			</form>
 		)}
 		<Rechtstext>
-			<Zusammenhang />
+			{istHuelle ? <Fragment set:html="<!--bs:text-->" /> : <Zusammenhang />}
 		</Rechtstext>
 		{videos.length > 0 && (
 			<div class="akte__videos">
+				{istHuelle && <Fragment set:html="<!--bs:clips-->" />}
 				{videos.map((v) => <KundenVideo stream={v.stream.trim()} titel={v.titel} />)}
+				{istHuelle && <Fragment set:html="<!--/bs:clips-->" />}
 			</div>
 		)}
+		{istHuelle && <Fragment set:html="<!--bs:schritt-->" />}
 		{schritt && (
 			<Rechtstext>
 				<h2>Nächster Schritt</h2>
@@ -110,6 +125,7 @@ const knopfZiel: string = typeof f.knopf_ziel === "string" && f.knopf_ziel ? f.k
 				<p><Knopf href={knopfZiel} text={knopf} /></p>
 			</Rechtstext>
 		)}
+		{istHuelle && <Fragment set:html="<!--/bs:schritt-->" />}
 	</main>
 </Layout>
 

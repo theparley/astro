@@ -63,6 +63,11 @@
 //
 // Weg zurück: diese Datei löschen. Die Kundenseiten sind dann offen erreichbar, also vorher auch sie entfernen.
 
+// BACKSTAGE, STUFE B (begonnen 27.11.2026, nur lokal): Bereiche aus der Datenbank. Die Anmeldung unter /login/ prüft
+// zuerst wie bisher die Kundenseiten aus Dateien, danach die Datenbank. Ohne Datenbank (env.DB fehlt) ändert sich nichts.
+// Alles Weitere: functions/_lib/backstage.js. Weg zurück: die vier mit BACKSTAGE markierten Stellen in dieser Datei löschen.
+import { BS_COOKIE, backstageAnmelden, backstageAngemeldet } from "./_lib/backstage.js";
+
 const TAGE = 30;
 const TEXT = {
 	titel: "Backstage", // bis 27.11.2026 abends „Kundenbereich“ (Rasuls Namenswahl), davor „Akteneinsicht“, siehe src/pages/[kunde].astro (TITEL AUS DER KUNDENDATEI)
@@ -185,6 +190,7 @@ function abmelden(url) {
 	kopf.set("Location", "/login/");
 	kopf.append("Set-Cookie", loeschZeile(COOKIE, url) + "; HttpOnly");
 	kopf.append("Set-Cookie", loeschZeile("akte_da", url));
+	kopf.append("Set-Cookie", loeschZeile(BS_COOKIE, url) + "; HttpOnly"); // BACKSTAGE
 	return new Response(null, { status: 303, headers: kopf });
 }
 
@@ -226,6 +232,11 @@ async function anmelden(request, env, url) {
 			}
 		}
 	}
+	// BACKSTAGE: keine Kundenseite aus einer Datei unter diesem Namen, dann die Datenbank fragen.
+	if (!ziel && !seite) {
+		const b = await backstageAnmelden(env, kuerzel, eingabe, url).catch(() => null);
+		if (b) { ziel = b.ziel; kopf.append("Set-Cookie", b.cookie); }
+	}
 	if (ziel) { kopf.set("Location", ziel); return new Response(null, { status: 303, headers: kopf }); }
 	await new Promise((fertig) => setTimeout(fertig, Math.max(0, 1000 - (Date.now() - start))));
 	const k = /^[a-z0-9-]{1,60}$/.test(kuerzel) ? "&k=" + kuerzel : "";
@@ -252,6 +263,11 @@ export async function onRequest({ request, env, next }) {
 			if (c && !url.searchParams.has("k") && !url.searchParams.has("fehler")) {
 				const eigene = await kundenseite(env, url.origin, c.slug);
 				if (eigene && !eigene.offen && await angemeldet(request, sollPasswort(env, c.slug), c.slug)) return new Response(null, { status: 303, headers: { Location: `/${c.slug}/`, ...KOPF } });
+			}
+			// BACKSTAGE: mit gültigem Cookie eines Bereichs aus der Datenbank direkt dorthin.
+			if (!url.searchParams.has("k") && !url.searchParams.has("fehler")) {
+				const b = await backstageAngemeldet(request, env).catch(() => null);
+				if (b) return new Response(null, { status: 303, headers: { Location: `/backstage/${b.adresse}/`, ...KOPF } });
 			}
 			return next();
 		}

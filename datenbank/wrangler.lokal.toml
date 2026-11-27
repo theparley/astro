@@ -1,0 +1,10 @@
+# NUR FÜR DEN LOKALEN TEST von Backstage, Stufe B (27.11.2026). Bewusst NICHT wrangler.toml im Hauptordner:
+# Eine solche Datei würde Cloudflare Pages als Einstellung des echten Projekts lesen. Diese hier kennt nur
+# scripts/backstage-lokal.mjs, um die lokale Datenbank (.wrangler/state, nicht in Git) anzulegen.
+name = "backstage-lokal"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "backstage-lokal"
+database_id = "backstage-lokal"
