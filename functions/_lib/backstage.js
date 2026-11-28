@@ -1,4 +1,6 @@
-// BACKSTAGE, STUFE B: Bereiche aus der Datenbank (Cloudflare D1, Bindung „DB“). Begonnen 27.11.2026, NUR LOKAL.
+// BACKSTAGE, STUFE B: Bereiche aus der Datenbank (Cloudflare D1, Bindung „DB“). Begonnen 27.11.2026, erst nur lokal.
+// AUF DEV SEIT 28.11.2026 (Rasul: „Wir machen jetzt keine Variante auf Localhost, wir machen das gleich auf Dev.“).
+// Wo in den Dateien von Stufe B noch „nur lokal“ steht, ist der Stand vor diesem Tag gemeint. NICHT AUF LIVE.
 // Rasul 27.11.2026 im Gespräch „Mitgliederbereich“: „Erst B, Code später“; in „Website · Programmierung“: „Ja, lokal
 // anfangen“. Auftrag und Bauplan: Marketing-Ordner website/Uebergabe_Mitgliederbereich_2026-11.md.
 //
