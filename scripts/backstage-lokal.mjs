@@ -25,6 +25,9 @@ if (!passwort) {
 	passwort = `${W[randomInt(W.length)]} ${W[randomInt(W.length)]} ${W[randomInt(W.length)]} ${randomInt(10, 100)}`;
 	appendFileSync(varsDatei, (vars && !vars.endsWith("\n") ? "\n" : "") + "# Testpasswort fuer die lokalen Backstage-Probebereiche (Stufe B, scripts/backstage-lokal.mjs). Gilt nirgends ausser lokal.\nBACKSTAGE_PROBE_PASSWORT=" + passwort + "\n");
 }
+// Passwort der Verwaltungsseite, nur lokal: lang und zufällig, wie es auch bei Cloudflare sein soll. Wird nie ausgegeben.
+vars = existsSync(varsDatei) ? readFileSync(varsDatei, "utf8") : "";
+if (!/^BACKSTAGE_VERWALTUNG=/m.test(vars)) appendFileSync(varsDatei, (vars && !vars.endsWith("\n") ? "\n" : "") + "# Passwort der lokalen Backstage-Verwaltung (Stufe B). Gilt nirgends ausser lokal.\nBACKSTAGE_VERWALTUNG=" + randomBytes(24).toString("base64url") + "\n");
 const jetzt = new Date().toISOString();
 const zeile = (b) => {
 	const salz = randomBytes(16).toString("hex");

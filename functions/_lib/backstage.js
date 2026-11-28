@@ -12,7 +12,7 @@
 // COOKIE „backstage“: <adresse>.<HMAC>. Der Schlüssel des HMAC ist der Wert AKTE_PFAD zusammen mit pw_summe.
 // Folge: Ein neues Passwort macht alle alten Anmeldungen ungültig, und wer nur die Datenbank kennt, kann kein
 // Cookie bauen. 30 Tage wie beim Cookie „akte“ (Rasul 27.11.2026: „30 Tage bleiben“).
-// NOCH NICHT GEBAUT: Zähler für Fehlversuche, persönlicher Link, Rasuls Seite zum Anlegen.
+// Rasuls Seite zum Anlegen: functions/_lib/verwaltung.js. NOCH NICHT GEBAUT: Zähler für Fehlversuche, persönlicher Link.
 // Weg zurück: diese Datei, functions/backstage/, datenbank/ und die mit BACKSTAGE markierten Stellen in
 // functions/_middleware.js, src/pages/[kunde].astro und astro.config.mjs löschen.
 
@@ -35,13 +35,13 @@ export async function pwSumme(passwortGlatt, salzHex) {
 	return hex(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: ausHex(salzHex), iterations: 100000 }, roh, 256));
 }
 
-async function hmac(schluessel, text) {
+export async function hmac(schluessel, text) {
 	const k = await crypto.subtle.importKey("raw", kodierer.encode(schluessel), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
 	return hex(await crypto.subtle.sign("HMAC", k, kodierer.encode(text)));
 }
 
 // Vergleich ohne frühen Abbruch (wie gleich() in _middleware.js).
-async function gleich(a, b) {
+export async function gleich(a, b) {
 	const [ha, hb] = await Promise.all([a, b].map(async (t) => new Uint8Array(await crypto.subtle.digest("SHA-256", kodierer.encode(String(t))))));
 	let unterschied = 0;
 	for (let i = 0; i < ha.length; i++) unterschied |= ha[i] ^ hb[i];
@@ -98,7 +98,7 @@ export async function backstageAngemeldet(request, env, adresse = "") {
 }
 
 // ENTSCHÄRFEN: Alles aus der Datenbank geht nur als Text in die Seite, nie als HTML.
-const sicher = (text) => String(text ?? "").replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[z]));
+export const sicher = (text) => String(text ?? "").replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[z]));
 const zwischen = (html, name) => {
 	const a = `<!--bs:${name}-->`, e = `<!--/bs:${name}-->`;
 	const i = html.indexOf(a), j = html.indexOf(e);
