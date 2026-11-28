@@ -41,6 +41,6 @@ const bereiche = [
 ];
 mkdirSync(path.join(wurzel, ".wrangler"), { recursive: true });
 const datei = path.join(wurzel, ".wrangler", "backstage-probe.sql");
-writeFileSync(datei, readFileSync(path.join(wurzel, "datenbank/schema.sql"), "utf8") + "\n" + bereiche.map(zeile).join("\n") + "\n", "utf8");
+writeFileSync(datei, "DROP TABLE IF EXISTS fehlversuch;\n" + readFileSync(path.join(wurzel, "datenbank/schema.sql"), "utf8") + "\n" + bereiche.map(zeile).join("\n") + "\n", "utf8");
 execFileSync("npx", ["wrangler", "d1", "execute", "backstage-lokal", "--local", "--config", "datenbank/wrangler.lokal.toml", "--persist-to", ".wrangler/state", "--file", datei, "--yes"], { cwd: wurzel, stdio: ["ignore", "ignore", "inherit"] });
 console.log(`Lokale Datenbank angelegt, ${bereiche.length} Testbereiche: ${bereiche.map((b) => b.adresse).join(", ")}. Passwort steht in .dev.vars (wird nicht angezeigt).`);

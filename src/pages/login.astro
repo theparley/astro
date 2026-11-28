@@ -44,6 +44,9 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
 				<input id="login-passwort" name="passwort" type="password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" />
 				<button type="submit">Öffnen</button>
 				<p class="login__fehler" role="alert" hidden>Benutzername oder Passwort stimmt nicht.</p>
+				{/* PAUSE NACH ZU VIELEN FEHLVERSUCHEN (Backstage Stufe B, 28.11.2026, nur lokal; functions/_lib/backstage.js).
+				   Der Satz erscheint für jede Adresse, auch für eine, die es nicht gibt. Text: Entwurf der Programmierung. */}
+				<p class="login__fehler login__pause" role="alert" hidden>Zu viele Versuche. Bitte in 15 Minuten noch einmal probieren.</p>
 			</form>
 		</div>
 		{/* OHNE DEN BLOCK „NOCH KEIN ZUGANG?“ (Rasul 27.11.2026: „Auf der Login-Seite können die drei Sätze weg. Noch
@@ -92,7 +95,8 @@ import Seitentitel from "../components/bausteine/Seitentitel.astro";
 			(form.elements.namedItem("kuerzel") as HTMLInputElement).value = k;
 			(form.elements.namedItem("passwort") as HTMLInputElement).focus();
 		}
-		if (p.get("fehler")) form.querySelector<HTMLElement>(".login__fehler")!.hidden = false;
+		if (p.get("fehler") === "pause") form.querySelector<HTMLElement>(".login__pause")!.hidden = false;
+		else if (p.get("fehler")) form.querySelector<HTMLElement>(".login__fehler")!.hidden = false;
 	};
 	document.addEventListener("astro:page-load", einrichten);
 </script>

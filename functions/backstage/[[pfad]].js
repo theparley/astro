@@ -3,7 +3,7 @@
 // WER NICHT ANGEMELDET IST, bekommt für jede Adresse dieselbe Antwort: weiter zur Anmeldung. Ob es den Bereich gibt,
 // ob er gesperrt ist oder ob nur das Cookie fehlt, ist von außen nicht zu unterscheiden (Punkt 22 der Offen-Liste).
 // Die Hülle der Seite baut Astro (src/pages/[kunde].astro, Zweig „huelle“); hier wird sie gefüllt.
-import { BS_KOPF, adresseGueltig, backstageAngemeldet, fuellen, huellenPfad } from "../_lib/backstage.js";
+import { BS_KOPF, adresseGueltig, backstageAngemeldet, backstageLink, fuellen, huellenPfad } from "../_lib/backstage.js";
 import { verwaltung } from "../_lib/verwaltung.js";
 
 const zurAnmeldung = (adresse = "") => new Response(null, { status: 303, headers: { Location: "/login/" + (adresse ? "?k=" + adresse : ""), ...BS_KOPF } });
@@ -26,6 +26,12 @@ export async function onRequest({ request, env, params }) {
 		if (!adresse) return zurAnmeldung();
 		const rest = teile.slice(1).join("/");
 		if (!adresseGueltig(adresse) || !(rest === "" || rest === "index.html")) return zurAnmeldung();
+		// Persönlicher Link: gilt der Schlüssel, gibt es das Cookie und es geht sofort auf die Adresse ohne Schlüssel.
+		const zugang = url.searchParams.get("zugang");
+		if (zugang) {
+			const l = await backstageLink(env, adresse, zugang, url).catch(() => null);
+			return l ? new Response(null, { status: 303, headers: { Location: `/backstage/${adresse}/`, "Set-Cookie": l.cookie, ...BS_KOPF } }) : zurAnmeldung(adresse);
+		}
 		const b = await backstageAngemeldet(request, env, adresse);
 		if (!b) return zurAnmeldung(adresse);
 		// Eine Adresse je Seite, mit Schrägstrich am Ende. Erst hier, damit die Weiterleitung nichts über Bereiche verrät.

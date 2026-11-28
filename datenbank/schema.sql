@@ -21,9 +21,12 @@ CREATE TABLE IF NOT EXISTS bereich (
 	notiz              TEXT NOT NULL DEFAULT '',  -- nur für Rasul: für wen, wozu
 	mail               TEXT NOT NULL DEFAULT ''   -- für den späteren Zahlencode, noch unbenutzt
 );
--- Zähler für Fehlversuche je Adresse (Schritt 4 des Bauplans, noch unbenutzt). Auch für Adressen, die es nicht gibt.
+-- Zähler für Fehlversuche je Adresse, auch für Adressen, die es nicht gibt (sonst verriete die Pause, welche es gibt).
+-- Keine IP-Adresse, keine Person. „~verwaltung“ zählt die Fehlversuche an Rasuls Seite (dort ohne Pause).
+-- Regeln in functions/_lib/backstage.js (fehlversuch): Zeilen, die 24 Stunden alt sind, werden gelöscht.
 CREATE TABLE IF NOT EXISTS fehlversuch (
-	adresse TEXT PRIMARY KEY,
-	anzahl  INTEGER NOT NULL DEFAULT 0,
-	pause_bis TEXT NOT NULL DEFAULT ''
+	adresse   TEXT PRIMARY KEY,
+	anzahl    INTEGER NOT NULL DEFAULT 0,
+	pause_bis TEXT NOT NULL DEFAULT '',
+	zuletzt   TEXT NOT NULL DEFAULT ''
 );

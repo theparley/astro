@@ -219,7 +219,7 @@ async function anmelden(request, env, url) {
 		eingabe = glatt(felder.get("passwort"));
 	} catch { /* leere oder kaputte Eingabe gilt als falsch */ }
 	const start = Date.now();
-	let ziel = "";
+	let ziel = "", pause = false;
 	const seite = await kundenseite(env, url.origin, kuerzel);
 	const kopf = new Headers(KOPF);
 	if (seite) {
@@ -235,12 +235,13 @@ async function anmelden(request, env, url) {
 	// BACKSTAGE: keine Kundenseite aus einer Datei unter diesem Namen, dann die Datenbank fragen.
 	if (!ziel && !seite) {
 		const b = await backstageAnmelden(env, kuerzel, eingabe, url).catch(() => null);
-		if (b) { ziel = b.ziel; kopf.append("Set-Cookie", b.cookie); }
+		if (b?.ziel) { ziel = b.ziel; kopf.append("Set-Cookie", b.cookie); }
+		else if (b?.pause) pause = true; // zu viele Fehlversuche, die Adresse ruht
 	}
 	if (ziel) { kopf.set("Location", ziel); return new Response(null, { status: 303, headers: kopf }); }
 	await new Promise((fertig) => setTimeout(fertig, Math.max(0, 1000 - (Date.now() - start))));
 	const k = /^[a-z0-9-]{1,60}$/.test(kuerzel) ? "&k=" + kuerzel : "";
-	return new Response(null, { status: 303, headers: { Location: "/login/?fehler=1" + k, ...KOPF } });
+	return new Response(null, { status: 303, headers: { Location: "/login/?fehler=" + (pause ? "pause" : "1") + k, ...KOPF } });
 }
 
 export async function onRequest({ request, env, next }) {
