@@ -45,6 +45,16 @@ const jetzt = () => new Date().toISOString();
 const uhrzeit = (iso) => { try { return new Date(iso).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" }); } catch { return "?"; } };
 const datum = (iso) => { try { return iso ? new Date(iso).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" }) : "noch nie"; } catch { return "?"; } };
 
+// DIE DATENBANK RICHTET SICH SELBST EIN (28.11.2026, Rasul: „wir machen das gleich auf Dev“): Bei jeder Anmeldung an
+// der Verwaltung werden die zwei Tabellen angelegt, falls sie fehlen. So muss Rasul bei Cloudflare nur die leere
+// Datenbank anlegen und binden und kein SQL in eine Konsole kopieren. Dieselben Tabellen stehen mit Erklärungen in
+// datenbank/schema.sql; beide Stellen müssen gleich bleiben.
+const TABELLEN = [
+	"CREATE TABLE IF NOT EXISTS bereich (adresse TEXT PRIMARY KEY, name TEXT NOT NULL DEFAULT '', titel TEXT NOT NULL DEFAULT '', text TEXT NOT NULL DEFAULT '', clips TEXT NOT NULL DEFAULT '[]', schritt TEXT NOT NULL DEFAULT '', knopf TEXT NOT NULL DEFAULT '', knopf_ziel TEXT NOT NULL DEFAULT '', salz TEXT NOT NULL, pw_summe TEXT NOT NULL, link_summe TEXT NOT NULL DEFAULT '', gesperrt INTEGER NOT NULL DEFAULT 0, angelegt TEXT NOT NULL, geaendert TEXT NOT NULL, zuletzt_angemeldet TEXT NOT NULL DEFAULT '', notiz TEXT NOT NULL DEFAULT '', mail TEXT NOT NULL DEFAULT '')",
+	"CREATE TABLE IF NOT EXISTS fehlversuch (adresse TEXT PRIMARY KEY, anzahl INTEGER NOT NULL DEFAULT 0, pause_bis TEXT NOT NULL DEFAULT '', zuletzt TEXT NOT NULL DEFAULT '')",
+];
+const einrichten = (env) => env.DB.batch(TABELLEN.map((sql) => env.DB.prepare(sql)));
+
 const schluessel = (env) => String(env.AKTE_PFAD || "") + ":" + String(env.BACKSTAGE_VERWALTUNG || "");
 async function cookieZeile(env, url) {
 	const ablauf = Date.now() + V_STUNDEN * 3600 * 1000;
@@ -189,7 +199,8 @@ export async function verwaltung({ request, env, url, teile, huelleHolen }) {
 		const aktion = String(f.get("aktion") || "");
 		if (aktion === "anmelden") {
 			const start = Date.now();
-			if (await gleich(String(f.get("passwort") ?? ""), String(env.BACKSTAGE_VERWALTUNG))) return new Response(null, { status: 303, headers: { Location: PFAD, "Set-Cookie": await cookieZeile(env, url), ...BS_KOPF } });
+			if (await gleich(String(f.get("passwort") ?? ""), String(env.BACKSTAGE_VERWALTUNG))) { await einrichten(env); return new Response(null, { status: 303, headers: { Location: PFAD, "Set-Cookie": await cookieZeile(env, url), ...BS_KOPF } }); }
+			await einrichten(env).catch(() => {});
 			await fehlversuch(env, "~verwaltung", 0).catch(() => {});
 			await new Promise((fertig) => setTimeout(fertig, Math.max(0, 1000 - (Date.now() - start))));
 			return anmeldeSeite("Das Passwort stimmt nicht.", 401);
